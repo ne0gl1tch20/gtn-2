@@ -9,6 +9,7 @@ import 'core/progression/progression_state.dart';
 import 'data/saves/save_data.dart';
 import 'data/saves/save_storage.dart';
 import 'progression/progression_hub_page.dart';
+import 'shop/nebula_shop_page.dart';
 import 'shop/upgrade_catalog.dart';
 import 'shop/upgrade_shop_page.dart';
 
@@ -193,6 +194,33 @@ class _GameHomePageState extends State<GameHomePage> {
     );
   }
 
+
+  Future<ProgressionState> _purchaseNebulaItem(
+    NebulaShopItem item,
+  ) async {
+    final updated = _progressionEngine.purchaseNebulaItem(
+      _progression,
+      itemId: item.id,
+      price: item.price,
+    );
+    if (updated != _progression) {
+      setState(() => _progression = updated);
+      await _persist();
+    }
+    return _progression;
+  }
+
+  Future<void> _openNebulaShop() async {
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (_) => NebulaShopPage(
+          progression: _progression,
+          onPurchase: _purchaseNebulaItem,
+        ),
+      ),
+    );
+  }
+
   Future<void> _openUpgradeShop() async {
     await Navigator.of(context).push<void>(
       MaterialPageRoute<void>(
@@ -227,7 +255,11 @@ class _GameHomePageState extends State<GameHomePage> {
           flatBonusReward: correct ? effects.flatBonus : null,
           modifiers: GuessRewardModifiers(
             streakMultiplier: effects.streakMultiplier,
-            criticalMultiplier: effects.firstGuessMultiplier,
+            criticalMultiplier: effects.firstGuessMultiplier *
+                ((_progression.nebulaItems['golden_guess'] ?? 0) > 0 &&
+                        (_progression.totalGuesses + 1) % 10 == 0
+                    ? 2
+                    : 1),
           ),
         );
       }
@@ -325,6 +357,11 @@ class _GameHomePageState extends State<GameHomePage> {
                   onPressed: _isLoading ? null : _openArcade,
                   icon: const Icon(Icons.sports_esports_rounded),
                   label: const Text('Arcade'),
+                ),
+                OutlinedButton.icon(
+                  onPressed: _isLoading ? null : _openNebulaShop,
+                  icon: const Icon(Icons.diamond_rounded),
+                  label: const Text('Nebula Shop'),
                 ),
                 TextButton(
                   onPressed: _isLoading ? null : _newGame,
