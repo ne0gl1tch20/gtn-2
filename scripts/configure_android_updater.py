@@ -59,33 +59,3 @@ else:
     )
 gradle_properties.write_text(properties_text, encoding="utf-8")
 print("Disabled the incompatible AGP 9 new DSL for Flutter plugin compatibility.")
-
-# Older Android library plugins can declare compileSdk 34 while using
-# lifecycle artifacts that require API 36. Configure the Android extension
-# when the library plugin is applied, without registering afterEvaluate.
-root_gradle = Path("android/build.gradle.kts")
-if not root_gradle.is_file():
-    print(f"Android root Gradle file not found: {root_gradle}", file=sys.stderr)
-    raise SystemExit(1)
-root_gradle_text = root_gradle.read_text(encoding="utf-8")
-marker = "// GTN2: align Android plugin modules with compileSdk 36"
-if marker not in root_gradle_text:
-    root_gradle_text += """
-
-// GTN2: align Android plugin modules with compileSdk 36
-subprojects {
-    plugins.withId("com.android.library") {
-        val androidExtension = extensions.findByName("android")
-        if (androidExtension != null) {
-            val intParameter = Integer.TYPE
-            val setter = androidExtension.javaClass.methods.firstOrNull { method ->
-                method.name == "setCompileSdkVersion" &&
-                    method.parameterCount == 1 &&
-                    method.parameterTypes[0] == intParameter
-            }
-            setter?.invoke(androidExtension, 36)
-        }
-    }
-}
-"""
-    root_gradle.write_text(root_gradle_text, encoding="utf-8")
