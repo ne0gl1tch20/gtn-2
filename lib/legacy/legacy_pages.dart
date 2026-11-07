@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../core/progression/progression_state.dart';
 import '../worlds/world_boss_catalog.dart';
+import 'legacy_systems_page.dart';
 
 enum LegacySection {
   journey('Journey', Icons.route_rounded),
@@ -16,9 +17,14 @@ enum LegacySection {
 }
 
 class LegacyHubPage extends StatelessWidget {
-  const LegacyHubPage({super.key, required this.progression});
+  const LegacyHubPage({
+    super.key,
+    required this.progression,
+    required this.onSystemsChanged,
+  });
 
   final ProgressionState progression;
+  final LegacyProgressionChanged onSystemsChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -31,6 +37,22 @@ class LegacyHubPage extends StatelessWidget {
           const SizedBox(height: 6),
           const Text('Progress, lifetime rewards, records and the world codex.'),
           const SizedBox(height: 16),
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.grid_view_rounded),
+              title: const Text('All gameplay systems'),
+              subtitle: const Text('Traits, talents, mutators, relics, sanctuary, stakes, rewards, loot, music and updates.'),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () => Navigator.of(context).push<void>(
+                MaterialPageRoute<void>(
+                  builder: (_) => LegacySystemsPage(
+                    progression: progression,
+                    onChanged: onSystemsChanged,
+                  ),
+                ),
+              ),
+            ),
+          ),
           for (final section in LegacySection.values)
             Card(
               child: ListTile(
