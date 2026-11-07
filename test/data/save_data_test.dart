@@ -16,6 +16,8 @@ void main() {
         attempts: 7,
         gamesWon: 3,
         isComplete: true,
+        minimum: 25,
+        maximum: 150,
         progression: ProgressionState.initial.copyWith(
           money: BigNumber.parse('12345678901234567890.25'),
           prestige: BigNumber.fromInt(4),
@@ -24,12 +26,14 @@ void main() {
         settings: const GameSettings(darkMode: false, reduceMotion: true),
       );
       expect(SaveData.fromJson(save.toJson()).toJson(), save.toJson());
+      expect(SaveData.fromJson(save.toJson()).minimum, 25);
+      expect(SaveData.fromJson(save.toJson()).maximum, 150);
     });
 
     test('rejects unknown versions and invalid fields', () {
       expect(
         () => SaveData.fromJson({
-          'schemaVersion': 3,
+          'schemaVersion': 4,
           'secret': 42,
           'attempts': 0,
           'gamesWon': 0,
@@ -60,6 +64,8 @@ void main() {
       expect(save.progression.money.toString(), '0');
       expect(save.settings, GameSettings.initial);
       expect(save.schemaVersion, SaveData.currentSchemaVersion);
+      expect(save.minimum, 1);
+      expect(save.maximum, 100);
       expect(save.progression.legacySystems.toJson(), LegacySystemsState.initial.toJson());
     });
 
