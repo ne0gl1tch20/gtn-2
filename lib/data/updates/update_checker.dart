@@ -179,7 +179,9 @@ class UpdateChecker {
         installedVersionName: currentVersionName,
         installedVersionCode: currentVersionCode,
         installedRunNumber: currentVersionCode,
-      )) return null;
+      )) {
+        return null;
+      }
       return WindowsUpdateRelease(
         versionName: versionName,
         versionCode: versionCode,
