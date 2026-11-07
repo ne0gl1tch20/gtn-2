@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 
+import 'core/numbers/big_number.dart';
+import 'core/progression/progression_engine.dart';
+import 'core/progression/progression_state.dart';
+
 import 'core/game/game_engine.dart';
 import 'data/saves/save_data.dart';
 import 'data/saves/save_storage.dart';
@@ -38,6 +42,8 @@ class GameHomePage extends StatefulWidget {
 
 class _GameHomePageState extends State<GameHomePage> {
   final GameEngine _engine = GameEngine();
+  const ProgressionEngine _progressionEngine = ProgressionEngine();
+  ProgressionState _progression = ProgressionState.initial;
   final TextEditingController _controller = TextEditingController();
   late GameState _game = _engine.newGame();
   late final Future<SaveStorage> _storage =
@@ -65,6 +71,7 @@ class _GameHomePageState extends State<GameHomePage> {
             isComplete: save.isComplete,
           );
           _gamesWon = save.gamesWon;
+          _progression = save.progression;
           _message = 'Welcome back! Your saved game is ready.';
         });
       }
@@ -88,6 +95,7 @@ class _GameHomePageState extends State<GameHomePage> {
           attempts: _game.attempts,
           gamesWon: _gamesWon,
           isComplete: _game.isComplete,
+          progression: _progression,
         ),
       );
     } on Exception {
@@ -105,7 +113,16 @@ class _GameHomePageState extends State<GameHomePage> {
     }
 
     setState(() {
+      final previousAttempts = _game.attempts;
       _game = _engine.guess(_game, guess);
+      if (_game.attempts > previousAttempts) {
+        final correct = _game.lastResult == GuessResult.correct;
+        _progression = _progressionEngine.recordGuess(
+          _progression,
+          correct: correct,
+          baseReward: correct ? BigNumber.fromInt(1) : null,
+        );
+      }
       switch (_game.lastResult) {
         case GuessResult.tooLow:
           _message = 'Too low. Try a higher number!';
@@ -162,7 +179,7 @@ class _GameHomePageState extends State<GameHomePage> {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  'Attempts: ${_game.attempts}  •  Games won: $_gamesWon',
+                  'Attempts: ${_game.attempts}  •  Games won: $_gamesWon\nMoney: ${_progression.money}',
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 24),
