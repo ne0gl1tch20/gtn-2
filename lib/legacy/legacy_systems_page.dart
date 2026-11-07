@@ -42,6 +42,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
   String? _updateMessage;
   String? _updateDetails;
   UpdateRelease? _availableUpdate;
+  WindowsUpdateRelease? _availableWindowsUpdate;
 
   LegacySystemsState get _systems => _progression.legacySystems;
 
@@ -691,10 +692,10 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Text(_updateDetails!),
             ),
-          if (_availableUpdate != null) ...[
+          if (_availableUpdate != null || _availableWindowsUpdate != null) ...[
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-              child: SelectableText('SHA-256: ${_availableUpdate!.sha256}'),
+              child: SelectableText('SHA-256: ${_availableUpdate?.sha256 ?? _availableWindowsUpdate!.sha256}'),
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
@@ -707,7 +708,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
               child: TextButton(
-                onPressed: () => _openGithubUrl(_availableUpdate!.releaseUrl),
+                onPressed: () => _openGithubUrl(_availableUpdate?.releaseUrl ?? _availableWindowsUpdate!.releaseUrl),
                 child: const Text('View release notes'),
               ),
             ),
@@ -742,19 +743,38 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
       _updateMessage = 'Checking debug-latest…';
       _updateDetails = null;
       _availableUpdate = null;
+      _availableWindowsUpdate = null;
     });
     try {
-      final update = await UpdateChecker().checkForUpdate();
-      if (!mounted) return;
-      setState(() {
-        _availableUpdate = update;
-        _updateDetails = update == null
-            ? 'This build is up to date.'
-            : 'Version ${update.versionName} (${update.versionCode}) · debug-latest #${update.runNumber}\nCommit: ${update.commitSha}';
-        _updateMessage = update == null
-            ? 'You are up to date.'
-            : 'A verified update is available.';
-      });
+      if (Platform.isWindows) {
+        final update = await UpdateChecker().checkForWindowsUpdate();
+        if (!mounted) return;
+        setState(() {
+          _availableWindowsUpdate = update;
+          _availableUpdate = null;
+          _updateDetails = update == null
+              ? 'This Windows build is up to date.'
+              : 'Windows ${update.versionName} · debug-latest #${update.runNumber}\\nCommit: ${update.commitSha}';
+          _updateMessage = update == null
+              ? 'You are up to date.'
+              : 'A verified Windows update is available.';
+        });
+      } else if (Platform.isAndroid) {
+        final update = await UpdateChecker().checkForUpdate();
+        if (!mounted) return;
+        setState(() {
+          _availableUpdate = update;
+          _availableWindowsUpdate = null;
+          _updateDetails = update == null
+              ? 'This Android build is up to date.'
+              : 'Android ${update.versionName} (${update.versionCode}) · debug-latest #${update.runNumber}\\nCommit: ${update.commitSha}';
+          _updateMessage = update == null
+              ? 'You are up to date.'
+              : 'A verified Android update is available.';
+        });
+      } else {
+        throw UnsupportedError('In-app updates are available on Android and Windows builds.');
+      }
     } catch (error) {
       if (!mounted) return;
       final message = error.toString();
@@ -770,16 +790,21 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
 
   Future<void> _downloadAndInstallUpdate() async {
     final update = _availableUpdate;
-    if (update == null) return;
+    final windowsUpdate = _availableWindowsUpdate;
+    if (update == null && windowsUpdate == null) return;
     setState(() {
       _checkingUpdate = true;
       _updateMessage = 'Downloading and verifying update…';
     });
     try {
-      await UpdateChecker().downloadAndInstall(update);
-      if (mounted) {
-        setState(() => _updateMessage =
-            'APK verified. Android package installer opened; follow its prompts to finish.');
+      if (Platform.isWindows && windowsUpdate != null) {
+        await UpdateChecker().downloadAndInstallWindowsUpdate(windowsUpdate);
+      } else if (Platform.isAndroid && update != null) {
+        await UpdateChecker().downloadAndInstall(update);
+        if (mounted) {
+          setState(() => _updateMessage =
+              'APK verified. Android package installer opened; follow its prompts to finish.');
+        }
       }
     } catch (error) {
       if (mounted) {
