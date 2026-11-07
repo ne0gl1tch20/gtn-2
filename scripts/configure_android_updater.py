@@ -73,19 +73,22 @@ if marker not in root_gradle_text:
     root_gradle_text += """
 
 // GTN2: align Android plugin modules with compileSdk 36
-subprojects {
-    plugins.withId("com.android.library") {
-        val androidExtension = extensions.findByName("android")
+subprojects { subproject ->
+    subproject.plugins.withId("com.android.library") {
+        val androidExtension = subproject.extensions.findByName("android")
         if (androidExtension != null) {
             val intParameter = Integer.TYPE
             val boxedIntParameter = Integer::class.java
-            val setter = androidExtension.javaClass.methods.firstOrNull { method ->
+            val compileSdkMethod = androidExtension.javaClass.methods.firstOrNull { method ->
                 method.name in setOf("setCompileSdk", "setCompileSdkVersion", "compileSdkVersion") &&
                     method.parameterCount == 1 &&
                     (method.parameterTypes[0] == intParameter ||
                         method.parameterTypes[0] == boxedIntParameter)
-            } ?: error("Could not find an integer compileSdk setter for ${project.path}.")
-            setter.invoke(androidExtension, 36)
+            } ?: error("Could not find an integer compileSdk method for ${subproject.path}.")
+            compileSdkMethod.invoke(androidExtension, 36)
+            println("GTN2: configured ${subproject.path} compileSdk 36")
+        } else {
+            error("Android library plugin applied without an android extension: ${subproject.path}")
         }
     }
 }
