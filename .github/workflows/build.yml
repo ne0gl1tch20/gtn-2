@@ -33,7 +33,11 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
       - name: Read app version
-        run: echo "APP_VERSION=$(sed -n 's/^version: *\([^+]*\).*/\\1/p' pubspec.yaml)" >> "$GITHUB_ENV"
+        shell: bash
+        run: |
+          version_name="$(sed -n 's/^version: *\\([^+]*\\).*/\\1/p' pubspec.yaml)"
+          test -n "$version_name"
+          echo "APP_VERSION=$version_name" >> "$GITHUB_ENV"
       - name: Build debug APK
         run: flutter build apk --debug --build-name="$APP_VERSION" --build-number="$GITHUB_RUN_NUMBER" --dart-define=APP_VERSION="$APP_VERSION" --dart-define=APP_BUILD_NUMBER="$GITHUB_RUN_NUMBER"
       - name: Upload Android APK
