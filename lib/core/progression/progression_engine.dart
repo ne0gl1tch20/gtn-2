@@ -143,11 +143,18 @@ class ProgressionEngine {
     final defeated = Set<String>.of(state.defeatedBosses)..add(boss.id);
     final moneyReward = BigNumber.fromInt(boss.moneyReward);
     final nebulaReward = BigNumber.fromInt(boss.nebulaReward);
-    final relicInventory = Set<String>.of(state.legacySystems.relicInventory)
-      ..add(boss.id);
+    const relicByWorld = <String, String>{
+      'verdant_grove': 'verdant_guardian',
+      'crystal_caverns': 'crystal_golem',
+      'ember_summit': 'ember_dragon',
+      'nebula_rift': 'nebula_titan',
+    };
+    final relicId = relicByWorld[boss.id];
+    final relicInventory = Set<String>.of(state.legacySystems.relicInventory);
+    if (relicId != null) relicInventory.add(relicId);
     final codexEntries = Set<String>.of(state.legacySystems.codexEntries)
-      ..add('world:${boss.worldId}')
-      ..add('boss:${boss.id}');
+      ..add('world:${boss.id}')
+      ..add('boss:${relicId ?? boss.id}');
     return state.copyWith(
       bossDamage: Map.unmodifiable(damage),
       defeatedBosses: Set.unmodifiable(defeated),
