@@ -7,7 +7,7 @@ import 'package:gtn_2/data/saves/save_storage.dart';
 void main() {
   group('SaveData', () {
     test('round-trips through JSON', () {
-      final save = SaveData(secret: 42, attempts: 7, gamesWon: 3);
+      final save = SaveData(secret: 42, attempts: 7, gamesWon: 3, isComplete: true);
       expect(SaveData.fromJson(save.toJson()).toJson(), save.toJson());
     });
 
@@ -18,6 +18,8 @@ void main() {
           'secret': 42,
           'attempts': 0,
           'gamesWon': 0,
+          'isComplete': false,
+          'isComplete': false,
         }),
         throwsFormatException,
       );
