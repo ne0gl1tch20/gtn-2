@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
@@ -14,6 +13,7 @@ import '../core/legacy/legacy_systems_engine.dart';
 import '../core/legacy/legacy_systems_state.dart';
 import '../core/numbers/big_number.dart';
 import '../core/progression/progression_state.dart';
+import '../data/updates/update_checker.dart';
 
 typedef LegacyProgressionChanged = Future<void> Function(ProgressionState progression);
 
@@ -42,6 +42,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
   String? _updateMessage;
   String? _updateUrl;
   String? _updateDetails;
+  UpdateRelease? _availableUpdate;
 
   LegacySystemsState get _systems => _progression.legacySystems;
 
@@ -691,14 +692,37 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Text(_updateDetails!),
             ),
-          if (_updateUrl != null)
+          if (_availableUpdate != null) ...[
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-              child: FilledButton.tonal(
-                onPressed: () => _openGithubUrl(_updateUrl!),
-                child: const Text('Open update release'),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+              child: SelectableText('SHA-256: ${_availableUpdate!.sha256}'),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+              child: FilledButton.icon(
+                onPressed: _checkingUpdate ? null : _downloadAndInstallUpdate,
+                icon: const Icon(Icons.download_rounded),
+                label: const Text('Download and install update'),
               ),
             ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+              child: TextButton(
+                onPressed: () => _openGithubUrl(_availableUpdate!.releaseUrl),
+                child: const Text('View release notes'),
+              ),
+            ),
+          ],
+          ListTile(
+            leading: const Icon(Icons.article_outlined),
+            title: const Text('Open-source licenses'),
+            subtitle: const Text('View notices for Flutter and bundled packages.'),
+            onTap: () => showLicensePage(
+              context: context,
+              applicationName: 'Guess The Number 2',
+              applicationVersion: UpdateChecker.currentVersionName,
+            ),
+          ),
           ListTile(
             leading: const Icon(Icons.code_rounded),
             title: const Text('Source repository'),
@@ -706,7 +730,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
           ),
           const Padding(
             padding: EdgeInsets.fromLTRB(16, 0, 16, 16),
-            child: Text('Open-source license notices and the validated APK installation flow are still being ported. The update action currently opens the verified GitHub release page rather than silently installing an APK.'),
+            child: Text('Updates are downloaded from the signed Stable Debug release. The APK checksum is checked before Android opens its package installer. Android may ask you to allow installs from this app.'),
           ),
         ],
       ),
@@ -716,51 +740,55 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
   Future<void> _checkForUpdate() async {
     setState(() {
       _checkingUpdate = true;
-      _updateMessage = 'Checking GitHub releases…';
+      _updateMessage = 'Checking Stable Debug…';
       _updateUrl = null;
       _updateDetails = null;
+      _availableUpdate = null;
     });
-    HttpClient? client;
     try {
-      client = HttpClient()..connectionTimeout = const Duration(seconds: 8);
-      final request = await client.getUrl(Uri.parse(
-        'https://api.github.com/repos/ne0gl1tch20/gtn-2/releases/latest',
-      ));
-      request.headers.set(HttpHeaders.acceptHeader, 'application/vnd.github+json');
-      request.headers.set(HttpHeaders.userAgentHeader, 'GTN2-Updater');
-      final response = await request.close().timeout(const Duration(seconds: 10));
-      if (response.statusCode != HttpStatus.ok) {
-        throw HttpException('GitHub returned HTTP ${response.statusCode}.');
-      }
-      final body = await response.transform(utf8.decoder).join();
-      final json = jsonDecode(body);
-      if (json is! Map<String, dynamic>) throw const FormatException('Invalid release metadata.');
-      final page = json['html_url'];
-      final tag = json['tag_name'];
-      final assets = json['assets'];
-      if (page is! String || !_isGithubUrl(page) || tag is! String || assets is! List) {
-        throw const FormatException('Release metadata is incomplete.');
-      }
-      final apks = assets.cast<Object?>().whereType<Map<String, dynamic>>().where((asset) {
-        final name = asset['name'];
-        final url = asset['browser_download_url'];
-        return name is String && name.toLowerCase().endsWith('.apk') &&
-            url is String && _isGithubUrl(url);
-      }).toList();
-      final apk = apks.isEmpty ? null : apks.first;
+      final update = await UpdateChecker().checkForUpdate();
+      if (!mounted) return;
+      setState(() {
+        _availableUpdate = update;
+        _updateUrl = update?.releaseUrl;
+        _updateDetails = update == null
+            ? 'This build is up to date.'
+            : 'Version ${update.versionName} (${update.versionCode}) · Stable Debug #${update.runNumber}\nCommit: ${update.commitSha}';
+        _updateMessage = update == null
+            ? 'You are up to date.'
+            : 'A verified update is available.';
+      });
+    } catch (error) {
+      if (!mounted) return;
+      final message = error.toString();
+      setState(() {
+        _updateMessage = message.contains('404')
+            ? 'No Stable Debug release has been published yet.'
+            : 'Update check failed: $error';
+      });
+    } finally {
+      if (mounted) setState(() => _checkingUpdate = false);
+    }
+  }
+
+  Future<void> _downloadAndInstallUpdate() async {
+    final update = _availableUpdate;
+    if (update == null) return;
+    setState(() {
+      _checkingUpdate = true;
+      _updateMessage = 'Downloading and verifying update…';
+    });
+    try {
+      await UpdateChecker().downloadAndInstall(update);
       if (mounted) {
-        setState(() {
-          _updateUrl = page;
-          _updateDetails = apk == null
-              ? 'Latest tag: $tag. No APK asset was attached to this release.'
-              : 'Latest tag: $tag\nAPK: ${apk['name']}\nThe APK is available on the release page.';
-          _updateMessage = 'Found release $tag.';
-        });
+        setState(() => _updateMessage =
+            'APK verified. Android package installer opened; follow its prompts to finish.');
       }
     } catch (error) {
-      if (mounted) setState(() => _updateMessage = 'Update check failed: $error');
+      if (mounted) {
+        setState(() => _updateMessage = 'Update installation could not start: $error');
+      }
     } finally {
-      client?.close(force: true);
       if (mounted) setState(() => _checkingUpdate = false);
     }
   }
@@ -768,7 +796,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
   bool _isGithubUrl(String value) {
     final uri = Uri.tryParse(value);
     return uri != null && uri.scheme == 'https' &&
-        {'github.com', 'api.github.com'}.contains(uri.host);
+        {'github.com', 'api.github.com', 'raw.githubusercontent.com'}.contains(uri.host);
   }
 
   Future<void> _openGithubUrl(String value) async {

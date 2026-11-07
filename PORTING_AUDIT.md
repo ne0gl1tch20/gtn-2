@@ -37,7 +37,7 @@ The source audit confirmed these canonical implementation areas:
 | Daily rewards / quests / chests | Claim and settlement rules exist | Connect progress recording to all gameplay actions; port canonical objective/catalog data and screens |
 | Worlds / mastery / secrets / rift / codex | Persisted fields exist | Port actual unlock, battle, mastery, secret and reward transactions before exposing these fields |
 | Music | Save fields for library, queue, playlists and playback options exist | Implement file import/permissions, player backend, queue operations, playback lifecycle and screen |
-| About / updater | Not implemented in GTN 2 | Port About content and channel-aware updater with checksum/signature validation; never accept an unverified package |
+| About / Android updater | About and license notices are present; Stable Debug discovery, SHA-256 verification and Android package-installer handoff are implemented | Publish signed builds through `debug-latest` after adding `GTN2_DEBUG_KEYSTORE_BASE64`; Windows update installation remains separate work |
 | Save migration | Legacy state is nested in progression JSON and defaults when absent | Add explicit migration/version strategy and tests for old saves, malformed nested data and per-slot isolation |
 | UI integration | No complete player-facing legacy-system route set yet | Add accessible Flutter screens and navigation backed exclusively by engine transactions |
 
@@ -48,7 +48,8 @@ The source audit confirmed these canonical implementation areas:
 - Transaction tests now cover core mutator, talent, Home Base, relic, Lucky Stake, daily reward, challenge and save-integrity cases.
 - Existing legacy-system tests cover additional claim and catalog behavior.
 - Flutter analysis, Flutter unit tests, Android build and Windows build have **not** been verified in this audit.
-- No updater installation or music playback runtime behavior is claimed.
+- Android updater version-ordering tests cover stale and newer builds. APK download is SHA-256 verified before handing it to Android Package Installer; device-level prompts still require runtime verification.
+- Windows self-update installation is not yet ported; Windows builds remain downloadable CI artifacts.
 
 ## Merge gate
 

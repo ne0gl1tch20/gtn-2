@@ -49,6 +49,8 @@ jobs:
           cache: true
       - name: Generate Android project
         run: flutter create --platforms=android --project-name=gtn_2 --org=com.jarrlyyy .
+      - name: Configure Android package installation permission
+        run: python3 scripts/configure_android_updater.py
       - name: Install dependencies
         run: flutter pub get
       - name: Build debug APK
