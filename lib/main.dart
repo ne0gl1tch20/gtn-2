@@ -633,7 +633,18 @@ class _GameHomePageState extends State<GameHomePage> {
           playerLevel: 1,
           activeSeasonId: _currentSeasonId(),
         );
-        _progression = afterReward.copyWith(legacySystems: systemsAfter);
+        var nextProgression = afterReward.copyWith(legacySystems: systemsAfter);
+        if (systemsAfter.endlessRiftActive) {
+          final riftResult = correct
+              ? _legacySystemsEngine.attackEndlessRiftBoss(nextProgression, systemsAfter)
+              : _legacySystemsEngine.recordEndlessRiftMiss(nextProgression, systemsAfter);
+          if (riftResult.accepted) {
+            nextProgression = riftResult.progression.copyWith(
+              legacySystems: riftResult.systems,
+            );
+          }
+        }
+        _progression = nextProgression;
       }
       switch (_game.lastResult) {
         case GuessResult.tooLow:
