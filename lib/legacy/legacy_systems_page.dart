@@ -1,0 +1,598 @@
+import 'dart:convert';
+import 'dart:io';
+import 'dart:math';
+
+import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+import '../core/legacy/builtin_trait_catalog.dart';
+import '../core/legacy/legacy_systems_engine.dart';
+import '../core/legacy/legacy_systems_state.dart';
+import '../core/numbers/big_number.dart';
+import '../core/progression/progression_state.dart';
+
+typedef LegacyProgressionChanged = Future<void> Function(ProgressionState progression);
+
+class LegacySystemsPage extends StatefulWidget {
+  const LegacySystemsPage({
+    super.key,
+    required this.progression,
+    required this.onChanged,
+  });
+
+  final ProgressionState progression;
+  final LegacyProgressionChanged onChanged;
+
+  @override
+  State<LegacySystemsPage> createState() => _LegacySystemsPageState();
+}
+
+class _LegacySystemsPageState extends State<LegacySystemsPage> {
+  final LegacySystemsEngine _engine = const LegacySystemsEngine();
+  final TextEditingController _stakeController = TextEditingController();
+  late ProgressionState _progression = widget.progression;
+  bool _checkingUpdate = false;
+  String? _updateMessage;
+  String? _updateUrl;
+  String? _updateDetails;
+
+  LegacySystemsState get _systems => _progression.legacySystems;
+
+  @override
+  void didUpdateWidget(covariant LegacySystemsPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.progression != widget.progression) {
+      _progression = widget.progression;
+    }
+  }
+
+  Future<void> _apply(LegacyActionResult result) async {
+    if (!result.accepted) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(result.message.isEmpty ? 'Action rejected.' : result.message)),
+        );
+      }
+      return;
+    }
+    final next = result.progression.copyWith(legacySystems: result.systems);
+    setState(() => _progression = next);
+    await widget.onChanged(next);
+  }
+
+  Future<void> _saveSystems(LegacySystemsState systems) async {
+    final next = _progression.copyWith(legacySystems: systems);
+    setState(() => _progression = next);
+    await widget.onChanged(next);
+  }
+
+  String get _today => DateTime.now().toIso8601String().substring(0, 10);
+
+  @override
+  void dispose() {
+    _stakeController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final traitState = _engine.evaluateTraits(
+      progression: _progression,
+      systems: _systems,
+      playerLevel: 1,
+      activeSeasonId: _seasonId(DateTime.now()),
+    );
+    return Scaffold(
+      appBar: AppBar(title: const Text('GTN 1 Systems')),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Legacy systems', style: Theme.of(context).textTheme.titleLarge),
+                  const SizedBox(height: 6),
+                  Text('Persistent gameplay systems ported from the original Kotlin game. Purchases and rewards are validated by the Dart engine.'),
+                  const SizedBox(height: 10),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      _statChip('Traits', '${traitState.activeTraitIds.length}/320'),
+                      _statChip('Talents', '${_systems.talents.length}/6'),
+                      _statChip('Relics', '${_systems.equippedRelics.length}/4'),
+                      _statChip('Sanctuary', 'Lv ${_systems.homeBaseLevel}'),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+          _traitsSection(traitState),
+          _talentsSection(),
+          _mutatorsSection(),
+          _relicsSection(),
+          _homeBaseSection(),
+          _stakeSection(),
+          _dailySection(),
+          _lootSection(),
+          _musicSection(),
+          _aboutSection(),
+        ],
+      ),
+    );
+  }
+
+  Widget _statChip(String label, String value) => Chip(
+    label: Text('$label · $value'),
+    visualDensity: VisualDensity.compact,
+  );
+
+  Widget _traitsSection(TraitEffectSummary traits) {
+    final sorted = [...builtInTraitCatalog]
+      ..sort((a, b) => (a['id']! as String).compareTo(b['id']! as String));
+    return Card(
+      child: ExpansionTile(
+        leading: const Icon(Icons.auto_awesome_rounded),
+        title: const Text('Traits'),
+        subtitle: Text('${traits.activeTraitIds.length} active · ${_systems.discoveredTraits.length} discovered'),
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Text('Trait activation is automatic. Hidden traits are discovered through their requirements. Effects are bounded by the original trait runtime.'),
+          ),
+          SizedBox(
+            height: 360,
+            child: ListView.builder(
+              itemCount: sorted.length,
+              itemBuilder: (context, index) {
+                final item = sorted[index];
+                final id = item['id']! as String;
+                final hidden = item['visibility'] == 'HIDDEN';
+                final discovered = _systems.discoveredTraits.contains(id);
+                final active = traits.activeTraitIds.contains(id);
+                final visible = !hidden || discovered;
+                return ListTile(
+                  dense: true,
+                  leading: Icon(
+                    active ? Icons.check_circle_rounded : hidden && !discovered ? Icons.lock_outline_rounded : Icons.circle_outlined,
+                    color: active ? Theme.of(context).colorScheme.primary : null,
+                  ),
+                  title: Text(visible ? _pretty(id) : 'Undiscovered trait'),
+                  subtitle: Text('${item['category']} · ${item['effect']}'),
+                  trailing: active ? const Text('ACTIVE') : null,
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _talentsSection() {
+    return Card(
+      child: ExpansionTile(
+        leading: const Icon(Icons.account_tree_rounded),
+        title: const Text('Talent tree'),
+        subtitle: Text('${_systems.talents.length} / 6 unlocked · ${_progression.prestige} Prestige'),
+        children: [
+          for (final entry in LegacySystemsEngine.talents.entries)
+            Builder(builder: (context) {
+              final owned = _systems.talents.contains(entry.key);
+              final parent = entry.value.parent;
+              final parentReady = parent == null || _systems.talents.contains(parent);
+              return ListTile(
+                title: Text(_pretty(entry.key)),
+                subtitle: Text('Cost: ${entry.value.cost} Prestige${parent == null ? '' : ' · Requires ${_pretty(parent)}'}'),
+                trailing: owned
+                    ? const Icon(Icons.check_circle_rounded, color: Colors.green)
+                    : FilledButton(
+                        onPressed: parentReady
+                            ? () => _apply(_engine.buyTalent(_progression, _systems, entry.key))
+                            : null,
+                        child: const Text('Unlock'),
+                      ),
+              );
+            }),
+        ],
+      ),
+    );
+  }
+
+  Widget _mutatorsSection() {
+    const ids = ['mut_hardcore', 'mut_speed', 'mut_blind', 'mut_tax'];
+    return Card(
+      child: ExpansionTile(
+        leading: const Icon(Icons.tune_rounded),
+        title: const Text('Mutators & challenge builder'),
+        subtitle: Text('Reward multiplier ×${_engine.mutatorRewardMultiplier(_systems)}'),
+        children: [
+          for (final id in ids)
+            SwitchListTile(
+              title: Text(_pretty(id)),
+              subtitle: Text(switch (id) {
+                'mut_hardcore' => 'Double the guessing range.',
+                'mut_speed' => 'Hyper-speed modifier.',
+                'mut_blind' => 'Hide higher/lower feedback.',
+                _ => 'Wrong guesses cost 5% of current Money.',
+              }),
+              value: _systems.activeMutators.contains(id),
+              onChanged: (value) => _apply(_engine.setMutator(_progression, _systems, id, value)),
+            ),
+          const Padding(
+            padding: EdgeInsets.fromLTRB(16, 0, 16, 12),
+            child: Text('Custom and weekly challenge rewards are claim-once transactions. Challenge objective tracking is connected to the save model.'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _relicsSection() {
+    const relics = <(String, String, String)>[
+      ('verdant_guardian', 'Heartwood Sigil', 'Verdant Guardian'),
+      ('crystal_golem', 'Prism Core', 'Crystal Golem'),
+      ('ember_dragon', 'Ember Scale', 'Ember Dragon'),
+      ('nebula_titan', 'Starbound Fragment', 'Nebula Titan'),
+    ];
+    return Card(
+      child: ExpansionTile(
+        leading: const Icon(Icons.diamond_rounded),
+        title: const Text('Relic collection'),
+        subtitle: Text('${_systems.relicInventory.length}/4 discovered · ${_systems.equippedRelics.length}/4 equipped'),
+        children: [
+          for (final relic in relics)
+            ListTile(
+              leading: Icon(_systems.relicInventory.contains(relic.$1) ? Icons.diamond_rounded : Icons.lock_outline_rounded),
+              title: Text(relic.$2),
+              subtitle: Text('Earned from ${relic.$3}'),
+              trailing: FilledButton.tonal(
+                onPressed: _systems.relicInventory.contains(relic.$1)
+                    ? () => _apply(_engine.equipRelic(_progression, _systems, relic.$1))
+                    : null,
+                child: Text(_systems.equippedRelics.contains(relic.$1) ? 'Unequip' : 'Equip'),
+              ),
+            ),
+          const Padding(
+            padding: EdgeInsets.fromLTRB(16, 0, 16, 12),
+            child: Text('Set bonus: 2 relics +10%, 3 relics +20%, 4 relics +35% Money. Individual relic bonuses are applied by the backend.'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _homeBaseSection() {
+    final level = _systems.homeBaseLevel;
+    final cost = BigNumber.fromInt(50000 * (level + 1));
+    return Card(
+      child: ExpansionTile(
+        leading: const Icon(Icons.home_work_rounded),
+        title: const Text('Home Base'),
+        subtitle: Text('Sanctuary level $level / 20 · +${level * 2}% Money'),
+        children: [
+          for (final milestone in const [(1, 'Portal Chamber'), (3, 'Relic Forge'), (5, 'Star Archive'), (10, 'Cosmic Observatory')])
+            ListTile(
+              leading: Icon(level >= milestone.$1 ? Icons.check_circle_rounded : Icons.lock_outline_rounded),
+              title: Text(milestone.$2),
+              subtitle: Text('Unlocks at level ${milestone.$1}'),
+            ),
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: FilledButton(
+              onPressed: level < 20 && _progression.money.compareTo(cost) >= 0
+                  ? () => _apply(_engine.upgradeHomeBase(_progression, _systems))
+                  : null,
+              child: Text(level >= 20 ? 'Fully restored' : 'Restore next level · $cost Money'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _stakeSection() {
+    return Card(
+      child: ExpansionTile(
+        leading: const Icon(Icons.casino_rounded),
+        title: const Text('Lucky Stake'),
+        subtitle: Text('Wins: ${_systems.stakesWon} · Losses: ${_systems.stakesLost}'),
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            child: TextField(
+              controller: _stakeController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(labelText: 'Stake amount', prefixText: 'Money '),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+            child: FilledButton(
+              onPressed: () {
+                final stake = BigNumber.tryParse(_stakeController.text.trim());
+                if (stake == null) {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Enter a valid stake.')));
+                  return;
+                }
+                final result = _engine.settleLuckyStake(
+                  progression: _progression,
+                  systems: _systems,
+                  stake: stake,
+                  won: Random.secure().nextBool(),
+                  currentStreak: _progression.currentStreak,
+                );
+                _apply(result);
+                _stakeController.clear();
+              },
+              child: const Text('Flip 50/50'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _dailySection() {
+    final daily = _systems.dailyQuestDate == _today ? _systems : _systems.copyWith(
+      dailyQuestDate: _today,
+      dailyQuestGuesses: 0,
+      dailyQuestCorrectGuesses: 0,
+      dailyQuestBestStreak: 0,
+      dailyQuestUpgradePurchases: 0,
+      claimedDailyQuests: const {},
+    );
+    const quests = <(String, String, int)>[
+      ('daily_guesses_10', 'Make 10 guesses', 10),
+      ('daily_correct_5', 'Get 5 correct guesses', 5),
+      ('daily_streak_5', 'Reach a streak of 5', 5),
+      ('daily_upgrades_3', 'Buy 3 upgrades', 3),
+    ];
+    final progress = <String, int>{
+      'daily_guesses_10': daily.dailyQuestGuesses,
+      'daily_correct_5': daily.dailyQuestCorrectGuesses,
+      'daily_streak_5': daily.dailyQuestBestStreak,
+      'daily_upgrades_3': daily.dailyQuestUpgradePurchases,
+    };
+    return Card(
+      child: ExpansionTile(
+        leading: const Icon(Icons.calendar_month_rounded),
+        title: const Text('Daily rewards & quests'),
+        subtitle: Text('Reward streak: ${_systems.dailyRewardStreak} days'),
+        children: [
+          ListTile(
+            title: const Text('Daily login reward'),
+            subtitle: Text(_systems.lastDailyRewardDate == _today ? 'Claimed today' : 'Claim your daily Nebula'),
+            trailing: FilledButton(
+              onPressed: _systems.lastDailyRewardDate == _today
+                  ? null
+                  : () => _apply(_engine.claimDailyReward(
+                        progression: _progression,
+                        systems: _systems,
+                        today: _today,
+                        traitNebulaBonus: _engine.evaluateTraits(
+                          progression: _progression,
+                          systems: _systems,
+                          playerLevel: 1,
+                          activeSeasonId: _seasonId(DateTime.now()),
+                        ).nebulaBonusPerClaim,
+                        nebulaBoostOwned: (_progression.nebulaItems['nebula_boost'] ?? 0) > 0,
+                      )),
+              child: const Text('Claim'),
+            ),
+          ),
+          for (final quest in quests)
+            ListTile(
+              title: Text(quest.$2),
+              subtitle: Text('${progress[quest.$1]} / ${quest.$3}'),
+              trailing: FilledButton.tonal(
+                onPressed: progress[quest.$1]! >= quest.$3 && !daily.claimedDailyQuests.contains(quest.$1)
+                    ? () => _apply(_engine.claimDailyQuest(
+                          progression: _progression,
+                          systems: daily,
+                          questId: quest.$1,
+                          today: _today,
+                          nebulaBoostOwned: (_progression.nebulaItems['nebula_boost'] ?? 0) > 0,
+                        ))
+                    : null,
+                child: Text(daily.claimedDailyQuests.contains(quest.$1) ? 'Claimed' : 'Claim'),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _lootSection() {
+    return Card(
+      child: ExpansionTile(
+        leading: const Icon(Icons.inventory_2_rounded),
+        title: const Text('Loot chests'),
+        subtitle: Text('Opened: ${_systems.lootChestsOpened}'),
+        children: [
+          for (final tier in const ['common', 'rare', 'epic'])
+            ListTile(
+              title: Text('${_pretty(tier)} chest'),
+              subtitle: Text('Owned: ${_systems.lootChests[tier] ?? 0}'),
+              trailing: FilledButton.tonal(
+                onPressed: (_systems.lootChests[tier] ?? 0) > 0
+                    ? () => _apply(_engine.openLootChest(
+                          progression: _progression,
+                          systems: _systems,
+                          tier: tier,
+                          rewardNebula: Random.secure().nextBool(),
+                        ))
+                    : null,
+                child: const Text('Open'),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _musicSection() {
+    return Card(
+      child: ExpansionTile(
+        leading: const Icon(Icons.library_music_rounded),
+        title: const Text('Offline music library'),
+        subtitle: Text('${_systems.musicLibrary.length} tracks · ${_systems.musicPlaylists.length} playlists'),
+        children: [
+          const Padding(
+            padding: EdgeInsets.fromLTRB(16, 0, 16, 12),
+            child: Text('Music library, queue, playlist, repeat and shuffle state are now save-backed. Native audio import and playback still need their platform audio adapter.'),
+          ),
+          SwitchListTile(
+            title: const Text('Shuffle'),
+            value: _systems.musicShuffle,
+            onChanged: (value) => _saveSystems(_systems.copyWith(musicShuffle: value)),
+          ),
+          ListTile(
+            title: const Text('Repeat mode'),
+            subtitle: Text(_systems.musicRepeatMode.toUpperCase()),
+            trailing: DropdownButton<String>(
+              value: _systems.musicRepeatMode,
+              items: const [
+                DropdownMenuItem(value: 'off', child: Text('Off')),
+                DropdownMenuItem(value: 'one', child: Text('One')),
+                DropdownMenuItem(value: 'all', child: Text('All')),
+              ],
+              onChanged: (value) {
+                if (value != null) _saveSystems(_systems.copyWith(musicRepeatMode: value));
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _aboutSection() {
+    return Card(
+      child: ExpansionTile(
+        leading: const Icon(Icons.info_outline_rounded),
+        title: const Text('About & updater'),
+        subtitle: const Text('Version 2.0.0 · Flutter / Dart'),
+        children: [
+          const ListTile(
+            title: Text('Guess The Number 2'),
+            subtitle: Text('Flutter continuation of the original Kotlin game. Offline-first local saves.'),
+          ),
+          ListTile(
+            leading: const Icon(Icons.system_update_rounded),
+            title: const Text('Check for updates'),
+            subtitle: Text(_updateMessage ?? 'Check the GitHub release feed for a newer build.'),
+            trailing: _checkingUpdate
+                ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                : const Icon(Icons.refresh_rounded),
+            onTap: _checkingUpdate ? null : _checkForUpdate,
+          ),
+          if (_updateDetails != null)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Text(_updateDetails!),
+            ),
+          if (_updateUrl != null)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+              child: FilledButton.tonal(
+                onPressed: () => _openGithubUrl(_updateUrl!),
+                child: const Text('Open update release'),
+              ),
+            ),
+          ListTile(
+            leading: const Icon(Icons.code_rounded),
+            title: const Text('Source repository'),
+            onTap: () => _openGithubUrl('https://github.com/ne0gl1tch20/gtn-2'),
+          ),
+          const Padding(
+            padding: EdgeInsets.fromLTRB(16, 0, 16, 16),
+            child: Text('Open-source license notices and the validated APK installation flow are still being ported. The update action currently opens the verified GitHub release page rather than silently installing an APK.'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _checkForUpdate() async {
+    setState(() {
+      _checkingUpdate = true;
+      _updateMessage = 'Checking GitHub releases…';
+      _updateUrl = null;
+      _updateDetails = null;
+    });
+    HttpClient? client;
+    try {
+      client = HttpClient()..connectionTimeout = const Duration(seconds: 8);
+      final request = await client.getUrl(Uri.parse(
+        'https://api.github.com/repos/ne0gl1tch20/gtn-2/releases/latest',
+      ));
+      request.headers.set(HttpHeaders.acceptHeader, 'application/vnd.github+json');
+      request.headers.set(HttpHeaders.userAgentHeader, 'GTN2-Updater');
+      final response = await request.close().timeout(const Duration(seconds: 10));
+      if (response.statusCode != HttpStatus.ok) {
+        throw HttpException('GitHub returned HTTP ${response.statusCode}.');
+      }
+      final body = await response.transform(utf8.decoder).join();
+      final json = jsonDecode(body);
+      if (json is! Map<String, dynamic>) throw const FormatException('Invalid release metadata.');
+      final page = json['html_url'];
+      final tag = json['tag_name'];
+      final assets = json['assets'];
+      if (page is! String || !_isGithubUrl(page) || tag is! String || assets is! List) {
+        throw const FormatException('Release metadata is incomplete.');
+      }
+      final apk = assets.cast<Object?>().whereType<Map<String, dynamic>>().where((asset) {
+        final name = asset['name'];
+        final url = asset['browser_download_url'];
+        return name is String && name.toLowerCase().endsWith('.apk') &&
+            url is String && _isGithubUrl(url);
+      }).firstOrNull;
+      if (mounted) {
+        setState(() {
+          _updateUrl = page;
+          _updateDetails = apk == null
+              ? 'Latest tag: $tag. No APK asset was attached to this release.'
+              : 'Latest tag: $tag\nAPK: ${apk['name']}\nThe APK is available on the release page.';
+          _updateMessage = 'Found release $tag.';
+        });
+      }
+    } catch (error) {
+      if (mounted) setState(() => _updateMessage = 'Update check failed: $error');
+    } finally {
+      client?.close(force: true);
+      if (mounted) setState(() => _checkingUpdate = false);
+    }
+  }
+
+  bool _isGithubUrl(String value) {
+    final uri = Uri.tryParse(value);
+    return uri != null && uri.scheme == 'https' &&
+        {'github.com', 'api.github.com'}.contains(uri.host);
+  }
+
+  Future<void> _openGithubUrl(String value) async {
+    final uri = Uri.tryParse(value);
+    if (uri == null || !_isGithubUrl(value)) return;
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
+  }
+
+  String? _seasonId(DateTime date) => switch (date.month) {
+    12 || 1 || 2 => 'winter',
+    3 || 4 || 5 => 'spring',
+    6 || 7 || 8 => 'summer',
+    _ => 'autumn',
+  };
+
+  String _pretty(String id) => id
+      .replaceAll('mut_', '')
+      .replaceAll('talent_', '')
+      .split(RegExp(r'[_-]'))
+      .where((part) => part.isNotEmpty)
+      .map((part) => part[0].toUpperCase() + part.substring(1))
+      .join(' ');
+}
