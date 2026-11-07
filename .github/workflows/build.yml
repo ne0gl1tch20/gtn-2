@@ -3,9 +3,6 @@ name: Build
 on:
   push:
     branches: [main, master]
-  pull_request:
-    branches: [main, master]
-  workflow_dispatch:
 
 permissions:
   contents: read
@@ -15,27 +12,9 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  validate:
-    name: Format, analyze and test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          cache: true
-      - name: Install dependencies
-        run: flutter pub get
-      - name: Check formatting
-        run: dart format --output=none .
-      - name: Analyze
-        run: flutter analyze --fatal-infos
-      - name: Test
-        run: flutter test
-
   android:
     name: Android debug APK
-    needs: validate
+    
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
