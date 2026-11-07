@@ -49,6 +49,23 @@ void main() {
       expect(engine.guess(won, 20), same(won));
     });
 
+    test('Range Scout narrows and enforces the active guess interval', () {
+      final engine = GameEngine();
+      final game = engine.restore(
+        secret: 75,
+        attempts: 1,
+        isComplete: false,
+        savedMinimum: 1,
+        savedMaximum: 100,
+      );
+      final afterMiss = engine.guess(game, 50);
+      final narrowed = engine.applyRangeScoutHint(afterMiss, 50);
+      expect(narrowed.minimum, 51);
+      expect(narrowed.maximum, 100);
+      expect(engine.guess(narrowed, 50).lastResult, GuessResult.outOfRange);
+      expect(engine.guess(narrowed, 75).lastResult, GuessResult.correct);
+    });
+
     test('rejects invalid restored state', () {
       final engine = GameEngine(random: FixedRandom(0));
       expect(
