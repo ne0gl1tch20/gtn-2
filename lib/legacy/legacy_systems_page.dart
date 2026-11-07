@@ -758,18 +758,40 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
                 child: Text(_systems.endgameRewardsClaimed.contains(reward.$1) ? 'Claimed' : 'Claim'),
               ),
             ),
-          if (allWorldsDefeated)
+          if (_systems.endlessRiftActive)
+            Builder(builder: (context) {
+              final world = WorldBossCatalog.worlds.firstWhere(
+                (item) => item.id == _systems.activeWorldId,
+              );
+              final hp = world.hits + (_systems.endlessRiftTier - 1) * 2;
+              final damage = (_progression.bossDamage[world.id] ?? 0).clamp(0, hp);
+              return ListTile(
+                leading: const Icon(Icons.all_inclusive_rounded),
+                title: Text('Endless Rift · Tier ${_systems.endlessRiftTier}'),
+                subtitle: Text('${world.name} · Boss HP: ${hp - damage} / $hp remaining. Correct guesses attack; misses can regress damage.'),
+                isThreeLine: true,
+                trailing: FilledButton.tonal(
+                  onPressed: () => _apply(_engine.setEndlessRift(
+                    progression: _progression,
+                    systems: _systems,
+                    active: false,
+                  )),
+                  child: const Text('Leave'),
+                ),
+              );
+            }),
+          if (allWorldsDefeated && !_systems.endlessRiftActive)
             ListTile(
               leading: const Icon(Icons.all_inclusive_rounded),
               title: const Text('Endless Rift unlocked'),
-              subtitle: Text(_systems.endlessRiftActive ? 'Tier ${_systems.endlessRiftTier} active' : 'Best tier: ${_systems.endlessRiftBestTier}'),
+              subtitle: Text('Best tier: ${_systems.endlessRiftBestTier} · Rematch all four guardians in sequence.'),
               trailing: FilledButton.tonal(
                 onPressed: () => _apply(_engine.setEndlessRift(
                   progression: _progression,
                   systems: _systems,
-                  active: !_systems.endlessRiftActive,
+                  active: true,
                 )),
-                child: Text(_systems.endlessRiftActive ? 'Leave' : 'Enter'),
+                child: const Text('Enter'),
               ),
             ),
         ],
