@@ -1,4 +1,5 @@
 import '../numbers/big_number.dart';
+import 'gtn1_systems_state.dart';
 
 class ProgressionState {
   ProgressionState({
@@ -20,6 +21,7 @@ class ProgressionState {
     this.currentStreak = 0,
     this.bestStreak = 0,
     BigNumber? nebulaEarned,
+    this.systems = const Gtn1SystemsState(),
   })  : money = money ?? BigNumber.fromInt(0),
         prestige = prestige ?? BigNumber.fromInt(0),
         ultra = ultra ?? BigNumber.fromInt(0),
@@ -34,6 +36,7 @@ class ProgressionState {
   final BigNumber moneyEarned;
   final int currentStreak, bestStreak;
   final BigNumber nebulaEarned;
+  final Gtn1SystemsState systems;
 
   static final initial = ProgressionState();
 
@@ -56,6 +59,7 @@ class ProgressionState {
         'currentStreak': currentStreak,
         'bestStreak': bestStreak,
         'nebulaEarned': nebulaEarned.toString(),
+        'systems': systems.toJson(),
       };
 
   factory ProgressionState.fromJson(Map<String, dynamic> json) {
@@ -119,6 +123,10 @@ class ProgressionState {
     if (correct > total || streak > correct || best < streak) {
       throw const FormatException('Inconsistent progression statistics.');
     }
+    final rawSystems = json['systems'];
+    if (rawSystems != null && rawSystems is! Map<String, dynamic>) {
+      throw const FormatException('Invalid GTN 1 systems save.');
+    }
     return ProgressionState(
       money: number('money'),
       prestige: number('prestige'),
@@ -138,6 +146,7 @@ class ProgressionState {
       currentStreak: streak,
       bestStreak: best,
       nebulaEarned: number('nebulaEarned'),
+      systems: rawSystems == null ? const Gtn1SystemsState() : Gtn1SystemsState.fromJson(rawSystems),
     );
   }
 
@@ -148,7 +157,7 @@ class ProgressionState {
     Map<String, int>? bossDamage, Set<String>? defeatedBosses,
     int? prestigeResets, int? ultraResets, int? totalGuesses,
     int? correctGuesses, BigNumber? moneyEarned, int? currentStreak,
-    int? bestStreak, BigNumber? nebulaEarned,
+    int? bestStreak, BigNumber? nebulaEarned, Gtn1SystemsState? systems,
   }) => ProgressionState(
     money: money ?? this.money,
     prestige: prestige ?? this.prestige,
@@ -168,5 +177,6 @@ class ProgressionState {
     currentStreak: currentStreak ?? this.currentStreak,
     bestStreak: bestStreak ?? this.bestStreak,
     nebulaEarned: nebulaEarned ?? this.nebulaEarned,
+    systems: systems ?? this.systems,
   );
 }
