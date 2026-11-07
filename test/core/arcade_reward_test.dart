@@ -20,6 +20,21 @@ void main() {
     expect(updated.moneyEarned, BigNumber.fromInt(5000));
   });
 
+  test('Nebula Crystal doubles future Arcade Nebula rewards', () {
+    final purchased = engine.purchaseNebulaItem(
+      ProgressionState(nebula: BigNumber.fromInt(50)),
+      itemId: 'nebula_boost',
+      price: BigNumber.fromInt(50),
+    );
+    final rewarded = engine.awardArcadeReward(
+      purchased,
+      nebulaReward: BigNumber.fromInt(1),
+      moneyReward: BigNumber.fromInt(0),
+    );
+    expect(rewarded.nebula, BigNumber.fromInt(2));
+    expect(rewarded.nebulaEarned, BigNumber.fromInt(2));
+  });
+
   test('Arcade reward rejects negative payouts', () {
     expect(
       () => engine.awardArcadeReward(
