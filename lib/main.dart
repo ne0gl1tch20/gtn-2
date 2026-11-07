@@ -283,8 +283,19 @@ class _GameHomePageState extends State<GameHomePage> {
   Future<ProgressionState> _attackWorldBoss(
     WorldBossDefinition boss,
   ) async {
-    final updated = _progressionEngine.attackWorldBoss(_progression, boss);
+    var updated = _progressionEngine.attackWorldBoss(_progression, boss);
     if (updated != _progression) {
+      final entries = Set<String>.of(updated.legacySystems.codexEntries);
+      if (updated.defeatedBosses.contains(boss.id)) {
+        entries
+          ..add('world:${boss.id}')
+          ..add('boss:${boss.id}');
+      }
+      updated = updated.copyWith(
+        legacySystems: updated.legacySystems.copyWith(
+          codexEntries: Set<String>.unmodifiable(entries),
+        ),
+      );
       setState(() => _progression = updated);
       await _persist();
     }
