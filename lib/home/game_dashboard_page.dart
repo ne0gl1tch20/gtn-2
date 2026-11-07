@@ -65,73 +65,6 @@ class GameDashboardPage extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: dark ? _bg : const Color(0xFFF5F6FC),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: 2,
-        onDestinationSelected: (index) {
-          switch (index) {
-            case 0:
-              onWorldMap();
-              break;
-            case 1:
-              onArcade();
-              break;
-            case 3:
-              onUpgradeShop();
-              break;
-            case 4:
-              showModalBottomSheet<void>(
-                context: context,
-                showDragHandle: true,
-                backgroundColor: panel,
-                builder: (sheetContext) => SafeArea(
-                  child: Wrap(
-                    children: [
-                      ListTile(
-                        leading: const Icon(Icons.auto_awesome_rounded, color: _gold),
-                        title: const Text('Prestige & Ultra'),
-                        onTap: () { Navigator.pop(sheetContext); onPrestige(); },
-                      ),
-                      ListTile(
-                        leading: const Icon(Icons.diamond_rounded, color: _purple),
-                        title: const Text('Nebula Shop'),
-                        onTap: () { Navigator.pop(sheetContext); onNebulaShop(); },
-                      ),
-                      ListTile(
-                        leading: const Icon(Icons.public_rounded, color: _green),
-                        title: const Text('World Map'),
-                        onTap: () { Navigator.pop(sheetContext); onWorldMap(); },
-                      ),
-                      ListTile(
-                        leading: const Icon(Icons.save_rounded),
-                        title: const Text('Save Slots'),
-                        onTap: () { Navigator.pop(sheetContext); onSaveSlots(); },
-                      ),
-                      ListTile(
-                        leading: const Icon(Icons.settings_rounded),
-                        title: const Text('Settings'),
-                        onTap: () { Navigator.pop(sheetContext); onSettings(); },
-                      ),
-                      if (showDeveloperSettings)
-                        ListTile(
-                          leading: const Icon(Icons.bug_report_rounded),
-                          title: const Text('Developer Settings'),
-                          onTap: () { Navigator.pop(sheetContext); onDeveloperSettings(); },
-                        ),
-                    ],
-                  ),
-                ),
-              );
-              break;
-          }
-        },
-        destinations: const [
-          NavigationDestination(icon: Icon(Icons.public_rounded), label: 'Worlds'),
-          NavigationDestination(icon: Icon(Icons.sports_esports_rounded), label: 'Arcade'),
-          NavigationDestination(icon: Icon(Icons.play_arrow_rounded), label: 'Play'),
-          NavigationDestination(icon: Icon(Icons.upgrade_rounded), label: 'Upgrades'),
-          NavigationDestination(icon: Icon(Icons.menu_rounded), label: 'More'),
-        ],
-      ),
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -223,7 +156,66 @@ class GameDashboardPage extends StatelessWidget {
                       ],
                     ],
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 14),
+                  Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: const Color(0xCC090D1B),
+                      borderRadius: BorderRadius.circular(19),
+                      border: Border.all(color: Colors.white.withValues(alpha: .09)),
+                    ),
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          _NavTab(Icons.public_rounded, 'Worlds', false, onWorldMap),
+                          _NavTab(Icons.sports_esports_rounded, 'Arcade', false, onArcade),
+                          _NavTab(Icons.play_arrow_rounded, 'Play', true, () {}),
+                          _NavTab(Icons.upgrade_rounded, 'Upgrades', false, onUpgradeShop),
+                          _NavTab(Icons.menu_rounded, 'More', false, () {
+                            showModalBottomSheet<void>(
+                              context: context,
+                              showDragHandle: true,
+                              backgroundColor: panel,
+                              builder: (sheetContext) => SafeArea(
+                                child: Wrap(
+                                  children: [
+                                    ListTile(
+                                      leading: const Icon(Icons.auto_awesome_rounded, color: _gold),
+                                      title: const Text('Prestige & Ultra'),
+                                      onTap: () { Navigator.pop(sheetContext); onPrestige(); },
+                                    ),
+                                    ListTile(
+                                      leading: const Icon(Icons.diamond_rounded, color: _purple),
+                                      title: const Text('Nebula Shop'),
+                                      onTap: () { Navigator.pop(sheetContext); onNebulaShop(); },
+                                    ),
+                                    ListTile(
+                                      leading: const Icon(Icons.save_rounded),
+                                      title: const Text('Save Slots'),
+                                      onTap: () { Navigator.pop(sheetContext); onSaveSlots(); },
+                                    ),
+                                    ListTile(
+                                      leading: const Icon(Icons.settings_rounded),
+                                      title: const Text('Settings'),
+                                      onTap: () { Navigator.pop(sheetContext); onSettings(); },
+                                    ),
+                                    if (showDeveloperSettings)
+                                      ListTile(
+                                        leading: const Icon(Icons.bug_report_rounded),
+                                        title: const Text('Developer Settings'),
+                                        onTap: () { Navigator.pop(sheetContext); onDeveloperSettings(); },
+                                      ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          }),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
                   Container(
                     padding: const EdgeInsets.all(23),
                     constraints: const BoxConstraints(minHeight: 188),
@@ -437,6 +429,51 @@ class GameDashboardPage extends StatelessWidget {
       ),
     );
   }
+}
+
+class _NavTab extends StatelessWidget {
+  const _NavTab(this.icon, this.label, this.selected, this.onTap);
+
+  final IconData icon;
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 2),
+        child: Material(
+          color: selected ? const Color(0x339B7CFF) : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(12),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 11),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: selected
+                      ? _purple.withValues(alpha: .35)
+                      : Colors.transparent,
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(icon, size: 17, color: selected ? _white : _muted),
+                  const SizedBox(width: 6),
+                  Text(label, style: TextStyle(
+                    color: selected ? _white : _muted,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w900,
+                  )),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
 }
 
 class _TopButton extends StatelessWidget {
