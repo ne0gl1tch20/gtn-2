@@ -125,6 +125,23 @@ class ProgressionEngine {
     );
   }
 
+  ProgressionState awardArcadeReward(
+    ProgressionState state, {
+    required BigNumber nebulaReward,
+    required BigNumber moneyReward,
+  }) {
+    final zero = BigNumber.fromInt(0);
+    if (nebulaReward.compareTo(zero) < 0 || moneyReward.compareTo(zero) < 0) {
+      throw ArgumentError('Arcade rewards cannot be negative.');
+    }
+    return state.copyWith(
+      nebula: state.nebula + nebulaReward,
+      nebulaEarned: state.nebulaEarned + nebulaReward,
+      money: state.money + moneyReward,
+      moneyEarned: state.moneyEarned + moneyReward,
+    );
+  }
+
   ProgressionState awardNebulaFromArcade(
     ProgressionState state, BigNumber reward,
   ) {
