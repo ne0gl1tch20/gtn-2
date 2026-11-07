@@ -42,7 +42,7 @@ class GameHomePage extends StatefulWidget {
 
 class _GameHomePageState extends State<GameHomePage> {
   final GameEngine _engine = GameEngine();
-  const ProgressionEngine _progressionEngine = ProgressionEngine();
+  final ProgressionEngine _progressionEngine = const ProgressionEngine();
   ProgressionState _progression = ProgressionState.initial;
   final TextEditingController _controller = TextEditingController();
   late GameState _game = _engine.newGame();
