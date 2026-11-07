@@ -1,8 +1,8 @@
+import '../../worlds/world_boss_catalog.dart';
 import '../numbers/big_number.dart';
 import '../progression/progression_state.dart';
 import 'builtin_trait_catalog.dart';
 import 'legacy_systems_state.dart';
-import '../../worlds/world_boss_catalog.dart';
 
 class LegacyActionResult {
   const LegacyActionResult({
