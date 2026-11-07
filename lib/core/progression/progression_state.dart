@@ -2,10 +2,10 @@ import '../numbers/big_number.dart';
 
 class ProgressionState {
   const ProgressionState({
-    this.money = const BigNumber.fromInt(0),
-    this.prestige = const BigNumber.fromInt(0),
-    this.ultra = const BigNumber.fromInt(0),
-    this.nebula = const BigNumber.fromInt(0),
+    this.money = const BigNumber.zero(),
+    this.prestige = const BigNumber.zero(),
+    this.ultra = const BigNumber.zero(),
+    this.nebula = const BigNumber.zero(),
     this.upgrades = const {},
     this.prestigeUpgrades = const {},
     this.ultraUpgrades = const {},
@@ -13,10 +13,10 @@ class ProgressionState {
     this.ultraResets = 0,
     this.totalGuesses = 0,
     this.correctGuesses = 0,
-    this.moneyEarned = const BigNumber.fromInt(0),
+    this.moneyEarned = const BigNumber.zero(),
     this.currentStreak = 0,
     this.bestStreak = 0,
-    this.nebulaEarned = const BigNumber.fromInt(0),
+    this.nebulaEarned = const BigNumber.zero(),
   });
 
   final BigNumber money, prestige, ultra, nebula;
