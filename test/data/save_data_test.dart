@@ -9,32 +9,18 @@ import 'package:gtn_2/settings/game_settings.dart';
 
 void main() {
   group('SaveData', () {
-    test('round-trips through JSON', () {
+    test('round-trips progression and settings through JSON', () {
       final save = SaveData(
-        secret: 42, attempts: 7, gamesWon: 3, isComplete: true,
+        secret: 42,
+        attempts: 7,
+        gamesWon: 3,
+        isComplete: true,
         progression: ProgressionState.initial.copyWith(
           money: BigNumber.parse('12345678901234567890.25'),
           prestige: BigNumber.fromInt(4),
           upgrades: const {'income': 2},
         ),
         settings: const GameSettings(darkMode: false, reduceMotion: true),
-      );
-      expect(SaveData.fromJson(save.toJson()).toJson(), save.toJson());
-    });
-
-    test('defaults settings for older saves', () {
-      final save = SaveData.fromJson({
-        'schemaVersion': 1,
-        'secret': 42,
-        'attempts': 0,
-        'gamesWon': 0,
-        'isComplete': false,
-      });
-      expect(save.settings, GameSettings.initial);
-    });
-
-    test('rejects unknown versions and invalid fields', () {
-        ),
       );
       expect(SaveData.fromJson(save.toJson()).toJson(), save.toJson());
     });
@@ -61,14 +47,18 @@ void main() {
         throwsFormatException,
       );
     });
-  });
 
-  test('loads older schema-one saves without progression data', () {
-    final save = SaveData.fromJson({
-      'schemaVersion': 1, 'secret': 42, 'attempts': 0,
-      'gamesWon': 0, 'isComplete': false,
+    test('defaults progression and settings for older saves', () {
+      final save = SaveData.fromJson({
+        'schemaVersion': 1,
+        'secret': 42,
+        'attempts': 0,
+        'gamesWon': 0,
+        'isComplete': false,
+      });
+      expect(save.progression.money.toString(), '0');
+      expect(save.settings, GameSettings.initial);
     });
-    expect(save.progression.money.toString(), '0');
   });
 
   test('saves and loads through a temporary file safely', () async {
@@ -84,5 +74,17 @@ void main() {
     expect((await storage.load())?.toJson(), first.toJson());
     await storage.save(second);
     expect((await storage.load())?.toJson(), second.toJson());
+  });
+
+  test('save slots use separate files', () async {
+    final directory =
+        await Directory.systemTemp.createTemp('gtn2-save-slots-test-');
+    addTearDown(() => directory.delete(recursive: true));
+    final firstSlot = SaveStorage(directory: directory, slot: 1);
+    final secondSlot = SaveStorage(directory: directory, slot: 2);
+    await firstSlot.save(SaveData(secret: 11, attempts: 0, gamesWon: 0));
+    await secondSlot.save(SaveData(secret: 22, attempts: 0, gamesWon: 0));
+    expect((await firstSlot.load())?.secret, 11);
+    expect((await secondSlot.load())?.secret, 22);
   });
 }
