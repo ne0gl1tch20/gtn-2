@@ -603,6 +603,8 @@ class _GameHomePageState extends State<GameHomePage> {
           legacySystems,
           correct: correct,
           currentStreak: afterReward.currentStreak,
+          today: DateTime.now().toIso8601String().substring(0, 10),
+          lootRoll: correct ? Random.secure().nextInt(1000) : null,
         );
         systemsAfter = _legacySystemsEngine.discoverEligibleTraits(
           progression: afterReward,
