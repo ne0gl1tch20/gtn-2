@@ -8,18 +8,22 @@ class SaveData {
     required this.attempts,
     required this.gamesWon,
     this.isComplete = false,
+    this.minimum = 1,
+    this.maximum = 100,
     ProgressionState? progression,
     GameSettings? settings,
   })  : progression = progression ?? ProgressionState.initial,
         settings = settings ?? GameSettings.initial;
 
-  static const currentSchemaVersion = 1;
+  static const currentSchemaVersion = 3;
 
   final int schemaVersion;
   final int secret;
   final int attempts;
   final int gamesWon;
   final bool isComplete;
+  final int minimum;
+  final int maximum;
   final ProgressionState progression;
   final GameSettings settings;
 
@@ -29,6 +33,8 @@ class SaveData {
         'attempts': attempts,
         'gamesWon': gamesWon,
         'isComplete': isComplete,
+        'minimum': minimum,
+        'maximum': maximum,
         'progression': progression.toJson(),
         'settings': settings.toJson(),
       };
@@ -39,15 +45,22 @@ class SaveData {
     final attempts = json['attempts'];
     final gamesWon = json['gamesWon'];
     final isComplete = json['isComplete'];
+    final minimum = json['minimum'] ?? 1;
+    final maximum = json['maximum'] ?? 100;
     final progressionJson = json['progression'];
     final settingsJson = json['settings'];
-    if (version != currentSchemaVersion ||
+    if (version is! int || (version != 1 && version != 2 && version != currentSchemaVersion) ||
         secret is! int ||
         attempts is! int ||
         gamesWon is! int ||
         isComplete is! bool ||
-        secret < 1 ||
-        secret > 100 ||
+        minimum is! int ||
+        maximum is! int ||
+        minimum < 1 ||
+        maximum > 200 ||
+        minimum > maximum ||
+        secret < minimum ||
+        secret > maximum ||
         attempts < 0 ||
         gamesWon < 0) {
       throw const FormatException('Unsupported or invalid save data.');
@@ -63,11 +76,13 @@ class SaveData {
             ? GameSettings.fromJson(settingsJson)
             : throw const FormatException('Invalid settings save.');
     return SaveData(
-      schemaVersion: version as int,
+      schemaVersion: currentSchemaVersion,
       secret: secret,
       attempts: attempts,
       gamesWon: gamesWon,
       isComplete: isComplete,
+      minimum: minimum,
+      maximum: maximum,
       progression: progression,
       settings: settings,
     );

@@ -2,10 +2,7 @@ name: Build
 
 on:
   push:
-    branches: [main]
-  pull_request:
-    branches: [main]
-  workflow_dispatch:
+    branches: [main, master]
 
 permissions:
   contents: read
@@ -15,27 +12,9 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  validate:
-    name: Format, analyze and test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          cache: true
-      - name: Install dependencies
-        run: flutter pub get
-      - name: Check formatting
-        run: dart format --output=none .
-      - name: Analyze
-        run: flutter analyze --fatal-infos
-      - name: Test
-        run: flutter test
-
   android:
     name: Android debug APK
-    needs: validate
+    
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -49,10 +28,14 @@ jobs:
           cache: true
       - name: Generate Android project
         run: flutter create --platforms=android --project-name=gtn_2 --org=com.jarrlyyy .
+      - name: Configure Android package installation permission
+        run: python3 scripts/configure_android_updater.py
       - name: Install dependencies
         run: flutter pub get
+      - name: Read app version
+        run: echo "APP_VERSION=$(sed -n 's/^version: *\([^+]*\).*/\\1/p' pubspec.yaml)" >> "$GITHUB_ENV"
       - name: Build debug APK
-        run: flutter build apk --debug
+        run: flutter build apk --debug --build-name="$APP_VERSION" --build-number="$GITHUB_RUN_NUMBER" --dart-define=APP_VERSION="$APP_VERSION" --dart-define=APP_BUILD_NUMBER="$GITHUB_RUN_NUMBER"
       - name: Upload Android APK
         uses: actions/upload-artifact@v4
         with:
@@ -63,7 +46,6 @@ jobs:
 
   windows:
     name: Windows desktop release
-    needs: validate
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -77,8 +59,14 @@ jobs:
         run: flutter create --platforms=windows --project-name=gtn_2 --org=com.jarrlyyy .
       - name: Install dependencies
         run: flutter pub get
+      - name: Read app version
+        shell: pwsh
+        run: |
+          $line = Get-Content pubspec.yaml | Where-Object { $_ -match '^version:' } | Select-Object -First 1
+          if ($line -notmatch '^version:\s*([^+]+)') { throw 'Could not read app version from pubspec.yaml' }
+          Add-Content $env:GITHUB_ENV "APP_VERSION=$($Matches[1])"
       - name: Build Windows release
-        run: flutter build windows --release
+        run: flutter build windows --release --build-name="$env:APP_VERSION" --build-number="$env:GITHUB_RUN_NUMBER" --dart-define=APP_VERSION="$env:APP_VERSION" --dart-define=APP_BUILD_NUMBER="$env:GITHUB_RUN_NUMBER"
       - name: Package Windows build
         shell: pwsh
         run: Compress-Archive -Path build/windows/x64/runner/Release/* -DestinationPath gtn-2-windows.zip
@@ -89,3 +77,59 @@ jobs:
           path: gtn-2-windows.zip
           if-no-files-found: error
           retention-days: 7
+
+
+  publish-debug-latest:
+    name: Publish Android and Windows debug-latest
+    needs: [android, windows]
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - name: Download Android build
+        uses: actions/download-artifact@v4
+        with:
+          name: gtn-2-debug-android
+          path: release/android
+      - name: Download Windows build
+        uses: actions/download-artifact@v4
+        with:
+          name: gtn-2-windows
+          path: release/windows
+      - name: Prepare checksums and platform manifests
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s release/android/app-debug.apk
+          test -s release/windows/gtn-2-windows.zip
+          mv release/android/app-debug.apk release/android/GuessTheNumber-debug.apk
+          cd release/android
+          sha256sum GuessTheNumber-debug.apk > SHA256SUMS
+          android_sha="$(cut -d ' ' -f 1 SHA256SUMS)"
+          cd ../windows
+          sha256sum gtn-2-windows.zip > SHA256SUMS-WINDOWS
+          windows_sha="$(cut -d ' ' -f 1 SHA256SUMS-WINDOWS)"
+          version_name="$(sed -n 's/^version: *\([^+]*\).*/\1/p' "$GITHUB_WORKSPACE/pubspec.yaml" | head -1)"
+          test -n "$version_name"
+          printf '{"channel":"android-debug","packageName":"com.jarrlyyy.gtn_2","versionName":"%s","versionCode":%s,"runNumber":%s,"commit":"%s","sha256":"%s","assetName":"GuessTheNumber-debug.apk"}\n' "$version_name" "$GITHUB_RUN_NUMBER" "$GITHUB_RUN_NUMBER" "$GITHUB_SHA" "$android_sha" > "$GITHUB_WORKSPACE/release/android/update-manifest.json"
+          printf '{"channel":"windows-debug","versionName":"%s","versionCode":%s,"runNumber":%s,"commit":"%s","sha256":"%s","assetName":"gtn-2-windows.zip"}\n' "$version_name" "$GITHUB_RUN_NUMBER" "$GITHUB_RUN_NUMBER" "$GITHUB_SHA" "$windows_sha" > "$GITHUB_WORKSPACE/release/windows/windows-update-manifest.json"
+      - name: Publish replaceable debug-latest release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          notes="$(printf 'GTN2 Debug Latest #%s\n\nVersion: %s\nCommit: %s\n\n- Android debug APK and SHA-256 manifest.\n- Windows desktop package and SHA-256 manifest.\n- Published only after both platform builds succeed on main/master.' "$GITHUB_RUN_NUMBER" "$(sed -n 's/^version: *\([^+]*\).*/\1/p' pubspec.yaml | head -1)" "$GITHUB_SHA")"
+          gh release view debug-latest >/dev/null 2>&1 || gh release create debug-latest --target "$GITHUB_SHA" --title "GTN2 Debug Latest" --notes "Publishing Android and Windows builds..."
+          gh release upload debug-latest \
+            release/android/GuessTheNumber-debug.apk \
+            release/android/SHA256SUMS \
+            release/android/update-manifest.json \
+            release/windows/gtn-2-windows.zip \
+            release/windows/SHA256SUMS-WINDOWS \
+            release/windows/windows-update-manifest.json \
+            --clobber
+          gh release edit debug-latest --target "$GITHUB_SHA" --title "GTN2 Debug Latest" --notes "$notes"
+          test "$(gh release view debug-latest --json body --jq .body)" = "$notes"

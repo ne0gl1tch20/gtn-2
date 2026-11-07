@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gtn_2/core/legacy/legacy_systems_state.dart';
 import 'package:gtn_2/core/numbers/big_number.dart';
 import 'package:gtn_2/core/progression/progression_state.dart';
 import 'package:gtn_2/data/saves/save_data.dart';
@@ -15,6 +16,8 @@ void main() {
         attempts: 7,
         gamesWon: 3,
         isComplete: true,
+        minimum: 25,
+        maximum: 150,
         progression: ProgressionState.initial.copyWith(
           money: BigNumber.parse('12345678901234567890.25'),
           prestige: BigNumber.fromInt(4),
@@ -23,12 +26,14 @@ void main() {
         settings: const GameSettings(darkMode: false, reduceMotion: true),
       );
       expect(SaveData.fromJson(save.toJson()).toJson(), save.toJson());
+      expect(SaveData.fromJson(save.toJson()).minimum, 25);
+      expect(SaveData.fromJson(save.toJson()).maximum, 150);
     });
 
     test('rejects unknown versions and invalid fields', () {
       expect(
         () => SaveData.fromJson({
-          'schemaVersion': 2,
+          'schemaVersion': 4,
           'secret': 42,
           'attempts': 0,
           'gamesWon': 0,
@@ -58,6 +63,29 @@ void main() {
       });
       expect(save.progression.money.toString(), '0');
       expect(save.settings, GameSettings.initial);
+      expect(save.schemaVersion, SaveData.currentSchemaVersion);
+      expect(save.minimum, 1);
+      expect(save.maximum, 100);
+      expect(save.progression.legacySystems.toJson(), LegacySystemsState.initial.toJson());
+    });
+
+    test('migrates schema 1 saves and preserves nested legacy systems', () {
+      final legacy = LegacySystemsState.initial.copyWith(
+        activeMutators: const {'mut_hardcore'},
+        talents: const {'talent_speed_1'},
+        homeBaseLevel: 3,
+        musicLibrary: const ['track_a'],
+      );
+      final oldSave = SaveData(
+        schemaVersion: 1,
+        secret: 42,
+        attempts: 2,
+        gamesWon: 1,
+        progression: ProgressionState.initial.copyWith(legacySystems: legacy),
+      ).toJson();
+      final migrated = SaveData.fromJson(oldSave);
+      expect(migrated.schemaVersion, SaveData.currentSchemaVersion);
+      expect(migrated.progression.legacySystems.toJson(), legacy.toJson());
     });
   });
 

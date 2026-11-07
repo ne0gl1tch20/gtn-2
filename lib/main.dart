@@ -1,8 +1,11 @@
+import 'dart:math';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'arcade/arcade_page.dart';
 import 'core/game/game_engine.dart';
+import 'core/legacy/legacy_systems_engine.dart';
 import 'core/numbers/big_number.dart';
 import 'core/progression/progression_calculator.dart';
 import 'core/progression/progression_engine.dart';
@@ -11,6 +14,7 @@ import 'data/saves/save_data.dart';
 import 'data/saves/save_storage.dart';
 import 'dev/developer_settings_page.dart';
 import 'home/game_dashboard_page.dart';
+import 'i18n/app_localizations.dart';
 import 'legacy/legacy_pages.dart';
 import 'progression/progression_hub_page.dart';
 import 'saves/save_slots_page.dart';
@@ -22,8 +26,9 @@ import 'shop/upgrade_shop_page.dart';
 import 'worlds/world_boss_catalog.dart';
 import 'worlds/world_map_page.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await AppLocalizations.load('en_us');
   runApp(const GtnApp());
 }
 
@@ -35,7 +40,9 @@ class GtnApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<GameSettings>(
+    return ValueListenableBuilder<Map<String, dynamic>>(
+      valueListenable: AppLocalizations.catalog,
+      builder: (context, translations, _) => ValueListenableBuilder<GameSettings>(
       valueListenable: settingsNotifier,
       builder: (context, settings, _) {
         ThemeData makeTheme(Brightness brightness) => ThemeData(
@@ -60,6 +67,7 @@ class GtnApp extends StatelessWidget {
           home: const GameHomePage(),
         );
       },
+    ),
     );
   }
 }
@@ -72,12 +80,17 @@ class GameHomePage extends StatefulWidget {
 }
 
 class _GameHomePageState extends State<GameHomePage> {
-  final GameEngine _engine = GameEngine();
+  GameEngine _engine = GameEngine();
+
+  GameState _createGame() => GameEngine(
+        maximum: 100 * _legacySystemsEngine.rangeMultiplier(_progression.legacySystems),
+      ).newGame();
   final ProgressionEngine _progressionEngine = const ProgressionEngine();
+  final LegacySystemsEngine _legacySystemsEngine = const LegacySystemsEngine();
   ProgressionState _progression = ProgressionState.initial;
   GameSettings _settings = GameSettings.initial;
   final TextEditingController _controller = TextEditingController();
-  late GameState _game = _engine.newGame();
+  late GameState _game = _createGame();
   late Future<SaveStorage> _storage = SaveStorage.inApplicationDocuments();
   int _activeSlot = 1;
   int _gamesWon = 0;
@@ -96,14 +109,22 @@ class _GameHomePageState extends State<GameHomePage> {
       final save = await storage.load();
       if (!mounted) return;
       if (save != null) {
+        final restoredProgression = save.progression;
+        final restoredEngine = GameEngine(
+          maximum: 100 * _legacySystemsEngine.rangeMultiplier(restoredProgression.legacySystems),
+        );
+        await AppLocalizations.load(save.settings.localeCode);
         setState(() {
+          _engine = restoredEngine;
           _game = _engine.restore(
             secret: save.secret,
             attempts: save.attempts,
             isComplete: save.isComplete,
+            savedMinimum: save.minimum,
+            savedMaximum: save.maximum,
           );
           _gamesWon = save.gamesWon;
-          _progression = save.progression;
+          _progression = restoredProgression;
           _settings = save.settings;
           GtnApp.settingsNotifier.value = _settings;
           _message = 'Welcome back! Your saved game is ready.';
@@ -129,6 +150,8 @@ class _GameHomePageState extends State<GameHomePage> {
           attempts: _game.attempts,
           gamesWon: _gamesWon,
           isComplete: _game.isComplete,
+          minimum: _game.minimum,
+          maximum: _game.maximum,
           progression: _progression,
           settings: _settings,
         ),
@@ -145,7 +168,12 @@ class _GameHomePageState extends State<GameHomePage> {
   ) async {
     final updated = _progressionEngine.purchaseUpgrade(_progression, definition);
     if (updated != _progression) {
-      setState(() => _progression = updated);
+      final withQuestProgress = updated.copyWith(
+        legacySystems: _legacySystemsEngine.recordUpgradePurchase(
+          updated.legacySystems,
+        ),
+      );
+      setState(() => _progression = withQuestProgress);
       await _persist();
     }
     return _progression;
@@ -281,9 +309,14 @@ class _GameHomePageState extends State<GameHomePage> {
       final storage = await SaveStorage.inApplicationDocuments(slot: slot);
       final save = await storage.load();
       if (!mounted) return;
+      final nextProgression = save?.progression ?? ProgressionState.initial;
+      final nextEngine = GameEngine(
+        maximum: 100 * _legacySystemsEngine.rangeMultiplier(nextProgression.legacySystems),
+      );
       setState(() {
         _storage = Future.value(storage);
         _activeSlot = slot;
+        _engine = nextEngine;
         _game = save == null
             ? _engine.newGame()
             : _engine.restore(
@@ -292,7 +325,7 @@ class _GameHomePageState extends State<GameHomePage> {
                 isComplete: save.isComplete,
               );
         _gamesWon = save?.gamesWon ?? 0;
-        _progression = save?.progression ?? ProgressionState.initial;
+        _progression = nextProgression;
         _settings = save?.settings ?? GameSettings.initial;
         GtnApp.settingsNotifier.value = _settings;
         _message = save == null
@@ -324,6 +357,8 @@ class _GameHomePageState extends State<GameHomePage> {
 
 
   Future<void> _updateSettings(GameSettings settings) async {
+    await AppLocalizations.load(settings.localeCode);
+    if (!mounted) return;
     setState(() => _settings = settings);
     GtnApp.settingsNotifier.value = settings;
     await _persist();
@@ -346,6 +381,8 @@ class _GameHomePageState extends State<GameHomePage> {
         attempts: _game.attempts,
         gamesWon: _gamesWon,
         isComplete: _game.isComplete,
+        minimum: _game.minimum,
+        maximum: _game.maximum,
         progression: _progression,
         settings: _settings,
       );
@@ -356,6 +393,8 @@ class _GameHomePageState extends State<GameHomePage> {
         secret: save.secret,
         attempts: save.attempts,
         isComplete: save.isComplete,
+        savedMinimum: save.minimum,
+        savedMaximum: save.maximum,
       );
       _gamesWon = save.gamesWon;
       _progression = save.progression;
@@ -443,10 +482,27 @@ class _GameHomePageState extends State<GameHomePage> {
     );
   }
 
+  Future<void> _applyLegacyProgression(ProgressionState progression) async {
+    final oldRange = _legacySystemsEngine.rangeMultiplier(_progression.legacySystems);
+    final newRange = _legacySystemsEngine.rangeMultiplier(progression.legacySystems);
+    setState(() {
+      _progression = progression;
+      if (oldRange != newRange) {
+        _engine = GameEngine(maximum: 100 * newRange);
+        _game = _engine.newGame();
+        _message = 'Hardcore range changed. A fresh round is ready.';
+      }
+    });
+    await _persist();
+  }
+
   Future<void> _openLegacyPages() async {
     await Navigator.of(context).push<void>(
       MaterialPageRoute<void>(
-        builder: (_) => LegacyHubPage(progression: _progression),
+        builder: (_) => LegacyHubPage(
+          progression: _progression,
+          onSystemsChanged: _applyLegacyProgression,
+        ),
       ),
     );
   }
@@ -462,48 +518,129 @@ class _GameHomePageState extends State<GameHomePage> {
     );
   }
 
+  String? _currentSeasonId() => switch (DateTime.now().month) {
+        12 || 1 || 2 => 'winter',
+        3 || 4 || 5 => 'spring',
+        6 || 7 || 8 => 'summer',
+        _ => 'autumn',
+      };
+
   Future<void> _submitGuess() async {
     final guess = int.tryParse(_controller.text.trim());
     if (guess == null) {
-      setState(() => _message = 'Enter a whole number from 1 to 100.');
+      setState(() => _message = 'Enter a whole number from ${_game.minimum} to ${_game.maximum}.');
       return;
     }
 
     setState(() {
+      var rangeScoutActive = false;
       final previousAttempts = _game.attempts;
       _game = _engine.guess(_game, guess);
       if (_game.attempts > previousAttempts) {
         final correct = _game.lastResult == GuessResult.correct;
+        final beforeGuess = _progression;
+        final legacySystems = beforeGuess.legacySystems;
         final effects = UpgradeCatalog.effectsFor(
-          _progression,
+          beforeGuess,
           isFirstGuess: _game.attempts == 1,
         );
-        _progression = _progressionEngine.recordGuess(
-          _progression,
+        final traitEffects = _legacySystemsEngine.evaluateTraits(
+          progression: beforeGuess,
+          systems: legacySystems,
+          playerLevel: 1,
+          activeSeasonId: _currentSeasonId(),
+        );
+        rangeScoutActive = traitEffects.rangeHint;
+        if (!correct && rangeScoutActive) {
+          _game = _engine.applyRangeScoutHint(_game, guess);
+        }
+        final rawReward = correct
+            ? (BigNumber.fromInt(1) + effects.flatBonus) *
+                _legacySystemsEngine.mutatorRewardMultiplier(legacySystems) *
+                BigNumber.parse(traitEffects.correctGuessMultiplier.toStringAsFixed(2))
+            : null;
+        var afterReward = _progressionEngine.recordGuess(
+          beforeGuess,
           correct: correct,
-          baseReward: correct ? BigNumber.fromInt(1) : null,
-          flatBonusReward: correct ? effects.flatBonus : null,
+          baseReward: rawReward,
           modifiers: GuessRewardModifiers(
             streakMultiplier: effects.streakMultiplier,
             criticalMultiplier: effects.firstGuessMultiplier *
-                ((_progression.nebulaItems['golden_guess'] ?? 0) > 0 &&
-                        (_progression.totalGuesses + 1) % 10 == 0
+                ((beforeGuess.nebulaItems['golden_guess'] ?? 0) > 0 &&
+                        (beforeGuess.totalGuesses + 1) % 10 == 0
                     ? 2
                     : 1),
           ),
         );
+        if (correct) {
+          final criticalChance = legacySystems.talents.contains('talent_crit_2')
+              ? 0.15
+              : legacySystems.talents.contains('talent_crit_1')
+                  ? 0.05
+                  : 0.0;
+          afterReward = _legacySystemsEngine.applyCorrectGuessBonuses(
+            before: beforeGuess,
+            after: afterReward,
+            systems: legacySystems,
+            criticalHit: Random.secure().nextDouble() < criticalChance,
+            crystalCoreProc: legacySystems.equippedRelics.contains('crystal_golem') &&
+                Random.secure().nextDouble() < 0.10,
+            nebulaBoostOwned: (beforeGuess.nebulaItems['nebula_boost'] ?? 0) > 0,
+          );
+        } else {
+          final penalty = legacySystems.activeMutators.contains('mut_tax')
+              ? beforeGuess.money * BigNumber.parse('0.05')
+              : BigNumber.fromInt(0);
+          final refund = penalty * BigNumber.parse(
+            traitEffects.missPenaltyRefundRate.toStringAsFixed(2),
+          );
+          final extraPenalty = penalty * BigNumber.parse(
+            traitEffects.riskMissPenaltyRate.toStringAsFixed(2),
+          );
+          final remainingMoney = beforeGuess.money - penalty + refund - extraPenalty;
+          afterReward = afterReward.copyWith(
+            money: remainingMoney.compareTo(BigNumber.fromInt(0)) < 0
+                ? BigNumber.fromInt(0)
+                : remainingMoney,
+            currentStreak: traitEffects.streakProtection
+                ? beforeGuess.currentStreak
+                : afterReward.currentStreak,
+          );
+        }
+        var systemsAfter = _legacySystemsEngine.recordGuessProgress(
+          legacySystems,
+          correct: correct,
+          currentStreak: afterReward.currentStreak,
+          today: DateTime.now().toIso8601String().substring(0, 10),
+          lootRoll: correct ? Random.secure().nextInt(1000) : null,
+        );
+        systemsAfter = _legacySystemsEngine.discoverEligibleTraits(
+          progression: afterReward,
+          systems: systemsAfter,
+          playerLevel: 1,
+          activeSeasonId: _currentSeasonId(),
+        );
+        _progression = afterReward.copyWith(legacySystems: systemsAfter);
       }
       switch (_game.lastResult) {
         case GuessResult.tooLow:
-          _message = 'Too low. Try a higher number!';
+          _message = rangeScoutActive
+              ? 'Range Scout narrowed the search to ${_game.minimum}–${_game.maximum}.'
+              : _progression.legacySystems.activeMutators.contains('mut_blind')
+                  ? 'Guess recorded. Try again.'
+                  : 'Too low. Try a higher number!';
         case GuessResult.tooHigh:
-          _message = 'Too high. Try a lower number!';
+          _message = rangeScoutActive
+              ? 'Range Scout narrowed the search to ${_game.minimum}–${_game.maximum}.'
+              : _progression.legacySystems.activeMutators.contains('mut_blind')
+                  ? 'Guess recorded. Try again.'
+                  : 'Too high. Try a lower number!';
         case GuessResult.correct:
           _gamesWon++;
           _message =
               'Correct! You got it in ${_game.attempts} ${_game.attempts == 1 ? 'try' : 'tries'}.';
         case GuessResult.outOfRange:
-          _message = 'Choose a number between 1 and 100.';
+          _message = 'Choose a number between ${_game.minimum} and ${_game.maximum}.';
         case null:
           break;
       }
@@ -515,7 +652,7 @@ class _GameHomePageState extends State<GameHomePage> {
   Future<void> _newGame() async {
     setState(() {
       _game = _engine.newGame();
-      _message = 'New round! Guess a number between 1 and 100.';
+      _message = 'New round! Guess a number between ${_game.minimum} and ${_game.maximum}.';
       _controller.clear();
     });
     await _persist();
