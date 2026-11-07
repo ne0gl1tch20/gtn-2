@@ -11,6 +11,7 @@ import 'data/saves/save_data.dart';
 import 'data/saves/save_storage.dart';
 import 'dev/developer_settings_page.dart';
 import 'home/game_dashboard_page.dart';
+import 'legacy/legacy_pages.dart';
 import 'progression/progression_hub_page.dart';
 import 'saves/save_slots_page.dart';
 import 'settings/game_settings.dart';
@@ -442,6 +443,14 @@ class _GameHomePageState extends State<GameHomePage> {
     );
   }
 
+  Future<void> _openLegacyPages() async {
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (_) => LegacyHubPage(progression: _progression),
+      ),
+    );
+  }
+
   Future<void> _openUpgradeShop() async {
     await Navigator.of(context).push<void>(
       MaterialPageRoute<void>(
@@ -537,6 +546,7 @@ class _GameHomePageState extends State<GameHomePage> {
       onSaveSlots: _openSaveSlots,
       onSettings: _openSettings,
       onDeveloperSettings: _openDeveloperSettings,
+      onLegacyPages: _openLegacyPages,
       showDeveloperSettings: kDebugMode,
     );
   }
