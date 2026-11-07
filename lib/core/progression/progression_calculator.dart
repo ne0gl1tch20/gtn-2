@@ -38,8 +38,8 @@ class ProgressionCalculator {
 
     final shift = 16 - exponent;
     final scaled = shift >= 0
-        ? (numerator * BigInt.fromInt(10).pow(shift)) ~/ denominator
-        : numerator ~/ (denominator * BigInt.fromInt(10).pow(-shift));
+        ? (numerator * BigInt.from(10).pow(shift)) ~/ denominator
+        : numerator ~/ (denominator * BigInt.from(10).pow(-shift));
     final digits = scaled.toString().padLeft(17, '0');
     final mantissa = double.parse('${digits.substring(0, 1)}.${digits.substring(1, 16)}');
     final reward = (100 * (exponent + ((math.log(mantissa) / math.ln10)))).floor();
