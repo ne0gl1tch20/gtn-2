@@ -13,7 +13,7 @@ class SaveData {
   })  : progression = progression ?? ProgressionState.initial,
         settings = settings ?? GameSettings.initial;
 
-  static const currentSchemaVersion = 1;
+  static const currentSchemaVersion = 2;
 
   final int schemaVersion;
   final int secret;
@@ -41,7 +41,7 @@ class SaveData {
     final isComplete = json['isComplete'];
     final progressionJson = json['progression'];
     final settingsJson = json['settings'];
-    if (version != currentSchemaVersion ||
+    if (version is! int || (version != 1 && version != currentSchemaVersion) ||
         secret is! int ||
         attempts is! int ||
         gamesWon is! int ||
@@ -63,7 +63,7 @@ class SaveData {
             ? GameSettings.fromJson(settingsJson)
             : throw const FormatException('Invalid settings save.');
     return SaveData(
-      schemaVersion: version as int,
+      schemaVersion: currentSchemaVersion,
       secret: secret,
       attempts: attempts,
       gamesWon: gamesWon,
