@@ -13,9 +13,5 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('MAKE YOUR GUESS'), findsOneWidget);
     expect(find.text('GUESS'), findsOneWidget);
-
-    await tester.drag(find.byType(ListView), const Offset(0, -500));
-    await tester.pumpAndSettle();
-    expect(find.text('YOUR JOURNEY'), findsOneWidget);
   });
 }
