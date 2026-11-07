@@ -96,7 +96,7 @@ class GameDashboardPage extends StatelessWidget {
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: _purple.withOpacity(.25),
+                              color: _purple.withValues(alpha: .25),
                               blurRadius: 18,
                               offset: const Offset(0, 7),
                             ),
@@ -154,7 +154,7 @@ class GameDashboardPage extends StatelessWidget {
                           Color(0xFF10172B),
                         ],
                       ),
-                      border: Border.all(color: Colors.white.withOpacity(.1)),
+                      border: Border.all(color: Colors.white.withValues(alpha: .1)),
                       boxShadow: const [
                         BoxShadow(
                           color: Color(0x33000000),
@@ -175,8 +175,8 @@ class GameDashboardPage extends StatelessWidget {
                               shape: BoxShape.circle,
                               gradient: RadialGradient(
                                 colors: [
-                                  _cyan.withOpacity(.24),
-                                  _cyan.withOpacity(0),
+                                  _cyan.withValues(alpha: .24),
+                                  _cyan.withValues(alpha: 0),
                                 ],
                               ),
                             ),
@@ -326,7 +326,7 @@ class GameDashboardPage extends StatelessWidget {
                     child: Text(
                       'SAVE SLOT ' + activeSlot.toString(),
                       style: TextStyle(
-                        color: muted.withOpacity(.7),
+                        color: muted.withValues(alpha: .7),
                         fontSize: 9,
                         fontWeight: FontWeight.w800,
                         letterSpacing: 1.6,
@@ -355,11 +355,11 @@ class _TopButton extends StatelessWidget {
         tooltip: tooltip,
         onPressed: onTap,
         style: IconButton.styleFrom(
-          backgroundColor: foreground.withOpacity(.07),
+          backgroundColor: foreground.withValues(alpha: .07),
           foregroundColor: foreground,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
-            side: BorderSide(color: foreground.withOpacity(.08)),
+            side: BorderSide(color: foreground.withValues(alpha: .08)),
           ),
         ),
         icon: Icon(icon, size: 19),
@@ -445,7 +445,7 @@ class _Wallet extends StatelessWidget {
                       letterSpacing: 1.5,
                     )),
                 const Spacer(),
-                Text('+' + state.moneyEarned.toString() + ' earned',
+                Text('${state.moneyEarned} earned',
                     style: const TextStyle(color: _green, fontSize: 10)),
               ],
             ),
@@ -599,7 +599,7 @@ class _GuessInput extends StatelessWidget {
                     ),
                     decoration: InputDecoration(
                       hintText: 'Enter a number',
-                      hintStyle: TextStyle(color: muted.withOpacity(.75)),
+                      hintStyle: TextStyle(color: muted.withValues(alpha: .75)),
                       filled: true,
                       fillColor: raised,
                       contentPadding: const EdgeInsets.symmetric(
@@ -692,7 +692,7 @@ class _Action extends StatelessWidget {
                   width: 35,
                   height: 35,
                   decoration: BoxDecoration(
-                    color: color.withOpacity(.14),
+                    color: color.withValues(alpha: .14),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(icon, color: color, size: 19),
@@ -765,7 +765,7 @@ class _WorldProgress extends StatelessWidget {
                     letterSpacing: 1.2,
                   )),
               const Spacer(),
-              Text(count.toString() + ' / 4 bosses',
+              Text('$count / 4 bosses',
                   style: TextStyle(color: muted, fontSize: 10)),
             ],
           ),
@@ -775,7 +775,7 @@ class _WorldProgress extends StatelessWidget {
             child: LinearProgressIndicator(
               value: count / 4,
               minHeight: 7,
-              backgroundColor: foreground.withOpacity(.08),
+              backgroundColor: foreground.withValues(alpha: .08),
               valueColor: const AlwaysStoppedAnimation<Color>(_cyan),
             ),
           ),
