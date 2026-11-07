@@ -4,6 +4,7 @@ class SaveData {
     required this.secret,
     required this.attempts,
     required this.gamesWon,
+    this.isComplete = false,
   });
 
   static const currentSchemaVersion = 1;
@@ -12,12 +13,14 @@ class SaveData {
   final int secret;
   final int attempts;
   final int gamesWon;
+  final bool isComplete;
 
   Map<String, Object> toJson() => {
         'schemaVersion': schemaVersion,
         'secret': secret,
         'attempts': attempts,
         'gamesWon': gamesWon,
+        'isComplete': isComplete,
       };
 
   factory SaveData.fromJson(Map<String, dynamic> json) {
@@ -25,10 +28,12 @@ class SaveData {
     final secret = json['secret'];
     final attempts = json['attempts'];
     final gamesWon = json['gamesWon'];
+    final isComplete = json['isComplete'];
     if (version != currentSchemaVersion ||
         secret is! int ||
         attempts is! int ||
         gamesWon is! int ||
+        isComplete is! bool ||
         secret < 1 ||
         secret > 100 ||
         attempts < 0 ||
@@ -40,6 +45,7 @@ class SaveData {
       secret: secret,
       attempts: attempts,
       gamesWon: gamesWon,
+      isComplete: isComplete,
     );
   }
 }
