@@ -378,6 +378,226 @@ class LegacySystemsEngine {
     ));
   }
 
+  LegacyActionResult upgradeWorldMastery({
+    required ProgressionState progression,
+    required LegacySystemsState systems,
+    required String worldId,
+  }) {
+    const relicByWorld = <String, String>{
+      'verdant_grove': 'verdant_guardian',
+      'crystal_caverns': 'crystal_golem',
+      'ember_summit': 'ember_dragon',
+      'nebula_rift': 'nebula_titan',
+    };
+    const previousWorld = <String, String>{
+      'crystal_caverns': 'verdant_grove',
+      'ember_summit': 'crystal_caverns',
+      'nebula_rift': 'ember_summit',
+    };
+    final relicId = relicByWorld[worldId];
+    if (relicId == null || !progression.defeatedBosses.contains(worldId) ||
+        (previousWorld[worldId] != null &&
+            !progression.defeatedBosses.contains(previousWorld[worldId]))) {
+      return _reject(progression, systems, 'Defeat this world guardian before upgrading mastery.');
+    }
+    final current = systems.worldMasteryLevels[worldId] ?? 1;
+    if (current >= 10) return _reject(progression, systems, 'Mastery is already at level 10.');
+    final secretId = const <String, String>{
+      'verdant_grove': 'whispering_hollow',
+      'crystal_caverns': 'shard_archive',
+      'ember_summit': 'ashen_vault',
+      'nebula_rift': 'lost_observatory',
+    }[worldId]!;
+    final secretDiscount = systems.discoveredSecrets.contains(secretId) ? 0.20 : 0.0;
+    final sanctuaryDiscount = (systems.homeBaseLevel * 0.01).clamp(0.0, 0.20).toDouble();
+    final allRelics = systems.equippedRelics.containsAll(_bossRelics);
+    final relicDiscount = allRelics ? 0.10 : 0.0;
+    final discount = (secretDiscount + sanctuaryDiscount + relicDiscount).clamp(0.0, 0.40).toDouble();
+    final cost = BigNumber.fromInt(10 * (current + 1)) *
+        BigNumber.parse((1 - discount).toStringAsFixed(2));
+    if (progression.nebula.compareTo(cost) < 0) {
+      return _reject(progression, systems, 'Not enough Nebula for this mastery upgrade.');
+    }
+    final nextLevel = current + 1;
+    final reward = nextLevel == 5 ? 25 : nextLevel == 10 ? 100 : 0;
+    final entries = <String>{...systems.codexEntries};
+    if (nextLevel == 5 || nextLevel == 10) {
+      entries.add('mastery:$worldId:$nextLevel');
+    }
+    final levels = Map<String, int>.of(systems.worldMasteryLevels)..[worldId] = nextLevel;
+    final nebulaReward = BigNumber.fromInt(reward);
+    return _accept(
+      progression.copyWith(
+        nebula: progression.nebula - cost + nebulaReward,
+        nebulaEarned: progression.nebulaEarned + nebulaReward,
+      ),
+      systems.copyWith(
+        worldMasteryLevels: Map.unmodifiable(levels),
+        codexEntries: Set.unmodifiable(entries),
+      ),
+    );
+  }
+
+  LegacyActionResult discoverSecret({
+    required ProgressionState progression,
+    required LegacySystemsState systems,
+    required String secretId,
+  }) {
+    const worlds = <String, String>{
+      'whispering_hollow': 'verdant_grove',
+      'shard_archive': 'crystal_caverns',
+      'ashen_vault': 'ember_summit',
+      'lost_observatory': 'nebula_rift',
+    };
+    const thresholds = <String, int>{
+      'whispering_hollow': 50,
+      'shard_archive': 150,
+      'ashen_vault': 300,
+      'lost_observatory': 600,
+    };
+    const moneyRewards = <String, int>{
+      'whispering_hollow': 10000,
+      'shard_archive': 50000,
+      'ashen_vault': 250000,
+      'lost_observatory': 1000000,
+    };
+    const nebulaRewards = <String, int>{
+      'whispering_hollow': 5,
+      'shard_archive': 15,
+      'ashen_vault': 50,
+      'lost_observatory': 150,
+    };
+    final worldId = worlds[secretId];
+    if (worldId == null) return _reject(progression, systems, 'Unknown secret area.');
+    if (systems.discoveredSecrets.contains(secretId)) {
+      return _reject(progression, systems, 'Secret area already discovered.');
+    }
+    const previousWorld = <String, String>{
+      'crystal_caverns': 'verdant_grove',
+      'ember_summit': 'crystal_caverns',
+      'nebula_rift': 'ember_summit',
+    };
+    if ((previousWorld[worldId] != null &&
+            !progression.defeatedBosses.contains(previousWorld[worldId])) ||
+        progression.correctGuesses < thresholds[secretId]!) {
+      return _reject(progression, systems, 'Secret area is still hidden.');
+    }
+    final money = BigNumber.fromInt(moneyRewards[secretId]!);
+    final nebula = BigNumber.fromInt(nebulaRewards[secretId]!);
+    return _accept(
+      progression.copyWith(
+        money: progression.money + money,
+        moneyEarned: progression.moneyEarned + money,
+        nebula: progression.nebula + nebula,
+        nebulaEarned: progression.nebulaEarned + nebula,
+      ),
+      systems.copyWith(
+        discoveredSecrets: Set.unmodifiable({...systems.discoveredSecrets, secretId}),
+        codexEntries: Set.unmodifiable({...systems.codexEntries, 'secret:$secretId'}),
+      ),
+    );
+  }
+
+  LegacyActionResult claimCodexCompletionReward(
+    ProgressionState progression,
+    LegacySystemsState systems,
+  ) {
+    const required = <String>{
+      'world:verdant_grove', 'world:crystal_caverns', 'world:ember_summit', 'world:nebula_rift',
+      'boss:verdant_guardian', 'boss:crystal_golem', 'boss:ember_dragon', 'boss:nebula_titan',
+      'secret:whispering_hollow', 'secret:shard_archive', 'secret:ashen_vault', 'secret:lost_observatory',
+    };
+    if (systems.codexRewardClaimed) {
+      return _reject(progression, systems, 'Codex completion reward already claimed.');
+    }
+    if (!systems.codexEntries.containsAll(required)) {
+      return _reject(progression, systems, 'Discover all 12 Codex entries first.');
+    }
+    return _accept(
+      _addNebula(progression, 100),
+      systems.copyWith(codexRewardClaimed: true),
+    );
+  }
+
+  LegacyActionResult claimEndgameReward(
+    ProgressionState progression,
+    LegacySystemsState systems,
+    String rewardId,
+  ) {
+    const allWorlds = <String>{
+      'verdant_grove', 'crystal_caverns', 'ember_summit', 'nebula_rift',
+    };
+    const allSecrets = <String>{
+      'whispering_hollow', 'shard_archive', 'ashen_vault', 'lost_observatory',
+    };
+    const rewards = <String, (int, int)>{
+      'all_bosses': (250, 2000000),
+      'all_secrets': (200, 1000000),
+      'all_relics': (300, 1000000),
+      'sanctuary_10': (500, 5000000),
+      'rift_tier_10': (1000, 10000000),
+      'mastery_all_5': (400, 5000000),
+    };
+    if (systems.endgameRewardsClaimed.contains(rewardId)) {
+      return _reject(progression, systems, 'Endgame reward already claimed.');
+    }
+    final eligible = switch (rewardId) {
+      'all_bosses' => progression.defeatedBosses.containsAll(allWorlds),
+      'all_secrets' => systems.discoveredSecrets.containsAll(allSecrets),
+      'all_relics' => systems.relicInventory.containsAll(_bossRelics),
+      'sanctuary_10' => systems.homeBaseLevel >= 10,
+      'rift_tier_10' => systems.endlessRiftBestTier >= 10,
+      'mastery_all_5' => allWorlds.every((id) => (systems.worldMasteryLevels[id] ?? 0) >= 5),
+      _ => false,
+    };
+    final reward = rewards[rewardId];
+    if (!eligible || reward == null) {
+      return _reject(progression, systems, 'Endgame goal is not complete.');
+    }
+    final nebula = BigNumber.fromInt(reward.$1);
+    final money = BigNumber.fromInt(reward.$2);
+    return _accept(
+      progression.copyWith(
+        money: progression.money + money,
+        moneyEarned: progression.moneyEarned + money,
+        nebula: progression.nebula + nebula,
+        nebulaEarned: progression.nebulaEarned + nebula,
+      ),
+      systems.copyWith(
+        endgameRewardsClaimed: Set.unmodifiable({...systems.endgameRewardsClaimed, rewardId}),
+      ),
+    );
+  }
+
+  LegacyActionResult setEndlessRift({
+    required ProgressionState progression,
+    required LegacySystemsState systems,
+    required bool active,
+  }) {
+    const allWorlds = <String>{
+      'verdant_grove', 'crystal_caverns', 'ember_summit', 'nebula_rift',
+    };
+    if (active) {
+      if (systems.endlessRiftActive) return _reject(progression, systems, 'Endless Rift is already active.');
+      if (!progression.defeatedBosses.containsAll(allWorlds)) {
+        return _reject(progression, systems, 'Defeat all four world bosses first.');
+      }
+      final tier = systems.endlessRiftBestTier + 1 > 1 ? systems.endlessRiftBestTier + 1 : 1;
+      return _accept(progression, systems.copyWith(
+        endlessRiftActive: true,
+        endlessRiftTier: tier,
+        activeWorldId: 'verdant_grove',
+        activeBossBattleWorldId: 'verdant_grove',
+        bossBattleMistakes: Map.unmodifiable({...systems.bossBattleMistakes, 'verdant_guardian': 0}),
+      ));
+    }
+    if (!systems.endlessRiftActive) return _reject(progression, systems, 'Endless Rift is not active.');
+    return _accept(progression, systems.copyWith(
+      endlessRiftActive: false,
+      clearActiveBossBattle: true,
+    ));
+  }
+
   LegacyActionResult claimChallenge({
     required ProgressionState progression,
     required LegacySystemsState systems,
