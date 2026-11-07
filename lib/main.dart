@@ -450,10 +450,18 @@ class _GameHomePageState extends State<GameHomePage> {
     );
   }
 
+  Future<void> _applyLegacyProgression(ProgressionState progression) async {
+    setState(() => _progression = progression);
+    await _persist();
+  }
+
   Future<void> _openLegacyPages() async {
     await Navigator.of(context).push<void>(
       MaterialPageRoute<void>(
-        builder: (_) => LegacyHubPage(progression: _progression),
+        builder: (_) => LegacyHubPage(
+          progression: _progression,
+          onSystemsChanged: _applyLegacyProgression,
+        ),
       ),
     );
   }
