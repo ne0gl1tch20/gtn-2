@@ -258,6 +258,7 @@ class LegacySystemsEngine {
       case 'daily_guesses_10':
         final reward = BigNumber.fromInt(10000);
         updated = updated.copyWith(money: updated.money + reward, moneyEarned: updated.moneyEarned + reward);
+        break;
       case 'daily_correct_5':
         updated = _addNebula(updated, 25 * multiplier);
         break;
@@ -363,13 +364,16 @@ class LegacySystemsEngine {
   }) {
     final definitions = builtInTraitCatalog.map((item) => _Trait.fromMap(item)).toList();
     final eligible = definitions.where((trait) {
-      if (trait.category == 'SEASONAL' && trait.seasonId != activeSeasonId) return false;
-      if (trait.visibility == 'HIDDEN' && !systems.discoveredTraits.contains(trait.id)) return false;
+      if (trait.category == 'SEASONAL' && trait.seasonId != activeSeasonId) {
+        return false;
+      }
+      if (trait.visibility == 'HIDDEN' && !systems.discoveredTraits.contains(trait.id)) {
+        return false;
+      }
       return playerLevel >= trait.minimumLevel &&
           progression.prestigeResets >= trait.minimumPrestige &&
           progression.correctGuesses >= trait.minimumCorrect &&
-          progression.bestStreak >= trait.minimumBestStreak &&
-          true;
+          progression.bestStreak >= trait.minimumBestStreak;
     }).toList()..sort((a, b) => a.id.compareTo(b.id));
     final accepted = <String, _Trait>{};
     for (final trait in eligible) {
@@ -392,8 +396,8 @@ class LegacySystemsEngine {
     final xpCount = active.where((trait) => trait.effect == 'XP_MULTIPLIER').length;
     final nebulaCount = active.where((trait) => trait.effect == 'NEBULA_BONUS').length;
     return TraitEffectSummary(
-      xpMultiplier: (1 + xpCount * 0.05).clamp(1.0, 2.0),
-      nebulaBonusPerClaim: nebulaCount.clamp(0, 100),
+      xpMultiplier: (1 + xpCount * 0.05).clamp(1.0, 2.0).toDouble(),
+      nebulaBonusPerClaim: nebulaCount.clamp(0, 100).toInt(),
       streakProtection: active.any((trait) => trait.effect == 'STREAK_PROTECTION'),
       activeTraitIds: Set.unmodifiable(active.map((trait) => trait.id)),
       discoveredHiddenTraitIds: Set.unmodifiable(
@@ -411,12 +415,18 @@ class LegacySystemsEngine {
   }) {
     final discovered = Set<String>.of(systems.discoveredTraits);
     for (final item in builtInTraitCatalog) {
-      if (item['visibility'] != 'HIDDEN') continue;
-      if (item['category'] == 'SEASONAL' && item['seasonId'] != activeSeasonId) continue;
-      if (playerLevel < item['minLevel']! as int ||
-          progression.prestigeResets < item['minPrestige']! as int ||
-          progression.correctGuesses < item['minCorrect']! as int ||
-          progression.bestStreak < item['minStreak']! as int) continue;
+      if (item['visibility'] != 'HIDDEN') {
+        continue;
+      }
+      if (item['category'] == 'SEASONAL' && item['seasonId'] != activeSeasonId) {
+        continue;
+      }
+      if (playerLevel < (item['minLevel']! as int) ||
+          progression.prestigeResets < (item['minPrestige']! as int) ||
+          progression.correctGuesses < (item['minCorrect']! as int) ||
+          progression.bestStreak < (item['minStreak']! as int)) {
+        continue;
+      }
       discovered.add(item['id']! as String);
     }
     return systems.copyWith(discoveredTraits: Set.unmodifiable(discovered));
@@ -444,7 +454,7 @@ class LegacySystemsEngine {
     ));
   }
 
-  static BigNumber _addNebula(ProgressionState state, int amount) {
+  static ProgressionState _addNebula(ProgressionState state, int amount) {
     final reward = BigNumber.fromInt(amount);
     return state.copyWith(nebula: state.nebula + reward, nebulaEarned: state.nebulaEarned + reward);
   }
