@@ -173,6 +173,86 @@ class LegacySystemsEngine {
     return baseReward * multiplier;
   }
 
+  ProgressionState applyCorrectGuessBonuses({
+    required ProgressionState before,
+    required ProgressionState after,
+    required LegacySystemsState systems,
+    bool criticalHit = false,
+    bool crystalCoreProc = false,
+    bool nebulaBoostOwned = false,
+  }) {
+    final earned = after.money - before.money;
+    if (earned.compareTo(_zero) <= 0) return after;
+    var bonusMoney = _zero;
+    if (systems.talents.contains('talent_reward_1')) {
+      bonusMoney += earned * BigNumber.parse('0.5');
+    }
+    final eventBoost = systems.permanentEventBoosts.clamp(0, 25);
+    if (eventBoost > 0) {
+      bonusMoney += earned * BigNumber.parse((eventBoost * 0.02).toStringAsFixed(2));
+    }
+    final mastery = (systems.worldMasteryLevels[systems.activeWorldId] ?? 0).clamp(0, 10);
+    if (mastery > 0) {
+      bonusMoney += earned * BigNumber.parse((mastery * 0.02).toStringAsFixed(2));
+    }
+    if (criticalHit &&
+        (systems.talents.contains('talent_crit_1') ||
+            systems.talents.contains('talent_crit_2'))) {
+      bonusMoney += earned;
+    }
+    final equipped = systems.equippedRelics.intersection(_bossRelics);
+    if (equipped.contains('verdant_guardian')) {
+      bonusMoney += earned * BigNumber.parse('0.10');
+    }
+    if (equipped.contains('crystal_golem') && crystalCoreProc) {
+      bonusMoney += earned * BigNumber.parse('0.50');
+    }
+    if (equipped.contains('ember_dragon')) {
+      bonusMoney += earned * BigNumber.parse('0.25');
+    }
+    if (equipped.contains('nebula_titan')) {
+      bonusMoney += earned * BigNumber.parse('0.25');
+    }
+    final setBonus = switch (equipped.length) {
+      2 => '0.10',
+      3 => '0.20',
+      4 => '0.35',
+      _ => '0',
+    };
+    bonusMoney += earned * BigNumber.parse(setBonus);
+    bonusMoney += earned * BigNumber.parse(
+      (systems.homeBaseLevel * 0.02).clamp(0, 0.40).toStringAsFixed(2),
+    );
+    const secretForWorld = <String, String>{
+      'verdant_grove': 'whispering_hollow',
+      'crystal_caverns': 'shard_archive',
+      'ember_summit': 'ashen_vault',
+      'nebula_rift': 'lost_observatory',
+    };
+    final activeSecret = secretForWorld[systems.activeWorldId];
+    if (activeSecret != null && systems.discoveredSecrets.contains(activeSecret)) {
+      bonusMoney += earned * BigNumber.parse('0.05');
+    }
+    final bonusNebula =
+        (systems.talents.contains('talent_master_1') ? 1 : 0) +
+        (eventBoost ~/ 5) +
+        (equipped.contains('ember_dragon') ? 1 : 0) +
+        (equipped.length == 4 ? 1 : 0) +
+        (systems.discoveredSecrets.length >= 4 ? 1 : 0) +
+        (systems.activeWorldId == 'ember_summit' &&
+                systems.discoveredSecrets.contains('ashen_vault')
+            ? 1
+            : 0);
+    final actualNebula = bonusNebula * (nebulaBoostOwned ? 2 : 1);
+    final nebula = BigNumber.fromInt(actualNebula);
+    return after.copyWith(
+      money: after.money + bonusMoney,
+      moneyEarned: after.moneyEarned + bonusMoney,
+      nebula: after.nebula + nebula,
+      nebulaEarned: after.nebulaEarned + nebula,
+    );
+  }
+
   LegacyActionResult settleLuckyStake({
     required ProgressionState progression,
     required LegacySystemsState systems,
