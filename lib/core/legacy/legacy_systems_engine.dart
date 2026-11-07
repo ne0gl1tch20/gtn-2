@@ -584,13 +584,18 @@ class LegacySystemsEngine {
         return _reject(progression, systems, 'Defeat all four world bosses first.');
       }
       final tier = systems.endlessRiftBestTier + 1 > 1 ? systems.endlessRiftBestTier + 1 : 1;
-      return _accept(progression, systems.copyWith(
-        endlessRiftActive: true,
-        endlessRiftTier: tier,
-        activeWorldId: 'verdant_grove',
-        activeBossBattleWorldId: 'verdant_grove',
-        bossBattleMistakes: Map.unmodifiable({...systems.bossBattleMistakes, 'verdant_guardian': 0}),
-      ));
+      final bossDamage = Map<String, int>.of(progression.bossDamage)
+        ..['verdant_grove'] = 0;
+      return _accept(
+        progression.copyWith(bossDamage: Map.unmodifiable(bossDamage)),
+        systems.copyWith(
+          endlessRiftActive: true,
+          endlessRiftTier: tier,
+          activeWorldId: 'verdant_grove',
+          activeBossBattleWorldId: 'verdant_grove',
+          bossBattleMistakes: Map.unmodifiable({...systems.bossBattleMistakes, 'verdant_grove': 0}),
+        ),
+      );
     }
     if (!systems.endlessRiftActive) return _reject(progression, systems, 'Endless Rift is not active.');
     return _accept(progression, systems.copyWith(
