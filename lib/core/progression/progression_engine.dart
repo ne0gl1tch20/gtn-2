@@ -2,7 +2,7 @@ import '../numbers/big_number.dart';
 import 'progression_state.dart';
 
 class UpgradeDefinition {
-  const UpgradeDefinition({
+  UpgradeDefinition({
     required this.id, required this.baseCost, required this.growthRate,
     this.maxLevel,
   });
@@ -136,16 +136,16 @@ class ProgressionEngine {
   ProgressionState purchaseNebulaItem(
     ProgressionState state, {
     required String itemId,
-    BigNumber price = const BigNumber.fromInt(25),
+    BigNumber? price,
   }) {
-    if (itemId.isEmpty || price.compareTo(BigNumber.fromInt(0)) < 0) {
+    final itemPrice = price ?? BigNumber.fromInt(25);\n    if (itemId.isEmpty || itemPrice.compareTo(BigNumber.fromInt(0)) < 0) {
       throw ArgumentError('Invalid Nebula shop purchase.');
     }
-    if (state.nebula.compareTo(price) < 0) return state;
+    if (state.nebula.compareTo(itemPrice) < 0) return state;
     final inventory = Map<String, int>.of(state.ultraUpgrades)
       ..[itemId] = (state.ultraUpgrades[itemId] ?? 0) + 1;
     return state.copyWith(
-      nebula: state.nebula - price,
+      nebula: state.nebula - itemPrice,
       ultraUpgrades: Map.unmodifiable(inventory),
     );
   }
