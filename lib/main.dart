@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'arcade/arcade_page.dart';
 import 'core/game/game_engine.dart';
+import 'core/legacy/legacy_systems_engine.dart';
 import 'core/numbers/big_number.dart';
 import 'core/progression/progression_calculator.dart';
 import 'core/progression/progression_engine.dart';
@@ -74,6 +75,7 @@ class GameHomePage extends StatefulWidget {
 class _GameHomePageState extends State<GameHomePage> {
   final GameEngine _engine = GameEngine();
   final ProgressionEngine _progressionEngine = const ProgressionEngine();
+  final LegacySystemsEngine _legacySystemsEngine = const LegacySystemsEngine();
   ProgressionState _progression = ProgressionState.initial;
   GameSettings _settings = GameSettings.initial;
   final TextEditingController _controller = TextEditingController();
@@ -145,7 +147,12 @@ class _GameHomePageState extends State<GameHomePage> {
   ) async {
     final updated = _progressionEngine.purchaseUpgrade(_progression, definition);
     if (updated != _progression) {
-      setState(() => _progression = updated);
+      final withQuestProgress = updated.copyWith(
+        legacySystems: _legacySystemsEngine.recordUpgradePurchase(
+          updated.legacySystems,
+        ),
+      );
+      setState(() => _progression = withQuestProgress);
       await _persist();
     }
     return _progression;
@@ -474,22 +481,37 @@ class _GameHomePageState extends State<GameHomePage> {
       _game = _engine.guess(_game, guess);
       if (_game.attempts > previousAttempts) {
         final correct = _game.lastResult == GuessResult.correct;
+        final beforeGuess = _progression;
+        final legacySystems = beforeGuess.legacySystems;
         final effects = UpgradeCatalog.effectsFor(
-          _progression,
+          beforeGuess,
           isFirstGuess: _game.attempts == 1,
         );
-        _progression = _progressionEngine.recordGuess(
-          _progression,
+        final baseReward = correct
+            ? _legacySystemsEngine.correctGuessReward(
+                baseReward: BigNumber.fromInt(1) + effects.flatBonus,
+                systems: legacySystems,
+                criticalHit: false,
+              ) * _legacySystemsEngine.mutatorRewardMultiplier(legacySystems)
+            : null;
+        final afterReward = _progressionEngine.recordGuess(
+          beforeGuess,
           correct: correct,
-          baseReward: correct ? BigNumber.fromInt(1) : null,
-          flatBonusReward: correct ? effects.flatBonus : null,
+          baseReward: baseReward,
           modifiers: GuessRewardModifiers(
             streakMultiplier: effects.streakMultiplier,
             criticalMultiplier: effects.firstGuessMultiplier *
-                ((_progression.nebulaItems['golden_guess'] ?? 0) > 0 &&
-                        (_progression.totalGuesses + 1) % 10 == 0
+                ((beforeGuess.nebulaItems['golden_guess'] ?? 0) > 0 &&
+                        (beforeGuess.totalGuesses + 1) % 10 == 0
                     ? 2
                     : 1),
+          ),
+        );
+        _progression = afterReward.copyWith(
+          legacySystems: _legacySystemsEngine.recordGuessProgress(
+            legacySystems,
+            correct: correct,
+            currentStreak: afterReward.currentStreak,
           ),
         );
       }
