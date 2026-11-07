@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -73,7 +75,7 @@ class GameHomePage extends StatefulWidget {
 }
 
 class _GameHomePageState extends State<GameHomePage> {
-  final GameEngine _engine = GameEngine();
+  GameEngine _engine = GameEngine();
   final ProgressionEngine _progressionEngine = const ProgressionEngine();
   final LegacySystemsEngine _legacySystemsEngine = const LegacySystemsEngine();
   ProgressionState _progression = ProgressionState.initial;
@@ -98,14 +100,19 @@ class _GameHomePageState extends State<GameHomePage> {
       final save = await storage.load();
       if (!mounted) return;
       if (save != null) {
+        final restoredProgression = save.progression;
+        final restoredEngine = GameEngine(
+          maximum: 100 * _legacySystemsEngine.rangeMultiplier(restoredProgression.legacySystems),
+        );
         setState(() {
+          _engine = restoredEngine;
           _game = _engine.restore(
             secret: save.secret,
             attempts: save.attempts,
             isComplete: save.isComplete,
           );
           _gamesWon = save.gamesWon;
-          _progression = save.progression;
+          _progression = restoredProgression;
           _settings = save.settings;
           GtnApp.settingsNotifier.value = _settings;
           _message = 'Welcome back! Your saved game is ready.';
@@ -288,9 +295,14 @@ class _GameHomePageState extends State<GameHomePage> {
       final storage = await SaveStorage.inApplicationDocuments(slot: slot);
       final save = await storage.load();
       if (!mounted) return;
+      final nextProgression = save?.progression ?? ProgressionState.initial;
+      final nextEngine = GameEngine(
+        maximum: 100 * _legacySystemsEngine.rangeMultiplier(nextProgression.legacySystems),
+      );
       setState(() {
         _storage = Future.value(storage);
         _activeSlot = slot;
+        _engine = nextEngine;
         _game = save == null
             ? _engine.newGame()
             : _engine.restore(
@@ -299,7 +311,7 @@ class _GameHomePageState extends State<GameHomePage> {
                 isComplete: save.isComplete,
               );
         _gamesWon = save?.gamesWon ?? 0;
-        _progression = save?.progression ?? ProgressionState.initial;
+        _progression = nextProgression;
         _settings = save?.settings ?? GameSettings.initial;
         GtnApp.settingsNotifier.value = _settings;
         _message = save == null
@@ -451,7 +463,16 @@ class _GameHomePageState extends State<GameHomePage> {
   }
 
   Future<void> _applyLegacyProgression(ProgressionState progression) async {
-    setState(() => _progression = progression);
+    final oldRange = _legacySystemsEngine.rangeMultiplier(_progression.legacySystems);
+    final newRange = _legacySystemsEngine.rangeMultiplier(progression.legacySystems);
+    setState(() {
+      _progression = progression;
+      if (oldRange != newRange) {
+        _engine = GameEngine(maximum: 100 * newRange);
+        _game = _engine.newGame();
+        _message = 'Hardcore range changed. A fresh round is ready.';
+      }
+    });
     await _persist();
   }
 
@@ -477,10 +498,17 @@ class _GameHomePageState extends State<GameHomePage> {
     );
   }
 
+  String? _currentSeasonId() => switch (DateTime.now().month) {
+        12 || 1 || 2 => 'winter',
+        3 || 4 || 5 => 'spring',
+        6 || 7 || 8 => 'summer',
+        _ => 'autumn',
+      };
+
   Future<void> _submitGuess() async {
     final guess = int.tryParse(_controller.text.trim());
     if (guess == null) {
-      setState(() => _message = 'Enter a whole number from 1 to 100.');
+      setState(() => _message = 'Enter a whole number from ${_game.minimum} to ${_game.maximum}.');
       return;
     }
 
@@ -495,17 +523,20 @@ class _GameHomePageState extends State<GameHomePage> {
           beforeGuess,
           isFirstGuess: _game.attempts == 1,
         );
-        final baseReward = correct
-            ? _legacySystemsEngine.correctGuessReward(
-                baseReward: BigNumber.fromInt(1) + effects.flatBonus,
-                systems: legacySystems,
-                criticalHit: false,
-              ) * _legacySystemsEngine.mutatorRewardMultiplier(legacySystems)
+        final traitEffects = _legacySystemsEngine.evaluateTraits(
+          progression: beforeGuess,
+          systems: legacySystems,
+          playerLevel: 1,
+          activeSeasonId: _currentSeasonId(),
+        );
+        final rawReward = correct
+            ? (BigNumber.fromInt(1) + effects.flatBonus) *
+                _legacySystemsEngine.mutatorRewardMultiplier(legacySystems)
             : null;
-        final afterReward = _progressionEngine.recordGuess(
+        var afterReward = _progressionEngine.recordGuess(
           beforeGuess,
           correct: correct,
-          baseReward: baseReward,
+          baseReward: rawReward,
           modifiers: GuessRewardModifiers(
             streakMultiplier: effects.streakMultiplier,
             criticalMultiplier: effects.firstGuessMultiplier *
@@ -515,25 +546,58 @@ class _GameHomePageState extends State<GameHomePage> {
                     : 1),
           ),
         );
-        _progression = afterReward.copyWith(
-          legacySystems: _legacySystemsEngine.recordGuessProgress(
-            legacySystems,
-            correct: correct,
-            currentStreak: afterReward.currentStreak,
-          ),
+        if (correct) {
+          final criticalChance = legacySystems.talents.contains('talent_crit_2')
+              ? 0.15
+              : legacySystems.talents.contains('talent_crit_1')
+                  ? 0.05
+                  : 0.0;
+          afterReward = _legacySystemsEngine.applyCorrectGuessBonuses(
+            before: beforeGuess,
+            after: afterReward,
+            systems: legacySystems,
+            criticalHit: Random.secure().nextDouble() < criticalChance,
+            crystalCoreProc: legacySystems.equippedRelics.contains('crystal_golem') &&
+                Random.secure().nextDouble() < 0.10,
+            nebulaBoostOwned: (beforeGuess.nebulaItems['nebula_boost'] ?? 0) > 0,
+          );
+        } else {
+          if (traitEffects.streakProtection) {
+            afterReward = afterReward.copyWith(currentStreak: beforeGuess.currentStreak);
+          }
+          if (legacySystems.activeMutators.contains('mut_tax')) {
+            final penalty = afterReward.money * BigNumber.parse('0.05');
+            afterReward = afterReward.copyWith(money: afterReward.money - penalty);
+          }
+        }
+        var systemsAfter = _legacySystemsEngine.recordGuessProgress(
+          legacySystems,
+          correct: correct,
+          currentStreak: afterReward.currentStreak,
         );
+        systemsAfter = _legacySystemsEngine.discoverEligibleTraits(
+          progression: afterReward,
+          systems: systemsAfter,
+          playerLevel: 1,
+          activeSeasonId: _currentSeasonId(),
+        );
+        _progression = afterReward.copyWith(legacySystems: systemsAfter);
       }
       switch (_game.lastResult) {
         case GuessResult.tooLow:
-          _message = 'Too low. Try a higher number!';
+          _message = _progression.legacySystems.activeMutators.contains('mut_blind')
+              ? 'Guess recorded. Try again.'
+              : 'Too low. Try a higher number!';
         case GuessResult.tooHigh:
-          _message = 'Too high. Try a lower number!';
+          _message = _progression.legacySystems.activeMutators.contains('mut_blind')
+              ? 'Guess recorded. Try again.'
+              : 'Too high. Try a lower number!';
         case GuessResult.correct:
           _gamesWon++;
           _message =
               'Correct! You got it in ${_game.attempts} ${_game.attempts == 1 ? 'try' : 'tries'}.';
         case GuessResult.outOfRange:
-          _message = 'Choose a number between 1 and 100.';
+          _message = 'Choose a number between ${_game.minimum} and ${_game.maximum}.';
         case null:
           break;
       }
@@ -545,7 +609,7 @@ class _GameHomePageState extends State<GameHomePage> {
   Future<void> _newGame() async {
     setState(() {
       _game = _engine.newGame();
-      _message = 'New round! Guess a number between 1 and 100.';
+      _message = 'New round! Guess a number between ${_game.minimum} and ${_game.maximum}.';
       _controller.clear();
     });
     await _persist();
