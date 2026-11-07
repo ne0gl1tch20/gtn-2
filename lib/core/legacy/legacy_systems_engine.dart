@@ -401,23 +401,43 @@ class LegacySystemsEngine {
     LegacySystemsState systems, {
     required bool correct,
     required int currentStreak,
+    String? today,
+    int? lootRoll,
   }) {
-    final today = DateTime.now().toIso8601String().substring(0, 10);
-    final current = systems.dailyQuestDate == today
+    final date = today ?? DateTime.now().toIso8601String().substring(0, 10);
+    final current = systems.dailyQuestDate == date
         ? systems
         : systems.copyWith(
-            dailyQuestDate: today,
+            dailyQuestDate: date,
             dailyQuestGuesses: 0,
             dailyQuestCorrectGuesses: 0,
             dailyQuestBestStreak: 0,
             dailyQuestUpgradePurchases: 0,
             claimedDailyQuests: const {},
           );
-    return current.copyWith(
+    final progressed = current.copyWith(
       dailyQuestGuesses: current.dailyQuestGuesses + 1,
       dailyQuestCorrectGuesses: current.dailyQuestCorrectGuesses + (correct ? 1 : 0),
       dailyQuestBestStreak: currentStreak > current.dailyQuestBestStreak
           ? currentStreak : current.dailyQuestBestStreak,
+    );
+    if (!correct || lootRoll == null || lootRoll < 0 || lootRoll > 999) {
+      return progressed;
+    }
+    final tier = switch (lootRoll) {
+      >= 0 && <= 9 => 'epic',
+      >= 10 && <= 59 => 'rare',
+      >= 60 && <= 239 => 'common',
+      _ => null,
+    };
+    if (tier == null) return progressed;
+    final chests = Map<String, int>.of(progressed.lootChests)
+      ..[tier] = (progressed.lootChests[tier] ?? 0) + 1;
+    return progressed.copyWith(
+      lootChests: Map.unmodifiable(chests),
+      lootDropsFound: progressed.lootDropsFound + 1,
+      lastLootDropTier: tier,
+      lootEventId: progressed.lootEventId + 1,
     );
   }
 
@@ -522,10 +542,11 @@ class LegacySystemsEngine {
       if (item['category'] == 'SEASONAL' && item['seasonId'] != activeSeasonId) {
         continue;
       }
-      if (playerLevel < (item['minLevel']! as int) ||
-          progression.prestigeResets < (item['minPrestige']! as int) ||
+      final dependencies = (item['dependencies']! as List<Object?>).cast<String>();
+      if (progression.prestigeResets < (item['minPrestige']! as int) ||
           progression.correctGuesses < (item['minCorrect']! as int) ||
-          progression.bestStreak < (item['minStreak']! as int)) {
+          progression.bestStreak < (item['minStreak']! as int) ||
+          !dependencies.every(discovered.contains)) {
         continue;
       }
       discovered.add(item['id']! as String);
