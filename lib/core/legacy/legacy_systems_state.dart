@@ -36,6 +36,18 @@ class LegacySystemsState {
     this.musicRepeatMode = 'off',
     this.musicShuffle = false,
     this.currentTrackId,
+    this.permanentEventBoosts = 0,
+    this.endgameRewardsClaimed = const {},
+    this.codexRewardClaimed = false,
+    this.activeBossBattleWorldId,
+    this.bossBattleMistakes = const {},
+    this.liveOpsClaims = const {},
+    this.lastRandomEventId,
+    this.autoClickerActive = false,
+    this.autoClickerSpeed = 1,
+    this.botTotalGuesses = 0,
+    this.botCorrectGuesses = 0,
+    this.botIncorrectGuesses = 0,
   });
 
   final Set<String> discoveredTraits;
@@ -73,6 +85,18 @@ class LegacySystemsState {
   final String musicRepeatMode;
   final bool musicShuffle;
   final String? currentTrackId;
+  final int permanentEventBoosts;
+  final Set<String> endgameRewardsClaimed;
+  final bool codexRewardClaimed;
+  final String? activeBossBattleWorldId;
+  final Map<String, int> bossBattleMistakes;
+  final Map<String, int> liveOpsClaims;
+  final String? lastRandomEventId;
+  final bool autoClickerActive;
+  final double autoClickerSpeed;
+  final int botTotalGuesses;
+  final int botCorrectGuesses;
+  final int botIncorrectGuesses;
 
   static const initial = LegacySystemsState();
 
@@ -113,6 +137,20 @@ class LegacySystemsState {
     bool? musicShuffle,
     String? currentTrackId,
     bool clearCurrentTrack = false,
+    int? permanentEventBoosts,
+    Set<String>? endgameRewardsClaimed,
+    bool? codexRewardClaimed,
+    String? activeBossBattleWorldId,
+    bool clearActiveBossBattle = false,
+    Map<String, int>? bossBattleMistakes,
+    Map<String, int>? liveOpsClaims,
+    String? lastRandomEventId,
+    bool clearLastRandomEvent = false,
+    bool? autoClickerActive,
+    double? autoClickerSpeed,
+    int? botTotalGuesses,
+    int? botCorrectGuesses,
+    int? botIncorrectGuesses,
   }) => LegacySystemsState(
     discoveredTraits: discoveredTraits ?? this.discoveredTraits,
     selectedTraitArms: selectedTraitArms ?? this.selectedTraitArms,
@@ -149,6 +187,18 @@ class LegacySystemsState {
     musicRepeatMode: musicRepeatMode ?? this.musicRepeatMode,
     musicShuffle: musicShuffle ?? this.musicShuffle,
     currentTrackId: clearCurrentTrack ? null : currentTrackId ?? this.currentTrackId,
+    permanentEventBoosts: permanentEventBoosts ?? this.permanentEventBoosts,
+    endgameRewardsClaimed: endgameRewardsClaimed ?? this.endgameRewardsClaimed,
+    codexRewardClaimed: codexRewardClaimed ?? this.codexRewardClaimed,
+    activeBossBattleWorldId: clearActiveBossBattle ? null : activeBossBattleWorldId ?? this.activeBossBattleWorldId,
+    bossBattleMistakes: bossBattleMistakes ?? this.bossBattleMistakes,
+    liveOpsClaims: liveOpsClaims ?? this.liveOpsClaims,
+    lastRandomEventId: clearLastRandomEvent ? null : lastRandomEventId ?? this.lastRandomEventId,
+    autoClickerActive: autoClickerActive ?? this.autoClickerActive,
+    autoClickerSpeed: autoClickerSpeed ?? this.autoClickerSpeed,
+    botTotalGuesses: botTotalGuesses ?? this.botTotalGuesses,
+    botCorrectGuesses: botCorrectGuesses ?? this.botCorrectGuesses,
+    botIncorrectGuesses: botIncorrectGuesses ?? this.botIncorrectGuesses,
   );
 
   Map<String, Object?> toJson() => {
@@ -187,6 +237,18 @@ class LegacySystemsState {
     'musicRepeatMode': musicRepeatMode,
     'musicShuffle': musicShuffle,
     'currentTrackId': currentTrackId,
+    'permanentEventBoosts': permanentEventBoosts,
+    'endgameRewardsClaimed': endgameRewardsClaimed.toList()..sort(),
+    'codexRewardClaimed': codexRewardClaimed,
+    'activeBossBattleWorldId': activeBossBattleWorldId,
+    'bossBattleMistakes': bossBattleMistakes,
+    'liveOpsClaims': liveOpsClaims,
+    'lastRandomEventId': lastRandomEventId,
+    'autoClickerActive': autoClickerActive,
+    'autoClickerSpeed': autoClickerSpeed,
+    'botTotalGuesses': botTotalGuesses,
+    'botCorrectGuesses': botCorrectGuesses,
+    'botIncorrectGuesses': botIncorrectGuesses,
   };
 
   factory LegacySystemsState.fromJson(Map<String, dynamic> json) {
@@ -266,6 +328,17 @@ class LegacySystemsState {
     final endless = json['endlessRiftActive'] ?? false;
     if (shuffle is! bool || endless is! bool) throw const FormatException('Invalid legacy boolean.');
     final currentTrack = json['currentTrackId'];
+    final codexClaimed = json['codexRewardClaimed'] ?? false;
+    final autoActive = json['autoClickerActive'] ?? false;
+    final autoSpeed = json['autoClickerSpeed'] ?? 1.0;
+    final activeBoss = json['activeBossBattleWorldId'];
+    final lastEvent = json['lastRandomEventId'];
+    if (codexClaimed is! bool || autoActive is! bool || autoSpeed is! num ||
+        !autoSpeed.isFinite || autoSpeed < 1 || autoSpeed > 5 ||
+        (activeBoss != null && activeBoss is! String) ||
+        (lastEvent != null && lastEvent is! String)) {
+      throw const FormatException('Invalid extended legacy state.');
+    }
     if (currentTrack != null && currentTrack is! String) throw const FormatException('Invalid current music track.');
     final state = LegacySystemsState(
       discoveredTraits: strings('discoveredTraits'),
@@ -303,11 +376,24 @@ class LegacySystemsState {
       musicRepeatMode: repeat,
       musicShuffle: shuffle,
       currentTrackId: currentTrack as String?,
+      permanentEventBoosts: count('permanentEventBoosts'),
+      endgameRewardsClaimed: strings('endgameRewardsClaimed'),
+      codexRewardClaimed: codexClaimed,
+      activeBossBattleWorldId: activeBoss as String?,
+      bossBattleMistakes: intMap('bossBattleMistakes'),
+      liveOpsClaims: intMap('liveOpsClaims'),
+      lastRandomEventId: lastEvent as String?,
+      autoClickerActive: autoActive,
+      autoClickerSpeed: autoSpeed.toDouble(),
+      botTotalGuesses: count('botTotalGuesses'),
+      botCorrectGuesses: count('botCorrectGuesses'),
+      botIncorrectGuesses: count('botIncorrectGuesses'),
     );
-    if (state.homeBaseLevel > 20 || state.equippedRelics.length > 4 ||
+    if (state.homeBaseLevel > 20 || state.permanentEventBoosts > 25 || state.equippedRelics.length > 4 ||
         state.stakesWon + state.stakesLost > state.stakesPlaced ||
         state.dailyQuestCorrectGuesses > state.dailyQuestGuesses ||
-        state.dailyRewardStreak > 7) {
+        state.dailyRewardStreak > 7 ||
+        state.botCorrectGuesses + state.botIncorrectGuesses > state.botTotalGuesses) {
       throw const FormatException('Legacy save invariants failed.');
     }
     if (!state.relicInventory.containsAll(state.equippedRelics)) {
