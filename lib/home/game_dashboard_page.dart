@@ -292,7 +292,7 @@ class GameDashboardPage extends StatelessWidget {
                                   letterSpacing: 1.4,
                                 )),
                             const SizedBox(height: 9),
-                            const Text('1 — 100',
+                            Text('${game.minimum} — ${game.maximum}',
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 43,
@@ -714,7 +714,7 @@ class _GuessInput extends StatelessWidget {
                       letterSpacing: 1.4,
                     )),
                 const Spacer(),
-                Text('1 TO 100',
+                Text('${game.minimum} TO ${game.maximum}',
                     style: TextStyle(
                       color: muted,
                       fontSize: 9,
