@@ -64,7 +64,7 @@ class _GameHomePageState extends State<GameHomePage> {
           _game = _engine.restore(
             secret: save.secret,
             attempts: save.attempts,
-            isComplete: false,
+            isComplete: save.isComplete,
           );
           _gamesWon = save.gamesWon;
           _message = 'Welcome back! Your saved game is ready.';
@@ -89,6 +89,7 @@ class _GameHomePageState extends State<GameHomePage> {
           secret: _game.secret,
           attempts: _game.attempts,
           gamesWon: _gamesWon,
+          isComplete: _game.isComplete,
         ),
       );
     } on Exception {
