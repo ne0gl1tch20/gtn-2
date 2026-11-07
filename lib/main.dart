@@ -274,8 +274,9 @@ class _GameHomePageState extends State<GameHomePage> {
           constraints: const BoxConstraints(maxWidth: 460),
           child: Padding(
             padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const Icon(Icons.casino_rounded, size: 64),
@@ -330,6 +331,7 @@ class _GameHomePageState extends State<GameHomePage> {
                   child: const Text('New game'),
                 ),
               ],
+              ),
             ),
           ),
         ),
