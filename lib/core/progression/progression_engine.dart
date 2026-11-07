@@ -1,5 +1,6 @@
 import '../numbers/big_number.dart';
 import 'progression_state.dart';
+import '../../worlds/world_boss_catalog.dart';
 
 class UpgradeDefinition {
   UpgradeDefinition({
@@ -122,6 +123,33 @@ class ProgressionEngine {
       ultraResets: state.ultraResets + 1,
       prestigeResets: 0,
       currentStreak: 0,
+    );
+  }
+
+  ProgressionState attackWorldBoss(
+    ProgressionState state,
+    WorldBossDefinition boss,
+  ) {
+    if (!WorldBossCatalog.isUnlocked(state, boss) ||
+        WorldBossCatalog.isDefeated(state, boss)) {
+      return state;
+    }
+    final nextDamage = WorldBossCatalog.damage(state, boss) + 1;
+    final damage = Map<String, int>.of(state.bossDamage)
+      ..[boss.id] = nextDamage;
+    if (nextDamage < boss.hits) {
+      return state.copyWith(bossDamage: Map.unmodifiable(damage));
+    }
+    final defeated = Set<String>.of(state.defeatedBosses)..add(boss.id);
+    final moneyReward = BigNumber.fromInt(boss.moneyReward);
+    final nebulaReward = BigNumber.fromInt(boss.nebulaReward);
+    return state.copyWith(
+      bossDamage: Map.unmodifiable(damage),
+      defeatedBosses: Set.unmodifiable(defeated),
+      money: state.money + moneyReward,
+      moneyEarned: state.moneyEarned + moneyReward,
+      nebula: state.nebula + nebulaReward,
+      nebulaEarned: state.nebulaEarned + nebulaReward,
     );
   }
 

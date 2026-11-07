@@ -10,6 +10,8 @@ class ProgressionState {
     this.prestigeUpgrades = const {},
     this.ultraUpgrades = const {},
     this.nebulaItems = const {},
+    this.bossDamage = const {},
+    this.defeatedBosses = const {},
     this.prestigeResets = 0,
     this.ultraResets = 0,
     this.totalGuesses = 0,
@@ -26,7 +28,8 @@ class ProgressionState {
         nebulaEarned = nebulaEarned ?? BigNumber.fromInt(0);
 
   final BigNumber money, prestige, ultra, nebula;
-  final Map<String, int> upgrades, prestigeUpgrades, ultraUpgrades, nebulaItems;
+  final Map<String, int> upgrades, prestigeUpgrades, ultraUpgrades, nebulaItems, bossDamage;
+  final Set<String> defeatedBosses;
   final int prestigeResets, ultraResets, totalGuesses, correctGuesses;
   final BigNumber moneyEarned;
   final int currentStreak, bestStreak;
@@ -43,6 +46,8 @@ class ProgressionState {
         'prestigeUpgrades': prestigeUpgrades,
         'ultraUpgrades': ultraUpgrades,
         'nebulaItems': nebulaItems,
+        'bossDamage': bossDamage,
+        'defeatedBosses': defeatedBosses.toList(),
         'prestigeResets': prestigeResets,
         'ultraResets': ultraResets,
         'totalGuesses': totalGuesses,
@@ -87,6 +92,26 @@ class ProgressionState {
       return Map.unmodifiable(result);
     }
 
+    final rawBossDamage = json['bossDamage'];
+    final bossDamage = <String, int>{};
+    if (rawBossDamage != null) {
+      if (rawBossDamage is! Map) throw const FormatException('Invalid boss damage map.');
+      for (final entry in rawBossDamage.entries) {
+        if (entry.key is! String || entry.value is! int || (entry.value as int) < 0) {
+          throw const FormatException('Invalid boss damage entry.');
+        }
+        bossDamage[entry.key as String] = entry.value as int;
+      }
+    }
+    final rawDefeated = json['defeatedBosses'];
+    final defeatedBosses = <String>{};
+    if (rawDefeated != null) {
+      if (rawDefeated is! List || rawDefeated.any((value) => value is! String)) {
+        throw const FormatException('Invalid defeated boss list.');
+      }
+      defeatedBosses.addAll(rawDefeated.cast<String>());
+    }
+
     final total = count('totalGuesses');
     final correct = count('correctGuesses');
     final streak = count('currentStreak');
@@ -103,6 +128,8 @@ class ProgressionState {
       prestigeUpgrades: levels('prestigeUpgrades'),
       ultraUpgrades: levels('ultraUpgrades'),
       nebulaItems: levels('nebulaItems', optional: true),
+      bossDamage: Map.unmodifiable(bossDamage),
+      defeatedBosses: Set.unmodifiable(defeatedBosses),
       prestigeResets: count('prestigeResets'),
       ultraResets: count('ultraResets'),
       totalGuesses: total,
@@ -118,6 +145,7 @@ class ProgressionState {
     BigNumber? money, BigNumber? prestige, BigNumber? ultra, BigNumber? nebula,
     Map<String, int>? upgrades, Map<String, int>? prestigeUpgrades,
     Map<String, int>? ultraUpgrades, Map<String, int>? nebulaItems,
+    Map<String, int>? bossDamage, Set<String>? defeatedBosses,
     int? prestigeResets, int? ultraResets, int? totalGuesses,
     int? correctGuesses, BigNumber? moneyEarned, int? currentStreak,
     int? bestStreak, BigNumber? nebulaEarned,
@@ -130,6 +158,8 @@ class ProgressionState {
     prestigeUpgrades: prestigeUpgrades ?? this.prestigeUpgrades,
     ultraUpgrades: ultraUpgrades ?? this.ultraUpgrades,
     nebulaItems: nebulaItems ?? this.nebulaItems,
+    bossDamage: bossDamage ?? this.bossDamage,
+    defeatedBosses: defeatedBosses ?? this.defeatedBosses,
     prestigeResets: prestigeResets ?? this.prestigeResets,
     ultraResets: ultraResets ?? this.ultraResets,
     totalGuesses: totalGuesses ?? this.totalGuesses,
