@@ -49,16 +49,45 @@ class GameEngine {
     required int secret,
     required int attempts,
     required bool isComplete,
+    int? savedMinimum,
+    int? savedMaximum,
   }) {
-    if (secret < minimum || secret > maximum || attempts < 0) {
+    final restoredMinimum = savedMinimum ?? minimum;
+    final restoredMaximum = savedMaximum ?? maximum;
+    if (restoredMinimum < 1 ||
+        restoredMaximum > 200 ||
+        restoredMinimum >= restoredMaximum ||
+        secret < restoredMinimum ||
+        secret > restoredMaximum ||
+        attempts < 0) {
       throw ArgumentError('Saved game state is invalid.');
     }
     return GameState(
       secret: secret,
       attempts: attempts,
       isComplete: isComplete,
-      minimum: minimum,
-      maximum: maximum,
+      minimum: restoredMinimum,
+      maximum: restoredMaximum,
+    );
+  }
+
+  /// Narrows the active interval after a miss when Range Scout is active.
+  GameState applyRangeScoutHint(GameState state, int guess) {
+    if (state.isComplete) return state;
+    final nextMinimum = state.lastResult == GuessResult.tooLow
+        ? (guess + 1 > state.minimum ? guess + 1 : state.minimum)
+        : state.minimum;
+    final nextMaximum = state.lastResult == GuessResult.tooHigh
+        ? (guess - 1 < state.maximum ? guess - 1 : state.maximum)
+        : state.maximum;
+    if (nextMinimum >= nextMaximum) return state;
+    return GameState(
+      secret: state.secret,
+      attempts: state.attempts,
+      isComplete: state.isComplete,
+      lastResult: state.lastResult,
+      minimum: nextMinimum,
+      maximum: nextMaximum,
     );
   }
 
