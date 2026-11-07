@@ -78,12 +78,14 @@ subprojects {
         val androidExtension = extensions.findByName("android")
         if (androidExtension != null) {
             val intParameter = Integer.TYPE
+            val boxedIntParameter = Integer::class.java
             val setter = androidExtension.javaClass.methods.firstOrNull { method ->
-                method.name == "setCompileSdkVersion" &&
+                method.name in setOf("setCompileSdk", "setCompileSdkVersion") &&
                     method.parameterCount == 1 &&
-                    method.parameterTypes[0] == intParameter
-            }
-            setter?.invoke(androidExtension, 36)
+                    (method.parameterTypes[0] == intParameter ||
+                        method.parameterTypes[0] == boxedIntParameter)
+            } ?: error("Could not find an integer compileSdk setter for ${project.path}.")
+            setter.invoke(androidExtension, 36)
         }
     }
 }
