@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'arcade/arcade_page.dart';
@@ -8,6 +9,7 @@ import 'core/progression/progression_engine.dart';
 import 'core/progression/progression_state.dart';
 import 'data/saves/save_data.dart';
 import 'data/saves/save_storage.dart';
+import 'dev/developer_settings_page.dart';
 import 'progression/progression_hub_page.dart';
 import 'saves/save_slots_page.dart';
 import 'settings/game_settings.dart';
@@ -336,6 +338,109 @@ class _GameHomePageState extends State<GameHomePage> {
     );
   }
 
+
+  SaveData _currentSaveData() => SaveData(
+        secret: _game.secret,
+        attempts: _game.attempts,
+        gamesWon: _gamesWon,
+        isComplete: _game.isComplete,
+        progression: _progression,
+        settings: _settings,
+      );
+
+  Future<void> _applyDeveloperSave(SaveData save) async {
+    setState(() {
+      _game = _engine.restore(
+        secret: save.secret,
+        attempts: save.attempts,
+        isComplete: save.isComplete,
+      );
+      _gamesWon = save.gamesWon;
+      _progression = save.progression;
+      _settings = save.settings;
+      GtnApp.settingsNotifier.value = _settings;
+      _message = 'Developer save applied.';
+    });
+    await _persist();
+  }
+
+  Future<String> _runDeveloperCommand(String command) async {
+    final parts = command.trim().split(RegExp(r'\\s+'));
+    final action = parts.first.toLowerCase();
+    if (action == '/help') {
+      return '/money N · /prestige N · /ultra N · /nebula N · /attempts N · /wins N · /reset';
+    }
+    if (action == '/reset') {
+      setState(() {
+        _game = _engine.newGame();
+        _progression = ProgressionState.initial;
+        _gamesWon = 0;
+        _message = 'Developer reset completed.';
+      });
+      await _persist();
+      return 'Current slot reset.';
+    }
+    if (parts.length != 2) return 'Usage: $action <value>';
+    try {
+      switch (action) {
+        case '/money':
+        case '/prestige':
+        case '/ultra':
+        case '/nebula':
+          final amount = BigNumber.parse(parts[1]);
+          if (amount.compareTo(BigNumber.fromInt(0)) < 0) {
+            return 'Currency values cannot be negative.';
+          }
+          setState(() {
+            _progression = switch (action) {
+              '/money' => _progression.copyWith(money: amount),
+              '/prestige' => _progression.copyWith(prestige: amount),
+              '/ultra' => _progression.copyWith(ultra: amount),
+              _ => _progression.copyWith(nebula: amount),
+            };
+          });
+          await _persist();
+          return '$action set to $amount.';
+        case '/attempts':
+          final value = int.parse(parts[1]);
+          if (value < 0) return 'Attempts cannot be negative.';
+          setState(() {
+            _game = _engine.restore(
+              secret: _game.secret,
+              attempts: value,
+              isComplete: _game.isComplete,
+            );
+          });
+          await _persist();
+          return 'Attempts set to $value.';
+        case '/wins':
+          final value = int.parse(parts[1]);
+          if (value < 0) return 'Wins cannot be negative.';
+          setState(() => _gamesWon = value);
+          await _persist();
+          return 'Games won set to $value.';
+        default:
+          return 'Unknown command. Try /help.';
+      }
+    } on FormatException {
+      return 'Invalid value. Use a whole number or decimal.';
+    } on ArgumentError {
+      return 'That value is not valid for the current game.';
+    }
+  }
+
+  Future<void> _openDeveloperSettings() async {
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (_) => DeveloperSettingsPage(
+          save: _currentSaveData(),
+          onCommand: _runDeveloperCommand,
+          onApplySave: _applyDeveloperSave,
+        ),
+      ),
+    );
+  }
+
   Future<void> _openUpgradeShop() async {
     await Navigator.of(context).push<void>(
       MaterialPageRoute<void>(
@@ -418,6 +523,12 @@ class _GameHomePageState extends State<GameHomePage> {
       appBar: AppBar(
         title: const Text('GuessTheNumber 2'),
         actions: [
+          if (kDebugMode)
+            IconButton(
+              tooltip: 'Developer settings',
+              onPressed: _isLoading ? null : _openDeveloperSettings,
+              icon: const Icon(Icons.bug_report_rounded),
+            ),
           IconButton(
             tooltip: 'Save slots',
             onPressed: _isLoading ? null : _openSaveSlots,
@@ -502,6 +613,12 @@ class _GameHomePageState extends State<GameHomePage> {
                   icon: const Icon(Icons.settings_rounded),
                   label: const Text('Settings'),
                 ),
+                if (kDebugMode)
+                  OutlinedButton.icon(
+                    onPressed: _isLoading ? null : _openDeveloperSettings,
+                    icon: const Icon(Icons.bug_report_rounded),
+                    label: const Text('Developer Settings'),
+                  ),
                 TextButton(
                   onPressed: _isLoading ? null : _newGame,
                   child: const Text('New game'),
