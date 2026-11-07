@@ -1,14 +1,14 @@
 import '../../core/progression/progression_state.dart';
 
 class SaveData {
-  const SaveData({
+  SaveData({
     this.schemaVersion = currentSchemaVersion,
     required this.secret,
     required this.attempts,
     required this.gamesWon,
     this.isComplete = false,
-    this.progression = ProgressionState.initial,
-  });
+    ProgressionState? progression,
+  }) : progression = progression ?? ProgressionState.initial;
 
   static const currentSchemaVersion = 1;
 
