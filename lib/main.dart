@@ -310,6 +310,8 @@ class _GameHomePageState extends State<GameHomePage> {
       final save = await storage.load();
       if (!mounted) return;
       final nextProgression = save?.progression ?? ProgressionState.initial;
+      await AppLocalizations.load(save?.settings.localeCode ?? 'en_us');
+      if (!mounted) return;
       final nextEngine = GameEngine(
         maximum: 100 * _legacySystemsEngine.rangeMultiplier(nextProgression.legacySystems),
       );
