@@ -729,7 +729,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
           ),
           const Padding(
             padding: EdgeInsets.fromLTRB(16, 0, 16, 16),
-            child: Text('Updates are downloaded from the signed Stable Debug release. The APK checksum is checked before Android opens its package installer. Android may ask you to allow installs from this app.'),
+            child: Text('Debug updates are published to the GitHub debug-latest release after both Android and Windows builds succeed. Android APK downloads are SHA-256 verified before opening the package installer. Windows packages are available from the same release.'),
           ),
         ],
       ),
@@ -739,8 +739,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
   Future<void> _checkForUpdate() async {
     setState(() {
       _checkingUpdate = true;
-      _updateMessage = 'Checking Stable Debug…';
-      _updateUrl = null;
+      _updateMessage = 'Checking debug-latest…';
       _updateDetails = null;
       _availableUpdate = null;
     });
@@ -749,10 +748,9 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
       if (!mounted) return;
       setState(() {
         _availableUpdate = update;
-        _updateUrl = update?.releaseUrl;
         _updateDetails = update == null
             ? 'This build is up to date.'
-            : 'Version ${update.versionName} (${update.versionCode}) · Stable Debug #${update.runNumber}\nCommit: ${update.commitSha}';
+            : 'Version ${update.versionName} (${update.versionCode}) · debug-latest #${update.runNumber}\nCommit: ${update.commitSha}';
         _updateMessage = update == null
             ? 'You are up to date.'
             : 'A verified update is available.';
@@ -762,7 +760,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
       final message = error.toString();
       setState(() {
         _updateMessage = message.contains('404')
-            ? 'No Stable Debug release has been published yet.'
+            ? 'No debug-latest release has been published yet.'
             : 'Update check failed: $error';
       });
     } finally {
