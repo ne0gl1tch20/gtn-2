@@ -26,7 +26,7 @@ void main() {
   });
 
   test('upgrade pricing follows baseCost times growthRate to level', () {
-    const upgrade = UpgradeDefinition(
+    final upgrade = UpgradeDefinition(
       id: 'income', baseCost: BigNumber.fromInt(10),
       growthRate: BigNumber.fromInt(2), maxLevel: 3,
     );
