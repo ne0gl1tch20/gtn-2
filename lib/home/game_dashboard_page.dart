@@ -33,6 +33,7 @@ class GameDashboardPage extends StatelessWidget {
     required this.onSaveSlots,
     required this.onSettings,
     required this.onDeveloperSettings,
+    required this.onLegacyPages,
     this.showDeveloperSettings = false,
   });
 
@@ -52,6 +53,7 @@ class GameDashboardPage extends StatelessWidget {
   final VoidCallback onSaveSlots;
   final VoidCallback onSettings;
   final VoidCallback onDeveloperSettings;
+  final VoidCallback onLegacyPages;
   final bool showDeveloperSettings;
 
   @override
@@ -189,6 +191,11 @@ class GameDashboardPage extends StatelessWidget {
                                       leading: const Icon(Icons.diamond_rounded, color: _purple),
                                       title: const Text('Nebula Shop'),
                                       onTap: () { Navigator.pop(sheetContext); onNebulaShop(); },
+                                    ),
+                                    ListTile(
+                                      leading: const Icon(Icons.auto_stories_rounded),
+                                      title: const Text('Journey, Rewards & Codex'),
+                                      onTap: () { Navigator.pop(sheetContext); onLegacyPages(); },
                                     ),
                                     ListTile(
                                       leading: const Icon(Icons.save_rounded),
