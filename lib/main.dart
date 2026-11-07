@@ -114,6 +114,8 @@ class _GameHomePageState extends State<GameHomePage> {
             secret: save.secret,
             attempts: save.attempts,
             isComplete: save.isComplete,
+            rangeMinimum: save.rangeMinimum,
+            rangeMaximum: save.rangeMaximum,
           );
           _gamesWon = save.gamesWon;
           _progression = restoredProgression;
@@ -142,6 +144,8 @@ class _GameHomePageState extends State<GameHomePage> {
           attempts: _game.attempts,
           gamesWon: _gamesWon,
           isComplete: _game.isComplete,
+          rangeMinimum: _game.minimum,
+          rangeMaximum: _game.maximum,
           progression: _progression,
           settings: _settings,
         ),
