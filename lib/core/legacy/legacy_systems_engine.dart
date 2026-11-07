@@ -609,7 +609,7 @@ class LegacySystemsEngine {
     final worldIndex = WorldBossCatalog.worlds.indexWhere((world) => world.id == systems.activeWorldId);
     if (worldIndex < 0) return _reject(progression, systems, 'Unknown Endless Rift world.');
     final world = WorldBossCatalog.worlds[worldIndex];
-    final tier = systems.endlessRiftTier.clamp(1, 1000000);
+    final tier = systems.endlessRiftTier.clamp(1, 1000000).toInt();
     final hp = world.hits + (tier - 1) * 2;
     final damage = progression.bossDamage[world.id] ?? 0;
     final nextDamage = damage + 1;
@@ -652,14 +652,15 @@ class LegacySystemsEngine {
       return _reject(progression, systems, 'No Endless Rift boss is active.');
     }
     final worldId = systems.activeWorldId;
-    final world = WorldBossCatalog.worlds.where((item) => item.id == worldId).firstOrNull;
-    if (world == null) return _reject(progression, systems, 'Unknown Endless Rift world.');
-    final hp = world.hits + (systems.endlessRiftTier - 1).clamp(0, 2000000) * 2;
+    final worldIndex = WorldBossCatalog.worlds.indexWhere((item) => item.id == worldId);
+    if (worldIndex < 0) return _reject(progression, systems, 'Unknown Endless Rift world.');
+    final world = WorldBossCatalog.worlds[worldIndex];
+    final hp = world.hits + (systems.endlessRiftTier - 1).clamp(0, 2000000).toInt() * 2;
     final damage = progression.bossDamage[worldId] ?? 0;
     final misses = (systems.bossBattleMistakes[worldId] ?? 0) + 1;
     final phase = ((damage * 3) ~/ hp + 1).clamp(1, 3);
     final interval = switch (phase) { 1 => 4, 2 => 3, _ => 2 };
-    final nextDamage = misses % interval == 0 ? (damage - 1).clamp(0, hp) : damage;
+    final nextDamage = misses % interval == 0 ? (damage - 1).clamp(0, hp).toInt() : damage;
     final bossDamage = Map<String, int>.of(progression.bossDamage)..[worldId] = nextDamage;
     return _accept(
       progression.copyWith(bossDamage: Map.unmodifiable(bossDamage)),
