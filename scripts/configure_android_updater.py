@@ -75,8 +75,11 @@ if marker not in root_gradle_text:
 // GTN2: align Android plugin modules with compileSdk 36
 subprojects.forEach { subproject ->
     subproject.plugins.withId("com.android.library") {
-        val androidExtension = subproject.extensions.findByName("android")
-        if (androidExtension != null) {
+        // The plugin's own build script assigns compileSdk 34 after applying the
+        // Android plugin. Override only after that project has finished evaluating.
+        subproject.afterEvaluate {
+            val androidExtension = subproject.extensions.findByName("android")
+                ?: error("Android library extension missing: ${subproject.path}")
             val intParameter = Integer.TYPE
             val boxedIntParameter = Integer::class.java
             val sdkMethods = androidExtension.javaClass.methods.filter { method ->
@@ -85,8 +88,6 @@ subprojects.forEach { subproject ->
                         method.parameterTypes[0] == boxedIntParameter) &&
                     method.name in setOf("compileSdkVersion", "setCompileSdk", "setCompileSdkVersion")
             }
-            // Prefer the legacy AGP LibraryExtension DSL method: the generic setters
-            // can update a compatibility facade without changing variant metadata.
             val compileSdkMethod = sdkMethods.firstOrNull { it.name == "compileSdkVersion" }
                 ?: sdkMethods.firstOrNull { it.name == "setCompileSdk" }
                 ?: sdkMethods.firstOrNull { it.name == "setCompileSdkVersion" }
@@ -95,9 +96,7 @@ subprojects.forEach { subproject ->
             val sdkGetter = androidExtension.javaClass.methods.firstOrNull { method ->
                 method.name in setOf("getCompileSdkVersion", "getCompileSdk") && method.parameterCount == 0
             }
-            println("GTN2: configured ${subproject.path} compileSdk via ${compileSdkMethod.name}; value=${sdkGetter?.invoke(androidExtension)}")
-        } else {
-            error("Android library plugin applied without an android extension: ${subproject.path}")
+            println("GTN2: finalized ${subproject.path} compileSdk via ${compileSdkMethod.name}; value=${sdkGetter?.invoke(androidExtension)}")
         }
     }
 }
