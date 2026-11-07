@@ -58,7 +58,7 @@ class SaveData {
         maximum is! int ||
         minimum < 1 ||
         maximum > 200 ||
-        minimum >= maximum ||
+        minimum > maximum ||
         secret < minimum ||
         secret > maximum ||
         attempts < 0 ||
