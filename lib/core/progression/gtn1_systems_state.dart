@@ -486,7 +486,7 @@ class Gtn1SystemsState {
     if (rawTraitProfile != null && rawTraitProfile is! Map<String, dynamic>) {
       throw const FormatException('Invalid trait profile.');
     }
-    final minimum = count('creativeRangeMin');
+    final minimum = (json['creativeRangeMin'] ?? 1) as int;
     final maximum = (json['creativeRangeMax'] ?? 100) as int;
     if (minimum < 1 || maximum < minimum || maximum > 1000000) {
       throw const FormatException('Invalid creative range.');
