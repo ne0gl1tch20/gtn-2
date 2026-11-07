@@ -31,8 +31,8 @@ if "compileSdk = flutter.compileSdkVersion" in gradle_text:
     gradle_text = gradle_text.replace(
         "compileSdk = flutter.compileSdkVersion", "compileSdk = 36", 1
     )
-elif re.search(r"compileSdk\\s*=\\s*\\d+", gradle_text):
-    gradle_text = re.sub(r"compileSdk\\s*=\\s*\\d+", "compileSdk = 36", gradle_text, count=1)
+elif re.search(r"compileSdk\s*=\s*\d+", gradle_text):
+    gradle_text = re.sub(r"compileSdk\s*=\s*\d+", "compileSdk = 36", gradle_text, count=1)
 else:
     print("Could not locate the Android compileSdk setting.", file=sys.stderr)
     raise SystemExit(1)
