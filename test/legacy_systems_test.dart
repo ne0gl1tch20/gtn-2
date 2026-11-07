@@ -15,6 +15,36 @@ void main() {
       expect(ids, hasLength(320));
     });
 
+    test('gameplay traits expose GTN1 combo, insurance and risk modifiers', () {
+      final progression = ProgressionState.initial.copyWith(
+        correctGuesses: 100,
+        currentStreak: 5,
+        bestStreak: 100,
+      );
+      final systems = LegacySystemsState.initial.copyWith(
+        selectedTraitArms: const {
+          'combo_momentum': 'burst',
+          'mistake_insurance': 'careful',
+          'risk_reward': 'high_risk',
+        },
+      );
+      final effects = engine.evaluateTraits(
+        progression: progression,
+        systems: systems,
+        playerLevel: 1,
+        activeSeasonId: null,
+      );
+      expect(effects.activeTraitIds, containsAll({
+        'combo_momentum', 'mistake_insurance', 'risk_reward', 'streak_guard',
+      }));
+      // Burst: 5 × 3% = 15%; high-risk: +40%.
+      expect(effects.correctGuessMultiplier, 1.55);
+      expect(effects.missPenaltyRefundRate, 0.75);
+      expect(effects.riskMissPenaltyRate, 0.20);
+      expect(effects.streakProtection, isTrue);
+      expect(effects.rangeHint, isTrue);
+    });
+
     test('activation resolves dependencies and reports bounded effects', () {
       final state = ProgressionState.initial.copyWith(
         correctGuesses: 25,
