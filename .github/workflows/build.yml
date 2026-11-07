@@ -34,7 +34,7 @@ jobs:
         run: flutter test
 
   android:
-    name: Android release APK
+    name: Android debug APK
     needs: validate
     runs-on: ubuntu-latest
     steps:
@@ -51,13 +51,13 @@ jobs:
         run: flutter create --platforms=android --project-name=gtn_2 --org=com.jarrlyyy .
       - name: Install dependencies
         run: flutter pub get
-      - name: Build release APK
-        run: flutter build apk --release
+      - name: Build debug APK
+        run: flutter build apk --debug
       - name: Upload Android APK
         uses: actions/upload-artifact@v4
         with:
-          name: gtn-2-android
-          path: build/app/outputs/flutter-apk/app-release.apk
+          name: gtn-2-debug-android
+          path: build/app/outputs/flutter-apk/app-debug.apk
           if-no-files-found: error
           retention-days: 7
 
