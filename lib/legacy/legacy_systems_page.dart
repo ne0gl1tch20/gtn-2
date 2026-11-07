@@ -801,7 +801,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
   Future<void> _createPlaylist() async {
     if (_systems.musicLibrary.isEmpty) {
       await _importMusicTracks();
-      if (_systems.musicLibrary.isEmpty) return;
+      if (!mounted || _systems.musicLibrary.isEmpty) return;
     }
     final controller = TextEditingController();
     final name = await showDialog<String>(
