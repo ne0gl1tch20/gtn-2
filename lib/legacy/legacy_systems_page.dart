@@ -40,7 +40,6 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
   bool _isPlaying = false;
   bool _checkingUpdate = false;
   String? _updateMessage;
-  String? _updateUrl;
   String? _updateDetails;
   UpdateRelease? _availableUpdate;
 
