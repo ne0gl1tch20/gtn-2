@@ -35,7 +35,7 @@ class LegacySystemsEngine {
     'talent_master_1': (cost: 10000, parent: 'talent_reward_1'),
   };
 
-  static const _gameplayArms = <String, Set<String>>{
+  static const gameplayArms = <String, Set<String>>{
     'combo_momentum': {'steady', 'burst'},
     'mistake_insurance': {'half_refund', 'careful'},
     'risk_reward': {'balanced', 'high_risk'},
@@ -541,7 +541,7 @@ class LegacySystemsEngine {
     required int playerLevel,
     required String? activeSeasonId,
   }) {
-    final allowed = _gameplayArms[traitId];
+    final allowed = gameplayArms[traitId];
     if (allowed == null || !allowed.contains(armId)) return _reject(progression, systems, 'Unknown trait arm.');
     final active = evaluateTraits(
       progression: progression,
