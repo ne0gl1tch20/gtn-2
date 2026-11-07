@@ -314,8 +314,10 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
             child: FilledButton(
               onPressed: () {
-                final stake = BigNumber.tryParse(_stakeController.text.trim());
-                if (stake == null) {
+                BigNumber stake;
+                try {
+                  stake = BigNumber.parse(_stakeController.text.trim());
+                } on FormatException {
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Enter a valid stake.')));
                   return;
                 }
@@ -546,12 +548,13 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
       if (page is! String || !_isGithubUrl(page) || tag is! String || assets is! List) {
         throw const FormatException('Release metadata is incomplete.');
       }
-      final apk = assets.cast<Object?>().whereType<Map<String, dynamic>>().where((asset) {
+      final apks = assets.cast<Object?>().whereType<Map<String, dynamic>>().where((asset) {
         final name = asset['name'];
         final url = asset['browser_download_url'];
         return name is String && name.toLowerCase().endsWith('.apk') &&
             url is String && _isGithubUrl(url);
-      }).firstOrNull;
+      }).toList();
+      final apk = apks.isEmpty ? null : apks.first;
       if (mounted) {
         setState(() {
           _updateUrl = page;
