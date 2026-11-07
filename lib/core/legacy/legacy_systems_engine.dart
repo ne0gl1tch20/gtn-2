@@ -573,7 +573,7 @@ class _Trait {
     minimumPrestige: map['minPrestige']! as int,
     minimumCorrect: map['minCorrect']! as int,
     minimumBestStreak: map['minStreak']! as int,
-    dependencies: Set<String>.from(map['dependencies']! as List<String>),
-    conflicts: Set<String>.from(map['conflicts']! as List<String>),
+    dependencies: Set<String>.from((map['dependencies']! as List).cast<String>()),
+    conflicts: Set<String>.from((map['conflicts']! as List).cast<String>()),
   );
 }
