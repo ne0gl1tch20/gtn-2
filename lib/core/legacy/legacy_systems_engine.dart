@@ -475,13 +475,32 @@ class LegacySystemsEngine {
       }
     }
     final active = accepted.values.toList();
+    final activeIds = active.map((trait) => trait.id).toSet();
     final xpCount = active.where((trait) => trait.effect == 'XP_MULTIPLIER').length;
     final nebulaCount = active.where((trait) => trait.effect == 'NEBULA_BONUS').length;
+    var correctGuessBonus = 0.0;
+    if (activeIds.contains('combo_momentum')) {
+      final burst = systems.selectedTraitArms['combo_momentum'] == 'burst';
+      final perStreak = burst ? 0.03 : 0.02;
+      final cap = burst ? 0.25 : 0.20;
+      correctGuessBonus += (progression.currentStreak * perStreak).clamp(0.0, cap);
+    }
+    if (activeIds.contains('risk_reward')) {
+      correctGuessBonus += systems.selectedTraitArms['risk_reward'] == 'high_risk' ? 0.40 : 0.25;
+    }
+    final hasInsurance = activeIds.contains('mistake_insurance');
+    final highRisk = systems.selectedTraitArms['risk_reward'] == 'high_risk';
     return TraitEffectSummary(
       xpMultiplier: (1 + xpCount * 0.05).clamp(1.0, 2.0).toDouble(),
       nebulaBonusPerClaim: nebulaCount.clamp(0, 100).toInt(),
-      streakProtection: active.any((trait) => trait.effect == 'STREAK_PROTECTION'),
-      activeTraitIds: Set.unmodifiable(active.map((trait) => trait.id)),
+      streakProtection: activeIds.contains('streak_guard') || activeIds.contains('focus_streak'),
+      correctGuessMultiplier: 1.0 + correctGuessBonus,
+      missPenaltyRefundRate: hasInsurance
+          ? (systems.selectedTraitArms['mistake_insurance'] == 'careful' ? 0.75 : 0.50)
+          : 0.0,
+      riskMissPenaltyRate: activeIds.contains('risk_reward') ? (highRisk ? 0.20 : 0.10) : 0.0,
+      rangeHint: activeIds.contains('range_scout'),
+      activeTraitIds: Set.unmodifiable(activeIds),
       discoveredHiddenTraitIds: Set.unmodifiable(
         definitions.where((trait) => trait.visibility == 'HIDDEN' && systems.discoveredTraits.contains(trait.id))
             .map((trait) => trait.id),
