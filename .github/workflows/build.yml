@@ -44,7 +44,6 @@ jobs:
 
   windows:
     name: Windows desktop release
-    needs: validate
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
