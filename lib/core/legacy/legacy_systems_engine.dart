@@ -458,7 +458,9 @@ class LegacySystemsEngine {
     final accepted = <String, _Trait>{};
     for (final trait in eligible) {
       if (trait.conflicts.any(accepted.containsKey) ||
-          accepted.values.any((value) => value.conflicts.contains(trait.id))) continue;
+          accepted.values.any((value) => value.conflicts.contains(trait.id))) {
+        continue;
+      }
       accepted[trait.id] = trait;
     }
     var changed = true;
