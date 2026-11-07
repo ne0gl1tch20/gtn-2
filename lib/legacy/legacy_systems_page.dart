@@ -16,6 +16,7 @@ import '../core/legacy/legacy_systems_state.dart';
 import '../core/numbers/big_number.dart';
 import '../core/progression/progression_state.dart';
 import '../data/updates/update_checker.dart';
+import '../worlds/world_boss_catalog.dart';
 
 typedef LegacyProgressionChanged = Future<void> Function(ProgressionState progression);
 
@@ -48,6 +49,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
   List<Map<String, dynamic>> _talentCatalog = [];
   List<Map<String, dynamic>> _mutatorCatalog = [];
   List<Map<String, dynamic>> _relicCatalog = [];
+  List<Map<String, dynamic>> _challengeCatalog = [];
 
   LegacySystemsState get _systems => _progression.legacySystems;
 
@@ -143,6 +145,8 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
           _stakeSection(),
           _dailySection(),
           _lootSection(),
+          _challengeSection(),
+          _worldCodexSection(),
           _musicSection(),
           _aboutSection(),
         ],
@@ -230,11 +234,13 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
       final talents = jsonDecode(await rootBundle.loadString('assets/game/talents.json')) as Map<String, dynamic>;
       final mutators = jsonDecode(await rootBundle.loadString('assets/game/mutators.json')) as Map<String, dynamic>;
       final relics = jsonDecode(await rootBundle.loadString('assets/game/relics.json')) as Map<String, dynamic>;
+      final challenges = jsonDecode(await rootBundle.loadString('assets/game/challenges.json')) as Map<String, dynamic>;
       if (!mounted) return;
       setState(() {
         _talentCatalog = (talents['talents'] as List).cast<Map<String, dynamic>>();
         _mutatorCatalog = (mutators['mutators'] as List).cast<Map<String, dynamic>>();
         _relicCatalog = (relics['relics'] as List).cast<Map<String, dynamic>>();
+        _challengeCatalog = (challenges['challenges'] as List).cast<Map<String, dynamic>>();
       });
     } on Exception {
       // Keep the deterministic built-in fallback catalogs available offline.
@@ -622,6 +628,154 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
     }
   }
 
+  Widget _challengeSection() {
+    final progress = _systems.dailyQuestDate == _today ? _systems.dailyQuestCorrectGuesses : 0;
+    final challenges = _challengeCatalog.isNotEmpty
+        ? _challengeCatalog
+        : const [{'id': 'daily_guess_50', 'name': 'Daily Number Challenge', 'description': 'Make 50 correct guesses today.', 'rewardNebula': 30}];
+    return Card(
+      child: ExpansionTile(
+        leading: const Icon(Icons.flag_rounded),
+        title: const Text('Challenges'),
+        subtitle: Text('$progress / 50 correct guesses today'),
+        children: [
+          for (final challenge in challenges)
+            Builder(builder: (context) {
+              final baseId = challenge['id'] as String;
+              final claimId = '$baseId:$_today';
+              final reward = challenge['rewardNebula'] as int;
+              final claimed = _systems.completedChallenges.contains(claimId);
+              final eligible = progress >= 50;
+              return ListTile(
+                title: Text(challenge['name'] as String),
+                subtitle: Text('${challenge['description']} Reward: $reward Nebula.'),
+                trailing: FilledButton.tonal(
+                  onPressed: eligible && !claimed
+                      ? () => _apply(_engine.claimChallenge(
+                            progression: _progression,
+                            systems: _systems,
+                            challengeId: claimId,
+                            nebulaReward: reward,
+                            eligible: eligible,
+                            nebulaBoostOwned: (_progression.nebulaItems['nebula_boost'] ?? 0) > 0,
+                          ))
+                      : null,
+                  child: Text(claimed ? 'Claimed' : 'Claim'),
+                ),
+              );
+            }),
+        ],
+      ),
+    );
+  }
+
+  Widget _worldCodexSection() {
+    const secrets = <(String, String, int, String?)>[
+      ('whispering_hollow', 'Whispering Hollow', 50, null),
+      ('shard_archive', 'Shard Archive', 150, 'verdant_grove'),
+      ('ashen_vault', 'Ashen Vault', 300, 'crystal_caverns'),
+      ('lost_observatory', 'Lost Observatory', 600, 'ember_summit'),
+    ];
+    const endgame = <(String, String)>[
+      ('all_bosses', 'Defeat all four guardians'),
+      ('all_secrets', 'Discover all four secret areas'),
+      ('all_relics', 'Collect all four boss relics'),
+      ('sanctuary_10', 'Restore Home Base to level 10'),
+      ('rift_tier_10', 'Reach Endless Rift tier 10'),
+      ('mastery_all_5', 'Reach mastery level 5 in every world'),
+    ];
+    final codexCount = _systems.codexEntries.length;
+    final allWorldsDefeated = WorldBossCatalog.worlds.every((world) => _progression.defeatedBosses.contains(world.id));
+    return Card(
+      child: ExpansionTile(
+        leading: const Icon(Icons.public_rounded),
+        title: const Text('World mastery, secrets & Codex'),
+        subtitle: Text('$codexCount / 12 Codex discoveries · ${_systems.discoveredSecrets.length}/4 secrets'),
+        children: [
+          for (final world in WorldBossCatalog.worlds)
+            Builder(builder: (context) {
+              final defeated = _progression.defeatedBosses.contains(world.id);
+              final level = _systems.worldMasteryLevels[world.id] ?? (defeated ? 1 : 0);
+              final canUpgrade = defeated && level < 10;
+              return ListTile(
+                leading: Icon(defeated ? Icons.verified_rounded : Icons.public_rounded),
+                title: Text(world.worldName),
+                subtitle: Text('${world.name} · Mastery $level / 10'),
+                trailing: FilledButton.tonal(
+                  onPressed: canUpgrade
+                      ? () => _apply(_engine.upgradeWorldMastery(
+                            progression: _progression,
+                            systems: _systems,
+                            worldId: world.id,
+                          ))
+                      : null,
+                  child: Text(level >= 10 ? 'MAX' : defeated ? 'Upgrade' : 'Locked'),
+                ),
+              );
+            }),
+          const Divider(height: 12),
+          for (final secret in secrets)
+            Builder(builder: (context) {
+              final discovered = _systems.discoveredSecrets.contains(secret.$1);
+              final previousBossReady = secret.$4 == null || _progression.defeatedBosses.contains(secret.$4);
+              final eligible = _progression.correctGuesses >= secret.$3 && previousBossReady;
+              return ListTile(
+                leading: Icon(discovered ? Icons.key_rounded : Icons.lock_outline_rounded),
+                title: Text(discovered ? secret.$2 : 'Hidden area'),
+                subtitle: Text(discovered ? 'Discovered' : 'Requires ${secret.$3} correct guesses and prior world progress'),
+                trailing: FilledButton.tonal(
+                  onPressed: eligible && !discovered
+                      ? () => _apply(_engine.discoverSecret(
+                            progression: _progression,
+                            systems: _systems,
+                            secretId: secret.$1,
+                          ))
+                      : null,
+                  child: Text(discovered ? 'Found' : 'Discover'),
+                ),
+              );
+            }),
+          ListTile(
+            leading: const Icon(Icons.menu_book_rounded),
+            title: const Text('Complete the Codex'),
+            subtitle: Text('$codexCount / 12 entries · Reward: 100 Nebula'),
+            trailing: FilledButton.tonal(
+              onPressed: codexCount >= 12 && !_systems.codexRewardClaimed
+                  ? () => _apply(_engine.claimCodexCompletionReward(_progression, _systems))
+                  : null,
+              child: Text(_systems.codexRewardClaimed ? 'Claimed' : 'Claim'),
+            ),
+          ),
+          const Divider(height: 12),
+          for (final reward in endgame)
+            ListTile(
+              title: Text(reward.$2),
+              subtitle: Text('Claim once when the goal is complete.'),
+              trailing: FilledButton.tonal(
+                onPressed: !_systems.endgameRewardsClaimed.contains(reward.$1)
+                    ? () => _apply(_engine.claimEndgameReward(_progression, _systems, reward.$1))
+                    : null,
+                child: Text(_systems.endgameRewardsClaimed.contains(reward.$1) ? 'Claimed' : 'Claim'),
+              ),
+            ),
+          if (allWorldsDefeated)
+            ListTile(
+              leading: const Icon(Icons.all_inclusive_rounded),
+              title: const Text('Endless Rift unlocked'),
+              subtitle: Text(_systems.endlessRiftActive ? 'Tier ${_systems.endlessRiftTier} active' : 'Best tier: ${_systems.endlessRiftBestTier}'),
+              trailing: FilledButton.tonal(
+                onPressed: () => _apply(_engine.setEndlessRift(
+                  progression: _progression,
+                  systems: _systems,
+                  active: !_systems.endlessRiftActive,
+                )),
+                child: Text(_systems.endlessRiftActive ? 'Leave' : 'Enter'),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
   Future<void> _createPlaylist() async {
     if (_systems.musicLibrary.isEmpty) {
       await _importMusicTracks();
