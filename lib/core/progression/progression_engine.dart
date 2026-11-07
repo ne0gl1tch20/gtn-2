@@ -143,11 +143,11 @@ class ProgressionEngine {
       throw ArgumentError('Invalid Nebula shop purchase.');
     }
     if (state.nebula.compareTo(itemPrice) < 0) return state;
-    final inventory = Map<String, int>.of(state.ultraUpgrades)
-      ..[itemId] = (state.ultraUpgrades[itemId] ?? 0) + 1;
+    final inventory = Map<String, int>.of(state.nebulaItems)
+      ..[itemId] = (state.nebulaItems[itemId] ?? 0) + 1;
     return state.copyWith(
       nebula: state.nebula - itemPrice,
-      ultraUpgrades: Map.unmodifiable(inventory),
+      nebulaItems: Map.unmodifiable(inventory),
     );
   }
 }
