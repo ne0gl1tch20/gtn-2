@@ -134,9 +134,12 @@ class ProgressionEngine {
     if (nebulaReward.compareTo(zero) < 0 || moneyReward.compareTo(zero) < 0) {
       throw ArgumentError('Arcade rewards cannot be negative.');
     }
+    final nebulaMultiplier =
+        (state.nebulaItems['nebula_boost'] ?? 0) > 0 ? 2 : 1;
+    final actualNebulaReward = nebulaReward.multiplyInt(nebulaMultiplier);
     return state.copyWith(
-      nebula: state.nebula + nebulaReward,
-      nebulaEarned: state.nebulaEarned + nebulaReward,
+      nebula: state.nebula + actualNebulaReward,
+      nebulaEarned: state.nebulaEarned + actualNebulaReward,
       money: state.money + moneyReward,
       moneyEarned: state.moneyEarned + moneyReward,
     );
