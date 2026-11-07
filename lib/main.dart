@@ -126,7 +126,8 @@ class _GameHomePageState extends State<GameHomePage> {
         SaveData(
           secret: _game.secret,
           attempts: _game.attempts,
-              isComplete: _game.isComplete,
+          gamesWon: _gamesWon,
+          isComplete: _game.isComplete,
           progression: _progression,
           settings: _settings,
         ),
@@ -522,7 +523,6 @@ class _GameHomePageState extends State<GameHomePage> {
     return GameDashboardPage(
       game: _game,
       progression: _progression,
-      gamesWon: _gamesWon,
       activeSlot: _activeSlot,
       loading: _isLoading,
       message: _message,
