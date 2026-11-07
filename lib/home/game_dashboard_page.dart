@@ -201,7 +201,7 @@ class GameDashboardPage extends StatelessWidget {
                               ],
                             ),
                             const SizedBox(height: 16),
-                            Text('Find your\\nsecret number',
+                            Text('Find your\nsecret number',
                                 style: TextStyle(
                                   color: foreground,
                                   fontSize: 28,
