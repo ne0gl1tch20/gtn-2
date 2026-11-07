@@ -73,7 +73,7 @@ if marker not in root_gradle_text:
     root_gradle_text += """
 
 // GTN2: align Android plugin modules with compileSdk 36
-subprojects { subproject ->
+subprojects.forEach { subproject ->
     subproject.plugins.withId("com.android.library") {
         val androidExtension = subproject.extensions.findByName("android")
         if (androidExtension != null) {
