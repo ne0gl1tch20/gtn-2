@@ -3,7 +3,7 @@
 /// For example, 12.34 is stored as coefficient 1234 and scale 2.
 /// Trailing decimal zeroes are normalized away.
 class BigNumber implements Comparable<BigNumber> {
-  BigNumber._(this.coefficient, this.scale);
+  BigNumber._(this.coefficient, this.scale);\n\n  const BigNumber.zero() : coefficient = BigInt.zero, scale = 0;
 
   factory BigNumber.fromInt(int value) => BigNumber._(BigInt.from(value), 0);
 
