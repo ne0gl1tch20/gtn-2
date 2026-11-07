@@ -46,7 +46,7 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
       final result = await widget.onCommand(command);
       if (mounted) {
         setState(() {
-          _logs.insert(0, '$ $command');
+          _logs.insert(0, '\$ $command');
           _logs.insert(1, result);
           if (_logs.length > 30) _logs.removeRange(30, _logs.length);
         });
