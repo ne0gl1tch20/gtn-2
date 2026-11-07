@@ -185,6 +185,34 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
               },
             ),
           ),
+          for (final entry in LegacySystemsEngine.gameplayArms.entries)
+            if (traits.activeTraitIds.contains(entry.key))
+              ListTile(
+                title: Text('${_pretty(entry.key)} strategy'),
+                subtitle: const Text('Choose how this gameplay trait behaves.'),
+                trailing: DropdownButton<String>(
+                  value: _systems.selectedTraitArms[entry.key] ?? entry.value.first,
+                  items: [
+                    for (final arm in entry.value)
+                      DropdownMenuItem<String>(
+                        value: arm,
+                        child: Text(_pretty(arm)),
+                      ),
+                  ],
+                  onChanged: (arm) {
+                    if (arm != null) {
+                      _apply(_engine.selectTraitArm(
+                        progression: _progression,
+                        systems: _systems,
+                        traitId: entry.key,
+                        armId: arm,
+                        playerLevel: 1,
+                        activeSeasonId: _seasonId(DateTime.now()),
+                      ));
+                    }
+                  },
+                ),
+              ),
         ],
       ),
     );
