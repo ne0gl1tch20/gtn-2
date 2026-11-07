@@ -77,8 +77,9 @@ class Gtn1SystemsEngine {
       ));
 
   ProgressionState buyTalent(ProgressionState state, String id) {
-    final talent = talentCatalog.where((item) => item.id == id).firstOrNull;
-    if (talent == null || state.systems.unlockedTalents.contains(id)) return state;
+    final matches = talentCatalog.where((item) => item.id == id);
+    if (matches.isEmpty || state.systems.unlockedTalents.contains(id)) return state;
+    final talent = matches.first;
     if (talent.parentId != null && !state.systems.unlockedTalents.contains(talent.parentId)) return state;
     final cost = BigNumber.fromInt(talent.cost);
     if (state.prestige.compareTo(cost) < 0) return state;
@@ -132,7 +133,7 @@ class Gtn1SystemsEngine {
         ? (systems.dailyRewardStreak >= 7 ? 1 : systems.dailyRewardStreak + 1)
         : 1;
     final base = dailyRewards[streak - 1];
-    final traitBonus = activeTraits(state, now: now).where((trait) => trait.effect == 'nebula_bonus').length.clamp(0, 100);
+    final traitBonus = activeTraits(state, now: now).where((trait) => trait.effect == 'nebula_bonus').length.clamp(0, 100).toInt();
     final multiplier = systems.activeMutators.contains('mut_blind') ? 1 : 1;
     final reward = (base + traitBonus) * multiplier;
     return state.copyWith(
@@ -156,8 +157,9 @@ class Gtn1SystemsEngine {
       );
     }
     if (systems.claimedDailyQuests.contains(questId)) return state.copyWith(systems: systems);
-    final quest = dailyQuests.where((item) => item.id == questId).firstOrNull;
-    if (quest == null) return state;
+    final matches = dailyQuests.where((item) => item.id == questId);
+    if (matches.isEmpty) return state;
+    final quest = matches.first;
     final progress = switch (questId) {
       'daily_guesses_10' => systems.dailyQuestGuesses,
       'daily_correct_5' => systems.dailyQuestCorrectGuesses,
@@ -166,7 +168,7 @@ class Gtn1SystemsEngine {
       _ => 0,
     };
     if (progress < quest.target) return state.copyWith(systems: systems);
-    final nebulaMultiplier = state.nebulaItems['nebula_boost'] ?? 0 > 0 ? 2 : 1;
+    final nebulaMultiplier = (state.nebulaItems['nebula_boost'] ?? 0) > 0 ? 2 : 1;
     final money = BigNumber.fromInt(quest.rewardMoney);
     final nebula = BigNumber.fromInt(quest.rewardNebula * nebulaMultiplier);
     return state.copyWith(
@@ -295,7 +297,7 @@ class Gtn1SystemsEngine {
       traitMultiplier += ids.contains('comeback_reward') ? 0.05 : 0;
       traitMultiplier += ids.contains('momentum_reward') ? 0.03 : 0;
       if (traitMultiplier > 1) moneyBonus += positiveEarned * BigNumber.parse((traitMultiplier - 1).toString());
-      final totalNebula = (bonusNebula + traits.where((t) => t.effect == 'nebula_bonus').length).clamp(0, 100) * nebulaBoost;
+      final totalNebula = ((bonusNebula + traits.where((t) => t.effect == 'nebula_bonus').length).clamp(0, 100) * nebulaBoost).toInt();
       updated = updated.copyWith(
         money: updated.money + moneyBonus,
         moneyEarned: updated.moneyEarned + moneyBonus,
@@ -318,7 +320,6 @@ class Gtn1SystemsEngine {
     } else {
       final active = activeTraits(before, now: now).map((item) => item.id).toSet();
       final taxRate = before.systems.activeMutators.contains('mut_tax') ? 0.05 : 0.0;
-      final originalPenalty = before.money - after.money;
       final penalty = taxRate > 0 ? before.money * BigNumber.parse(taxRate.toString()) : BigNumber.fromInt(0);
       final refundRate = before.systems.selectedTraitArms['mistake_insurance'] == 'careful' ? 0.75 : 0.50;
       final refund = active.contains('mistake_insurance') ? penalty * BigNumber.parse(refundRate.toString()) : BigNumber.fromInt(0);
