@@ -38,3 +38,32 @@ else:
     raise SystemExit(1)
 gradle_file.write_text(gradle_text, encoding="utf-8")
 print("Configured Android compileSdk 36 for current plugin requirements.")
+
+
+# Some older Flutter plugins pin their Android library module to API 34 while
+# depending on lifecycle artifacts that require API 36. Override every Android
+# subproject after its Android extension is created, without changing targetSdk.
+root_gradle = Path("android/build.gradle.kts")
+if not root_gradle.is_file():
+    print(f"Android root Gradle file not found: {root_gradle}", file=sys.stderr)
+    raise SystemExit(1)
+root_gradle_text = root_gradle.read_text(encoding="utf-8")
+marker = "// GTN2: align Android plugin modules with compileSdk 36"
+if marker not in root_gradle_text:
+    root_gradle_text += """
+
+// GTN2: align Android plugin modules with compileSdk 36
+subprojects {
+    afterEvaluate {
+        val androidExtension = extensions.findByName("android")
+        if (androidExtension != null) {
+            androidExtension.javaClass.methods
+                .firstOrNull { method ->
+                    method.name == "setCompileSdkVersion" && method.parameterCount == 1
+                }
+                ?.invoke(androidExtension, 36)
+        }
+    }
+}
+"""
+    root_gradle.write_text(root_gradle_text, encoding="utf-8")
