@@ -76,12 +76,16 @@ class GameHomePage extends StatefulWidget {
 
 class _GameHomePageState extends State<GameHomePage> {
   GameEngine _engine = GameEngine();
+
+  GameState _createGame() => GameEngine(
+        maximum: 100 * _legacySystemsEngine.rangeMultiplier(_progression.legacySystems),
+      ).newGame();
   final ProgressionEngine _progressionEngine = const ProgressionEngine();
   final LegacySystemsEngine _legacySystemsEngine = const LegacySystemsEngine();
   ProgressionState _progression = ProgressionState.initial;
   GameSettings _settings = GameSettings.initial;
   final TextEditingController _controller = TextEditingController();
-  late GameState _game = _engine.newGame();
+  late GameState _game = _createGame();
   late Future<SaveStorage> _storage = SaveStorage.inApplicationDocuments();
   int _activeSlot = 1;
   int _gamesWon = 0;
@@ -365,6 +369,8 @@ class _GameHomePageState extends State<GameHomePage> {
         attempts: _game.attempts,
         gamesWon: _gamesWon,
         isComplete: _game.isComplete,
+        minimum: _game.minimum,
+        maximum: _game.maximum,
         progression: _progression,
         settings: _settings,
       );
@@ -375,6 +381,8 @@ class _GameHomePageState extends State<GameHomePage> {
         secret: save.secret,
         attempts: save.attempts,
         isComplete: save.isComplete,
+        savedMinimum: save.minimum,
+        savedMaximum: save.maximum,
       );
       _gamesWon = save.gamesWon;
       _progression = save.progression;
@@ -513,6 +521,7 @@ class _GameHomePageState extends State<GameHomePage> {
     }
 
     setState(() {
+      var rangeScoutActive = false;
       final previousAttempts = _game.attempts;
       _game = _engine.guess(_game, guess);
       if (_game.attempts > previousAttempts) {
@@ -529,6 +538,10 @@ class _GameHomePageState extends State<GameHomePage> {
           playerLevel: 1,
           activeSeasonId: _currentSeasonId(),
         );
+        rangeScoutActive = traitEffects.rangeHint;
+        if (!correct && rangeScoutActive) {
+          _game = _engine.applyRangeScoutHint(_game, guess);
+        }
         final rawReward = correct
             ? (BigNumber.fromInt(1) + effects.flatBonus) *
                 _legacySystemsEngine.mutatorRewardMultiplier(legacySystems) *
@@ -597,13 +610,17 @@ class _GameHomePageState extends State<GameHomePage> {
       }
       switch (_game.lastResult) {
         case GuessResult.tooLow:
-          _message = _progression.legacySystems.activeMutators.contains('mut_blind')
-              ? 'Guess recorded. Try again.'
-              : 'Too low. Try a higher number!';
+          _message = rangeScoutActive
+              ? 'Range Scout narrowed the search to ${_game.minimum}–${_game.maximum}.'
+              : _progression.legacySystems.activeMutators.contains('mut_blind')
+                  ? 'Guess recorded. Try again.'
+                  : 'Too low. Try a higher number!';
         case GuessResult.tooHigh:
-          _message = _progression.legacySystems.activeMutators.contains('mut_blind')
-              ? 'Guess recorded. Try again.'
-              : 'Too high. Try a lower number!';
+          _message = rangeScoutActive
+              ? 'Range Scout narrowed the search to ${_game.minimum}–${_game.maximum}.'
+              : _progression.legacySystems.activeMutators.contains('mut_blind')
+                  ? 'Guess recorded. Try again.'
+                  : 'Too high. Try a lower number!';
         case GuessResult.correct:
           _gamesWon++;
           _message =
