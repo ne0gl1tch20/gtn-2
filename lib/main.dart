@@ -10,6 +10,8 @@ import 'data/saves/save_data.dart';
 import 'data/saves/save_storage.dart';
 import 'progression/progression_hub_page.dart';
 import 'shop/nebula_shop_page.dart';
+import 'worlds/world_boss_catalog.dart';
+import 'worlds/world_map_page.dart';
 import 'shop/upgrade_catalog.dart';
 import 'shop/upgrade_shop_page.dart';
 
@@ -221,6 +223,29 @@ class _GameHomePageState extends State<GameHomePage> {
     );
   }
 
+
+  Future<ProgressionState> _attackWorldBoss(
+    WorldBossDefinition boss,
+  ) async {
+    final updated = _progressionEngine.attackWorldBoss(_progression, boss);
+    if (updated != _progression) {
+      setState(() => _progression = updated);
+      await _persist();
+    }
+    return _progression;
+  }
+
+  Future<void> _openWorldMap() async {
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (_) => WorldMapPage(
+          progression: _progression,
+          onAttack: _attackWorldBoss,
+        ),
+      ),
+    );
+  }
+
   Future<void> _openUpgradeShop() async {
     await Navigator.of(context).push<void>(
       MaterialPageRoute<void>(
@@ -362,6 +387,11 @@ class _GameHomePageState extends State<GameHomePage> {
                   onPressed: _isLoading ? null : _openNebulaShop,
                   icon: const Icon(Icons.diamond_rounded),
                   label: const Text('Nebula Shop'),
+                ),
+                OutlinedButton.icon(
+                  onPressed: _isLoading ? null : _openWorldMap,
+                  icon: const Icon(Icons.map_rounded),
+                  label: const Text('World Map'),
                 ),
                 TextButton(
                   onPressed: _isLoading ? null : _newGame,
