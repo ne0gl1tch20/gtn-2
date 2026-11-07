@@ -11,7 +11,7 @@ if not manifest.is_file():
 text = manifest.read_text(encoding="utf-8")
 permission = '    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />'
 if "android.permission.REQUEST_INSTALL_PACKAGES" not in text:
-    updated, count = re.subn(r"(<manifest\\b[^>]*>)", r"\\1\\n" + permission, text, count=1)
+    updated, count = re.subn(r"(<manifest\b[^>]*>)", r"\1\n" + permission, text, count=1)
     if count != 1:
         print("Could not locate the manifest root element.", file=sys.stderr)
         raise SystemExit(1)
