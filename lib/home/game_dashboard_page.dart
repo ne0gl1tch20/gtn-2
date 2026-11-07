@@ -324,7 +324,7 @@ class GameDashboardPage extends StatelessWidget {
                   const SizedBox(height: 12),
                   Center(
                     child: Text(
-                      'SAVE SLOT $activeSlot,
+                      'SAVE SLOT $activeSlot',
                       style: TextStyle(
                         color: muted.withValues(alpha: .7),
                         fontSize: 9,
