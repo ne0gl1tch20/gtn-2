@@ -19,7 +19,6 @@ class GameDashboardPage extends StatelessWidget {
     super.key,
     required this.game,
     required this.progression,
-    required this.gamesWon,
     required this.activeSlot,
     required this.loading,
     required this.message,
@@ -39,7 +38,6 @@ class GameDashboardPage extends StatelessWidget {
 
   final GameState game;
   final ProgressionState progression;
-  final int gamesWon;
   final int activeSlot;
   final bool loading;
   final String message;
@@ -67,6 +65,73 @@ class GameDashboardPage extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: dark ? _bg : const Color(0xFFF5F6FC),
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: 2,
+        onDestinationSelected: (index) {
+          switch (index) {
+            case 0:
+              onWorldMap();
+              break;
+            case 1:
+              onArcade();
+              break;
+            case 3:
+              onUpgradeShop();
+              break;
+            case 4:
+              showModalBottomSheet<void>(
+                context: context,
+                showDragHandle: true,
+                backgroundColor: panel,
+                builder: (sheetContext) => SafeArea(
+                  child: Wrap(
+                    children: [
+                      ListTile(
+                        leading: const Icon(Icons.auto_awesome_rounded, color: _gold),
+                        title: const Text('Prestige & Ultra'),
+                        onTap: () { Navigator.pop(sheetContext); onPrestige(); },
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.diamond_rounded, color: _purple),
+                        title: const Text('Nebula Shop'),
+                        onTap: () { Navigator.pop(sheetContext); onNebulaShop(); },
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.public_rounded, color: _green),
+                        title: const Text('World Map'),
+                        onTap: () { Navigator.pop(sheetContext); onWorldMap(); },
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.save_rounded),
+                        title: const Text('Save Slots'),
+                        onTap: () { Navigator.pop(sheetContext); onSaveSlots(); },
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.settings_rounded),
+                        title: const Text('Settings'),
+                        onTap: () { Navigator.pop(sheetContext); onSettings(); },
+                      ),
+                      if (showDeveloperSettings)
+                        ListTile(
+                          leading: const Icon(Icons.bug_report_rounded),
+                          title: const Text('Developer Settings'),
+                          onTap: () { Navigator.pop(sheetContext); onDeveloperSettings(); },
+                        ),
+                    ],
+                  ),
+                ),
+              );
+              break;
+          }
+        },
+        destinations: const [
+          NavigationDestination(icon: Icon(Icons.public_rounded), label: 'Worlds'),
+          NavigationDestination(icon: Icon(Icons.sports_esports_rounded), label: 'Arcade'),
+          NavigationDestination(icon: Icon(Icons.play_arrow_rounded), label: 'Play'),
+          NavigationDestination(icon: Icon(Icons.upgrade_rounded), label: 'Upgrades'),
+          NavigationDestination(icon: Icon(Icons.menu_rounded), label: 'More'),
+        ],
+      ),
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -117,7 +182,7 @@ class GameDashboardPage extends StatelessWidget {
                                   fontWeight: FontWeight.w900,
                                   letterSpacing: 1.7,
                                 )),
-                            Text('Game Center',
+                            Text('Guess The Number',
                                 style: TextStyle(
                                   color: foreground,
                                   fontSize: 19,
@@ -126,6 +191,25 @@ class GameDashboardPage extends StatelessWidget {
                           ],
                         ),
                       ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                        decoration: BoxDecoration(
+                          color: foreground.withValues(alpha: .06),
+                          borderRadius: BorderRadius.circular(99),
+                          border: Border.all(color: foreground.withValues(alpha: .08)),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.circle, color: _green, size: 7),
+                            const SizedBox(width: 6),
+                            Text('ONLINE', style: TextStyle(
+                              color: muted, fontSize: 8,
+                              fontWeight: FontWeight.w900, letterSpacing: 1,
+                            )),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 5),
                       _TopButton(Icons.save_rounded, 'Save slots', onSaveSlots,
                           foreground),
                       const SizedBox(width: 5),
@@ -201,19 +285,27 @@ class GameDashboardPage extends StatelessWidget {
                               ],
                             ),
                             const SizedBox(height: 16),
-                            Text('Find your\nsecret number',
+                            const Text('YOUR SECRET NUMBER RANGE',
                                 style: TextStyle(
-                                  color: foreground,
-                                  fontSize: 28,
-                                  height: 1.08,
+                                  color: Color(0xFF9BA5C4),
+                                  fontSize: 9,
                                   fontWeight: FontWeight.w900,
-                                  letterSpacing: -1,
+                                  letterSpacing: 1.4,
                                 )),
                             const SizedBox(height: 9),
-                            const Text('RANGE  1 — 100',
+                            const Text('1 — 100',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 43,
+                                  height: 1,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: -2,
+                                )),
+                            const SizedBox(height: 7),
+                            const Text('FIND THE HIDDEN NUMBER',
                                 style: TextStyle(
                                   color: _cyan,
-                                  fontSize: 13,
+                                  fontSize: 10,
                                   fontWeight: FontWeight.w900,
                                   letterSpacing: 1.5,
                                 )),
@@ -237,13 +329,17 @@ class GameDashboardPage extends StatelessWidget {
                       Expanded(child: _Stat(Icons.bolt_rounded,
                           game.attempts.toString(), 'ATTEMPTS', _cyan,
                           panel, line, foreground, muted)),
-                      const SizedBox(width: 9),
-                      Expanded(child: _Stat(Icons.emoji_events_rounded,
-                          gamesWon.toString(), 'GAMES WON', _gold,
+                      const SizedBox(width: 6),
+                      Expanded(child: _Stat(Icons.check_circle_rounded,
+                          progression.correctGuesses.toString(), 'CORRECT', _gold,
                           panel, line, foreground, muted)),
-                      const SizedBox(width: 9),
+                      const SizedBox(width: 6),
                       Expanded(child: _Stat(Icons.local_fire_department_rounded,
                           progression.currentStreak.toString(), 'STREAK', _green,
+                          panel, line, foreground, muted)),
+                      const SizedBox(width: 6),
+                      Expanded(child: _Stat(Icons.military_tech_rounded,
+                          progression.bestStreak.toString(), 'BEST', _purple,
                           panel, line, foreground, muted)),
                     ],
                   ),
