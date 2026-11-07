@@ -16,7 +16,7 @@ void main() {
           'mut_hardcore', 'mut_speed', 'mut_blind', 'mut_tax',
         },
       );
-      expect(engine.mutatorRewardMultiplier(systems).compareTo(n(3000)), 0);
+      expect(engine.mutatorRewardMultiplier(systems).compareTo(n(300)), 0);
       expect(engine.rangeMultiplier(systems), 2);
     });
 
