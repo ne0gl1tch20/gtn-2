@@ -41,8 +41,9 @@ print("Configured Android compileSdk 36 for current plugin requirements.")
 
 
 # Some older Flutter plugins pin their Android library module to API 34 while
-# depending on lifecycle artifacts that require API 36. Override every Android
-# subproject after its Android extension is created, without changing targetSdk.
+# depending on lifecycle artifacts that require API 36. Configure each Android
+# library as soon as its plugin is applied. Do not use afterEvaluate: Flutter's
+# generated Gradle project may already have evaluated a subproject by then.
 root_gradle = Path("android/build.gradle.kts")
 if not root_gradle.is_file():
     print(f"Android root Gradle file not found: {root_gradle}", file=sys.stderr)
@@ -54,7 +55,7 @@ if marker not in root_gradle_text:
 
 // GTN2: align Android plugin modules with compileSdk 36
 subprojects {
-    afterEvaluate {
+    plugins.withId("com.android.library") {
         val androidExtension = extensions.findByName("android")
         if (androidExtension != null) {
             androidExtension.javaClass.methods
