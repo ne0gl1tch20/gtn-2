@@ -6,6 +6,8 @@ import 'core/progression/progression_engine.dart';
 import 'core/progression/progression_state.dart';
 import 'data/saves/save_data.dart';
 import 'data/saves/save_storage.dart';
+import 'shop/upgrade_catalog.dart';
+import 'shop/upgrade_shop_page.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -104,6 +106,28 @@ class _GameHomePageState extends State<GameHomePage> {
     }
   }
 
+  Future<ProgressionState> _purchaseUpgrade(
+    UpgradeDefinition definition,
+  ) async {
+    final updated = _progressionEngine.purchaseUpgrade(_progression, definition);
+    if (updated != _progression) {
+      setState(() => _progression = updated);
+      await _persist();
+    }
+    return _progression;
+  }
+
+  Future<void> _openUpgradeShop() async {
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (_) => UpgradeShopPage(
+          progression: _progression,
+          onPurchase: _purchaseUpgrade,
+        ),
+      ),
+    );
+  }
+
   Future<void> _submitGuess() async {
     final guess = int.tryParse(_controller.text.trim());
     if (guess == null) {
@@ -116,10 +140,19 @@ class _GameHomePageState extends State<GameHomePage> {
       _game = _engine.guess(_game, guess);
       if (_game.attempts > previousAttempts) {
         final correct = _game.lastResult == GuessResult.correct;
+        final effects = UpgradeCatalog.effectsFor(
+          _progression,
+          isFirstGuess: _game.attempts == 1,
+        );
         _progression = _progressionEngine.recordGuess(
           _progression,
           correct: correct,
           baseReward: correct ? BigNumber.fromInt(1) : null,
+          flatBonusReward: correct ? effects.flatBonus : null,
+          modifiers: GuessRewardModifiers(
+            streakMultiplier: effects.streakMultiplier,
+            criticalMultiplier: effects.firstGuessMultiplier,
+          ),
         );
       }
       switch (_game.lastResult) {
@@ -178,7 +211,8 @@ class _GameHomePageState extends State<GameHomePage> {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  'Attempts: ${_game.attempts}  •  Games won: $_gamesWon\nMoney: ${_progression.money}',
+                  'Attempts: ${_game.attempts}  •  Games won: $_gamesWon\n'
+                  'Money: ${_progression.money}',
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 24),
@@ -199,6 +233,11 @@ class _GameHomePageState extends State<GameHomePage> {
                       ? null
                       : _submitGuess,
                   child: const Text('Guess'),
+                ),
+                OutlinedButton.icon(
+                  onPressed: _isLoading ? null : _openUpgradeShop,
+                  icon: const Icon(Icons.upgrade_rounded),
+                  label: const Text('Upgrade Shop'),
                 ),
                 TextButton(
                   onPressed: _isLoading ? null : _newGame,
