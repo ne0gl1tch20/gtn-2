@@ -622,6 +622,49 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
     }
   }
 
+  Future<void> _createPlaylist() async {
+    if (_systems.musicLibrary.isEmpty) {
+      await _importMusicTracks();
+      if (_systems.musicLibrary.isEmpty) return;
+    }
+    final controller = TextEditingController();
+    final name = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('New playlist'),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          maxLength: 40,
+          decoration: const InputDecoration(labelText: 'Playlist name'),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          FilledButton(onPressed: () => Navigator.pop(context, controller.text.trim()), child: const Text('Create')),
+        ],
+      ),
+    );
+    controller.dispose();
+    if (name == null || name.isEmpty || _systems.musicPlaylists.containsKey(name)) return;
+    final playlists = Map<String, List<String>>.of(_systems.musicPlaylists)
+      ..[name] = List<String>.unmodifiable(_systems.musicLibrary);
+    await _saveSystems(_systems.copyWith(musicPlaylists: Map.unmodifiable(playlists)));
+  }
+
+  Future<void> _playPlaylist(List<String> tracks) async {
+    final valid = tracks.where((track) => _systems.musicLibrary.contains(track) && File(track).existsSync()).toList();
+    if (valid.isEmpty) return;
+    await _saveSystems(_systems.copyWith(
+      musicQueue: List<String>.unmodifiable(valid),
+      currentTrackId: valid.first,
+    ));
+    await _playTrack(valid.first);
+  }
+
+  Future<void> _deletePlaylist(String name) async {
+    final playlists = Map<String, List<String>>.of(_systems.musicPlaylists)..remove(name);
+    await _saveSystems(_systems.copyWith(musicPlaylists: Map.unmodifiable(playlists)));
+  }
   Widget _musicSection() {
     return Card(
       child: ExpansionTile(
@@ -672,6 +715,26 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
               label: const Text('Import audio files'),
             ),
           ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+            child: FilledButton.tonalIcon(
+              onPressed: _createPlaylist,
+              icon: const Icon(Icons.playlist_add_rounded),
+              label: const Text('Create playlist from library'),
+            ),
+          ),
+          for (final playlist in _systems.musicPlaylists.entries)
+            ListTile(
+              leading: const Icon(Icons.queue_music_rounded),
+              title: Text(playlist.key),
+              subtitle: Text('${playlist.value.length} tracks'),
+              onTap: () => _playPlaylist(playlist.value),
+              trailing: IconButton(
+                tooltip: 'Delete playlist',
+                onPressed: () => _deletePlaylist(playlist.key),
+                icon: const Icon(Icons.delete_outline_rounded),
+              ),
+            ),
           SwitchListTile(
             title: const Text('Shuffle'),
             value: _systems.musicShuffle,
@@ -713,7 +776,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
       child: ExpansionTile(
         leading: const Icon(Icons.info_outline_rounded),
         title: const Text('About & updater'),
-        subtitle: const Text('Version 2.0.0 · Flutter / Dart'),
+        subtitle: Text('Version ${UpdateChecker.currentVersionName} · Flutter / Dart'),
         children: [
           const ListTile(
             title: Text('Guess The Number 2'),
