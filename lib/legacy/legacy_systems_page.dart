@@ -1,8 +1,12 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:audioplayers/audioplayers.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../core/legacy/builtin_trait_catalog.dart';
@@ -31,12 +35,23 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
   final LegacySystemsEngine _engine = const LegacySystemsEngine();
   final TextEditingController _stakeController = TextEditingController();
   late ProgressionState _progression = widget.progression;
+  final AudioPlayer _audioPlayer = AudioPlayer();
+  StreamSubscription<void>? _trackCompleteSubscription;
+  bool _isPlaying = false;
   bool _checkingUpdate = false;
   String? _updateMessage;
   String? _updateUrl;
   String? _updateDetails;
 
   LegacySystemsState get _systems => _progression.legacySystems;
+
+  @override
+  void initState() {
+    super.initState();
+    _trackCompleteSubscription = _audioPlayer.onPlayerComplete.listen((_) {
+      _playNextTrack();
+    });
+  }
 
   @override
   void didUpdateWidget(covariant LegacySystemsPage oldWidget) {
@@ -71,6 +86,8 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
   @override
   void dispose() {
     _stakeController.dispose();
+    _trackCompleteSubscription?.cancel();
+    unawaited(_audioPlayer.dispose());
     super.dispose();
   }
 
@@ -437,16 +454,153 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
     );
   }
 
+  Future<void> _importMusicTracks() async {
+    final picked = await FilePicker.platform.pickFiles(
+      type: FileType.audio,
+      allowMultiple: true,
+      withData: true,
+    );
+    if (picked == null || picked.files.isEmpty) return;
+    final directory = await getApplicationDocumentsDirectory();
+    final musicDirectory = Directory('${directory.path}/music');
+    await musicDirectory.create(recursive: true);
+    final imported = <String>[];
+    for (final track in picked.files) {
+      final bytes = track.bytes;
+      if (bytes == null || bytes.isEmpty || bytes.length > 100 * 1024 * 1024) {
+        continue;
+      }
+      final extension = track.extension?.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '') ?? 'audio';
+      final safeName = 'track_${DateTime.now().microsecondsSinceEpoch}_${imported.length}.$extension';
+      final destination = File('${musicDirectory.path}/$safeName');
+      await destination.writeAsBytes(bytes, flush: true);
+      imported.add(destination.path);
+    }
+    if (imported.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No supported audio files could be imported.')),
+        );
+      }
+      return;
+    }
+    await _saveSystems(_systems.copyWith(
+      musicLibrary: List.unmodifiable({..._systems.musicLibrary, ...imported}),
+      musicQueue: List.unmodifiable({..._systems.musicQueue, ...imported}),
+      currentTrackId: _systems.currentTrackId ?? imported.first,
+    ));
+    await _playTrack(imported.first);
+  }
+
+  Future<void> _playTrack(String path) async {
+    try {
+      await _audioPlayer.stop();
+      await _audioPlayer.play(DeviceFileSource(path));
+      if (!mounted) return;
+      setState(() => _isPlaying = true);
+      await _saveSystems(_systems.copyWith(currentTrackId: path));
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not play this track: $error')),
+        );
+      }
+    }
+  }
+
+  Future<void> _playNextTrack() async {
+    if (!mounted || _systems.musicQueue.isEmpty) {
+      if (mounted) setState(() => _isPlaying = false);
+      return;
+    }
+    final queue = _systems.musicQueue;
+    final currentIndex = queue.indexOf(_systems.currentTrackId ?? '');
+    if (_systems.musicRepeatMode == 'one' && currentIndex >= 0) {
+      await _playTrack(queue[currentIndex]);
+      return;
+    }
+    var nextIndex = currentIndex + 1;
+    if (_systems.musicShuffle && queue.length > 1) {
+      final choices = List<int>.generate(queue.length, (index) => index)
+        ..remove(currentIndex);
+      nextIndex = choices[Random.secure().nextInt(choices.length)];
+    }
+    if (nextIndex >= queue.length) {
+      if (_systems.musicRepeatMode != 'all') {
+        setState(() => _isPlaying = false);
+        return;
+      }
+      nextIndex = 0;
+    }
+    await _playTrack(queue[nextIndex]);
+  }
+
+  Future<void> _toggleMusicPlayback() async {
+    if (_isPlaying) {
+      await _audioPlayer.pause();
+      if (mounted) setState(() => _isPlaying = false);
+      return;
+    }
+    final current = _systems.currentTrackId;
+    if (current != null && File(current).existsSync()) {
+      await _audioPlayer.resume();
+      if (mounted) setState(() => _isPlaying = true);
+    } else if (_systems.musicQueue.isNotEmpty) {
+      await _playTrack(_systems.musicQueue.first);
+    } else {
+      await _importMusicTracks();
+    }
+  }
+
   Widget _musicSection() {
     return Card(
       child: ExpansionTile(
         leading: const Icon(Icons.library_music_rounded),
-        title: const Text('Offline music library'),
+        title: const Text('Offline music player'),
         subtitle: Text('${_systems.musicLibrary.length} tracks · ${_systems.musicPlaylists.length} playlists'),
         children: [
-          const Padding(
-            padding: EdgeInsets.fromLTRB(16, 0, 16, 12),
-            child: Text('Music library, queue, playlist, repeat and shuffle state are now save-backed. Native audio import and playback still need their platform audio adapter.'),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    _systems.currentTrackId == null
+                        ? 'No track selected'
+                        : _systems.currentTrackId!.split(Platform.pathSeparator).last,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                IconButton(
+                  tooltip: 'Previous track',
+                  onPressed: _systems.musicQueue.isEmpty ? null : () async {
+                    final index = _systems.musicQueue.indexOf(_systems.currentTrackId ?? '');
+                    final previous = (index - 1 + _systems.musicQueue.length) % _systems.musicQueue.length;
+                    await _playTrack(_systems.musicQueue[previous]);
+                  },
+                  icon: const Icon(Icons.skip_previous_rounded),
+                ),
+                IconButton(
+                  tooltip: _isPlaying ? 'Pause' : 'Play',
+                  onPressed: _toggleMusicPlayback,
+                  icon: Icon(_isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded),
+                ),
+                IconButton(
+                  tooltip: 'Next track',
+                  onPressed: _systems.musicQueue.isEmpty ? null : _playNextTrack,
+                  icon: const Icon(Icons.skip_next_rounded),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            child: FilledButton.tonalIcon(
+              onPressed: _importMusicTracks,
+              icon: const Icon(Icons.add_rounded),
+              label: const Text('Import audio files'),
+            ),
           ),
           SwitchListTile(
             title: const Text('Shuffle'),
@@ -468,6 +622,17 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
               },
             ),
           ),
+          for (final track in _systems.musicLibrary)
+            ListTile(
+              dense: true,
+              leading: const Icon(Icons.music_note_rounded),
+              title: Text(track.split(Platform.pathSeparator).last, maxLines: 1, overflow: TextOverflow.ellipsis),
+              trailing: IconButton(
+                tooltip: 'Play track',
+                onPressed: () => _playTrack(track),
+                icon: const Icon(Icons.play_circle_outline_rounded),
+              ),
+            ),
         ],
       ),
     );
