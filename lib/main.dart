@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 
 import 'core/game/game_engine.dart';
 import 'core/numbers/big_number.dart';
+import 'core/progression/progression_calculator.dart';
 import 'core/progression/progression_engine.dart';
 import 'core/progression/progression_state.dart';
 import 'data/saves/save_data.dart';
 import 'data/saves/save_storage.dart';
+import 'progression/progression_hub_page.dart';
 import 'shop/upgrade_catalog.dart';
 import 'shop/upgrade_shop_page.dart';
 
@@ -115,6 +117,56 @@ class _GameHomePageState extends State<GameHomePage> {
       await _persist();
     }
     return _progression;
+  }
+
+
+  Future<void> _prestige() async {
+    final updated = _progressionEngine.prestige(
+      _progression,
+      ProgressionCalculator.prestigeRules(_progression),
+    );
+    if (updated != _progression) {
+      setState(() {
+        _progression = updated;
+        _game = _engine.newGame();
+        _message = 'Prestige complete! Build your progress again.';
+      });
+      await _persist();
+    }
+  }
+
+  Future<void> _ultra() async {
+    if (_progression.prestige.compareTo(BigNumber.fromInt(1000)) < 0) return;
+    final updated = _progressionEngine.ultra(
+      _progression,
+      ProgressionCalculator.ultraRules(_progression),
+    );
+    if (updated != _progression) {
+      setState(() {
+        _progression = updated;
+        _game = _engine.newGame();
+        _message = 'Ultra reset complete! A new run begins.';
+      });
+      await _persist();
+    }
+  }
+
+  Future<void> _openProgressionHub() async {
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (_) => ProgressionHubPage(
+          progression: _progression,
+          onPrestige: () async {
+            await _prestige();
+            return _progression;
+          },
+          onUltra: () async {
+            await _ultra();
+            return _progression;
+          },
+        ),
+      ),
+    );
   }
 
   Future<void> _openUpgradeShop() async {
@@ -238,6 +290,11 @@ class _GameHomePageState extends State<GameHomePage> {
                   onPressed: _isLoading ? null : _openUpgradeShop,
                   icon: const Icon(Icons.upgrade_rounded),
                   label: const Text('Upgrade Shop'),
+                ),
+                OutlinedButton.icon(
+                  onPressed: _isLoading ? null : _openProgressionHub,
+                  icon: const Icon(Icons.auto_awesome_rounded),
+                  label: const Text('Prestige & Ultra'),
                 ),
                 TextButton(
                   onPressed: _isLoading ? null : _newGame,
