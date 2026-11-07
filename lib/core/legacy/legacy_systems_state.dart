@@ -430,12 +430,20 @@ class TraitEffectSummary {
     this.xpMultiplier = 1,
     this.nebulaBonusPerClaim = 0,
     this.streakProtection = false,
+    this.correctGuessMultiplier = 1,
+    this.missPenaltyRefundRate = 0,
+    this.riskMissPenaltyRate = 0,
+    this.rangeHint = false,
     this.activeTraitIds = const {},
     this.discoveredHiddenTraitIds = const {},
   });
   final double xpMultiplier;
   final int nebulaBonusPerClaim;
   final bool streakProtection;
+  final double correctGuessMultiplier;
+  final double missPenaltyRefundRate;
+  final double riskMissPenaltyRate;
+  final bool rangeHint;
   final Set<String> activeTraitIds;
   final Set<String> discoveredHiddenTraitIds;
 }
