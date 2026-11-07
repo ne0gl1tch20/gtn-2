@@ -19,7 +19,6 @@ void main() {
           'attempts': 0,
           'gamesWon': 0,
           'isComplete': false,
-          'isComplete': false,
         }),
         throwsFormatException,
       );
@@ -29,6 +28,7 @@ void main() {
           'secret': 0,
           'attempts': -1,
           'gamesWon': 0,
+          'isComplete': false,
         }),
         throwsFormatException,
       );
