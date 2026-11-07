@@ -226,8 +226,8 @@ void main() {
       expect(
         () => LegacySystemsState.fromJson(<String, dynamic>{
           ...LegacySystemsState.initial.toJson(),
-          'equippedRelics': ['verdant_guardian'],
-          'relicInventory': [],
+          'equippedRelics': <String>['verdant_guardian'],
+          'relicInventory': <String>[],
         }),
         throwsFormatException,
       );
