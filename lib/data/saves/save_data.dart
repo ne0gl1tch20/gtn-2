@@ -1,6 +1,9 @@
 import '../../core/progression/progression_state.dart';
 import '../../settings/game_settings.dart';
 
+int systemsRangeMaximum(ProgressionState progression) =>
+    progression.systems.activeMutators.contains('mut_hardcore') ? 200 : 100;
+
 class SaveData {
   SaveData({
     this.schemaVersion = currentSchemaVersion,
@@ -47,7 +50,7 @@ class SaveData {
         gamesWon is! int ||
         isComplete is! bool ||
         secret < 1 ||
-        secret > 100 ||
+        secret > 200 ||
         attempts < 0 ||
         gamesWon < 0) {
       throw const FormatException('Unsupported or invalid save data.');
@@ -57,6 +60,8 @@ class SaveData {
         : progressionJson is Map<String, dynamic>
             ? ProgressionState.fromJson(progressionJson)
             : throw const FormatException('Invalid progression save.');
+    final maximum = systemsRangeMaximum(progression);
+    if (secret > maximum) throw const FormatException('Saved secret exceeds the active game range.');
     final settings = settingsJson == null
         ? GameSettings.initial
         : settingsJson is Map<String, dynamic>
