@@ -1,0 +1,138 @@
+import 'package:flutter/material.dart';
+
+import '../core/numbers/big_number.dart';
+import '../core/progression/progression_state.dart';
+
+class NebulaShopItem {
+  const NebulaShopItem({
+    required this.id,
+    required this.name,
+    required this.description,
+    required this.effect,
+    required this.price,
+  });
+
+  final String id;
+  final String name;
+  final String description;
+  final String effect;
+  final BigNumber price;
+}
+
+class NebulaShopCatalog {
+  NebulaShopCatalog._();
+
+  static final items = List<NebulaShopItem>.unmodifiable([
+    NebulaShopItem(
+      id: 'nebula_boost',
+      name: 'Nebula Crystal',
+      description: 'A permanent crystal that amplifies Arcade payouts.',
+      effect: '2× Nebula from Arcade rewards',
+      price: BigNumber.fromInt(50),
+    ),
+    NebulaShopItem(
+      id: 'golden_guess',
+      name: 'Golden Guess Pass',
+      description: 'Every tenth correct guess gets a guaranteed reward boost.',
+      effect: '2× reward on every 10th correct guess',
+      price: BigNumber.fromInt(100),
+    ),
+  ]);
+}
+
+typedef NebulaPurchase = Future<ProgressionState> Function(
+  NebulaShopItem item,
+);
+
+class NebulaShopPage extends StatefulWidget {
+  const NebulaShopPage({
+    super.key,
+    required this.progression,
+    required this.onPurchase,
+  });
+
+  final ProgressionState progression;
+  final NebulaPurchase onPurchase;
+
+  @override
+  State<NebulaShopPage> createState() => _NebulaShopPageState();
+}
+
+class _NebulaShopPageState extends State<NebulaShopPage> {
+  late ProgressionState _state = widget.progression;
+  String? _buyingId;
+
+  Future<void> _buy(NebulaShopItem item) async {
+    if (_buyingId != null) return;
+    setState(() => _buyingId = item.id);
+    try {
+      final updated = await widget.onPurchase(item);
+      if (mounted) setState(() => _state = updated);
+    } finally {
+      if (mounted) setState(() => _buyingId = null);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Nebula Shop'),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 16),
+            child: Center(child: Text('Nebula: ${_state.nebula}')),
+          ),
+        ],
+      ),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          Text(
+            'Permanent upgrades purchased with Nebula earned in Arcade.',
+            style: theme.textTheme.bodyLarge,
+          ),
+          const SizedBox(height: 16),
+          for (final item in NebulaShopCatalog.items)
+            Card(
+              margin: const EdgeInsets.only(bottom: 12),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(item.name, style: theme.textTheme.titleMedium),
+                        ),
+                        Text('Owned: ${_state.nebulaItems[item.id] ?? 0}'),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Text(item.description),
+                    const SizedBox(height: 6),
+                    Text(
+                      item.effect,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.primary,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    FilledButton(
+                      onPressed: _buyingId != null ||
+                              _state.nebula.compareTo(item.price) < 0
+                          ? null
+                          : () => _buy(item),
+                      child: Text('Buy · ${item.price} Nebula'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}

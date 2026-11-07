@@ -1,0 +1,172 @@
+import '../numbers/big_number.dart';
+
+class ProgressionState {
+  ProgressionState({
+    BigNumber? money,
+    BigNumber? prestige,
+    BigNumber? ultra,
+    BigNumber? nebula,
+    this.upgrades = const {},
+    this.prestigeUpgrades = const {},
+    this.ultraUpgrades = const {},
+    this.nebulaItems = const {},
+    this.bossDamage = const {},
+    this.defeatedBosses = const {},
+    this.prestigeResets = 0,
+    this.ultraResets = 0,
+    this.totalGuesses = 0,
+    this.correctGuesses = 0,
+    BigNumber? moneyEarned,
+    this.currentStreak = 0,
+    this.bestStreak = 0,
+    BigNumber? nebulaEarned,
+  })  : money = money ?? BigNumber.fromInt(0),
+        prestige = prestige ?? BigNumber.fromInt(0),
+        ultra = ultra ?? BigNumber.fromInt(0),
+        nebula = nebula ?? BigNumber.fromInt(0),
+        moneyEarned = moneyEarned ?? BigNumber.fromInt(0),
+        nebulaEarned = nebulaEarned ?? BigNumber.fromInt(0);
+
+  final BigNumber money, prestige, ultra, nebula;
+  final Map<String, int> upgrades, prestigeUpgrades, ultraUpgrades, nebulaItems, bossDamage;
+  final Set<String> defeatedBosses;
+  final int prestigeResets, ultraResets, totalGuesses, correctGuesses;
+  final BigNumber moneyEarned;
+  final int currentStreak, bestStreak;
+  final BigNumber nebulaEarned;
+
+  static final initial = ProgressionState();
+
+  Map<String, Object> toJson() => {
+        'money': money.toString(),
+        'prestige': prestige.toString(),
+        'ultra': ultra.toString(),
+        'nebula': nebula.toString(),
+        'upgrades': upgrades,
+        'prestigeUpgrades': prestigeUpgrades,
+        'ultraUpgrades': ultraUpgrades,
+        'nebulaItems': nebulaItems,
+        'bossDamage': bossDamage,
+        'defeatedBosses': defeatedBosses.toList(),
+        'prestigeResets': prestigeResets,
+        'ultraResets': ultraResets,
+        'totalGuesses': totalGuesses,
+        'correctGuesses': correctGuesses,
+        'moneyEarned': moneyEarned.toString(),
+        'currentStreak': currentStreak,
+        'bestStreak': bestStreak,
+        'nebulaEarned': nebulaEarned.toString(),
+      };
+
+  factory ProgressionState.fromJson(Map<String, dynamic> json) {
+    BigNumber number(String key) {
+      final value = json[key];
+      if (value is! String) throw FormatException('Invalid currency: $key');
+      final parsed = BigNumber.parse(value);
+      if (parsed.compareTo(BigNumber.fromInt(0)) < 0) {
+        throw FormatException('Negative currency: $key');
+      }
+      return parsed;
+    }
+
+    int count(String key) {
+      final value = json[key];
+      if (value is! int || value < 0) {
+        throw FormatException('Invalid statistic: $key');
+      }
+      return value;
+    }
+
+    Map<String, int> levels(String key, {bool optional = false}) {
+      final value = json[key];
+      if (value == null && optional) return const {};
+      if (value is! Map) throw FormatException('Invalid upgrade map: $key');
+      final result = <String, int>{};
+      for (final entry in value.entries) {
+        if (entry.key is! String || entry.value is! int ||
+            (entry.value as int) < 0) {
+          throw FormatException('Invalid upgrade level: $key');
+        }
+        result[entry.key as String] = entry.value as int;
+      }
+      return Map.unmodifiable(result);
+    }
+
+    final rawBossDamage = json['bossDamage'];
+    final bossDamage = <String, int>{};
+    if (rawBossDamage != null) {
+      if (rawBossDamage is! Map) throw const FormatException('Invalid boss damage map.');
+      for (final entry in rawBossDamage.entries) {
+        if (entry.key is! String || entry.value is! int || (entry.value as int) < 0) {
+          throw const FormatException('Invalid boss damage entry.');
+        }
+        bossDamage[entry.key as String] = entry.value as int;
+      }
+    }
+    final rawDefeated = json['defeatedBosses'];
+    final defeatedBosses = <String>{};
+    if (rawDefeated != null) {
+      if (rawDefeated is! List || rawDefeated.any((value) => value is! String)) {
+        throw const FormatException('Invalid defeated boss list.');
+      }
+      defeatedBosses.addAll(rawDefeated.cast<String>());
+    }
+
+    final total = count('totalGuesses');
+    final correct = count('correctGuesses');
+    final streak = count('currentStreak');
+    final best = count('bestStreak');
+    if (correct > total || streak > correct || best < streak) {
+      throw const FormatException('Inconsistent progression statistics.');
+    }
+    return ProgressionState(
+      money: number('money'),
+      prestige: number('prestige'),
+      ultra: number('ultra'),
+      nebula: number('nebula'),
+      upgrades: levels('upgrades'),
+      prestigeUpgrades: levels('prestigeUpgrades'),
+      ultraUpgrades: levels('ultraUpgrades'),
+      nebulaItems: levels('nebulaItems', optional: true),
+      bossDamage: Map.unmodifiable(bossDamage),
+      defeatedBosses: Set.unmodifiable(defeatedBosses),
+      prestigeResets: count('prestigeResets'),
+      ultraResets: count('ultraResets'),
+      totalGuesses: total,
+      correctGuesses: correct,
+      moneyEarned: number('moneyEarned'),
+      currentStreak: streak,
+      bestStreak: best,
+      nebulaEarned: number('nebulaEarned'),
+    );
+  }
+
+  ProgressionState copyWith({
+    BigNumber? money, BigNumber? prestige, BigNumber? ultra, BigNumber? nebula,
+    Map<String, int>? upgrades, Map<String, int>? prestigeUpgrades,
+    Map<String, int>? ultraUpgrades, Map<String, int>? nebulaItems,
+    Map<String, int>? bossDamage, Set<String>? defeatedBosses,
+    int? prestigeResets, int? ultraResets, int? totalGuesses,
+    int? correctGuesses, BigNumber? moneyEarned, int? currentStreak,
+    int? bestStreak, BigNumber? nebulaEarned,
+  }) => ProgressionState(
+    money: money ?? this.money,
+    prestige: prestige ?? this.prestige,
+    ultra: ultra ?? this.ultra,
+    nebula: nebula ?? this.nebula,
+    upgrades: upgrades ?? this.upgrades,
+    prestigeUpgrades: prestigeUpgrades ?? this.prestigeUpgrades,
+    ultraUpgrades: ultraUpgrades ?? this.ultraUpgrades,
+    nebulaItems: nebulaItems ?? this.nebulaItems,
+    bossDamage: bossDamage ?? this.bossDamage,
+    defeatedBosses: defeatedBosses ?? this.defeatedBosses,
+    prestigeResets: prestigeResets ?? this.prestigeResets,
+    ultraResets: ultraResets ?? this.ultraResets,
+    totalGuesses: totalGuesses ?? this.totalGuesses,
+    correctGuesses: correctGuesses ?? this.correctGuesses,
+    moneyEarned: moneyEarned ?? this.moneyEarned,
+    currentStreak: currentStreak ?? this.currentStreak,
+    bestStreak: bestStreak ?? this.bestStreak,
+    nebulaEarned: nebulaEarned ?? this.nebulaEarned,
+  );
+}
