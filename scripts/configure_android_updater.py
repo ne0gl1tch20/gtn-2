@@ -40,10 +40,29 @@ gradle_file.write_text(gradle_text, encoding="utf-8")
 print("Configured Android compileSdk 36 for current plugin requirements.")
 
 
-# Some older Flutter plugins pin their Android library module to API 34 while
-# depending on lifecycle artifacts that require API 36. Configure each Android
-# library as soon as its plugin is applied. Do not use afterEvaluate: Flutter's
-# generated Gradle project may already have evaluated a subproject by then.
+# AGP 9's new DSL is not yet compatible with Flutter's Gradle plugin and some
+# older Flutter plugins. Opt into the legacy DSL until those dependencies are
+# upgraded, then align Android library modules with compileSdk 36.
+gradle_properties = Path("android/gradle.properties")
+if not gradle_properties.is_file():
+    print(f"Android Gradle properties not found: {gradle_properties}", file=sys.stderr)
+    raise SystemExit(1)
+properties_text = gradle_properties.read_text(encoding="utf-8")
+if not re.search(r"(?m)^android\.newDsl\s*=", properties_text):
+    properties_text += "\nandroid.newDsl=false\n"
+else:
+    properties_text = re.sub(
+        r"(?m)^android\.newDsl\s*=.*$",
+        "android.newDsl=false",
+        properties_text,
+        count=1,
+    )
+gradle_properties.write_text(properties_text, encoding="utf-8")
+print("Disabled the incompatible AGP 9 new DSL for Flutter plugin compatibility.")
+
+# Older Android library plugins can declare compileSdk 34 while using
+# lifecycle artifacts that require API 36. Configure the Android extension
+# when the library plugin is applied, without registering afterEvaluate.
 root_gradle = Path("android/build.gradle.kts")
 if not root_gradle.is_file():
     print(f"Android root Gradle file not found: {root_gradle}", file=sys.stderr)
@@ -58,11 +77,13 @@ subprojects {
     plugins.withId("com.android.library") {
         val androidExtension = extensions.findByName("android")
         if (androidExtension != null) {
-            androidExtension.javaClass.methods
-                .firstOrNull { method ->
-                    method.name == "setCompileSdkVersion" && method.parameterCount == 1
-                }
-                ?.invoke(androidExtension, 36)
+            val intParameter = Integer.TYPE
+            val setter = androidExtension.javaClass.methods.firstOrNull { method ->
+                method.name == "setCompileSdkVersion" &&
+                    method.parameterCount == 1 &&
+                    method.parameterTypes[0] == intParameter
+            }
+            setter?.invoke(androidExtension, 36)
         }
     }
 }
