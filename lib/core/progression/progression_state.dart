@@ -1,4 +1,5 @@
 import '../numbers/big_number.dart';
+import '../legacy/legacy_systems_state.dart';
 
 class ProgressionState {
   ProgressionState({
@@ -20,12 +21,14 @@ class ProgressionState {
     this.currentStreak = 0,
     this.bestStreak = 0,
     BigNumber? nebulaEarned,
+    LegacySystemsState? legacySystems,
   })  : money = money ?? BigNumber.fromInt(0),
         prestige = prestige ?? BigNumber.fromInt(0),
         ultra = ultra ?? BigNumber.fromInt(0),
         nebula = nebula ?? BigNumber.fromInt(0),
         moneyEarned = moneyEarned ?? BigNumber.fromInt(0),
-        nebulaEarned = nebulaEarned ?? BigNumber.fromInt(0);
+        nebulaEarned = nebulaEarned ?? BigNumber.fromInt(0),
+        legacySystems = legacySystems ?? LegacySystemsState.initial;
 
   final BigNumber money, prestige, ultra, nebula;
   final Map<String, int> upgrades, prestigeUpgrades, ultraUpgrades, nebulaItems, bossDamage;
@@ -34,6 +37,7 @@ class ProgressionState {
   final BigNumber moneyEarned;
   final int currentStreak, bestStreak;
   final BigNumber nebulaEarned;
+  final LegacySystemsState legacySystems;
 
   static final initial = ProgressionState();
 
@@ -56,6 +60,7 @@ class ProgressionState {
         'currentStreak': currentStreak,
         'bestStreak': bestStreak,
         'nebulaEarned': nebulaEarned.toString(),
+        'legacySystems': legacySystems.toJson(),
       };
 
   factory ProgressionState.fromJson(Map<String, dynamic> json) {
@@ -91,6 +96,13 @@ class ProgressionState {
       }
       return Map.unmodifiable(result);
     }
+
+    final rawLegacy = json['legacySystems'];
+    final legacySystems = rawLegacy == null
+        ? LegacySystemsState.initial
+        : rawLegacy is Map<String, dynamic>
+            ? LegacySystemsState.fromJson(rawLegacy)
+            : throw const FormatException('Invalid legacy systems save.');
 
     final rawBossDamage = json['bossDamage'];
     final bossDamage = <String, int>{};
@@ -138,6 +150,7 @@ class ProgressionState {
       currentStreak: streak,
       bestStreak: best,
       nebulaEarned: number('nebulaEarned'),
+      legacySystems: legacySystems,
     );
   }
 
@@ -149,6 +162,7 @@ class ProgressionState {
     int? prestigeResets, int? ultraResets, int? totalGuesses,
     int? correctGuesses, BigNumber? moneyEarned, int? currentStreak,
     int? bestStreak, BigNumber? nebulaEarned,
+    LegacySystemsState? legacySystems,
   }) => ProgressionState(
     money: money ?? this.money,
     prestige: prestige ?? this.prestige,
@@ -168,5 +182,6 @@ class ProgressionState {
     currentStreak: currentStreak ?? this.currentStreak,
     bestStreak: bestStreak ?? this.bestStreak,
     nebulaEarned: nebulaEarned ?? this.nebulaEarned,
+    legacySystems: legacySystems ?? this.legacySystems,
   );
 }
