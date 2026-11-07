@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 
+import 'core/game/game_engine.dart';
 import 'core/numbers/big_number.dart';
 import 'core/progression/progression_engine.dart';
 import 'core/progression/progression_state.dart';
-
-import 'core/game/game_engine.dart';
 import 'data/saves/save_data.dart';
 import 'data/saves/save_storage.dart';
 
