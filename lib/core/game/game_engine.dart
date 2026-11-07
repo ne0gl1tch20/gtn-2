@@ -56,7 +56,7 @@ class GameEngine {
     final restoredMaximum = savedMaximum ?? maximum;
     if (restoredMinimum < 1 ||
         restoredMaximum > 200 ||
-        restoredMinimum >= restoredMaximum ||
+        restoredMinimum > restoredMaximum ||
         secret < restoredMinimum ||
         secret > restoredMaximum ||
         attempts < 0) {
@@ -80,7 +80,7 @@ class GameEngine {
     final nextMaximum = state.lastResult == GuessResult.tooHigh
         ? (guess - 1 < state.maximum ? guess - 1 : state.maximum)
         : state.maximum;
-    if (nextMinimum >= nextMaximum) return state;
+    if (nextMinimum > nextMaximum) return state;
     return GameState(
       secret: state.secret,
       attempts: state.attempts,
