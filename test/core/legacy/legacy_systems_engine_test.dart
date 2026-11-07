@@ -136,6 +136,64 @@ void main() {
     });
   });
 
+  group('Endless Rift', () {
+    test('starts a fresh run and advances tiers with scaled boss rewards', () {
+      final defeated = ProgressionState.initial.copyWith(
+        defeatedBosses: const {
+          'verdant_grove', 'crystal_caverns', 'ember_summit', 'nebula_rift',
+        },
+        bossDamage: const {
+          'verdant_grove': 3, 'crystal_caverns': 5, 'ember_summit': 7, 'nebula_rift': 10,
+        },
+      );
+      final started = engine.setEndlessRift(
+        progression: defeated,
+        systems: LegacySystemsState.initial,
+        active: true,
+      );
+      expect(started.accepted, isTrue);
+      expect(started.systems.endlessRiftTier, 1);
+      expect(started.progression.bossDamage['verdant_grove'], 0);
+      var progression = started.progression;
+      var systems = started.systems;
+      for (var hit = 0; hit < 3; hit++) {
+        final result = engine.attackEndlessRiftBoss(progression, systems);
+        expect(result.accepted, isTrue);
+        progression = result.progression;
+        systems = result.systems;
+      }
+      expect(systems.activeWorldId, 'crystal_caverns');
+      expect(systems.endlessRiftTier, 2);
+      expect(systems.endlessRiftBestTier, 1);
+      expect(progression.money.compareTo(n(25000)), 0);
+      expect(progression.nebula.compareTo(n(10)), 0);
+      expect(progression.bossDamage['crystal_caverns'], 0);
+    });
+
+    test('misses regress Rift boss damage according to its current phase', () {
+      final defeated = ProgressionState.initial.copyWith(
+        defeatedBosses: const {
+          'verdant_grove', 'crystal_caverns', 'ember_summit', 'nebula_rift',
+        },
+      );
+      final started = engine.setEndlessRift(
+        progression: defeated,
+        systems: LegacySystemsState.initial,
+        active: true,
+      );
+      var progression = started.progression;
+      var systems = started.systems;
+      for (var hit = 0; hit < 2; hit++) {
+        final result = engine.attackEndlessRiftBoss(progression, systems);
+        progression = result.progression;
+        systems = result.systems;
+      }
+      final firstMiss = engine.recordEndlessRiftMiss(progression, systems);
+      expect(firstMiss.progression.bossDamage['verdant_grove'], 2);
+      final secondMiss = engine.recordEndlessRiftMiss(firstMiss.progression, firstMiss.systems);
+      expect(secondMiss.progression.bossDamage['verdant_grove'], 1);
+    });
+  });
   group('daily rewards and challenge claims', () {
     test('prevents duplicate daily rewards and advances a consecutive streak', () {
       final first = engine.claimDailyReward(
