@@ -99,7 +99,7 @@ void main() {
     expect(rewarded.nebulaEarned.toString(), '30');
     final bought = engine.purchaseNebulaItem(rewarded, itemId: 'arcade_boost');
     expect(bought.nebula.toString(), '5');
-    expect(bought.ultraUpgrades['arcade_boost'], 1);
+    expect(bought.nebulaItems['arcade_boost'], 1);
     expect(bought.money.toString(), '0');
   });
 }
