@@ -9,7 +9,14 @@ import 'package:gtn_2/data/saves/save_storage.dart';
 void main() {
   group('SaveData', () {
     test('round-trips through JSON', () {
-      final save = SaveData(\n        secret: 42, attempts: 7, gamesWon: 3, isComplete: true,\n        progression: ProgressionState.initial.copyWith(\n          money: BigNumber.parse('12345678901234567890.25'),\n          prestige: BigNumber.fromInt(4),\n          upgrades: const {'income': 2},\n        ),\n      );
+      final save = SaveData(
+        secret: 42, attempts: 7, gamesWon: 3, isComplete: true,
+        progression: ProgressionState.initial.copyWith(
+          money: BigNumber.parse('12345678901234567890.25'),
+          prestige: BigNumber.fromInt(4),
+          upgrades: const {'income': 2},
+        ),
+      );
       expect(SaveData.fromJson(save.toJson()).toJson(), save.toJson());
     });
 
@@ -37,7 +44,15 @@ void main() {
     });
   });
 
-  test('loads older schema-one saves without progression data', () {\n    final save = SaveData.fromJson({\n      'schemaVersion': 1, 'secret': 42, 'attempts': 0,\n      'gamesWon': 0, 'isComplete': false,\n    });\n    expect(save.progression.money.toString(), '0');\n  });\n\n  test('saves and loads through a temporary file safely', () async {
+  test('loads older schema-one saves without progression data', () {
+    final save = SaveData.fromJson({
+      'schemaVersion': 1, 'secret': 42, 'attempts': 0,
+      'gamesWon': 0, 'isComplete': false,
+    });
+    expect(save.progression.money.toString(), '0');
+  });
+
+  test('saves and loads through a temporary file safely', () async {
     final directory =
         await Directory.systemTemp.createTemp('gtn2-save-test-');
     addTearDown(() => directory.delete(recursive: true));
