@@ -224,7 +224,7 @@ void main() {
 
     test('rejects invalid equipped relic and music references', () {
       expect(
-        () => LegacySystemsState.fromJson({
+        () => LegacySystemsState.fromJson(<String, dynamic>{
           ...LegacySystemsState.initial.toJson(),
           'equippedRelics': ['verdant_guardian'],
           'relicInventory': [],
