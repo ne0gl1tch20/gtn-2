@@ -1,5 +1,5 @@
-import '../numbers/big_number.dart';
 import '../legacy/legacy_systems_state.dart';
+import '../numbers/big_number.dart';
 
 class ProgressionState {
   ProgressionState({
