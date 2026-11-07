@@ -49,4 +49,4 @@ void main() {
     await storage.save(second);
     expect((await storage.load())?.toJson(), second.toJson());
   });
-});
+}
