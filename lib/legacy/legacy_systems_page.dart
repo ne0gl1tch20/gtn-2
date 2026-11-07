@@ -1,10 +1,12 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -43,12 +45,16 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
   String? _updateDetails;
   UpdateRelease? _availableUpdate;
   WindowsUpdateRelease? _availableWindowsUpdate;
+  List<Map<String, dynamic>> _talentCatalog = [];
+  List<Map<String, dynamic>> _mutatorCatalog = [];
+  List<Map<String, dynamic>> _relicCatalog = [];
 
   LegacySystemsState get _systems => _progression.legacySystems;
 
   @override
   void initState() {
     super.initState();
+    _loadSystemCatalogs();
     _trackCompleteSubscription = _audioPlayer.onPlayerComplete.listen((_) {
       _playNextTrack();
     });
@@ -219,27 +225,55 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
     );
   }
 
+  Future<void> _loadSystemCatalogs() async {
+    try {
+      final talents = jsonDecode(await rootBundle.loadString('assets/game/talents.json')) as Map<String, dynamic>;
+      final mutators = jsonDecode(await rootBundle.loadString('assets/game/mutators.json')) as Map<String, dynamic>;
+      final relics = jsonDecode(await rootBundle.loadString('assets/game/relics.json')) as Map<String, dynamic>;
+      if (!mounted) return;
+      setState(() {
+        _talentCatalog = (talents['talents'] as List).cast<Map<String, dynamic>>();
+        _mutatorCatalog = (mutators['mutators'] as List).cast<Map<String, dynamic>>();
+        _relicCatalog = (relics['relics'] as List).cast<Map<String, dynamic>>();
+      });
+    } on Exception {
+      // Keep the deterministic built-in fallback catalogs available offline.
+    }
+  }
+
   Widget _talentsSection() {
+    final talents = _talentCatalog.isNotEmpty
+        ? _talentCatalog
+        : LegacySystemsEngine.talents.entries.map((entry) => <String, dynamic>{
+            'id': entry.key,
+            'name': _pretty(entry.key),
+            'description': 'Unlock this permanent talent.',
+            'cost': entry.value.cost,
+            'requiredParentId': entry.value.parent,
+          }).toList();
     return Card(
       child: ExpansionTile(
         leading: const Icon(Icons.account_tree_rounded),
         title: const Text('Talent tree'),
         subtitle: Text('${_systems.talents.length} / 6 unlocked · ${_progression.prestige} Prestige'),
         children: [
-          for (final entry in LegacySystemsEngine.talents.entries)
+          for (final talent in talents)
             Builder(builder: (context) {
-              final owned = _systems.talents.contains(entry.key);
-              final parent = entry.value.parent;
+              final id = talent['id'] as String;
+              final name = talent['name'] as String? ?? _pretty(id);
+              final description = talent['description'] as String? ?? '';
+              final cost = talent['cost'] as int;
+              final parent = talent['requiredParentId'] as String?;
+              final owned = _systems.talents.contains(id);
               final parentReady = parent == null || _systems.talents.contains(parent);
               return ListTile(
-                title: Text(_pretty(entry.key)),
-                subtitle: Text('Cost: ${entry.value.cost} Prestige${parent == null ? '' : ' · Requires ${_pretty(parent)}'}'),
+                title: Text(name),
+                subtitle: Text('$description\\nCost: $cost Prestige${parent == null ? '' : ' · Requires ${_pretty(parent)}'}'),
+                isThreeLine: true,
                 trailing: owned
                     ? const Icon(Icons.check_circle_rounded, color: Colors.green)
                     : FilledButton(
-                        onPressed: parentReady
-                            ? () => _apply(_engine.buyTalent(_progression, _systems, entry.key))
-                            : null,
+                        onPressed: parentReady ? () => _apply(_engine.buyTalent(_progression, _systems, id)) : null,
                         child: const Text('Unlock'),
                       ),
               );
@@ -250,24 +284,26 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
   }
 
   Widget _mutatorsSection() {
-    const ids = ['mut_hardcore', 'mut_speed', 'mut_blind', 'mut_tax'];
+    final mutators = _mutatorCatalog.isNotEmpty
+        ? _mutatorCatalog
+        : const [
+            {'id': 'mut_hardcore', 'name': 'Hardcore Range', 'description': 'Double the guessing range. Rewards ×2.'},
+            {'id': 'mut_speed', 'name': 'Hyper Speed', 'description': 'Auto-clicker speed ×3, but earnings halved.'},
+            {'id': 'mut_blind', 'name': 'Blindfolded Oracle', 'description': 'Hide higher/lower feedback. Rewards ×5.'},
+            {'id': 'mut_tax', 'name': 'Heavy Taxation', 'description': 'Wrong guesses cost 5% of current Money. Rewards ×10.'},
+          ];
     return Card(
       child: ExpansionTile(
         leading: const Icon(Icons.tune_rounded),
         title: const Text('Mutators & challenge builder'),
         subtitle: Text('Reward multiplier ×${_engine.mutatorRewardMultiplier(_systems)}'),
         children: [
-          for (final id in ids)
+          for (final mutator in mutators)
             SwitchListTile(
-              title: Text(_pretty(id)),
-              subtitle: Text(switch (id) {
-                'mut_hardcore' => 'Double the guessing range.',
-                'mut_speed' => 'Hyper-speed modifier.',
-                'mut_blind' => 'Hide higher/lower feedback.',
-                _ => 'Wrong guesses cost 5% of current Money.',
-              }),
-              value: _systems.activeMutators.contains(id),
-              onChanged: (value) => _apply(_engine.setMutator(_progression, _systems, id, value)),
+              title: Text(mutator['name'] as String),
+              subtitle: Text(mutator['description'] as String),
+              value: _systems.activeMutators.contains(mutator['id']),
+              onChanged: (value) => _apply(_engine.setMutator(_progression, _systems, mutator['id'] as String, value)),
             ),
           const Padding(
             padding: EdgeInsets.fromLTRB(16, 0, 16, 12),
@@ -279,12 +315,14 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
   }
 
   Widget _relicsSection() {
-    const relics = <(String, String, String)>[
-      ('verdant_guardian', 'Heartwood Sigil', 'Verdant Guardian'),
-      ('crystal_golem', 'Prism Core', 'Crystal Golem'),
-      ('ember_dragon', 'Ember Scale', 'Ember Dragon'),
-      ('nebula_titan', 'Starbound Fragment', 'Nebula Titan'),
-    ];
+    final relics = _relicCatalog.isNotEmpty
+        ? _relicCatalog
+        : const [
+            {'id': 'verdant_guardian', 'name': 'Heartwood Sigil', 'description': 'Verdant Guardian relic.', 'unlockBossName': 'Verdant Guardian'},
+            {'id': 'crystal_golem', 'name': 'Prism Core', 'description': 'Crystal Golem relic.', 'unlockBossName': 'Crystal Golem'},
+            {'id': 'ember_dragon', 'name': 'Ember Scale', 'description': 'Ember Dragon relic.', 'unlockBossName': 'Ember Dragon'},
+            {'id': 'nebula_titan', 'name': 'Starbound Fragment', 'description': 'Nebula Titan relic.', 'unlockBossName': 'Nebula Titan'},
+          ];
     return Card(
       child: ExpansionTile(
         leading: const Icon(Icons.diamond_rounded),
@@ -292,17 +330,21 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
         subtitle: Text('${_systems.relicInventory.length}/4 discovered · ${_systems.equippedRelics.length}/4 equipped'),
         children: [
           for (final relic in relics)
-            ListTile(
-              leading: Icon(_systems.relicInventory.contains(relic.$1) ? Icons.diamond_rounded : Icons.lock_outline_rounded),
-              title: Text(relic.$2),
-              subtitle: Text('Earned from ${relic.$3}'),
-              trailing: FilledButton.tonal(
-                onPressed: _systems.relicInventory.contains(relic.$1)
-                    ? () => _apply(_engine.equipRelic(_progression, _systems, relic.$1))
-                    : null,
-                child: Text(_systems.equippedRelics.contains(relic.$1) ? 'Unequip' : 'Equip'),
-              ),
-            ),
+            Builder(builder: (context) {
+              final id = relic['id'] as String;
+              final owned = _systems.relicInventory.contains(id);
+              final equipped = _systems.equippedRelics.contains(id);
+              return ListTile(
+                leading: Icon(owned ? Icons.diamond_rounded : Icons.lock_outline_rounded),
+                title: Text(relic['name'] as String),
+                subtitle: Text('${relic['description']}\\nEarned from ${relic['unlockBossName']}'),
+                isThreeLine: true,
+                trailing: FilledButton.tonal(
+                  onPressed: owned ? () => _apply(_engine.equipRelic(_progression, _systems, id)) : null,
+                  child: Text(equipped ? 'Unequip' : 'Equip'),
+                ),
+              );
+            }),
           const Padding(
             padding: EdgeInsets.fromLTRB(16, 0, 16, 12),
             child: Text('Set bonus: 2 relics +10%, 3 relics +20%, 4 relics +35% Money. Individual relic bonuses are applied by the backend.'),
@@ -311,7 +353,6 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
       ),
     );
   }
-
   Widget _homeBaseSection() {
     final level = _systems.homeBaseLevel;
     final cost = BigNumber.fromInt(50000 * (level + 1));
