@@ -33,7 +33,7 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
       - name: Read app version
-        run: echo "APP_VERSION=$(sed -n 's/^version: *\\([^+]*\\).*/\\1/p' pubspec.yaml)" >> "$GITHUB_ENV"
+        run: echo "APP_VERSION=$(sed -n 's/^version: *\([^+]*\).*/\\1/p' pubspec.yaml)" >> "$GITHUB_ENV"
       - name: Build debug APK
         run: flutter build apk --debug --build-name="$APP_VERSION" --build-number="$GITHUB_RUN_NUMBER" --dart-define=APP_VERSION="$APP_VERSION" --dart-define=APP_BUILD_NUMBER="$GITHUB_RUN_NUMBER"
       - name: Upload Android APK
@@ -63,7 +63,7 @@ jobs:
         shell: pwsh
         run: |
           $line = Get-Content pubspec.yaml | Where-Object { $_ -match '^version:' } | Select-Object -First 1
-          if ($line -notmatch '^version:\\s*([^+]+)') { throw 'Could not read app version from pubspec.yaml' }
+          if ($line -notmatch '^version:\s*([^+]+)') { throw 'Could not read app version from pubspec.yaml' }
           Add-Content $env:GITHUB_ENV "APP_VERSION=$($Matches[1])"
       - name: Build Windows release
         run: flutter build windows --release --build-name="$env:APP_VERSION" --build-number="$env:GITHUB_RUN_NUMBER" --dart-define=APP_VERSION="$env:APP_VERSION" --dart-define=APP_BUILD_NUMBER="$env:GITHUB_RUN_NUMBER"
