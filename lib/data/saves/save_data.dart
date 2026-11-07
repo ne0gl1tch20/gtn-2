@@ -47,7 +47,7 @@ class SaveData {
         gamesWon is! int ||
         isComplete is! bool ||
         secret < 1 ||
-        secret > 100 ||
+        secret > 200 ||
         attempts < 0 ||
         gamesWon < 0) {
       throw const FormatException('Unsupported or invalid save data.');
