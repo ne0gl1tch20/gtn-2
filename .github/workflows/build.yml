@@ -35,7 +35,7 @@ jobs:
       - name: Read app version
         shell: bash
         run: |
-          version_name="$(sed -n 's/^version: *\\([^+]*\\).*/\\1/p' pubspec.yaml)"
+          version_name="$(sed -n 's/^version: *\([^+]*\).*/\1/p' pubspec.yaml)"
           test -n "$version_name"
           echo "APP_VERSION=$version_name" >> "$GITHUB_ENV"
       - name: Build debug APK
