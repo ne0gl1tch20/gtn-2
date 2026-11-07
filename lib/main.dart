@@ -10,6 +10,8 @@ import 'data/saves/save_data.dart';
 import 'data/saves/save_storage.dart';
 import 'progression/progression_hub_page.dart';
 import 'saves/save_slots_page.dart';
+import 'settings/game_settings.dart';
+import 'settings/settings_page.dart';
 import 'shop/nebula_shop_page.dart';
 import 'shop/upgrade_catalog.dart';
 import 'shop/upgrade_shop_page.dart';
@@ -24,19 +26,36 @@ void main() {
 class GtnApp extends StatelessWidget {
   const GtnApp({super.key});
 
+  static final ValueNotifier<GameSettings> settingsNotifier =
+      ValueNotifier<GameSettings>(GameSettings.initial);
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'GuessTheNumber 2',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF7C5CFC),
-          brightness: Brightness.dark,
-        ),
-        useMaterial3: true,
-      ),
-      home: const GameHomePage(),
+    return ValueListenableBuilder<GameSettings>(
+      valueListenable: settingsNotifier,
+      builder: (context, settings, _) {
+        ThemeData makeTheme(Brightness brightness) => ThemeData(
+              colorScheme: ColorScheme.fromSeed(
+                seedColor: const Color(0xFF7C5CFC),
+                brightness: brightness,
+              ),
+              useMaterial3: true,
+            );
+        return MaterialApp(
+          title: 'GuessTheNumber 2',
+          debugShowCheckedModeBanner: false,
+          theme: makeTheme(Brightness.light),
+          darkTheme: makeTheme(Brightness.dark),
+          themeMode: settings.darkMode ? ThemeMode.dark : ThemeMode.light,
+          builder: (context, child) => MediaQuery(
+            data: MediaQuery.of(context).copyWith(
+              disableAnimations: settings.reduceMotion,
+            ),
+            child: child ?? const SizedBox.shrink(),
+          ),
+          home: const GameHomePage(),
+        );
+      },
     );
   }
 }
@@ -52,6 +71,7 @@ class _GameHomePageState extends State<GameHomePage> {
   final GameEngine _engine = GameEngine();
   final ProgressionEngine _progressionEngine = const ProgressionEngine();
   ProgressionState _progression = ProgressionState.initial;
+  GameSettings _settings = GameSettings.initial;
   final TextEditingController _controller = TextEditingController();
   late GameState _game = _engine.newGame();
   late Future<SaveStorage> _storage = SaveStorage.inApplicationDocuments();
@@ -80,6 +100,8 @@ class _GameHomePageState extends State<GameHomePage> {
           );
           _gamesWon = save.gamesWon;
           _progression = save.progression;
+          _settings = save.settings;
+          GtnApp.settingsNotifier.value = _settings;
           _message = 'Welcome back! Your saved game is ready.';
         });
       }
@@ -104,6 +126,7 @@ class _GameHomePageState extends State<GameHomePage> {
           gamesWon: _gamesWon,
           isComplete: _game.isComplete,
           progression: _progression,
+          settings: _settings,
         ),
       );
     } on Exception {
@@ -266,6 +289,8 @@ class _GameHomePageState extends State<GameHomePage> {
               );
         _gamesWon = save?.gamesWon ?? 0;
         _progression = save?.progression ?? ProgressionState.initial;
+        _settings = save?.settings ?? GameSettings.initial;
+        GtnApp.settingsNotifier.value = _settings;
         _message = save == null
             ? 'New save slot ready. Guess a number between 1 and 100.'
             : 'Save slot $slot loaded.';
@@ -288,6 +313,24 @@ class _GameHomePageState extends State<GameHomePage> {
         builder: (_) => SaveSlotsPage(
           activeSlot: _activeSlot,
           onSelect: _switchSaveSlot,
+        ),
+      ),
+    );
+  }
+
+
+  Future<void> _updateSettings(GameSettings settings) async {
+    setState(() => _settings = settings);
+    GtnApp.settingsNotifier.value = settings;
+    await _persist();
+  }
+
+  Future<void> _openSettings() async {
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (_) => SettingsPage(
+          settings: _settings,
+          onChanged: _updateSettings,
         ),
       ),
     );
@@ -453,6 +496,11 @@ class _GameHomePageState extends State<GameHomePage> {
                   onPressed: _isLoading ? null : _openSaveSlots,
                   icon: const Icon(Icons.save_rounded),
                   label: Text('Save Slots · $_activeSlot'),
+                ),
+                OutlinedButton.icon(
+                  onPressed: _isLoading ? null : _openSettings,
+                  icon: const Icon(Icons.settings_rounded),
+                  label: const Text('Settings'),
                 ),
                 TextButton(
                   onPressed: _isLoading ? null : _newGame,
