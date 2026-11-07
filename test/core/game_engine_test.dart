@@ -64,6 +64,16 @@ void main() {
       expect(narrowed.maximum, 100);
       expect(engine.guess(narrowed, 50).lastResult, GuessResult.outOfRange);
       expect(engine.guess(narrowed, 75).lastResult, GuessResult.correct);
+      final lastPossible = engine.applyRangeScoutHint(
+        engine.guess(engine.restore(
+          secret: 75, attempts: 1, isComplete: false,
+          savedMinimum: 1, savedMaximum: 75,
+        ), 74),
+        74,
+      );
+      expect(lastPossible.minimum, 75);
+      expect(lastPossible.maximum, 75);
+      expect(engine.guess(lastPossible, 75).lastResult, GuessResult.correct);
     });
 
     test('rejects invalid restored state', () {
