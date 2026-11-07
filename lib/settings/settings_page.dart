@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'game_settings.dart';
+import '../i18n/app_localizations.dart';
 
 typedef SettingsChanged = Future<void> Function(GameSettings settings);
 
@@ -17,20 +18,37 @@ class SettingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Settings')),
+      appBar: AppBar(title: Text(AppLocalizations.text('settings', 'Settings'))),
       body: ListView(
         children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 18, 16, 8),
+            child: DropdownButtonFormField<String>(
+              value: settings.localeCode,
+              decoration: InputDecoration(
+                labelText: AppLocalizations.text('language', 'Language'),
+                border: const OutlineInputBorder(),
+              ),
+              items: [
+                for (final locale in AppLocalizations.supportedLocales)
+                  DropdownMenuItem<String>(value: locale.$1, child: Text(locale.$2)),
+              ],
+              onChanged: (code) {
+                if (code != null) onChanged(settings.copyWith(localeCode: code));
+              },
+            ),
+          ),
           SwitchListTile(
             secondary: const Icon(Icons.dark_mode_rounded),
-            title: const Text('Dark theme'),
-            subtitle: const Text('Use the darker GTN 2 appearance.'),
+            title: Text(AppLocalizations.text('dark_mode', 'Dark theme')),
+            subtitle: Text(AppLocalizations.text('dark_mode_desc', 'Use the darker GTN 2 appearance.')),
             value: settings.darkMode,
             onChanged: (value) => onChanged(settings.copyWith(darkMode: value)),
           ),
           SwitchListTile(
             secondary: const Icon(Icons.motion_photos_off_rounded),
-            title: const Text('Reduce motion'),
-            subtitle: const Text('Disable most interface animations.'),
+            title: Text(AppLocalizations.text('reduce_motion', 'Reduce motion')),
+            subtitle: Text(AppLocalizations.text('reduce_motion_desc', 'Disable most interface animations.')),
             value: settings.reduceMotion,
             onChanged: (value) => onChanged(settings.copyWith(reduceMotion: value)),
           ),
