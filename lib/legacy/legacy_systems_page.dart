@@ -684,8 +684,25 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
       ('rift_tier_10', 'Reach Endless Rift tier 10'),
       ('mastery_all_5', 'Reach mastery level 5 in every world'),
     ];
-    final codexCount = _systems.codexEntries.length;
-    final allWorldsDefeated = WorldBossCatalog.worlds.every((world) => _progression.defeatedBosses.contains(world.id));
+    const requiredCodexEntries = <String>{
+      'world:verdant_grove', 'world:crystal_caverns', 'world:ember_summit', 'world:nebula_rift',
+      'boss:verdant_guardian', 'boss:crystal_golem', 'boss:ember_dragon', 'boss:nebula_titan',
+      'secret:whispering_hollow', 'secret:shard_archive', 'secret:ashen_vault', 'secret:lost_observatory',
+    };
+    final codexCount = requiredCodexEntries.where(_systems.codexEntries.contains).length;
+    final codexComplete = _systems.codexEntries.containsAll(requiredCodexEntries);
+    const allWorldIds = <String>{'verdant_grove', 'crystal_caverns', 'ember_summit', 'nebula_rift'};
+    const allSecretIds = <String>{'whispering_hollow', 'shard_archive', 'ashen_vault', 'lost_observatory'};
+    const allRelicIds = <String>{'verdant_guardian', 'crystal_golem', 'ember_dragon', 'nebula_titan'};
+    final allWorldsDefeated = _progression.defeatedBosses.containsAll(allWorldIds);
+    final endgameEligibility = <String, bool>{
+      'all_bosses': allWorldsDefeated,
+      'all_secrets': _systems.discoveredSecrets.containsAll(allSecretIds),
+      'all_relics': _systems.relicInventory.containsAll(allRelicIds),
+      'sanctuary_10': _systems.homeBaseLevel >= 10,
+      'rift_tier_10': _systems.endlessRiftBestTier >= 10,
+      'mastery_all_5': allWorldIds.every((id) => (_systems.worldMasteryLevels[id] ?? 0) >= 5),
+    };
     return Card(
       child: ExpansionTile(
         leading: const Icon(Icons.public_rounded),
@@ -740,7 +757,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
             title: const Text('Complete the Codex'),
             subtitle: Text('$codexCount / 12 entries · Reward: 100 Nebula'),
             trailing: FilledButton.tonal(
-              onPressed: codexCount >= 12 && !_systems.codexRewardClaimed
+              onPressed: codexComplete && !_systems.codexRewardClaimed
                   ? () => _apply(_engine.claimCodexCompletionReward(_progression, _systems))
                   : null,
               child: Text(_systems.codexRewardClaimed ? 'Claimed' : 'Claim'),
@@ -752,7 +769,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
               title: Text(reward.$2),
               subtitle: Text('Claim once when the goal is complete.'),
               trailing: FilledButton.tonal(
-                onPressed: !_systems.endgameRewardsClaimed.contains(reward.$1)
+                onPressed: endgameEligibility[reward.$1] == true && !_systems.endgameRewardsClaimed.contains(reward.$1)
                     ? () => _apply(_engine.claimEndgameReward(_progression, _systems, reward.$1))
                     : null,
                 child: Text(_systems.endgameRewardsClaimed.contains(reward.$1) ? 'Claimed' : 'Claim'),
