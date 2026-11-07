@@ -346,6 +346,7 @@ class GameDashboardPage extends StatelessWidget {
                   _Wallet(progression, panel, raised, line, foreground, muted),
                   const SizedBox(height: 12),
                   _GuessInput(
+                    game: game,
                     controller: controller,
                     enabled: !loading && !game.isComplete,
                     completed: game.isComplete,
@@ -673,6 +674,7 @@ class _Currency extends StatelessWidget {
 
 class _GuessInput extends StatelessWidget {
   const _GuessInput({
+    required this.game,
     required this.controller,
     required this.enabled,
     required this.completed,
@@ -683,6 +685,7 @@ class _GuessInput extends StatelessWidget {
     required this.foreground,
     required this.muted,
   });
+  final GameState game;
   final TextEditingController controller;
   final bool enabled;
   final bool completed;
