@@ -126,8 +126,7 @@ class _GameHomePageState extends State<GameHomePage> {
         SaveData(
           secret: _game.secret,
           attempts: _game.attempts,
-          gamesWon: _gamesWon,
-          isComplete: _game.isComplete,
+              isComplete: _game.isComplete,
           progression: _progression,
           settings: _settings,
         ),
