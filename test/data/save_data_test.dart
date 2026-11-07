@@ -5,6 +5,7 @@ import 'package:gtn_2/core/numbers/big_number.dart';
 import 'package:gtn_2/core/progression/progression_state.dart';
 import 'package:gtn_2/data/saves/save_data.dart';
 import 'package:gtn_2/data/saves/save_storage.dart';
+import 'package:gtn_2/settings/game_settings.dart';
 
 void main() {
   group('SaveData', () {
@@ -15,6 +16,24 @@ void main() {
           money: BigNumber.parse('12345678901234567890.25'),
           prestige: BigNumber.fromInt(4),
           upgrades: const {'income': 2},
+        ),
+        settings: const GameSettings(darkMode: false, reduceMotion: true),
+      );
+      expect(SaveData.fromJson(save.toJson()).toJson(), save.toJson());
+    });
+
+    test('defaults settings for older saves', () {
+      final save = SaveData.fromJson({
+        'schemaVersion': 1,
+        'secret': 42,
+        'attempts': 0,
+        'gamesWon': 0,
+        'isComplete': false,
+      });
+      expect(save.settings, GameSettings.initial);
+    });
+
+    test('rejects unknown versions and invalid fields', () {
         ),
       );
       expect(SaveData.fromJson(save.toJson()).toJson(), save.toJson());
