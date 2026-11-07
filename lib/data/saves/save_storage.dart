@@ -6,15 +6,18 @@ import 'package:path_provider/path_provider.dart';
 import 'save_data.dart';
 
 class SaveStorage {
-  SaveStorage({required Directory directory})
-      : _file = File('${directory.path}/gtn2-save.json');
+  SaveStorage({required Directory directory, int slot = 1})
+      : assert(slot >= 1 && slot <= 5),
+        slot = slot,
+        _file = File(slot == 1 ? '${directory.path}/gtn2-save.json' : '${directory.path}/gtn2-save-slot$slot.json');
 
+  final int slot;
   final File _file;
   Future<void> _pendingWrite = Future<void>.value();
 
-  static Future<SaveStorage> inApplicationDocuments() async {
+  static Future<SaveStorage> inApplicationDocuments({int slot = 1}) async {
     final directory = await getApplicationDocumentsDirectory();
-    return SaveStorage(directory: directory);
+    return SaveStorage(directory: directory, slot: slot);
   }
 
   Future<SaveData?> load() async {
