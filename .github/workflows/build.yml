@@ -126,7 +126,7 @@ jobs:
         run: |
           set -euo pipefail
           notes="$(printf 'GTN2 Debug Latest #%s\n\nVersion: %s\nCommit: %s\n\n- Android debug APK and SHA-256 manifest.\n- Windows desktop package and SHA-256 manifest.\n- Published only after both platform builds succeed on main/master.' "$GITHUB_RUN_NUMBER" "$(sed -n 's/^version: *\([^+]*\).*/\1/p' pubspec.yaml | head -1)" "$GITHUB_SHA")"
-          gh release view debug-latest >/dev/null 2>&1 || gh release create debug-latest --prerelease --target "$GITHUB_SHA" --title "GTN2 Debug Latest" --notes "Publishing Android and Windows builds..."
+          gh release view debug-latest >/dev/null 2>&1 || gh release create debug-latest --prerelease --latest=false --target "$GITHUB_SHA" --title "GTN2 Debug Latest" --notes "Publishing Android and Windows builds..."
           gh release upload debug-latest \
             release/android/GuessTheNumber-debug.apk \
             release/android/SHA256SUMS \
@@ -135,5 +135,5 @@ jobs:
             release/windows/SHA256SUMS-WINDOWS \
             release/windows/windows-update-manifest.json \
             --clobber
-          gh release edit debug-latest --target "$GITHUB_SHA" --title "GTN2 Debug Latest" --notes "$notes" --prerelease --latest=false
+          gh release edit debug-latest --target "$GITHUB_SHA" --title "GTN2 Debug Latest" --notes "$notes" --prerelease
           test "$(gh release view debug-latest --json body --jq .body)" = "$notes"
