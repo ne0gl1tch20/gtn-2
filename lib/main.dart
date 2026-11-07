@@ -531,7 +531,8 @@ class _GameHomePageState extends State<GameHomePage> {
         );
         final rawReward = correct
             ? (BigNumber.fromInt(1) + effects.flatBonus) *
-                _legacySystemsEngine.mutatorRewardMultiplier(legacySystems)
+                _legacySystemsEngine.mutatorRewardMultiplier(legacySystems) *
+                BigNumber.parse(traitEffects.correctGuessMultiplier.toStringAsFixed(2))
             : null;
         var afterReward = _progressionEngine.recordGuess(
           beforeGuess,
@@ -562,13 +563,24 @@ class _GameHomePageState extends State<GameHomePage> {
             nebulaBoostOwned: (beforeGuess.nebulaItems['nebula_boost'] ?? 0) > 0,
           );
         } else {
-          if (traitEffects.streakProtection) {
-            afterReward = afterReward.copyWith(currentStreak: beforeGuess.currentStreak);
-          }
-          if (legacySystems.activeMutators.contains('mut_tax')) {
-            final penalty = afterReward.money * BigNumber.parse('0.05');
-            afterReward = afterReward.copyWith(money: afterReward.money - penalty);
-          }
+          final penalty = legacySystems.activeMutators.contains('mut_tax')
+              ? beforeGuess.money * BigNumber.parse('0.05')
+              : BigNumber.fromInt(0);
+          final refund = penalty * BigNumber.parse(
+            traitEffects.missPenaltyRefundRate.toStringAsFixed(2),
+          );
+          final extraPenalty = penalty * BigNumber.parse(
+            traitEffects.riskMissPenaltyRate.toStringAsFixed(2),
+          );
+          final remainingMoney = beforeGuess.money - penalty + refund - extraPenalty;
+          afterReward = afterReward.copyWith(
+            money: remainingMoney.compareTo(BigNumber.fromInt(0)) < 0
+                ? BigNumber.fromInt(0)
+                : remainingMoney,
+            currentStreak: traitEffects.streakProtection
+                ? beforeGuess.currentStreak
+                : afterReward.currentStreak,
+          );
         }
         var systemsAfter = _legacySystemsEngine.recordGuessProgress(
           legacySystems,
