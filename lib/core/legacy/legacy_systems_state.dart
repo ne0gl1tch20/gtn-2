@@ -1,5 +1,3 @@
-import 'dart:collection';
-
 /// Persisted per-save-slot state for GTN 1 systems that were not in the first Flutter slice.
 class LegacySystemsState {
   const LegacySystemsState({
