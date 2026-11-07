@@ -14,6 +14,7 @@ import 'data/saves/save_data.dart';
 import 'data/saves/save_storage.dart';
 import 'dev/developer_settings_page.dart';
 import 'home/game_dashboard_page.dart';
+import 'i18n/app_localizations.dart';
 import 'legacy/legacy_pages.dart';
 import 'progression/progression_hub_page.dart';
 import 'saves/save_slots_page.dart';
@@ -25,8 +26,9 @@ import 'shop/upgrade_shop_page.dart';
 import 'worlds/world_boss_catalog.dart';
 import 'worlds/world_map_page.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await AppLocalizations.load('en_us');
   runApp(const GtnApp());
 }
 
@@ -38,7 +40,9 @@ class GtnApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<GameSettings>(
+    return ValueListenableBuilder<Map<String, dynamic>>(
+      valueListenable: AppLocalizations.catalog,
+      builder: (context, translations, _) => ValueListenableBuilder<GameSettings>(
       valueListenable: settingsNotifier,
       builder: (context, settings, _) {
         ThemeData makeTheme(Brightness brightness) => ThemeData(
@@ -63,6 +67,7 @@ class GtnApp extends StatelessWidget {
           home: const GameHomePage(),
         );
       },
+    ),
     );
   }
 }
@@ -108,6 +113,7 @@ class _GameHomePageState extends State<GameHomePage> {
         final restoredEngine = GameEngine(
           maximum: 100 * _legacySystemsEngine.rangeMultiplier(restoredProgression.legacySystems),
         );
+        await AppLocalizations.load(save.settings.localeCode);
         setState(() {
           _engine = restoredEngine;
           _game = _engine.restore(
@@ -351,6 +357,8 @@ class _GameHomePageState extends State<GameHomePage> {
 
 
   Future<void> _updateSettings(GameSettings settings) async {
+    await AppLocalizations.load(settings.localeCode);
+    if (!mounted) return;
     setState(() => _settings = settings);
     GtnApp.settingsNotifier.value = settings;
     await _persist();
