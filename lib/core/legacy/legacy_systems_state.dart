@@ -19,6 +19,8 @@ class LegacySystemsState {
     this.lootChests = const {'common': 0, 'rare': 0, 'epic': 0},
     this.lootDropsFound = 0,
     this.lootChestsOpened = 0,
+    this.lastLootDropTier,
+    this.lootEventId = 0,
     this.completedChallenges = const {},
     this.worldMasteryLevels = const {},
     this.discoveredSecrets = const {},
@@ -68,6 +70,8 @@ class LegacySystemsState {
   final Map<String, int> lootChests;
   final int lootDropsFound;
   final int lootChestsOpened;
+  final String? lastLootDropTier;
+  final int lootEventId;
   final Set<String> completedChallenges;
   final Map<String, int> worldMasteryLevels;
   final Set<String> discoveredSecrets;
@@ -119,6 +123,9 @@ class LegacySystemsState {
     Map<String, int>? lootChests,
     int? lootDropsFound,
     int? lootChestsOpened,
+    String? lastLootDropTier,
+    bool clearLastLootDropTier = false,
+    int? lootEventId,
     Set<String>? completedChallenges,
     Map<String, int>? worldMasteryLevels,
     Set<String>? discoveredSecrets,
@@ -170,6 +177,8 @@ class LegacySystemsState {
     lootChests: lootChests ?? this.lootChests,
     lootDropsFound: lootDropsFound ?? this.lootDropsFound,
     lootChestsOpened: lootChestsOpened ?? this.lootChestsOpened,
+    lastLootDropTier: clearLastLootDropTier ? null : lastLootDropTier ?? this.lastLootDropTier,
+    lootEventId: lootEventId ?? this.lootEventId,
     completedChallenges: completedChallenges ?? this.completedChallenges,
     worldMasteryLevels: worldMasteryLevels ?? this.worldMasteryLevels,
     discoveredSecrets: discoveredSecrets ?? this.discoveredSecrets,
@@ -220,6 +229,8 @@ class LegacySystemsState {
     'lootChests': lootChests,
     'lootDropsFound': lootDropsFound,
     'lootChestsOpened': lootChestsOpened,
+    'lastLootDropTier': lastLootDropTier,
+    'lootEventId': lootEventId,
     'completedChallenges': completedChallenges.toList()..sort(),
     'worldMasteryLevels': worldMasteryLevels,
     'discoveredSecrets': discoveredSecrets.toList()..sort(),
@@ -328,6 +339,10 @@ class LegacySystemsState {
     final endless = json['endlessRiftActive'] ?? false;
     if (shuffle is! bool || endless is! bool) throw const FormatException('Invalid legacy boolean.');
     final currentTrack = json['currentTrackId'];
+    final lastLootTier = json['lastLootDropTier'];
+    if (lastLootTier != null && !{'common', 'rare', 'epic'}.contains(lastLootTier)) {
+      throw const FormatException('Invalid last loot drop tier.');
+    }
     final codexClaimed = json['codexRewardClaimed'] ?? false;
     final autoActive = json['autoClickerActive'] ?? false;
     final autoSpeed = json['autoClickerSpeed'] ?? 1.0;
@@ -359,6 +374,8 @@ class LegacySystemsState {
       lootChests: chests,
       lootDropsFound: count('lootDropsFound'),
       lootChestsOpened: count('lootChestsOpened'),
+      lastLootDropTier: lastLootTier as String?,
+      lootEventId: count('lootEventId'),
       completedChallenges: strings('completedChallenges'),
       worldMasteryLevels: intMap('worldMasteryLevels'),
       discoveredSecrets: strings('discoveredSecrets'),
