@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'game_settings.dart';
 import '../i18n/app_localizations.dart';
+import 'game_settings.dart';
 
 typedef SettingsChanged = Future<void> Function(GameSettings settings);
 
@@ -24,7 +24,7 @@ class SettingsPage extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 18, 16, 8),
             child: DropdownButtonFormField<String>(
-              value: settings.localeCode,
+              initialValue: settings.localeCode,
               decoration: InputDecoration(
                 labelText: AppLocalizations.text('language', 'Language'),
                 border: const OutlineInputBorder(),
