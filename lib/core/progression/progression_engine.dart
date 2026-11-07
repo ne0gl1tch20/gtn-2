@@ -138,7 +138,8 @@ class ProgressionEngine {
     required String itemId,
     BigNumber? price,
   }) {
-    final itemPrice = price ?? BigNumber.fromInt(25);\n    if (itemId.isEmpty || itemPrice.compareTo(BigNumber.fromInt(0)) < 0) {
+    final itemPrice = price ?? BigNumber.fromInt(25);
+    if (itemId.isEmpty || itemPrice.compareTo(BigNumber.fromInt(0)) < 0) {
       throw ArgumentError('Invalid Nebula shop purchase.');
     }
     if (state.nebula.compareTo(itemPrice) < 0) return state;
