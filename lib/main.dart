@@ -1,8 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import 'home/game_dashboard_page.dart';
-
 import 'arcade/arcade_page.dart';
 import 'core/game/game_engine.dart';
 import 'core/numbers/big_number.dart';
@@ -12,6 +10,7 @@ import 'core/progression/progression_state.dart';
 import 'data/saves/save_data.dart';
 import 'data/saves/save_storage.dart';
 import 'dev/developer_settings_page.dart';
+import 'home/game_dashboard_page.dart';
 import 'progression/progression_hub_page.dart';
 import 'saves/save_slots_page.dart';
 import 'settings/game_settings.dart';
