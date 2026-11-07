@@ -79,14 +79,23 @@ subprojects.forEach { subproject ->
         if (androidExtension != null) {
             val intParameter = Integer.TYPE
             val boxedIntParameter = Integer::class.java
-            val compileSdkMethod = androidExtension.javaClass.methods.firstOrNull { method ->
-                method.name in setOf("setCompileSdk", "setCompileSdkVersion", "compileSdkVersion") &&
-                    method.parameterCount == 1 &&
+            val sdkMethods = androidExtension.javaClass.methods.filter { method ->
+                method.parameterCount == 1 &&
                     (method.parameterTypes[0] == intParameter ||
-                        method.parameterTypes[0] == boxedIntParameter)
-            } ?: error("Could not find an integer compileSdk method for ${subproject.path}.")
+                        method.parameterTypes[0] == boxedIntParameter) &&
+                    method.name in setOf("compileSdkVersion", "setCompileSdk", "setCompileSdkVersion")
+            }
+            // Prefer the legacy AGP LibraryExtension DSL method: the generic setters
+            // can update a compatibility facade without changing variant metadata.
+            val compileSdkMethod = sdkMethods.firstOrNull { it.name == "compileSdkVersion" }
+                ?: sdkMethods.firstOrNull { it.name == "setCompileSdk" }
+                ?: sdkMethods.firstOrNull { it.name == "setCompileSdkVersion" }
+                ?: error("Could not find an integer compileSdk method for ${subproject.path}.")
             compileSdkMethod.invoke(androidExtension, 36)
-            println("GTN2: configured ${subproject.path} compileSdk 36")
+            val sdkGetter = androidExtension.javaClass.methods.firstOrNull { method ->
+                method.name in setOf("getCompileSdkVersion", "getCompileSdk") && method.parameterCount == 0
+            }
+            println("GTN2: configured ${subproject.path} compileSdk via ${compileSdkMethod.name}; value=${sdkGetter?.invoke(androidExtension)}")
         } else {
             error("Android library plugin applied without an android extension: ${subproject.path}")
         }
