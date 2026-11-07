@@ -1,6 +1,6 @@
+import '../../worlds/world_boss_catalog.dart';
 import '../numbers/big_number.dart';
 import 'progression_state.dart';
-import '../../worlds/world_boss_catalog.dart';
 
 class UpgradeDefinition {
   UpgradeDefinition({

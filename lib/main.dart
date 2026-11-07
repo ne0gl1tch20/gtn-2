@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import 'arcade/arcade_page.dart';
-import 'saves/save_slots_page.dart';
 import 'core/game/game_engine.dart';
 import 'core/numbers/big_number.dart';
 import 'core/progression/progression_calculator.dart';
@@ -10,11 +9,12 @@ import 'core/progression/progression_state.dart';
 import 'data/saves/save_data.dart';
 import 'data/saves/save_storage.dart';
 import 'progression/progression_hub_page.dart';
+import 'saves/save_slots_page.dart';
 import 'shop/nebula_shop_page.dart';
-import 'worlds/world_boss_catalog.dart';
-import 'worlds/world_map_page.dart';
 import 'shop/upgrade_catalog.dart';
 import 'shop/upgrade_shop_page.dart';
+import 'worlds/world_boss_catalog.dart';
+import 'worlds/world_map_page.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
