@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'arcade/arcade_page.dart';
 import 'core/game/game_engine.dart';
 import 'core/numbers/big_number.dart';
 import 'core/progression/progression_calculator.dart';
@@ -169,6 +170,29 @@ class _GameHomePageState extends State<GameHomePage> {
     );
   }
 
+
+  Future<void> _awardArcadeReward(
+    BigNumber nebula,
+    BigNumber money,
+  ) async {
+    setState(() {
+      _progression = _progressionEngine.awardArcadeReward(
+        _progression,
+        nebulaReward: nebula,
+        moneyReward: money,
+      );
+    });
+    await _persist();
+  }
+
+  Future<void> _openArcade() async {
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (_) => ArcadePage(onReward: _awardArcadeReward),
+      ),
+    );
+  }
+
   Future<void> _openUpgradeShop() async {
     await Navigator.of(context).push<void>(
       MaterialPageRoute<void>(
@@ -295,6 +319,11 @@ class _GameHomePageState extends State<GameHomePage> {
                   onPressed: _isLoading ? null : _openProgressionHub,
                   icon: const Icon(Icons.auto_awesome_rounded),
                   label: const Text('Prestige & Ultra'),
+                ),
+                OutlinedButton.icon(
+                  onPressed: _isLoading ? null : _openArcade,
+                  icon: const Icon(Icons.sports_esports_rounded),
+                  label: const Text('Arcade'),
                 ),
                 TextButton(
                   onPressed: _isLoading ? null : _newGame,
