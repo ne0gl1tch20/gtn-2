@@ -5,8 +5,6 @@
 class BigNumber implements Comparable<BigNumber> {
   BigNumber._(this.coefficient, this.scale);
 
-  const BigNumber.zero() : coefficient = BigInt.zero, scale = 0;
-
   factory BigNumber.fromInt(int value) => BigNumber._(BigInt.from(value), 0);
 
   factory BigNumber.fromParts(BigInt coefficient, int scale) {
