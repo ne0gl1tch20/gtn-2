@@ -35,7 +35,7 @@ void main() {
     );
     expect(
       ProgressionCalculator.ultraReward(
-        BigNumber.fromInt(10000000000000000000000000000000000000000),
+        BigNumber.parse('10000000000000000000000000000000000000000'),
         BigNumber.fromInt(10000000000),
       ),
       2000,
