@@ -232,10 +232,10 @@ void main() {
         throwsFormatException,
       );
       expect(
-        () => LegacySystemsState.fromJson({
+        () => LegacySystemsState.fromJson(<String, dynamic>{
           ...LegacySystemsState.initial.toJson(),
-          'musicLibrary': ['track_a'],
-          'musicQueue': ['missing_track'],
+          'musicLibrary': <String>['track_a'],
+          'musicQueue': <String>['missing_track'],
         }),
         throwsFormatException,
       );
