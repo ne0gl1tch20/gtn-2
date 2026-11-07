@@ -143,6 +143,11 @@ class ProgressionEngine {
     final defeated = Set<String>.of(state.defeatedBosses)..add(boss.id);
     final moneyReward = BigNumber.fromInt(boss.moneyReward);
     final nebulaReward = BigNumber.fromInt(boss.nebulaReward);
+    final relicInventory = Set<String>.of(state.legacySystems.relicInventory)
+      ..add(boss.id);
+    final codexEntries = Set<String>.of(state.legacySystems.codexEntries)
+      ..add('world:${boss.worldId}')
+      ..add('boss:${boss.id}');
     return state.copyWith(
       bossDamage: Map.unmodifiable(damage),
       defeatedBosses: Set.unmodifiable(defeated),
@@ -150,6 +155,10 @@ class ProgressionEngine {
       moneyEarned: state.moneyEarned + moneyReward,
       nebula: state.nebula + nebulaReward,
       nebulaEarned: state.nebulaEarned + nebulaReward,
+      legacySystems: state.legacySystems.copyWith(
+        relicInventory: Set.unmodifiable(relicInventory),
+        codexEntries: Set.unmodifiable(codexEntries),
+      ),
     );
   }
 
