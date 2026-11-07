@@ -57,6 +57,14 @@ class BigNumber implements Comparable<BigNumber> {
   BigNumber multiplyInt(int value) =>
       BigNumber.fromParts(coefficient * BigInt.from(value), scale);
 
+  /// Raises this value to a non-negative integer exponent exactly.
+  BigNumber powInt(int exponent) {
+    if (exponent < 0) {
+      throw ArgumentError.value(exponent, 'exponent', 'Must not be negative.');
+    }
+    return BigNumber.fromParts(coefficient.pow(exponent), scale * exponent);
+  }
+
   @override
   int compareTo(BigNumber other) {
     final commonScale = scale > other.scale ? scale : other.scale;
