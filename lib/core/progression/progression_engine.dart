@@ -46,6 +46,7 @@ class ProgressionEngine {
     ProgressionState state, {
     required bool correct,
     BigNumber? baseReward,
+    BigNumber? flatBonusReward,
     GuessRewardModifiers modifiers = const GuessRewardModifiers(),
     int upgradeMultiplier = 1,
   }) {
@@ -60,10 +61,13 @@ class ProgressionEngine {
       );
     }
     var reward = baseReward ?? BigNumber.fromInt(0);
-    if (reward.compareTo(BigNumber.fromInt(0)) < 0) {
-      throw ArgumentError('Guess reward cannot be negative.');
+    final bonus = flatBonusReward ?? BigNumber.fromInt(0);
+    if (reward.compareTo(BigNumber.fromInt(0)) < 0 ||
+        bonus.compareTo(BigNumber.fromInt(0)) < 0) {
+      throw ArgumentError('Guess rewards cannot be negative.');
     }
-    reward = reward.multiplyInt(upgradeMultiplier)
+    reward = (reward + bonus)
+        .multiplyInt(upgradeMultiplier)
         .multiplyInt(modifiers.streakMultiplier)
         .multiplyInt(modifiers.criticalMultiplier);
     return state.copyWith(
