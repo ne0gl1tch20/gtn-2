@@ -80,7 +80,7 @@ subprojects {
             val intParameter = Integer.TYPE
             val boxedIntParameter = Integer::class.java
             val setter = androidExtension.javaClass.methods.firstOrNull { method ->
-                method.name in setOf("setCompileSdk", "setCompileSdkVersion") &&
+                method.name in setOf("setCompileSdk", "setCompileSdkVersion", "compileSdkVersion") &&
                     method.parameterCount == 1 &&
                     (method.parameterTypes[0] == intParameter ||
                         method.parameterTypes[0] == boxedIntParameter)
