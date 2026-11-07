@@ -1,32 +1,38 @@
 import '../numbers/big_number.dart';
 
 class ProgressionState {
-  const ProgressionState({
-    this.money = const BigNumber.zero(),
-    this.prestige = const BigNumber.zero(),
-    this.ultra = const BigNumber.zero(),
-    this.nebula = const BigNumber.zero(),
+  ProgressionState({
+    BigNumber? money,
+    BigNumber? prestige,
+    BigNumber? ultra,
+    BigNumber? nebula,
     this.upgrades = const {},
     this.prestigeUpgrades = const {},
     this.ultraUpgrades = const {},
+    this.nebulaItems = const {},
     this.prestigeResets = 0,
     this.ultraResets = 0,
     this.totalGuesses = 0,
     this.correctGuesses = 0,
-    this.moneyEarned = const BigNumber.zero(),
+    BigNumber? moneyEarned,
     this.currentStreak = 0,
     this.bestStreak = 0,
-    this.nebulaEarned = const BigNumber.zero(),
-  });
+    BigNumber? nebulaEarned,
+  })  : money = money ?? BigNumber.fromInt(0),
+        prestige = prestige ?? BigNumber.fromInt(0),
+        ultra = ultra ?? BigNumber.fromInt(0),
+        nebula = nebula ?? BigNumber.fromInt(0),
+        moneyEarned = moneyEarned ?? BigNumber.fromInt(0),
+        nebulaEarned = nebulaEarned ?? BigNumber.fromInt(0);
 
   final BigNumber money, prestige, ultra, nebula;
-  final Map<String, int> upgrades, prestigeUpgrades, ultraUpgrades;
+  final Map<String, int> upgrades, prestigeUpgrades, ultraUpgrades, nebulaItems;
   final int prestigeResets, ultraResets, totalGuesses, correctGuesses;
   final BigNumber moneyEarned;
   final int currentStreak, bestStreak;
   final BigNumber nebulaEarned;
 
-  static const initial = ProgressionState();
+  static final initial = ProgressionState();
 
   Map<String, Object> toJson() => {
         'money': money.toString(),
@@ -36,6 +42,7 @@ class ProgressionState {
         'upgrades': upgrades,
         'prestigeUpgrades': prestigeUpgrades,
         'ultraUpgrades': ultraUpgrades,
+        'nebulaItems': nebulaItems,
         'prestigeResets': prestigeResets,
         'ultraResets': ultraResets,
         'totalGuesses': totalGuesses,
@@ -65,8 +72,9 @@ class ProgressionState {
       return value;
     }
 
-    Map<String, int> levels(String key) {
+    Map<String, int> levels(String key, {bool optional = false}) {
       final value = json[key];
+      if (value == null && optional) return const {};
       if (value is! Map) throw FormatException('Invalid upgrade map: $key');
       final result = <String, int>{};
       for (final entry in value.entries) {
@@ -94,6 +102,7 @@ class ProgressionState {
       upgrades: levels('upgrades'),
       prestigeUpgrades: levels('prestigeUpgrades'),
       ultraUpgrades: levels('ultraUpgrades'),
+      nebulaItems: levels('nebulaItems', optional: true),
       prestigeResets: count('prestigeResets'),
       ultraResets: count('ultraResets'),
       totalGuesses: total,
@@ -108,9 +117,10 @@ class ProgressionState {
   ProgressionState copyWith({
     BigNumber? money, BigNumber? prestige, BigNumber? ultra, BigNumber? nebula,
     Map<String, int>? upgrades, Map<String, int>? prestigeUpgrades,
-    Map<String, int>? ultraUpgrades, int? prestigeResets, int? ultraResets,
-    int? totalGuesses, int? correctGuesses, BigNumber? moneyEarned,
-    int? currentStreak, int? bestStreak, BigNumber? nebulaEarned,
+    Map<String, int>? ultraUpgrades, Map<String, int>? nebulaItems,
+    int? prestigeResets, int? ultraResets, int? totalGuesses,
+    int? correctGuesses, BigNumber? moneyEarned, int? currentStreak,
+    int? bestStreak, BigNumber? nebulaEarned,
   }) => ProgressionState(
     money: money ?? this.money,
     prestige: prestige ?? this.prestige,
@@ -119,6 +129,7 @@ class ProgressionState {
     upgrades: upgrades ?? this.upgrades,
     prestigeUpgrades: prestigeUpgrades ?? this.prestigeUpgrades,
     ultraUpgrades: ultraUpgrades ?? this.ultraUpgrades,
+    nebulaItems: nebulaItems ?? this.nebulaItems,
     prestigeResets: prestigeResets ?? this.prestigeResets,
     ultraResets: ultraResets ?? this.ultraResets,
     totalGuesses: totalGuesses ?? this.totalGuesses,
