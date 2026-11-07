@@ -1,6 +1,6 @@
-import '../numbers/big_number.dart';
-import 'progression_engine.dart';
-import 'progression_state.dart';
+import '../core/numbers/big_number.dart';
+import '../core/progression/progression_engine.dart';
+import '../core/progression/progression_state.dart';
 
 class UpgradeRewardEffects {
   const UpgradeRewardEffects({
@@ -28,8 +28,8 @@ class GameUpgrade {
   final String effectDescription;
 }
 
-/// Starter catalog values are intentionally centralized and can be rebalanced
-/// without changing save data or the progression engine.
+/// Starter catalog values are centralized so they can be rebalanced without
+/// changing save data or the progression engine.
 class UpgradeCatalog {
   UpgradeCatalog._();
 
@@ -60,7 +60,7 @@ class UpgradeCatalog {
       definition: UpgradeDefinition(
         id: 'first_strike',
         baseCost: BigNumber.fromInt(75),
-        growthRate: BigNumber.parse('2'),
+        growthRate: BigNumber.fromInt(2),
         maxLevel: 5,
       ),
       name: 'First Strike',
@@ -85,8 +85,7 @@ class UpgradeCatalog {
     return UpgradeRewardEffects(
       flatBonus: BigNumber.fromInt(luckyLevel),
       streakMultiplier: 1 + streakMilestones * streakLevel,
-      firstGuessMultiplier:
-          isFirstGuess ? 1 + firstStrikeLevel : 1,
+      firstGuessMultiplier: isFirstGuess ? 1 + firstStrikeLevel : 1,
     );
   }
 }
