@@ -49,7 +49,7 @@ jobs:
           retention-days: 7
 
   windows:
-    name: Windows desktop release
+    name: Windows desktop debug
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -69,11 +69,11 @@ jobs:
           $line = Get-Content pubspec.yaml | Where-Object { $_ -match '^version:' } | Select-Object -First 1
           if ($line -notmatch '^version:\s*([^+]+)') { throw 'Could not read app version from pubspec.yaml' }
           Add-Content $env:GITHUB_ENV "APP_VERSION=$($Matches[1])"
-      - name: Build Windows release
-        run: flutter build windows --release --build-name="$env:APP_VERSION" --build-number="$env:GITHUB_RUN_NUMBER" --dart-define=APP_VERSION="$env:APP_VERSION" --dart-define=APP_BUILD_NUMBER="$env:GITHUB_RUN_NUMBER"
+      - name: Build Windows debug
+        run: flutter build windows --debug --build-name="$env:APP_VERSION" --build-number="$env:GITHUB_RUN_NUMBER" --dart-define=APP_VERSION="$env:APP_VERSION" --dart-define=APP_BUILD_NUMBER="$env:GITHUB_RUN_NUMBER"
       - name: Package Windows build
         shell: pwsh
-        run: Compress-Archive -Path build/windows/x64/runner/Release/* -DestinationPath gtn-2-windows.zip
+        run: Compress-Archive -Path build/windows/x64/runner/Debug/* -DestinationPath gtn-2-windows.zip
       - name: Upload Windows build
         uses: actions/upload-artifact@v4
         with:
@@ -126,7 +126,7 @@ jobs:
         run: |
           set -euo pipefail
           notes="$(printf 'GTN2 Debug Latest #%s\n\nVersion: %s\nCommit: %s\n\n- Android debug APK and SHA-256 manifest.\n- Windows desktop package and SHA-256 manifest.\n- Published only after both platform builds succeed on main/master.' "$GITHUB_RUN_NUMBER" "$(sed -n 's/^version: *\([^+]*\).*/\1/p' pubspec.yaml | head -1)" "$GITHUB_SHA")"
-          gh release view debug-latest >/dev/null 2>&1 || gh release create debug-latest --target "$GITHUB_SHA" --title "GTN2 Debug Latest" --notes "Publishing Android and Windows builds..."
+          gh release view debug-latest >/dev/null 2>&1 || gh release create debug-latest --prerelease --latest=false --target "$GITHUB_SHA" --title "GTN2 Debug Latest" --notes "Publishing Android and Windows builds..."
           gh release upload debug-latest \
             release/android/GuessTheNumber-debug.apk \
             release/android/SHA256SUMS \
@@ -135,5 +135,5 @@ jobs:
             release/windows/SHA256SUMS-WINDOWS \
             release/windows/windows-update-manifest.json \
             --clobber
-          gh release edit debug-latest --target "$GITHUB_SHA" --title "GTN2 Debug Latest" --notes "$notes"
+          gh release edit debug-latest --target "$GITHUB_SHA" --title "GTN2 Debug Latest" --notes "$notes" --prerelease
           test "$(gh release view debug-latest --json body --jq .body)" = "$notes"

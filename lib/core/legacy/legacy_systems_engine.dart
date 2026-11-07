@@ -1,3 +1,4 @@
+import '../../worlds/world_boss_catalog.dart';
 import '../numbers/big_number.dart';
 import '../progression/progression_state.dart';
 import 'builtin_trait_catalog.dart';
@@ -583,19 +584,93 @@ class LegacySystemsEngine {
         return _reject(progression, systems, 'Defeat all four world bosses first.');
       }
       final tier = systems.endlessRiftBestTier + 1 > 1 ? systems.endlessRiftBestTier + 1 : 1;
-      return _accept(progression, systems.copyWith(
-        endlessRiftActive: true,
-        endlessRiftTier: tier,
-        activeWorldId: 'verdant_grove',
-        activeBossBattleWorldId: 'verdant_grove',
-        bossBattleMistakes: Map.unmodifiable({...systems.bossBattleMistakes, 'verdant_guardian': 0}),
-      ));
+      final bossDamage = Map<String, int>.of(progression.bossDamage)
+        ..['verdant_grove'] = 0;
+      return _accept(
+        progression.copyWith(bossDamage: Map.unmodifiable(bossDamage)),
+        systems.copyWith(
+          endlessRiftActive: true,
+          endlessRiftTier: tier,
+          activeWorldId: 'verdant_grove',
+          activeBossBattleWorldId: 'verdant_grove',
+          bossBattleMistakes: Map.unmodifiable({...systems.bossBattleMistakes, 'verdant_grove': 0}),
+        ),
+      );
     }
     if (!systems.endlessRiftActive) return _reject(progression, systems, 'Endless Rift is not active.');
     return _accept(progression, systems.copyWith(
       endlessRiftActive: false,
       clearActiveBossBattle: true,
     ));
+  }
+
+  LegacyActionResult attackEndlessRiftBoss(
+    ProgressionState progression,
+    LegacySystemsState systems,
+  ) {
+    if (!systems.endlessRiftActive || systems.activeBossBattleWorldId == null) {
+      return _reject(progression, systems, 'No Endless Rift boss is active.');
+    }
+    final worldIndex = WorldBossCatalog.worlds.indexWhere((world) => world.id == systems.activeWorldId);
+    if (worldIndex < 0) return _reject(progression, systems, 'Unknown Endless Rift world.');
+    final world = WorldBossCatalog.worlds[worldIndex];
+    final tier = systems.endlessRiftTier.clamp(1, 1000000).toInt();
+    final hp = world.hits + (tier - 1) * 2;
+    final damage = progression.bossDamage[world.id] ?? 0;
+    final nextDamage = damage + 1;
+    if (nextDamage < hp) {
+      final nextBossDamage = Map<String, int>.of(progression.bossDamage)..[world.id] = nextDamage;
+      return _accept(
+        progression.copyWith(bossDamage: Map.unmodifiable(nextBossDamage)),
+        systems,
+      );
+    }
+    final moneyReward = BigNumber.fromInt(world.moneyReward).multiplyInt(tier);
+    final nebulaReward = BigNumber.fromInt(world.nebulaReward).multiplyInt(tier);
+    final nextWorld = WorldBossCatalog.worlds[(worldIndex + 1) % WorldBossCatalog.worlds.length];
+    final nextBossDamage = Map<String, int>.of(progression.bossDamage)
+      ..[world.id] = hp
+      ..[nextWorld.id] = 0;
+    return _accept(
+      progression.copyWith(
+        money: progression.money + moneyReward,
+        moneyEarned: progression.moneyEarned + moneyReward,
+        nebula: progression.nebula + nebulaReward,
+        nebulaEarned: progression.nebulaEarned + nebulaReward,
+        bossDamage: Map.unmodifiable(nextBossDamage),
+      ),
+      systems.copyWith(
+        activeWorldId: nextWorld.id,
+        activeBossBattleWorldId: nextWorld.id,
+        endlessRiftTier: tier + 1,
+        endlessRiftBestTier: systems.endlessRiftBestTier > tier ? systems.endlessRiftBestTier : tier,
+        bossBattleMistakes: Map.unmodifiable({...systems.bossBattleMistakes, nextWorld.id: 0}),
+      ),
+    );
+  }
+
+  LegacyActionResult recordEndlessRiftMiss(
+    ProgressionState progression,
+    LegacySystemsState systems,
+  ) {
+    if (!systems.endlessRiftActive || systems.activeBossBattleWorldId == null) {
+      return _reject(progression, systems, 'No Endless Rift boss is active.');
+    }
+    final worldId = systems.activeWorldId;
+    final worldIndex = WorldBossCatalog.worlds.indexWhere((item) => item.id == worldId);
+    if (worldIndex < 0) return _reject(progression, systems, 'Unknown Endless Rift world.');
+    final world = WorldBossCatalog.worlds[worldIndex];
+    final hp = world.hits + (systems.endlessRiftTier - 1).clamp(0, 2000000).toInt() * 2;
+    final damage = progression.bossDamage[worldId] ?? 0;
+    final misses = (systems.bossBattleMistakes[worldId] ?? 0) + 1;
+    final phase = ((damage * 3) ~/ hp + 1).clamp(1, 3);
+    final interval = switch (phase) { 1 => 4, 2 => 3, _ => 2 };
+    final nextDamage = misses % interval == 0 ? (damage - 1).clamp(0, hp).toInt() : damage;
+    final bossDamage = Map<String, int>.of(progression.bossDamage)..[worldId] = nextDamage;
+    return _accept(
+      progression.copyWith(bossDamage: Map.unmodifiable(bossDamage)),
+      systems.copyWith(bossBattleMistakes: Map.unmodifiable({...systems.bossBattleMistakes, worldId: misses})),
+    );
   }
 
   LegacyActionResult claimChallenge({
