@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import 'home/game_dashboard_page.dart';
+
 import 'arcade/arcade_page.dart';
 import 'core/game/game_engine.dart';
 import 'core/numbers/big_number.dart';
@@ -519,116 +521,25 @@ class _GameHomePageState extends State<GameHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('GuessTheNumber 2'),
-        actions: [
-          if (kDebugMode)
-            IconButton(
-              tooltip: 'Developer settings',
-              onPressed: _isLoading ? null : _openDeveloperSettings,
-              icon: const Icon(Icons.bug_report_rounded),
-            ),
-          IconButton(
-            tooltip: 'Save slots',
-            onPressed: _isLoading ? null : _openSaveSlots,
-            icon: const Icon(Icons.save_rounded),
-          ),
-        ],
-      ),
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 460),
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const Icon(Icons.casino_rounded, size: 64),
-                const SizedBox(height: 24),
-                Text(
-                  _isLoading ? 'Loading saved game…' : _message,
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  'Attempts: ${_game.attempts}  •  Games won: $_gamesWon\n'
-                  'Money: ${_progression.money}',
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 24),
-                TextField(
-                  controller: _controller,
-                  enabled: !_isLoading && !_game.isComplete,
-                  keyboardType: TextInputType.number,
-                  textInputAction: TextInputAction.done,
-                  onSubmitted: (_) => _submitGuess(),
-                  decoration: const InputDecoration(
-                    labelText: 'Your guess',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                FilledButton(
-                  onPressed: _isLoading || _game.isComplete
-                      ? null
-                      : _submitGuess,
-                  child: const Text('Guess'),
-                ),
-                OutlinedButton.icon(
-                  onPressed: _isLoading ? null : _openUpgradeShop,
-                  icon: const Icon(Icons.upgrade_rounded),
-                  label: const Text('Upgrade Shop'),
-                ),
-                OutlinedButton.icon(
-                  onPressed: _isLoading ? null : _openProgressionHub,
-                  icon: const Icon(Icons.auto_awesome_rounded),
-                  label: const Text('Prestige & Ultra'),
-                ),
-                OutlinedButton.icon(
-                  onPressed: _isLoading ? null : _openArcade,
-                  icon: const Icon(Icons.sports_esports_rounded),
-                  label: const Text('Arcade'),
-                ),
-                OutlinedButton.icon(
-                  onPressed: _isLoading ? null : _openNebulaShop,
-                  icon: const Icon(Icons.diamond_rounded),
-                  label: const Text('Nebula Shop'),
-                ),
-                OutlinedButton.icon(
-                  onPressed: _isLoading ? null : _openWorldMap,
-                  icon: const Icon(Icons.map_rounded),
-                  label: const Text('World Map'),
-                ),
-                OutlinedButton.icon(
-                  onPressed: _isLoading ? null : _openSaveSlots,
-                  icon: const Icon(Icons.save_rounded),
-                  label: Text('Save Slots · $_activeSlot'),
-                ),
-                OutlinedButton.icon(
-                  onPressed: _isLoading ? null : _openSettings,
-                  icon: const Icon(Icons.settings_rounded),
-                  label: const Text('Settings'),
-                ),
-                if (kDebugMode)
-                  OutlinedButton.icon(
-                    onPressed: _isLoading ? null : _openDeveloperSettings,
-                    icon: const Icon(Icons.bug_report_rounded),
-                    label: const Text('Developer Settings'),
-                  ),
-                TextButton(
-                  onPressed: _isLoading ? null : _newGame,
-                  child: const Text('New game'),
-                ),
-              ],
-              ),
-            ),
-          ),
-        ),
-      ),
+    return GameDashboardPage(
+      game: _game,
+      progression: _progression,
+      gamesWon: _gamesWon,
+      activeSlot: _activeSlot,
+      loading: _isLoading,
+      message: _message,
+      controller: _controller,
+      onGuess: _submitGuess,
+      onNewGame: _newGame,
+      onUpgradeShop: _openUpgradeShop,
+      onPrestige: _openProgressionHub,
+      onArcade: _openArcade,
+      onNebulaShop: _openNebulaShop,
+      onWorldMap: _openWorldMap,
+      onSaveSlots: _openSaveSlots,
+      onSettings: _openSettings,
+      onDeveloperSettings: _openDeveloperSettings,
+      showDeveloperSettings: kDebugMode,
     );
   }
 }
