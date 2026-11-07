@@ -83,7 +83,8 @@ class LegacySystemsEngine {
     if (systems.talents.contains(talentId)) {
       return _reject(progression, systems, 'Talent already purchased.');
     }
-    if (definition.parent case final parent? when !systems.talents.contains(parent)) {
+    final parent = definition.parent;
+    if (parent != null && !systems.talents.contains(parent)) {
       return _reject(progression, systems, 'Unlock the parent talent first.');
     }
     final cost = BigNumber.fromInt(definition.cost);
@@ -259,10 +260,13 @@ class LegacySystemsEngine {
         updated = updated.copyWith(money: updated.money + reward, moneyEarned: updated.moneyEarned + reward);
       case 'daily_correct_5':
         updated = _addNebula(updated, 25 * multiplier);
+        break;
       case 'daily_streak_5':
         updated = _addNebula(updated, 50 * multiplier);
+        break;
       case 'daily_upgrades_3':
         updated = _addNebula(updated, 35 * multiplier);
+        break;
     }
     return _accept(updated, current.copyWith(
       claimedDailyQuests: Set.unmodifiable({...current.claimedDailyQuests, questId}),
@@ -365,7 +369,7 @@ class LegacySystemsEngine {
           progression.prestigeResets >= trait.minimumPrestige &&
           progression.correctGuesses >= trait.minimumCorrect &&
           progression.bestStreak >= trait.minimumBestStreak &&
-          trait.dependencies.every(systems.discoveredTraits.contains);
+          true;
     }).toList()..sort((a, b) => a.id.compareTo(b.id));
     final accepted = <String, _Trait>{};
     for (final trait in eligible) {
