@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'arcade/arcade_page.dart';
+import 'saves/save_slots_page.dart';
 import 'core/game/game_engine.dart';
 import 'core/numbers/big_number.dart';
 import 'core/progression/progression_calculator.dart';
@@ -53,8 +54,8 @@ class _GameHomePageState extends State<GameHomePage> {
   ProgressionState _progression = ProgressionState.initial;
   final TextEditingController _controller = TextEditingController();
   late GameState _game = _engine.newGame();
-  late final Future<SaveStorage> _storage =
-      SaveStorage.inApplicationDocuments();
+  late Future<SaveStorage> _storage = SaveStorage.inApplicationDocuments();
+  int _activeSlot = 1;
   int _gamesWon = 0;
   bool _isLoading = true;
   String _message = 'Guess a number between 1 and 100.';
@@ -246,6 +247,52 @@ class _GameHomePageState extends State<GameHomePage> {
     );
   }
 
+
+  Future<void> _switchSaveSlot(int slot) async {
+    setState(() => _isLoading = true);
+    try {
+      final storage = await SaveStorage.inApplicationDocuments(slot: slot);
+      final save = await storage.load();
+      if (!mounted) return;
+      setState(() {
+        _storage = Future.value(storage);
+        _activeSlot = slot;
+        _game = save == null
+            ? _engine.newGame()
+            : _engine.restore(
+                secret: save.secret,
+                attempts: save.attempts,
+                isComplete: save.isComplete,
+              );
+        _gamesWon = save?.gamesWon ?? 0;
+        _progression = save?.progression ?? ProgressionState.initial;
+        _message = save == null
+            ? 'New save slot ready. Guess a number between 1 and 100.'
+            : 'Save slot $slot loaded.';
+        _isLoading = false;
+      });
+      if (save == null) await _persist();
+    } on Exception {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _message = 'Could not load save slot $slot.';
+        });
+      }
+    }
+  }
+
+  Future<void> _openSaveSlots() async {
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (_) => SaveSlotsPage(
+          activeSlot: _activeSlot,
+          onSelect: _switchSaveSlot,
+        ),
+      ),
+    );
+  }
+
   Future<void> _openUpgradeShop() async {
     await Navigator.of(context).push<void>(
       MaterialPageRoute<void>(
@@ -325,7 +372,16 @@ class _GameHomePageState extends State<GameHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('GuessTheNumber 2')),
+      appBar: AppBar(
+        title: const Text('GuessTheNumber 2'),
+        actions: [
+          IconButton(
+            tooltip: 'Save slots',
+            onPressed: _isLoading ? null : _openSaveSlots,
+            icon: const Icon(Icons.save_rounded),
+          ),
+        ],
+      ),
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 460),
@@ -392,6 +448,11 @@ class _GameHomePageState extends State<GameHomePage> {
                   onPressed: _isLoading ? null : _openWorldMap,
                   icon: const Icon(Icons.map_rounded),
                   label: const Text('World Map'),
+                ),
+                OutlinedButton.icon(
+                  onPressed: _isLoading ? null : _openSaveSlots,
+                  icon: const Icon(Icons.save_rounded),
+                  label: Text('Save Slots · $_activeSlot'),
                 ),
                 TextButton(
                   onPressed: _isLoading ? null : _newGame,
