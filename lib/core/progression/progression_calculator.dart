@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import '../numbers/big_number.dart';
 import 'progression_engine.dart';
 import 'progression_state.dart';
@@ -40,7 +42,7 @@ class ProgressionCalculator {
         : numerator ~/ (denominator * BigInt.fromInt(10).pow(-shift));
     final digits = scaled.toString().padLeft(17, '0');
     final mantissa = double.parse('${digits.substring(0, 1)}.${digits.substring(1, 16)}');
-    final reward = (100 * (exponent + (log10(mantissa)))).floor();
+    final reward = (100 * (exponent + ((math.log(mantissa) / math.ln10)))).floor();
     return reward.clamp(0, 2000);
   }
 
@@ -96,5 +98,3 @@ class ProgressionCalculator {
     return exponent;
   }
 }
-
-double log10(double value) => value.log10();
