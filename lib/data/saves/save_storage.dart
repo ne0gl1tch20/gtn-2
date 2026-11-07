@@ -10,6 +10,7 @@ class SaveStorage {
       : _file = File('${directory.path}/gtn2-save.json');
 
   final File _file;
+  Future<void> _pendingWrite = Future<void>.value();
 
   static Future<SaveStorage> inApplicationDocuments() async {
     final directory = await getApplicationDocumentsDirectory();
@@ -29,15 +30,25 @@ class SaveStorage {
     }
   }
 
-  Future<void> save(SaveData data) async {
+  Future<void> save(SaveData data) {
     if (data.schemaVersion != SaveData.currentSchemaVersion ||
         data.secret < 1 ||
         data.secret > 100 ||
         data.attempts < 0 ||
         data.gamesWon < 0) {
-      throw ArgumentError('Refusing to write invalid save data.');
+      return Future<void>.error(
+        ArgumentError('Refusing to write invalid save data.'),
+      );
     }
 
+    // Serialize writes so rapid input cannot race on the same temporary file.
+    _pendingWrite = _pendingWrite
+        .catchError((Object _) {})
+        .then((_) => _write(data));
+    return _pendingWrite;
+  }
+
+  Future<void> _write(SaveData data) async {
     await _file.parent.create(recursive: true);
     final temporary = File('${_file.path}.tmp');
     final backup = File('${_file.path}.bak');
