@@ -62,12 +62,12 @@ class _ProgressionHubPageState extends State<ProgressionHubPage> {
   Widget build(BuildContext context) {
     final prestigeRequirement =
         ProgressionCalculator.prestigeRequirement(_state.prestigeResets);
-    final prestigeReward =
-        ProgressionCalculator.prestigeReward(_state.money, prestigeRequirement);
+    final prestigeReward = ProgressionCalculator.prestigeRules(_state)
+        .rewardForMoney(_state.money);
     final ultraRequirement =
         ProgressionCalculator.ultraRequirement(_state.ultraResets);
-    final ultraReward =
-        ProgressionCalculator.ultraReward(_state.money, ultraRequirement);
+    final ultraReward = ProgressionCalculator.ultraRules(_state)
+        .rewardForMoney(_state.money);
     final hasPrestigeForUltra =
         _state.prestige.compareTo(BigNumber.fromInt(1000)) >= 0;
     final theme = Theme.of(context);
