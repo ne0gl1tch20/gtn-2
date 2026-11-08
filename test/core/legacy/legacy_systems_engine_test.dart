@@ -119,19 +119,30 @@ void main() {
       expect(result.progression.nebula.compareTo(n(80)), 0);
     });
 
-    test('mastery requires the preceding world boss to be defeated', () {
-      final progression = ProgressionState.initial.copyWith(
+    test('mastery requires the world to be unlocked and its boss defeated', () {
+      final defeatedButLocked = ProgressionState.initial.copyWith(
         defeatedBosses: const {'crystal_golem'},
         nebula: n(100),
       );
-      final result = engine.upgradeWorldMastery(
-        progression: progression,
+      final lockedResult = engine.upgradeWorldMastery(
+        progression: defeatedButLocked,
         systems: LegacySystemsState.initial,
         worldId: 'crystal_caverns',
       );
+      expect(lockedResult.accepted, isFalse);
 
-      expect(result.accepted, isFalse);
-      expect(result.progression.nebula.compareTo(n(100)), 0);
+      final unlocked = defeatedButLocked.copyWith(
+        legacySystems: LegacySystemsState.initial.copyWith(
+          unlockedWorldIds: const {'verdant_grove', 'crystal_caverns'},
+        ),
+      );
+      final accepted = engine.upgradeWorldMastery(
+        progression: unlocked,
+        systems: unlocked.legacySystems,
+        worldId: 'crystal_caverns',
+      );
+      expect(accepted.accepted, isTrue);
+      expect(accepted.systems.worldMasteryLevels['crystal_caverns'], 2);
     });
 
     test('secret discovery recognizes previous boss IDs and requires unlock', () {
