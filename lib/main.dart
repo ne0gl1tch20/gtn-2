@@ -624,8 +624,12 @@ class _GameHomePageState extends State<GameHomePage> {
         );
         final adaptiveDecision = _invisibleTraitEngine.evaluate(
           profile: adaptiveProfile,
-          prestigeCount: adaptiveProfile.prestigesObserved,
-          ultraCount: adaptiveProfile.ultrasObserved,
+          prestigeCount: adaptiveProfile.prestigesObserved > beforeGuess.prestigeResets
+              ? adaptiveProfile.prestigesObserved
+              : beforeGuess.prestigeResets,
+          ultraCount: adaptiveProfile.ultrasObserved > beforeGuess.ultraResets
+              ? adaptiveProfile.ultrasObserved
+              : beforeGuess.ultraResets,
           currentStreak: afterReward.currentStreak,
         );
         rangeScoutActive = rangeScoutActive ||
