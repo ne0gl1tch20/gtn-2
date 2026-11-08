@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'arcade/arcade_page.dart';
+import 'core/game/difficulty_rules.dart';
 import 'core/game/game_engine.dart';
 import 'core/legacy/invisible_trait_engine.dart';
 import 'core/legacy/legacy_systems_engine.dart';
@@ -84,10 +85,17 @@ class GameHomePage extends StatefulWidget {
 class _GameHomePageState extends State<GameHomePage> {
   GameEngine _engine = GameEngine();
 
+  int _rangeMaximum(ProgressionState progression, GameSettings settings) =>
+      DifficultyRules.rangeMaximum(
+        settings.difficultyId,
+        progression.upgrades['better_range'] ?? 0,
+      ) * _legacySystemsEngine.rangeMultiplier(progression.legacySystems);
+
+  GameEngine _engineFor(ProgressionState progression, GameSettings settings) =>
+      GameEngine(maximum: _rangeMaximum(progression, settings));
+
   GameState _createGame() => _newGameWithAdaptiveTarget(
-        GameEngine(
-          maximum: 100 * _legacySystemsEngine.rangeMultiplier(_progression.legacySystems),
-        ).newGame(),
+        _engineFor(_progression, _settings).newGame(),
       );
 
   GameState _newGameWithAdaptiveTarget(GameState candidate) {
@@ -133,9 +141,7 @@ class _GameHomePageState extends State<GameHomePage> {
       if (!mounted) return;
       if (save != null) {
         final restoredProgression = save.progression;
-        final restoredEngine = GameEngine(
-          maximum: 100 * _legacySystemsEngine.rangeMultiplier(restoredProgression.legacySystems),
-        );
+        final restoredEngine = _engineFor(restoredProgression, save.settings);
         await AppLocalizations.load(save.settings.localeCode);
         setState(() {
           _engine = restoredEngine;
@@ -191,6 +197,8 @@ class _GameHomePageState extends State<GameHomePage> {
   ) async {
     final updated = _progressionEngine.purchaseUpgrade(_progression, definition);
     if (updated != _progression) {
+      final previousRange = _rangeMaximum(_progression, _settings);
+      final nextRange = _rangeMaximum(updated, _settings);
       final withQuestProgress = updated.copyWith(
         legacySystems: _legacySystemsEngine.recordUpgradePurchase(
           updated.legacySystems,
@@ -200,7 +208,14 @@ class _GameHomePageState extends State<GameHomePage> {
           ),
         ),
       );
-      setState(() => _progression = withQuestProgress);
+      setState(() {
+        _progression = withQuestProgress;
+        if (previousRange != nextRange) {
+          _engine = _engineFor(withQuestProgress, _settings);
+          _game = _newGameWithAdaptiveTarget(_engine.newGame());
+          _message = 'Your range upgrade is active. A fresh round is ready.';
+        }
+      });
       await _persist();
     }
     return _progression;
@@ -365,9 +380,8 @@ class _GameHomePageState extends State<GameHomePage> {
       final nextProgression = save?.progression ?? ProgressionState.initial;
       await AppLocalizations.load(save?.settings.localeCode ?? 'en_us');
       if (!mounted) return;
-      final nextEngine = GameEngine(
-        maximum: 100 * _legacySystemsEngine.rangeMultiplier(nextProgression.legacySystems),
-      );
+      final nextSettings = save?.settings ?? GameSettings.initial;
+      final nextEngine = _engineFor(nextProgression, nextSettings);
       setState(() {
         _storage = Future.value(storage);
         _activeSlot = slot;
@@ -378,10 +392,12 @@ class _GameHomePageState extends State<GameHomePage> {
                 secret: save.secret,
                 attempts: save.attempts,
                 isComplete: save.isComplete,
+                savedMinimum: save.minimum,
+                savedMaximum: save.maximum,
               );
         _gamesWon = save?.gamesWon ?? 0;
         _progression = nextProgression;
-        _settings = save?.settings ?? GameSettings.initial;
+        _settings = nextSettings;
         GtnApp.settingsNotifier.value = _settings;
         _message = save == null
             ? 'New save slot ready. Guess a number between 1 and 100.'
@@ -414,7 +430,15 @@ class _GameHomePageState extends State<GameHomePage> {
   Future<void> _updateSettings(GameSettings settings) async {
     await AppLocalizations.load(settings.localeCode);
     if (!mounted) return;
-    setState(() => _settings = settings);
+    final difficultyChanged = settings.difficultyId != _settings.difficultyId;
+    setState(() {
+      _settings = settings;
+      if (difficultyChanged) {
+        _engine = _engineFor(_progression, settings);
+        _game = _newGameWithAdaptiveTarget(_engine.newGame());
+        _message = 'Difficulty changed to ${DifficultyRules.name(settings.difficultyId)}. A fresh round is ready.';
+      }
+    });
     GtnApp.settingsNotifier.value = settings;
     await _persist();
   }
@@ -538,12 +562,12 @@ class _GameHomePageState extends State<GameHomePage> {
   }
 
   Future<void> _applyLegacyProgression(ProgressionState progression) async {
-    final oldRange = _legacySystemsEngine.rangeMultiplier(_progression.legacySystems);
-    final newRange = _legacySystemsEngine.rangeMultiplier(progression.legacySystems);
+    final oldRange = _rangeMaximum(_progression, _settings);
+    final newRange = _rangeMaximum(progression, _settings);
     setState(() {
       _progression = progression;
       if (oldRange != newRange) {
-        _engine = GameEngine(maximum: 100 * newRange);
+        _engine = _engineFor(progression, _settings);
         _game = _newGameWithAdaptiveTarget(_engine.newGame());
         _message = 'Hardcore range changed. A fresh round is ready.';
       }
@@ -609,6 +633,7 @@ class _GameHomePageState extends State<GameHomePage> {
         final rawReward = correct
             ? (BigNumber.fromInt(1) + effects.flatBonus) *
                 _legacySystemsEngine.mutatorRewardMultiplier(legacySystems) *
+                BigNumber.parse(DifficultyRules.rewardMultiplier(_settings.difficultyId).toStringAsFixed(2)) *
                 BigNumber.parse(traitEffects.correctGuessMultiplier.toStringAsFixed(2))
             : null;
         var afterReward = _progressionEngine.recordGuess(
@@ -676,9 +701,12 @@ class _GameHomePageState extends State<GameHomePage> {
             );
           }
         } else {
-          final penalty = legacySystems.activeMutators.contains('mut_tax')
+          final difficultyPenalty = beforeGuess.money *
+              BigNumber.parse(DifficultyRules.wrongGuessPenalty(_settings.difficultyId).toStringAsFixed(2));
+          final taxPenalty = legacySystems.activeMutators.contains('mut_tax')
               ? beforeGuess.money * BigNumber.parse('0.05')
               : BigNumber.fromInt(0);
+          final penalty = difficultyPenalty + taxPenalty;
           final refund = penalty * BigNumber.parse(
             traitEffects.missPenaltyRefundRate.toStringAsFixed(2),
           );

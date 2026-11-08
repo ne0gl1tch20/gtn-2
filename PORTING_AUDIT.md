@@ -77,3 +77,18 @@ Implemented in Dart on this branch:
 - Dedicated tests cover default migration, profile round-trip/invalid data, helper thresholds/cooldowns, one-time bonuses, observation and target bias.
 
 This is one behavioral subsystem pass, not a full-port completion claim. It still needs CI validation and source-parity review. Remaining major work includes connecting every canonical talent/mutator/relic effect to the actual gameplay transaction, removing fallback/mock catalogs, validating every canonical talent/mutator/relic effect against the source gameplay transaction, finishing music and updater parity, auditing every source asset/catalog, and validating all screens and save migrations. The current player-level value of 1 matches GTN1's current Kotlin trait runtime and is not being changed as part of this port.
+
+
+## Difficulty and range gameplay pass (2026-11-08)
+
+The active branch `port/difficulty-range-rules` ports GTN1's canonical `DifficultyRules` values into Dart:
+- Classic, Hard and Extreme target ranges (100 / 150 / 250).
+- Difficulty reward multipliers (1.0× / 1.5× / 2.5×) and wrong-guess penalties (0% / 2% / 5%).
+- The Better Guess Range upgrade reduces the configured maximum by five per level, down to 50.
+- Hardcore doubles the selected difficulty range, including Extreme Hardcore's 500 maximum.
+- Difficulty selection is stored in each save's settings; older saves default to Classic.
+- The save and game-state validators now accept the full 500-number range.
+- The Flutter settings screen exposes the difficulty selector, and the gameplay transaction applies the difficulty reward and penalty rules.
+- Tests cover balance values, range reduction, save compatibility and restoring a 500-range game.
+
+This pass fixes the previous fixed-100-range behavior. It does not yet claim full economy parity: GTN1's complete reward stack, difficulty-specific presentation, all upgrade catalog effects, auto-clicker/offline earnings and remaining settings parity still require separate implementation and comparison.

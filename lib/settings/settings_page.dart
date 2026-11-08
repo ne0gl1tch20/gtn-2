@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../core/game/difficulty_rules.dart';
 import '../i18n/app_localizations.dart';
 import 'game_settings.dart';
 
@@ -35,6 +36,27 @@ class SettingsPage extends StatelessWidget {
               ],
               onChanged: (code) {
                 if (code != null) onChanged(settings.copyWith(localeCode: code));
+              },
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+            child: DropdownButtonFormField<String>(
+              initialValue: settings.difficultyId,
+              decoration: const InputDecoration(
+                labelText: 'Difficulty',
+                helperText: 'Changes the target range, rewards and wrong-guess penalty.',
+                border: OutlineInputBorder(),
+              ),
+              items: [
+                for (final id in DifficultyRules.ids)
+                  DropdownMenuItem<String>(
+                    value: id,
+                    child: Text(DifficultyRules.name(id)),
+                  ),
+              ],
+              onChanged: (id) {
+                if (id != null) onChanged(settings.copyWith(difficultyId: id));
               },
             ),
           ),
