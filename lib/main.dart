@@ -452,6 +452,13 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
       (id) => (_progression.nebulaItems[id] ?? 0) > 0,
     );
     if (!hasBot) return _progression;
+    if (active && _progression.legacySystems.timeTravelPenaltyUntil >
+        DateTime.now().millisecondsSinceEpoch) {
+      if (mounted) {
+        setState(() => _message = 'Auto Clicker is temporarily paused after a clock rollback.');
+      }
+      return _progression;
+    }
     setState(() {
       _progression = _progression.copyWith(
         legacySystems: _progression.legacySystems.copyWith(
