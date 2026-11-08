@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../core/progression/progression_state.dart';
 import '../creative/creative_mode_page.dart';
 import '../i18n/app_localizations.dart';
+import '../lua/lua_activity_hub_page.dart';
 import '../worlds/world_boss_catalog.dart';
 import 'legacy_systems_page.dart';
 
@@ -41,6 +42,19 @@ class LegacyHubPage extends StatelessWidget {
           const SizedBox(height: 6),
           const Text('Progress, lifetime rewards, records and the world codex.'),
           const SizedBox(height: 16),
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.play_circle_outline_rounded),
+              title: const Text('Activity Hub'),
+              subtitle: const Text('Play short offline activities powered by the bundled GTN1 script catalog.'),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () => Navigator.of(context).push<void>(
+                MaterialPageRoute<void>(
+                  builder: (_) => const LuaActivityHubPage(),
+                ),
+              ),
+            ),
+          ),
           Card(
             child: ListTile(
               leading: const Icon(Icons.palette_rounded),
