@@ -70,7 +70,7 @@ void main() {
       tester.getSemantics(
         find.byKey(const ValueKey('world-node-crystal_caverns')),
       ).getSemanticsData().flagsCollection.isSelected,
-      isTrue,
+      Tristate.isTrue,
     );
   });
 
