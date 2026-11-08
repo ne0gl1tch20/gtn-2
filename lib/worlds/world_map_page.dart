@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
 import '../core/progression/progression_state.dart';
 import '../i18n/app_localizations.dart';
@@ -102,13 +101,13 @@ class _WorldMapPageState extends State<WorldMapPage> {
     final horizontalOffset =
         (constraints.maxWidth - _mapWidth * scale) / 2;
     _transformController.value = Matrix4.identity()
-      ..translate(horizontalOffset, verticalOffset)
-      ..scale(scale);
+      ..translateByDouble(horizontalOffset, verticalOffset, 0, 1)
+      ..scaleByDouble(scale, scale, scale, 1);
   }
 
   void _zoom(double factor) {
     final current = _transformController.value;
-    final next = Matrix4.copy(current)..scale(factor);
+    final next = Matrix4.copy(current)..scaleByDouble(factor, factor, factor, 1);
     final scale = next.getMaxScaleOnAxis();
     if (scale >= 0.35 && scale <= 3.0) {
       _transformController.value = next;
