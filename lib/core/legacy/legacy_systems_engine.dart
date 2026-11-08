@@ -118,7 +118,7 @@ class LegacySystemsEngine {
     return _accept(
       progression.copyWith(
         money: progression.money - cost,
-        moneyEarned: progression.moneyEarned,
+        moneySpent: progression.moneySpent + cost,
       ),
       systems.copyWith(homeBaseLevel: systems.homeBaseLevel + 1),
     );
@@ -273,6 +273,7 @@ class LegacySystemsEngine {
     final updated = progression.copyWith(
       money: money,
       moneyEarned: progression.moneyEarned + payout,
+      moneySpent: progression.moneySpent + stake,
     );
     return _accept(updated, systems.copyWith(
       stakesPlaced: systems.stakesPlaced + 1,
