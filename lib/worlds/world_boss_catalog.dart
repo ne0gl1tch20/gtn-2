@@ -5,8 +5,12 @@ class WorldBossDefinition {
     required this.id,
     required this.bossId,
     required this.name,
+    required this.nameKey,
     required this.worldName,
-    required this.description,
+    required this.bossNameKey,
+    required this.worldRequirementKey,
+    required this.bossRequirementKey,
+    required this.bossRewardKey,
     required this.x,
     required this.y,
     required this.secretId,
@@ -28,8 +32,12 @@ class WorldBossDefinition {
   final String id;
   final String bossId;
   final String name;
+  final String nameKey;
   final String worldName;
-  final String description;
+  final String bossNameKey;
+  final String worldRequirementKey;
+  final String bossRequirementKey;
+  final String bossRewardKey;
   final double x;
   final double y;
   final String secretId;
@@ -61,8 +69,10 @@ class WorldBossCatalog {
   static const worlds = <WorldBossDefinition>[
     WorldBossDefinition(
       id: 'verdant_grove', bossId: 'verdant_guardian',
-      name: 'Verdant Guardian', worldName: 'Verdant Grove',
-      description: 'The first guardian protects the overgrown path.',
+      name: 'Verdant Guardian', nameKey: 'boss_verdant_name',
+      worldName: 'Verdant Grove', bossNameKey: 'boss_verdant_name',
+      worldRequirementKey: 'world_verdant_requirement',
+      bossRequirementKey: 'boss_verdant_requirement', bossRewardKey: 'boss_verdant_reward',
       x: 0.16, y: 0.24, secretId: 'whispering_hollow', secretAt: 50,
       unlockCorrectGuesses: 0, unlockUpgradeCount: 0,
       unlockPrestigeCount: 0, unlockUltraCount: 0,
@@ -72,8 +82,10 @@ class WorldBossCatalog {
     ),
     WorldBossDefinition(
       id: 'crystal_caverns', bossId: 'crystal_golem',
-      name: 'Crystal Golem', worldName: 'Crystal Caverns',
-      description: 'A crystal beast guards the cavern entrance.',
+      name: 'Crystal Golem', nameKey: 'boss_crystal_name',
+      worldName: 'Crystal Caverns', bossNameKey: 'boss_crystal_name',
+      worldRequirementKey: 'world_crystal_requirement',
+      bossRequirementKey: 'boss_crystal_requirement', bossRewardKey: 'boss_crystal_reward',
       x: 0.43, y: 0.43, secretId: 'shard_archive', secretAt: 150,
       unlockBossId: 'verdant_guardian', unlockCorrectGuesses: 25,
       unlockUpgradeCount: 5, unlockPrestigeCount: 0, unlockUltraCount: 0,
@@ -83,8 +95,10 @@ class WorldBossCatalog {
     ),
     WorldBossDefinition(
       id: 'ember_summit', bossId: 'ember_dragon',
-      name: 'Ember Dragon', worldName: 'Ember Summit',
-      description: 'A blazing guardian waits above the clouds.',
+      name: 'Ember Dragon', nameKey: 'boss_ember_name',
+      worldName: 'Ember Summit', bossNameKey: 'boss_ember_name',
+      worldRequirementKey: 'world_ember_requirement',
+      bossRequirementKey: 'boss_ember_requirement', bossRewardKey: 'boss_ember_reward',
       x: 0.67, y: 0.24, secretId: 'ashen_vault', secretAt: 300,
       unlockBossId: 'crystal_golem', unlockCorrectGuesses: 100,
       unlockUpgradeCount: 15, unlockPrestigeCount: 1, unlockUltraCount: 0,
@@ -94,8 +108,10 @@ class WorldBossCatalog {
     ),
     WorldBossDefinition(
       id: 'nebula_rift', bossId: 'nebula_titan',
-      name: 'Nebula Titan', worldName: 'Nebula Rift',
-      description: 'The final guardian watches over the rift.',
+      name: 'Nebula Titan', nameKey: 'boss_nebula_name',
+      worldName: 'Nebula Rift', bossNameKey: 'boss_nebula_name',
+      worldRequirementKey: 'world_nebula_requirement',
+      bossRequirementKey: 'boss_nebula_requirement', bossRewardKey: 'boss_nebula_reward',
       x: 0.82, y: 0.59, secretId: 'lost_observatory', secretAt: 600,
       unlockBossId: 'ember_dragon', unlockCorrectGuesses: 250,
       unlockUpgradeCount: 40, unlockPrestigeCount: 3, unlockUltraCount: 1,
