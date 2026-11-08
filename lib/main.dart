@@ -627,9 +627,11 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
   }
 
   Future<ProgressionState> _worldBossAction(String worldId, String action) async {
-    final result = action == 'select_world'
-        ? _worldBossBattleEngine.selectWorld(_progression, worldId)
-        : _worldBossBattleEngine.toggleBossBattle(_progression, worldId);
+    final result = switch (action) {
+      'unlock' => _worldBossBattleEngine.unlockWorld(_progression, worldId),
+      'select_world' => _worldBossBattleEngine.selectWorld(_progression, worldId),
+      _ => _worldBossBattleEngine.toggleBossBattle(_progression, worldId),
+    };
     if (result.accepted) {
       setState(() {
         _progression = result.progression;
