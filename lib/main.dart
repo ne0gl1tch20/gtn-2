@@ -213,10 +213,15 @@ class _GameHomePageState extends State<GameHomePage> {
       ProgressionCalculator.prestigeRules(_progression),
     );
     if (updated != _progression) {
+      final existingProfile = _progression.legacySystems.adaptiveTraitProfile;
       final profile = _invisibleTraitEngine.observeProgression(
         updated.legacySystems.adaptiveTraitProfile,
-        prestigeDelta: updated.prestigeResets - _progression.prestigeResets,
-        ultraDelta: updated.ultraResets - _progression.ultraResets,
+        prestigeDelta: updated.prestigeResets > existingProfile.prestigesObserved
+            ? updated.prestigeResets - existingProfile.prestigesObserved
+            : 0,
+        ultraDelta: updated.ultraResets > existingProfile.ultrasObserved
+            ? updated.ultraResets - existingProfile.ultrasObserved
+            : 0,
       );
       updated = updated.copyWith(
         legacySystems: updated.legacySystems.copyWith(adaptiveTraitProfile: profile),
@@ -237,10 +242,15 @@ class _GameHomePageState extends State<GameHomePage> {
       ProgressionCalculator.ultraRules(_progression),
     );
     if (updated != _progression) {
+      final existingProfile = _progression.legacySystems.adaptiveTraitProfile;
       final profile = _invisibleTraitEngine.observeProgression(
         updated.legacySystems.adaptiveTraitProfile,
-        prestigeDelta: 0,
-        ultraDelta: updated.ultraResets - _progression.ultraResets,
+        prestigeDelta: _progression.prestigeResets > existingProfile.prestigesObserved
+            ? _progression.prestigeResets - existingProfile.prestigesObserved
+            : 0,
+        ultraDelta: updated.ultraResets > existingProfile.ultrasObserved
+            ? updated.ultraResets - existingProfile.ultrasObserved
+            : 0,
       );
       updated = updated.copyWith(
         legacySystems: updated.legacySystems.copyWith(adaptiveTraitProfile: profile),
