@@ -43,6 +43,16 @@ class InvisibleTraitEngine {
     );
   }
 
+  AdaptiveTraitProfile observeUpgradePurchase(
+    AdaptiveTraitProfile profile, {
+    int countDelta = 1,
+  }) {
+    if (countDelta <= 0) return profile;
+    return profile.copyWith(
+      upgradesPurchasedObserved: profile.upgradesPurchasedObserved + countDelta,
+    );
+  }
+
   AdaptiveTraitProfile observeProgression(
     AdaptiveTraitProfile profile, {
     required int prestigeDelta,
