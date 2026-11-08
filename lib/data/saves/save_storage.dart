@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -117,14 +118,14 @@ class SaveStorage {
   Future<bool> hasBackup() async =>
       await _readSave(File('${_file.path}.bak')) != null;
 
-  Future<bool> duplicateTo(int targetSlot) async {
+  Future<bool> duplicateTo(int targetSlot) => _enqueue(() async {
     final target = SaveStorage(directory: _file.parent, slot: targetSlot);
     if (targetSlot == slot ||
         await target._file.exists() ||
         await File('${target._file.path}.bak').exists()) {
       return false;
     }
-    final current = await load();
+    final current = await _readSave(_file);
     if (current == null) return false;
     await target.save(current);
     final sourceBackup = File('${_file.path}.bak');
@@ -134,10 +135,9 @@ class SaveStorage {
       await targetBackup.writeAsString(jsonEncode(previous.toJson()), flush: true);
     }
     return true;
-  }
+  });
 
-  Future<bool> restoreBackup() async {
-    await _pendingWrite;
+  Future<bool> restoreBackup() => _enqueue(() async {
     final backup = File('${_file.path}.bak');
     final previous = await _readSave(_file);
     final recoverable = await _readSave(backup);
@@ -154,15 +154,14 @@ class SaveStorage {
       }
       rethrow;
     }
-  }
+  });
 
-  Future<void> reset() async {
-    await _pendingWrite;
+  Future<void> reset() => _enqueue(() async {
     for (final suffix in ['', '.tmp', '.bak', '.corrupt', '.restore-tmp']) {
       final file = File('${_file.path}$suffix');
       if (await file.exists()) await file.delete();
     }
-  }
+  });
 
   Future<SaveData?> _readSave(File file) async {
     if (!await file.exists()) return null;
@@ -199,12 +198,19 @@ class SaveStorage {
         ArgumentError('Refusing to write invalid save data.'),
       );
     }
+    return _enqueue(() => _write(data));
+  }
 
-    // Serialize writes so rapid input cannot race on the same temporary file.
-    _pendingWrite = _pendingWrite
-        .catchError((Object _) {})
-        .then((_) => _write(data));
-    return _pendingWrite;
+  Future<T> _enqueue<T>(Future<T> Function() operation) {
+    final completer = Completer<T>();
+    _pendingWrite = _pendingWrite.catchError((Object _) {}).then((_) async {
+      try {
+        completer.complete(await operation());
+      } catch (error, stackTrace) {
+        completer.completeError(error, stackTrace);
+      }
+    });
+    return completer.future;
   }
 
   Future<void> _write(SaveData data) async {
