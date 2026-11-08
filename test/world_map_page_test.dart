@@ -140,9 +140,13 @@ void main() {
     );
 
     expect(find.textContaining('World mastery: 1 / 10'), findsOneWidget);
-    final upgrade = find.textContaining('Increase mastery');
+    final upgrade = find.ancestor(
+      of: find.textContaining('Increase mastery'),
+      matching: find.byType(FilledButton),
+    );
     expect(upgrade, findsOneWidget);
     await tester.ensureVisible(upgrade);
+    await tester.pumpAndSettle();
     await tester.tap(upgrade);
     await tester.pumpAndSettle();
 
