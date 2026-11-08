@@ -132,24 +132,48 @@ class SaveStorage {
   Future<bool> hasBackup() => _enqueue(() async =>
       await _readSave(File('${_file.path}.bak')) != null);
 
-  Future<bool> duplicateTo(int targetSlot) => _enqueue(() async {
-    final target = SaveStorage(directory: _file.parent, slot: targetSlot);
-    if (targetSlot == slot ||
-        await target._file.exists() ||
-        await File('${target._file.path}.bak').exists()) {
-      return false;
-    }
-    final current = await _readSave(_file);
+  Future<bool> duplicateTo(int targetSlot) async {
+    if (targetSlot == slot) return false;
+    final snapshot = await _enqueue(() async => (
+          current: await _loadUnlocked(),
+          previous: await _readSave(File('${_file.path}.bak')),
+        ));
+    final current = snapshot.current;
     if (current == null) return false;
-    await target.save(current);
-    final sourceBackup = File('${_file.path}.bak');
-    final targetBackup = File('${target._file.path}.bak');
-    final previous = await _readSave(sourceBackup);
-    if (previous != null) {
-      await targetBackup.writeAsString(jsonEncode(previous.toJson()), flush: true);
-    }
-    return true;
-  });
+    final target = SaveStorage(directory: _file.parent, slot: targetSlot);
+    return target._enqueue(() async {
+      final backup = File('${target._file.path}.bak');
+      final temporary = File('${target._file.path}.tmp');
+      if (await target._file.exists() ||
+          await backup.exists() ||
+          await temporary.exists()) {
+        return false;
+      }
+      await target._write(current);
+      final previous = snapshot.previous;
+      if (previous != null) {
+        await backup.writeAsString(jsonEncode(previous.toJson()), flush: true);
+      }
+      return true;
+    });
+  }
+
+  Future<bool> createIfEmpty(SaveData data) => _enqueue(() async {
+        if (!_isValidSave(data)) {
+          throw ArgumentError('Refusing to create invalid save data.');
+        }
+        final existing = await _loadUnlocked();
+        final backup = File('${_file.path}.bak');
+        final temporary = File('${_file.path}.tmp');
+        if (existing != null ||
+            await _file.exists() ||
+            await backup.exists() ||
+            await temporary.exists()) {
+          return false;
+        }
+        await _write(data);
+        return true;
+      });
 
   Future<bool> restoreBackup() => _enqueue(() async {
     final backup = File('${_file.path}.bak');
