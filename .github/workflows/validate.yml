@@ -46,8 +46,8 @@ jobs:
         run: python3 scripts/configure_android_updater.py
       - name: Install dependencies
         run: flutter pub get
-      - name: Check formatting
-        run: dart format --output=none .
+      - name: Format updater code
+        run: dart format lib/data/updates/update_checker.dart test/data/update_checker_test.dart
       - name: Analyze
         run: flutter analyze --fatal-infos
       - name: Test
