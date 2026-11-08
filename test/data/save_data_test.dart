@@ -127,6 +127,46 @@ void main() {
     expect((await storage.load())?.toJson(), second.toJson());
   });
 
+  test('persists Extreme Hardcore saves through the storage layer', () async {
+    final directory =
+        await Directory.systemTemp.createTemp('gtn2-extreme-save-test-');
+    addTearDown(() => directory.delete(recursive: true));
+    final storage = SaveStorage(directory: directory);
+    final extremeSave = SaveData(
+      secret: 487,
+      attempts: 12,
+      gamesWon: 2,
+      minimum: 1,
+      maximum: 500,
+      settings: const GameSettings(difficultyId: 'extreme'),
+    );
+
+    await storage.save(extremeSave);
+
+    final restored = await storage.load();
+    expect(restored?.secret, 487);
+    expect(restored?.maximum, 500);
+    expect(restored?.settings.difficultyId, 'extreme');
+  });
+
+  test('rejects save data whose secret is outside its configured range', () async {
+    final directory =
+        await Directory.systemTemp.createTemp('gtn2-invalid-range-save-test-');
+    addTearDown(() => directory.delete(recursive: true));
+    final storage = SaveStorage(directory: directory);
+
+    await expectLater(
+      storage.save(SaveData(
+        secret: 501,
+        attempts: 0,
+        gamesWon: 0,
+        minimum: 1,
+        maximum: 500,
+      )),
+      throwsArgumentError,
+    );
+  });
+
   test('save slots use separate files', () async {
     final directory =
         await Directory.systemTemp.createTemp('gtn2-save-slots-test-');
