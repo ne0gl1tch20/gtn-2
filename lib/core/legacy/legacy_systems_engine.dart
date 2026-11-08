@@ -575,25 +575,25 @@ class LegacySystemsEngine {
     required LegacySystemsState systems,
     required bool active,
   }) {
-    const allWorlds = <String>{
-      'verdant_grove', 'crystal_caverns', 'ember_summit', 'nebula_rift',
-    };
     if (active) {
       if (systems.endlessRiftActive) return _reject(progression, systems, 'Endless Rift is already active.');
-      if (!progression.defeatedBosses.containsAll(allWorlds)) {
+      if (!WorldBossCatalog.worlds.every(
+        (world) => WorldBossCatalog.isDefeated(progression, world),
+      )) {
         return _reject(progression, systems, 'Defeat all four world bosses first.');
       }
       final tier = systems.endlessRiftBestTier + 1 > 1 ? systems.endlessRiftBestTier + 1 : 1;
+      final firstWorld = WorldBossCatalog.worlds.first;
       final bossDamage = Map<String, int>.of(progression.bossDamage)
-        ..['verdant_grove'] = 0;
+        ..[firstWorld.bossId] = 0;
       return _accept(
         progression.copyWith(bossDamage: Map.unmodifiable(bossDamage)),
         systems.copyWith(
           endlessRiftActive: true,
           endlessRiftTier: tier,
-          activeWorldId: 'verdant_grove',
-          activeBossBattleWorldId: 'verdant_grove',
-          bossBattleMistakes: Map.unmodifiable({...systems.bossBattleMistakes, 'verdant_grove': 0}),
+          activeWorldId: firstWorld.id,
+          activeBossBattleWorldId: firstWorld.id,
+          bossBattleMistakes: Map.unmodifiable({...systems.bossBattleMistakes, firstWorld.bossId: 0}),
         ),
       );
     }
