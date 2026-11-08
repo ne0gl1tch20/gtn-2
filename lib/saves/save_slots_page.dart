@@ -3,7 +3,6 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 import '../core/game/difficulty_rules.dart';
-import '../creative/creative_mode_page.dart';
 import '../data/saves/save_data.dart';
 import '../data/saves/save_storage.dart';
 import '../settings/game_settings.dart';
@@ -129,10 +128,10 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
         profileIconId: result.icon,
       );
       final storage = await SaveStorage.inApplicationDocuments(slot: slot);
-      if (await storage.load() != null || await storage.hasBackup()) {
-        throw StateError('This slot is no longer empty.');
+      final created = await storage.createIfEmpty(save);
+      if (!created) {
+        throw StateError('This slot is no longer empty or contains recoverable data.');
       }
-      await storage.save(save);
       await _refresh();
       await widget.onSelect(slot);
       if (mounted) Navigator.of(context).pop();
@@ -196,10 +195,15 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
     if (result == null || !mounted) return;
     setState(() => _working = slot);
     try {
-      await storage.save(current.copyWith(
-        profileName: result.name,
-        profileIconId: result.icon,
-      ));
+      await storage.update((latest) {
+        if (latest == null) {
+          throw StateError('The save disappeared while editing its profile.');
+        }
+        return latest.copyWith(
+          profileName: result.name,
+          profileIconId: result.icon,
+        );
+      });
       await _refresh();
     } finally {
       if (mounted) setState(() => _working = null);
@@ -213,15 +217,6 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
         'planet' => '🪐',
         _ => '🎮',
       };
-
-  Future<void> _openCreativeMode(int slot) async {
-    await Navigator.of(context).push<void>(
-      MaterialPageRoute<void>(
-        builder: (_) => CreativeModePage(slot: slot),
-      ),
-    );
-    await _refresh();
-  }
 
   Future<void> _duplicate(int sourceSlot) async {
     final emptySlots = <int>[];
@@ -367,7 +362,6 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
                           enabled: _switching == null && _working == null && snapshot.connectionState == ConnectionState.done,
                           onSelected: (action) {
                             switch (action) {
-                              case 'creative': _openCreativeMode(slot);
                               case 'create': _create(slot);
                               case 'profile': _editProfile(slot);
                               case 'duplicate': _duplicate(slot);
@@ -377,7 +371,6 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
                           },
                           itemBuilder: (context) => [
                             if (save == null) const PopupMenuItem(value: 'create', child: Text('Create save')),
-                            if (save != null) const PopupMenuItem(value: 'creative', child: Text('Creative Mode')),
                             if (save != null) const PopupMenuItem(value: 'profile', child: Text('Edit profile')),
                             if (save != null) const PopupMenuItem(value: 'duplicate', child: Text('Duplicate')),
                             const PopupMenuItem(value: 'restore', child: Text('Restore backup')),
