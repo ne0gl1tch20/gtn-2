@@ -138,6 +138,7 @@ class WorldBossBattleEngine {
           ? (oldDamage - 1).clamp(0, hp).toInt()
           : oldDamage;
       damage[world.bossId] = nextDamage;
+      damage[world.id] = nextDamage;
       mistakes[world.bossId] = nextMisses;
       return WorldBossActionResult(
         progression: state.copyWith(
@@ -155,6 +156,7 @@ class WorldBossBattleEngine {
       final newPhase = ((nextDamage * 3) ~/ hp + 1).clamp(1, 3);
       if (newPhase != oldPhase) mistakes[world.bossId] = 0;
       damage[world.bossId] = nextDamage;
+      damage[world.id] = nextDamage;
       return WorldBossActionResult(
         progression: state.copyWith(
           bossDamage: Map.unmodifiable(damage),
@@ -172,6 +174,7 @@ class WorldBossBattleEngine {
     final moneyReward = (baseMoney + bonusMoney) * rewardMultiplier;
     final nebulaReward = (baseNebula + BigNumber.fromInt(bonusNebula)) * rewardMultiplier;
     damage[world.bossId] = hp;
+    damage[world.id] = hp;
     final nextSystems = systems.copyWith(
       worldBossVictories: systems.worldBossVictories + 1,
       bossBattleMistakes: Map.unmodifiable(mistakes),
@@ -181,6 +184,7 @@ class WorldBossBattleEngine {
       final nextIndex = (WorldBossCatalog.worlds.indexOf(world) + 1) % WorldBossCatalog.worlds.length;
       final nextWorld = WorldBossCatalog.worlds[nextIndex];
       damage[nextWorld.bossId] = 0;
+      damage[nextWorld.id] = 0;
       mistakes[nextWorld.bossId] = 0;
       return WorldBossActionResult(
         progression: state.copyWith(
