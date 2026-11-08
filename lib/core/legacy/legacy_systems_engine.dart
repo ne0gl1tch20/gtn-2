@@ -5,6 +5,19 @@ import '../progression/progression_state.dart';
 import 'builtin_trait_catalog.dart';
 import 'legacy_systems_state.dart';
 
+/// A validated definition loaded from the pinned GTN1 talent catalog.
+class TalentDefinition {
+  const TalentDefinition({
+    required this.id,
+    required this.cost,
+    this.requiredParentId,
+  });
+
+  final String id;
+  final int cost;
+  final String? requiredParentId;
+}
+
 class LegacyActionResult {
   const LegacyActionResult({
     required this.progression,
@@ -26,15 +39,6 @@ class LegacySystemsEngine {
   static final _mutators = <String>{'mut_hardcore', 'mut_speed', 'mut_blind', 'mut_tax'};
   static const _bossRelics = <String>{
     'verdant_guardian', 'crystal_golem', 'ember_dragon', 'nebula_titan',
-  };
-
-  static const talents = <String, ({int cost, String? parent})>{
-    'talent_speed_1': (cost: 100, parent: null),
-    'talent_crit_1': (cost: 250, parent: null),
-    'talent_speed_2': (cost: 500, parent: 'talent_speed_1'),
-    'talent_crit_2': (cost: 1000, parent: 'talent_crit_1'),
-    'talent_reward_1': (cost: 2500, parent: 'talent_crit_2'),
-    'talent_master_1': (cost: 10000, parent: 'talent_reward_1'),
   };
 
   static const gameplayArms = <String, Set<String>>{
@@ -78,14 +82,17 @@ class LegacySystemsEngine {
   LegacyActionResult buyTalent(
     ProgressionState progression,
     LegacySystemsState systems,
-    String talentId,
+    TalentDefinition definition,
   ) {
-    final definition = talents[talentId];
-    if (definition == null) return _reject(progression, systems, 'Unknown talent.');
+    final talentId = definition.id;
+    if (talentId.isEmpty || definition.cost <= 0 ||
+        definition.requiredParentId == talentId) {
+      return _reject(progression, systems, 'Invalid talent definition.');
+    }
     if (systems.talents.contains(talentId)) {
       return _reject(progression, systems, 'Talent already purchased.');
     }
-    final parent = definition.parent;
+    final parent = definition.requiredParentId;
     if (parent != null && !systems.talents.contains(parent)) {
       return _reject(progression, systems, 'Unlock the parent talent first.');
     }
