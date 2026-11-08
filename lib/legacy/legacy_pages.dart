@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../core/progression/progression_state.dart';
+import '../creative/creative_mode_page.dart';
 import '../i18n/app_localizations.dart';
 import '../worlds/world_boss_catalog.dart';
 import 'legacy_systems_page.dart';
@@ -21,10 +22,12 @@ class LegacyHubPage extends StatelessWidget {
   const LegacyHubPage({
     super.key,
     required this.progression,
+    required this.activeSlot,
     required this.onSystemsChanged,
   });
 
   final ProgressionState progression;
+  final int activeSlot;
   final LegacyProgressionChanged onSystemsChanged;
 
   @override
@@ -38,6 +41,19 @@ class LegacyHubPage extends StatelessWidget {
           const SizedBox(height: 6),
           const Text('Progress, lifetime rewards, records and the world codex.'),
           const SizedBox(height: 16),
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.palette_rounded),
+              title: const Text('Creative Mode'),
+              subtitle: const Text('Build a separate sandbox with custom ranges and rules.'),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () => Navigator.of(context).push<void>(
+                MaterialPageRoute<void>(
+                  builder: (_) => CreativeModePage(slot: activeSlot),
+                ),
+              ),
+            ),
+          ),
           Card(
             child: ListTile(
               leading: const Icon(Icons.grid_view_rounded),
