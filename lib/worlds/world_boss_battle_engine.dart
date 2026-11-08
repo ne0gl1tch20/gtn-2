@@ -22,6 +22,28 @@ class WorldBossBattleEngine {
     'verdant_guardian', 'crystal_golem', 'ember_dragon', 'nebula_titan',
   };
 
+  WorldBossActionResult unlockWorld(ProgressionState state, String worldId) {
+    final matches = WorldBossCatalog.worlds.where((item) => item.id == worldId);
+    final world = matches.isEmpty ? null : matches.first;
+    if (world == null || !WorldBossCatalog.canUnlock(state, world)) {
+      return WorldBossActionResult(
+        progression: state, accepted: false, message: 'World unlock requirements are not met.',
+      );
+    }
+    final unlocked = Set<String>.of(state.legacySystems.unlockedWorldIds)
+      ..add(worldId);
+    return WorldBossActionResult(
+      progression: state.copyWith(
+        legacySystems: state.legacySystems.copyWith(
+          unlockedWorldIds: Set.unmodifiable(unlocked),
+          activeWorldId: worldId,
+        ),
+      ),
+      accepted: true,
+      message: 'Unlocked ${world.worldName}.',
+    );
+  }
+
   WorldBossActionResult selectWorld(ProgressionState state, String worldId) {
     final matches = WorldBossCatalog.worlds.where((item) => item.id == worldId);
     final world = matches.isEmpty ? null : matches.first;
