@@ -21,8 +21,8 @@ void main() {
         .widgetList<Text>(find.byType(Text))
         .map((widget) => widget.data?.trim())
         .whereType<String>()
-        .firstWhere((value) => RegExp(r'^\\d\\s+\\d\\s+\\d$').hasMatch(value));
-    final expected = sequence.split(RegExp(r'\\s+')).join();
+        .firstWhere((value) => RegExp(r'^\d\s+\d\s+\d$').hasMatch(value));
+    final expected = sequence.split(RegExp(r'\s+')).join();
 
     await tester.enterText(find.byType(TextField), '000');
     await tester.tap(find.text('Submit'));
@@ -55,8 +55,8 @@ void main() {
         .widgetList<Text>(find.byType(Text))
         .map((widget) => widget.data?.trim())
         .whereType<String>()
-        .firstWhere((value) => RegExp(r'^\\d\\s+\\d\\s+\\d$').hasMatch(value));
-    final expected = sequence.split(RegExp(r'\\s+')).join();
+        .firstWhere((value) => RegExp(r'^\d\s+\d\s+\d$').hasMatch(value));
+    final expected = sequence.split(RegExp(r'\s+')).join();
 
     await tester.enterText(find.byType(TextField), expected);
     await tester.tap(find.text('Submit'));
