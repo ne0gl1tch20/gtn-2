@@ -5,8 +5,8 @@ class WorldBossDefinition {
     required this.id,
     required this.bossId,
     required this.name,
-    required this.nameKey,
     required this.worldName,
+    required this.worldNameKey,
     required this.bossNameKey,
     required this.worldRequirementKey,
     required this.bossRequirementKey,
@@ -32,8 +32,8 @@ class WorldBossDefinition {
   final String id;
   final String bossId;
   final String name;
-  final String nameKey;
   final String worldName;
+  final String worldNameKey;
   final String bossNameKey;
   final String worldRequirementKey;
   final String bossRequirementKey;
@@ -69,8 +69,9 @@ class WorldBossCatalog {
   static const worlds = <WorldBossDefinition>[
     WorldBossDefinition(
       id: 'verdant_grove', bossId: 'verdant_guardian',
-      name: 'Verdant Guardian', nameKey: 'boss_verdant_name',
-      worldName: 'Verdant Grove', bossNameKey: 'boss_verdant_name',
+      name: 'Verdant Guardian',
+      worldName: 'Verdant Grove', worldNameKey: 'world_verdant_name',
+      bossNameKey: 'boss_verdant_name',
       worldRequirementKey: 'world_verdant_requirement',
       bossRequirementKey: 'boss_verdant_requirement', bossRewardKey: 'boss_verdant_reward',
       x: 0.16, y: 0.24, secretId: 'whispering_hollow', secretAt: 50,
@@ -82,8 +83,9 @@ class WorldBossCatalog {
     ),
     WorldBossDefinition(
       id: 'crystal_caverns', bossId: 'crystal_golem',
-      name: 'Crystal Golem', nameKey: 'boss_crystal_name',
-      worldName: 'Crystal Caverns', bossNameKey: 'boss_crystal_name',
+      name: 'Crystal Golem',
+      worldName: 'Crystal Caverns', worldNameKey: 'world_crystal_name',
+      bossNameKey: 'boss_crystal_name',
       worldRequirementKey: 'world_crystal_requirement',
       bossRequirementKey: 'boss_crystal_requirement', bossRewardKey: 'boss_crystal_reward',
       x: 0.43, y: 0.43, secretId: 'shard_archive', secretAt: 150,
@@ -95,8 +97,9 @@ class WorldBossCatalog {
     ),
     WorldBossDefinition(
       id: 'ember_summit', bossId: 'ember_dragon',
-      name: 'Ember Dragon', nameKey: 'boss_ember_name',
-      worldName: 'Ember Summit', bossNameKey: 'boss_ember_name',
+      name: 'Ember Dragon',
+      worldName: 'Ember Summit', worldNameKey: 'world_ember_name',
+      bossNameKey: 'boss_ember_name',
       worldRequirementKey: 'world_ember_requirement',
       bossRequirementKey: 'boss_ember_requirement', bossRewardKey: 'boss_ember_reward',
       x: 0.67, y: 0.24, secretId: 'ashen_vault', secretAt: 300,
@@ -108,8 +111,9 @@ class WorldBossCatalog {
     ),
     WorldBossDefinition(
       id: 'nebula_rift', bossId: 'nebula_titan',
-      name: 'Nebula Titan', nameKey: 'boss_nebula_name',
-      worldName: 'Nebula Rift', bossNameKey: 'boss_nebula_name',
+      name: 'Nebula Titan',
+      worldName: 'Nebula Rift', worldNameKey: 'world_nebula_name',
+      bossNameKey: 'boss_nebula_name',
       worldRequirementKey: 'world_nebula_requirement',
       bossRequirementKey: 'boss_nebula_requirement', bossRewardKey: 'boss_nebula_reward',
       x: 0.82, y: 0.59, secretId: 'lost_observatory', secretAt: 600,
