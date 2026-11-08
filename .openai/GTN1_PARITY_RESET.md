@@ -22,6 +22,7 @@ GTN1 is the behavioral source of truth. Do not invent new rules where a tested G
 | Talents, mutators, relics, sanctuary, stakes, daily quests, loot and challenges | `legacy_systems_engine.dart` and `legacy_systems_page.dart` | Implemented in one systems screen; transaction-by-transaction parity audit remains |
 | Arcade | `lib/arcade`, seven-game catalog and reward tests | Implemented; each game loop and payout still needs direct GTN1 comparison |
 | Music | Offline file import, audio playback, queue, playlists, shuffle and repeat in legacy systems page | Partial parity; verify lifecycle, queue and error behavior |
+| Random events | Added Dart selector (35% chance every 60 seconds), all seven Kotlin-owned reward effects, persisted event ID/count and eight-second event banner lifecycle | Newly ported on reset branch; CI verification pending |
 | LiveOps and seasonal events | `LiveOpsRepository`, `LiveOpsEvent`, `LegacySystemsEngine.claimLiveOpsEvent`, bundled manifest and feature flags | Ported on reset branch with claim, eligibility, date-window, max-claim, reward and permanent-boost tests; remote signed Lua refresh remains unported |
 | Random events | GTN1 `RandomEventEngine`, Lua selector and 60-second scheduler; target only stores `lastRandomEventId` | Missing: event selection, effects, persistence, timer and notification behavior |
 | About and updater | `lib/data/updates/update_checker.dart` and About section | Update check/install code exists; publishing is intentionally disabled until parity gate passes |
@@ -36,6 +37,12 @@ GTN1 is the behavioral source of truth. Do not invent new rules where a tested G
 - Ported save metadata preservation and serialized read/modify/write operations. Gameplay autosaves now update the existing save rather than rebuilding a reduced save object that drops profile or Creative Mode metadata.
 - Ported regression tests for save metadata, concurrent slot creation and duplicate-slot collisions.
 - Kept Android/Windows debug publishing disabled until the full parity gate is met.
+
+## Known parity gaps still open
+
+- GTN1 signed remote LiveOps bundle refresh and verified script/event cache are not yet ported. GTN2 currently uses the bundled, validated event manifest and feature flags offline; do not mark remote LiveOps delivery complete.
+- The random-event timer pauses while the Flutter app is inactive and restarts its 60-second interval on resume. GTN1 runs its coroutine while the process remains alive. Verify whether background timing is required before calling lifecycle parity complete.
+- Finish the per-feature comparison for every catalog, rule, UI action, migration and failure path. The inventory above is not an exhaustive completion certificate.
 
 ## Android CI investigation
 
