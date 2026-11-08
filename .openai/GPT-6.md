@@ -28,11 +28,13 @@ No placeholders, mock systems, fake functionality, inert controls, or knowingly 
 
 ### 1. Finish the interactive world map
 
-Current work:
-- Issue [#24](https://github.com/ne0gl1tch20/gtn-2/issues/24)
-- Draft PR [#25](https://github.com/ne0gl1tch20/gtn-2/pull/25)
+<badge>Implementation merged</badge>
+
+- PR [#25](https://github.com/ne0gl1tch20/gtn-2/pull/25) merged to `main` at `7582784c17f74466bef215cc1eb3213c0e218c88`.
+- PR #25 combined the world-boss state-machine work from PR #23 with the interactive map. PR #23 was closed without a separate merge because its changes were included in PR #25.
 - Branch: `port/gtn1-interactive-world-map`
-- Dependency: PR [#23](https://github.com/ne0gl1tch20/gtn-2/pull/23), branch `port/gtn1-world-boss-state-machine`
+- The branch validation run [#42450609725](https://github.com/ne0gl1tch20/gtn-2/actions/runs/42450609725) passed formatting, analysis, automated tests, Android debug build and Windows desktop debug build.
+- The full-port APK gate remains closed; final Android installation/play-test is still required in Step 8.
 
 Acceptance:
 - Validate the four world nodes, original route graph and source coordinates.
@@ -151,10 +153,11 @@ The port is complete only when all of the following are true:
 ## Current checkpoint
 
 This checkpoint is intentionally not a completion claim:
-- PR #25 is open and draft.
-- Its latest known fix addresses a leaked Flutter test semantics handle.
-- The latest validation run for that fix is [#42448892131](https://github.com/ne0gl1tch20/gtn-2/actions/runs/42448892131); check its final Android and Windows results.
-- The prior run passed formatting, analysis, and Windows build but failed one Android widget test; its Android APK build was skipped.
+- Step 1's interactive map and Step 2's world/boss progression implementation are merged in PR #25. Branch validation passed Android and Windows builds plus automated tests; real Android play-test remains in Step 8.
+- Step 3's source inventory confirms 320 built-in trait definitions: 244 cosmetic badges, 64 Nebula bonuses, 6 XP multipliers, 2 streak-protection traits, and one each for combo reward, range hint, miss-penalty reduction, and risk reward. Cosmetic entries still require correct unlock/discovery and presentation behavior; data presence alone is not parity.
+- The gameplay-content audit found a reward-parity defect: the Dart guess pipeline applied the `talent_reward_1` +50% bonus in both the base reward multiplier and the post-reward talent bonus. GTN1 stores this talent separately from the shop/upgrade flag used by the base engine, then applies its +50% once afterward.
+- Fix in progress on branch `port/gtn1-economy-talent-reward-parity`: the legacy Prestige talent no longer activates the base-reward flag, and a regression test asserts a 10,000 base reward becomes 15,000, not 22,500.
+- Candidate workflow: [#42451764578](https://github.com/ne0gl1tch20/gtn-2/actions/runs/42451764578). Its Android and Windows jobs are pending at the time of this checkpoint.
 - The full-port APK gate remains closed.
 
 

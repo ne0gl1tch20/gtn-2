@@ -984,7 +984,10 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
                 currentStreak: beforeGuess.currentStreak,
                 rewardMultiplierLevel:
                     beforeGuess.upgrades['reward_multiplier'] ?? 0,
-                hasTalentReward: legacySystems.talents.contains('talent_reward_1'),
+                // talent_reward_1 is a Prestige talent, not the legacy shop/upgrade flag
+                // consumed by GameEngine's base reward calculation. GTN1 applies its
+                // +50% once in applyTalentBonuses after the raw reward is recorded.
+                hasTalentReward: false,
                 isCritical: isCritical,
                 difficultyId: _settings.difficultyId,
                 mutatorMultiplier:
