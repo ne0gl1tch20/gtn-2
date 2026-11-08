@@ -4,6 +4,7 @@ import '../numbers/big_number.dart';
 import '../progression/progression_state.dart';
 import 'builtin_trait_catalog.dart';
 import 'legacy_systems_state.dart';
+import '../live_ops/live_ops.dart';
 
 /// A validated definition loaded from the pinned GTN1 talent catalog.
 class TalentDefinition {
@@ -844,6 +845,53 @@ class LegacySystemsEngine {
     return _accept(progression, systems.copyWith(
       selectedTraitArms: Map.unmodifiable({...systems.selectedTraitArms, traitId: armId}),
     ));
+  }
+
+  LegacyActionResult claimLiveOpsEvent({
+    required ProgressionState progression,
+    required LegacySystemsState systems,
+    required LiveOpsEvent event,
+    required bool featureEnabled,
+    required DateTime now,
+  }) {
+    if (!featureEnabled) {
+      return _reject(progression, systems, 'Seasonal events are disabled.');
+    }
+    if (event.status != 'ACTIVE' || !event.isWithinClaimWindow(now)) {
+      return _reject(progression, systems, 'This event is not currently active.');
+    }
+    if (event.maxClaims <= 0 ||
+        event.rewardNebula < 0 ||
+        event.permanentBoostPerClaim < 0 ||
+        event.minCorrectGuesses < 0 ||
+        event.minPrestigeCount < 0 ||
+        event.minUltraCount < 0) {
+      return _reject(progression, systems, 'This event has invalid reward rules.');
+    }
+    if (progression.correctGuesses < event.minCorrectGuesses ||
+        progression.prestigeResets < event.minPrestigeCount ||
+        progression.ultraResets < event.minUltraCount) {
+      return _reject(progression, systems, 'You do not meet this event’s requirements yet.');
+    }
+    final previousClaims = systems.liveOpsClaims[event.id] ?? 0;
+    if (previousClaims < 0 || previousClaims >= event.maxClaims) {
+      return _reject(progression, systems, 'You have reached this event’s claim limit.');
+    }
+    final reward = BigNumber.fromInt(event.rewardNebula);
+    final nextProgression = progression.copyWith(
+      nebula: progression.nebula + reward,
+      nebulaEarned: progression.nebulaEarned + reward,
+    );
+    final nextSystems = systems.copyWith(
+      liveOpsClaims: Map.unmodifiable({
+        ...systems.liveOpsClaims,
+        event.id: previousClaims + 1,
+      }),
+      permanentEventBoosts:
+          (systems.permanentEventBoosts + event.permanentBoostPerClaim)
+              .clamp(0, 25),
+    );
+    return _accept(nextProgression, nextSystems);
   }
 
   static ProgressionState _addNebula(ProgressionState state, int amount) {
