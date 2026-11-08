@@ -4,24 +4,36 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 import '../core/numbers/big_number.dart';
+import 'arcade_catalog.dart';
+import 'arcade_reward_rules.dart';
 
 typedef ArcadeRewardCallback = Future<void> Function(
   BigNumber nebula,
   BigNumber money,
 );
 
-class ArcadePage extends StatelessWidget {
+class ArcadePage extends StatefulWidget {
   const ArcadePage({super.key, required this.onReward});
 
   final ArcadeRewardCallback onReward;
 
-  static const _games = [
-    ('quick_guess', 'Quick Guess', 'Solve as many 1–9 guesses as you can in 10 seconds.', Icons.timer_rounded),
-    ('reaction_test', 'Reaction Test', 'Tap as soon as the signal turns green.', Icons.flash_on_rounded),
-    ('lucky_number', 'Lucky Number Box', 'Choose one of three mystery boxes.', Icons.card_giftcard_rounded),
-    ('memory_match', 'Memory Digit Sequence', 'Memorize and repeat a short digit sequence.', Icons.memory_rounded),
-    ('number_rush', 'Number Rush', 'Tap numbers in ascending order from 1 to 5.', Icons.numbers_rounded),
-  ];
+  @override
+  State<ArcadePage> createState() => _ArcadePageState();
+}
+
+class _ArcadePageState extends State<ArcadePage> {
+  late Future<List<ArcadeGameDefinition>> _catalog = ArcadeCatalog.load();
+
+  IconData _iconFor(String id) => switch (id) {
+        'quick_guess' => Icons.timer_rounded,
+        'reaction_test' => Icons.flash_on_rounded,
+        'lucky_number' => Icons.card_giftcard_rounded,
+        'memory_match' => Icons.memory_rounded,
+        'number_rush' => Icons.numbers_rounded,
+        'math_blitz' => Icons.calculate_rounded,
+        'memory_grid' => Icons.grid_on_rounded,
+        _ => Icons.sports_esports_rounded,
+      };
 
   @override
   Widget build(BuildContext context) {
@@ -31,32 +43,69 @@ class ArcadePage extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         children: [
           Text(
-            'Play quick minigames to earn Nebula and bonus Money. Each completed run can only pay once.',
+            'Play the original seven GTN1 minigames to earn Nebula and Money.',
             style: Theme.of(context).textTheme.bodyLarge,
           ),
           const SizedBox(height: 16),
-          for (final game in _games)
-            Card(
-              margin: const EdgeInsets.only(bottom: 12),
-              child: ListTile(
-                contentPadding: const EdgeInsets.all(16),
-                leading: Icon(game.$4, size: 32),
-                title: Text(game.$2),
-                subtitle: Padding(
-                  padding: const EdgeInsets.only(top: 6),
-                  child: Text(game.$3),
-                ),
-                trailing: const Icon(Icons.play_arrow_rounded),
-                onTap: () => showDialog<void>(
-                  context: context,
-                  builder: (_) => _ArcadeDialog(
-                    gameId: game.$1,
-                    title: game.$2,
-                    onReward: onReward,
+          FutureBuilder<List<ArcadeGameDefinition>>(
+            future: _catalog,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState != ConnectionState.done) {
+                return const Padding(
+                  padding: EdgeInsets.all(32),
+                  child: Center(child: CircularProgressIndicator()),
+                );
+              }
+              if (snapshot.hasError || !snapshot.hasData) {
+                return Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      children: [
+                        const Icon(Icons.error_outline_rounded, size: 32),
+                        const SizedBox(height: 8),
+                        const Text('The original Arcade catalog could not be loaded.'),
+                        const SizedBox(height: 8),
+                        FilledButton(
+                          onPressed: () => setState(() {
+                            _catalog = ArcadeCatalog.load();
+                          }),
+                          child: const Text('Retry'),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ),
-            ),
+                );
+              }
+
+              return Column(
+                children: [
+                  for (final game in snapshot.data!)
+                    Card(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      child: ListTile(
+                        contentPadding: const EdgeInsets.all(16),
+                        leading: Icon(_iconFor(game.id), size: 32),
+                        title: Text(game.name),
+                        subtitle: Padding(
+                          padding: const EdgeInsets.only(top: 6),
+                          child: Text(game.description),
+                        ),
+                        trailing: const Icon(Icons.play_arrow_rounded),
+                        onTap: () => showDialog<void>(
+                          context: context,
+                          builder: (_) => _ArcadeDialog(
+                            gameId: game.id,
+                            title: game.name,
+                            onReward: widget.onReward,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              );
+            },
+          ),
         ],
       ),
     );
@@ -87,43 +136,79 @@ class _ArcadeDialogState extends State<_ArcadeDialog> {
   int _target = 1;
   int? _chosenBox;
   late final int _winningBox = _random.nextInt(3) + 1;
-  late final List<int> _sequence = List.generate(3, (_) => _random.nextInt(9) + 1);
-  late final List<int> _numbers = (List<int>.generate(5, (i) => i + 1)..shuffle(_random));
+  late final List<int> _sequence =
+      List.generate(3, (_) => _random.nextInt(9) + 1);
+  late final List<int> _numbers =
+      (List<int>.generate(5, (i) => i + 1)..shuffle(_random));
   int _nextNumber = 1;
   bool _finished = false;
   bool _sequenceVisible = true;
   bool _reactionReady = false;
   bool _reactionFinished = false;
   int? _reactionTime;
-  late final Stopwatch _stopwatch = Stopwatch();
+  late final Stopwatch _reactionStopwatch = Stopwatch();
+  final Stopwatch _roundStopwatch = Stopwatch();
+
+  late int _mathFirst = _random.nextInt(11) + 2;
+  late int _mathSecond = _random.nextInt(11) + 2;
+  late int _mathOperation = _random.nextInt(3);
+  int get _mathAnswer => switch (_mathOperation) {
+        0 => _mathFirst + _mathSecond,
+        1 => _mathFirst * _mathSecond,
+        _ => _mathFirst - _mathSecond,
+      };
+  late List<int> _mathChoices = _choicesFor(_mathAnswer);
+
+  late final List<int> _gridCards =
+      (List<int>.generate(16, (index) => index ~/ 2 + 1)..shuffle(_random));
+  final List<int> _gridSelected = [];
+  final Set<int> _gridMatched = {};
+  int _gridMoves = 0;
 
   @override
   void initState() {
     super.initState();
+    _roundStopwatch.start();
     switch (widget.gameId) {
       case 'quick_guess':
-        _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-          if (_timeLeft <= 1) {
-            timer.cancel();
-            if (mounted) setState(() { _timeLeft = 0; _finished = true; });
-          } else if (mounted) {
-            setState(() => _timeLeft--);
-          }
-        });
+        _startCountdown(10);
+      case 'math_blitz':
+      case 'memory_grid':
+        _timeLeft = 60;
+        _startCountdown(60);
       case 'reaction_test':
-        Future<void>.delayed(Duration(milliseconds: 1000 + _random.nextInt(2000)), () {
-          if (mounted && !_reactionFinished) {
-            setState(() {
-              _reactionReady = true;
-              _stopwatch.start();
-            });
-          }
-        });
+        Future<void>.delayed(
+          Duration(milliseconds: 1000 + _random.nextInt(2000)),
+          () {
+            if (mounted && !_reactionFinished) {
+              setState(() {
+                _reactionReady = true;
+                _reactionStopwatch.start();
+              });
+            }
+          },
+        );
       case 'memory_match':
         Future<void>.delayed(const Duration(seconds: 2), () {
           if (mounted) setState(() => _sequenceVisible = false);
         });
     }
+  }
+
+  void _startCountdown(int seconds) {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) {
+        timer.cancel();
+      } else if (_finished || _timeLeft <= 1) {
+        timer.cancel();
+        setState(() {
+          _timeLeft = 0;
+          _finished = true;
+        });
+      } else {
+        setState(() => _timeLeft--);
+      }
+    });
   }
 
   @override
@@ -142,7 +227,7 @@ class _ArcadeDialogState extends State<_ArcadeDialog> {
     } else if (widget.gameId == 'reaction_test' &&
         _reactionFinished &&
         _reactionTime != null &&
-        _reactionTime != 9999) {
+        ArcadeRewardRules.isReactionTestRewardEligible(_reactionTime!)) {
       await widget.onReward(BigNumber.fromInt(1), BigNumber.fromInt(2000));
     } else if (widget.gameId == 'lucky_number' &&
         _chosenBox == _winningBox) {
@@ -151,6 +236,16 @@ class _ArcadeDialogState extends State<_ArcadeDialog> {
       await widget.onReward(BigNumber.fromInt(1), BigNumber.fromInt(10000));
     } else if (widget.gameId == 'number_rush' && _finished) {
       await widget.onReward(BigNumber.fromInt(1), BigNumber.fromInt(7500));
+    } else if ((widget.gameId == 'math_blitz' ||
+            widget.gameId == 'memory_grid') &&
+        _finished) {
+      final elapsed = _roundStopwatch.elapsed.inSeconds.clamp(1, 600).toInt();
+      final nebula = ArcadeRewardRules.calculateNebulaReward(elapsed, _score);
+      final money = ArcadeRewardRules.calculateMoneyReward(elapsed, _score);
+      await widget.onReward(
+        BigNumber.fromInt(nebula),
+        BigNumber.fromInt(money),
+      );
     }
     if (mounted) Navigator.of(context).pop();
   }
@@ -171,14 +266,68 @@ class _ArcadeDialogState extends State<_ArcadeDialog> {
     if (!_reactionReady) {
       setState(() {
         _reactionFinished = true;
-        _reactionTime = 9999;
+        _reactionTime = ArcadeRewardRules.tooEarlyReactionSentinel;
       });
       return;
     }
-    _stopwatch.stop();
+    _reactionStopwatch.stop();
     setState(() {
       _reactionFinished = true;
-      _reactionTime = _stopwatch.elapsedMilliseconds;
+      _reactionTime = _reactionStopwatch.elapsedMilliseconds;
+    });
+  }
+
+  List<int> _choicesFor(int answer) {
+    final choices = <int>{answer};
+    while (choices.length < 4) {
+      choices.add(answer + _random.nextInt(25) - 12);
+    }
+    final result = choices.toList()..shuffle(_random);
+    return result;
+  }
+
+  void _answerMath(int choice) {
+    if (_finished) return;
+    setState(() {
+      if (choice == _mathAnswer) _score++;
+      _mathFirst = _random.nextInt(11) + 2;
+      _mathSecond = _random.nextInt(11) + 2;
+      _mathOperation = _random.nextInt(3);
+      _mathChoices = _choicesFor(_mathAnswer);
+    });
+  }
+
+  void _flipGridCard(int index) {
+    if (_finished ||
+        _gridSelected.length >= 2 ||
+        _gridSelected.contains(index) ||
+        _gridMatched.contains(index)) {
+      return;
+    }
+    setState(() {
+      _gridSelected.add(index);
+      if (_gridSelected.length == 2) _gridMoves++;
+    });
+    if (_gridSelected.length != 2) return;
+
+    Future<void>.delayed(const Duration(milliseconds: 500), () {
+      if (!mounted || _gridSelected.length != 2) return;
+      final first = _gridSelected[0];
+      final second = _gridSelected[1];
+      setState(() {
+        if (_gridCards[first] == _gridCards[second]) {
+          _gridMatched.add(first);
+          _gridMatched.add(second);
+          _score += 2;
+          if (_gridMatched.length == _gridCards.length) {
+            _finished = true;
+            _timer?.cancel();
+          }
+        } else {
+          _score = (_score - 1).clamp(0, 1 << 30).toInt();
+        }
+        _gridSelected.clear();
+      });
     });
   }
 
@@ -189,7 +338,10 @@ class _ArcadeDialogState extends State<_ArcadeDialog> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text('Time left: $_timeLeft seconds'),
-            Text('Score: $_score', style: Theme.of(context).textTheme.headlineSmall),
+            Text(
+              'Score: $_score',
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
             if (!_finished) ...[
               Text('Guess the target: $_target'),
               TextField(
@@ -210,7 +362,9 @@ class _ArcadeDialogState extends State<_ArcadeDialog> {
           children: [
             Text(
               _reactionFinished
-                  ? (_reactionTime == 9999 ? 'Too early!' : 'Reaction: ${_reactionTime}ms')
+                  ? (_reactionTime == ArcadeRewardRules.tooEarlyReactionSentinel
+                      ? 'Too early!'
+                      : 'Reaction: ${_reactionTime}ms')
                   : (_reactionReady ? 'TAP NOW!' : 'Wait for green…'),
               style: Theme.of(context).textTheme.titleLarge,
             ),
@@ -268,7 +422,8 @@ class _ArcadeDialogState extends State<_ArcadeDialog> {
                 }),
                 child: const Text('Submit'),
               ),
-              if (_input.text.isNotEmpty && _input.text.trim() != _sequence.join())
+              if (_input.text.isNotEmpty &&
+                  _input.text.trim() != _sequence.join())
                 const Text('Not quite. Try again.'),
             ] else
               const Text('Correct! You remembered the sequence.'),
@@ -304,6 +459,97 @@ class _ArcadeDialogState extends State<_ArcadeDialog> {
             if (_finished) const Text('Rush completed!'),
           ],
         );
+      case 'math_blitz':
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('Score: $_score'),
+                Text('Time: ${_timeLeft}s'),
+              ],
+            ),
+            LinearProgressIndicator(value: _timeLeft / 60),
+            const SizedBox(height: 12),
+            if (!_finished) ...[
+              Text(
+                '$_mathFirst ${['+', '×', '−'][_mathOperation]} $_mathSecond = ?',
+                style: Theme.of(context).textTheme.headlineMedium,
+              ),
+              const SizedBox(height: 12),
+              Wrap(
+                alignment: WrapAlignment.center,
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  for (final option in _mathChoices)
+                    FilledButton(
+                      onPressed: () => _answerMath(option),
+                      child: Text('$option'),
+                    ),
+                ],
+              ),
+            ] else ...[
+              const Text('Time is up!'),
+              Text('Final score: $_score'),
+            ],
+          ],
+        );
+      case 'memory_grid':
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('Score: $_score'),
+                Text('Time: ${_timeLeft}s'),
+              ],
+            ),
+            LinearProgressIndicator(value: _timeLeft / 60),
+            const SizedBox(height: 8),
+            Text('Find all 8 matching pairs. Moves: $_gridMoves'),
+            const SizedBox(height: 8),
+            if (!_finished)
+              GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: _gridCards.length,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 4,
+                  crossAxisSpacing: 6,
+                  mainAxisSpacing: 6,
+                  childAspectRatio: 1.15,
+                ),
+                itemBuilder: (context, index) {
+                  final revealed = _gridSelected.contains(index) ||
+                      _gridMatched.contains(index);
+                  return FilledButton(
+                    onPressed: revealed || _gridSelected.length >= 2
+                        ? null
+                        : () => _flipGridCard(index),
+                    style: FilledButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                      minimumSize: Size.zero,
+                    ),
+                    child: Text(
+                      revealed ? '${_gridCards[index]}' : '?',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                  );
+                },
+              )
+            else
+              Text(
+                _gridMatched.length == _gridCards.length
+                    ? 'Grid cleared!'
+                    : 'Time is up!',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+            if (_finished) Text('Final score: $_score'),
+          ],
+        );
       default:
         return const Text('Unknown minigame.');
     }
@@ -320,6 +566,8 @@ class _ArcadeDialogState extends State<_ArcadeDialog> {
       case 'memory_match':
         return _finished;
       case 'number_rush':
+      case 'math_blitz':
+      case 'memory_grid':
         return _finished;
       default:
         return false;
@@ -330,7 +578,7 @@ class _ArcadeDialogState extends State<_ArcadeDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text(widget.title),
-      content: _gameContent(),
+      content: SingleChildScrollView(child: _gameContent()),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
