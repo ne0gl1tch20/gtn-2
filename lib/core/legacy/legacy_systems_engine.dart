@@ -397,9 +397,18 @@ class LegacySystemsEngine {
       'nebula_rift': 'ember_summit',
     };
     final relicId = relicByWorld[worldId];
-    if (relicId == null || !progression.defeatedBosses.contains(worldId) ||
-        (previousWorld[worldId] != null &&
-            !progression.defeatedBosses.contains(previousWorld[worldId]))) {
+    final worldMatches =
+        WorldBossCatalog.worlds.where((world) => world.id == worldId);
+    final world = worldMatches.isEmpty ? null : worldMatches.first;
+    final previousWorldId = previousWorld[worldId];
+    final previousMatches = WorldBossCatalog.worlds
+        .where((candidate) => candidate.id == previousWorldId);
+    final previous = previousMatches.isEmpty ? null : previousMatches.first;
+    if (relicId == null ||
+        world == null ||
+        !WorldBossCatalog.isDefeated(progression, world) ||
+        (previous != null &&
+            !WorldBossCatalog.isDefeated(progression, previous))) {
       return _reject(progression, systems, 'Defeat this world guardian before upgrading mastery.');
     }
     final current = systems.worldMasteryLevels[worldId] ?? 1;
@@ -479,8 +488,17 @@ class LegacySystemsEngine {
       'ember_summit': 'crystal_caverns',
       'nebula_rift': 'ember_summit',
     };
-    if ((previousWorld[worldId] != null &&
-            !progression.defeatedBosses.contains(previousWorld[worldId])) ||
+    final worldMatches =
+        WorldBossCatalog.worlds.where((world) => world.id == worldId);
+    final world = worldMatches.isEmpty ? null : worldMatches.first;
+    final previousWorldId = previousWorld[worldId];
+    final previousMatches = WorldBossCatalog.worlds
+        .where((candidate) => candidate.id == previousWorldId);
+    final previous = previousMatches.isEmpty ? null : previousMatches.first;
+    if (world == null ||
+        !WorldBossCatalog.isUnlocked(progression, world) ||
+        (previous != null &&
+            !WorldBossCatalog.isDefeated(progression, previous)) ||
         progression.correctGuesses < thresholds[secretId]!) {
       return _reject(progression, systems, 'Secret area is still hidden.');
     }
