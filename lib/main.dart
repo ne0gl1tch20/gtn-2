@@ -776,8 +776,9 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
         _ => 'autumn',
       };
 
-  Future<void> _submitGuess() async {
-    final guess = int.tryParse(_controller.text.trim());
+  Future<void> _submitGuess({int? automatedGuess, String? botId}) async {
+    final isBot = botId != null;
+    final guess = automatedGuess ?? int.tryParse(_controller.text.trim());
     if (guess == null) {
       setState(() => _message = 'Enter a whole number from ${_game.minimum} to ${_game.maximum}.');
       return;
@@ -787,8 +788,9 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
       var rangeScoutActive = false;
       final previousAttempts = _game.attempts;
       _game = _engine.guess(_game, guess);
+      final resultForMessage = _game.lastResult;
       if (_game.attempts > previousAttempts) {
-        final correct = _game.lastResult == GuessResult.correct;
+        final correct = resultForMessage == GuessResult.correct;
         final beforeGuess = _progression;
         final legacySystems = beforeGuess.legacySystems;
         final traitEffects = _legacySystemsEngine.evaluateTraits(
@@ -801,7 +803,7 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
         final criticalPrecisionLevel =
             beforeGuess.prestigeUpgrades['critical_precision_boost'] ?? 0;
         final guaranteedGoldenGuess =
-            (beforeGuess.nebulaItems['golden_guess'] ?? 0) > 0 &&
+            !isBot && (beforeGuess.nebulaItems['golden_guess'] ?? 0) > 0 &&
             (beforeGuess.totalGuesses + 1) % 10 == 0;
         final isCritical = correct &&
             (guaranteedGoldenGuess ||
@@ -829,6 +831,7 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
           beforeGuess,
           correct: correct,
           baseReward: rawReward,
+          isBot: isBot,
         );
         final adaptiveProfile = _invisibleTraitEngine.observeGuess(
           profile: legacySystems.adaptiveTraitProfile,
@@ -925,6 +928,25 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
           today: DateTime.now().toIso8601String().substring(0, 10),
           lootRoll: correct ? Random.secure().nextInt(1000) : null,
         ).copyWith(adaptiveTraitProfile: adaptiveProfileAfter);
+        if (isBot && botId != null) {
+          final feedbackName = switch (resultForMessage) {
+            GuessResult.tooLow => 'TOO_LOW',
+            GuessResult.tooHigh => 'TOO_HIGH',
+            GuessResult.correct => 'CORRECT',
+            GuessResult.outOfRange || null => null,
+          };
+          if (feedbackName != null) {
+            systemsAfter = systemsAfter.copyWith(
+              botTotalGuesses: legacySystems.botTotalGuesses + 1,
+              botCorrectGuesses: legacySystems.botCorrectGuesses + (correct ? 1 : 0),
+              botIncorrectGuesses: legacySystems.botIncorrectGuesses + (correct ? 0 : 1),
+              botActionSequence: legacySystems.botActionSequence + 1,
+              lastBotGuess: guess,
+              lastBotFeedback: feedbackName,
+              lastBotId: botId,
+            );
+          }
+        }
         systemsAfter = _legacySystemsEngine.discoverEligibleTraits(
           progression: afterReward,
           systems: systemsAfter,
@@ -943,31 +965,64 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
           }
         }
         _progression = nextProgression;
+        if (isBot) {
+          if (correct) {
+            _game = _newGameWithAdaptiveTarget(_engine.newGame());
+          } else {
+            _game = GameState(
+              secret: _game.secret,
+              attempts: previousAttempts,
+              isComplete: false,
+              lastResult: resultForMessage,
+              minimum: _game.minimum,
+              maximum: _game.maximum,
+            );
+          }
+        }
       }
-      switch (_game.lastResult) {
+      if (isBot && botId != null) {
+        final feedback = switch (resultForMessage) {
+          GuessResult.tooLow => BotFeedback.tooLow,
+          GuessResult.tooHigh => BotFeedback.tooHigh,
+          GuessResult.correct => BotFeedback.correct,
+          GuessResult.outOfRange || null => null,
+        };
+        if (feedback != null) {
+          _botTeam.observe(
+            botId: botId,
+            guess: guess,
+            feedback: feedback,
+            sharedMemory: (_progression.nebulaItems['bot_logic_upgrade'] ?? 0) > 0,
+            nextRangeMinimum: _game.minimum,
+            nextRangeMaximum: _game.maximum,
+          );
+        }
+      }
+      switch (resultForMessage) {
         case GuessResult.tooLow:
           _message = rangeScoutActive
               ? 'Range Scout narrowed the search to ${_game.minimum}–${_game.maximum}.'
               : _progression.legacySystems.activeMutators.contains('mut_blind')
                   ? 'Guess recorded. Try again.'
-                  : 'Too low. Try a higher number!';
+                  : isBot ? '$botId guessed $guess. Too low.' : 'Too low. Try a higher number!';
         case GuessResult.tooHigh:
           _message = rangeScoutActive
               ? 'Range Scout narrowed the search to ${_game.minimum}–${_game.maximum}.'
               : _progression.legacySystems.activeMutators.contains('mut_blind')
                   ? 'Guess recorded. Try again.'
-                  : 'Too high. Try a lower number!';
+                  : isBot ? '$botId guessed $guess. Too high.' : 'Too high. Try a lower number!';
         case GuessResult.correct:
-          _gamesWon++;
-          _message =
-              'Correct! You got it in ${_game.attempts} ${_game.attempts == 1 ? 'try' : 'tries'}.';
+          if (!isBot) _gamesWon++;
+          _message = isBot
+              ? '$botId guessed $guess correctly. A new round is ready.'
+              : 'Correct! You got it in ${_game.attempts} ${_game.attempts == 1 ? 'try' : 'tries'}.';
         case GuessResult.outOfRange:
           _message = 'Choose a number between ${_game.minimum} and ${_game.maximum}.';
         case null:
           break;
       }
     });
-    _controller.clear();
+    if (!isBot) _controller.clear();
     await _persist();
   }
 
