@@ -7,9 +7,14 @@ import 'save_data.dart';
 
 class SaveStorage {
   SaveStorage({required Directory directory, int slot = 1})
-      : assert(slot >= 1 && slot <= 5),
-        slot = slot,
-        _file = File(slot == 1 ? '${directory.path}/gtn2-save.json' : '${directory.path}/gtn2-save-slot$slot.json');
+      : slot = slot,
+        _file = File(slot == 1 ? '${directory.path}/gtn2-save.json' : '${directory.path}/gtn2-save-slot$slot.json') {
+    if (slot < 1 || slot > maxSaveSlots) {
+      throw RangeError.range(slot, 1, maxSaveSlots, 'slot');
+    }
+  }
+
+  static const int maxSaveSlots = 10;
 
   final int slot;
   final File _file;

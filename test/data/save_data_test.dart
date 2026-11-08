@@ -209,9 +209,32 @@ void main() {
     addTearDown(() => directory.delete(recursive: true));
     final firstSlot = SaveStorage(directory: directory, slot: 1);
     final secondSlot = SaveStorage(directory: directory, slot: 2);
+    final tenthSlot = SaveStorage(directory: directory, slot: SaveStorage.maxSaveSlots);
     await firstSlot.save(SaveData(secret: 11, attempts: 0, gamesWon: 0));
     await secondSlot.save(SaveData(secret: 22, attempts: 0, gamesWon: 0));
+    await tenthSlot.save(SaveData(secret: 99, attempts: 0, gamesWon: 0));
     expect((await firstSlot.load())?.secret, 11);
     expect((await secondSlot.load())?.secret, 22);
+    expect((await tenthSlot.load())?.secret, 99);
+    expect(
+      File('${directory.path}/gtn2-save-slot10.json').existsSync(),
+      isTrue,
+    );
+  });
+
+  test('rejects save slots outside the original ten-slot range', () async {
+    final directory =
+        await Directory.systemTemp.createTemp('gtn2-save-slot-range-');
+    addTearDown(() => directory.delete(recursive: true));
+
+    expect(SaveStorage.maxSaveSlots, 10);
+    expect(
+      () => SaveStorage(directory: directory, slot: 0),
+      throwsRangeError,
+    );
+    expect(
+      () => SaveStorage(directory: directory, slot: 11),
+      throwsRangeError,
+    );
   });
 }
