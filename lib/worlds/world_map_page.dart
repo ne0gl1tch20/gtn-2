@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../core/numbers/big_number.dart';
 import '../core/progression/progression_state.dart';
 import '../i18n/app_localizations.dart';
 import 'world_boss_catalog.dart';
@@ -137,6 +138,29 @@ class _WorldMapPageState extends State<WorldMapPage> {
     final phase = ((damage * 3) ~/ hp + 1).clamp(1, 3);
     final misses =
         _state.legacySystems.bossBattleMistakes[selected.bossId] ?? 0;
+    final mastery = _state.legacySystems.worldMasteryLevels[selected.id] ?? 1;
+    const bossRelics = <String>{
+      'verdant_guardian',
+      'crystal_golem',
+      'ember_dragon',
+      'nebula_titan',
+    };
+    final secretDiscount = _state.legacySystems.discoveredSecrets
+            .contains(selected.secretId)
+        ? 0.20
+        : 0.0;
+    final sanctuaryDiscount =
+        (_state.legacySystems.homeBaseLevel * 0.01).clamp(0.0, 0.20);
+    final relicDiscount = _state.legacySystems.equippedRelics
+            .containsAll(bossRelics)
+        ? 0.10
+        : 0.0;
+    final masteryDiscount =
+        (secretDiscount + sanctuaryDiscount + relicDiscount).clamp(0.0, 0.40);
+    final masteryCost = BigNumber.fromInt(10 * (mastery + 1)) *
+        BigNumber.parse((1 - masteryDiscount).toStringAsFixed(2));
+    final canUpgradeMastery = mastery < 10 &&
+        _state.nebula.compareTo(masteryCost) >= 0;
 
     return Scaffold(
       appBar: AppBar(
@@ -500,11 +524,42 @@ class _WorldMapPageState extends State<WorldMapPage> {
                     : null,
                 child: Text(active ? 'Leave boss battle' : 'Start boss battle'),
               )
-            else
+            else ...[
               Text(
                 AppLocalizations.text('boss_defeated', 'Boss defeated'),
                 style: theme.textTheme.labelLarge,
               ),
+              const SizedBox(height: 8),
+              Text(
+                AppLocalizations.text(
+                  'world_mastery_label',
+                  'World mastery: $mastery / 10',
+                ),
+                style: theme.textTheme.titleSmall,
+              ),
+              Text(
+                AppLocalizations.text(
+                  'world_mastery_bonus',
+                  '+${mastery * 2}% Money per correct guess in this world.',
+                ),
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.tertiary,
+                ),
+              ),
+              FilledButton.tonal(
+                onPressed: canUpgradeMastery && !busy
+                    ? () => _runAction(world.id, 'mastery')
+                    : null,
+                child: Text(
+                  mastery >= 10
+                      ? AppLocalizations.text('world_mastery_max', 'Mastery maxed')
+                      : AppLocalizations.text(
+                          'world_mastery_upgrade',
+                          'Increase mastery · $masteryCost Nebula',
+                        ),
+                ),
+              ),
+            ],
             if (unlocked)
               TextButton.icon(
                 onPressed: busy
