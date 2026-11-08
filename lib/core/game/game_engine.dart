@@ -55,7 +55,7 @@ class GameEngine {
     final restoredMinimum = savedMinimum ?? minimum;
     final restoredMaximum = savedMaximum ?? maximum;
     if (restoredMinimum < 1 ||
-        restoredMaximum > 200 ||
+        restoredMaximum > 500 ||
         restoredMinimum > restoredMaximum ||
         secret < restoredMinimum ||
         secret > restoredMaximum ||
