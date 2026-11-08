@@ -92,3 +92,8 @@ The active branch `port/difficulty-range-rules` ports GTN1's canonical `Difficul
 - Tests cover balance values, range reduction, save compatibility and restoring a 500-range game.
 
 This pass fixes the previous fixed-100-range behavior. It does not yet claim full economy parity: GTN1's complete reward stack, difficulty-specific presentation, all upgrade catalog effects, auto-clicker/offline earnings and remaining settings parity still require separate implementation and comparison.
+
+
+## Guess economy and permanent-upgrade pass (2026-11-08)
+
+See [docs/GUESS_ECONOMY_PORT.md](docs/GUESS_ECONOMY_PORT.md) for the source formulas, transaction wiring and regression coverage added on `port/gtn1-guess-economy`. The player-facing normal, Prestige and Ultra shops now use the canonical source JSON definitions. Only upgrades with verified live effects are exposed for purchase; the other source catalog entries remain data-only until their behavior is established and ported.
