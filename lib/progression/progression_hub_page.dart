@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '../core/numbers/big_number.dart';
 import '../core/progression/progression_calculator.dart';
 import '../core/progression/progression_state.dart';
+import '../shop/permanent_upgrade_shop_page.dart';
+import '../shop/upgrade_catalog.dart';
 
 typedef ResetAction = Future<ProgressionState> Function();
 
@@ -12,11 +14,14 @@ class ProgressionHubPage extends StatefulWidget {
     required this.progression,
     required this.onPrestige,
     required this.onUltra,
+    required this.onPurchasePermanentUpgrade,
   });
 
   final ProgressionState progression;
   final ResetAction onPrestige;
   final ResetAction onUltra;
+  final Future<ProgressionState> Function(GameUpgrade upgrade, bool ultra)
+      onPurchasePermanentUpgrade;
 
   @override
   State<ProgressionHubPage> createState() => _ProgressionHubPageState();
@@ -34,6 +39,22 @@ class _ProgressionHubPageState extends State<ProgressionHubPage> {
       if (mounted) setState(() => _state = updated);
     } finally {
       if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _openPermanentShop(bool ultra) async {
+    final updated = await Navigator.of(context).push<ProgressionState>(
+      MaterialPageRoute<ProgressionState>(
+        builder: (_) => PermanentUpgradeShopPage(
+          progression: _state,
+          ultra: ultra,
+          onPurchase: (upgrade) =>
+              widget.onPurchasePermanentUpgrade(upgrade, ultra),
+        ),
+      ),
+    );
+    if (updated != null && mounted) {
+      setState(() => _state = updated);
     }
   }
 
@@ -81,6 +102,11 @@ class _ProgressionHubPageState extends State<ProgressionHubPage> {
                         : () => _run(widget.onPrestige),
                     child: const Text('Prestige reset'),
                   ),
+                  OutlinedButton.icon(
+                    onPressed: _busy ? null : () => _openPermanentShop(false),
+                    icon: const Icon(Icons.upgrade),
+                    label: const Text('Prestige upgrades'),
+                  ),
                 ],
               ),
             ),
@@ -111,6 +137,11 @@ class _ProgressionHubPageState extends State<ProgressionHubPage> {
                         ? null
                         : () => _run(widget.onUltra),
                     child: const Text('Ultra reset'),
+                  ),
+                  OutlinedButton.icon(
+                    onPressed: _busy ? null : () => _openPermanentShop(true),
+                    icon: const Icon(Icons.auto_awesome),
+                    label: const Text('Ultra upgrades'),
                   ),
                   if (!hasPrestigeForUltra)
                     Text(
