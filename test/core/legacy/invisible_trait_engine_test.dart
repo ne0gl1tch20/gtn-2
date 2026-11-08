@@ -120,7 +120,8 @@ void main() {
       rangeMin: 1,
       rangeMax: 100,
     );
-    expect(adjusted, inInclusiveRange(1, 100));
+    expect(adjusted, greaterThanOrEqualTo(1));
+    expect(adjusted, lessThanOrEqualTo(100));
     expect(adjusted, lessThan(90));
     expect(engine.adjustNextTarget(
       profile: const AdaptiveTraitProfile(),
