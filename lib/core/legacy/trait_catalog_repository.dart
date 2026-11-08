@@ -56,14 +56,17 @@ class TraitCatalogRepository {
     if (manifest['schemaVersion'] != 1 ||
         manifest['sourceCommit'] != sourceCommit ||
         manifest['traitCount'] != 320) {
-      throw const FormatException('GTN1 trait catalog manifest does not match the pinned source.');
+      throw const FormatException(
+        'GTN1 trait catalog manifest does not match the pinned source.',
+      );
     }
     final rawEntries = manifest['traits'];
     if (rawEntries is! List || rawEntries.length != 320) {
-      throw const FormatException('GTN1 trait catalog must contain exactly 320 entries.');
+      throw const FormatException(
+        'GTN1 trait catalog must contain exactly 320 entries.',
+      );
     }
 
-    final result = <TraitCatalogEntry>[];
     final ids = <String>{};
     for (final rawEntry in rawEntries) {
       if (rawEntry is! Map) {
@@ -72,6 +75,11 @@ class TraitCatalogRepository {
       final entry = Map<String, dynamic>.from(rawEntry);
       final id = _requiredString(entry, 'id');
       if (!ids.add(id)) throw FormatException('Duplicate GTN1 trait ID: $id');
+    }
+
+    Future<TraitCatalogEntry> parseEntry(Object? rawEntry) async {
+      final entry = Map<String, dynamic>.from(rawEntry as Map);
+      final id = _requiredString(entry, 'id');
       final definitionPath = _assetPath(entry, 'definitionPath');
       final rulesPath = _assetPath(entry, 'rulesPath');
       final localizationPath = _assetPath(entry, 'localizationPath');
@@ -94,36 +102,44 @@ class TraitCatalogRepository {
           definition['visibility'] != entry['visibility']) {
         throw FormatException('GTN1 trait package identity mismatch: $id');
       }
+
       final activation = rules['activation'];
       if (activation is! Map) {
         throw FormatException('GTN1 trait activation rules are missing: $id');
       }
-      final effects = _stringSet(definition['effects'], 'effects', id);
-      final dependencies = _stringSet(rules['dependencies'], 'dependencies', id);
-      final conflicts = _stringSet(rules['conflicts'], 'conflicts', id);
       final season = definition['seasonId'];
       if (season != null && season is! String) {
         throw FormatException('Invalid GTN1 trait season: $id');
       }
-      final title = _requiredString(localization, 'title');
-      final description = _requiredString(localization, 'description');
-      result.add(TraitCatalogEntry(
+
+      return TraitCatalogEntry(
         id: id,
         catalogId: _requiredString(entry, 'catalogId'),
         packageFolder: _requiredString(entry, 'packageFolder'),
         category: _requiredString(entry, 'category'),
         visibility: _requiredString(entry, 'visibility'),
-        title: title,
-        description: description,
-        effects: effects,
+        title: _requiredString(localization, 'title'),
+        description: _requiredString(localization, 'description'),
+        effects: _stringSet(definition['effects'], 'effects', id),
         minimumLevel: _requiredInt(activation, 'minimumLevel', id),
         minimumPrestige: _requiredInt(activation, 'minimumPrestige', id),
-        minimumCorrectGuesses: _requiredInt(activation, 'minimumCorrectGuesses', id),
-        dependencies: dependencies,
-        conflicts: conflicts,
+        minimumCorrectGuesses:
+            _requiredInt(activation, 'minimumCorrectGuesses', id),
+        dependencies: _stringSet(rules['dependencies'], 'dependencies', id),
+        conflicts: _stringSet(rules['conflicts'], 'conflicts', id),
         seasonId: season as String?,
         iconAssetPath: iconPath,
-      ));
+      );
+    }
+
+    // Limit concurrent asset reads so low-memory Android devices do not have to
+    // decode all 960 JSON files at once.
+    final result = <TraitCatalogEntry>[];
+    const batchSize = 16;
+    for (var start = 0; start < rawEntries.length; start += batchSize) {
+      final end = (start + batchSize).clamp(0, rawEntries.length);
+      final batch = rawEntries.sublist(start, end);
+      result.addAll(await Future.wait(batch.map(parseEntry)));
     }
     result.sort((a, b) => a.id.compareTo(b.id));
     return List.unmodifiable(result);
