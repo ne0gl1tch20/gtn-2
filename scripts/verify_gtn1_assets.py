@@ -55,7 +55,7 @@ except (OSError, json.JSONDecodeError) as error:
 
 if manifest.get("sourceCommit") != "fe9cf567169e19059e0330d08769fe454336ef94":
     fail("asset source commit does not match the pinned GTN1 revision")
-if manifest.get("bundledGameCatalogCount") != 17:
+if manifest.get("bundledWebPlayImageCount", 0) < 13:\n    fail("source manifest is missing Web Play SVG artwork")\nif manifest.get("bundledGameCatalogCount") != 17:
     fail("source manifest game catalog count is not 17")
 if manifest.get("bundledTraitAssetCount", 0) < 1300:
     fail("source manifest is missing the full trait asset bundle")
