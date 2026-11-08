@@ -36,6 +36,14 @@ void main() {
       expect(bot.upperBound, 100);
     });
 
+    test('never widens learned bounds after contradictory clamped feedback', () {
+      final bot = GuessingBot(minimum: 50, maximum: 100);
+      bot.observeGuess(40, BotFeedback.tooLow);
+      expect(bot.lowerBound, 50);
+      expect(bot.upperBound, 100);
+      expect(bot.nextGuess(rangeMinimum: 101, rangeMaximum: 200), 101);
+    });
+
     test('correct feedback does not change the learned interval', () {
       final bot = GuessingBot();
       bot.observeGuess(50, BotFeedback.correct);
