@@ -1,4 +1,4 @@
-import 'dart:math';
+import 'dart:math' show Random;
 
 import 'package:flutter/material.dart';
 
@@ -82,7 +82,7 @@ class _CreativeModePageState extends State<CreativeModePage> {
             .where((effect) => effect.type == CreativeEffectType.attemptLimit)
             .map((effect) => effect.value)
             .fold<int?>(null, (value, effect) =>
-                value == null ? effect : min(value, effect)) ??
+                value == null || value > effect ? effect : value) ??
             0;
         _message = rules == null
             ? 'Creative Mode configuration is invalid.'
