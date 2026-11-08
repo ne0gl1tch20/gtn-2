@@ -562,11 +562,6 @@ class _Wallet extends StatelessWidget {
   final Color foreground;
   final Color muted;
 
-  void _setGuess(int value) {
-    controller.text = value.toString();
-    controller.selection = TextSelection.collapsed(offset: controller.text.length);
-  }
-
   @override
   Widget build(BuildContext context) => Container(
         padding: const EdgeInsets.all(17),
@@ -700,6 +695,11 @@ class _GuessInput extends StatelessWidget {
   final Color line;
   final Color foreground;
   final Color muted;
+
+  void _setGuess(int value) {
+    controller.text = value.toString();
+    controller.selection = TextSelection.collapsed(offset: controller.text.length);
+  }
 
   @override
   Widget build(BuildContext context) => Container(
