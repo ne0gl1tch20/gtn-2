@@ -22,6 +22,33 @@ class WorldBossBattleEngine {
     'verdant_guardian', 'crystal_golem', 'ember_dragon', 'nebula_titan',
   };
 
+  ProgressionState migrateLegacyWorldUnlocks(ProgressionState state) {
+    final systems = state.legacySystems;
+    if (!systems.worldUnlockMigrationPending) return state;
+    final unlocked = Set<String>.of(systems.unlockedWorldIds);
+    final totalUpgrades = WorldBossCatalog.ownedUpgradeLevels(state);
+    for (var index = 1; index < WorldBossCatalog.worlds.length; index++) {
+      final world = WorldBossCatalog.worlds[index];
+      final previousWorld = WorldBossCatalog.worlds[index - 1];
+      final previousBossDefeated =
+          state.defeatedBosses.contains(previousWorld.id) ||
+          state.defeatedBosses.contains(previousWorld.bossId) ||
+          systems.relicInventory.contains(previousWorld.bossId);
+      final wasUnlockedByLegacyFlutter = previousBossDefeated &&
+          state.correctGuesses >= world.unlockCorrectGuesses &&
+          totalUpgrades >= world.unlockUpgradeCount &&
+          state.prestigeResets >= world.unlockPrestigeCount &&
+          state.ultraResets >= world.unlockUltraCount;
+      if (wasUnlockedByLegacyFlutter) unlocked.add(world.id);
+    }
+    return state.copyWith(
+      legacySystems: systems.copyWith(
+        unlockedWorldIds: Set.unmodifiable(unlocked),
+        worldUnlockMigrationPending: false,
+      ),
+    );
+  }
+
   WorldBossActionResult unlockWorld(ProgressionState state, String worldId) {
     final matches = WorldBossCatalog.worlds.where((item) => item.id == worldId);
     final world = matches.isEmpty ? null : matches.first;
@@ -36,6 +63,7 @@ class WorldBossBattleEngine {
       progression: state.copyWith(
         legacySystems: state.legacySystems.copyWith(
           unlockedWorldIds: Set.unmodifiable(unlocked),
+          worldUnlockMigrationPending: false,
           activeWorldId: worldId,
         ),
       ),
