@@ -33,17 +33,17 @@ void main() {
     test('requires parent talent, spends prestige and rejects duplicates', () {
       final progression = ProgressionState.initial.copyWith(prestige: n(10000));
       final systems = LegacySystemsState.initial;
-      final blocked = engine.buyTalent(progression, systems, 'talent_speed_2');
+      final blocked = engine.buyTalent(progression, systems, const TalentDefinition(id: 'talent_speed_2', cost: 500, requiredParentId: 'talent_speed_1'));
       expect(blocked.accepted, isFalse);
-      final first = engine.buyTalent(progression, systems, 'talent_speed_1');
+      final first = engine.buyTalent(progression, systems, const TalentDefinition(id: 'talent_speed_1', cost: 100));
       expect(first.accepted, isTrue);
       expect(first.progression.prestige.compareTo(n(9900)), 0);
       final duplicate = engine.buyTalent(
-        first.progression, first.systems, 'talent_speed_1',
+        first.progression, first.systems, const TalentDefinition(id: 'talent_speed_1', cost: 100),
       );
       expect(duplicate.accepted, isFalse);
       final second = engine.buyTalent(
-        first.progression, first.systems, 'talent_speed_2',
+        first.progression, first.systems, const TalentDefinition(id: 'talent_speed_2', cost: 500, requiredParentId: 'talent_speed_1'),
       );
       expect(second.accepted, isTrue);
       expect(second.progression.prestige.compareTo(n(9400)), 0);
@@ -51,7 +51,7 @@ void main() {
 
     test('rejects purchases when prestige is insufficient', () {
       final result = engine.buyTalent(
-        ProgressionState.initial, LegacySystemsState.initial, 'talent_speed_1',
+        ProgressionState.initial, LegacySystemsState.initial, const TalentDefinition(id: 'talent_speed_1', cost: 100),
       );
       expect(result.accepted, isFalse);
       expect(result.progression.prestige.compareTo(n(0)), 0);
