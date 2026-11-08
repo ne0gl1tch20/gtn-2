@@ -109,7 +109,7 @@ class InvisibleTraitEngine {
     required int rangeMin,
     required int rangeMax,
   }) {
-    final safeCandidate = candidate.clamp(rangeMin, rangeMax);
+    final safeCandidate = candidate.clamp(rangeMin, rangeMax).toInt();
     final decision = evaluate(
       profile: profile,
       prestigeCount: 0,
@@ -124,8 +124,9 @@ class InvisibleTraitEngine {
             (gentleTargetAccuracyCeiling - profile.accuracyScore) * 0.20)
         .clamp(gentleTargetBaseStrength, gentleTargetMaxStrength);
     return (safeCandidate + (midpoint - safeCandidate) * strength)
-        .round()
-        .clamp(rangeMin, rangeMax);
+        .toInt()
+        .clamp(rangeMin, rangeMax)
+        .toInt();
   }
 
   AdaptiveTraitProfile markHelperUses(AdaptiveTraitProfile profile, Set<String> helperIds) {
