@@ -103,6 +103,31 @@ class InvisibleTraitEngine {
     );
   }
 
+  int adjustNextTarget({
+    required AdaptiveTraitProfile profile,
+    required int candidate,
+    required int rangeMin,
+    required int rangeMax,
+  }) {
+    final safeCandidate = candidate.clamp(rangeMin, rangeMax);
+    final decision = evaluate(
+      profile: profile,
+      prestigeCount: 0,
+      ultraCount: 0,
+      currentStreak: 0,
+    );
+    if (rangeMax <= rangeMin || !decision.helperIds.contains(helperGentleTarget)) {
+      return safeCandidate;
+    }
+    final midpoint = rangeMin / 2 + rangeMax / 2;
+    final strength = (gentleTargetBaseStrength +
+            (gentleTargetAccuracyCeiling - profile.accuracyScore) * 0.20)
+        .clamp(gentleTargetBaseStrength, gentleTargetMaxStrength);
+    return (safeCandidate + (midpoint - safeCandidate) * strength)
+        .round()
+        .clamp(rangeMin, rangeMax);
+  }
+
   AdaptiveTraitProfile markHelperUses(AdaptiveTraitProfile profile, Set<String> helperIds) {
     if (helperIds.isEmpty) return profile;
     final tick = profile.totalGuessesObserved;
