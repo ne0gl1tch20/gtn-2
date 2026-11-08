@@ -47,6 +47,8 @@ void main() {
 
   testWidgets('selecting an unlocked node uses the progression action',
       (tester) async {
+    final semantics = tester.ensureSemantics();
+    addTearDown(semantics.dispose);
     final unlocked = WorldBossCatalog.worlds.map((world) => world.id).toSet();
     final state = stateWith(unlocked: unlocked);
     final calls = <(String, String)>[];
