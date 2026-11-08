@@ -50,3 +50,32 @@ jobs:
         run: flutter test
       - name: Build Android debug APK
         run: flutter build apk --debug
+
+  windows-build:
+    name: Windows desktop debug build
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch GTN1 source assets
+        uses: actions/checkout@v4
+        with:
+          repository: ne0gl1tch20/GuessTheNumber
+          ref: fe9cf567169e19059e0330d08769fe454336ef94
+          path: gtn1-source
+      - name: Bundle GTN1 artwork and offline fonts
+        shell: bash
+        run: bash scripts/sync_gtn1_assets.sh gtn1-source
+      - name: Verify complete GTN1 content bundle
+        run: python scripts/verify_gtn1_assets.py
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Enable Windows desktop
+        run: flutter config --enable-windows-desktop
+      - name: Generate Windows project
+        run: flutter create --platforms=windows --project-name=gtn_2 --org=com.jarrlyyy .
+      - name: Install dependencies
+        run: flutter pub get
+      - name: Build Windows debug app
+        run: flutter build windows --debug
