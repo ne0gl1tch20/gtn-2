@@ -796,7 +796,9 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
     const allWorldIds = <String>{'verdant_grove', 'crystal_caverns', 'ember_summit', 'nebula_rift'};
     const allSecretIds = <String>{'whispering_hollow', 'shard_archive', 'ashen_vault', 'lost_observatory'};
     const allRelicIds = <String>{'verdant_guardian', 'crystal_golem', 'ember_dragon', 'nebula_titan'};
-    final allWorldsDefeated = _progression.defeatedBosses.containsAll(allWorldIds);
+    final allWorldsDefeated = WorldBossCatalog.worlds.every(
+      (world) => WorldBossCatalog.isDefeated(_progression, world),
+    );
     final endgameEligibility = <String, bool>{
       'all_bosses': allWorldsDefeated,
       'all_secrets': _systems.discoveredSecrets.containsAll(allSecretIds),
