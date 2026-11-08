@@ -31,7 +31,7 @@ void main() {
       (WidgetTester tester) async {
     final rewards = <String>[];
     final expected = await startMemoryMatch(tester, (nebula, money) async {
-      rewards.add('\${nebula.toString()}:\${money.toString()}');
+      rewards.add(nebula.toString() + ':' + money.toString());
     });
 
     await tester.enterText(find.byType(TextField), '000');
@@ -51,7 +51,7 @@ void main() {
       (WidgetTester tester) async {
     final rewards = <String>[];
     final expected = await startMemoryMatch(tester, (nebula, money) async {
-      rewards.add('\${nebula.toString()}:\${money.toString()}');
+      rewards.add(nebula.toString() + ':' + money.toString());
     });
 
     await tester.enterText(find.byType(TextField), expected);
