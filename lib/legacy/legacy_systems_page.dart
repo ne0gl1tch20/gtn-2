@@ -537,6 +537,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
         .toList();
     final hasBot = ownedBots.isNotEmpty;
     final sharedMemory = (_progression.nebulaItems['bot_logic_upgrade'] ?? 0) > 0;
+    final timeTravelLocked = _systems.timeTravelPenaltyUntil > DateTime.now().millisecondsSinceEpoch;
     return Card(
       child: ExpansionTile(
         leading: const Icon(Icons.smart_toy_rounded),
@@ -550,12 +551,14 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
           SwitchListTile(
             title: const Text('Automation'),
             subtitle: Text(
-              hasBot
-                  ? 'Bots use real game feedback and take turns guessing.'
-                  : 'Buy Auto Clicker in the Nebula Shop to unlock this control.',
+              timeTravelLocked
+                  ? 'Paused by clock rollback protection.'
+                  : hasBot
+                      ? 'Bots use real game feedback and take turns guessing.'
+                      : 'Buy Auto Clicker in the Nebula Shop to unlock this control.',
             ),
             value: _systems.autoClickerActive,
-            onChanged: hasBot
+            onChanged: hasBot && !timeTravelLocked
                 ? (active) => _saveSystems(
                       _systems.copyWith(autoClickerActive: active),
                     )
