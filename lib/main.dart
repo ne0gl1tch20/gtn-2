@@ -281,6 +281,26 @@ class _GameHomePageState extends State<GameHomePage> {
     }
   }
 
+  Future<ProgressionState> _purchasePermanentUpgrade(
+    GameUpgrade upgrade,
+    bool ultra,
+  ) async {
+    final updated = ultra
+        ? _progressionEngine.purchaseUltraUpgrade(
+            _progression,
+            upgrade.definition,
+          )
+        : _progressionEngine.purchasePrestigeUpgrade(
+            _progression,
+            upgrade.definition,
+          );
+    if (updated != _progression) {
+      setState(() => _progression = updated);
+      await _persist();
+    }
+    return _progression;
+  }
+
   Future<void> _openProgressionHub() async {
     await Navigator.of(context).push<void>(
       MaterialPageRoute<void>(
@@ -294,6 +314,7 @@ class _GameHomePageState extends State<GameHomePage> {
             await _ultra();
             return _progression;
           },
+          onPurchasePermanentUpgrade: _purchasePermanentUpgrade,
         ),
       ),
     );
