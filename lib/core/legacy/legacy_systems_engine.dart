@@ -391,15 +391,14 @@ class LegacySystemsEngine {
       'ember_summit': 'ember_dragon',
       'nebula_rift': 'nebula_titan',
     };
-    const previousWorld = <String, String>{
-      'crystal_caverns': 'verdant_grove',
-      'ember_summit': 'crystal_caverns',
-      'nebula_rift': 'ember_summit',
-    };
     final relicId = relicByWorld[worldId];
-    if (relicId == null || !progression.defeatedBosses.contains(worldId) ||
-        (previousWorld[worldId] != null &&
-            !progression.defeatedBosses.contains(previousWorld[worldId]))) {
+    final worldMatches =
+        WorldBossCatalog.worlds.where((world) => world.id == worldId);
+    final world = worldMatches.isEmpty ? null : worldMatches.first;
+    if (relicId == null ||
+        world == null ||
+        !systems.unlockedWorldIds.contains(worldId) ||
+        !WorldBossCatalog.isDefeated(progression, world)) {
       return _reject(progression, systems, 'Defeat this world guardian before upgrading mastery.');
     }
     final current = systems.worldMasteryLevels[worldId] ?? 1;
@@ -474,13 +473,11 @@ class LegacySystemsEngine {
     if (systems.discoveredSecrets.contains(secretId)) {
       return _reject(progression, systems, 'Secret area already discovered.');
     }
-    const previousWorld = <String, String>{
-      'crystal_caverns': 'verdant_grove',
-      'ember_summit': 'crystal_caverns',
-      'nebula_rift': 'ember_summit',
-    };
-    if ((previousWorld[worldId] != null &&
-            !progression.defeatedBosses.contains(previousWorld[worldId])) ||
+    final worldMatches =
+        WorldBossCatalog.worlds.where((world) => world.id == worldId);
+    final world = worldMatches.isEmpty ? null : worldMatches.first;
+    if (world == null ||
+        !systems.unlockedWorldIds.contains(worldId) ||
         progression.correctGuesses < thresholds[secretId]!) {
       return _reject(progression, systems, 'Secret area is still hidden.');
     }
