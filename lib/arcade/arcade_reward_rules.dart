@@ -10,16 +10,16 @@ class ArcadeRewardRules {
 
   /// One guaranteed Nebula plus capped time and score bonuses.
   static int calculateNebulaReward(int playSeconds, int score) {
-    final timeBonus = (playSeconds < 0 ? 0 : playSeconds ~/ 30).clamp(0, 4);
-    final scoreBonus = (score < 0 ? 0 : score ~/ 5).clamp(0, 5);
-    return (1 + timeBonus + scoreBonus).clamp(0, 10);
+    final timeBonus = (playSeconds < 0 ? 0 : playSeconds ~/ 30).clamp(0, 4).toInt();
+    final scoreBonus = (score < 0 ? 0 : score ~/ 5).clamp(0, 5).toInt();
+    return (1 + timeBonus + scoreBonus).clamp(0, 10).toInt();
   }
 
   /// Small Money reward based on validated elapsed time and score.
   static int calculateMoneyReward(int playSeconds, int score) {
-    final safeSeconds = playSeconds.clamp(0, 600);
+    final safeSeconds = playSeconds.clamp(0, 600).toInt();
     final safeScore = score < 0 ? 0 : score;
     final reward = safeScore * 300 + safeSeconds * 25;
-    return reward.clamp(0, 1000000);
+    return reward.clamp(0, 1000000).toInt();
   }
 }
