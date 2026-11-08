@@ -7,9 +7,10 @@ import '../data/saves/save_data.dart';
 import '../data/saves/save_storage.dart';
 
 class CreativeModePage extends StatefulWidget {
-  const CreativeModePage({super.key, required this.slot});
+  const CreativeModePage({super.key, required this.slot, this.storage});
 
   final int slot;
+  final SaveStorage? storage;
 
   @override
   State<CreativeModePage> createState() => _CreativeModePageState();
@@ -50,7 +51,7 @@ class _CreativeModePageState extends State<CreativeModePage> {
 
   Future<void> _load() async {
     try {
-      final storage =
+      final storage = widget.storage ??
           await SaveStorage.inApplicationDocuments(slot: widget.slot);
       final save = await storage.load();
       if (save == null) {
