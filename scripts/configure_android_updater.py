@@ -59,3 +59,26 @@ else:
     )
 gradle_properties.write_text(properties_text, encoding="utf-8")
 print("Disabled the incompatible AGP 9 new DSL for Flutter plugin compatibility.")
+
+# Avoid the services.gradle.org redirect to GitHub Releases. The direct official
+# Gradle distribution host is more reliable in CI environments that intermittently
+# return 504 for GitHub release downloads.
+wrapper_properties = Path("android/gradle/wrapper/gradle-wrapper.properties")
+if not wrapper_properties.is_file():
+    print(f"Gradle wrapper properties not found: {wrapper_properties}", file=sys.stderr)
+    raise SystemExit(1)
+wrapper_text = wrapper_properties.read_text(encoding="utf-8")
+wrapper_text, wrapper_count = re.subn(
+    r"(?m)^(distributionUrl=.*)services\\.gradle\\.org/distributions/(.*)$",
+    r"\\1downloads.gradle.org/distributions/\\2",
+    wrapper_text,
+    count=1,
+)
+if wrapper_count == 0:
+    if "downloads.gradle.org/distributions/" not in wrapper_text:
+        print("Could not locate the Gradle distribution URL.", file=sys.stderr)
+        raise SystemExit(1)
+else:
+    wrapper_properties.write_text(wrapper_text, encoding="utf-8")
+    print("Configured the direct Gradle distribution host.")
+
