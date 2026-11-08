@@ -22,7 +22,7 @@ GTN1 is the behavioral source of truth. Do not invent new rules where a tested G
 | Talents, mutators, relics, sanctuary, stakes, daily quests, loot and challenges | `legacy_systems_engine.dart` and `legacy_systems_page.dart` | Implemented in one systems screen; transaction-by-transaction parity audit remains |
 | Arcade | `lib/arcade`, seven-game catalog and reward tests | Implemented; each game loop and payout still needs direct GTN1 comparison |
 | Music | Offline file import, audio playback, queue, playlists, shuffle and repeat in legacy systems page | Partial parity; verify lifecycle, queue and error behavior |
-| Random events | Added Dart selector (35% chance every 60 seconds), all seven Kotlin-owned reward effects, persisted event ID/count and eight-second event banner lifecycle | Newly ported on reset branch; CI verification pending |
+| Random events | Added Dart selector (35% chance every 60 seconds), all seven Kotlin-owned reward effects, persisted event ID/count and eight-second event banner lifecycle | Ported and covered by deterministic tests; validation run #587 passed |
 | LiveOps and seasonal events | `LiveOpsRepository`, `LiveOpsEvent`, `LegacySystemsEngine.claimLiveOpsEvent`, bundled manifest and feature flags | Ported on reset branch with claim, eligibility, date-window, max-claim, reward and permanent-boost tests; remote signed Lua refresh remains unported |
 | Random events | GTN1 `RandomEventEngine`, Lua selector and 60-second scheduler; target only stores `lastRandomEventId` | Missing: event selection, effects, persistence, timer and notification behavior |
 | About and updater | `lib/data/updates/update_checker.dart` and About section | Update check/install code exists; publishing is intentionally disabled until parity gate passes |
@@ -45,6 +45,9 @@ GTN1 is the behavioral source of truth. Do not invent new rules where a tested G
 - Finish the per-feature comparison for every catalog, rule, UI action, migration and failure path. The inventory above is not an exhaustive completion certificate.
 
 ## Android CI investigation
+
+- Validation run [#587](https://github.com/ne0gl1tch20/gtn-2/actions/runs/42472569299) passed on commit `f04b3dc02690424dfb7c4de93c8d3362c78ceb02`: formatting, `flutter analyze --fatal-infos`, full `flutter test`, Android debug APK build and Windows desktop debug build.
+- The validation workflow compiles the APK but does not upload an artifact. The separate artifact workflow only runs on pushes to `main`/`master`, and the publish job remains explicitly disabled until the full parity gate passes. No APK artifact or release was published from this feature branch.
 
 The Android job failed while downloading Gradle 9.3.1 from the GitHub release asset endpoint (HTTP 504). An attempted direct-host rewrite changed the Gradle wrapper cache key, bypassing the already-populated cache, and was therefore counterproductive. That rewrite was removed from both `main` and this branch. The existing Gradle cache setup and bounded retry remain.
 
