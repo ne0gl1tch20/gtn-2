@@ -250,6 +250,16 @@ void main() {
   });
 
   group('catalog and save integrity', () {
+    test('hidden trait discovery respects player-level gates', () {
+      final discovered = engine.discoverEligibleTraits(
+        progression: ProgressionState.initial.copyWith(correctGuesses: 100),
+        systems: LegacySystemsState.initial,
+        playerLevel: 0,
+        activeSeasonId: null,
+      );
+      expect(discovered.discoveredTraits, isEmpty);
+    });
+
     test('contains the full GTN1 built-in trait catalog', () {
       expect(builtInTraitCatalog, hasLength(320));
       final ids = builtInTraitCatalog.map((trait) => trait['id']).toSet();
