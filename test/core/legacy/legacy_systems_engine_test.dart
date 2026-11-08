@@ -49,6 +49,27 @@ void main() {
       expect(second.progression.prestige.compareTo(n(9400)), 0);
     });
 
+    test('rejects malformed catalog definitions without mutating state', () {
+      final progression = ProgressionState.initial.copyWith(prestige: n(1000));
+      final emptyId = engine.buyTalent(
+        progression, LegacySystemsState.initial,
+        const TalentDefinition(id: '', cost: 100),
+      );
+      final nonPositiveCost = engine.buyTalent(
+        progression, LegacySystemsState.initial,
+        const TalentDefinition(id: 'invalid_cost', cost: 0),
+      );
+      final selfParent = engine.buyTalent(
+        progression, LegacySystemsState.initial,
+        const TalentDefinition(id: 'self_parent', cost: 100, requiredParentId: 'self_parent'),
+      );
+      expect(emptyId.accepted, isFalse);
+      expect(nonPositiveCost.accepted, isFalse);
+      expect(selfParent.accepted, isFalse);
+      expect(selfParent.progression.prestige, progression.prestige);
+      expect(selfParent.systems.talents, isEmpty);
+    });
+
     test('rejects purchases when prestige is insufficient', () {
       final result = engine.buyTalent(
         ProgressionState.initial, LegacySystemsState.initial, const TalentDefinition(id: 'talent_speed_1', cost: 100),
