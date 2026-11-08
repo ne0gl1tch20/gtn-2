@@ -127,6 +127,7 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
   final BotTeam _botTeam = BotTeam();
   Timer? _autoClickerTimer;
   bool _autoClickerTickRunning = false;
+  static const int _timeTravelPenaltyMillis = 24 * 60 * 60 * 1000;
   ProgressionState _progression = ProgressionState.initial;
   GameSettings _settings = GameSettings.initial;
   final TextEditingController _controller = TextEditingController();
@@ -164,13 +165,26 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
         var restoredProgression = save.progression;
         final savedAt = restoredProgression.legacySystems.lastSaveTimestamp;
         final now = DateTime.now().millisecondsSinceEpoch;
+        final timeTravelDetected = savedAt > 0 && now < savedAt;
+        if (timeTravelDetected) {
+          restoredProgression = restoredProgression.copyWith(
+            legacySystems: restoredProgression.legacySystems.copyWith(
+              autoClickerActive: false,
+              lastSaveTimestamp: now,
+              timeTravelPenaltyUntil: now + _timeTravelPenaltyMillis,
+            ),
+          );
+          shouldPersistOfflineEarnings = true;
+        }
         final elapsedSeconds = savedAt > 0 && now >= savedAt
             ? ((now - savedAt) ~/ 1000)
             : 0;
-        final offlineEarnings = OfflineEarningsPolicy.calculate(
-          autoClickerWasActive: restoredProgression.legacySystems.autoClickerActive,
-          elapsedSeconds: elapsedSeconds,
-        );
+        final offlineEarnings = timeTravelDetected
+            ? BigNumber.fromInt(0)
+            : OfflineEarningsPolicy.calculate(
+                autoClickerWasActive: restoredProgression.legacySystems.autoClickerActive,
+                elapsedSeconds: elapsedSeconds,
+              );
         if (offlineEarnings.compareTo(BigNumber.fromInt(0)) > 0) {
           shouldPersistOfflineEarnings = true;
           restoredProgression = restoredProgression.copyWith(
@@ -193,9 +207,11 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
           _progression = restoredProgression;
           _settings = save.settings;
           GtnApp.settingsNotifier.value = _settings;
-          _message = offlineEarnings.compareTo(BigNumber.fromInt(0)) > 0
-              ? 'Welcome back! Your Auto Clicker earned $offlineEarnings Money while you were away.'
-              : 'Welcome back! Your saved game is ready.';
+          _message = timeTravelDetected
+              ? 'Clock rollback detected. Auto Clicker paused for 24 hours.'
+              : offlineEarnings.compareTo(BigNumber.fromInt(0)) > 0
+                  ? 'Welcome back! Your Auto Clicker earned $offlineEarnings Money while you were away.'
+                  : 'Welcome back! Your saved game is ready.';
         });
       }
     } on Exception {
@@ -458,7 +474,8 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
       return;
     }
     final systems = _progression.legacySystems;
-    if (!systems.autoClickerActive) return;
+    if (!systems.autoClickerActive ||
+        systems.timeTravelPenaltyUntil > DateTime.now().millisecondsSinceEpoch) return;
     final purchasedBots = NebulaShopCatalog.botIds
         .where((id) => (_progression.nebulaItems[id] ?? 0) > 0)
         .toSet();
@@ -560,13 +577,25 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
       var nextProgression = save?.progression ?? ProgressionState.initial;
       final savedAt = nextProgression.legacySystems.lastSaveTimestamp;
       final now = DateTime.now().millisecondsSinceEpoch;
+      final timeTravelDetected = savedAt > 0 && now < savedAt;
+      if (timeTravelDetected) {
+        nextProgression = nextProgression.copyWith(
+          legacySystems: nextProgression.legacySystems.copyWith(
+            autoClickerActive: false,
+            lastSaveTimestamp: now,
+            timeTravelPenaltyUntil: now + _timeTravelPenaltyMillis,
+          ),
+        );
+      }
       final elapsedSeconds = savedAt > 0 && now >= savedAt
           ? ((now - savedAt) ~/ 1000)
           : 0;
-      final offlineEarnings = OfflineEarningsPolicy.calculate(
-        autoClickerWasActive: nextProgression.legacySystems.autoClickerActive,
-        elapsedSeconds: elapsedSeconds,
-      );
+      final offlineEarnings = timeTravelDetected
+          ? BigNumber.fromInt(0)
+          : OfflineEarningsPolicy.calculate(
+              autoClickerWasActive: nextProgression.legacySystems.autoClickerActive,
+              elapsedSeconds: elapsedSeconds,
+            );
       if (offlineEarnings.compareTo(BigNumber.fromInt(0)) > 0) {
         nextProgression = nextProgression.copyWith(
           money: nextProgression.money + offlineEarnings,
@@ -594,14 +623,16 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
         _progression = nextProgression;
         _settings = nextSettings;
         GtnApp.settingsNotifier.value = _settings;
-        _message = offlineEarnings.compareTo(BigNumber.fromInt(0)) > 0
-            ? 'Save slot $slot loaded. Auto Clicker earned $offlineEarnings Money offline.'
-            : save == null
+        _message = timeTravelDetected
+            ? 'Clock rollback detected. Auto Clicker paused for 24 hours.'
+            : offlineEarnings.compareTo(BigNumber.fromInt(0)) > 0
+                ? 'Save slot $slot loaded. Auto Clicker earned $offlineEarnings Money offline.'
+                : save == null
                 ? 'New save slot ready. Guess a number between 1 and 100.'
                 : 'Save slot $slot loaded.';
         _isLoading = false;
       });
-      if (save == null || offlineEarnings.compareTo(BigNumber.fromInt(0)) > 0) {
+      if (save == null || timeTravelDetected || offlineEarnings.compareTo(BigNumber.fromInt(0)) > 0) {
         await _persist();
       }
       _botTeam.reset(_game.minimum, _game.maximum);
@@ -764,6 +795,13 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
   }
 
   Future<void> _applyLegacyProgression(ProgressionState progression) async {
+    if (progression.legacySystems.autoClickerActive &&
+        progression.legacySystems.timeTravelPenaltyUntil > DateTime.now().millisecondsSinceEpoch) {
+      progression = progression.copyWith(
+        legacySystems: progression.legacySystems.copyWith(autoClickerActive: false),
+      );
+      setState(() => _message = 'Auto Clicker is temporarily paused after a clock rollback.');
+    }
     final oldRange = _rangeMaximum(_progression, _settings);
     final newRange = _rangeMaximum(progression, _settings);
     setState(() {
