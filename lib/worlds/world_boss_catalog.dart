@@ -110,19 +110,6 @@ class WorldBossCatalog {
 
   static bool canUnlock(ProgressionState state, WorldBossDefinition boss) {
     if (isUnlocked(state, boss)) return false;
-    if (boss.unlockBossId != null &&
-        !state.defeatedBosses.contains(boss.unlockBossId) &&
-        !state.legacySystems.relicInventory.contains(boss.unlockBossId)) {
-      return false;
-    }
-    return state.correctGuesses >= boss.unlockCorrectGuesses &&
-        ownedUpgradeLevels(state) >= boss.unlockUpgradeCount &&
-        state.prestigeResets >= boss.unlockPrestigeCount &&
-        state.ultraResets >= boss.unlockUltraCount;
-  }
-
-  static bool canUnlock(ProgressionState state, WorldBossDefinition boss) {
-    if (state.legacySystems.unlockedWorldIds.contains(boss.id)) return true;
     final requiredBossId = boss.unlockBossId;
     if (requiredBossId == null) return true;
     return state.defeatedBosses.contains(requiredBossId) &&
