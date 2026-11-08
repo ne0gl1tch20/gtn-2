@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gtn_2/core/legacy/legacy_systems_state.dart';
+import 'package:gtn_2/core/numbers/big_number.dart';
 import 'package:gtn_2/core/progression/progression_state.dart';
 import 'package:gtn_2/worlds/world_boss_catalog.dart';
 import 'package:gtn_2/worlds/world_map_page.dart';
@@ -65,6 +66,47 @@ void main() {
 
     expect(calls, contains(('crystal_caverns', 'select_world')));
     expect(find.text('Selected world'), findsOneWidget);
+  });
+
+  testWidgets('defeated world exposes mastery and dispatches its real action',
+      (tester) async {
+    final state = stateWith().copyWith(
+      defeatedBosses: const {'verdant_guardian'},
+      nebula: BigNumber.fromInt(1000),
+      legacySystems: LegacySystemsState.initial.copyWith(
+        unlockedWorldIds: const {'verdant_grove'},
+        worldUnlockMigrationPending: false,
+        worldMasteryLevels: const {'verdant_grove': 1},
+      ),
+    );
+    String? actionId;
+    String? actionName;
+
+    await pumpMap(
+      tester,
+      state: state,
+      onAction: (id, action) async {
+        actionId = id;
+        actionName = action;
+        return state.copyWith(
+          nebula: BigNumber.fromInt(980),
+          legacySystems: state.legacySystems.copyWith(
+            worldMasteryLevels: const {'verdant_grove': 2},
+          ),
+        );
+      },
+    );
+
+    expect(find.textContaining('World mastery: 1 / 10'), findsOneWidget);
+    final upgrade = find.textContaining('Increase mastery');
+    expect(upgrade, findsOneWidget);
+    await tester.ensureVisible(upgrade);
+    await tester.tap(upgrade);
+    await tester.pumpAndSettle();
+
+    expect(actionId, 'verdant_grove');
+    expect(actionName, 'mastery');
+    expect(find.textContaining('World mastery: 2 / 10'), findsOneWidget);
   });
 
   testWidgets('secret route marker appears at its threshold and dispatches discovery',
