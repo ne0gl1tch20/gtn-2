@@ -23,11 +23,12 @@ void main() {
           prestige: BigNumber.fromInt(4),
           upgrades: const {'income': 2},
         ),
-        settings: const GameSettings(darkMode: false, reduceMotion: true),
+        settings: const GameSettings(darkMode: false, reduceMotion: true, difficultyId: 'hard'),
       );
       expect(SaveData.fromJson(save.toJson()).toJson(), save.toJson());
       expect(SaveData.fromJson(save.toJson()).minimum, 25);
       expect(SaveData.fromJson(save.toJson()).maximum, 150);
+      expect(SaveData.fromJson(save.toJson()).settings.difficultyId, 'hard');
     });
 
     test('rejects unknown versions and invalid fields', () {
