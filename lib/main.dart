@@ -155,6 +155,7 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
   }
 
   Future<void> _restoreSave() async {
+    var shouldPersistOfflineEarnings = false;
     try {
       final storage = await _storage;
       final save = await storage.load();
@@ -171,6 +172,7 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
           elapsedSeconds: elapsedSeconds,
         );
         if (offlineEarnings.compareTo(BigNumber.fromInt(0)) > 0) {
+          shouldPersistOfflineEarnings = true;
           restoredProgression = restoredProgression.copyWith(
             money: restoredProgression.money + offlineEarnings,
             moneyEarned: restoredProgression.moneyEarned + offlineEarnings,
@@ -205,6 +207,8 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
+    _botTeam.reset(_game.minimum, _game.maximum);
+    if (shouldPersistOfflineEarnings) await _persist();
     _scheduleAutoClicker();
   }
 
@@ -256,6 +260,7 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
         if (previousRange != nextRange) {
           _engine = _engineFor(withQuestProgress, _settings);
           _game = _newGameWithAdaptiveTarget(_engine.newGame());
+          _botTeam.reset(_game.minimum, _game.maximum);
           _message = 'Your range upgrade is active. A fresh round is ready.';
         }
       });
@@ -288,6 +293,7 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
         _progression = updated;
         _engine = _engineFor(updated, _settings);
         _game = _newGameWithAdaptiveTarget(_engine.newGame());
+        _botTeam.reset(_game.minimum, _game.maximum);
         _message = 'Prestige complete! Build your progress again.';
       });
       await _persist();
@@ -318,6 +324,7 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
         _progression = updated;
         _engine = _engineFor(updated, _settings);
         _game = _newGameWithAdaptiveTarget(_engine.newGame());
+        _botTeam.reset(_game.minimum, _game.maximum);
         _message = 'Ultra reset complete! A new run begins.';
       });
       await _persist();
@@ -483,6 +490,7 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
     if (_game.isComplete) {
       setState(() {
         _game = _newGameWithAdaptiveTarget(_engine.newGame());
+        _botTeam.reset(_game.minimum, _game.maximum);
         _message = 'Auto Clicker started a new round.';
       });
     }
@@ -629,6 +637,7 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
       if (difficultyChanged) {
         _engine = _engineFor(_progression, settings);
         _game = _newGameWithAdaptiveTarget(_engine.newGame());
+        _botTeam.reset(_game.minimum, _game.maximum);
         _message = 'Difficulty changed to ${DifficultyRules.name(settings.difficultyId)}. A fresh round is ready.';
       }
     });
@@ -1053,6 +1062,7 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
   Future<void> _newGame() async {
     setState(() {
       _game = _newGameWithAdaptiveTarget(_engine.newGame());
+      _botTeam.reset(_game.minimum, _game.maximum);
       _message = 'New round! Guess a number between ${_game.minimum} and ${_game.maximum}.';
       _controller.clear();
     });
