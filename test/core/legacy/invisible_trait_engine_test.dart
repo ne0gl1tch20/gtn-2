@@ -94,6 +94,12 @@ void main() {
     expect(second.bonusIds, isEmpty);
   });
 
+  test('upgrade purchases increment the persistent profile counter', () {
+    final next = engine.observeUpgradePurchase(const AdaptiveTraitProfile());
+    expect(next.upgradesPurchasedObserved, 1);
+    expect(engine.observeUpgradePurchase(next, countDelta: 0).upgradesPurchasedObserved, 1);
+  });
+
   test('guess observations update bounded scores and exact earned currency', () {
     final next = engine.observeGuess(
       profile: const AdaptiveTraitProfile(),
