@@ -83,7 +83,7 @@ class RandomEventEngine {
           money: progression.money + bonus,
           moneyEarned: progression.moneyEarned + bonus,
         );
-        message = 'Random event: Cash Burst! +' + bonus.toString() + ' Money.';
+        message = 'Random event: Cash Burst! +$bonus Money.';
         break;
       case RandomEventType.nebulaRain:
         final bonus = _random.nextInt(41) + 10;
@@ -91,7 +91,7 @@ class RandomEventEngine {
           nebula: progression.nebula + BigNumber.fromInt(bonus),
           nebulaEarned: progression.nebulaEarned + BigNumber.fromInt(bonus),
         );
-        message = 'Random event: Nebula Rain! +' + bonus.toString() + ' Nebula.';
+        message = 'Random event: Nebula Rain! +$bonus Nebula.';
         break;
       case RandomEventType.jackpot:
         final bonus = BigNumber.fromInt(1000).multiplyInt(currentRangeMax);
@@ -99,7 +99,7 @@ class RandomEventEngine {
           money: progression.money + bonus,
           moneyEarned: progression.moneyEarned + bonus,
         );
-        message = 'Random event: Jackpot! +' + bonus.toString() + ' Money.';
+        message = 'Random event: Jackpot! +$bonus Money.';
         break;
       case RandomEventType.streakSurge:
         final streak = progression.currentStreak + 2;
@@ -123,7 +123,7 @@ class RandomEventEngine {
           money: progression.money + bonus,
           moneyEarned: progression.moneyEarned + bonus,
         );
-        message = 'Random event: Tax Refund! +' + bonus.toString() + ' Money.';
+        message = 'Random event: Tax Refund! +$bonus Money.';
         break;
       case RandomEventType.cosmicGift:
         const bonus = 100;
