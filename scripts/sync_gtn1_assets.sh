@@ -11,8 +11,10 @@ IMAGE_DEST="assets/gtn1/web-play"
 required_fonts=(
   "Manrope-VariableFont_wght.ttf"
   "Inter-VariableFont_opsz,wght.ttf"
+  "Inter-Italic-VariableFont_opsz,wght.ttf"
   "SpaceGrotesk-VariableFont_wght.ttf"
   "JetBrainsMono-VariableFont_wght.ttf"
+  "JetBrainsMono-Italic-VariableFont_wght.ttf"
 )
 
 mkdir -p "$FONT_DEST" "$IMAGE_DEST"
