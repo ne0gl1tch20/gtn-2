@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -18,7 +19,7 @@ class SaveStorage {
 
   final int slot;
   final File _file;
-  Future<void> _pendingWrite = Future<void>.value();
+  static final Map<String, Future<void>> _fileQueues = {};
 
   static Future<SaveStorage> inApplicationDocuments({int slot = 1}) async {
     final directory = await getApplicationDocumentsDirectory();
@@ -91,7 +92,7 @@ class SaveStorage {
     await candidate.rename(destination.path);
   }
 
-  Future<SaveData?> load() async {
+  Future<SaveData?> load() => _enqueue(() async {
     final primary = await _readSave(_file);
     if (primary != null) return primary;
 
@@ -112,7 +113,55 @@ class SaveStorage {
       return backupSave;
     }
     return null;
-  }
+  });
+
+  Future<bool> hasBackup() => _enqueue(() async =>
+      await _readSave(File('${_file.path}.bak')) != null);
+
+  Future<bool> duplicateTo(int targetSlot) => _enqueue(() async {
+    final target = SaveStorage(directory: _file.parent, slot: targetSlot);
+    if (targetSlot == slot ||
+        await target._file.exists() ||
+        await File('${target._file.path}.bak').exists()) {
+      return false;
+    }
+    final current = await _readSave(_file);
+    if (current == null) return false;
+    await target.save(current);
+    final sourceBackup = File('${_file.path}.bak');
+    final targetBackup = File('${target._file.path}.bak');
+    final previous = await _readSave(sourceBackup);
+    if (previous != null) {
+      await targetBackup.writeAsString(jsonEncode(previous.toJson()), flush: true);
+    }
+    return true;
+  });
+
+  Future<bool> restoreBackup() => _enqueue(() async {
+    final backup = File('${_file.path}.bak');
+    final previous = await _readSave(_file);
+    final recoverable = await _readSave(backup);
+    if (previous == null || recoverable == null) return false;
+    final temporary = File('${_file.path}.restore-tmp');
+    try {
+      await _file.rename(temporary.path);
+      await backup.rename(_file.path);
+      await temporary.rename(backup.path);
+      return true;
+    } on FileSystemException {
+      if (!await _file.exists() && await temporary.exists()) {
+        await temporary.rename(_file.path);
+      }
+      rethrow;
+    }
+  });
+
+  Future<void> reset() => _enqueue(() async {
+    for (final suffix in ['', '.tmp', '.bak', '.corrupt', '.restore-tmp']) {
+      final file = File('${_file.path}$suffix');
+      if (await file.exists()) await file.delete();
+    }
+  });
 
   Future<SaveData?> _readSave(File file) async {
     if (!await file.exists()) return null;
@@ -144,17 +193,28 @@ class SaveStorage {
         data.secret < data.minimum ||
         data.secret > data.maximum ||
         data.attempts < 0 ||
-        data.gamesWon < 0) {
+        data.gamesWon < 0 ||
+        data.profileName.length > 24 ||
+        !SaveData.profileIconIds.contains(data.profileIconId)) {
       return Future<void>.error(
         ArgumentError('Refusing to write invalid save data.'),
       );
     }
+    return _enqueue(() => _write(data));
+  }
 
-    // Serialize writes so rapid input cannot race on the same temporary file.
-    _pendingWrite = _pendingWrite
-        .catchError((Object _) {})
-        .then((_) => _write(data));
-    return _pendingWrite;
+  Future<T> _enqueue<T>(Future<T> Function() operation) {
+    final completer = Completer<T>();
+    final previous = _fileQueues[_file.path] ?? Future<void>.value();
+    final next = previous.catchError((Object _) {}).then((_) async {
+      try {
+        completer.complete(await operation());
+      } catch (error, stackTrace) {
+        completer.completeError(error, stackTrace);
+      }
+    });
+    _fileQueues[_file.path] = next;
+    return completer.future;
   }
 
   Future<void> _write(SaveData data) async {
@@ -171,7 +231,7 @@ class SaveStorage {
         backedUp = true;
       }
       await temporary.rename(_file.path);
-      if (backedUp && await backup.exists()) await backup.delete();
+      // Retain the previous valid save for explicit one-step restoration.
     } on FileSystemException {
       if (backedUp && !await _file.exists() && await backup.exists()) {
         await backup.rename(_file.path);

@@ -31,6 +31,47 @@ void main() {
       expect(SaveData.fromJson(save.toJson()).settings.difficultyId, 'hard');
     });
 
+    test('round-trips save profile name and icon', () {
+      final save = SaveData(
+        secret: 42,
+        attempts: 0,
+        gamesWon: 0,
+        profileName: 'My Run',
+        profileIconId: 'planet',
+      );
+      final restored = SaveData.fromJson(save.toJson());
+      expect(restored.profileName, 'My Run');
+      expect(restored.profileIconId, 'planet');
+      expect(restored.copyWith(profileName: 'New Name').profileIconId, 'planet');
+    });
+
+    test('migrates old saves without profile fields', () {
+      final oldSave = SaveData(
+        schemaVersion: 3,
+        secret: 42,
+        attempts: 0,
+        gamesWon: 0,
+      ).toJson()
+        ..remove('profileName')
+        ..remove('profileIconId');
+      final migrated = SaveData.fromJson(oldSave);
+      expect(migrated.schemaVersion, SaveData.currentSchemaVersion);
+      expect(migrated.profileName, isEmpty);
+      expect(migrated.profileIconId, 'default');
+    });
+
+    test('rejects invalid profile metadata', () {
+      final base = SaveData(secret: 42, attempts: 0, gamesWon: 0).toJson();
+      expect(
+        () => SaveData.fromJson({...base, 'profileName': List.filled(25, 'x').join()}),
+        throwsFormatException,
+      );
+      expect(
+        () => SaveData.fromJson({...base, 'profileIconId': 'unknown'}),
+        throwsFormatException,
+      );
+    });
+
     test('accepts and round-trips Extreme Hardcore save ranges', () {
       final save = SaveData(
         secret: 487,
@@ -56,7 +97,7 @@ void main() {
     test('rejects unknown versions and invalid fields', () {
       expect(
         () => SaveData.fromJson({
-          'schemaVersion': 4,
+          'schemaVersion': 5,
           'secret': 42,
           'attempts': 0,
           'gamesWon': 0,
@@ -125,6 +166,24 @@ void main() {
     expect((await storage.load())?.toJson(), first.toJson());
     await storage.save(second);
     expect((await storage.load())?.toJson(), second.toJson());
+  });
+
+  test('serializes writes across separate storage instances for one slot', () async {
+    final directory =
+        await Directory.systemTemp.createTemp('gtn2-save-instance-queue-');
+    addTearDown(() => directory.delete(recursive: true));
+    final first = SaveStorage(directory: directory, slot: 3);
+    final second = SaveStorage(directory: directory, slot: 3);
+
+    await Future.wait([
+      first.save(SaveData(secret: 31, attempts: 1, gamesWon: 1)),
+      second.save(SaveData(secret: 82, attempts: 2, gamesWon: 2)),
+    ]);
+
+    final restored = await first.load();
+    expect(restored, isNotNull);
+    expect([31, 82], contains(restored!.secret));
+    expect(await first.hasBackup(), isTrue);
   });
 
   test('persists Extreme Hardcore saves through the storage layer', () async {
@@ -255,6 +314,53 @@ void main() {
     expect(await storage.loadActiveSlot(), 6);
     expect(await File('${directory.path}/gtn2-active-slot.json').exists(), isTrue);
     expect(await File('${directory.path}/gtn2-active-slot.json.corrupt').exists(), isTrue);
+  });
+
+  test('retains and restores the previous valid save', () async {
+    final directory =
+        await Directory.systemTemp.createTemp('gtn2-save-restore-test-');
+    addTearDown(() => directory.delete(recursive: true));
+    final storage = SaveStorage(directory: directory);
+    await storage.save(SaveData(secret: 42, attempts: 1, gamesWon: 1));
+    await storage.save(SaveData(secret: 73, attempts: 2, gamesWon: 2));
+
+    expect(await storage.hasBackup(), isTrue);
+    expect((await storage.load())?.secret, 73);
+    expect(await storage.restoreBackup(), isTrue);
+    expect((await storage.load())?.secret, 42);
+    expect(await storage.hasBackup(), isTrue);
+    expect(await storage.restoreBackup(), isTrue);
+    expect((await storage.load())?.secret, 73);
+  });
+
+  test('duplicates a save and its restore backup into an empty slot', () async {
+    final directory =
+        await Directory.systemTemp.createTemp('gtn2-save-duplicate-test-');
+    addTearDown(() => directory.delete(recursive: true));
+    final source = SaveStorage(directory: directory, slot: 1);
+    final target = SaveStorage(directory: directory, slot: 2);
+    await source.save(SaveData(secret: 42, attempts: 1, gamesWon: 1));
+    await source.save(SaveData(secret: 73, attempts: 2, gamesWon: 2));
+
+    expect(await source.duplicateTo(2), isTrue);
+    expect((await target.load())?.secret, 73);
+    expect(await target.hasBackup(), isTrue);
+    expect(await source.duplicateTo(2), isFalse);
+    expect(await source.duplicateTo(1), isFalse);
+  });
+
+  test('reset removes the save and all recovery files', () async {
+    final directory =
+        await Directory.systemTemp.createTemp('gtn2-save-reset-test-');
+    addTearDown(() => directory.delete(recursive: true));
+    final storage = SaveStorage(directory: directory, slot: 4);
+    await storage.save(SaveData(secret: 42, attempts: 1, gamesWon: 1));
+    await storage.save(SaveData(secret: 73, attempts: 2, gamesWon: 2));
+
+    await storage.reset();
+
+    expect(await storage.load(), isNull);
+    expect(await storage.hasBackup(), isFalse);
   });
 
   test('save slots use separate files', () async {

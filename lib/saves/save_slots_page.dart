@@ -1,7 +1,11 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
+import '../core/game/difficulty_rules.dart';
 import '../data/saves/save_data.dart';
 import '../data/saves/save_storage.dart';
+import '../settings/game_settings.dart';
 
 typedef SaveSlotSelection = Future<void> Function(int slot);
 
@@ -20,22 +24,299 @@ class SaveSlotsPage extends StatefulWidget {
 }
 
 class _SaveSlotsPageState extends State<SaveSlotsPage> {
-  late final Map<int, Future<SaveData?>> _previews = {
-    for (var slot = 1; slot <= SaveStorage.maxSaveSlots; slot++)
-      slot: SaveStorage.inApplicationDocuments(slot: slot)
-          .then((storage) => storage.load()),
-  };
-
+  late Map<int, Future<SaveData?>> _previews;
   int? _switching;
+  int? _working;
+
+  @override
+  void initState() {
+    super.initState();
+    _refreshPreviews();
+  }
+
+  void _refreshPreviews() {
+    _previews = {
+      for (var slot = 1; slot <= SaveStorage.maxSaveSlots; slot++)
+        slot: SaveStorage.inApplicationDocuments(slot: slot)
+            .then((storage) => storage.load()),
+    };
+  }
+
+  Future<void> _refresh() async {
+    if (!mounted) return;
+    setState(_refreshPreviews);
+  }
 
   Future<void> _select(int slot) async {
-    if (_switching != null) return;
+    if (_switching != null || _working != null) return;
     setState(() => _switching = slot);
     try {
       await widget.onSelect(slot);
       if (mounted) Navigator.of(context).pop();
     } finally {
       if (mounted) setState(() => _switching = null);
+    }
+  }
+
+  Future<void> _create(int slot) async {
+    final nameController = TextEditingController();
+    var difficulty = DifficultyRules.classic;
+    var icon = 'default';
+    final result = await showDialog<({String name, String difficulty, String icon})>(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: Text('Create Slot $slot'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nameController,
+                maxLength: 24,
+                decoration: const InputDecoration(labelText: 'Save name (optional)'),
+              ),
+              DropdownButtonFormField<String>(
+                initialValue: difficulty,
+                decoration: const InputDecoration(labelText: 'Difficulty'),
+                items: [
+                  for (final id in DifficultyRules.ids)
+                    DropdownMenuItem(value: id, child: Text(DifficultyRules.name(id))),
+                ],
+                onChanged: (value) {
+                  if (value != null) setDialogState(() => difficulty = value);
+                },
+              ),
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 8,
+                children: [
+                  for (final id in SaveData.profileIconIds)
+                    ChoiceChip(
+                      label: Text(_iconSymbol(id)),
+                      selected: icon == id,
+                      onSelected: (_) => setDialogState(() => icon = id),
+                    ),
+                ],
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(dialogContext), child: const Text('Cancel')),
+            FilledButton(
+              onPressed: () => Navigator.pop(
+                dialogContext,
+                (name: nameController.text.trim(), difficulty: difficulty, icon: icon),
+              ),
+              child: const Text('Create'),
+            ),
+          ],
+        ),
+      ),
+    );
+    nameController.dispose();
+    if (result == null || !mounted) return;
+    setState(() => _working = slot);
+    try {
+      final maximum = DifficultyRules.baseRangeMaximum(result.difficulty);
+      final save = SaveData(
+        secret: Random.secure().nextInt(maximum) + 1,
+        attempts: 0,
+        gamesWon: 0,
+        maximum: maximum,
+        settings: GameSettings.initial.copyWith(difficultyId: result.difficulty),
+        profileName: result.name,
+        profileIconId: result.icon,
+      );
+      final storage = await SaveStorage.inApplicationDocuments(slot: slot);
+      if (await storage.load() != null || await storage.hasBackup()) {
+        throw StateError('This slot is no longer empty.');
+      }
+      await storage.save(save);
+      await _refresh();
+      await widget.onSelect(slot);
+      if (mounted) Navigator.of(context).pop();
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not create this save: $error')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _working = null);
+    }
+  }
+
+  Future<void> _editProfile(int slot) async {
+    final storage = await SaveStorage.inApplicationDocuments(slot: slot);
+    final current = await storage.load();
+    if (current == null || !mounted) return;
+    final nameController = TextEditingController(text: current.profileName);
+    var icon = current.profileIconId;
+    final result = await showDialog<({String name, String icon})>(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: Text('Edit Slot $slot Profile'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nameController,
+                maxLength: 24,
+                decoration: const InputDecoration(labelText: 'Save name'),
+              ),
+              Wrap(
+                spacing: 8,
+                children: [
+                  for (final id in SaveData.profileIconIds)
+                    ChoiceChip(
+                      label: Text(_iconSymbol(id)),
+                      selected: icon == id,
+                      onSelected: (_) => setDialogState(() => icon = id),
+                    ),
+                ],
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(dialogContext), child: const Text('Cancel')),
+            FilledButton(
+              onPressed: () => Navigator.pop(
+                dialogContext,
+                (name: nameController.text.trim(), icon: icon),
+              ),
+              child: const Text('Save'),
+            ),
+          ],
+        ),
+      ),
+    );
+    nameController.dispose();
+    if (result == null || !mounted) return;
+    setState(() => _working = slot);
+    try {
+      await storage.save(current.copyWith(
+        profileName: result.name,
+        profileIconId: result.icon,
+      ));
+      await _refresh();
+    } finally {
+      if (mounted) setState(() => _working = null);
+    }
+  }
+
+  String _iconSymbol(String id) => switch (id) {
+        'star' => '⭐',
+        'bolt' => '⚡',
+        'crown' => '👑',
+        'planet' => '🪐',
+        _ => '🎮',
+      };
+
+  Future<void> _duplicate(int sourceSlot) async {
+    final emptySlots = <int>[];
+    for (var slot = 1; slot <= SaveStorage.maxSaveSlots; slot++) {
+      final storage = await SaveStorage.inApplicationDocuments(slot: slot);
+      if (slot != sourceSlot && await storage.load() == null && !await storage.hasBackup()) {
+        emptySlots.add(slot);
+      }
+    }
+    if (!mounted) return;
+    if (emptySlots.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No empty save slots are available.')),
+      );
+      return;
+    }
+    var target = emptySlots.first;
+    final selected = await showDialog<int>(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: Text('Duplicate Slot $sourceSlot'),
+          content: DropdownButtonFormField<int>(
+            initialValue: target,
+            decoration: const InputDecoration(labelText: 'Copy into'),
+            items: [
+              for (final slot in emptySlots)
+                DropdownMenuItem(value: slot, child: Text('Slot $slot')),
+            ],
+            onChanged: (value) {
+              if (value != null) setDialogState(() => target = value);
+            },
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(dialogContext), child: const Text('Cancel')),
+            FilledButton(onPressed: () => Navigator.pop(dialogContext, target), child: const Text('Duplicate')),
+          ],
+        ),
+      ),
+    );
+    if (selected == null || !mounted) return;
+    setState(() => _working = sourceSlot);
+    try {
+      final source = await SaveStorage.inApplicationDocuments(slot: sourceSlot);
+      final success = await source.duplicateTo(selected);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(success ? 'Copied Slot $sourceSlot to Slot $selected.' : 'Could not duplicate this save.')),
+      );
+      await _refresh();
+    } finally {
+      if (mounted) setState(() => _working = null);
+    }
+  }
+
+  Future<void> _reset(int slot) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text('Reset Slot $slot?'),
+        content: const Text('This permanently deletes the save and its restore backup.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(dialogContext, false), child: const Text('Cancel')),
+          FilledButton(onPressed: () => Navigator.pop(dialogContext, true), child: const Text('Reset')),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    setState(() => _working = slot);
+    try {
+      final storage = await SaveStorage.inApplicationDocuments(slot: slot);
+      await storage.reset();
+      if (slot == widget.activeSlot) {
+        await widget.onSelect(slot);
+      }
+      await _refresh();
+    } finally {
+      if (mounted) setState(() => _working = null);
+    }
+  }
+
+  Future<void> _restore(int slot) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text('Restore Slot $slot backup?'),
+        content: const Text('The current save will become the backup, so you can switch back if needed.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(dialogContext, false), child: const Text('Cancel')),
+          FilledButton(onPressed: () => Navigator.pop(dialogContext, true), child: const Text('Restore')),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    setState(() => _working = slot);
+    try {
+      final storage = await SaveStorage.inApplicationDocuments(slot: slot);
+      final success = await storage.restoreBackup();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(success ? 'Restored Slot $slot backup.' : 'No valid backup could be restored.')),
+      );
+      await _refresh();
+    } finally {
+      if (mounted) setState(() => _working = null);
     }
   }
 
@@ -46,7 +327,7 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          const Text('Your saves stay on this device. Choose a slot to continue or start a fresh run.'),
+          const Text('Your saves stay on this device. Choose a slot to continue or manage its backup.'),
           const SizedBox(height: 12),
           for (var slot = 1; slot <= SaveStorage.maxSaveSlots; slot++)
             FutureBuilder<SaveData?>(
@@ -54,6 +335,7 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
               builder: (context, snapshot) {
                 final save = snapshot.data;
                 final selected = widget.activeSlot == slot;
+                final busy = _switching == slot || _working == slot;
                 final subtitle = snapshot.connectionState != ConnectionState.done
                     ? 'Checking save…'
                     : save == null
@@ -61,19 +343,40 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
                         : 'Games won: ${save.gamesWon}';
                 return Card(
                   child: ListTile(
-                    leading: Icon(selected ? Icons.check_circle : Icons.save_outlined),
-                    title: Text('Slot $slot'),
+                    leading: CircleAvatar(child: Text(save == null ? '$slot' : _iconSymbol(save.profileIconId))),
+                    title: Text(save?.profileName.isNotEmpty == true ? save!.profileName : 'Slot $slot'),
                     subtitle: Text(subtitle),
-                    trailing: _switching == slot
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : selected
-                            ? const Text('Active')
-                            : const Icon(Icons.chevron_right),
-                    onTap: _switching != null || selected ? null : () => _select(slot),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (busy)
+                          const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                        else if (selected)
+                          const Text('Active'),
+                        PopupMenuButton<String>(
+                          enabled: _switching == null && _working == null && snapshot.connectionState == ConnectionState.done,
+                          onSelected: (action) {
+                            switch (action) {
+                              case 'create': _create(slot);
+                              case 'profile': _editProfile(slot);
+                              case 'duplicate': _duplicate(slot);
+                              case 'restore': _restore(slot);
+                              case 'reset': _reset(slot);
+                            }
+                          },
+                          itemBuilder: (context) => [
+                            if (save == null) const PopupMenuItem(value: 'create', child: Text('Create save')),
+                            if (save != null) const PopupMenuItem(value: 'profile', child: Text('Edit profile')),
+                            if (save != null) const PopupMenuItem(value: 'duplicate', child: Text('Duplicate')),
+                            const PopupMenuItem(value: 'restore', child: Text('Restore backup')),
+                            if (save != null) const PopupMenuItem(value: 'reset', child: Text('Reset slot')),
+                          ],
+                        ),
+                      ],
+                    ),
+                    onTap: _switching != null || _working != null || selected || save == null
+                        ? null
+                        : () => _select(slot),
                   ),
                 );
               },
