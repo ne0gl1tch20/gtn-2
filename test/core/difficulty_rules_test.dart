@@ -1,7 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gtn_2/core/game/difficulty_rules.dart';
 import 'package:gtn_2/core/game/game_engine.dart';
-import 'package:gtn_2/core/progression/progression_state.dart';
 import 'package:gtn_2/settings/game_settings.dart';
 
 void main() {
