@@ -965,6 +965,7 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
         final traitEffects = _legacySystemsEngine.evaluateTraits(
           progression: beforeGuess,
           systems: legacySystems,
+          playerLevel: 1,
           activeSeasonId: _currentSeasonId(),
         );
         rangeScoutActive = traitEffects.rangeHint;
