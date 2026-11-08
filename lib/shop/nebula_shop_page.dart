@@ -33,8 +33,8 @@ class NebulaShopCatalog {
     NebulaShopItem(
       id: 'golden_guess',
       name: 'Golden Guess Pass',
-      description: 'Every tenth correct guess gets a guaranteed reward boost.',
-      effect: '2× reward on every 10th correct guess',
+      description: 'Every tenth guess guarantees a critical hit when the answer is correct.',
+      effect: 'Guaranteed 5× critical payout every 10th guess',
       price: BigNumber.fromInt(100),
     ),
   ]);
