@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:isolate';
 import 'dart:math';
 
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/services.dart';
 import 'package:lua_dardo_plus/lua.dart';
 
@@ -16,6 +17,7 @@ class LuaScriptEntry {
     required this.description,
     required this.featured,
     required this.hostApiVersion,
+    this.source = 'bundled',
   });
 
   final String id;
@@ -24,6 +26,7 @@ class LuaScriptEntry {
   final String description;
   final bool featured;
   final int hostApiVersion;
+  final String source;
 
   factory LuaScriptEntry.fromJson(Map<String, dynamic> json) {
     final id = json['id'];
@@ -55,6 +58,7 @@ class LuaScriptEntry {
       description: description.trim(),
       featured: featured,
       hostApiVersion: hostApiVersion,
+      source: 'bundled',
     );
   }
 }
@@ -383,12 +387,14 @@ class LuaEngine {
   bool? _lastAnswerCorrect;
   bool _starting = false;
   String? _lastError;
+  bool _runtimeAvailable = false;
+  List<LuaScriptEntry> _cachedScripts = const [];
   List<String> _diagnostics = [];
 
   LuaActivityDefinition? currentActivity() => _activeActivity;
 
   LuaEngineStatus status() => LuaEngineStatus(
-        runtimeAvailable: true,
+        runtimeAvailable: _runtimeAvailable,
         hostApiVersion: hostApiVersion,
         activeInstanceId: _activeActivity?.instanceId,
         lastError: _lastError,
@@ -396,7 +402,63 @@ class LuaEngine {
 
   List<String> recentDiagnostics() => List.unmodifiable(_diagnostics);
 
-  Future<List<LuaScriptEntry>> listScripts() => _repository.listScripts();
+  Future<List<LuaScriptEntry>> listScripts() async {
+    final scripts = await _repository.listScripts();
+    _cachedScripts = scripts;
+    _runtimeAvailable = scripts.isNotEmpty;
+    return scripts;
+  }
+
+  Future<LuaScriptEntry?> inspectScript(String scriptId) async {
+    final scripts = await listScripts();
+    for (final script in scripts) {
+      if (script.id == scriptId) return script;
+    }
+    return null;
+  }
+
+  Future<String> executeConsoleCommand(String command) async {
+    if (!kDebugMode) return 'Lua developer commands are disabled in release builds.';
+    final args = command.trim().split(RegExp(r'\\s+')).where((part) => part.isNotEmpty).toList();
+    if (args.isEmpty || args.first != '/lua') return 'Use /lua help.';
+    switch (args.length > 1 ? args[1].toLowerCase() : 'help') {
+      case 'help':
+        return '/lua status | list | inspect <id> | run <id> | stop [instance-id] | logs | eval';
+      case 'status':
+        final current = status();
+        return 'Lua runtime: ' +
+            (current.runtimeAvailable ? 'ready' : 'unavailable') +
+            '; host API v' + current.hostApiVersion.toString() +
+            '; active instance: ' + (current.activeInstanceId ?? 'none') +
+            '; last error: ' + (current.lastError ?? 'none');
+      case 'list':
+        final scripts = await listScripts();
+        return scripts.isEmpty
+            ? 'No registered Lua scripts.'
+            : scripts.map((script) => '${script.id} — ${script.title} [${script.source}, API v${script.hostApiVersion}]').join('\\n');
+      case 'inspect':
+        if (args.length < 3) return 'Usage: /lua inspect <id>';
+        final entry = await inspectScript(args[2]);
+        if (entry == null) return 'Unknown script ID: ${args[2]}';
+        return 'ID: ${entry.id}\\nTitle: ${entry.title}\\nSource: ${entry.source}\\nFile: ${entry.file}\\nHost API: ${entry.hostApiVersion}\\nFeatured: ${entry.featured}';
+      case 'run':
+        if (args.length < 3) return 'Usage: /lua run <id>';
+        final result = await start(args[2]);
+        if (!result.isStarted) return 'Lua start rejected: ${result.reason}';
+        return 'Started ${result.activity!.title} (instance ${result.activity!.instanceId}).';
+      case 'stop':
+        final stopped = stop(args.length > 2 ? args[2] : null);
+        return stopped ? 'Lua activity stopped.' : 'No matching active Lua instance.';
+      case 'logs':
+        final logs = recentDiagnostics().toList();
+        final recent = logs.length > 40 ? logs.sublist(logs.length - 40) : logs;
+        return recent.isEmpty ? 'No Lua diagnostics yet.' : recent.join('\\n');
+      case 'eval':
+        return 'Lua REPL is disabled. Run a registered script with /lua run <id>.';
+      default:
+        return 'Unknown Lua command. Use /lua help.';
+    }
+  }
 
   Future<LuaStartResult> startFeaturedActivity() async {
     final scripts = await _repository.listScripts();
