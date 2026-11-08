@@ -4,6 +4,7 @@ import '../core/numbers/big_number.dart';
 import '../core/progression/progression_calculator.dart';
 import '../core/progression/progression_state.dart';
 import '../shop/permanent_upgrade_shop_page.dart';
+import '../shop/permanent_shop_catalog.dart';
 import '../shop/upgrade_catalog.dart';
 
 typedef ResetAction = Future<ProgressionState> Function();
@@ -15,6 +16,7 @@ class ProgressionHubPage extends StatefulWidget {
     required this.onPrestige,
     required this.onUltra,
     required this.onPurchasePermanentUpgrade,
+    required this.onPurchasePermanentShopItem,
   });
 
   final ProgressionState progression;
@@ -22,6 +24,8 @@ class ProgressionHubPage extends StatefulWidget {
   final ResetAction onUltra;
   final Future<ProgressionState> Function(GameUpgrade upgrade, bool ultra)
       onPurchasePermanentUpgrade;
+  final Future<ProgressionState> Function(PermanentShopItem item, bool ultra)
+      onPurchasePermanentShopItem;
 
   @override
   State<ProgressionHubPage> createState() => _ProgressionHubPageState();
@@ -50,6 +54,8 @@ class _ProgressionHubPageState extends State<ProgressionHubPage> {
           ultra: ultra,
           onPurchase: (upgrade) =>
               widget.onPurchasePermanentUpgrade(upgrade, ultra),
+          onPurchaseShopItem: (item) =>
+              widget.onPurchasePermanentShopItem(item, ultra),
         ),
       ),
     );
