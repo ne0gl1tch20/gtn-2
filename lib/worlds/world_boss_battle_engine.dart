@@ -49,6 +49,53 @@ class WorldBossBattleEngine {
     );
   }
 
+  WorldBossActionResult discoverSecret(ProgressionState state, String secretId) {
+    final matches = WorldBossCatalog.worlds.where((item) => item.secretId == secretId);
+    final world = matches.isEmpty ? null : matches.first;
+    if (world == null ||
+        !WorldBossCatalog.isUnlocked(state, world) ||
+        state.correctGuesses < world.secretAt ||
+        state.legacySystems.discoveredSecrets.contains(secretId)) {
+      return const WorldBossActionResult(
+        progression: state,
+        accepted: false,
+        message: 'Secret area is not discoverable yet.',
+      );
+    }
+    const moneyRewards = <String, int>{
+      'whispering_hollow': 10000,
+      'shard_archive': 50000,
+      'ashen_vault': 250000,
+      'lost_observatory': 1000000,
+    };
+    const nebulaRewards = <String, int>{
+      'whispering_hollow': 5,
+      'shard_archive': 15,
+      'ashen_vault': 50,
+      'lost_observatory': 150,
+    };
+    final moneyReward = BigNumber.fromInt(moneyRewards[secretId]!);
+    final nebulaReward = BigNumber.fromInt(nebulaRewards[secretId]!);
+    final secrets = Set<String>.of(state.legacySystems.discoveredSecrets)
+      ..add(secretId);
+    final codex = Set<String>.of(state.legacySystems.codexEntries)
+      ..add('secret:$secretId');
+    return WorldBossActionResult(
+      progression: state.copyWith(
+        money: state.money + moneyReward,
+        moneyEarned: state.moneyEarned + moneyReward,
+        nebula: state.nebula + nebulaReward,
+        nebulaEarned: state.nebulaEarned + nebulaReward,
+        legacySystems: state.legacySystems.copyWith(
+          discoveredSecrets: Set.unmodifiable(secrets),
+          codexEntries: Set.unmodifiable(codex),
+        ),
+      ),
+      accepted: true,
+      message: 'Discovered secret area: $secretId.',
+    );
+  }
+
   WorldBossActionResult unlockWorld(ProgressionState state, String worldId) {
     final matches = WorldBossCatalog.worlds.where((item) => item.id == worldId);
     final world = matches.isEmpty ? null : matches.first;
