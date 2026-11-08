@@ -56,7 +56,7 @@ class WorldBossBattleEngine {
         !WorldBossCatalog.isUnlocked(state, world) ||
         state.correctGuesses < world.secretAt ||
         state.legacySystems.discoveredSecrets.contains(secretId)) {
-      return const WorldBossActionResult(
+      return WorldBossActionResult(
         progression: state,
         accepted: false,
         message: 'Secret area is not discoverable yet.',
