@@ -104,7 +104,7 @@ class LiveOpsEvent {
         ultra < 0) {
       throw const FormatException('Invalid LiveOps event definition.');
     }
-    final hasStartOffset = RegExp(r'(?:Z|[+-]\\d{2}:\\d{2})
+    final hasStartOffset = RegExp(r'(?:Z|[+-]\d{2}:\d{2})
     if (startDate == null ||
         endDate == null ||
         !endDate.isAfter(startDate)) {
@@ -173,7 +173,7 @@ class LiveOpsCatalog {
   final List<LiveOpsEvent> events;
 }
 ).hasMatch(start);
-    final hasEndOffset = RegExp(r'(?:Z|[+-]\\d{2}:\\d{2})
+    final hasEndOffset = RegExp(r'(?:Z|[+-]\d{2}:\d{2})
     if (startDate == null ||
         endDate == null ||
         !endDate.isAfter(startDate)) {
