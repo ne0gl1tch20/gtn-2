@@ -10,6 +10,7 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 GAME = ROOT / "assets" / "game"
 TRAITS = ROOT / "assets" / "gtn1" / "traits"
+SCRIPTS = ROOT / "assets" / "gtn1" / "scripts"
 MANIFEST = ROOT / "assets" / "gtn1" / "source-manifest.json"
 
 
@@ -61,6 +62,32 @@ if manifest.get("bundledGameCatalogCount") != 17:
     fail("source manifest game catalog count is not 17")
 if manifest.get("bundledTraitAssetCount", 0) < 1300:
     fail("source manifest is missing the full trait asset bundle")
+if manifest.get("bundledLuaScriptCount") != 4:
+    fail("source manifest is missing the complete Lua script bundle")
+
+try:
+    script_catalog = json.loads(
+        (SCRIPTS / "manifest.json").read_text(encoding="utf-8")
+    )
+except (OSError, json.JSONDecodeError) as error:
+    fail(f"Lua script manifest is invalid: {error}")
+if script_catalog.get("schemaVersion") != 1 or script_catalog.get("hostApiVersion") != 1:
+    fail("unsupported Lua script catalog schema or host API version")
+script_entries = script_catalog.get("scripts")
+if not isinstance(script_entries, list) or not script_entries:
+    fail("Lua script catalog has no registered scripts")
+script_ids = [entry.get("id") for entry in script_entries if isinstance(entry, dict)]
+if len(script_ids) != len(script_entries) or len(set(script_ids)) != len(script_ids):
+    fail("Lua script catalog contains missing or duplicate IDs")
+for entry in script_entries:
+    relative = entry.get("file")
+    if not isinstance(relative, str) or ".." in Path(relative).parts:
+        fail(f"Lua script {entry.get('id')} has an invalid source path")
+    script_path = SCRIPTS / relative
+    if not script_path.is_file() or script_path.suffix != ".lua":
+        fail(f"Lua script {entry.get('id')} is missing its source file")
+    if entry.get("hostApiVersion") != 1:
+        fail(f"Lua script {entry.get('id')} requires an unsupported host API version")
 
 try:
     trait_manifest = json.loads(
@@ -87,5 +114,6 @@ print(
     f"{len(trait_definitions)} trait definitions, "
     f"{len(trait_rules)} rule files, "
     f"{len(trait_icons)} icons and "
-    f"{len(trait_locales)} English localizations."
+    f"{len(trait_locales)} English localizations and "
+    f"{len(list(SCRIPTS.rglob('*.lua')))} Lua scripts."
 )
