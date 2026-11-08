@@ -97,8 +97,23 @@ void main() {
       ), 177);
       expect(team.delayMillis(
         active: false, speed: 5, speedTalentOne: true,
-        speedTalentTwo: true, speedMutator: true,
+        speedTalentTwo: true, prestigeAutoSpeed: false, speedMutator: true,
       ), 1000);
+    });
+
+    test('Prestige Auto-Guess increases bot frequency by fifty percent', () {
+      final team = BotTeam();
+      expect(
+        team.delayMillis(
+          active: true,
+          speed: 1,
+          speedTalentOne: false,
+          speedTalentTwo: false,
+          prestigeAutoSpeed: true,
+          speedMutator: false,
+        ),
+        666,
+      );
     });
 
     test('independent bot memory is separate until shared memory is enabled', () {
@@ -107,7 +122,7 @@ void main() {
         purchasedBots: const {'bot_byte'}, sharedMemory: false, sequence: 0,
         rangeMinimum: 1, rangeMaximum: 100, currentMinimum: 1,
         currentMaximum: 100, speed: 1, speedTalentOne: false,
-        speedTalentTwo: false, speedMutator: false,
+        speedTalentTwo: false, prestigeAutoSpeed: false, speedMutator: false,
       )!;
       team.observe(
         botId: byte.botId, guess: byte.guess, feedback: BotFeedback.tooLow,
