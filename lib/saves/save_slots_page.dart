@@ -128,10 +128,10 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
         profileIconId: result.icon,
       );
       final storage = await SaveStorage.inApplicationDocuments(slot: slot);
-      if (await storage.load() != null || await storage.hasBackup()) {
-        throw StateError('This slot is no longer empty.');
+      final created = await storage.createIfEmpty(save);
+      if (!created) {
+        throw StateError('This slot is no longer empty or contains recoverable data.');
       }
-      await storage.save(save);
       await _refresh();
       await widget.onSelect(slot);
       if (mounted) Navigator.of(context).pop();
@@ -195,10 +195,15 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
     if (result == null || !mounted) return;
     setState(() => _working = slot);
     try {
-      await storage.save(current.copyWith(
-        profileName: result.name,
-        profileIconId: result.icon,
-      ));
+      await storage.update((latest) {
+        if (latest == null) {
+          throw StateError('The save disappeared while editing its profile.');
+        }
+        return latest.copyWith(
+          profileName: result.name,
+          profileIconId: result.icon,
+        );
+      });
       await _refresh();
     } finally {
       if (mounted) setState(() => _working = null);
