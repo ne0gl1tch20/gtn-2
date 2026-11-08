@@ -290,6 +290,46 @@ void main() {
       expect(LegacySystemsState.fromJson(systems.toJson()).toJson(), systems.toJson());
     });
 
+    test('round-trips bot sequence, last feedback and save timestamp', () {
+      final systems = LegacySystemsState.initial.copyWith(
+        autoClickerActive: true,
+        autoClickerSpeed: 1.5,
+        botTotalGuesses: 4,
+        botCorrectGuesses: 1,
+        botIncorrectGuesses: 3,
+        botActionSequence: 9,
+        lastBotGuess: 63,
+        lastBotFeedback: 'TOO_HIGH',
+        lastBotId: 'bot_byte',
+        lastSaveTimestamp: 1794100000000,
+      );
+      final restored = LegacySystemsState.fromJson(systems.toJson());
+      expect(restored.botActionSequence, 9);
+      expect(restored.lastBotGuess, 63);
+      expect(restored.lastBotFeedback, 'TOO_HIGH');
+      expect(restored.lastBotId, 'bot_byte');
+      expect(restored.lastSaveTimestamp, 1794100000000);
+      expect(restored.autoClickerActive, isTrue);
+      expect(restored.autoClickerSpeed, 1.5);
+    });
+
+    test('rejects invalid persisted bot feedback and identity', () {
+      expect(
+        () => LegacySystemsState.fromJson(<String, dynamic>{
+          ...LegacySystemsState.initial.toJson(),
+          'lastBotFeedback': 'SECRET_READ',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => LegacySystemsState.fromJson(<String, dynamic>{
+          ...LegacySystemsState.initial.toJson(),
+          'lastBotId': 'unknown_bot',
+        }),
+        throwsFormatException,
+      );
+    });
+
     test('rejects invalid equipped relic and music references', () {
       expect(
         () => LegacySystemsState.fromJson(<String, dynamic>{
