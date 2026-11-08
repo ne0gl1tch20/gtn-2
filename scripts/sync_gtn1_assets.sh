@@ -80,6 +80,7 @@ if [[ "$trait_asset_count" -ne "$source_trait_asset_count" || "$trait_asset_coun
   echo "Incomplete GTN1 trait asset bundle: found $trait_asset_count of $source_trait_asset_count files." >&2
   exit 1
 fi
+python scripts/generate_trait_manifest.py "$TRAIT_DEST"
 
 # Preserve release notes and third-party notices used by About and license screens.
 if [[ -f "$SOURCE_ROOT/changelogs.md" ]]; then
