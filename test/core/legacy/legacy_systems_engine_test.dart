@@ -145,10 +145,9 @@ void main() {
       expect(accepted.systems.worldMasteryLevels['crystal_caverns'], 2);
     });
 
-    test('secret discovery recognizes previous boss IDs and requires unlock', () {
+    test('secret discovery requires its world unlock and guess threshold', () {
       final progression = ProgressionState.initial.copyWith(
         correctGuesses: 150,
-        defeatedBosses: const {'verdant_guardian'},
       );
       final systems = LegacySystemsState.initial.copyWith(
         unlockedWorldIds: const {'verdant_grove', 'crystal_caverns'},
