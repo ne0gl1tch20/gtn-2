@@ -57,7 +57,11 @@ class _WorldMapPageState extends State<WorldMapPage> {
               final defeated = WorldBossCatalog.isDefeated(_state, boss);
               final canFight = WorldBossCatalog.canFight(_state, boss);
               final active = _state.legacySystems.activeBossBattleWorldId == boss.id;
+              final riftTier = _state.legacySystems.endlessRiftTier.clamp(1, 1000000).toInt();
+              final bossHp = boss.hits + (_state.legacySystems.endlessRiftActive ? (riftTier - 1) * 2 : 0);
               final damage = WorldBossCatalog.damage(_state, boss);
+              final phase = ((damage * 3) ~/ bossHp + 1).clamp(1, 3);
+              final misses = _state.legacySystems.bossBattleMistakes[boss.bossId] ?? 0;
               return Card(
                 margin: const EdgeInsets.only(bottom: 12),
                 child: Padding(
@@ -78,8 +82,9 @@ class _WorldMapPageState extends State<WorldMapPage> {
                       const SizedBox(height: 6),
                       Text(boss.description),
                       const SizedBox(height: 10),
-                      Text('Boss health: ${boss.hits - damage} / ${boss.hits}'),
-                      LinearProgressIndicator(value: damage / boss.hits),
+                      Text('Boss health: ${bossHp - damage} / $bossHp'),
+                      LinearProgressIndicator(value: damage / bossHp),
+                      if (active) Text('Phase $phase · Misses this phase: $misses'),
                       const SizedBox(height: 8),
                       Text(
                         'Unlock: ${boss.unlockCorrectGuesses} correct guesses, '
