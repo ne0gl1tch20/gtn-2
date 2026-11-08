@@ -3,19 +3,20 @@ import 'package:flutter/material.dart';
 import '../core/progression/progression_state.dart';
 import 'world_boss_catalog.dart';
 
-typedef BossAttack = Future<ProgressionState> Function(
-  WorldBossDefinition boss,
+typedef WorldBossAction = Future<ProgressionState> Function(
+  String worldId,
+  String action,
 );
 
 class WorldMapPage extends StatefulWidget {
   const WorldMapPage({
     super.key,
     required this.progression,
-    required this.onAttack,
+    required this.onAction,
   });
 
   final ProgressionState progression;
-  final BossAttack onAttack;
+  final WorldBossAction onAction;
 
   @override
   State<WorldMapPage> createState() => _WorldMapPageState();
@@ -25,11 +26,11 @@ class _WorldMapPageState extends State<WorldMapPage> {
   late ProgressionState _state = widget.progression;
   String? _attacking;
 
-  Future<void> _attack(WorldBossDefinition boss) async {
+  Future<void> _runAction(WorldBossDefinition boss, String action) async {
     if (_attacking != null) return;
     setState(() => _attacking = boss.id);
     try {
-      final updated = await widget.onAttack(boss);
+      final updated = await widget.onAction(boss.id, action);
       if (mounted) setState(() => _state = updated);
     } finally {
       if (mounted) setState(() => _attacking = null);
@@ -54,6 +55,7 @@ class _WorldMapPageState extends State<WorldMapPage> {
               final unlocked = WorldBossCatalog.isUnlocked(_state, boss);
               final defeated = WorldBossCatalog.isDefeated(_state, boss);
               final canFight = WorldBossCatalog.canFight(_state, boss);
+              final active = _state.legacySystems.activeBossBattleWorldId == boss.id;
               final damage = WorldBossCatalog.damage(_state, boss);
               return Card(
                 margin: const EdgeInsets.only(bottom: 12),
@@ -67,7 +69,7 @@ class _WorldMapPageState extends State<WorldMapPage> {
                           Expanded(
                             child: Text(boss.worldName, style: theme.textTheme.titleLarge),
                           ),
-                          Text(defeated ? 'Defeated' : canFight ? 'Ready to fight' : unlocked ? 'Unlocked' : 'Locked'),
+                          Text(defeated ? 'Defeated' : active ? 'Battle active' : canFight ? 'Ready to fight' : unlocked ? 'Unlocked' : 'Locked'),
                         ],
                       ),
                       const SizedBox(height: 4),
@@ -93,19 +95,30 @@ class _WorldMapPageState extends State<WorldMapPage> {
                       Text('Reward: ${boss.moneyReward} Money + ${boss.nebulaReward} Nebula'),
                       const SizedBox(height: 12),
                       FilledButton(
-                        onPressed: !canFight || defeated || _attacking != null
+                        onPressed: defeated || _attacking != null || (!canFight && !active)
                             ? null
-                            : () => _attack(boss),
+                            : () => _runAction(boss, 'boss'),
                         child: Text(
                           defeated
                               ? 'Victory claimed'
-                              : canFight
-                                  ? 'Attack boss'
-                                  : unlocked
-                                      ? 'Fight requirements not met'
-                                      : 'World locked',
+                              : active
+                                  ? 'Leave boss battle'
+                                  : canFight
+                                      ? 'Start boss battle'
+                                      : unlocked
+                                          ? 'Fight requirements not met'
+                                          : 'World locked',
                         ),
                       ),
+                      if (unlocked)
+                        OutlinedButton(
+                          onPressed: _attacking != null
+                              ? null
+                              : () => _runAction(boss, 'select_world'),
+                          child: Text(_state.legacySystems.activeWorldId == boss.id
+                              ? 'Selected world'
+                              : 'Select world'),
+                        ),
                     ],
                   ),
                 ),
