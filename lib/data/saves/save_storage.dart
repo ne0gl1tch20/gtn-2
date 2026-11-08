@@ -21,9 +21,32 @@ class SaveStorage {
   }
 
   Future<SaveData?> load() async {
-    if (!await _file.exists()) return null;
+    final primary = await _readSave(_file);
+    if (primary != null) return primary;
+
+    // A process can be killed after the old save is moved to .bak but before
+    // the flushed .tmp file is renamed into place. Prefer that complete new
+    // temporary save, then fall back to the last known-good backup.
+    final temporary = File('${_file.path}.tmp');
+    final temporarySave = await _readSave(temporary);
+    if (temporarySave != null) {
+      await _restoreRecoveryFile(temporary);
+      return temporarySave;
+    }
+
+    final backup = File('${_file.path}.bak');
+    final backupSave = await _readSave(backup);
+    if (backupSave != null) {
+      await _restoreRecoveryFile(backup);
+      return backupSave;
+    }
+    return null;
+  }
+
+  Future<SaveData?> _readSave(File file) async {
+    if (!await file.exists()) return null;
     try {
-      final decoded = jsonDecode(await _file.readAsString());
+      final decoded = jsonDecode(await file.readAsString());
       if (decoded is! Map<String, dynamic>) {
         throw const FormatException('Save root must be an object.');
       }
@@ -31,6 +54,15 @@ class SaveStorage {
     } on FormatException {
       return null;
     }
+  }
+
+  Future<void> _restoreRecoveryFile(File candidate) async {
+    if (await _file.exists()) {
+      final corrupt = File('${_file.path}.corrupt');
+      if (await corrupt.exists()) await corrupt.delete();
+      await _file.rename(corrupt.path);
+    }
+    await candidate.rename(_file.path);
   }
 
   Future<void> save(SaveData data) {
