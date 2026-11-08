@@ -22,7 +22,8 @@ class GuessEconomyRules {
   }) =>
       (0.05 + precisionUpgradeLevel * 0.01 +
               (prestigeLuckCharmOwned ? 0.05 : 0.0))
-          .clamp(0.0, 1.0);
+          .clamp(0.0, 1.0)
+          .toDouble();
 
   static double streakMultiplier(int streak) => 1.0 + streak * 0.1;
 
