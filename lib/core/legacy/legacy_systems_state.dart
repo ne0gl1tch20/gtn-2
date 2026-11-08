@@ -32,6 +32,7 @@ class LegacySystemsState {
     this.endlessRiftTier = 0,
     this.endlessRiftBestTier = 0,
     this.endlessRiftActive = false,
+    this.worldBossVictories = 0,
     this.stakesPlaced = 0,
     this.stakesWon = 0,
     this.stakesLost = 0,
@@ -90,6 +91,7 @@ class LegacySystemsState {
   final int endlessRiftTier;
   final int endlessRiftBestTier;
   final bool endlessRiftActive;
+  final int worldBossVictories;
   final int stakesPlaced;
   final int stakesWon;
   final int stakesLost;
@@ -151,6 +153,7 @@ class LegacySystemsState {
     int? endlessRiftTier,
     int? endlessRiftBestTier,
     bool? endlessRiftActive,
+    int? worldBossVictories,
     int? stakesPlaced,
     int? stakesWon,
     int? stakesLost,
@@ -214,6 +217,7 @@ class LegacySystemsState {
     endlessRiftTier: endlessRiftTier ?? this.endlessRiftTier,
     endlessRiftBestTier: endlessRiftBestTier ?? this.endlessRiftBestTier,
     endlessRiftActive: endlessRiftActive ?? this.endlessRiftActive,
+    worldBossVictories: worldBossVictories ?? this.worldBossVictories,
     stakesPlaced: stakesPlaced ?? this.stakesPlaced,
     stakesWon: stakesWon ?? this.stakesWon,
     stakesLost: stakesLost ?? this.stakesLost,
@@ -273,6 +277,7 @@ class LegacySystemsState {
     'endlessRiftTier': endlessRiftTier,
     'endlessRiftBestTier': endlessRiftBestTier,
     'endlessRiftActive': endlessRiftActive,
+    'worldBossVictories': worldBossVictories,
     'stakesPlaced': stakesPlaced,
     'stakesWon': stakesWon,
     'stakesLost': stakesLost,
