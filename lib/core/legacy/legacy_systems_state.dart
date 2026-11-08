@@ -53,6 +53,11 @@ class LegacySystemsState {
     this.botTotalGuesses = 0,
     this.botCorrectGuesses = 0,
     this.botIncorrectGuesses = 0,
+    this.botActionSequence = 0,
+    this.lastBotGuess,
+    this.lastBotFeedback,
+    this.lastBotId,
+    this.lastSaveTimestamp = 0,
   });
 
   final AdaptiveTraitProfile adaptiveTraitProfile;
@@ -105,6 +110,11 @@ class LegacySystemsState {
   final int botTotalGuesses;
   final int botCorrectGuesses;
   final int botIncorrectGuesses;
+  final int botActionSequence;
+  final int? lastBotGuess;
+  final String? lastBotFeedback;
+  final String? lastBotId;
+  final int lastSaveTimestamp;
 
   static const initial = LegacySystemsState();
 
@@ -163,6 +173,14 @@ class LegacySystemsState {
     int? botTotalGuesses,
     int? botCorrectGuesses,
     int? botIncorrectGuesses,
+    int? botActionSequence,
+    int? lastBotGuess,
+    bool clearLastBotGuess = false,
+    String? lastBotFeedback,
+    bool clearLastBotFeedback = false,
+    String? lastBotId,
+    bool clearLastBotId = false,
+    int? lastSaveTimestamp,
   }) => LegacySystemsState(
     adaptiveTraitProfile: adaptiveTraitProfile ?? this.adaptiveTraitProfile,
     discoveredTraits: discoveredTraits ?? this.discoveredTraits,
@@ -214,6 +232,11 @@ class LegacySystemsState {
     botTotalGuesses: botTotalGuesses ?? this.botTotalGuesses,
     botCorrectGuesses: botCorrectGuesses ?? this.botCorrectGuesses,
     botIncorrectGuesses: botIncorrectGuesses ?? this.botIncorrectGuesses,
+    botActionSequence: botActionSequence ?? this.botActionSequence,
+    lastBotGuess: clearLastBotGuess ? null : lastBotGuess ?? this.lastBotGuess,
+    lastBotFeedback: clearLastBotFeedback ? null : lastBotFeedback ?? this.lastBotFeedback,
+    lastBotId: clearLastBotId ? null : lastBotId ?? this.lastBotId,
+    lastSaveTimestamp: lastSaveTimestamp ?? this.lastSaveTimestamp,
   );
 
   Map<String, Object?> toJson() => {
@@ -267,6 +290,11 @@ class LegacySystemsState {
     'botTotalGuesses': botTotalGuesses,
     'botCorrectGuesses': botCorrectGuesses,
     'botIncorrectGuesses': botIncorrectGuesses,
+    'botActionSequence': botActionSequence,
+    'lastBotGuess': lastBotGuess,
+    'lastBotFeedback': lastBotFeedback,
+    'lastBotId': lastBotId,
+    'lastSaveTimestamp': lastSaveTimestamp,
   };
 
   factory LegacySystemsState.fromJson(Map<String, dynamic> json) {
@@ -355,6 +383,14 @@ class LegacySystemsState {
     final autoSpeed = json['autoClickerSpeed'] ?? 1.0;
     final activeBoss = json['activeBossBattleWorldId'];
     final lastEvent = json['lastRandomEventId'];
+    final lastBotGuess = json['lastBotGuess'];
+    final lastBotFeedback = json['lastBotFeedback'];
+    final lastBotId = json['lastBotId'];
+    if ((lastBotGuess != null && (lastBotGuess is! int || lastBotGuess < 1)) ||
+        (lastBotFeedback != null && !{'TOO_LOW', 'TOO_HIGH', 'CORRECT'}.contains(lastBotFeedback)) ||
+        (lastBotId != null && !{'auto_clicker_basic', 'bot_byte', 'bot_pixel'}.contains(lastBotId))) {
+      throw const FormatException('Invalid bot team state.');
+    }
     if (codexClaimed is! bool || autoActive is! bool || autoSpeed is! num ||
         !autoSpeed.isFinite || autoSpeed < 1 || autoSpeed > 5 ||
         (activeBoss != null && activeBoss is! String) ||
@@ -419,6 +455,11 @@ class LegacySystemsState {
       botTotalGuesses: count('botTotalGuesses'),
       botCorrectGuesses: count('botCorrectGuesses'),
       botIncorrectGuesses: count('botIncorrectGuesses'),
+      botActionSequence: count('botActionSequence'),
+      lastBotGuess: lastBotGuess as int?,
+      lastBotFeedback: lastBotFeedback as String?,
+      lastBotId: lastBotId as String?,
+      lastSaveTimestamp: count('lastSaveTimestamp'),
     );
     if (state.homeBaseLevel > 20 || state.permanentEventBoosts > 25 || state.equippedRelics.length > 4 ||
         state.stakesWon + state.stakesLost > state.stakesPlaced ||
