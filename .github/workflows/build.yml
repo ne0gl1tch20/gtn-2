@@ -25,7 +25,7 @@ jobs:
           ref: fe9cf567169e19059e0330d08769fe454336ef94
           path: gtn1-source
       - name: Bundle GTN1 artwork and offline fonts
-        run: bash scripts/sync_gtn1_assets.sh gtn1-source/app/src/main/assets
+        run: bash scripts/sync_gtn1_assets.sh gtn1-source
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -68,7 +68,7 @@ jobs:
           ref: fe9cf567169e19059e0330d08769fe454336ef94
           path: gtn1-source
       - name: Bundle GTN1 artwork and offline fonts
-        run: bash scripts/sync_gtn1_assets.sh gtn1-source/app/src/main/assets
+        run: bash scripts/sync_gtn1_assets.sh gtn1-source
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
