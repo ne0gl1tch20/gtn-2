@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/semantics.dart' show Tristate;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gtn_2/core/legacy/legacy_systems_state.dart';
 import 'package:gtn_2/core/progression/progression_state.dart';
@@ -70,8 +69,8 @@ void main() {
     expect(
       tester.getSemantics(
         find.byKey(const ValueKey('world-node-crystal_caverns')),
-      ).getSemanticsData().flagsCollection.isSelected,
-      Tristate.isTrue,
+      ).getSemanticsData().flagsCollection.isSelected.toString(),
+      'Tristate.isTrue',
     );
   });
 
