@@ -7,6 +7,31 @@ import 'package:gtn_2/core/progression/progression_state.dart';
 void main() {
   const engine = ProgressionEngine();
 
+  test('bot guesses award rewards without changing player guess or streak stats', () {
+    final before = ProgressionState.initial.copyWith(
+      totalGuesses: 12,
+      correctGuesses: 7,
+      currentStreak: 4,
+      bestStreak: 9,
+    );
+    final correct = engine.recordGuess(
+      before,
+      correct: true,
+      baseReward: n(25),
+      isBot: true,
+    );
+    expect(correct.money.toString(), '25');
+    expect(correct.moneyEarned.toString(), '25');
+    expect(correct.totalGuesses, 12);
+    expect(correct.correctGuesses, 7);
+    expect(correct.currentStreak, 4);
+    expect(correct.bestStreak, 9);
+
+    final miss = engine.recordGuess(before, correct: false, isBot: true);
+    expect(miss.totalGuesses, 12);
+    expect(miss.currentStreak, 4);
+  });
+
   test('correct guesses award exact money and update streak stats', () {
     var state = engine.recordGuess(
       ProgressionState.initial,
