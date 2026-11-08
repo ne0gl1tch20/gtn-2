@@ -56,6 +56,51 @@ class GameDashboardPage extends StatelessWidget {
   final VoidCallback onLegacyPages;
   final bool showDeveloperSettings;
 
+  void _openMoreMenu(BuildContext context, Color panel) {
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      backgroundColor: panel,
+      builder: (sheetContext) => SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.auto_awesome_rounded, color: _gold),
+              title: const Text('Prestige & Ultra'),
+              onTap: () { Navigator.pop(sheetContext); onPrestige(); },
+            ),
+            ListTile(
+              leading: const Icon(Icons.diamond_rounded, color: _purple),
+              title: const Text('Nebula Shop'),
+              onTap: () { Navigator.pop(sheetContext); onNebulaShop(); },
+            ),
+            ListTile(
+              leading: const Icon(Icons.auto_stories_rounded),
+              title: const Text('Journey, Rewards & Codex'),
+              onTap: () { Navigator.pop(sheetContext); onLegacyPages(); },
+            ),
+            ListTile(
+              leading: const Icon(Icons.save_rounded),
+              title: const Text('Save Slots'),
+              onTap: () { Navigator.pop(sheetContext); onSaveSlots(); },
+            ),
+            ListTile(
+              leading: const Icon(Icons.settings_rounded),
+              title: const Text('Settings'),
+              onTap: () { Navigator.pop(sheetContext); onSettings(); },
+            ),
+            if (showDeveloperSettings)
+              ListTile(
+                leading: const Icon(Icons.bug_report_rounded),
+                title: const Text('Developer Settings'),
+                onTap: () { Navigator.pop(sheetContext); onDeveloperSettings(); },
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final dark = Theme.of(context).brightness == Brightness.dark;
@@ -67,6 +112,27 @@ class GameDashboardPage extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: dark ? _bg : const Color(0xFFF5F6FC),
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(7, 8, 7, 7),
+          decoration: BoxDecoration(
+            color: dark ? const Color(0xF20A0E1C) : Colors.white,
+            border: Border(
+              top: BorderSide(color: foreground.withValues(alpha: .10)),
+            ),
+          ),
+          child: Row(
+            children: [
+              Expanded(child: _BottomNavItem(Icons.public_rounded, 'Beyond the Numbers', false, onWorldMap)),
+              Expanded(child: _BottomNavItem(Icons.sports_esports_rounded, 'Arcade', false, onArcade)),
+              Expanded(child: _BottomNavItem(Icons.play_arrow_rounded, 'Play', true, () {})),
+              Expanded(child: _BottomNavItem(Icons.upgrade_rounded, 'Upgrades', false, onUpgradeShop)),
+              Expanded(child: _BottomNavItem(Icons.menu_rounded, 'More', false, () => _openMoreMenu(context, panel))),
+            ],
+          ),
+        ),
+      ),
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -151,83 +217,7 @@ class GameDashboardPage extends StatelessWidget {
                           ],
                         ),
                       ),
-                      const SizedBox(width: 5),
-                      _TopButton(Icons.save_rounded, 'Save slots', onSaveSlots,
-                          foreground),
-                      const SizedBox(width: 5),
-                      _TopButton(Icons.tune_rounded, 'Settings', onSettings,
-                          foreground),
-                      if (showDeveloperSettings) ...[
-                        const SizedBox(width: 5),
-                        _TopButton(Icons.bug_report_rounded,
-                            'Developer settings', onDeveloperSettings,
-                            foreground),
-                      ],
                     ],
-                  ),
-                  const SizedBox(height: 14),
-                  Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: const Color(0xCC090D1B),
-                      borderRadius: BorderRadius.circular(19),
-                      border: Border.all(color: Colors.white.withValues(alpha: .09)),
-                    ),
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        children: [
-                          _NavTab(Icons.public_rounded, 'Worlds', false, onWorldMap),
-                          _NavTab(Icons.sports_esports_rounded, 'Arcade', false, onArcade),
-                          _NavTab(Icons.play_arrow_rounded, 'Play', true, () {}),
-                          _NavTab(Icons.upgrade_rounded, 'Upgrades', false, onUpgradeShop),
-                          _NavTab(Icons.menu_rounded, 'More', false, () {
-                            showModalBottomSheet<void>(
-                              context: context,
-                              showDragHandle: true,
-                              backgroundColor: panel,
-                              builder: (sheetContext) => SafeArea(
-                                child: Wrap(
-                                  children: [
-                                    ListTile(
-                                      leading: const Icon(Icons.auto_awesome_rounded, color: _gold),
-                                      title: const Text('Prestige & Ultra'),
-                                      onTap: () { Navigator.pop(sheetContext); onPrestige(); },
-                                    ),
-                                    ListTile(
-                                      leading: const Icon(Icons.diamond_rounded, color: _purple),
-                                      title: const Text('Nebula Shop'),
-                                      onTap: () { Navigator.pop(sheetContext); onNebulaShop(); },
-                                    ),
-                                    ListTile(
-                                      leading: const Icon(Icons.auto_stories_rounded),
-                                      title: const Text('Journey, Rewards & Codex'),
-                                      onTap: () { Navigator.pop(sheetContext); onLegacyPages(); },
-                                    ),
-                                    ListTile(
-                                      leading: const Icon(Icons.save_rounded),
-                                      title: const Text('Save Slots'),
-                                      onTap: () { Navigator.pop(sheetContext); onSaveSlots(); },
-                                    ),
-                                    ListTile(
-                                      leading: const Icon(Icons.settings_rounded),
-                                      title: const Text('Settings'),
-                                      onTap: () { Navigator.pop(sheetContext); onSettings(); },
-                                    ),
-                                    if (showDeveloperSettings)
-                                      ListTile(
-                                        leading: const Icon(Icons.bug_report_rounded),
-                                        title: const Text('Developer Settings'),
-                                        onTap: () { Navigator.pop(sheetContext); onDeveloperSettings(); },
-                                      ),
-                                  ],
-                                ),
-                              ),
-                            );
-                          }),
-                        ],
-                      ),
-                    ),
                   ),
                   const SizedBox(height: 14),
                   Container(
@@ -491,26 +481,43 @@ class _NavTab extends StatelessWidget {
       );
 }
 
-class _TopButton extends StatelessWidget {
-  const _TopButton(this.icon, this.tooltip, this.onTap, this.foreground);
+class _BottomNavItem extends StatelessWidget {
+  const _BottomNavItem(this.icon, this.label, this.selected, this.onTap);
+
   final IconData icon;
-  final String tooltip;
+  final String label;
+  final bool selected;
   final VoidCallback onTap;
-  final Color foreground;
 
   @override
-  Widget build(BuildContext context) => IconButton(
-        tooltip: tooltip,
-        onPressed: onTap,
-        style: IconButton.styleFrom(
-          backgroundColor: foreground.withValues(alpha: .07),
-          foregroundColor: foreground,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
-            side: BorderSide(color: foreground.withValues(alpha: .08)),
+  Widget build(BuildContext context) => Material(
+        color: selected ? _purple.withValues(alpha: .15) : Colors.transparent,
+        borderRadius: BorderRadius.circular(13),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(13),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 7),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(icon, size: 19, color: selected ? _purple : _muted),
+                const SizedBox(height: 3),
+                Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: selected ? _white : _muted,
+                    fontSize: 8,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
-        icon: Icon(icon, size: 19),
       );
 }
 
@@ -782,17 +789,13 @@ class _GuessInput extends StatelessWidget {
                         borderRadius: BorderRadius.circular(16),
                       ),
                     ),
-                    child: const Row(
-                      children: [
-                        Text('GUESS',
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: 1,
-                            )),
-                        SizedBox(width: 6),
-                        Icon(Icons.arrow_forward_rounded, size: 17),
-                      ],
+                    child: const Text(
+                      '->',
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0,
+                      ),
                     ),
                   ),
                 ),
