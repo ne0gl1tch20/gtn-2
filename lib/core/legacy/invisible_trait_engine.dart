@@ -1,6 +1,5 @@
 import '../numbers/big_number.dart';
 import 'adaptive_trait_profile.dart';
-import 'legacy_systems_state.dart';
 
 class AdaptiveTraitDecision {
   const AdaptiveTraitDecision({this.helperIds = const {}, this.bonusIds = const {}});
@@ -47,7 +46,9 @@ class InvisibleTraitEngine {
     AdaptiveTraitProfile profile, {
     int countDelta = 1,
   }) {
-    if (countDelta <= 0) return profile;
+    if (countDelta <= 0) {
+      return profile;
+    }
     return profile.copyWith(
       upgradesPurchasedObserved: profile.upgradesPurchasedObserved + countDelta,
     );
@@ -60,7 +61,9 @@ class InvisibleTraitEngine {
   }) {
     final prestige = prestigeDelta < 0 ? 0 : prestigeDelta;
     final ultra = ultraDelta < 0 ? 0 : ultraDelta;
-    if (prestige == 0 && ultra == 0) return profile;
+    if (prestige == 0 && ultra == 0) {
+      return profile;
+    }
     return profile.copyWith(
       prestigesObserved: profile.prestigesObserved + prestige,
       ultrasObserved: profile.ultrasObserved + ultra,
@@ -88,13 +91,23 @@ class InvisibleTraitEngine {
         profile.accuracyScore <= gentleTargetAccuracyCeiling) {
       helpers.add(helperGentleTarget);
     }
-    if (profile.failedGuessesObserved >= failureHelperThreshold) offer(helperMistakeInsurance);
+    if (profile.failedGuessesObserved >= failureHelperThreshold) {
+      offer(helperMistakeInsurance);
+    }
     if (profile.failedGuessesObserved >= rangeHelperThreshold &&
-        profile.correctGuessesObserved >= 10) offer(helperRangeScout);
-    if (profile.longStreaksObserved > 0) offer(helperStreakGuard);
+        profile.correctGuessesObserved >= 10) {
+      offer(helperRangeScout);
+    }
+    if (profile.longStreaksObserved > 0) {
+      offer(helperStreakGuard);
+    }
     if (profile.failedGuessesObserved >= comebackFailureThreshold &&
-        profile.correctGuessesObserved > 0) offer(helperComeback);
-    if (currentStreak >= momentumStreakThreshold) offer(helperMomentum);
+        profile.correctGuessesObserved > 0) {
+      offer(helperComeback);
+    }
+    if (currentStreak >= momentumStreakThreshold) {
+      offer(helperMomentum);
+    }
 
     final bonuses = <String>{};
     if (prestigeCount >= 1 && !profile.awardedBonuses.contains(bonusFirstPrestige)) {
