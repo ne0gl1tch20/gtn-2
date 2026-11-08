@@ -48,17 +48,48 @@ class ProgressionCalculator {
 
   static PrestigeRules prestigeRules(ProgressionState state) {
     final requirement = prestigeRequirement(state.prestigeResets);
+    final gainLevel =
+        (state.prestigeUpgrades['prestige_gain_boost'] ?? 0).clamp(0, 25);
+    final startingLevel =
+        (state.prestigeUpgrades['prestige_starting_capital'] ?? 0).clamp(0, 30);
+    final gainMultiplier = BigNumber.parse(
+      (1.0 + gainLevel * 0.2).toStringAsFixed(2),
+    );
     return PrestigeRules(
       minimumMoney: requirement,
-      rewardForMoney: (money) => prestigeReward(money, requirement),
+      startingCapital: BigNumber.fromInt(startingLevel * 1000),
+      rewardForMoney: (money) => _floorToInteger(
+        prestigeReward(money, requirement) * gainMultiplier,
+      ),
     );
   }
 
   static UltraRules ultraRules(ProgressionState state) {
     final requirement = ultraRequirement(state.ultraResets);
+    final gainLevel =
+        (state.ultraUpgrades['ultra_gain_boost'] ?? 0).clamp(0, 10);
+    final startingLevel =
+        (state.prestigeUpgrades['prestige_starting_capital'] ?? 0).clamp(0, 30);
+    final gainMultiplier = BigNumber.parse(
+      (1.0 + gainLevel * 0.5).toStringAsFixed(2),
+    );
     return UltraRules(
       minimumMoney: requirement,
-      rewardForMoney: (money) => ultraReward(money, requirement),
+      startingCapital: BigNumber.fromInt(startingLevel * 1000),
+      rewardForMoney: (money) {
+        final boosted = _floorToInteger(
+          BigNumber.fromInt(ultraReward(money, requirement)) * gainMultiplier,
+        );
+        return boosted.coefficient.toInt().clamp(0, 2000);
+      },
+    );
+  }
+
+  static BigNumber _floorToInteger(BigNumber value) {
+    if (value.scale == 0) return value;
+    return BigNumber.fromParts(
+      value.coefficient ~/ BigInt.from(10).pow(value.scale),
+      0,
     );
   }
 

@@ -1,102 +1,140 @@
+import 'dart:convert';
+
+import 'package:flutter/services.dart';
+
 import '../core/numbers/big_number.dart';
 import '../core/progression/progression_engine.dart';
-import '../core/progression/progression_state.dart';
-
-class UpgradeRewardEffects {
-  const UpgradeRewardEffects({
-    required this.flatBonus,
-    required this.streakMultiplier,
-    required this.firstGuessMultiplier,
-  });
-
-  final BigNumber flatBonus;
-  final int streakMultiplier;
-  final int firstGuessMultiplier;
-}
 
 class GameUpgrade {
   const GameUpgrade({
     required this.definition,
     required this.name,
     required this.description,
-    required this.effectDescription,
+    required this.effectPerLevel,
   });
 
   final UpgradeDefinition definition;
   final String name;
   final String description;
-  final String effectDescription;
+  final double effectPerLevel;
+
+  /// Only upgrades with a verified, wired GTN1 gameplay effect appear in a shop.
+  bool get gameplayImplemented => const {
+        'reward_multiplier',
+        'better_range',
+        'prestige_money_boost',
+        'prestige_gain_boost',
+        'prestige_starting_capital',
+        'ultra_money_boost',
+        'ultra_gain_boost',
+        'ultra_nebula_boost',
+      }.contains(definition.id);
+
+  String get effectDescription => switch (definition.id) {
+        'reward_multiplier' => '+25% correct-guess reward per level',
+        'better_range' => '-5 maximum target range per level',
+        'prestige_money_boost' => '+50% Money earnings per level',
+        'prestige_gain_boost' => '+20% Prestige reward per level',
+        'prestige_starting_capital' => '+1,000 starting Money per level',
+        'ultra_money_boost' => '+200% Money earnings per level',
+        'ultra_gain_boost' => '+50% Ultra reward per level',
+        'ultra_nebula_boost' => 'Nebula rewards gain +1× per level',
+        _ => 'Source catalog entry; gameplay behavior is not yet ported',
+      };
 }
 
-/// Starter catalog values are centralized so they can be rebalanced without
-/// changing save data or the progression engine.
 class UpgradeCatalog {
   UpgradeCatalog._();
 
-  static final List<GameUpgrade> all = List.unmodifiable([
-    GameUpgrade(
-      definition: UpgradeDefinition(
-        id: 'better_range',
-        baseCost: BigNumber.fromInt(500),
-        growthRate: BigNumber.fromInt(2),
-        maxLevel: 20,
-      ),
-      name: 'Better Guess Range',
-      description: 'Narrows the maximum target range by five per level.',
-      effectDescription: '-5 maximum range per level',
-    ),
-    GameUpgrade(
-      definition: UpgradeDefinition(
-        id: 'lucky_charm',
-        baseCost: BigNumber.fromInt(10),
-        growthRate: BigNumber.parse('1.8'),
-        maxLevel: 20,
-      ),
-      name: 'Lucky Charm',
-      description: 'Adds a little extra Money to every correct guess.',
-      effectDescription: '+1 base Money per level',
-    ),
-    GameUpgrade(
-      definition: UpgradeDefinition(
-        id: 'streak_engine',
-        baseCost: BigNumber.fromInt(40),
-        growthRate: BigNumber.parse('1.9'),
-        maxLevel: 10,
-      ),
-      name: 'Streak Engine',
-      description: 'Build bigger rewards by keeping your correct-guess streak alive.',
-      effectDescription: '+1× reward per 5-streak milestone, per level',
-    ),
-    GameUpgrade(
-      definition: UpgradeDefinition(
-        id: 'first_strike',
-        baseCost: BigNumber.fromInt(75),
-        growthRate: BigNumber.fromInt(2),
-        maxLevel: 5,
-      ),
-      name: 'First Strike',
-      description: 'Earn a bonus when your first guess of a round is correct.',
-      effectDescription: '+1× first-guess reward multiplier per level',
-    ),
-  ]);
+  static List<GameUpgrade> _all = const [];
+  static List<GameUpgrade> _prestige = const [];
+  static List<GameUpgrade> _ultra = const [];
+  static bool _loaded = false;
 
-  static GameUpgrade byId(String id) =>
-      all.firstWhere((upgrade) => upgrade.definition.id == id);
+  static List<GameUpgrade> get all => List.unmodifiable(_all);
+  static List<GameUpgrade> get prestige => List.unmodifiable(_prestige);
+  static List<GameUpgrade> get ultra => List.unmodifiable(_ultra);
 
-  static UpgradeRewardEffects effectsFor(
-    ProgressionState state, {
-    required bool isFirstGuess,
-  }) {
-    final luckyLevel = state.upgrades['lucky_charm'] ?? 0;
-    final streakLevel = state.upgrades['streak_engine'] ?? 0;
-    final firstStrikeLevel = state.upgrades['first_strike'] ?? 0;
-    final nextStreak = state.currentStreak + 1;
-    final streakMilestones = nextStreak ~/ 5;
+  static List<GameUpgrade> get availableForGameplay =>
+      List.unmodifiable(_all.where((item) => item.gameplayImplemented));
 
-    return UpgradeRewardEffects(
-      flatBonus: BigNumber.fromInt(luckyLevel),
-      streakMultiplier: 1 + streakMilestones * streakLevel,
-      firstGuessMultiplier: isFirstGuess ? 1 + firstStrikeLevel : 1,
-    );
+  static List<GameUpgrade> get availablePrestige =>
+      List.unmodifiable(_prestige.where((item) => item.gameplayImplemented));
+
+  static List<GameUpgrade> get availableUltra =>
+      List.unmodifiable(_ultra.where((item) => item.gameplayImplemented));
+
+  static Future<void> load() async {
+    if (_loaded) return;
+
+    Future<List<GameUpgrade>> readCatalog(
+      String path,
+      int expectedCount,
+    ) async {
+      final source = await rootBundle.loadString(path);
+      final decoded = jsonDecode(source);
+      if (decoded is! Map<String, dynamic> ||
+          decoded['schemaVersion'] != 1 ||
+          decoded['upgrades'] is! List) {
+        throw FormatException('Unsupported GTN1 upgrade catalog: $path');
+      }
+
+      final parsed = <GameUpgrade>[];
+      final ids = <String>{};
+      for (final raw in decoded['upgrades'] as List) {
+        if (raw is! Map<String, dynamic>) {
+          throw const FormatException('Invalid GTN1 upgrade definition.');
+        }
+        final id = raw['id'];
+        final name = raw['name'];
+        final description = raw['description'];
+        final maxLevel = raw['maxLevel'];
+        final baseCost = raw['baseCost'];
+        final growthRate = raw['costMultiplier'];
+        final effect = raw['effectPerLevel'];
+        if (id is! String ||
+            id.isEmpty ||
+            !ids.add(id) ||
+            name is! String ||
+            description is! String ||
+            maxLevel is! int ||
+            maxLevel < 1 ||
+            baseCost is! String ||
+            growthRate is! num ||
+            growthRate <= 0 ||
+            effect is! num) {
+          throw FormatException('Invalid or duplicate GTN1 upgrade: $id');
+        }
+        parsed.add(GameUpgrade(
+          definition: UpgradeDefinition(
+            id: id,
+            baseCost: BigNumber.parse(baseCost),
+            growthRate: BigNumber.parse(growthRate.toString()),
+            maxLevel: maxLevel,
+          ),
+          name: name,
+          description: description,
+          effectPerLevel: effect.toDouble(),
+        ));
+      }
+      if (parsed.length != expectedCount) {
+        throw FormatException(
+          'Expected $expectedCount GTN1 upgrades in $path, '
+          'found ${parsed.length}.',
+        );
+      }
+      return List.unmodifiable(parsed);
+    }
+
+    final normal = await readCatalog('assets/game/upgrades.json', 11);
+    final prestige = await readCatalog('assets/game/prestige_upgrades.json', 3);
+    final ultra = await readCatalog('assets/game/ultra_upgrades.json', 3);
+    _all = normal;
+    _prestige = prestige;
+    _ultra = ultra;
+    _loaded = true;
   }
+
+  static GameUpgrade byId(String id) => [..._all, ..._prestige, ..._ultra]
+      .firstWhere((upgrade) => upgrade.definition.id == id);
 }

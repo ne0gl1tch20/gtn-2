@@ -25,19 +25,26 @@ class GuessRewardModifiers {
 }
 
 class PrestigeRules {
-  const PrestigeRules({required this.minimumMoney, required this.rewardForMoney});
+  const PrestigeRules({
+    required this.minimumMoney,
+    required this.rewardForMoney,
+    this.startingCapital,
+  });
   final BigNumber minimumMoney;
   final BigNumber Function(BigNumber money) rewardForMoney;
+  final BigNumber? startingCapital;
 }
 
 class UltraRules {
   const UltraRules({
     required this.minimumMoney, required this.rewardForMoney,
     this.resetPrestigeUpgrades = true,
+    this.startingCapital,
   });
   final BigNumber minimumMoney;
   final int Function(BigNumber money) rewardForMoney;
   final bool resetPrestigeUpgrades;
+  final BigNumber? startingCapital;
 }
 
 class ProgressionEngine {
@@ -95,12 +102,44 @@ class ProgressionEngine {
     );
   }
 
+  ProgressionState purchasePrestigeUpgrade(
+    ProgressionState state,
+    UpgradeDefinition definition,
+  ) {
+    final level = state.prestigeUpgrades[definition.id] ?? 0;
+    if (definition.maxLevel != null && level >= definition.maxLevel!) return state;
+    final cost = definition.costAtLevel(level);
+    if (state.prestige.compareTo(cost) < 0) return state;
+    final levels = Map<String, int>.of(state.prestigeUpgrades)
+      ..[definition.id] = level + 1;
+    return state.copyWith(
+      prestige: state.prestige - cost,
+      prestigeUpgrades: Map.unmodifiable(levels),
+    );
+  }
+
+  ProgressionState purchaseUltraUpgrade(
+    ProgressionState state,
+    UpgradeDefinition definition,
+  ) {
+    final level = state.ultraUpgrades[definition.id] ?? 0;
+    if (definition.maxLevel != null && level >= definition.maxLevel!) return state;
+    final cost = definition.costAtLevel(level);
+    if (state.ultra.compareTo(cost) < 0) return state;
+    final levels = Map<String, int>.of(state.ultraUpgrades)
+      ..[definition.id] = level + 1;
+    return state.copyWith(
+      ultra: state.ultra - cost,
+      ultraUpgrades: Map.unmodifiable(levels),
+    );
+  }
+
   ProgressionState prestige(ProgressionState state, PrestigeRules rules) {
     if (state.money.compareTo(rules.minimumMoney) < 0) return state;
     final reward = rules.rewardForMoney(state.money);
     if (reward.compareTo(BigNumber.fromInt(0)) <= 0) return state;
     return state.copyWith(
-      money: BigNumber.fromInt(0),
+      money: rules.startingCapital ?? BigNumber.fromInt(0),
       prestige: state.prestige + reward,
       upgrades: const {},
       prestigeResets: state.prestigeResets + 1,
@@ -114,7 +153,7 @@ class ProgressionEngine {
     if (rawReward <= 0) return state;
     final reward = rawReward > 2000 ? 2000 : rawReward;
     return state.copyWith(
-      money: BigNumber.fromInt(0),
+      money: rules.startingCapital ?? BigNumber.fromInt(0),
       prestige: BigNumber.fromInt(0),
       ultra: state.ultra + BigNumber.fromInt(reward),
       upgrades: const {},
@@ -178,8 +217,11 @@ class ProgressionEngine {
     if (nebulaReward.compareTo(zero) < 0 || moneyReward.compareTo(zero) < 0) {
       throw ArgumentError('Arcade rewards cannot be negative.');
     }
-    final nebulaMultiplier =
+    final nebulaUpgradeLevel =
+        (state.ultraUpgrades['ultra_nebula_boost'] ?? 0).clamp(0, 15);
+    final shopMultiplier =
         (state.nebulaItems['nebula_boost'] ?? 0) > 0 ? 2 : 1;
+    final nebulaMultiplier = (1 + nebulaUpgradeLevel) * shopMultiplier;
     final actualNebulaReward = nebulaReward.multiplyInt(nebulaMultiplier);
     return state.copyWith(
       nebula: state.nebula + actualNebulaReward,
@@ -195,9 +237,14 @@ class ProgressionEngine {
     if (reward.compareTo(BigNumber.fromInt(0)) < 0) {
       throw ArgumentError('Nebula reward cannot be negative.');
     }
+    final ultraLevel =
+        (state.ultraUpgrades['ultra_nebula_boost'] ?? 0).clamp(0, 15);
+    final shopMultiplier =
+        (state.nebulaItems['nebula_boost'] ?? 0) > 0 ? 2 : 1;
+    final actualReward = reward.multiplyInt((1 + ultraLevel) * shopMultiplier);
     return state.copyWith(
-      nebula: state.nebula + reward,
-      nebulaEarned: state.nebulaEarned + reward,
+      nebula: state.nebula + actualReward,
+      nebulaEarned: state.nebulaEarned + actualReward,
     );
   }
 

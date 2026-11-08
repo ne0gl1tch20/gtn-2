@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'arcade/arcade_page.dart';
 import 'core/game/difficulty_rules.dart';
 import 'core/game/game_engine.dart';
+import 'core/game/guess_economy_rules.dart';
 import 'core/legacy/invisible_trait_engine.dart';
 import 'core/legacy/legacy_systems_engine.dart';
 import 'core/numbers/big_number.dart';
@@ -31,6 +32,7 @@ import 'worlds/world_map_page.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await AppLocalizations.load('en_us');
+  await UpgradeCatalog.load();
   runApp(const GtnApp());
 }
 
@@ -243,6 +245,7 @@ class _GameHomePageState extends State<GameHomePage> {
       );
       setState(() {
         _progression = updated;
+        _engine = _engineFor(updated, _settings);
         _game = _newGameWithAdaptiveTarget(_engine.newGame());
         _message = 'Prestige complete! Build your progress again.';
       });
@@ -272,11 +275,32 @@ class _GameHomePageState extends State<GameHomePage> {
       );
       setState(() {
         _progression = updated;
+        _engine = _engineFor(updated, _settings);
         _game = _newGameWithAdaptiveTarget(_engine.newGame());
         _message = 'Ultra reset complete! A new run begins.';
       });
       await _persist();
     }
+  }
+
+  Future<ProgressionState> _purchasePermanentUpgrade(
+    GameUpgrade upgrade,
+    bool ultra,
+  ) async {
+    final updated = ultra
+        ? _progressionEngine.purchaseUltraUpgrade(
+            _progression,
+            upgrade.definition,
+          )
+        : _progressionEngine.purchasePrestigeUpgrade(
+            _progression,
+            upgrade.definition,
+          );
+    if (updated != _progression) {
+      setState(() => _progression = updated);
+      await _persist();
+    }
+    return _progression;
   }
 
   Future<void> _openProgressionHub() async {
@@ -292,6 +316,7 @@ class _GameHomePageState extends State<GameHomePage> {
             await _ultra();
             return _progression;
           },
+          onPurchasePermanentUpgrade: _purchasePermanentUpgrade,
         ),
       ),
     );
@@ -619,10 +644,6 @@ class _GameHomePageState extends State<GameHomePage> {
         final correct = _game.lastResult == GuessResult.correct;
         final beforeGuess = _progression;
         final legacySystems = beforeGuess.legacySystems;
-        final effects = UpgradeCatalog.effectsFor(
-          beforeGuess,
-          isFirstGuess: _game.attempts == 1,
-        );
         final traitEffects = _legacySystemsEngine.evaluateTraits(
           progression: beforeGuess,
           systems: legacySystems,
@@ -630,24 +651,37 @@ class _GameHomePageState extends State<GameHomePage> {
           activeSeasonId: _currentSeasonId(),
         );
         rangeScoutActive = traitEffects.rangeHint;
+        final criticalPrecisionLevel =
+            beforeGuess.prestigeUpgrades['critical_precision_boost'] ?? 0;
+        final guaranteedGoldenGuess =
+            (beforeGuess.nebulaItems['golden_guess'] ?? 0) > 0 &&
+            (beforeGuess.totalGuesses + 1) % 10 == 0;
+        final isCritical = correct &&
+            (guaranteedGoldenGuess ||
+                Random.secure().nextDouble() <
+                    GuessEconomyRules.criticalChance(criticalPrecisionLevel));
         final rawReward = correct
-            ? (BigNumber.fromInt(1) + effects.flatBonus) *
-                _legacySystemsEngine.mutatorRewardMultiplier(legacySystems) *
-                BigNumber.parse(DifficultyRules.rewardMultiplier(_settings.difficultyId).toStringAsFixed(2)) *
-                BigNumber.parse(traitEffects.correctGuessMultiplier.toStringAsFixed(2))
+            ? GuessEconomyRules.correctGuessReward(
+                rangeMaximum: _game.maximum,
+                currentStreak: beforeGuess.currentStreak,
+                rewardMultiplierLevel:
+                    beforeGuess.upgrades['reward_multiplier'] ?? 0,
+                hasTalentReward: legacySystems.talents.contains('talent_reward_1'),
+                isCritical: isCritical,
+                difficultyId: _settings.difficultyId,
+                mutatorMultiplier:
+                    _legacySystemsEngine.mutatorRewardMultiplier(legacySystems),
+                traitMultiplier: BigNumber.parse(
+                  traitEffects.correctGuessMultiplier.toStringAsFixed(2),
+                ),
+                permanentMoneyMultiplier:
+                    GuessEconomyRules.moneyEarningMultiplier(beforeGuess),
+              )
             : null;
         var afterReward = _progressionEngine.recordGuess(
           beforeGuess,
           correct: correct,
           baseReward: rawReward,
-          modifiers: GuessRewardModifiers(
-            streakMultiplier: effects.streakMultiplier,
-            criticalMultiplier: effects.firstGuessMultiplier *
-                ((beforeGuess.nebulaItems['golden_guess'] ?? 0) > 0 &&
-                        (beforeGuess.totalGuesses + 1) % 10 == 0
-                    ? 2
-                    : 1),
-          ),
         );
         final adaptiveProfile = _invisibleTraitEngine.observeGuess(
           profile: legacySystems.adaptiveTraitProfile,
