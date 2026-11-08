@@ -31,6 +31,47 @@ void main() {
       expect(SaveData.fromJson(save.toJson()).settings.difficultyId, 'hard');
     });
 
+    test('round-trips save profile name and icon', () {
+      final save = SaveData(
+        secret: 42,
+        attempts: 0,
+        gamesWon: 0,
+        profileName: 'My Run',
+        profileIconId: 'planet',
+      );
+      final restored = SaveData.fromJson(save.toJson());
+      expect(restored.profileName, 'My Run');
+      expect(restored.profileIconId, 'planet');
+      expect(restored.copyWith(profileName: 'New Name').profileIconId, 'planet');
+    });
+
+    test('migrates old saves without profile fields', () {
+      final oldSave = SaveData(
+        schemaVersion: 3,
+        secret: 42,
+        attempts: 0,
+        gamesWon: 0,
+      ).toJson()
+        ..remove('profileName')
+        ..remove('profileIconId');
+      final migrated = SaveData.fromJson(oldSave);
+      expect(migrated.schemaVersion, SaveData.currentSchemaVersion);
+      expect(migrated.profileName, isEmpty);
+      expect(migrated.profileIconId, 'default');
+    });
+
+    test('rejects invalid profile metadata', () {
+      final base = SaveData(secret: 42, attempts: 0, gamesWon: 0).toJson();
+      expect(
+        () => SaveData.fromJson({...base, 'profileName': 'x' * 25}),
+        throwsFormatException,
+      );
+      expect(
+        () => SaveData.fromJson({...base, 'profileIconId': 'unknown'}),
+        throwsFormatException,
+      );
+    });
+
     test('accepts and round-trips Extreme Hardcore save ranges', () {
       final save = SaveData(
         secret: 487,
