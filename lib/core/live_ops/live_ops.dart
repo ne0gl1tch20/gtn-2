@@ -104,146 +104,13 @@ class LiveOpsEvent {
         ultra < 0) {
       throw const FormatException('Invalid LiveOps event definition.');
     }
-    final hasStartOffset = RegExp(r'(?:Z|[+-]\d{2}:\d{2})
-    if (startDate == null ||
-        endDate == null ||
-        !endDate.isAfter(startDate)) {
-      throw const FormatException('Invalid LiveOps event date window.');
-    }
-    return LiveOpsEvent(
-      id: id,
-      title: title,
-      description: description,
-      status: status,
-      startDate: startDate,
-      endDate: endDate,
-      currencyName: currency,
-      maxClaims: maxClaims,
-      rewardNebula: reward,
-      permanentBoostPerClaim: boost,
-      minCorrectGuesses: correct,
-      minPrestigeCount: prestige,
-      minUltraCount: ultra,
-    );
-  }
-
-  LiveOpsEvent resolveStatus(DateTime now) {
-    final utcNow = now.toUtc();
-    final nextStatus = status == 'ARCHIVED'
-        ? 'ARCHIVED'
-        : utcNow.isBefore(startDate)
-            ? 'UPCOMING'
-            : !utcNow.isBefore(endDate)
-                ? 'ARCHIVED'
-                : status == 'ENDING'
-                    ? 'ENDING'
-                    : 'ACTIVE';
-    return LiveOpsEvent(
-      id: id,
-      title: title,
-      description: description,
-      status: nextStatus,
-      startDate: startDate,
-      endDate: endDate,
-      currencyName: currencyName,
-      maxClaims: maxClaims,
-      rewardNebula: rewardNebula,
-      permanentBoostPerClaim: permanentBoostPerClaim,
-      minCorrectGuesses: minCorrectGuesses,
-      minPrestigeCount: minPrestigeCount,
-      minUltraCount: minUltraCount,
-    );
-  }
-
-  bool isWithinClaimWindow(DateTime now) {
-    final utcNow = now.toUtc();
-    return !utcNow.isBefore(startDate) && utcNow.isBefore(endDate);
-  }
-}
-
-class LiveOpsCatalog {
-  const LiveOpsCatalog({
-    required this.manifestVersion,
-    required this.enabled,
-    required this.events,
-  });
-
-  final int manifestVersion;
-  final bool enabled;
-  final List<LiveOpsEvent> events;
-}
-).hasMatch(start);
-    final hasEndOffset = RegExp(r'(?:Z|[+-]\d{2}:\d{2})
-    if (startDate == null ||
-        endDate == null ||
-        !endDate.isAfter(startDate)) {
-      throw const FormatException('Invalid LiveOps event date window.');
-    }
-    return LiveOpsEvent(
-      id: id,
-      title: title,
-      description: description,
-      status: status,
-      startDate: startDate,
-      endDate: endDate,
-      currencyName: currency,
-      maxClaims: maxClaims,
-      rewardNebula: reward,
-      permanentBoostPerClaim: boost,
-      minCorrectGuesses: correct,
-      minPrestigeCount: prestige,
-      minUltraCount: ultra,
-    );
-  }
-
-  LiveOpsEvent resolveStatus(DateTime now) {
-    final utcNow = now.toUtc();
-    final nextStatus = status == 'ARCHIVED'
-        ? 'ARCHIVED'
-        : utcNow.isBefore(startDate)
-            ? 'UPCOMING'
-            : !utcNow.isBefore(endDate)
-                ? 'ARCHIVED'
-                : status == 'ENDING'
-                    ? 'ENDING'
-                    : 'ACTIVE';
-    return LiveOpsEvent(
-      id: id,
-      title: title,
-      description: description,
-      status: nextStatus,
-      startDate: startDate,
-      endDate: endDate,
-      currencyName: currencyName,
-      maxClaims: maxClaims,
-      rewardNebula: rewardNebula,
-      permanentBoostPerClaim: permanentBoostPerClaim,
-      minCorrectGuesses: minCorrectGuesses,
-      minPrestigeCount: minPrestigeCount,
-      minUltraCount: minUltraCount,
-    );
-  }
-
-  bool isWithinClaimWindow(DateTime now) {
-    final utcNow = now.toUtc();
-    return !utcNow.isBefore(startDate) && utcNow.isBefore(endDate);
-  }
-}
-
-class LiveOpsCatalog {
-  const LiveOpsCatalog({
-    required this.manifestVersion,
-    required this.enabled,
-    required this.events,
-  });
-
-  final int manifestVersion;
-  final bool enabled;
-  final List<LiveOpsEvent> events;
-}
-).hasMatch(end);
+    final hasStartOffset =
+        RegExp(r'(?:Z|[+-]\d{2}:\d{2})$').hasMatch(start);
+    final hasEndOffset = RegExp(r'(?:Z|[+-]\d{2}:\d{2})$').hasMatch(end);
     if (!hasStartOffset || !hasEndOffset) {
-      throw const FormatException('LiveOps dates must include an explicit UTC offset.');
+      throw const FormatException(
+        'LiveOps dates must include an explicit UTC offset.',
+      );
     }
     final startDate = DateTime.tryParse(start)?.toUtc();
     final endDate = DateTime.tryParse(end)?.toUtc();
@@ -280,21 +147,7 @@ class LiveOpsCatalog {
                 : status == 'ENDING'
                     ? 'ENDING'
                     : 'ACTIVE';
-    return LiveOpsEvent(
-      id: id,
-      title: title,
-      description: description,
-      status: nextStatus,
-      startDate: startDate,
-      endDate: endDate,
-      currencyName: currencyName,
-      maxClaims: maxClaims,
-      rewardNebula: rewardNebula,
-      permanentBoostPerClaim: permanentBoostPerClaim,
-      minCorrectGuesses: minCorrectGuesses,
-      minPrestigeCount: minPrestigeCount,
-      minUltraCount: minUltraCount,
-    );
+    return copyWith(status: nextStatus);
   }
 
   bool isWithinClaimWindow(DateTime now) {
