@@ -50,4 +50,39 @@ void main() {
     );
     expect(engine.purchaseUpgrade(state, upgrade), same(state));
   });
+  test('loads source Prestige and Ultra upgrade catalogs', () {
+    expect(UpgradeCatalog.prestige.map((item) => item.definition.id).toList(), [
+      'prestige_money_boost',
+      'prestige_gain_boost',
+      'prestige_starting_capital',
+    ]);
+    expect(UpgradeCatalog.ultra.map((item) => item.definition.id).toList(), [
+      'ultra_money_boost',
+      'ultra_gain_boost',
+      'ultra_nebula_boost',
+    ]);
+    expect(UpgradeCatalog.availablePrestige.length, 3);
+    expect(UpgradeCatalog.availableUltra.length, 3);
+  });
+
+  test('Prestige upgrade purchase spends Prestige and persists its level', () {
+    final upgrade = UpgradeCatalog.byId('prestige_money_boost').definition;
+    final state = ProgressionState.initial.copyWith(
+      prestige: BigNumber.fromInt(10),
+    );
+    final result = engine.purchasePrestigeUpgrade(state, upgrade);
+    expect(result.prestige.toString(), '0');
+    expect(result.prestigeUpgrades['prestige_money_boost'], 1);
+  });
+
+  test('Ultra upgrade purchase spends Ultra and persists its level', () {
+    final upgrade = UpgradeCatalog.byId('ultra_money_boost').definition;
+    final state = ProgressionState.initial.copyWith(
+      ultra: BigNumber.fromInt(5),
+    );
+    final result = engine.purchaseUltraUpgrade(state, upgrade);
+    expect(result.ultra.toString(), '0');
+    expect(result.ultraUpgrades['ultra_money_boost'], 1);
+  });
+
 }
