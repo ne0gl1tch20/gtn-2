@@ -54,7 +54,7 @@ void main() {
     var result = engine.recordGuess(state, correct: false);
     state = result.progression;
     expect(state.legacySystems.bossBattleMistakes['verdant_guardian'], 1);
-    expect(state.bossDamage['verdant_guardian'], isNull);
+    expect(state.bossDamage['verdant_guardian'], 0);
 
     result = engine.recordGuess(state, correct: true);
     state = result.progression;
