@@ -208,9 +208,17 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
   Future<void> _restoreSave() async {
     var shouldPersistOfflineEarnings = false;
     try {
-      final storage = await _storage;
+      final firstSlotStorage = await _storage;
+      final activeSlot = await firstSlotStorage.loadActiveSlot();
+      final storage = activeSlot == firstSlotStorage.slot
+          ? firstSlotStorage
+          : await SaveStorage.inApplicationDocuments(slot: activeSlot);
       final save = await storage.load();
       if (!mounted) return;
+      setState(() {
+        _storage = Future.value(storage);
+        _activeSlot = activeSlot;
+      });
       if (save != null) {
         var restoredProgression =
             _worldBossBattleEngine.migrateLegacyWorldUnlocks(save.progression);
@@ -702,6 +710,7 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
         );
       }
       await AppLocalizations.load(save?.settings.localeCode ?? 'en_us');
+      await storage.saveActiveSlot(slot);
       if (!mounted) return;
       final nextSettings = save?.settings ?? GameSettings.initial;
       final nextEngine = _engineFor(nextProgression, nextSettings);

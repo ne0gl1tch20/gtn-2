@@ -203,6 +203,60 @@ void main() {
     expect(await File('${directory.path}/gtn2-save.json.corrupt').exists(), isTrue);
   });
 
+  test('persists the active save slot across storage instances', () async {
+    final directory =
+        await Directory.systemTemp.createTemp('gtn2-active-slot-test-');
+    addTearDown(() => directory.delete(recursive: true));
+    final slotOne = SaveStorage(directory: directory, slot: 1);
+    final slotTen = SaveStorage(directory: directory, slot: 10);
+
+    expect(await slotOne.loadActiveSlot(), 1);
+    await slotTen.saveActiveSlot(10);
+    expect(await slotOne.loadActiveSlot(), 10);
+    await slotOne.saveActiveSlot(3);
+    expect(await slotTen.loadActiveSlot(), 3);
+  });
+
+  test('rejects invalid active slot values without replacing the selection', () async {
+    final directory =
+        await Directory.systemTemp.createTemp('gtn2-active-slot-invalid-');
+    addTearDown(() => directory.delete(recursive: true));
+    final storage = SaveStorage(directory: directory);
+
+    await storage.saveActiveSlot(4);
+    await expectLater(storage.saveActiveSlot(0), throwsRangeError);
+    await expectLater(storage.saveActiveSlot(11), throwsRangeError);
+    expect(await storage.loadActiveSlot(), 4);
+  });
+
+  test('recovers active-slot metadata from a completed temporary file', () async {
+    final directory =
+        await Directory.systemTemp.createTemp('gtn2-active-slot-tmp-');
+    addTearDown(() => directory.delete(recursive: true));
+    final storage = SaveStorage(directory: directory);
+    final temporary = File('${directory.path}/gtn2-active-slot.json.tmp');
+    await temporary.writeAsString('{"schemaVersion":1,"slot":8}');
+
+    expect(await storage.loadActiveSlot(), 8);
+    expect(await File('${directory.path}/gtn2-active-slot.json').exists(), isTrue);
+    expect(await temporary.exists(), isFalse);
+  });
+
+  test('recovers active-slot metadata from backup when primary is corrupt', () async {
+    final directory =
+        await Directory.systemTemp.createTemp('gtn2-active-slot-bak-');
+    addTearDown(() => directory.delete(recursive: true));
+    final storage = SaveStorage(directory: directory);
+    final primary = File('${directory.path}/gtn2-active-slot.json');
+    final backup = File('${directory.path}/gtn2-active-slot.json.bak');
+    await primary.writeAsString('{broken json');
+    await backup.writeAsString('{"schemaVersion":1,"slot":6}');
+
+    expect(await storage.loadActiveSlot(), 6);
+    expect(await File('${directory.path}/gtn2-active-slot.json').exists(), isTrue);
+    expect(await File('${directory.path}/gtn2-active-slot.json.corrupt').exists(), isTrue);
+  });
+
   test('save slots use separate files', () async {
     final directory =
         await Directory.systemTemp.createTemp('gtn2-save-slots-test-');
