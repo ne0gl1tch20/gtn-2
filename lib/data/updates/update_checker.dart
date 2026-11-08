@@ -153,9 +153,13 @@ class UpdateChecker {
       }
       String? assetUrl(String name) {
         for (final item in assets) {
-          if (item is! Map<String, dynamic> || item['name'] != name) continue;
+          if (item is! Map<String, dynamic> || item['name'] != name) {
+            continue;
+          }
           final value = item['browser_download_url'];
-          if (value is String && _isReleaseAssetUrl(Uri.tryParse(value), name)) return value;
+          if (value is String && _isReleaseAssetUrl(Uri.tryParse(value), name)) {
+            return value;
+          }
         }
         return null;
       }
