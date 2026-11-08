@@ -839,8 +839,9 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
             const ListTile(
               title: Text('No seasonal events are available right now.'),
             ),
-          for (final event in catalog.events)
-            Builder(builder: (context) {
+          if (catalog.enabled)
+            for (final event in catalog.events)
+              Builder(builder: (context) {
               final claims = _systems.liveOpsClaims[event.id] ?? 0;
               final eligible =
                   _progression.correctGuesses >= event.minCorrectGuesses &&
