@@ -71,7 +71,7 @@ class SaveStorage {
         backedUp = true;
       }
       await temporary.rename(activeFile.path);
-      if (backedUp && await backup.exists()) await backup.delete();
+      // Keep the previous valid save as the one-step restore backup.
     } on FileSystemException {
       if (backedUp && !await activeFile.exists() && await backup.exists()) {
         await backup.rename(activeFile.path);
@@ -112,6 +112,56 @@ class SaveStorage {
       return backupSave;
     }
     return null;
+  }
+
+  Future<bool> hasBackup() async =>
+      await _readSave(File('${_file.path}.bak')) != null;
+
+  Future<bool> duplicateTo(int targetSlot) async {
+    final target = SaveStorage(directory: _file.parent, slot: targetSlot);
+    if (targetSlot == slot ||
+        await target._file.exists() ||
+        await File('${target._file.path}.bak').exists()) {
+      return false;
+    }
+    final current = await load();
+    if (current == null) return false;
+    await target.save(current);
+    final sourceBackup = File('${_file.path}.bak');
+    final targetBackup = File('${target._file.path}.bak');
+    final previous = await _readSave(sourceBackup);
+    if (previous != null) {
+      await targetBackup.writeAsString(jsonEncode(previous.toJson()), flush: true);
+    }
+    return true;
+  }
+
+  Future<bool> restoreBackup() async {
+    await _pendingWrite;
+    final backup = File('${_file.path}.bak');
+    final previous = await _readSave(_file);
+    final recoverable = await _readSave(backup);
+    if (previous == null || recoverable == null) return false;
+    final temporary = File('${_file.path}.restore-tmp');
+    try {
+      await _file.rename(temporary.path);
+      await backup.rename(_file.path);
+      await temporary.rename(backup.path);
+      return true;
+    } on FileSystemException {
+      if (!await _file.exists() && await temporary.exists()) {
+        await temporary.rename(_file.path);
+      }
+      rethrow;
+    }
+  }
+
+  Future<void> reset() async {
+    await _pendingWrite;
+    for (final suffix in ['', '.tmp', '.bak', '.corrupt', '.restore-tmp']) {
+      final file = File('${_file.path}$suffix');
+      if (await file.exists()) await file.delete();
+    }
   }
 
   Future<SaveData?> _readSave(File file) async {
