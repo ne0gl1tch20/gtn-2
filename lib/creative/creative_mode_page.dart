@@ -71,11 +71,13 @@ class _CreativeModePageState extends State<CreativeModePage> {
         _rangeScale = config.effects
             .where((effect) => effect.type == CreativeEffectType.rangeScale)
             .fold(1, (value, effect) => value * effect.value)
-            .clamp(1, 5);
+            .clamp(1, 5)
+            .toInt();
         _extraHints = config.effects
             .where((effect) => effect.type == CreativeEffectType.extraHints)
             .fold(0, (value, effect) => value + effect.value)
-            .clamp(0, 5);
+            .clamp(0, 5)
+            .toInt();
         _attemptLimit = config.effects
             .where((effect) => effect.type == CreativeEffectType.attemptLimit)
             .map((effect) => effect.value)
