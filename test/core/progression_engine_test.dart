@@ -17,7 +17,7 @@ void main() {
     final correct = engine.recordGuess(
       before,
       correct: true,
-      baseReward: n(25),
+      baseReward: BigNumber.fromInt(25),
       isBot: true,
     );
     expect(correct.money.toString(), '25');
