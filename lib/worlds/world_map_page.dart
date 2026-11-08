@@ -59,6 +59,10 @@ class _WorldMapPageState extends State<WorldMapPage> {
       );
 
   Future<void> _selectWorld(WorldBossDefinition world) async {
+    if (_state.legacySystems.endlessRiftActive &&
+        world.id != _state.legacySystems.activeWorldId) {
+      return;
+    }
     setState(() => _selectedWorldId = world.id);
     if (WorldBossCatalog.isUnlocked(_state, world)) {
       await _runAction(world.id, 'select_world');
