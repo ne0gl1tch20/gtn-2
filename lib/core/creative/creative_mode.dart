@@ -229,7 +229,7 @@ class CreativeModeSave {
       final enabled = decoded['enabled'] ?? false;
       final rangeMin = decoded['rangeMin'] ?? 1;
       final rangeMax = decoded['rangeMax'] ?? 100;
-      final effectsJson = decoded['effects'] ?? const [];
+      final effectsJson = decoded['effects'] ?? const <dynamic>[];
       if (name is! String ||
           enabled is! bool ||
           rangeMin is! int ||
