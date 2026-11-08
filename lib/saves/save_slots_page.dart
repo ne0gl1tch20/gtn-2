@@ -21,7 +21,7 @@ class SaveSlotsPage extends StatefulWidget {
 
 class _SaveSlotsPageState extends State<SaveSlotsPage> {
   late final Map<int, Future<SaveData?>> _previews = {
-    for (var slot = 1; slot <= 5; slot++)
+    for (var slot = 1; slot <= SaveStorage.maxSaveSlots; slot++)
       slot: SaveStorage.inApplicationDocuments(slot: slot)
           .then((storage) => storage.load()),
   };
@@ -48,7 +48,7 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
         children: [
           const Text('Your saves stay on this device. Choose a slot to continue or start a fresh run.'),
           const SizedBox(height: 12),
-          for (var slot = 1; slot <= 5; slot++)
+          for (var slot = 1; slot <= SaveStorage.maxSaveSlots; slot++)
             FutureBuilder<SaveData?>(
               future: _previews[slot],
               builder: (context, snapshot) {
