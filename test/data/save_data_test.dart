@@ -257,6 +257,53 @@ void main() {
     expect(await File('${directory.path}/gtn2-active-slot.json.corrupt').exists(), isTrue);
   });
 
+  test('retains and restores the previous valid save', () async {
+    final directory =
+        await Directory.systemTemp.createTemp('gtn2-save-restore-test-');
+    addTearDown(() => directory.delete(recursive: true));
+    final storage = SaveStorage(directory: directory);
+    await storage.save(SaveData(secret: 42, attempts: 1, gamesWon: 1));
+    await storage.save(SaveData(secret: 73, attempts: 2, gamesWon: 2));
+
+    expect(await storage.hasBackup(), isTrue);
+    expect((await storage.load())?.secret, 73);
+    expect(await storage.restoreBackup(), isTrue);
+    expect((await storage.load())?.secret, 42);
+    expect(await storage.hasBackup(), isTrue);
+    expect(await storage.restoreBackup(), isTrue);
+    expect((await storage.load())?.secret, 73);
+  });
+
+  test('duplicates a save and its restore backup into an empty slot', () async {
+    final directory =
+        await Directory.systemTemp.createTemp('gtn2-save-duplicate-test-');
+    addTearDown(() => directory.delete(recursive: true));
+    final source = SaveStorage(directory: directory, slot: 1);
+    final target = SaveStorage(directory: directory, slot: 2);
+    await source.save(SaveData(secret: 42, attempts: 1, gamesWon: 1));
+    await source.save(SaveData(secret: 73, attempts: 2, gamesWon: 2));
+
+    expect(await source.duplicateTo(2), isTrue);
+    expect((await target.load())?.secret, 73);
+    expect(await target.hasBackup(), isTrue);
+    expect(await source.duplicateTo(2), isFalse);
+    expect(await source.duplicateTo(1), isFalse);
+  });
+
+  test('reset removes the save and all recovery files', () async {
+    final directory =
+        await Directory.systemTemp.createTemp('gtn2-save-reset-test-');
+    addTearDown(() => directory.delete(recursive: true));
+    final storage = SaveStorage(directory: directory, slot: 4);
+    await storage.save(SaveData(secret: 42, attempts: 1, gamesWon: 1));
+    await storage.save(SaveData(secret: 73, attempts: 2, gamesWon: 2));
+
+    await storage.reset();
+
+    expect(await storage.load(), isNull);
+    expect(await storage.hasBackup(), isFalse);
+  });
+
   test('save slots use separate files', () async {
     final directory =
         await Directory.systemTemp.createTemp('gtn2-save-slots-test-');
