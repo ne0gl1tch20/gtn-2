@@ -23,7 +23,8 @@ class WorldBossBattleEngine {
   };
 
   WorldBossActionResult selectWorld(ProgressionState state, String worldId) {
-    final world = WorldBossCatalog.worlds.where((item) => item.id == worldId).firstOrNull;
+    final matches = WorldBossCatalog.worlds.where((item) => item.id == worldId);
+    final world = matches.isEmpty ? null : matches.first;
     if (world == null || !WorldBossCatalog.isUnlocked(state, world)) {
       return WorldBossActionResult(
         progression: state, accepted: false, message: 'World is locked.',
@@ -47,7 +48,8 @@ class WorldBossBattleEngine {
   }
 
   WorldBossActionResult toggleBossBattle(ProgressionState state, String worldId) {
-    final world = WorldBossCatalog.worlds.where((item) => item.id == worldId).firstOrNull;
+    final matches = WorldBossCatalog.worlds.where((item) => item.id == worldId);
+    final world = matches.isEmpty ? null : matches.first;
     if (world == null || !WorldBossCatalog.isUnlocked(state, world) ||
         (WorldBossCatalog.isDefeated(state, world) &&
             !state.legacySystems.endlessRiftActive)) {
@@ -90,9 +92,9 @@ class WorldBossBattleEngine {
     required bool correct,
   }) {
     final systems = state.legacySystems;
-    final world = WorldBossCatalog.worlds
-        .where((item) => item.id == systems.activeBossBattleWorldId)
-        .firstOrNull;
+    final matches = WorldBossCatalog.worlds
+        .where((item) => item.id == systems.activeBossBattleWorldId);
+    final world = matches.isEmpty ? null : matches.first;
     if (world == null || !WorldBossCatalog.isUnlocked(state, world) ||
         (WorldBossCatalog.isDefeated(state, world) && !systems.endlessRiftActive)) {
       return WorldBossActionResult(
