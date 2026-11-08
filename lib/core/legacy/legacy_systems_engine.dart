@@ -397,7 +397,7 @@ class LegacySystemsEngine {
     final world = worldMatches.isEmpty ? null : worldMatches.first;
     if (relicId == null ||
         world == null ||
-        !WorldBossCatalog.isUnlocked(progression, world) ||
+        !systems.unlockedWorldIds.contains(worldId) ||
         !WorldBossCatalog.isDefeated(progression, world)) {
       return _reject(progression, systems, 'Defeat this world guardian before upgrading mastery.');
     }
@@ -477,7 +477,7 @@ class LegacySystemsEngine {
         WorldBossCatalog.worlds.where((world) => world.id == worldId);
     final world = worldMatches.isEmpty ? null : worldMatches.first;
     if (world == null ||
-        !WorldBossCatalog.isUnlocked(progression, world) ||
+        !systems.unlockedWorldIds.contains(worldId) ||
         progression.correctGuesses < thresholds[secretId]!) {
       return _reject(progression, systems, 'Secret area is still hidden.');
     }
