@@ -72,6 +72,30 @@ void main() {
     expect(engine.recordGuess(state, correct: true).progression.money, state.money);
   });
 
+  test('boss rewards include relic set, mastery, sanctuary, event and secret bonuses', () {
+    final state = fightReadyState().copyWith(
+      legacySystems: ProgressionState.initial.legacySystems.copyWith(
+        activeWorldId: 'verdant_grove',
+        activeBossBattleWorldId: 'verdant_grove',
+        equippedRelics: const {
+          'verdant_guardian', 'crystal_golem', 'ember_dragon', 'nebula_titan',
+        },
+        worldMasteryLevels: const {'verdant_grove': 5},
+        homeBaseLevel: 20,
+        permanentEventBoosts: 25,
+        discoveredSecrets: const {'whispering_hollow'},
+      ),
+    );
+    var defeated = state;
+    for (var i = 0; i < 3; i++) {
+      defeated = engine.recordGuess(defeated, correct: true).progression;
+    }
+    // 35% relic set + 10% mastery + 40% sanctuary + 50% event + 5% secret.
+    expect(defeated.money, BigNumber.fromInt(60000));
+    // Four relics + mastery level five + discovered secret.
+    expect(defeated.nebula, BigNumber.fromInt(30));
+  });
+
   test('Endless Rift scales boss health and rewards then rotates to the next world', () {
     var state = fightReadyState().copyWith(
       legacySystems: ProgressionState.initial.legacySystems.copyWith(
