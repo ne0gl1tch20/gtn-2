@@ -77,9 +77,14 @@ class TraitCatalogRepository {
       final localizationPath = _assetPath(entry, 'localizationPath');
       final iconPath = _assetPath(entry, 'iconPath');
 
-      final definition = _decodeObject(await _loadAsset(definitionPath), definitionPath);
-      final rules = _decodeObject(await _loadAsset(rulesPath), rulesPath);
-      final localization = _decodeObject(await _loadAsset(localizationPath), localizationPath);
+      final packageData = await Future.wait([
+        _loadAsset(definitionPath),
+        _loadAsset(rulesPath),
+        _loadAsset(localizationPath),
+      ]);
+      final definition = _decodeObject(packageData[0], definitionPath);
+      final rules = _decodeObject(packageData[1], rulesPath);
+      final localization = _decodeObject(packageData[2], localizationPath);
       if (definition['id'] != id || rules['id'] != id || localization['id'] != id) {
         throw FormatException('GTN1 trait package identity mismatch: $id');
       }
