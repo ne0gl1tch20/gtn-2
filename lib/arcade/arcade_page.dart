@@ -239,7 +239,7 @@ class _ArcadeDialogState extends State<_ArcadeDialog> {
     } else if ((widget.gameId == 'math_blitz' ||
             widget.gameId == 'memory_grid') &&
         _finished) {
-      final elapsed = _roundStopwatch.elapsed.inSeconds.clamp(1, 600);
+      final elapsed = _roundStopwatch.elapsed.inSeconds.clamp(1, 600).toInt();
       final nebula = ArcadeRewardRules.calculateNebulaReward(elapsed, _score);
       final money = ArcadeRewardRules.calculateMoneyReward(elapsed, _score);
       await widget.onReward(
@@ -324,7 +324,7 @@ class _ArcadeDialogState extends State<_ArcadeDialog> {
             _timer?.cancel();
           }
         } else {
-          _score = (_score - 1).clamp(0, 1 << 30);
+          _score = (_score - 1).clamp(0, 1 << 30).toInt();
         }
         _gridSelected.clear();
       });
