@@ -1,7 +1,6 @@
 import 'dart:math';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:gtn_2/core/legacy/legacy_systems_state.dart';
 import 'package:gtn_2/core/numbers/big_number.dart';
 import 'package:gtn_2/core/progression/progression_state.dart';
 import 'package:gtn_2/core/random_events/random_event_engine.dart';
