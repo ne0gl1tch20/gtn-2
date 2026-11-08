@@ -168,6 +168,24 @@ void main() {
     expect((await storage.load())?.toJson(), second.toJson());
   });
 
+  test('serializes writes across separate storage instances for one slot', () async {
+    final directory =
+        await Directory.systemTemp.createTemp('gtn2-save-instance-queue-');
+    addTearDown(() => directory.delete(recursive: true));
+    final first = SaveStorage(directory: directory, slot: 3);
+    final second = SaveStorage(directory: directory, slot: 3);
+
+    await Future.wait([
+      first.save(SaveData(secret: 31, attempts: 1, gamesWon: 1)),
+      second.save(SaveData(secret: 82, attempts: 2, gamesWon: 2)),
+    ]);
+
+    final restored = await first.load();
+    expect(restored, isNotNull);
+    expect([31, 82], contains(restored!.secret));
+    expect(await first.hasBackup(), isTrue);
+  });
+
   test('persists Extreme Hardcore saves through the storage layer', () async {
     final directory =
         await Directory.systemTemp.createTemp('gtn2-extreme-save-test-');
