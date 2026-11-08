@@ -69,6 +69,90 @@ void main() {
     expect(engine.purchaseUpgrade(state, upgrade), same(state));
   });
 
+  test('permanent Prestige and Ultra shop items spend exact currency once', () {
+    var state = ProgressionState.initial.copyWith(
+      prestige: BigNumber.fromInt(350),
+      ultra: BigNumber.fromInt(11000),
+    );
+
+    state = engine.purchasePrestigeShopItem(state, 'prestige_auto_speed');
+    expect(state.prestige.toString(), '250');
+    expect(state.prestigeShopPurchases, contains('prestige_auto_speed'));
+    expect(
+      engine.purchasePrestigeShopItem(state, 'prestige_auto_speed'),
+      same(state),
+    );
+
+    state = engine.purchasePrestigeShopItem(state, 'prestige_luck_charm');
+    expect(state.prestige.toString(), '0');
+    expect(state.prestigeShopPurchases, containsAll({
+      'prestige_auto_speed',
+      'prestige_luck_charm',
+    }));
+
+    state = engine.purchaseUltraShopItem(state, 'ultra_universal_harmony');
+    expect(state.ultra.toString(), '10500');
+    state = engine.purchaseUltraShopItem(state, 'ultra_infinite_multiplier');
+    expect(state.ultra.toString(), '9500');
+    state = engine.purchaseUltraShopItem(state, 'ultra_flex_badge');
+    expect(state.ultra.toString(), '0');
+    expect(state.ultraShopPurchases, containsAll({
+      'ultra_universal_harmony',
+      'ultra_infinite_multiplier',
+      'ultra_flex_badge',
+    }));
+  });
+
+  test('permanent shop rejects unknown and unaffordable items atomically', () {
+    final state = ProgressionState.initial.copyWith(
+      prestige: BigNumber.fromInt(99),
+      ultra: BigNumber.fromInt(499),
+    );
+    expect(
+      engine.purchasePrestigeShopItem(state, 'not_a_real_item'),
+      same(state),
+    );
+    expect(
+      engine.purchasePrestigeShopItem(state, 'prestige_auto_speed'),
+      same(state),
+    );
+    expect(
+      engine.purchaseUltraShopItem(state, 'ultra_universal_harmony'),
+      same(state),
+    );
+  });
+
+  test('Prestige and Ultra resets preserve permanent shop ownership', () {
+    final state = ProgressionState.initial.copyWith(
+      money: BigNumber.fromInt(1000),
+      prestige: BigNumber.fromInt(1000),
+      prestigeShopPurchases: const {'prestige_auto_speed', 'prestige_luck_charm'},
+      ultraShopPurchases: const {
+        'ultra_universal_harmony',
+        'ultra_infinite_multiplier',
+      },
+    );
+    final afterPrestige = engine.prestige(
+      state,
+      PrestigeRules(
+        minimumMoney: BigNumber.fromInt(100),
+        rewardForMoney: (_) => BigNumber.fromInt(10),
+      ),
+    );
+    expect(afterPrestige.prestigeShopPurchases, state.prestigeShopPurchases);
+    expect(afterPrestige.ultraShopPurchases, state.ultraShopPurchases);
+
+    final afterUltra = engine.ultra(
+      afterPrestige.copyWith(money: BigNumber.fromInt(1000)),
+      UltraRules(
+        minimumMoney: BigNumber.fromInt(100),
+        rewardForMoney: (_) => 5,
+      ),
+    );
+    expect(afterUltra.prestigeShopPurchases, state.prestigeShopPurchases);
+    expect(afterUltra.ultraShopPurchases, state.ultraShopPurchases);
+  });
+
   test('Prestige soft-resets normal upgrades and preserves permanent progress', () {
     final state = ProgressionState.initial.copyWith(
       money: BigNumber.fromInt(150), prestige: BigNumber.fromInt(4),
