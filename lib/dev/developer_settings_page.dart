@@ -1,8 +1,10 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 
 import '../data/saves/save_data.dart';
+import '../lua/lua_testing_hub_page.dart';
 
 typedef DeveloperCommand = Future<String> Function(String command);
 typedef DeveloperSaveApply = Future<void> Function(SaveData save);
@@ -90,6 +92,16 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          if (kDebugMode)
+            OutlinedButton.icon(
+              onPressed: () => Navigator.of(context).push<void>(
+                MaterialPageRoute<void>(
+                  builder: (_) => const LuaTestingHubPage(),
+                ),
+              ),
+              icon: const Icon(Icons.code_rounded),
+              label: const Text('Lua Testing Hub'),
+            ),
           Text('Developer Console', style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 8),
           const Text('Try /help, /money 1000000, /prestige 10, /ultra 1, /nebula 100 or /reset.'),
