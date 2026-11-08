@@ -235,8 +235,10 @@ class _ArcadeDialogState extends State<_ArcadeDialog> {
         _chosenBox == _winningBox) {
       await widget.onReward(BigNumber.fromInt(1), BigNumber.fromInt(5000));
     } else if (widget.gameId == 'memory_match' &&
-        _memorySubmitted &&
-        _memoryCorrect) {
+        ArcadeRewardRules.isMemoryMatchRewardEligible(
+          submitted: _memorySubmitted,
+          correct: _memoryCorrect,
+        )) {
       await widget.onReward(BigNumber.fromInt(1), BigNumber.fromInt(10000));
     } else if (widget.gameId == 'number_rush' && _finished) {
       await widget.onReward(BigNumber.fromInt(1), BigNumber.fromInt(7500));
