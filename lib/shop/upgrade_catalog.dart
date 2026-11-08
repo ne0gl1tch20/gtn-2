@@ -36,6 +36,17 @@ class UpgradeCatalog {
   static final List<GameUpgrade> all = List.unmodifiable([
     GameUpgrade(
       definition: UpgradeDefinition(
+        id: 'better_range',
+        baseCost: BigNumber.fromInt(500),
+        growthRate: BigNumber.fromInt(2),
+        maxLevel: 20,
+      ),
+      name: 'Better Guess Range',
+      description: 'Narrows the maximum target range by five per level.',
+      effectDescription: '-5 maximum range per level',
+    ),
+    GameUpgrade(
+      definition: UpgradeDefinition(
         id: 'lucky_charm',
         baseCost: BigNumber.fromInt(10),
         growthRate: BigNumber.parse('1.8'),
