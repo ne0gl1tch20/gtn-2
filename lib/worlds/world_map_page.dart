@@ -123,7 +123,8 @@ class _WorldMapPageState extends State<WorldMapPage> {
                       ),
                       if (unlocked && _state.correctGuesses >= boss.secretAt)
                         OutlinedButton.icon(
-                          onPressed: _attacking != null
+                          onPressed: _attacking != null ||
+                                  _state.legacySystems.discoveredSecrets.contains(boss.secretId)
                               ? null
                               : () => _runAction(
                                     boss,
