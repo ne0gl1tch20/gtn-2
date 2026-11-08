@@ -390,16 +390,120 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
   Future<ProgressionState> _purchaseNebulaItem(
     NebulaShopItem item,
   ) async {
-    final updated = _progressionEngine.purchaseNebulaItem(
+    final systems = _progression.legacySystems;
+    final ownedBot = NebulaShopCatalog.botIds.any(
+      (id) => ( _progression.nebulaItems[id] ?? 0) > 0,
+    );
+    if (NebulaShopCatalog.botUpgradeIds.contains(item.id) && !ownedBot) {
+      return _progression;
+    }
+    if (NebulaShopCatalog.automationIds.contains(item.id) &&
+        (_progression.nebulaItems[item.id] ?? 0) > 0) {
+      return _progression;
+    }
+    var updated = _progressionEngine.purchaseNebulaItem(
       _progression,
       itemId: item.id,
       price: item.price,
     );
     if (updated != _progression) {
+      final isBotPurchase = NebulaShopCatalog.botIds.contains(item.id);
+      final nextSpeed = item.id == 'bot_speed_upgrade'
+          ? (systems.autoClickerSpeed * 1.5).clamp(1.0, 5.0).toDouble()
+          : systems.autoClickerSpeed;
+      updated = updated.copyWith(
+        legacySystems: systems.copyWith(
+          autoClickerActive: isBotPurchase ? true : systems.autoClickerActive,
+          autoClickerSpeed: nextSpeed,
+        ),
+      );
       setState(() => _progression = updated);
       await _persist();
+      _scheduleAutoClicker();
     }
     return _progression;
+  }
+
+  Future<void> _setAutomationActive(bool active) async {
+    final hasBot = NebulaShopCatalog.botIds.any(
+      (id) => (_progression.nebulaItems[id] ?? 0) > 0,
+    );
+    if (!hasBot) return;
+    setState(() {
+      _progression = _progression.copyWith(
+        legacySystems: _progression.legacySystems.copyWith(
+          autoClickerActive: active,
+        ),
+      );
+    });
+    await _persist();
+    _scheduleAutoClicker();
+  }
+
+  void _scheduleAutoClicker() {
+    _autoClickerTimer?.cancel();
+    _autoClickerTimer = null;
+    if (!mounted || _isLoading ||
+        WidgetsBinding.instance.lifecycleState == AppLifecycleState.paused ||
+        WidgetsBinding.instance.lifecycleState == AppLifecycleState.inactive ||
+        WidgetsBinding.instance.lifecycleState == AppLifecycleState.detached) {
+      return;
+    }
+    final systems = _progression.legacySystems;
+    if (!systems.autoClickerActive) return;
+    final purchasedBots = NebulaShopCatalog.botIds
+        .where((id) => (_progression.nebulaItems[id] ?? 0) > 0)
+        .toSet();
+    if (purchasedBots.isEmpty) return;
+    final delay = _botTeam.delayMillis(
+      active: true,
+      speed: systems.autoClickerSpeed,
+      speedTalentOne: systems.talents.contains('talent_speed_1'),
+      speedTalentTwo: systems.talents.contains('talent_speed_2'),
+      speedMutator: systems.activeMutators.contains('mut_speed'),
+    );
+    _autoClickerTimer = Timer(Duration(milliseconds: delay), () async {
+      if (_autoClickerTickRunning) return;
+      _autoClickerTimer = null;
+      _autoClickerTickRunning = true;
+      try {
+        await _runAutoClickerTick();
+      } finally {
+        _autoClickerTickRunning = false;
+        _scheduleAutoClicker();
+      }
+    });
+  }
+
+  Future<void> _runAutoClickerTick() async {
+    if (!mounted || _isLoading || !_progression.legacySystems.autoClickerActive) {
+      return;
+    }
+    if (_game.isComplete) {
+      setState(() {
+        _game = _newGameWithAdaptiveTarget(_engine.newGame());
+        _message = 'Auto Clicker started a new round.';
+      });
+    }
+    final systems = _progression.legacySystems;
+    final purchasedBots = NebulaShopCatalog.botIds
+        .where((id) => (_progression.nebulaItems[id] ?? 0) > 0)
+        .toSet();
+    final action = _botTeam.nextAction(
+      purchasedBots: purchasedBots,
+      sharedMemory: (_progression.nebulaItems['bot_logic_upgrade'] ?? 0) > 0,
+      sequence: systems.botActionSequence,
+      rangeMinimum: 1,
+      rangeMaximum: _rangeMaximum(_progression, _settings),
+      currentMinimum: _game.minimum,
+      currentMaximum: _game.maximum,
+      speed: systems.autoClickerSpeed,
+      speedTalentOne: systems.talents.contains('talent_speed_1'),
+      speedTalentTwo: systems.talents.contains('talent_speed_2'),
+      speedMutator: systems.activeMutators.contains('mut_speed'),
+    );
+    if (action == null) return;
+    await _submitGuess(automatedGuess: action.guess, botId: action.botId);
   }
 
   Future<void> _openNebulaShop() async {
