@@ -22,6 +22,8 @@ void main() {
           money: BigNumber.parse('12345678901234567890.25'),
           prestige: BigNumber.fromInt(4),
           upgrades: const {'income': 2},
+          prestigeShopPurchases: const {'prestige_auto_speed'},
+          ultraShopPurchases: const {'ultra_infinite_multiplier'},
         ),
         settings: const GameSettings(darkMode: false, reduceMotion: true, difficultyId: 'hard'),
       );
@@ -56,7 +58,7 @@ void main() {
     test('rejects unknown versions and invalid fields', () {
       expect(
         () => SaveData.fromJson({
-          'schemaVersion': 4,
+          'schemaVersion': 5,
           'secret': 42,
           'attempts': 0,
           'gamesWon': 0,
@@ -85,6 +87,8 @@ void main() {
         'isComplete': false,
       });
       expect(save.progression.money.toString(), '0');
+      expect(save.progression.prestigeShopPurchases, isEmpty);
+      expect(save.progression.ultraShopPurchases, isEmpty);
       expect(save.settings, GameSettings.initial);
       expect(save.schemaVersion, SaveData.currentSchemaVersion);
       expect(save.minimum, 1);
