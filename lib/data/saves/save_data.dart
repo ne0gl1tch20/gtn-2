@@ -37,7 +37,12 @@ class SaveData {
   final String profileIconId;
   final CreativeModeSave? creativeMode;
 
-  SaveData copyWith({String? profileName, String? profileIconId}) => SaveData(
+  SaveData copyWith({
+    String? profileName,
+    String? profileIconId,
+    CreativeModeSave? creativeMode,
+    bool clearCreativeMode = false,
+  }) => SaveData(
         schemaVersion: schemaVersion,
         secret: secret,
         attempts: attempts,
@@ -49,10 +54,10 @@ class SaveData {
         settings: settings,
         profileName: profileName ?? this.profileName,
         profileIconId: profileIconId ?? this.profileIconId,
-        creativeMode: creativeMode ?? this.creativeMode,
+        creativeMode: clearCreativeMode ? null : creativeMode ?? this.creativeMode,
       );
 
-  Map<String, Object> toJson() => {
+  Map<String, Object?> toJson() => {
         'schemaVersion': schemaVersion,
         'secret': secret,
         'attempts': attempts,
