@@ -58,6 +58,32 @@ void main() {
     });
   });
 
+  group('correct guess reward stacking', () {
+    test('does not apply the talent reward multiplier twice', () {
+      final before = ProgressionState.initial.copyWith(
+        money: n(100),
+        moneyEarned: n(100),
+      );
+      // The base guess economy has already applied the talent's 1.5× bonus.
+      final afterBaseEconomy = before.copyWith(
+        money: n(250),
+        moneyEarned: n(250),
+      );
+      final systems = LegacySystemsState.initial.copyWith(
+        talents: const {'talent_reward_1'},
+      );
+
+      final result = engine.applyCorrectGuessBonuses(
+        before: before,
+        after: afterBaseEconomy,
+        systems: systems,
+      );
+
+      expect(result.money.compareTo(n(250)), 0);
+      expect(result.moneyEarned.compareTo(n(250)), 0);
+    });
+  });
+
   group('home base and relics', () {
     test('uses the escalating home base cost and enforces the level cap', () {
       final start = ProgressionState.initial.copyWith(money: n(150000));
