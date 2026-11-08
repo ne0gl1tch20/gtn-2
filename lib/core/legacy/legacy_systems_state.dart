@@ -51,6 +51,7 @@ class LegacySystemsState {
     this.bossBattleMistakes = const {},
     this.liveOpsClaims = const {},
     this.lastRandomEventId,
+    this.randomEventsTriggered = 0,
     this.autoClickerActive = false,
     this.autoClickerSpeed = 1,
     this.botTotalGuesses = 0,
@@ -112,6 +113,7 @@ class LegacySystemsState {
   final Map<String, int> bossBattleMistakes;
   final Map<String, int> liveOpsClaims;
   final String? lastRandomEventId;
+  final int randomEventsTriggered;
   final bool autoClickerActive;
   final double autoClickerSpeed;
   final int botTotalGuesses;
@@ -179,6 +181,7 @@ class LegacySystemsState {
     Map<String, int>? liveOpsClaims,
     String? lastRandomEventId,
     bool clearLastRandomEvent = false,
+    int? randomEventsTriggered,
     bool? autoClickerActive,
     double? autoClickerSpeed,
     int? botTotalGuesses,
@@ -242,6 +245,7 @@ class LegacySystemsState {
     bossBattleMistakes: bossBattleMistakes ?? this.bossBattleMistakes,
     liveOpsClaims: liveOpsClaims ?? this.liveOpsClaims,
     lastRandomEventId: clearLastRandomEvent ? null : lastRandomEventId ?? this.lastRandomEventId,
+    randomEventsTriggered: randomEventsTriggered ?? this.randomEventsTriggered,
     autoClickerActive: autoClickerActive ?? this.autoClickerActive,
     autoClickerSpeed: autoClickerSpeed ?? this.autoClickerSpeed,
     botTotalGuesses: botTotalGuesses ?? this.botTotalGuesses,
@@ -304,6 +308,7 @@ class LegacySystemsState {
     'bossBattleMistakes': bossBattleMistakes,
     'liveOpsClaims': liveOpsClaims,
     'lastRandomEventId': lastRandomEventId,
+    'randomEventsTriggered': randomEventsTriggered,
     'autoClickerActive': autoClickerActive,
     'autoClickerSpeed': autoClickerSpeed,
     'botTotalGuesses': botTotalGuesses,
@@ -478,6 +483,7 @@ class LegacySystemsState {
       bossBattleMistakes: intMap('bossBattleMistakes'),
       liveOpsClaims: intMap('liveOpsClaims'),
       lastRandomEventId: lastEvent as String?,
+      randomEventsTriggered: count('randomEventsTriggered'),
       autoClickerActive: autoActive,
       autoClickerSpeed: autoSpeed.toDouble(),
       botTotalGuesses: count('botTotalGuesses'),
