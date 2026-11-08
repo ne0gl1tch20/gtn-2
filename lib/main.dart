@@ -194,6 +194,10 @@ class _GameHomePageState extends State<GameHomePage> {
       final withQuestProgress = updated.copyWith(
         legacySystems: _legacySystemsEngine.recordUpgradePurchase(
           updated.legacySystems,
+        ).copyWith(
+          adaptiveTraitProfile: _invisibleTraitEngine.observeUpgradePurchase(
+            updated.legacySystems.adaptiveTraitProfile,
+          ),
         ),
       );
       setState(() => _progression = withQuestProgress);
