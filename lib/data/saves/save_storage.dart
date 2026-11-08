@@ -193,7 +193,9 @@ class SaveStorage {
         data.secret < data.minimum ||
         data.secret > data.maximum ||
         data.attempts < 0 ||
-        data.gamesWon < 0) {
+        data.gamesWon < 0 ||
+        data.profileName.length > 24 ||
+        !SaveData.profileIconIds.contains(data.profileIconId)) {
       return Future<void>.error(
         ArgumentError('Refusing to write invalid save data.'),
       );
