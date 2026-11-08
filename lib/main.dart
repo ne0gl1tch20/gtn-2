@@ -621,10 +621,6 @@ class _GameHomePageState extends State<GameHomePage> {
         final correct = _game.lastResult == GuessResult.correct;
         final beforeGuess = _progression;
         final legacySystems = beforeGuess.legacySystems;
-        final effects = UpgradeCatalog.effectsFor(
-          beforeGuess,
-          isFirstGuess: _game.attempts == 1,
-        );
         final traitEffects = _legacySystemsEngine.evaluateTraits(
           progression: beforeGuess,
           systems: legacySystems,
@@ -632,24 +628,37 @@ class _GameHomePageState extends State<GameHomePage> {
           activeSeasonId: _currentSeasonId(),
         );
         rangeScoutActive = traitEffects.rangeHint;
+        final criticalPrecisionLevel =
+            beforeGuess.prestigeUpgrades['critical_precision_boost'] ?? 0;
+        final guaranteedGoldenGuess =
+            (beforeGuess.nebulaItems['golden_guess'] ?? 0) > 0 &&
+            (beforeGuess.totalGuesses + 1) % 10 == 0;
+        final isCritical = correct &&
+            (guaranteedGoldenGuess ||
+                Random.secure().nextDouble() <
+                    GuessEconomyRules.criticalChance(criticalPrecisionLevel));
         final rawReward = correct
-            ? (BigNumber.fromInt(1) + effects.flatBonus) *
-                _legacySystemsEngine.mutatorRewardMultiplier(legacySystems) *
-                BigNumber.parse(DifficultyRules.rewardMultiplier(_settings.difficultyId).toStringAsFixed(2)) *
-                BigNumber.parse(traitEffects.correctGuessMultiplier.toStringAsFixed(2))
+            ? GuessEconomyRules.correctGuessReward(
+                rangeMaximum: _game.maximum,
+                currentStreak: beforeGuess.currentStreak,
+                rewardMultiplierLevel:
+                    beforeGuess.upgrades['reward_multiplier'] ?? 0,
+                hasTalentReward: legacySystems.talents.contains('talent_reward_1'),
+                isCritical: isCritical,
+                difficultyId: _settings.difficultyId,
+                mutatorMultiplier:
+                    _legacySystemsEngine.mutatorRewardMultiplier(legacySystems),
+                traitMultiplier: BigNumber.parse(
+                  traitEffects.correctGuessMultiplier.toStringAsFixed(2),
+                ),
+                permanentMoneyMultiplier:
+                    GuessEconomyRules.moneyEarningMultiplier(beforeGuess),
+              )
             : null;
         var afterReward = _progressionEngine.recordGuess(
           beforeGuess,
           correct: correct,
           baseReward: rawReward,
-          modifiers: GuessRewardModifiers(
-            streakMultiplier: effects.streakMultiplier,
-            criticalMultiplier: effects.firstGuessMultiplier *
-                ((beforeGuess.nebulaItems['golden_guess'] ?? 0) > 0 &&
-                        (beforeGuess.totalGuesses + 1) % 10 == 0
-                    ? 2
-                    : 1),
-          ),
         );
         final adaptiveProfile = _invisibleTraitEngine.observeGuess(
           profile: legacySystems.adaptiveTraitProfile,
