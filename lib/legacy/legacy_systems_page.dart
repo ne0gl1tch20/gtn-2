@@ -271,6 +271,19 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
         entries.add(entry);
       }
       if (entries.isEmpty) throw FormatException('Empty pinned GTN1 catalog: $path');
+      if (key == 'talents') {
+        final talentIds = entries.map((entry) => entry['id'] as String).toSet();
+        for (final entry in entries) {
+          final id = entry['id'] as String;
+          final cost = entry['cost'];
+          final parent = entry['requiredParentId'];
+          if (cost is! int || cost <= 0 ||
+              (parent != null &&
+                  (parent is! String || parent == id || !talentIds.contains(parent)))) {
+            throw FormatException('Invalid GTN1 talent definition: $id');
+          }
+        }
+      }
       return List.unmodifiable(entries);
     }
 
