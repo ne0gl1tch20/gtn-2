@@ -29,7 +29,9 @@ class GuessingBot {
     }
     if (rangeMinimum != _lowerBound || rangeMaximum != _upperBound) {
       _lowerBound = rangeMinimum > _lowerBound ? rangeMinimum : _lowerBound;
+      if (_lowerBound < 1) _lowerBound = 1;
       _upperBound = rangeMaximum < _upperBound ? rangeMaximum : _upperBound;
+      if (_upperBound < _lowerBound) _upperBound = _lowerBound;
       if (_lowerBound > _upperBound) reset(rangeMinimum, rangeMaximum);
     }
     return _lowerBound + ((_upperBound - _lowerBound) ~/ 2);
@@ -38,10 +40,10 @@ class GuessingBot {
   void observeGuess(int guess, BotFeedback feedback) {
     switch (feedback) {
       case BotFeedback.tooLow:
-        _lowerBound = guess + 1;
+        if (guess + 1 > _lowerBound) _lowerBound = guess + 1;
         break;
       case BotFeedback.tooHigh:
-        _upperBound = guess - 1;
+        if (guess - 1 < _upperBound) _upperBound = guess - 1;
         break;
       case BotFeedback.correct:
         break;
