@@ -39,10 +39,10 @@ void main() {
     await tester.tap(find.byType(Switch));
     await tester.pumpAndSettle();
 
-    await tester.scrollUntilVisible(find.text('Start new run'), 300, scrollable: find.byType(ListView).first);
+    await tester.scrollUntilVisible(find.text('Start new run'), 300, scrollable: find.descendant(of: find.byType(ListView).first, matching: find.byType(Scrollable)).first);
     await tester.tap(find.text('Start new run'));
     await tester.pumpAndSettle();
-    await tester.scrollUntilVisible(find.text('Run in progress'), 300, scrollable: find.byType(ListView).first);
+    await tester.scrollUntilVisible(find.text('Run in progress'), 300, scrollable: find.descendant(of: find.byType(ListView).first, matching: find.byType(Scrollable)).first);
     expect(find.text('Run in progress'), findsOneWidget);
 
     final runningSave = storage.value!;
@@ -50,12 +50,12 @@ void main() {
     final run = CreativeModeRuntime.resume(runningSave.creativeMode!);
     expect(run, isNotNull);
 
-    await tester.scrollUntilVisible(find.text('Submit guess'), 300, scrollable: find.byType(ListView).first);
+    await tester.scrollUntilVisible(find.text('Submit guess'), 300, scrollable: find.descendant(of: find.byType(ListView).first, matching: find.byType(Scrollable)).first);
     await tester.enterText(find.byType(TextField).last, run!.target.toString());
     await tester.tap(find.text('Submit guess'));
     await tester.pumpAndSettle();
 
-    await tester.scrollUntilVisible(find.text('Run complete'), 300, scrollable: find.byType(ListView).first);
+    await tester.scrollUntilVisible(find.text('Run complete'), 300, scrollable: find.descendant(of: find.byType(ListView).first, matching: find.byType(Scrollable)).first);
     expect(find.text('Run complete'), findsOneWidget);
     final completedRun =
         CreativeModeRuntime.resume(storage.value!.creativeMode!);
