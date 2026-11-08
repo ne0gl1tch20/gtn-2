@@ -102,6 +102,38 @@ class ProgressionEngine {
     );
   }
 
+  ProgressionState purchasePrestigeUpgrade(
+    ProgressionState state,
+    UpgradeDefinition definition,
+  ) {
+    final level = state.prestigeUpgrades[definition.id] ?? 0;
+    if (definition.maxLevel != null && level >= definition.maxLevel!) return state;
+    final cost = definition.costAtLevel(level);
+    if (state.prestige.compareTo(cost) < 0) return state;
+    final levels = Map<String, int>.of(state.prestigeUpgrades)
+      ..[definition.id] = level + 1;
+    return state.copyWith(
+      prestige: state.prestige - cost,
+      prestigeUpgrades: Map.unmodifiable(levels),
+    );
+  }
+
+  ProgressionState purchaseUltraUpgrade(
+    ProgressionState state,
+    UpgradeDefinition definition,
+  ) {
+    final level = state.ultraUpgrades[definition.id] ?? 0;
+    if (definition.maxLevel != null && level >= definition.maxLevel!) return state;
+    final cost = definition.costAtLevel(level);
+    if (state.ultra.compareTo(cost) < 0) return state;
+    final levels = Map<String, int>.of(state.ultraUpgrades)
+      ..[definition.id] = level + 1;
+    return state.copyWith(
+      ultra: state.ultra - cost,
+      ultraUpgrades: Map.unmodifiable(levels),
+    );
+  }
+
   ProgressionState prestige(ProgressionState state, PrestigeRules rules) {
     if (state.money.compareTo(rules.minimumMoney) < 0) return state;
     final reward = rules.rewardForMoney(state.money);
