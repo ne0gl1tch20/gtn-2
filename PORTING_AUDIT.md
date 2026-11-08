@@ -62,3 +62,15 @@ Do not mark this port complete or merge the PR until the remaining work above is
 - The Flutter app theme now uses the bundled Manrope family.
 - Hidden-trait discovery now checks the trait's `minLevel` gate in addition to prestige, correct guesses, best streak, season and discovered dependencies. A regression test covers the level gate.
 - These changes do not close the remaining behavioral parity items in the table above. In particular, the separate adaptive/invisible trait profile and its helper cooldown/one-time bonus behavior, complete minigame/music playback parity, and device-level updater/install verification remain unclaimed.
+
+
+## Source-content bundle pass (2026-11-08)
+
+The active branch `port/gtn1-content-assets` expands CI's pinned-source sync beyond fonts and Web Play raster art:
+- Copies all 17 canonical GTN1 `game/*.json` catalogs into Flutter's `assets/game/` bundle.
+- Copies the complete GTN1 `traits/` tree, including 320 trait definitions, 320 rule files, 320 SVG icons, English localization files and the invisible-trait profile.
+- Preserves the source changelog and third-party license notices for native Flutter About/license screens.
+- Adds a pre-build verifier that parses every bundled game and trait JSON file and checks the expected catalog and trait asset counts.
+- Runs that verifier in PR validation and both Android and Windows build jobs.
+
+The source content is now available to Flutter offline after CI sync, but copying it is not the same as implementing every source-backed screen or behavior. Catalog-driven Flutter screens and remaining gameplay transactions still need to consume these assets. This branch must pass CI before merge.
