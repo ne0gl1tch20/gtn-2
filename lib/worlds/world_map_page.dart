@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../core/progression/progression_state.dart';
@@ -93,9 +95,10 @@ class _WorldMapPageState extends State<WorldMapPage> {
   }
 
   void _resetMap(BoxConstraints constraints) {
-    final scale = (constraints.maxWidth / _mapWidth)
-        .clamp(0.35, 0.9)
-        .toDouble();
+    final scale = math.min(
+      constraints.maxWidth / _mapWidth,
+      constraints.maxHeight / _mapHeight,
+    ).clamp(0.35, 0.9).toDouble();
     final verticalOffset =
         (constraints.maxHeight - _mapHeight * scale) / 2;
     final horizontalOffset =
