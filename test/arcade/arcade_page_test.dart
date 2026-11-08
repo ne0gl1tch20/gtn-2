@@ -10,8 +10,12 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: ArcadePage(onReward: onReward),
     ));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 100));
+    for (var attempt = 0;
+        attempt < 20 && find.text('Memory Digit Sequence').evaluate().isEmpty;
+        attempt++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+    expect(find.text('Memory Digit Sequence'), findsOneWidget);
     await tester.tap(find.text('Memory Digit Sequence'));
     await tester.pump(const Duration(milliseconds: 300));
 
