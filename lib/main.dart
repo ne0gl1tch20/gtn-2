@@ -245,6 +245,7 @@ class _GameHomePageState extends State<GameHomePage> {
       );
       setState(() {
         _progression = updated;
+        _engine = _engineFor(updated, _settings);
         _game = _newGameWithAdaptiveTarget(_engine.newGame());
         _message = 'Prestige complete! Build your progress again.';
       });
@@ -274,6 +275,7 @@ class _GameHomePageState extends State<GameHomePage> {
       );
       setState(() {
         _progression = updated;
+        _engine = _engineFor(updated, _settings);
         _game = _newGameWithAdaptiveTarget(_engine.newGame());
         _message = 'Ultra reset complete! A new run begins.';
       });
