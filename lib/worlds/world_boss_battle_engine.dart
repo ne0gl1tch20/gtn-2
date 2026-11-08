@@ -1,5 +1,5 @@
-import '../core/numbers/big_number.dart';
 import '../core/game/guess_economy_rules.dart';
+import '../core/numbers/big_number.dart';
 import '../core/progression/progression_state.dart';
 import 'world_boss_catalog.dart';
 
