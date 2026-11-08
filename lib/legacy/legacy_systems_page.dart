@@ -815,7 +815,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
         children: [
           for (final world in WorldBossCatalog.worlds)
             Builder(builder: (context) {
-              final defeated = _progression.defeatedBosses.contains(world.id);
+              final defeated = WorldBossCatalog.isDefeated(_progression, world);
               final level = _systems.worldMasteryLevels[world.id] ?? (defeated ? 1 : 0);
               final canUpgrade = defeated && level < 10;
               return ListTile(
