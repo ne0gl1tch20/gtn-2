@@ -127,6 +127,82 @@ void main() {
     expect((await storage.load())?.toJson(), second.toJson());
   });
 
+  test('persists Extreme Hardcore saves through the storage layer', () async {
+    final directory =
+        await Directory.systemTemp.createTemp('gtn2-extreme-save-test-');
+    addTearDown(() => directory.delete(recursive: true));
+    final storage = SaveStorage(directory: directory);
+    final extremeSave = SaveData(
+      secret: 487,
+      attempts: 12,
+      gamesWon: 2,
+      minimum: 1,
+      maximum: 500,
+      settings: const GameSettings(difficultyId: 'extreme'),
+    );
+
+    await storage.save(extremeSave);
+
+    final restored = await storage.load();
+    expect(restored?.secret, 487);
+    expect(restored?.maximum, 500);
+    expect(restored?.settings.difficultyId, 'extreme');
+  });
+
+  test('rejects save data whose secret is outside its configured range', () async {
+    final directory =
+        await Directory.systemTemp.createTemp('gtn2-invalid-range-save-test-');
+    addTearDown(() => directory.delete(recursive: true));
+    final storage = SaveStorage(directory: directory);
+
+    await expectLater(
+      storage.save(SaveData(
+        secret: 501,
+        attempts: 0,
+        gamesWon: 0,
+        minimum: 1,
+        maximum: 500,
+      )),
+      throwsArgumentError,
+    );
+  });
+
+  test('recovers the completed temporary save after an interrupted write', () async {
+    final directory =
+        await Directory.systemTemp.createTemp('gtn2-save-recovery-tmp-');
+    addTearDown(() => directory.delete(recursive: true));
+    final storage = SaveStorage(directory: directory);
+    final temporary = File('${directory.path}/gtn2-save.json.tmp');
+    await temporary.writeAsString(
+      '{"schemaVersion":3,"secret":91,"attempts":4,"gamesWon":2,"isComplete":false,"minimum":1,"maximum":100}',
+    );
+
+    final recovered = await storage.load();
+
+    expect(recovered?.secret, 91);
+    expect(await File('${directory.path}/gtn2-save.json').exists(), isTrue);
+    expect(await temporary.exists(), isFalse);
+  });
+
+  test('recovers the last known-good backup when the primary save is corrupt', () async {
+    final directory =
+        await Directory.systemTemp.createTemp('gtn2-save-recovery-bak-');
+    addTearDown(() => directory.delete(recursive: true));
+    final storage = SaveStorage(directory: directory);
+    final primary = File('${directory.path}/gtn2-save.json');
+    final backup = File('${directory.path}/gtn2-save.json.bak');
+    await primary.writeAsString('{broken json');
+    await backup.writeAsString(
+      '{"schemaVersion":3,"secret":73,"attempts":2,"gamesWon":1,"isComplete":false,"minimum":1,"maximum":100}',
+    );
+
+    final recovered = await storage.load();
+
+    expect(recovered?.secret, 73);
+    expect(await File('${directory.path}/gtn2-save.json').exists(), isTrue);
+    expect(await File('${directory.path}/gtn2-save.json.corrupt').exists(), isTrue);
+  });
+
   test('save slots use separate files', () async {
     final directory =
         await Directory.systemTemp.createTemp('gtn2-save-slots-test-');
