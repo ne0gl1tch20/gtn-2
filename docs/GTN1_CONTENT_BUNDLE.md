@@ -15,4 +15,4 @@ This is an offline content-bundle foundation. It does not by itself implement th
 
 ## Release safety gate
 
-The `debug-latest` publishing job is disabled unless the repository variable `GTN1_FULL_PORT_VERIFIED` is explicitly set to `true`. Android and Windows CI builds can still run and produce short-lived validation artifacts, but merging an intermediate porting PR cannot overwrite the public debug release. Set the variable only after the full parity audit, gameplay tests, UI checks and device/platform validation are complete.
+The `debug-latest` publishing job is explicitly disabled in `.github/workflows/build.yml`. Android and Windows CI builds can still run and produce short-lived validation artifacts, but merging an intermediate porting PR cannot overwrite the public debug release. Re-enable publishing only after the full parity audit, gameplay tests, UI checks and device/platform validation are complete.
