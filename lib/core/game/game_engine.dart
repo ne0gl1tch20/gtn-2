@@ -45,6 +45,39 @@ class GameEngine {
         maximum: maximum,
       );
 
+  /// Continues the endless GTN1 loop after a correct guess.
+  ///
+  /// GTN1 immediately installs the next target while keeping the lifetime
+  /// attempts counter. Bot guesses can override [attempts] so they never
+  /// consume a player's attempts.
+  GameState continueAfterCorrect(
+    GameState completed,
+    GameState nextGame, {
+    int? attempts,
+  }) {
+    if (!completed.isComplete || completed.lastResult != GuessResult.correct) {
+      throw ArgumentError('Only a completed correct guess can advance the game.');
+    }
+    if (nextGame.isComplete ||
+        nextGame.minimum > nextGame.maximum ||
+        nextGame.secret < nextGame.minimum ||
+        nextGame.secret > nextGame.maximum) {
+      throw ArgumentError('The next game state is invalid.');
+    }
+    final nextAttempts = attempts ?? completed.attempts;
+    if (nextAttempts < 0) {
+      throw ArgumentError('Attempts cannot be negative.');
+    }
+    return GameState(
+      secret: nextGame.secret,
+      attempts: nextAttempts,
+      isComplete: false,
+      lastResult: GuessResult.correct,
+      minimum: nextGame.minimum,
+      maximum: nextGame.maximum,
+    );
+  }
+
   GameState restore({
     required int secret,
     required int attempts,
