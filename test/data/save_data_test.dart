@@ -31,6 +31,28 @@ void main() {
       expect(SaveData.fromJson(save.toJson()).settings.difficultyId, 'hard');
     });
 
+    test('accepts and round-trips Extreme Hardcore save ranges', () {
+      final save = SaveData(
+        secret: 487,
+        attempts: 12,
+        gamesWon: 2,
+        minimum: 1,
+        maximum: 500,
+        settings: const GameSettings(difficultyId: 'extreme'),
+      );
+      final restored = SaveData.fromJson(save.toJson());
+      expect(restored.secret, 487);
+      expect(restored.maximum, 500);
+      expect(restored.settings.difficultyId, 'extreme');
+      expect(
+        () => SaveData.fromJson({
+          ...save.toJson(),
+          'maximum': 501,
+        }),
+        throwsFormatException,
+      );
+    });
+
     test('rejects unknown versions and invalid fields', () {
       expect(
         () => SaveData.fromJson({
