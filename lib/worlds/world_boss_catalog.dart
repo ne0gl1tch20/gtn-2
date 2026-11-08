@@ -121,6 +121,17 @@ class WorldBossCatalog {
         state.ultraResets >= boss.unlockUltraCount;
   }
 
+  static bool canUnlock(ProgressionState state, WorldBossDefinition boss) {
+    if (state.legacySystems.unlockedWorldIds.contains(boss.id)) return true;
+    final requiredBossId = boss.unlockBossId;
+    if (requiredBossId == null) return true;
+    return state.defeatedBosses.contains(requiredBossId) &&
+        state.correctGuesses >= boss.unlockCorrectGuesses &&
+        ownedUpgradeLevels(state) >= boss.unlockUpgradeCount &&
+        state.prestigeResets >= boss.unlockPrestigeCount &&
+        state.ultraResets >= boss.unlockUltraCount;
+  }
+
   static bool isUnlocked(ProgressionState state, WorldBossDefinition boss) =>
       state.legacySystems.unlockedWorldIds.contains(boss.id);
 
