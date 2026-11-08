@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gtn_2/core/creative/creative_mode.dart';
 import 'package:gtn_2/creative/creative_mode_page.dart';
@@ -11,29 +10,19 @@ import 'package:gtn_2/data/saves/save_storage.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  const pathProvider = MethodChannel('plugins.flutter.io/path_provider');
-
   testWidgets('Creative Mode screen persists a run and a correct guess', (tester) async {
     final directory =
         await Directory.systemTemp.createTemp('gtn2-creative-mode-widget-');
     addTearDown(() async {
-      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-          .setMockMethodCallHandler(pathProvider, null);
       await directory.delete(recursive: true);
     });
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(
-      pathProvider,
-      (call) async => directory.path,
-    );
-
     final initialStorage = SaveStorage(directory: directory, slot: 1);
     await initialStorage.save(
       SaveData(secret: 42, attempts: 0, gamesWon: 0),
     );
 
     await tester.pumpWidget(
-      const MaterialApp(home: CreativeModePage(slot: 1)),
+      MaterialApp(home: CreativeModePage(slot: 1, storage: initialStorage)),
     );
     await tester.pumpAndSettle();
 
