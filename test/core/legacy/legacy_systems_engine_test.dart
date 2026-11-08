@@ -286,8 +286,15 @@ void main() {
         musicQueue: const ['track_b'],
         musicPlaylists: const {'favorites': ['track_a']},
         currentTrackId: 'track_b',
+        worldBossVictories: 12,
       );
       expect(LegacySystemsState.fromJson(systems.toJson()).toJson(), systems.toJson());
+    });
+
+    test('defaults world boss victories when loading older saves', () {
+      final legacyJson = Map<String, dynamic>.of(LegacySystemsState.initial.toJson())
+        ..remove('worldBossVictories');
+      expect(LegacySystemsState.fromJson(legacyJson).worldBossVictories, 0);
     });
 
     test('round-trips bot sequence, last feedback and save timestamp', () {
