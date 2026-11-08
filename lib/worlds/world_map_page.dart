@@ -62,9 +62,11 @@ class _WorldMapPageState extends State<WorldMapPage> {
                   !_state.legacySystems.endlessRiftActive;
               final canFight = WorldBossCatalog.canFight(_state, boss);
               final active = _state.legacySystems.activeBossBattleWorldId == boss.id;
-              final riftTier = _state.legacySystems.endlessRiftTier.clamp(1, 1000000).toInt();
+              final riftTier = _state.legacySystems.endlessRiftTier < 1
+                  ? 1
+                  : _state.legacySystems.endlessRiftTier;
               final bossHp = boss.hits + (_state.legacySystems.endlessRiftActive ? (riftTier - 1) * 2 : 0);
-              final damage = WorldBossCatalog.damage(_state, boss);
+              final damage = WorldBossCatalog.damage(_state, boss).clamp(0, bossHp);
               final phase = ((damage * 3) ~/ bossHp + 1).clamp(1, 3);
               final misses = _state.legacySystems.bossBattleMistakes[boss.bossId] ?? 0;
               return Card(
