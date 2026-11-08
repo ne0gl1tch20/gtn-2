@@ -269,13 +269,6 @@ class GameDashboardPage extends StatelessWidget {
                                   letterSpacing: -2,
                                 )),
                             const SizedBox(height: 7),
-                            const Text('Make your move.',
-                                style: TextStyle(
-                                  color: _cyan,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w900,
-                                  letterSpacing: 1.5,
-                                )),
                             const SizedBox(height: 12),
                             Text(message,
                                 maxLines: 2,
@@ -569,6 +562,11 @@ class _Wallet extends StatelessWidget {
   final Color foreground;
   final Color muted;
 
+  void _setGuess(int value) {
+    controller.text = value.toString();
+    controller.selection = TextSelection.collapsed(offset: controller.text.length);
+  }
+
   @override
   Widget build(BuildContext context) => Container(
         padding: const EdgeInsets.all(17),
@@ -794,6 +792,51 @@ class _GuessInput extends StatelessWidget {
                 ),
               ],
             ),
+            const SizedBox(height: 12),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'QUICK PICK',
+                style: TextStyle(
+                  color: muted,
+                  fontSize: 9,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 1,
+                ),
+              ),
+            ),
+            const SizedBox(height: 7),
+            Wrap(
+              spacing: 7,
+              runSpacing: 7,
+              children: [
+                _QuickGuessButton(
+                  label: 'LOW END',
+                  enabled: enabled,
+                  onPressed: () => _setGuess(game.minimum),
+                ),
+                _QuickGuessButton(
+                  label: 'MIDPOINT',
+                  enabled: enabled,
+                  onPressed: () => _setGuess(
+                    game.minimum + (game.maximum - game.minimum) ~/ 2,
+                  ),
+                ),
+                _QuickGuessButton(
+                  label: 'HIGH END',
+                  enabled: enabled,
+                  onPressed: () => _setGuess(game.maximum),
+                ),
+                _QuickGuessButton(
+                  label: 'CLEAR',
+                  enabled: enabled,
+                  onPressed: () {
+                    controller.clear();
+                    controller.selection = const TextSelection.collapsed(offset: 0);
+                  },
+                ),
+              ],
+            ),
             const SizedBox(height: 8),
             Text(
               completed
@@ -802,6 +845,34 @@ class _GuessInput extends StatelessWidget {
               style: TextStyle(color: muted, fontSize: 10, height: 1.4),
             ),
           ],
+        ),
+      );
+}
+
+class _QuickGuessButton extends StatelessWidget {
+  const _QuickGuessButton({
+    required this.label,
+    required this.enabled,
+    required this.onPressed,
+  });
+
+  final String label;
+  final bool enabled;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) => OutlinedButton(
+        onPressed: enabled ? onPressed : null,
+        style: OutlinedButton.styleFrom(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+          visualDensity: VisualDensity.compact,
+          foregroundColor: _muted,
+          side: const BorderSide(color: _line),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+        child: Text(
+          label,
+          style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w900),
         ),
       );
 }
