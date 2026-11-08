@@ -31,7 +31,6 @@ import 'settings/settings_page.dart';
 import 'shop/nebula_shop_page.dart';
 import 'shop/upgrade_catalog.dart';
 import 'shop/upgrade_shop_page.dart';
-import 'worlds/world_boss_catalog.dart';
 import 'worlds/world_boss_battle_engine.dart';
 import 'worlds/world_map_page.dart';
 
@@ -614,17 +613,6 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
     );
   }
 
-
-  Future<ProgressionState> _attackWorldBoss(
-    WorldBossDefinition boss,
-  ) async {
-    final updated = _progressionEngine.attackWorldBoss(_progression, boss);
-    if (updated != _progression) {
-      setState(() => _progression = updated);
-      await _persist();
-    }
-    return _progression;
-  }
 
   Future<ProgressionState> _worldBossAction(String worldId, String action) async {
     final result = switch (action) {
