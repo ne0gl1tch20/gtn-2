@@ -12,6 +12,39 @@ void main() {
         upgrades: const {'upgrade_a': 3},
       );
 
+  test('secret discovery pays the original reward once and records its Codex entry', () {
+    final state = ProgressionState(correctGuesses: 50);
+    final discovered = engine.discoverSecret(state, 'whispering_hollow');
+    expect(discovered.accepted, isTrue);
+    expect(discovered.progression.money, BigNumber.fromInt(10000));
+    expect(discovered.progression.moneyEarned, BigNumber.fromInt(10000));
+    expect(discovered.progression.nebula, BigNumber.fromInt(5));
+    expect(discovered.progression.nebulaEarned, BigNumber.fromInt(5));
+    expect(discovered.progression.legacySystems.discoveredSecrets,
+        contains('whispering_hollow'));
+    expect(discovered.progression.legacySystems.codexEntries,
+        contains('secret:whispering_hollow'));
+
+    final repeated = engine.discoverSecret(discovered.progression, 'whispering_hollow');
+    expect(repeated.accepted, isFalse);
+    expect(repeated.progression.money, discovered.progression.money);
+    expect(repeated.progression.nebula, discovered.progression.nebula);
+  });
+
+  test('secret discovery requires both its threshold and an unlocked world', () {
+    final tooEarly = engine.discoverSecret(
+      ProgressionState(correctGuesses: 49),
+      'whispering_hollow',
+    );
+    expect(tooEarly.accepted, isFalse);
+
+    final lockedWorld = engine.discoverSecret(
+      ProgressionState(correctGuesses: 150),
+      'shard_archive',
+    );
+    expect(lockedWorld.accepted, isFalse);
+  });
+
   test('migrates worlds unlocked by the previous Flutter save rules', () {
     final oldSave = ProgressionState(
       correctGuesses: 25,
