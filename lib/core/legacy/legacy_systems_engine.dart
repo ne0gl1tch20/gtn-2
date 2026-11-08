@@ -795,22 +795,32 @@ class LegacySystemsEngine {
     required String? activeSeasonId,
   }) {
     final discovered = Set<String>.of(systems.discoveredTraits);
-    for (final item in builtInTraitCatalog) {
-      if (item['visibility'] != 'HIDDEN') {
-        continue;
+    var changed = true;
+    while (changed) {
+      changed = false;
+      for (final item in builtInTraitCatalog) {
+        if (item['visibility'] != 'HIDDEN') {
+          continue;
+        }
+        final traitId = item['id']! as String;
+        if (discovered.contains(traitId)) {
+          continue;
+        }
+        if (item['category'] == 'SEASONAL' && item['seasonId'] != activeSeasonId) {
+          continue;
+        }
+        final dependencies =
+            (item['dependencies']! as List<Object?>).cast<String>();
+        if (playerLevel < (item['minLevel']! as int) ||
+            progression.prestigeResets < (item['minPrestige']! as int) ||
+            progression.correctGuesses < (item['minCorrect']! as int) ||
+            progression.bestStreak < (item['minStreak']! as int) ||
+            !dependencies.every(discovered.contains)) {
+          continue;
+        }
+        discovered.add(traitId);
+        changed = true;
       }
-      if (item['category'] == 'SEASONAL' && item['seasonId'] != activeSeasonId) {
-        continue;
-      }
-      final dependencies = (item['dependencies']! as List<Object?>).cast<String>();
-      if (playerLevel < (item['minLevel']! as int) ||
-          progression.prestigeResets < (item['minPrestige']! as int) ||
-          progression.correctGuesses < (item['minCorrect']! as int) ||
-          progression.bestStreak < (item['minStreak']! as int) ||
-          !dependencies.every(discovered.contains)) {
-        continue;
-      }
-      discovered.add(item['id']! as String);
     }
     return systems.copyWith(discoveredTraits: Set.unmodifiable(discovered));
   }
