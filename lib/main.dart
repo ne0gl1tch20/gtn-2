@@ -29,6 +29,7 @@ import 'saves/save_slots_page.dart';
 import 'settings/game_settings.dart';
 import 'settings/settings_page.dart';
 import 'shop/nebula_shop_page.dart';
+import 'shop/permanent_shop_catalog.dart';
 import 'shop/upgrade_catalog.dart';
 import 'shop/upgrade_shop_page.dart';
 import 'worlds/world_boss_battle_engine.dart';
@@ -422,6 +423,22 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
     return _progression;
   }
 
+  Future<ProgressionState> _purchasePermanentShopItem(
+    PermanentShopItem item,
+    bool ultra,
+  ) async {
+    final updated = _progressionEngine.purchasePermanentShopItem(
+      _progression,
+      itemId: item.id,
+      ultra: ultra,
+    );
+    if (updated != _progression) {
+      setState(() => _progression = updated);
+      await _persist();
+    }
+    return _progression;
+  }
+
   Future<void> _openProgressionHub() async {
     await Navigator.of(context).push<void>(
       MaterialPageRoute<void>(
@@ -436,6 +453,7 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
             return _progression;
           },
           onPurchasePermanentUpgrade: _purchasePermanentUpgrade,
+          onPurchasePermanentShopItem: _purchasePermanentShopItem,
         ),
       ),
     );
