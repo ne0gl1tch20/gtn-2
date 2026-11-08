@@ -76,7 +76,7 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
         builder: (context, setDialogState) => AlertDialog(
           title: Text('Duplicate Slot $sourceSlot'),
           content: DropdownButtonFormField<int>(
-            value: target,
+            initialValue: target,
             decoration: const InputDecoration(labelText: 'Copy into'),
             items: [
               for (final slot in emptySlots)
