@@ -239,9 +239,12 @@ void main() {
       for (final result in [ineligible, disabled, expired, exhausted]) {
         expect(result.accepted, isFalse);
         expect(result.progression.nebula.toString(), '0');
-        expect(result.systems.liveOpsClaims, isEmpty);
         expect(result.systems.permanentEventBoosts, 0);
       }
+      expect(ineligible.systems.liveOpsClaims, isEmpty);
+      expect(disabled.systems.liveOpsClaims, isEmpty);
+      expect(expired.systems.liveOpsClaims, isEmpty);
+      expect(exhausted.systems.liveOpsClaims, const {'season_1': 2});
     });
 
     test('rejects negative claim counters without changing progression', () {
