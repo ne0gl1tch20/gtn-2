@@ -41,11 +41,14 @@ class BotTeam {
     required double speed,
     required bool speedTalentOne,
     required bool speedTalentTwo,
+    required bool prestigeAutoSpeed,
     required bool speedMutator,
   }) {
     final talentMultiplier =
         (speedTalentOne ? 1.25 : 1.0) * (speedTalentTwo ? 1.5 : 1.0);
-    final effectiveSpeed = speed * talentMultiplier * (speedMutator ? 3.0 : 1.0);
+    final effectiveSpeed = speed * talentMultiplier *
+        (prestigeAutoSpeed ? 1.5 : 1.0) *
+        (speedMutator ? 3.0 : 1.0);
     if (!active || effectiveSpeed <= 0) return 1000;
     return (1000.0 / effectiveSpeed).toInt();
   }
@@ -61,6 +64,7 @@ class BotTeam {
     required double speed,
     required bool speedTalentOne,
     required bool speedTalentTwo,
+    required bool prestigeAutoSpeed,
     required bool speedMutator,
   }) {
     if (purchasedBots.isEmpty) return null;
@@ -88,6 +92,7 @@ class BotTeam {
         speed: speed,
         speedTalentOne: speedTalentOne,
         speedTalentTwo: speedTalentTwo,
+        prestigeAutoSpeed: prestigeAutoSpeed,
         speedMutator: speedMutator,
       ),
     );
