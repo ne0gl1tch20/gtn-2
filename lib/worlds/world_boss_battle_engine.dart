@@ -215,9 +215,10 @@ class WorldBossBattleEngine {
     final relicCount = state.legacySystems.equippedRelics.intersection(_bossIds).length;
     final setRate = switch (relicCount) { 2 => 0.10, 3 => 0.20, 4 => 0.35, _ => 0.0 };
     final masteryRate = (state.legacySystems.worldMasteryLevels[world.id] ?? 0)
-        .clamp(0, 10) * 0.02;
-    final sanctuaryRate = (state.legacySystems.homeBaseLevel.clamp(0, 20) * 0.02).clamp(0.0, 0.40);
-    final eventRate = state.legacySystems.permanentEventBoosts.clamp(0, 25) * 0.02;
+        .clamp(0, 10).toDouble() * 0.02;
+    final sanctuaryRate = (state.legacySystems.homeBaseLevel.clamp(0, 20) * 0.02)
+        .clamp(0.0, 0.40).toDouble();
+    final eventRate = state.legacySystems.permanentEventBoosts.clamp(0, 25).toDouble() * 0.02;
     final secretRate = state.legacySystems.discoveredSecrets.contains(world.secretId) ? 0.05 : 0.0;
     final bonusMoney = BigNumber.fromInt(world.moneyReward) *
         BigNumber.parse((setRate + masteryRate + sanctuaryRate + eventRate + secretRate).toStringAsFixed(2));
