@@ -19,8 +19,16 @@ class GameUpgrade {
   final double effectPerLevel;
 
   /// Only upgrades with a verified, wired GTN1 gameplay effect appear in the shop.
-  bool get gameplayImplemented =>
-      definition.id == 'reward_multiplier' || definition.id == 'better_range';
+  bool get gameplayImplemented => const {
+        'reward_multiplier',
+        'better_range',
+        'prestige_money_boost',
+        'prestige_gain_boost',
+        'prestige_starting_capital',
+        'ultra_money_boost',
+        'ultra_gain_boost',
+        'ultra_nebula_boost',
+      }.contains(definition.id);
 
   String get effectDescription => switch (definition.id) {
         'reward_multiplier' => '+25% correct-guess reward per level',
@@ -49,6 +57,10 @@ class UpgradeCatalog {
 
   static List<GameUpgrade> get availableForGameplay =>
       List.unmodifiable(_all.where((item) => item.gameplayImplemented));
+  static List<GameUpgrade> get availablePrestige =>
+      List.unmodifiable(_prestige.where((item) => item.gameplayImplemented));
+  static List<GameUpgrade> get availableUltra =>
+      List.unmodifiable(_ultra.where((item) => item.gameplayImplemented));
 
   static Future<void> load() async {
     if (_loaded) return;
@@ -115,5 +127,6 @@ class UpgradeCatalog {
   }
 
   static GameUpgrade byId(String id) =>
-      _all.firstWhere((upgrade) => upgrade.definition.id == id);
+      [..._all, ..._prestige, ..._ultra]
+          .firstWhere((upgrade) => upgrade.definition.id == id);
 }
