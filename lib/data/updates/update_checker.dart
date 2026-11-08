@@ -104,7 +104,8 @@ class UpdateChecker {
           versionCode is! int || versionCode <= 0 ||
           runNumber is! int || runNumber <= 0 ||
           commitSha is! String || !RegExp(r'^[a-fA-F0-9]{40}$').hasMatch(commitSha) ||
-          checksum is! String || !RegExp(r'^[a-fA-F0-9]{64}
+          checksum is! String || !RegExp(r'^[a-fA-F0-9]{64}$').hasMatch(checksum) ||
+          signingCertificate is! String || !isValidCertificateFingerprint(signingCertificate)) {
         throw const FormatException('Stable Debug update manifest is invalid.');
       }
       if (isCurrent(
