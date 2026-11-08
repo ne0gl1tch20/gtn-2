@@ -25,6 +25,72 @@ class SaveStorage {
     return SaveStorage(directory: directory, slot: slot);
   }
 
+  Future<int> loadActiveSlot() async {
+    final activeFile = File('${_file.parent.path}/gtn2-active-slot.json');
+    final temporary = File('${activeFile.path}.tmp');
+    final backup = File('${activeFile.path}.bak');
+    for (final candidate in [activeFile, temporary, backup]) {
+      if (!await candidate.exists()) continue;
+      try {
+        final decoded = jsonDecode(await candidate.readAsString());
+        if (decoded is Map<String, dynamic> &&
+            decoded['schemaVersion'] == 1 &&
+            decoded['slot'] is int) {
+          final value = decoded['slot'] as int;
+          if (value >= 1 && value <= maxSaveSlots) {
+            if (candidate.path != activeFile.path) {
+              await _restoreMetadataFile(candidate, activeFile);
+            }
+            return value;
+          }
+        }
+      } on FormatException {
+        // Try the next recovery candidate.
+      }
+    }
+    return 1;
+  }
+
+  Future<void> saveActiveSlot(int value) async {
+    if (value < 1 || value > maxSaveSlots) {
+      throw RangeError.range(value, 1, maxSaveSlots, 'slot');
+    }
+    final activeFile = File('${_file.parent.path}/gtn2-active-slot.json');
+    final temporary = File('${activeFile.path}.tmp');
+    final backup = File('${activeFile.path}.bak');
+    await activeFile.parent.create(recursive: true);
+    await temporary.writeAsString(
+      jsonEncode({'schemaVersion': 1, 'slot': value}),
+      flush: true,
+    );
+    var backedUp = false;
+    try {
+      if (await activeFile.exists()) {
+        if (await backup.exists()) await backup.delete();
+        await activeFile.rename(backup.path);
+        backedUp = true;
+      }
+      await temporary.rename(activeFile.path);
+      if (backedUp && await backup.exists()) await backup.delete();
+    } on FileSystemException {
+      if (backedUp && !await activeFile.exists() && await backup.exists()) {
+        await backup.rename(activeFile.path);
+      }
+      rethrow;
+    } finally {
+      if (await temporary.exists()) await temporary.delete();
+    }
+  }
+
+  Future<void> _restoreMetadataFile(File candidate, File destination) async {
+    if (await destination.exists()) {
+      final corrupt = File('${destination.path}.corrupt');
+      if (await corrupt.exists()) await corrupt.delete();
+      await destination.rename(corrupt.path);
+    }
+    await candidate.rename(destination.path);
+  }
+
   Future<SaveData?> load() async {
     final primary = await _readSave(_file);
     if (primary != null) return primary;
