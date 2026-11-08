@@ -69,7 +69,7 @@ class _UpgradeShopPageState extends State<UpgradeShopPage> {
             style: Theme.of(context).textTheme.bodySmall,
           ),
           const SizedBox(height: 16),
-          for (final upgrade in UpgradeCatalog.all)
+          for (final upgrade in UpgradeCatalog.availableForGameplay)
             _UpgradeCard(
               upgrade: upgrade,
               level: _progression.upgrades[upgrade.definition.id] ?? 0,
