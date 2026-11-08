@@ -109,6 +109,67 @@ void main() {
     expect(adjusted.moneyEarned.toString(), '15000');
   });
 
+  test('Critical Precision talents proc only in the GTN1 post-reward bonus', () {
+    final before = ProgressionState.initial;
+    final rawReward = BigNumber.fromInt(10000);
+    final afterRawReward = before.copyWith(
+      money: rawReward,
+      moneyEarned: rawReward,
+    );
+    const engine = LegacySystemsEngine();
+
+    for (final talentId in ['talent_crit_1', 'talent_crit_2']) {
+      final systems = LegacySystemsState.initial.copyWith(
+        talents: {talentId},
+      );
+      final baseReward = engine.correctGuessReward(
+        baseReward: rawReward,
+        systems: systems,
+        criticalHit: true,
+      );
+      expect(
+        baseReward.toString(),
+        '10000',
+        reason: '$talentId must not add a second base-reward multiplier',
+      );
+
+      final noProc = engine.applyCorrectGuessBonuses(
+        before: before,
+        after: afterRawReward,
+        systems: systems,
+        criticalHit: false,
+      );
+      final proc = engine.applyCorrectGuessBonuses(
+        before: before,
+        after: afterRawReward,
+        systems: systems,
+        criticalHit: true,
+      );
+      expect(noProc.money.toString(), '10000');
+      expect(proc.money.toString(), '20000');
+      expect(proc.moneyEarned.toString(), '20000');
+    }
+  });
+
+  test('Omniscient Oracle awards its source-implemented Nebula bonus once', () {
+    final before = ProgressionState.initial;
+    final rawReward = BigNumber.fromInt(10000);
+    final afterRawReward = before.copyWith(
+      money: rawReward,
+      moneyEarned: rawReward,
+    );
+    final adjusted = const LegacySystemsEngine().applyCorrectGuessBonuses(
+      before: before,
+      after: afterRawReward,
+      systems: LegacySystemsState.initial.copyWith(
+        talents: const {'talent_master_1'},
+      ),
+    );
+
+    expect(adjusted.nebula.toString(), '1');
+    expect(adjusted.nebulaEarned.toString(), '1');
+  });
+
   test('streak and frenzy formulas match GTN1 five-guess tiers', () {
     expect(GuessEconomyRules.streakMultiplier(4), 1.4);
     expect(GuessEconomyRules.frenzyMultiplier(4), 1);
