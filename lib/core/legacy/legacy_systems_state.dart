@@ -1,6 +1,9 @@
+import 'adaptive_trait_profile.dart';
+
 /// Persisted per-save-slot state for GTN 1 systems that were not in the first Flutter slice.
 class LegacySystemsState {
   const LegacySystemsState({
+    this.adaptiveTraitProfile = const AdaptiveTraitProfile(),
     this.discoveredTraits = const {},
     this.selectedTraitArms = const {},
     this.activeMutators = const {},
@@ -52,6 +55,7 @@ class LegacySystemsState {
     this.botIncorrectGuesses = 0,
   });
 
+  final AdaptiveTraitProfile adaptiveTraitProfile;
   final Set<String> discoveredTraits;
   final Map<String, String> selectedTraitArms;
   final Set<String> activeMutators;
@@ -105,6 +109,7 @@ class LegacySystemsState {
   static const initial = LegacySystemsState();
 
   LegacySystemsState copyWith({
+    AdaptiveTraitProfile? adaptiveTraitProfile,
     Set<String>? discoveredTraits,
     Map<String, String>? selectedTraitArms,
     Set<String>? activeMutators,
@@ -159,6 +164,7 @@ class LegacySystemsState {
     int? botCorrectGuesses,
     int? botIncorrectGuesses,
   }) => LegacySystemsState(
+    adaptiveTraitProfile: adaptiveTraitProfile ?? this.adaptiveTraitProfile,
     discoveredTraits: discoveredTraits ?? this.discoveredTraits,
     selectedTraitArms: selectedTraitArms ?? this.selectedTraitArms,
     activeMutators: activeMutators ?? this.activeMutators,
@@ -211,6 +217,7 @@ class LegacySystemsState {
   );
 
   Map<String, Object?> toJson() => {
+    'adaptiveTraitProfile': adaptiveTraitProfile.toJson(),
     'discoveredTraits': discoveredTraits.toList()..sort(),
     'selectedTraitArms': selectedTraitArms,
     'activeMutators': activeMutators.toList()..sort(),
@@ -355,7 +362,14 @@ class LegacySystemsState {
       throw const FormatException('Invalid extended legacy state.');
     }
     if (currentTrack != null && currentTrack is! String) throw const FormatException('Invalid current music track.');
+    final rawAdaptiveProfile = json['adaptiveTraitProfile'];
+    if (rawAdaptiveProfile != null && rawAdaptiveProfile is! Map) {
+      throw const FormatException('Invalid adaptive trait profile.');
+    }
     final state = LegacySystemsState(
+      adaptiveTraitProfile: rawAdaptiveProfile == null
+          ? const AdaptiveTraitProfile()
+          : AdaptiveTraitProfile.fromJson(Map<String, dynamic>.from(rawAdaptiveProfile as Map)),
       discoveredTraits: strings('discoveredTraits'),
       selectedTraitArms: Map.unmodifiable(arms),
       activeMutators: strings('activeMutators'),
