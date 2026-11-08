@@ -31,7 +31,7 @@ class _ArcadePageState extends State<ArcadePage> {
         'memory_match' => Icons.memory_rounded,
         'number_rush' => Icons.numbers_rounded,
         'math_blitz' => Icons.calculate_rounded,
-        'memory_grid' => Icons.grid_4x4_rounded,
+        'memory_grid' => Icons.grid_on_rounded,
         _ => Icons.sports_esports_rounded,
       };
 
