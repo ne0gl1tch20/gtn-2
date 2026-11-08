@@ -145,6 +145,75 @@ void main() {
       expect(accepted.systems.worldMasteryLevels['crystal_caverns'], 2);
     });
 
+    test('mastery level five and ten grant the exact Nebula milestones', () {
+      final progression = ProgressionState.initial.copyWith(
+        defeatedBosses: const {'verdant_guardian'},
+        nebula: n(150),
+      );
+      final systems = LegacySystemsState.initial.copyWith(
+        worldMasteryLevels: const {'verdant_grove': 4},
+      );
+      final levelFive = engine.upgradeWorldMastery(
+        progression: progression,
+        systems: systems,
+        worldId: 'verdant_grove',
+      );
+
+      expect(levelFive.accepted, isTrue);
+      expect(levelFive.systems.worldMasteryLevels['verdant_grove'], 5);
+      expect(levelFive.progression.nebula.compareTo(n(125)), 0);
+      expect(levelFive.progression.nebulaEarned.compareTo(n(25)), 0);
+      expect(
+        levelFive.systems.codexEntries,
+        contains('mastery:verdant_grove:5'),
+      );
+
+      final levelNineSystems = levelFive.systems.copyWith(
+        worldMasteryLevels: const {'verdant_grove': 9},
+      );
+      final levelTen = engine.upgradeWorldMastery(
+        progression: levelFive.progression.copyWith(nebula: n(100)),
+        systems: levelNineSystems,
+        worldId: 'verdant_grove',
+      );
+
+      expect(levelTen.accepted, isTrue);
+      expect(levelTen.systems.worldMasteryLevels['verdant_grove'], 10);
+      expect(levelTen.progression.nebula.compareTo(n(100)), 0);
+      expect(levelTen.progression.nebulaEarned.compareTo(n(125)), 0);
+      expect(
+        levelTen.systems.codexEntries,
+        contains('mastery:verdant_grove:10'),
+      );
+    });
+
+    test('mastery applies stacked discounts with a forty percent cap', () {
+      final progression = ProgressionState.initial.copyWith(
+        defeatedBosses: const {'verdant_guardian'},
+        nebula: n(60),
+      );
+      final systems = LegacySystemsState.initial.copyWith(
+        worldMasteryLevels: const {'verdant_grove': 9},
+        discoveredSecrets: const {'whispering_hollow'},
+        homeBaseLevel: 20,
+        equippedRelics: const {
+          'verdant_guardian',
+          'crystal_golem',
+          'ember_dragon',
+          'nebula_titan',
+        },
+      );
+      final result = engine.upgradeWorldMastery(
+        progression: progression,
+        systems: systems,
+        worldId: 'verdant_grove',
+      );
+
+      expect(result.accepted, isTrue);
+      // Base cost 100, capped discount 40%, exact final cost 60.
+      expect(result.progression.nebula.compareTo(n(100)), 0);
+    });
+
     test('secret discovery requires its world unlock and guess threshold', () {
       final progression = ProgressionState.initial.copyWith(
         correctGuesses: 150,
