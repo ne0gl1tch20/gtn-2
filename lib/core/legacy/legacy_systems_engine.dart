@@ -838,7 +838,8 @@ class LegacySystemsEngine {
         continue;
       }
       final dependencies = (item['dependencies']! as List<Object?>).cast<String>();
-      if (progression.prestigeResets < (item['minPrestige']! as int) ||
+      if (playerLevel < (item['minLevel']! as int) ||
+          progression.prestigeResets < (item['minPrestige']! as int) ||
           progression.correctGuesses < (item['minCorrect']! as int) ||
           progression.bestStreak < (item['minStreak']! as int) ||
           !dependencies.every(discovered.contains)) {
