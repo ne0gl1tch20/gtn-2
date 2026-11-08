@@ -235,7 +235,7 @@ class _GameHomePageState extends State<GameHomePage> {
     if (updated != _progression) {
       final profile = _invisibleTraitEngine.observeProgression(
         updated.legacySystems.adaptiveTraitProfile,
-        prestigeDelta: updated.prestigeResets - _progression.prestigeResets,
+        prestigeDelta: _progression.prestigeResets,
         ultraDelta: updated.ultraResets - _progression.ultraResets,
       );
       updated = updated.copyWith(
@@ -243,7 +243,7 @@ class _GameHomePageState extends State<GameHomePage> {
       );
       setState(() {
         _progression = updated;
-        _game = _engine.newGame();
+        _game = _newGameWithAdaptiveTarget(_engine.newGame());
         _message = 'Ultra reset complete! A new run begins.';
       });
       await _persist();
@@ -454,7 +454,7 @@ class _GameHomePageState extends State<GameHomePage> {
     }
     if (action == '/reset') {
       setState(() {
-        _game = _engine.newGame();
+        _game = _newGameWithAdaptiveTarget(_engine.newGame());
         _progression = ProgressionState.initial;
         _gamesWon = 0;
         _message = 'Developer reset completed.';
@@ -530,7 +530,7 @@ class _GameHomePageState extends State<GameHomePage> {
       _progression = progression;
       if (oldRange != newRange) {
         _engine = GameEngine(maximum: 100 * newRange);
-        _game = _engine.newGame();
+        _game = _newGameWithAdaptiveTarget(_engine.newGame());
         _message = 'Hardcore range changed. A fresh round is ready.';
       }
     });
@@ -620,8 +620,8 @@ class _GameHomePageState extends State<GameHomePage> {
         );
         final adaptiveDecision = _invisibleTraitEngine.evaluate(
           profile: adaptiveProfile,
-          prestigeCount: beforeGuess.prestigeResets,
-          ultraCount: beforeGuess.ultraResets,
+          prestigeCount: adaptiveProfile.prestigesObserved,
+          ultraCount: adaptiveProfile.ultrasObserved,
           currentStreak: afterReward.currentStreak,
         );
         rangeScoutActive = rangeScoutActive ||
@@ -746,7 +746,7 @@ class _GameHomePageState extends State<GameHomePage> {
 
   Future<void> _newGame() async {
     setState(() {
-      _game = _engine.newGame();
+      _game = _newGameWithAdaptiveTarget(_engine.newGame());
       _message = 'New round! Guess a number between ${_game.minimum} and ${_game.maximum}.';
       _controller.clear();
     });
