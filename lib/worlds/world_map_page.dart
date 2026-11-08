@@ -594,8 +594,8 @@ class _WorldRoutesPainter extends CustomPainter {
           ..strokeWidth = 4
           ..strokeCap = StrokeCap.round
           ..style = PaintingStyle.stroke;
-        final start = points[i] + const Offset(0, 28);
-        final end = points[i] + const Offset(0, 83);
+        final start = points[i];
+        final end = points[i] + const Offset(38, 52);
         canvas.drawLine(start, end, secretPaint);
         canvas.drawCircle(
           end,
