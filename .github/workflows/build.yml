@@ -106,7 +106,7 @@ jobs:
   publish-debug-latest:
     name: Publish Android and Windows debug-latest
     needs: [android, windows]
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') && vars.GTN1_FULL_PORT_VERIFIED == 'true'
+    if: false # Re-enable only after the GTN1 full-port verification gate passes.
     runs-on: ubuntu-latest
     permissions:
       contents: write
