@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 import '../core/game/difficulty_rules.dart';
+import '../creative/creative_mode_page.dart';
 import '../data/saves/save_data.dart';
 import '../data/saves/save_storage.dart';
 import '../settings/game_settings.dart';
@@ -218,6 +219,15 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
         _ => '🎮',
       };
 
+  Future<void> _openCreativeMode(int slot) async {
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (_) => CreativeModePage(slot: slot),
+      ),
+    );
+    _refreshPreviews();
+  }
+
   Future<void> _duplicate(int sourceSlot) async {
     final emptySlots = <int>[];
     for (var slot = 1; slot <= SaveStorage.maxSaveSlots; slot++) {
@@ -362,6 +372,7 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
                           enabled: _switching == null && _working == null && snapshot.connectionState == ConnectionState.done,
                           onSelected: (action) {
                             switch (action) {
+                              case 'creative': _openCreativeMode(slot);
                               case 'create': _create(slot);
                               case 'profile': _editProfile(slot);
                               case 'duplicate': _duplicate(slot);
@@ -372,6 +383,7 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
                           itemBuilder: (context) => [
                             if (save == null) const PopupMenuItem(value: 'create', child: Text('Create save')),
                             if (save != null) const PopupMenuItem(value: 'profile', child: Text('Edit profile')),
+                            if (save != null) const PopupMenuItem(value: 'creative', child: Text('Creative Mode')),
                             if (save != null) const PopupMenuItem(value: 'duplicate', child: Text('Duplicate')),
                             const PopupMenuItem(value: 'restore', child: Text('Restore backup')),
                             if (save != null) const PopupMenuItem(value: 'reset', child: Text('Reset slot')),
