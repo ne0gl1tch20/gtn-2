@@ -145,6 +145,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
           _stakeSection(),
           _dailySection(),
           _lootSection(),
+          _automationSection(),
           _challengeSection(),
           _worldCodexSection(),
           _musicSection(),
@@ -524,6 +525,64 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
                     : null,
                 child: const Text('Open'),
               ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _automationSection() {
+    final ownedBots = const ['auto_clicker_basic', 'bot_byte', 'bot_pixel']
+        .where((id) => (_progression.nebulaItems[id] ?? 0) > 0)
+        .toList();
+    final hasBot = ownedBots.isNotEmpty;
+    final sharedMemory = (_progression.nebulaItems['bot_logic_upgrade'] ?? 0) > 0;
+    return Card(
+      child: ExpansionTile(
+        leading: const Icon(Icons.smart_toy_rounded),
+        title: const Text('Auto Clicker & bot team'),
+        subtitle: Text(
+          hasBot
+              ? '${_systems.autoClickerActive ? 'Running' : 'Paused'} · ${ownedBots.length} bot(s)'
+              : 'Not purchased',
+        ),
+        children: [
+          SwitchListTile(
+            title: const Text('Automation'),
+            subtitle: Text(
+              hasBot
+                  ? 'Bots use real game feedback and take turns guessing.'
+                  : 'Buy Auto Clicker in the Nebula Shop to unlock this control.',
+            ),
+            value: _systems.autoClickerActive,
+            onChanged: hasBot
+                ? (active) => _saveSystems(
+                      _systems.copyWith(autoClickerActive: active),
+                    )
+                : null,
+          ),
+          ListTile(
+            title: const Text('Owned bots'),
+            subtitle: Text(ownedBots.isEmpty ? 'None' : ownedBots.join(', ')),
+          ),
+          ListTile(
+            title: const Text('Bot speed'),
+            subtitle: Text('${_systems.autoClickerSpeed.toStringAsFixed(2)}× base speed'),
+          ),
+          ListTile(
+            title: const Text('Memory mode'),
+            subtitle: Text(sharedMemory ? 'Shared Memory enabled' : 'Independent bot memory'),
+          ),
+          ListTile(
+            title: const Text('Bot guesses'),
+            subtitle: Text(
+              '${_systems.botTotalGuesses} total · ${_systems.botCorrectGuesses} correct · ${_systems.botIncorrectGuesses} misses',
+            ),
+          ),
+          if (_systems.lastBotGuess != null)
+            ListTile(
+              title: Text('Last guess: ${_systems.lastBotGuess}'),
+              subtitle: Text('${_systems.lastBotId ?? 'Bot'} · ${_systems.lastBotFeedback ?? 'No feedback'}'),
             ),
         ],
       ),
