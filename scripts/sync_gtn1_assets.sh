@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-SOURCE_ROOT="${1:-gtn1-source/app/src/main/assets}"
+GTN1_ROOT="${1:-gtn1-source}"
+SOURCE_ROOT="$GTN1_ROOT/app/src/main/assets"
 FONT_SOURCE="$SOURCE_ROOT/fonts"
 WEB_SOURCE="$SOURCE_ROOT/web-play"
 FONT_DEST="assets/fonts"
@@ -15,6 +16,11 @@ required_fonts=(
 )
 
 mkdir -p "$FONT_DEST" "$IMAGE_DEST"
+if [[ ! -s "$GTN1_ROOT/GTN_APP_LOGO.png" ]]; then
+  echo "Missing canonical GTN1 logo: $GTN1_ROOT/GTN_APP_LOGO.png" >&2
+  exit 1
+fi
+cp "$GTN1_ROOT/GTN_APP_LOGO.png" "assets/gtn1/gtn-app-logo.png"
 for font in "${required_fonts[@]}"; do
   if [[ ! -s "$FONT_SOURCE/$font" ]]; then
     echo "Missing required GTN1 font: $FONT_SOURCE/$font" >&2
@@ -31,7 +37,7 @@ if [[ ! -d "$WEB_SOURCE" ]]; then
   exit 1
 fi
 
-image_count=0
+image_count=1
 while IFS= read -r -d '' file; do
   relative="${file#"$WEB_SOURCE"/}"
   destination="$IMAGE_DEST/$relative"
