@@ -142,6 +142,33 @@ void main() {
     expect(GuessEconomyRules.moneyEarningMultiplier(state).toString(), '14');
   });
 
+  test('Prestige Luck Charm adds five percentage points to critical chance', () {
+    expect(
+      GuessEconomyRules.criticalChance(0, prestigeLuckCharmOwned: true),
+      0.10,
+    );
+    expect(
+      GuessEconomyRules.criticalChance(100, prestigeLuckCharmOwned: true),
+      1.0,
+    );
+  });
+
+  test('Infinite Singularity doubles the correct-guess Money reward', () {
+    final reward = GuessEconomyRules.correctGuessReward(
+      rangeMaximum: 100,
+      currentStreak: 0,
+      rewardMultiplierLevel: 0,
+      hasTalentReward: false,
+      isCritical: false,
+      difficultyId: 'classic',
+      mutatorMultiplier: BigNumber.fromInt(1),
+      traitMultiplier: BigNumber.fromInt(1),
+      permanentMoneyMultiplier: BigNumber.fromInt(1),
+      infiniteSingularityOwned: true,
+    );
+    expect(reward.toString(), '20000');
+  });
+
   test('critical chance starts at five percent and adds one percent per level', () {
     expect(GuessEconomyRules.criticalChance(0), 0.05);
     expect(GuessEconomyRules.criticalChance(5), 0.10);
