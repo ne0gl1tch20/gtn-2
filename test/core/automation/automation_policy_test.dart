@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:gtn_2/core/automation/guessing_bot.dart';
 import 'package:gtn_2/core/automation/bot_team.dart';
+import 'package:gtn_2/core/automation/guessing_bot.dart';
 import 'package:gtn_2/core/automation/offline_earnings_policy.dart';
 
 void main() {
