@@ -19,7 +19,7 @@ class SaveStorage {
 
   final int slot;
   final File _file;
-  Future<void> _pendingWrite = Future<void>.value();
+  static final Map<String, Future<void>> _fileQueues = {};
 
   static Future<SaveStorage> inApplicationDocuments({int slot = 1}) async {
     final directory = await getApplicationDocumentsDirectory();
@@ -92,7 +92,7 @@ class SaveStorage {
     await candidate.rename(destination.path);
   }
 
-  Future<SaveData?> load() async {
+  Future<SaveData?> load() => _enqueue(() async {
     final primary = await _readSave(_file);
     if (primary != null) return primary;
 
@@ -113,10 +113,10 @@ class SaveStorage {
       return backupSave;
     }
     return null;
-  }
+  });
 
-  Future<bool> hasBackup() async =>
-      await _readSave(File('${_file.path}.bak')) != null;
+  Future<bool> hasBackup() => _enqueue(() async =>
+      await _readSave(File('${_file.path}.bak')) != null);
 
   Future<bool> duplicateTo(int targetSlot) => _enqueue(() async {
     final target = SaveStorage(directory: _file.parent, slot: targetSlot);
@@ -205,13 +205,15 @@ class SaveStorage {
 
   Future<T> _enqueue<T>(Future<T> Function() operation) {
     final completer = Completer<T>();
-    _pendingWrite = _pendingWrite.catchError((Object _) {}).then((_) async {
+    final previous = _fileQueues[_file.path] ?? Future<void>.value();
+    final next = previous.catchError((Object _) {}).then((_) async {
       try {
         completer.complete(await operation());
       } catch (error, stackTrace) {
         completer.completeError(error, stackTrace);
       }
     });
+    _fileQueues[_file.path] = next;
     return completer.future;
   }
 
