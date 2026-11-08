@@ -424,11 +424,11 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
     return _progression;
   }
 
-  Future<void> _setAutomationActive(bool active) async {
+  Future<ProgressionState> _setAutomationActive(bool active) async {
     final hasBot = NebulaShopCatalog.botIds.any(
       (id) => (_progression.nebulaItems[id] ?? 0) > 0,
     );
-    if (!hasBot) return;
+    if (!hasBot) return _progression;
     setState(() {
       _progression = _progression.copyWith(
         legacySystems: _progression.legacySystems.copyWith(
@@ -438,6 +438,7 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
     });
     await _persist();
     _scheduleAutoClicker();
+    return _progression;
   }
 
   void _scheduleAutoClicker() {
@@ -512,6 +513,7 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
         builder: (_) => NebulaShopPage(
           progression: _progression,
           onPurchase: _purchaseNebulaItem,
+          onAutomationChanged: _setAutomationActive,
         ),
       ),
     );
