@@ -32,6 +32,7 @@ import 'shop/nebula_shop_page.dart';
 import 'shop/upgrade_catalog.dart';
 import 'shop/upgrade_shop_page.dart';
 import 'worlds/world_boss_catalog.dart';
+import 'worlds/world_boss_battle_engine.dart';
 import 'worlds/world_map_page.dart';
 
 Future<void> main() async {
@@ -123,6 +124,7 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
     );
   }
   final ProgressionEngine _progressionEngine = const ProgressionEngine();
+  final WorldBossBattleEngine _worldBossBattleEngine = const WorldBossBattleEngine();
   final LegacySystemsEngine _legacySystemsEngine = const LegacySystemsEngine();
   final InvisibleTraitEngine _invisibleTraitEngine = const InvisibleTraitEngine();
   final BotTeam _botTeam = BotTeam();
@@ -624,12 +626,26 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
     return _progression;
   }
 
+  Future<ProgressionState> _worldBossAction(String worldId, String action) async {
+    final result = action == 'select_world'
+        ? _worldBossBattleEngine.selectWorld(_progression, worldId)
+        : _worldBossBattleEngine.toggleBossBattle(_progression, worldId);
+    if (result.accepted) {
+      setState(() {
+        _progression = result.progression;
+        _message = result.message;
+      });
+      await _persist();
+    }
+    return _progression;
+  }
+
   Future<void> _openWorldMap() async {
     await Navigator.of(context).push<void>(
       MaterialPageRoute<void>(
         builder: (_) => WorldMapPage(
           progression: _progression,
-          onAttack: _attackWorldBoss,
+          onAction: _worldBossAction,
         ),
       ),
     );
@@ -1096,16 +1112,11 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
           activeSeasonId: _currentSeasonId(),
         );
         var nextProgression = afterReward.copyWith(legacySystems: systemsAfter);
-        if (systemsAfter.endlessRiftActive) {
-          final riftResult = correct
-              ? _legacySystemsEngine.attackEndlessRiftBoss(nextProgression, systemsAfter)
-              : _legacySystemsEngine.recordEndlessRiftMiss(nextProgression, systemsAfter);
-          if (riftResult.accepted) {
-            nextProgression = riftResult.progression.copyWith(
-              legacySystems: riftResult.systems,
-            );
-          }
-        }
+        final bossResult = _worldBossBattleEngine.recordGuess(
+          nextProgression,
+          correct: correct,
+        );
+        if (bossResult.accepted) nextProgression = bossResult.progression;
         _progression = nextProgression;
         if (isBot) {
           if (correct) {
