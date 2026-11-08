@@ -486,9 +486,28 @@ class _WorldMapPageState extends State<WorldMapPage> {
               ),
               const SizedBox(height: 4),
               Text(
-                active ? 'Phase $phase / 3 · Misses this phase: $misses'
-                    : 'Correct guesses damage the active boss.',
+                'Phase $phase / 3 · Misses this phase: $misses',
                 style: theme.textTheme.bodySmall,
+              ),
+              Text(
+                AppLocalizations.text(
+                  'boss_battle_tip',
+                  'Phase 1: every 4 misses pushes back your progress. '
+                      'Phase 2: every 3 misses. Phase 3: every 2 misses.',
+                ),
+                style: theme.textTheme.bodySmall,
+              ),
+              Text(
+                active
+                    ? AppLocalizations.text(
+                        'boss_battle_active',
+                        'Battle active! Return to Play and guess the number '
+                            'to damage this boss.',
+                      )
+                    : 'Start the battle to make correct guesses damage this boss.',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: active ? theme.colorScheme.tertiary : null,
+                ),
               ),
               if (_state.legacySystems.endlessRiftActive)
                 Text('Endless Rift · Tier $riftTierLabel',
