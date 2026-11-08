@@ -6,6 +6,7 @@ void main() {
   testWidgets('shows the HTML-facing game dashboard controls',
       (WidgetTester tester) async {
     await tester.pumpWidget(const GtnApp());
+    await tester.pumpAndSettle();
     expect(find.text('Guess The Number'), findsOneWidget);
     expect(find.text('YOUR WALLET'), findsOneWidget);
     expect(find.text('Play'), findsOneWidget);
