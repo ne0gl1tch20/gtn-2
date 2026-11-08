@@ -302,6 +302,7 @@ void main() {
         lastBotFeedback: 'TOO_HIGH',
         lastBotId: 'bot_byte',
         lastSaveTimestamp: 1794100000000,
+        timeTravelPenaltyUntil: 1794186400000,
       );
       final restored = LegacySystemsState.fromJson(systems.toJson());
       expect(restored.botActionSequence, 9);
@@ -309,6 +310,7 @@ void main() {
       expect(restored.lastBotFeedback, 'TOO_HIGH');
       expect(restored.lastBotId, 'bot_byte');
       expect(restored.lastSaveTimestamp, 1794100000000);
+      expect(restored.timeTravelPenaltyUntil, 1794186400000);
       expect(restored.autoClickerActive, isTrue);
       expect(restored.autoClickerSpeed, 1.5);
     });
