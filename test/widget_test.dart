@@ -13,7 +13,7 @@ void main() {
     await tester.scrollUntilVisible(
       find.text('MAKE YOUR GUESS'),
       200,
-      scrollable: find.descendant(of: find.byType(ListView).first, matching: find.byType(Scrollable)).first,
+      scrollable: find.ancestor(of: find.text('YOUR WALLET'), matching: find.byType(Scrollable)).first,
     );
     await tester.pumpAndSettle();
     expect(find.text('MAKE YOUR GUESS'), findsOneWidget);
