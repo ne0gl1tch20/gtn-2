@@ -16,8 +16,13 @@ class GuessEconomyRules {
   static const int minimumGuessReward = 10;
   static const double criticalMultiplier = 5.0;
 
-  static double criticalChance(int precisionUpgradeLevel) =>
-      0.05 + precisionUpgradeLevel * 0.01;
+  static double criticalChance(
+    int precisionUpgradeLevel, {
+    bool prestigeLuckCharmOwned = false,
+  }) =>
+      (0.05 + precisionUpgradeLevel * 0.01 +
+              (prestigeLuckCharmOwned ? 0.05 : 0.0))
+          .clamp(0.0, 1.0);
 
   static double streakMultiplier(int streak) => 1.0 + streak * 0.1;
 
