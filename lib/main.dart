@@ -128,6 +128,7 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
   final BotTeam _botTeam = BotTeam();
   Timer? _autoClickerTimer;
   bool _autoClickerTickRunning = false;
+  bool _resumeCatchUpPending = false;
   ProgressionState _progression = ProgressionState.initial;
   GameSettings _settings = GameSettings.initial;
   final TextEditingController _controller = TextEditingController();
@@ -157,6 +158,10 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
 
   Future<void> _resumeAutoClicker() async {
     if (!mounted || _isLoading) return;
+    if (_autoClickerTickRunning) {
+      _resumeCatchUpPending = true;
+      return;
+    }
     final systems = _progression.legacySystems;
     final now = DateTime.now().millisecondsSinceEpoch;
     final savedAt = systems.lastSaveTimestamp;
@@ -223,7 +228,6 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
             timeTravelPenaltyUntil: clockCheck.timeTravelPenaltyUntil,
           ),
         );
-        shouldPersistOfflineEarnings = true;
         final elapsedSeconds = savedAt > 0 && !timeTravelDetected
             ? ((now - savedAt) ~/ 1000)
             : 0;
@@ -234,7 +238,6 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
                 elapsedSeconds: elapsedSeconds,
               );
         if (offlineEarnings.compareTo(BigNumber.fromInt(0)) > 0) {
-          shouldPersistOfflineEarnings = true;
           restoredProgression = restoredProgression.copyWith(
             money: restoredProgression.money + offlineEarnings,
             moneyEarned: restoredProgression.moneyEarned + offlineEarnings,
@@ -242,6 +245,7 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
         }
         final restoredEngine = _engineFor(restoredProgression, save.settings);
         await AppLocalizations.load(save.settings.localeCode);
+        if (!mounted) return;
         setState(() {
           _engine = restoredEngine;
           _game = _engine.restore(
@@ -261,6 +265,7 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
                   ? 'Welcome back! Your Auto Clicker earned $offlineEarnings Money while you were away.'
                   : 'Welcome back! Your saved game is ready.';
         });
+        shouldPersistOfflineEarnings = true;
       }
     } on Exception {
       if (mounted) {
@@ -536,7 +541,7 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
     final purchasedBots = NebulaShopCatalog.botIds
         .where((id) => (_progression.nebulaItems[id] ?? 0) > 0)
         .toSet();
-    if (purchasedBots.isEmpty) return;
+    if (purchasedBots.isEmpty) purchasedBots.add('auto_clicker_basic');
     final delay = _botTeam.delayMillis(
       active: true,
       speed: systems.autoClickerSpeed,
@@ -552,7 +557,12 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
         await _runAutoClickerTick();
       } finally {
         _autoClickerTickRunning = false;
-        _scheduleAutoClicker();
+        if (_resumeCatchUpPending) {
+          _resumeCatchUpPending = false;
+          unawaited(_resumeAutoClicker());
+        } else {
+          _scheduleAutoClicker();
+        }
       }
     });
   }
@@ -572,6 +582,7 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
     final purchasedBots = NebulaShopCatalog.botIds
         .where((id) => (_progression.nebulaItems[id] ?? 0) > 0)
         .toSet();
+    if (purchasedBots.isEmpty) purchasedBots.add('auto_clicker_basic');
     final action = _botTeam.nextAction(
       purchasedBots: purchasedBots,
       sharedMemory: (_progression.nebulaItems['bot_logic_upgrade'] ?? 0) > 0,
