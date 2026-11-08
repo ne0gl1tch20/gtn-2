@@ -160,23 +160,31 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
     final systems = _progression.legacySystems;
     final now = DateTime.now().millisecondsSinceEpoch;
     final savedAt = systems.lastSaveTimestamp;
-    if (savedAt > 0 && now < savedAt) {
+    final clockCheck = ClockRollbackPolicy.check(
+      nowMillis: now,
+      lastSaveTimestamp: savedAt,
+      timeTravelPenaltyUntil: systems.timeTravelPenaltyUntil,
+      autoClickerActive: systems.autoClickerActive,
+    );
+    if (clockCheck.detected) {
       setState(() {
         _progression = _progression.copyWith(
           legacySystems: systems.copyWith(
-            autoClickerActive: false,
-            lastSaveTimestamp: now,
-            timeTravelPenaltyUntil: now + _timeTravelPenaltyMillis,
+            autoClickerActive: clockCheck.autoClickerActive,
+            lastSaveTimestamp: clockCheck.lastSaveTimestamp,
+            timeTravelPenaltyUntil: clockCheck.timeTravelPenaltyUntil,
           ),
         );
         _message = 'Clock rollback detected. Auto Clicker paused for 24 hours.';
       });
       await _persist();
-    } else if (systems.autoClickerActive && savedAt > 0) {
-      final offlineEarnings = OfflineEarningsPolicy.calculate(
-        autoClickerWasActive: true,
-        elapsedSeconds: (now - savedAt) ~/ 1000,
-      );
+    } else {
+      final offlineEarnings = systems.autoClickerActive && savedAt > 0
+          ? OfflineEarningsPolicy.calculate(
+              autoClickerWasActive: true,
+              elapsedSeconds: (now - savedAt) ~/ 1000,
+            )
+          : BigNumber.fromInt(0);
       if (offlineEarnings.compareTo(BigNumber.fromInt(0)) > 0) {
         setState(() {
           _progression = _progression.copyWith(
@@ -185,8 +193,8 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
           );
           _message = 'Auto Clicker earned $offlineEarnings Money while the app was away.';
         });
-        await _persist();
       }
+      await _persist();
     }
     _scheduleAutoClicker();
   }
