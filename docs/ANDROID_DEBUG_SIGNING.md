@@ -46,3 +46,14 @@ The pull-request validation workflow remains unsigned because it only compiles/t
 ## Key rotation
 
 Do not regenerate the key after the first signed release. Keep at least two secure backups. Losing the keystore means existing signed installs cannot receive in-place updates from a newly signed APK.
+
+## Downloaded APK certificate verification
+
+The updater requires `signingCertificateSha256` in the Android release manifest. Before opening Android's package installer, a native Android MethodChannel:
+
+1. Reads the signer certificate from the downloaded APK using Android's PackageManager.
+2. Reads the signer certificate from the currently installed GTN2 package.
+3. Requires both SHA-256 fingerprints to match the manifest fingerprint.
+4. Rejects missing, malformed, multiple-signer, or mismatched certificates.
+
+This is deliberately fail-closed. A build signed with a different key cannot update an existing installation. The first install using the permanent key may therefore require uninstalling an older debug-key-signed build first; export/back up save data before doing that.
