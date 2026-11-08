@@ -615,6 +615,7 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
       speed: systems.autoClickerSpeed,
       speedTalentOne: systems.talents.contains('talent_speed_1'),
       speedTalentTwo: systems.talents.contains('talent_speed_2'),
+      prestigeAutoSpeed: _progression.prestigeShopPurchases.contains('prestige_auto_speed'),
       speedMutator: systems.activeMutators.contains('mut_speed'),
     );
     if (action == null) return;
