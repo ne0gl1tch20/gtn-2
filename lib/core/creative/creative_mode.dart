@@ -225,8 +225,18 @@ class CreativeModeSave {
       if (version is! int || version < 1 || version > currentSchemaVersion) {
         return null;
       }
+      final name = decoded['name'] ?? 'My Creative Mode';
+      final enabled = decoded['enabled'] ?? false;
+      final rangeMin = decoded['rangeMin'] ?? 1;
+      final rangeMax = decoded['rangeMax'] ?? 100;
       final effectsJson = decoded['effects'] ?? const [];
-      if (effectsJson is! List) return null;
+      if (name is! String ||
+          enabled is! bool ||
+          rangeMin is! int ||
+          rangeMax is! int ||
+          effectsJson is! List) {
+        return null;
+      }
       final effects = version == 1
           ? <CreativeModeEffect>[]
           : effectsJson
@@ -237,13 +247,10 @@ class CreativeModeSave {
       final activeRunJson = decoded['activeRun'];
       final migrated = CreativeModeSave(
         schemaVersion: currentSchemaVersion,
-        name: decoded['name'] is String
-            ? decoded['name'] as String
-            : 'My Creative Mode',
-        enabled: decoded['enabled'] == true,
-        rangeMin: decoded['rangeMin'] is int ? decoded['rangeMin'] as int : 1,
-        rangeMax:
-            decoded['rangeMax'] is int ? decoded['rangeMax'] as int : 100,
+        name: name,
+        enabled: enabled,
+        rangeMin: rangeMin,
+        rangeMax: rangeMax,
         effects: effects,
         activeRun: version < 3
             ? null
