@@ -38,9 +38,13 @@ flutter:
     - family: Inter
       fonts:
         - asset: assets/fonts/Inter-VariableFont_opsz,wght.ttf
+        - asset: assets/fonts/Inter-Italic-VariableFont_opsz,wght.ttf
+          style: italic
     - family: SpaceGrotesk
       fonts:
         - asset: assets/fonts/SpaceGrotesk-VariableFont_wght.ttf
     - family: JetBrainsMono
       fonts:
         - asset: assets/fonts/JetBrainsMono-VariableFont_wght.ttf
+        - asset: assets/fonts/JetBrainsMono-Italic-VariableFont_wght.ttf
+          style: italic
