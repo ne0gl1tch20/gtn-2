@@ -153,7 +153,7 @@ class LuaScriptCatalogRepository {
 
   Future<String> readScript(LuaScriptEntry entry) async {
     final source =
-        await _loadAsset('assets/gtn1/scripts/' + entry.file);
+        await _loadAsset('assets/gtn1/scripts/${entry.file}');
     if (source.isEmpty || source.length > LuaSandbox.maxSourceChars) {
       throw const FormatException('Lua script source is empty or too large.');
     }
@@ -288,17 +288,13 @@ void _luaWorker(List<Object?> request) {
       state.getField(-1, field);
       if (state.type(-1) != LuaType.luaString) {
         state.pop(1);
-        throw FormatException('Lua activity field "' + field + '" must be a string.');
+        throw FormatException('Lua activity field "$field" must be a string.');
       }
       final value = (state.toStr(-1) ?? '').trim();
       state.pop(1);
       if (value.isEmpty || value.length > maxLength) {
         throw FormatException(
-          'Lua activity field "' +
-              field +
-              '" must be nonblank and at most ' +
-              maxLength.toString() +
-              ' characters.',
+          'Lua activity field "$field" must be nonblank and at most $maxLength characters.',
         );
       }
       return value;
@@ -432,7 +428,7 @@ class LuaEngine {
       final scripts = await _repository.listScripts();
       final matching = scripts.where((script) => script.id == scriptId);
       if (matching.isEmpty) {
-        return LuaStartResult.rejected('Unknown script ID: ' + scriptId);
+        return LuaStartResult.rejected('Unknown script ID: $scriptId');
       }
       final entry = matching.first;
       if (entry.hostApiVersion != hostApiVersion) {
@@ -454,9 +450,7 @@ class LuaEngine {
         throw const FormatException('Activity answer key is invalid.');
       }
       final instanceId =
-          DateTime.now().microsecondsSinceEpoch.toString() +
-              '-' +
-              _random.nextInt(1 << 24).toString();
+          '${DateTime.now().microsecondsSinceEpoch}-${_random.nextInt(1 << 24)}';
       final activity = LuaActivityDefinition(
         id: scriptId,
         title: payload['title'] as String,
@@ -473,15 +467,15 @@ class LuaEngine {
       _lastError = null;
       _diagnostics = [
         ..._diagnostics,
-        ...result.logs.map((line) => '[lua:' + scriptId + '] ' + line),
-        '[lua:' + scriptId + '] Activity started.',
+        ...result.logs.map((line) => '[lua:$scriptId] $line'),
+        '[lua:$scriptId] Activity started.',
       ].take(200).toList(growable: false);
       return LuaStartResult.started(activity);
     } catch (error) {
       _lastError = error.toString();
       _diagnostics = [
         ..._diagnostics,
-        '[lua:' + scriptId + '] Activity rejected: ' + _lastError!,
+        '[lua:$scriptId] Activity rejected: $_lastError!',
       ].take(200).toList(growable: false);
       return LuaStartResult.rejected(_lastError!);
     } finally {
