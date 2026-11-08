@@ -735,6 +735,7 @@ class _GuessInput extends StatelessWidget {
               children: [
                 Expanded(
                   child: TextField(
+                    key: const Key('guess-input'),
                     controller: controller,
                     enabled: enabled,
                     keyboardType: TextInputType.number,
