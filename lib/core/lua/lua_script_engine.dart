@@ -388,7 +388,6 @@ class LuaEngine {
   bool _starting = false;
   String? _lastError;
   bool _runtimeAvailable = false;
-  List<LuaScriptEntry> _cachedScripts = const [];
   List<String> _diagnostics = [];
 
   LuaActivityDefinition? currentActivity() => _activeActivity;
@@ -404,7 +403,6 @@ class LuaEngine {
 
   Future<List<LuaScriptEntry>> listScripts() async {
     final scripts = await _repository.listScripts();
-    _cachedScripts = scripts;
     _runtimeAvailable = scripts.isNotEmpty;
     return scripts;
   }
@@ -419,18 +417,14 @@ class LuaEngine {
 
   Future<String> executeConsoleCommand(String command) async {
     if (!kDebugMode) return 'Lua developer commands are disabled in release builds.';
-    final args = command.trim().split(RegExp(r'\\s+')).where((part) => part.isNotEmpty).toList();
+    final args = command.trim().split(RegExp(r'\s+')).where((part) => part.isNotEmpty).toList();
     if (args.isEmpty || args.first != '/lua') return 'Use /lua help.';
     switch (args.length > 1 ? args[1].toLowerCase() : 'help') {
       case 'help':
         return '/lua status | list | inspect <id> | run <id> | stop [instance-id] | logs | eval';
       case 'status':
         final current = status();
-        return 'Lua runtime: ' +
-            (current.runtimeAvailable ? 'ready' : 'unavailable') +
-            '; host API v' + current.hostApiVersion.toString() +
-            '; active instance: ' + (current.activeInstanceId ?? 'none') +
-            '; last error: ' + (current.lastError ?? 'none');
+        return "Lua runtime: ${current.runtimeAvailable ? 'ready' : 'unavailable'}; host API v${current.hostApiVersion}; active instance: ${current.activeInstanceId ?? 'none'}; last error: ${current.lastError ?? 'none'}";
       case 'list':
         final scripts = await listScripts();
         return scripts.isEmpty
@@ -461,7 +455,7 @@ class LuaEngine {
   }
 
   Future<LuaStartResult> startFeaturedActivity() async {
-    final scripts = await _repository.listScripts();
+    final scripts = await listScripts();
     final featured = scripts.where((entry) => entry.featured);
     if (featured.isEmpty) {
       return const LuaStartResult.rejected(
@@ -487,7 +481,7 @@ class LuaEngine {
     }
     _starting = true;
     try {
-      final scripts = await _repository.listScripts();
+      final scripts = await listScripts();
       final matching = scripts.where((script) => script.id == scriptId);
       if (matching.isEmpty) {
         return LuaStartResult.rejected('Unknown script ID: $scriptId');
