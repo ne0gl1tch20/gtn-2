@@ -308,7 +308,6 @@ class GameDashboardPage extends StatelessWidget {
                       Expanded(child: _Stat(Icons.military_tech_rounded,
                           progression.bestStreak.toString(), 'BEST', _purple,
                           panel, line, foreground, muted)),
-
                     ],
                   ),
                   const SizedBox(height: 12),
@@ -406,51 +405,6 @@ class GameDashboardPage extends StatelessWidget {
       ),
     );
   }
-}
-
-class _NavTab extends StatelessWidget {
-  const _NavTab(this.icon, this.label, this.selected, this.onTap);
-
-  final IconData icon;
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 2),
-        child: Material(
-          color: selected ? const Color(0x339B7CFF) : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
-          child: InkWell(
-            onTap: onTap,
-            borderRadius: BorderRadius.circular(12),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 11),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: selected
-                      ? _purple.withValues(alpha: .35)
-                      : Colors.transparent,
-                ),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(icon, size: 17, color: selected ? _white : _muted),
-                  const SizedBox(width: 6),
-                  Text(label, style: TextStyle(
-                    color: selected ? _white : _muted,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w900,
-                  )),
-                ],
-              ),
-            ),
-          ),
-        ),
-      );
 }
 
 class _MoreMenuPage extends StatelessWidget {
