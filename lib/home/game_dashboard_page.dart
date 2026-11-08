@@ -270,7 +270,7 @@ class GameDashboardPage extends StatelessWidget {
                                 Icon(Icons.circle, color: _green, size: 8),
                                 SizedBox(width: 7),
                                 Text(
-                                  'YOUR NEXT NUMBER IS WAITING',
+                                  'CURRENT RUN',
                                   style: TextStyle(
                                     color: Color(0xFF9BA5C4),
                                     fontSize: 9,
@@ -281,7 +281,7 @@ class GameDashboardPage extends StatelessWidget {
                               ],
                             ),
                             const SizedBox(height: 16),
-                            const Text('YOUR SECRET NUMBER RANGE',
+                            const Text('Find your secret number',
                                 style: TextStyle(
                                   color: Color(0xFF9BA5C4),
                                   fontSize: 9,
@@ -298,7 +298,7 @@ class GameDashboardPage extends StatelessWidget {
                                   letterSpacing: -2,
                                 )),
                             const SizedBox(height: 7),
-                            const Text('FIND THE HIDDEN NUMBER',
+                            const Text('Make your move.',
                                 style: TextStyle(
                                   color: _cyan,
                                   fontSize: 10,
@@ -333,10 +333,7 @@ class GameDashboardPage extends StatelessWidget {
                       Expanded(child: _Stat(Icons.local_fire_department_rounded,
                           progression.currentStreak.toString(), 'STREAK', _green,
                           panel, line, foreground, muted)),
-                      const SizedBox(width: 6),
-                      Expanded(child: _Stat(Icons.military_tech_rounded,
-                          progression.bestStreak.toString(), 'BEST', _purple,
-                          panel, line, foreground, muted)),
+
                     ],
                   ),
                   const SizedBox(height: 12),
@@ -358,7 +355,7 @@ class GameDashboardPage extends StatelessWidget {
                   Row(
                     children: [
                       Expanded(
-                        child: Text('YOUR JOURNEY',
+                        child: Text('MORE TO EXPLORE',
                             style: TextStyle(
                               color: muted,
                               fontSize: 11,
@@ -366,7 +363,7 @@ class GameDashboardPage extends StatelessWidget {
                               letterSpacing: 2,
                             )),
                       ),
-                      Text('Explore the game',
+                      Text('Open a section',
                           style: TextStyle(color: muted, fontSize: 11)),
                     ],
                   ),
@@ -723,7 +720,7 @@ class _GuessInput extends StatelessWidget {
           children: [
             Row(
               children: [
-                Text('MAKE YOUR GUESS',
+                Text('YOUR GUESS',
                     style: TextStyle(
                       color: foreground,
                       fontSize: 11,
@@ -731,7 +728,7 @@ class _GuessInput extends StatelessWidget {
                       letterSpacing: 1.4,
                     )),
                 const Spacer(),
-                Text('${game.minimum} TO ${game.maximum}',
+                Text('WHOLE NUMBER',
                     style: TextStyle(
                       color: muted,
                       fontSize: 9,
