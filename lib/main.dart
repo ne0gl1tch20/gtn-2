@@ -616,6 +616,23 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
 
 
   Future<ProgressionState> _worldBossAction(String worldId, String action) async {
+    if (action == 'mastery') {
+      final masteryResult = _legacySystemsEngine.upgradeWorldMastery(
+        progression: _progression,
+        systems: _progression.legacySystems,
+        worldId: worldId,
+      );
+      if (masteryResult.accepted) {
+        setState(() {
+          _progression = masteryResult.progression.copyWith(
+            legacySystems: masteryResult.systems,
+          );
+          _message = masteryResult.message;
+        });
+        await _persist();
+      }
+      return _progression;
+    }
     final result = switch (action) {
       'secret' => _worldBossBattleEngine.discoverSecret(_progression, worldId),
       'unlock' => _worldBossBattleEngine.unlockWorld(_progression, worldId),
