@@ -60,6 +60,25 @@ if manifest.get("bundledGameCatalogCount") != 17:
 if manifest.get("bundledTraitAssetCount", 0) < 1300:
     fail("source manifest is missing the full trait asset bundle")
 
+try:
+    trait_manifest = json.loads(
+        (TRAITS / "catalog-manifest.json").read_text(encoding="utf-8")
+    )
+except (OSError, json.JSONDecodeError) as error:
+    fail(f"trait catalog manifest is invalid: {error}")
+
+entries = trait_manifest.get("traits")
+if trait_manifest.get("traitCount") != 320 or not isinstance(entries, list) or len(entries) != 320:
+    fail("trait catalog manifest must contain exactly 320 entries")
+ids = [entry.get("id") for entry in entries if isinstance(entry, dict)]
+if len(ids) != 320 or len(set(ids)) != 320:
+    fail("trait catalog manifest contains missing or duplicate stable IDs")
+for entry in entries:
+    for key in ("definitionPath", "rulesPath", "localizationPath", "iconPath"):
+        relative = entry.get(key)
+        if not isinstance(relative, str) or not (TRAITS / relative).is_file():
+            fail(f"trait manifest entry {entry.get('id')} is missing {key}")
+
 print(
     "GTN1 content verified: "
     f"{len(game_catalogs)} game catalogs, "
