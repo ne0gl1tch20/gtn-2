@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gtn_2/core/automation/bot_team.dart';
+import 'package:gtn_2/core/automation/clock_rollback_policy.dart';
 import 'package:gtn_2/core/automation/guessing_bot.dart';
 import 'package:gtn_2/core/automation/offline_earnings_policy.dart';
 
@@ -118,6 +119,52 @@ void main() {
         speedTalentTwo: false, speedMutator: false,
       )!;
       expect(shared.guess, 50);
+    });
+  });
+
+  group('GTN1 clock rollback protection', () {
+    test('backward clock disables automation for 24 hours', () {
+      const now = 1800000000000;
+      final result = ClockRollbackPolicy.check(
+        nowMillis: now,
+        lastSaveTimestamp: now + 90000,
+        timeTravelPenaltyUntil: 0,
+        autoClickerActive: true,
+      );
+      expect(result.detected, isTrue);
+      expect(result.differenceSeconds, 90);
+      expect(result.lastSaveTimestamp, now);
+      expect(result.timeTravelPenaltyUntil, now + 86400000);
+      expect(result.autoClickerActive, isFalse);
+    });
+
+    test('forward clock changes are accepted without a penalty', () {
+      const now = 1800000000000;
+      final result = ClockRollbackPolicy.check(
+        nowMillis: now,
+        lastSaveTimestamp: now - 3600000,
+        timeTravelPenaltyUntil: 0,
+        autoClickerActive: true,
+      );
+      expect(result.detected, isFalse);
+      expect(result.differenceSeconds, 0);
+      expect(result.lastSaveTimestamp, now);
+      expect(result.timeTravelPenaltyUntil, 0);
+      expect(result.autoClickerActive, isTrue);
+    });
+
+    test('preserves an existing penalty deadline when no rollback occurs', () {
+      const now = 1800000000000;
+      const penaltyUntil = now + 120000;
+      final result = ClockRollbackPolicy.check(
+        nowMillis: now,
+        lastSaveTimestamp: now,
+        timeTravelPenaltyUntil: penaltyUntil,
+        autoClickerActive: false,
+      );
+      expect(result.detected, isFalse);
+      expect(result.timeTravelPenaltyUntil, penaltyUntil);
+      expect(result.autoClickerActive, isFalse);
     });
   });
 
