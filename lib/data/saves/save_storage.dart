@@ -35,8 +35,11 @@ class SaveStorage {
 
   Future<void> save(SaveData data) {
     if (data.schemaVersion != SaveData.currentSchemaVersion ||
-        data.secret < 1 ||
-        data.secret > 100 ||
+        data.minimum < 1 ||
+        data.maximum > 500 ||
+        data.minimum > data.maximum ||
+        data.secret < data.minimum ||
+        data.secret > data.maximum ||
         data.attempts < 0 ||
         data.gamesWon < 0) {
       return Future<void>.error(
