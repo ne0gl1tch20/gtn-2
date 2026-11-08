@@ -235,7 +235,7 @@ class _GameHomePageState extends State<GameHomePage> {
     if (updated != _progression) {
       final profile = _invisibleTraitEngine.observeProgression(
         updated.legacySystems.adaptiveTraitProfile,
-        prestigeDelta: _progression.prestigeResets,
+        prestigeDelta: 0,
         ultraDelta: updated.ultraResets - _progression.ultraResets,
       );
       updated = updated.copyWith(
