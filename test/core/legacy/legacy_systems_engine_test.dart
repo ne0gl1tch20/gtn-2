@@ -33,25 +33,46 @@ void main() {
     test('requires parent talent, spends prestige and rejects duplicates', () {
       final progression = ProgressionState.initial.copyWith(prestige: n(10000));
       final systems = LegacySystemsState.initial;
-      final blocked = engine.buyTalent(progression, systems, 'talent_speed_2');
+      final blocked = engine.buyTalent(progression, systems, const TalentDefinition(id: 'talent_speed_2', cost: 500, requiredParentId: 'talent_speed_1'));
       expect(blocked.accepted, isFalse);
-      final first = engine.buyTalent(progression, systems, 'talent_speed_1');
+      final first = engine.buyTalent(progression, systems, const TalentDefinition(id: 'talent_speed_1', cost: 100));
       expect(first.accepted, isTrue);
       expect(first.progression.prestige.compareTo(n(9900)), 0);
       final duplicate = engine.buyTalent(
-        first.progression, first.systems, 'talent_speed_1',
+        first.progression, first.systems, const TalentDefinition(id: 'talent_speed_1', cost: 100),
       );
       expect(duplicate.accepted, isFalse);
       final second = engine.buyTalent(
-        first.progression, first.systems, 'talent_speed_2',
+        first.progression, first.systems, const TalentDefinition(id: 'talent_speed_2', cost: 500, requiredParentId: 'talent_speed_1'),
       );
       expect(second.accepted, isTrue);
       expect(second.progression.prestige.compareTo(n(9400)), 0);
     });
 
+    test('rejects malformed catalog definitions without mutating state', () {
+      final progression = ProgressionState.initial.copyWith(prestige: n(1000));
+      final emptyId = engine.buyTalent(
+        progression, LegacySystemsState.initial,
+        const TalentDefinition(id: '', cost: 100),
+      );
+      final nonPositiveCost = engine.buyTalent(
+        progression, LegacySystemsState.initial,
+        const TalentDefinition(id: 'invalid_cost', cost: 0),
+      );
+      final selfParent = engine.buyTalent(
+        progression, LegacySystemsState.initial,
+        const TalentDefinition(id: 'self_parent', cost: 100, requiredParentId: 'self_parent'),
+      );
+      expect(emptyId.accepted, isFalse);
+      expect(nonPositiveCost.accepted, isFalse);
+      expect(selfParent.accepted, isFalse);
+      expect(selfParent.progression.prestige, progression.prestige);
+      expect(selfParent.systems.talents, isEmpty);
+    });
+
     test('rejects purchases when prestige is insufficient', () {
       final result = engine.buyTalent(
-        ProgressionState.initial, LegacySystemsState.initial, 'talent_speed_1',
+        ProgressionState.initial, LegacySystemsState.initial, const TalentDefinition(id: 'talent_speed_1', cost: 100),
       );
       expect(result.accepted, isFalse);
       expect(result.progression.prestige.compareTo(n(0)), 0);
