@@ -44,7 +44,7 @@ if [[ ! -d "$WEB_SOURCE" ]]; then
   exit 1
 fi
 
-image_count=1
+image_count=0
 while IFS= read -r -d '' file; do
   relative="${file#"$WEB_SOURCE"/}"
   destination="$IMAGE_DEST/$relative"
