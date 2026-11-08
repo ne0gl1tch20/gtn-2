@@ -143,6 +143,8 @@ class _ArcadeDialogState extends State<_ArcadeDialog> {
   int _nextNumber = 1;
   bool _finished = false;
   bool _sequenceVisible = true;
+  bool _memorySubmitted = false;
+  bool _memoryCorrect = false;
   bool _reactionReady = false;
   bool _reactionFinished = false;
   int? _reactionTime;
@@ -232,7 +234,9 @@ class _ArcadeDialogState extends State<_ArcadeDialog> {
     } else if (widget.gameId == 'lucky_number' &&
         _chosenBox == _winningBox) {
       await widget.onReward(BigNumber.fromInt(1), BigNumber.fromInt(5000));
-    } else if (widget.gameId == 'memory_match' && _finished) {
+    } else if (widget.gameId == 'memory_match' &&
+        _memorySubmitted &&
+        _memoryCorrect) {
       await widget.onReward(BigNumber.fromInt(1), BigNumber.fromInt(10000));
     } else if (widget.gameId == 'number_rush' && _finished) {
       await widget.onReward(BigNumber.fromInt(1), BigNumber.fromInt(7500));
@@ -409,7 +413,7 @@ class _ArcadeDialogState extends State<_ArcadeDialog> {
                 _sequence.join('  '),
                 style: Theme.of(context).textTheme.headlineMedium,
               )
-            else if (!_finished) ...[
+            else if (!_memorySubmitted) ...[
               const Text('Enter the three digits in the same order.'),
               TextField(
                 controller: _input,
@@ -418,15 +422,18 @@ class _ArcadeDialogState extends State<_ArcadeDialog> {
               ),
               FilledButton(
                 onPressed: () => setState(() {
-                  _finished = _input.text.trim() == _sequence.join();
+                  _memoryCorrect = _input.text.trim() == _sequence.join();
+                  _memorySubmitted = true;
+                  _finished = true;
                 }),
                 child: const Text('Submit'),
               ),
-              if (_input.text.isNotEmpty &&
-                  _input.text.trim() != _sequence.join())
-                const Text('Not quite. Try again.'),
             ] else
-              const Text('Correct! You remembered the sequence.'),
+              Text(
+                _memoryCorrect
+                    ? 'Correct! You remembered the sequence.'
+                    : 'Incorrect! Expected ${_sequence.join()}',
+              ),
           ],
         );
       case 'number_rush':
@@ -564,7 +571,7 @@ class _ArcadeDialogState extends State<_ArcadeDialog> {
       case 'lucky_number':
         return _chosenBox != null;
       case 'memory_match':
-        return _finished;
+        return _memorySubmitted;
       case 'number_rush':
       case 'math_blitz':
       case 'memory_grid':
@@ -587,7 +594,11 @@ class _ArcadeDialogState extends State<_ArcadeDialog> {
         if (_canClaim)
           FilledButton(
             onPressed: _claim,
-            child: const Text('Claim reward'),
+            child: Text(
+              widget.gameId == 'memory_match' && !_memoryCorrect
+                  ? 'Done'
+                  : 'Claim reward',
+            ),
           ),
       ],
     );
