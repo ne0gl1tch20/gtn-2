@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart' show ListView;
+import 'package:flutter/material.dart' show ListView, Scrollable;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gtn_2/main.dart';
 
@@ -13,7 +13,7 @@ void main() {
     await tester.scrollUntilVisible(
       find.text('MAKE YOUR GUESS'),
       200,
-      scrollable: find.byType(ListView).first,
+      scrollable: find.descendant(of: find.byType(ListView).first, matching: find.byType(Scrollable)).first,
     );
     await tester.pumpAndSettle();
     expect(find.text('MAKE YOUR GUESS'), findsOneWidget);
