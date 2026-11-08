@@ -4,7 +4,7 @@ GTN2 uses one persistent Android signing identity for every distributable debug 
 
 ## Create the permanent key (Windows)
 
-Run PowerShell from a private folder outside the repository:
+Run PowerShell from the GTN2 repository root. The output directory is outside the repository so the private key files cannot be committed accidentally:
 
 \`\`\`powershell
 powershell -ExecutionPolicy Bypass -File .\scripts\create_android_signing_key.ps1 -OutputDirectory "$HOME\GTN2-signing-backup"
