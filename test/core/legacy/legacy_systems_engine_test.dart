@@ -407,6 +407,24 @@ void main() {
       expect(discovered.discoveredTraits, isEmpty);
     });
 
+    test('hidden trait dependency chains unlock in one discovery pass', () {
+      final discovered = engine.discoverEligibleTraits(
+        progression: ProgressionState.initial.copyWith(correctGuesses: 500),
+        systems: LegacySystemsState.initial,
+        playerLevel: 1,
+        activeSeasonId: null,
+      );
+
+      expect(
+        discovered.discoveredTraits,
+        containsAll({
+          'hidden_night_owl',
+          'hidden_century_club',
+          'hidden_precision_mind',
+        }),
+      );
+    });
+
     test('contains the full GTN1 built-in trait catalog', () {
       expect(builtInTraitCatalog, hasLength(320));
       final ids = builtInTraitCatalog.map((trait) => trait['id']).toSet();
