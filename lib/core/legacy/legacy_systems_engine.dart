@@ -391,24 +391,14 @@ class LegacySystemsEngine {
       'ember_summit': 'ember_dragon',
       'nebula_rift': 'nebula_titan',
     };
-    const previousWorld = <String, String>{
-      'crystal_caverns': 'verdant_grove',
-      'ember_summit': 'crystal_caverns',
-      'nebula_rift': 'ember_summit',
-    };
     final relicId = relicByWorld[worldId];
     final worldMatches =
         WorldBossCatalog.worlds.where((world) => world.id == worldId);
     final world = worldMatches.isEmpty ? null : worldMatches.first;
-    final previousWorldId = previousWorld[worldId];
-    final previousMatches = WorldBossCatalog.worlds
-        .where((candidate) => candidate.id == previousWorldId);
-    final previous = previousMatches.isEmpty ? null : previousMatches.first;
     if (relicId == null ||
         world == null ||
-        !WorldBossCatalog.isDefeated(progression, world) ||
-        (previous != null &&
-            !WorldBossCatalog.isDefeated(progression, previous))) {
+        !WorldBossCatalog.isUnlocked(progression, world) ||
+        !WorldBossCatalog.isDefeated(progression, world)) {
       return _reject(progression, systems, 'Defeat this world guardian before upgrading mastery.');
     }
     final current = systems.worldMasteryLevels[worldId] ?? 1;
@@ -483,22 +473,11 @@ class LegacySystemsEngine {
     if (systems.discoveredSecrets.contains(secretId)) {
       return _reject(progression, systems, 'Secret area already discovered.');
     }
-    const previousWorld = <String, String>{
-      'crystal_caverns': 'verdant_grove',
-      'ember_summit': 'crystal_caverns',
-      'nebula_rift': 'ember_summit',
-    };
     final worldMatches =
         WorldBossCatalog.worlds.where((world) => world.id == worldId);
     final world = worldMatches.isEmpty ? null : worldMatches.first;
-    final previousWorldId = previousWorld[worldId];
-    final previousMatches = WorldBossCatalog.worlds
-        .where((candidate) => candidate.id == previousWorldId);
-    final previous = previousMatches.isEmpty ? null : previousMatches.first;
     if (world == null ||
         !WorldBossCatalog.isUnlocked(progression, world) ||
-        (previous != null &&
-            !WorldBossCatalog.isDefeated(progression, previous)) ||
         progression.correctGuesses < thresholds[secretId]!) {
       return _reject(progression, systems, 'Secret area is still hidden.');
     }
