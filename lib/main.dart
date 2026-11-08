@@ -928,6 +928,7 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
       MaterialPageRoute<void>(
         builder: (_) => LegacyHubPage(
           progression: _progression,
+          activeSlot: _activeSlot,
           onSystemsChanged: _applyLegacyProgression,
         ),
       ),
