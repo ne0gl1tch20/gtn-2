@@ -1,4 +1,5 @@
 import '../core/numbers/big_number.dart';
+import '../core/game/guess_economy_rules.dart';
 import '../core/progression/progression_state.dart';
 import 'world_boss_catalog.dart';
 
@@ -246,7 +247,12 @@ class WorldBossBattleEngine {
     final baseMoney = BigNumber.fromInt(world.moneyReward);
     final baseNebula = BigNumber.fromInt(world.nebulaReward);
     final rewardMultiplier = BigNumber.fromInt(tier);
-    final moneyReward = (baseMoney + bonusMoney) * rewardMultiplier;
+    final riftMoneyReward = (baseMoney + bonusMoney) * rewardMultiplier;
+    // GTN1 applies permanent Prestige/Ultra Money boosts to normal boss
+    // victories, while Endless Rift uses its tier-scaled reward directly.
+    final moneyReward = systems.endlessRiftActive
+        ? riftMoneyReward
+        : riftMoneyReward * GuessEconomyRules.moneyEarningMultiplier(state);
     final nebulaReward = (baseNebula + BigNumber.fromInt(bonusNebula)) * rewardMultiplier;
     damage[world.bossId] = hp;
     damage[world.id] = hp;
