@@ -993,10 +993,17 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
         final guaranteedGoldenGuess =
             !isBot && (beforeGuess.nebulaItems['golden_guess'] ?? 0) > 0 &&
             (beforeGuess.totalGuesses + 1) % 10 == 0;
+        final guaranteedHarmony =
+            beforeGuess.ultraShopPurchases.contains('ultra_universal_harmony');
         final isCritical = correct &&
-            (guaranteedGoldenGuess ||
+            (guaranteedHarmony ||
+                guaranteedGoldenGuess ||
                 Random.secure().nextDouble() <
-                    GuessEconomyRules.criticalChance(criticalPrecisionLevel));
+                    GuessEconomyRules.criticalChance(
+                      criticalPrecisionLevel,
+                      prestigeLuckCharmOwned: beforeGuess.prestigeShopPurchases
+                          .contains('prestige_luck_charm'),
+                    ));
         final rawReward = correct
             ? GuessEconomyRules.correctGuessReward(
                 rangeMaximum: _game.maximum,
@@ -1016,6 +1023,8 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
                 ),
                 permanentMoneyMultiplier:
                     GuessEconomyRules.moneyEarningMultiplier(beforeGuess),
+                infiniteSingularityOwned: beforeGuess.ultraShopPurchases
+                    .contains('ultra_infinite_multiplier'),
               )
             : null;
         var afterReward = _progressionEngine.recordGuess(
