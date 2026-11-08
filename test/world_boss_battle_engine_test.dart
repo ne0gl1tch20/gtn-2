@@ -12,6 +12,30 @@ void main() {
         upgrades: const {'upgrade_a': 3},
       );
 
+  test('unlocks the next world only after its previous boss and thresholds', () {
+    final first = WorldBossCatalog.worlds.first;
+    final second = WorldBossCatalog.worlds[1];
+    var state = ProgressionState(
+      correctGuesses: 25,
+      upgrades: const {'upgrade_a': 5},
+    );
+    expect(WorldBossCatalog.canUnlock(state, second), isFalse);
+
+    state = state.copyWith(
+      defeatedBosses: const {'verdant_guardian'},
+      legacySystems: state.legacySystems.copyWith(
+        relicInventory: const {'verdant_guardian'},
+      ),
+    );
+    expect(WorldBossCatalog.canUnlock(state, second), isTrue);
+    final unlocked = engine.unlockWorld(state, second.id);
+    expect(unlocked.accepted, isTrue);
+    expect(unlocked.progression.legacySystems.unlockedWorldIds,
+        containsAll([first.id, second.id]));
+    expect(unlocked.progression.legacySystems.activeWorldId, second.id);
+    expect(WorldBossCatalog.isUnlocked(unlocked.progression, second), isTrue);
+  });
+
   test('starts and stops only an eligible world boss battle', () {
     final locked = engine.toggleBossBattle(ProgressionState(), 'verdant_grove');
     expect(locked.accepted, isFalse);
