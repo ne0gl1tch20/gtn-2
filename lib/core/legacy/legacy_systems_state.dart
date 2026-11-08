@@ -444,6 +444,7 @@ class LegacySystemsState {
       endlessRiftTier: count('endlessRiftTier'),
       endlessRiftBestTier: count('endlessRiftBestTier'),
       endlessRiftActive: endless,
+      worldBossVictories: json['worldBossVictories'] == null ? 0 : count('worldBossVictories'),
       stakesPlaced: count('stakesPlaced'),
       stakesWon: count('stakesWon'),
       stakesLost: count('stakesLost'),
