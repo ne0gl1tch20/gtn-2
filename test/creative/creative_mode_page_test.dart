@@ -39,8 +39,10 @@ void main() {
     await tester.tap(find.byType(Switch));
     await tester.pumpAndSettle();
 
+    await tester.ensureVisible(find.text('Start new run'));
     await tester.tap(find.text('Start new run'));
     await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('Run in progress'));
     expect(find.text('Run in progress'), findsOneWidget);
 
     final runningSave = storage.value!;
@@ -48,10 +50,12 @@ void main() {
     final run = CreativeModeRuntime.resume(runningSave.creativeMode!);
     expect(run, isNotNull);
 
+    await tester.ensureVisible(find.text('Submit guess'));
     await tester.enterText(find.byType(TextField).last, run!.target.toString());
     await tester.tap(find.text('Submit guess'));
     await tester.pumpAndSettle();
 
+    await tester.ensureVisible(find.text('Run complete'));
     expect(find.text('Run complete'), findsOneWidget);
     final completedRun =
         CreativeModeRuntime.resume(storage.value!.creativeMode!);
