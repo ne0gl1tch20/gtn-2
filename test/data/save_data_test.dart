@@ -437,6 +437,46 @@ void main() {
     expect((await storage.load())?.secret, 73);
   });
 
+  test('creates a save only once when two storage instances race', () async {
+    final directory =
+        await Directory.systemTemp.createTemp('gtn2-create-slot-race-');
+    addTearDown(() => directory.delete(recursive: true));
+    final first = SaveStorage(directory: directory, slot: 5);
+    final second = SaveStorage(directory: directory, slot: 5);
+    final results = await Future.wait([
+      first.createIfEmpty(
+        SaveData(secret: 31, attempts: 0, gamesWon: 0),
+      ),
+      second.createIfEmpty(
+        SaveData(secret: 82, attempts: 0, gamesWon: 0),
+      ),
+    ]);
+
+    expect(results.where((created) => created).length, 1);
+    expect([31, 82], contains((await first.load())!.secret));
+  });
+
+  test('duplicate operations cannot overwrite the same target slot', () async {
+    final directory =
+        await Directory.systemTemp.createTemp('gtn2-duplicate-slot-race-');
+    addTearDown(() => directory.delete(recursive: true));
+    final first = SaveStorage(directory: directory, slot: 1);
+    final second = SaveStorage(directory: directory, slot: 2);
+    await first.save(SaveData(secret: 31, attempts: 0, gamesWon: 0));
+    await second.save(SaveData(secret: 82, attempts: 0, gamesWon: 0));
+
+    final results = await Future.wait([
+      first.duplicateTo(3),
+      second.duplicateTo(3),
+    ]);
+
+    expect(results.where((created) => created).length, 1);
+    expect([31, 82], contains((await SaveStorage(
+      directory: directory,
+      slot: 3,
+    ).load())!.secret));
+  });
+
   test('duplicates a save and its restore backup into an empty slot', () async {
     final directory =
         await Directory.systemTemp.createTemp('gtn2-save-duplicate-test-');
