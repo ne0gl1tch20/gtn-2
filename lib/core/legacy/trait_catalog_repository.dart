@@ -85,7 +85,13 @@ class TraitCatalogRepository {
       final definition = _decodeObject(packageData[0], definitionPath);
       final rules = _decodeObject(packageData[1], rulesPath);
       final localization = _decodeObject(packageData[2], localizationPath);
-      if (definition['id'] != id || rules['id'] != id || localization['id'] != id) {
+      if (definition['id'] != id ||
+          rules['id'] != id ||
+          localization['id'] != id ||
+          definition['catalogId'] != entry['catalogId'] ||
+          definition['packageFolder'] != entry['packageFolder'] ||
+          definition['category'] != entry['category'] ||
+          definition['visibility'] != entry['visibility']) {
         throw FormatException('GTN1 trait package identity mismatch: $id');
       }
       final activation = rules['activation'];
