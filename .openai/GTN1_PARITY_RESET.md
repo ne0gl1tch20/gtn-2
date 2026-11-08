@@ -22,6 +22,8 @@ GTN1 is the behavioral source of truth. Do not invent new rules where a tested G
 | Talents, mutators, relics, sanctuary, stakes, daily quests, loot and challenges | `legacy_systems_engine.dart` and `legacy_systems_page.dart` | Implemented in one systems screen; transaction-by-transaction parity audit remains |
 | Arcade | `lib/arcade`, seven-game catalog and reward tests | Implemented; each game loop and payout still needs direct GTN1 comparison |
 | Music | Offline file import, audio playback, queue, playlists, shuffle and repeat in legacy systems page | Partial parity; verify lifecycle, queue and error behavior |
+| LiveOps and seasonal events | `LiveOpsRepository`, `LiveOpsEvent`, `LegacySystemsEngine.claimLiveOpsEvent`, bundled manifest and feature flags | Ported on reset branch with claim, eligibility, date-window, max-claim, reward and permanent-boost tests; remote signed Lua refresh remains unported |
+| Random events | GTN1 `RandomEventEngine`, Lua selector and 60-second scheduler; target only stores `lastRandomEventId` | Missing: event selection, effects, persistence, timer and notification behavior |
 | About and updater | `lib/data/updates/update_checker.dart` and About section | Update check/install code exists; publishing is intentionally disabled until parity gate passes |
 | Creative Mode | Runtime and schema in `lib/core/creative/creative_mode.dart`; UI and entry points on reset branch | UI added on reset branch; deterministic widget test now uses in-memory storage |
 | Save profiles and metadata | `SaveData.copyWith`, atomic `SaveStorage.update/createIfEmpty/duplicateTo`, profile updates | Ported onto reset branch with regression tests; CI verification pending |
