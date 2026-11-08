@@ -1,5 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gtn_2/core/game/guess_economy_rules.dart';
+import 'package:gtn_2/core/legacy/legacy_systems_engine.dart';
+import 'package:gtn_2/core/legacy/legacy_systems_state.dart';
 import 'package:gtn_2/core/numbers/big_number.dart';
 import 'package:gtn_2/core/progression/progression_state.dart';
 import 'package:gtn_2/shop/upgrade_catalog.dart';
@@ -71,6 +73,40 @@ void main() {
       permanentMoneyMultiplier: BigNumber.fromInt(1),
     );
     expect(minimum.toString(), '10');
+  });
+
+  test('Prestige talent reward bonus is applied once after the base guess reward', () {
+    final before = ProgressionState.initial;
+    final rawReward = GuessEconomyRules.correctGuessReward(
+      rangeMaximum: 100,
+      currentStreak: 0,
+      rewardMultiplierLevel: 0,
+      // The GTN1 Prestige talent is not GameEngine's shopPurchases/upgradeLevels flag.
+      hasTalentReward: false,
+      isCritical: false,
+      difficultyId: 'classic',
+      mutatorMultiplier: BigNumber.fromInt(1),
+      traitMultiplier: BigNumber.fromInt(1),
+      permanentMoneyMultiplier: BigNumber.fromInt(1),
+    );
+    expect(rawReward.toString(), '10000');
+
+    final afterRawReward = before.copyWith(
+      money: rawReward,
+      moneyEarned: rawReward,
+    );
+    final adjusted = const LegacySystemsEngine().applyCorrectGuessBonuses(
+      before: before,
+      after: afterRawReward,
+      systems: LegacySystemsState.initial.copyWith(
+        talents: const {'talent_reward_1'},
+      ),
+    );
+
+    // GTN1 adds +50% in applyTalentBonuses. Applying it in both the base
+    // reward and the post-reward bonus would incorrectly produce 22,500.
+    expect(adjusted.money.toString(), '15000');
+    expect(adjusted.moneyEarned.toString(), '15000');
   });
 
   test('streak and frenzy formulas match GTN1 five-guess tiers', () {
