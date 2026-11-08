@@ -27,6 +27,10 @@ void main() {
       });
       assets['assets/gtn1/traits/$definitionPath'] = jsonEncode({
         'id': id,
+        'catalogId': 'test',
+        'packageFolder': id,
+        'category': 'PROGRESSION',
+        'visibility': 'VISIBLE',
         'effects': ['COSMETIC_BADGE'],
         'seasonId': null,
       });
@@ -60,7 +64,7 @@ void main() {
     expect(catalog, hasLength(320));
     expect(catalog.first.id, 'trait_0');
     expect(catalog.first.title, 'Trait 0');
-    expect(catalog.last.minimumCorrectGuesses, 319);
+    expect(catalog.singleWhere((trait) => trait.id == 'trait_319').minimumCorrectGuesses, 319);
     expect(catalog.first.effects, contains('COSMETIC_BADGE'));
     expect(catalog.first.iconAssetPath, 'assets/gtn1/traits/catalogs/test/trait_0/icon.svg');
   });
@@ -95,7 +99,7 @@ void main() {
     final assets = <String, String>{
       TraitCatalogRepository.manifestAsset: jsonEncode({
         'schemaVersion': 1,
-        'sourceCommit': '0' * 40,
+        'sourceCommit': List.filled(40, '0').join(),
         'traitCount': 320,
         'traits': List.filled(320, <String, Object?>{}),
       }),
