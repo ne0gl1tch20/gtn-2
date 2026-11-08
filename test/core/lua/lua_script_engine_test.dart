@@ -106,7 +106,8 @@ void main() {
       return {
         title = "Sandbox check",
         description = "Restricted libraries",
-        prompt = (io == nil and os == nil and package == nil and debug == nil)\n          and "Libraries removed" or "Libraries available",
+        prompt = (io == nil and os == nil and package == nil and debug == nil)
+          and "Libraries removed" or "Libraries available",
         options = { "Yes", "No" },
         correct_option = 1,
         success_message = "Correct!",
