@@ -173,11 +173,10 @@ class _LuaActivityHubPageState extends State<LuaActivityHubPage> {
                         const SizedBox(height: 8),
                         RadioGroup<int>(
                           groupValue: _selectedAnswer,
-                          onChanged: _answerMessage == null
-                              ? (value) => setState(
-                                    () => _selectedAnswer = value ?? -1,
-                                  )
-                              : null,
+                          onChanged: (value) {
+                            if (_answerMessage != null) return;
+                            setState(() => _selectedAnswer = value ?? -1);
+                          },
                           child: Column(
                             children: [
                               for (var index = 0;
