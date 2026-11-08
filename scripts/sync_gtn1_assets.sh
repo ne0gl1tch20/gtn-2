@@ -103,7 +103,7 @@ while IFS= read -r -d '' file; do
   mkdir -p "$(dirname "$destination")"
   cp "$file" "$destination"
   other_artwork_count=$((other_artwork_count + 1))
-done < <(find "$SOURCE_ROOT" -type f \\( -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.webp' -o -iname '*.avif' -o -iname '*.gif' -o -iname '*.svg' \\) ! -path "$WEB_SOURCE/*" ! -path "$TRAIT_SOURCE/*" -print0)
+done < <(find "$SOURCE_ROOT" -type f \( -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.webp' -o -iname '*.avif' -o -iname '*.gif' -o -iname '*.svg' \) ! -path "$WEB_SOURCE/*" ! -path "$TRAIT_SOURCE/*" -print0)
 
 cat > assets/gtn1/source-manifest.json <<EOF
 {
