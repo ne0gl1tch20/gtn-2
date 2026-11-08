@@ -435,6 +435,7 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
     if (updated != _progression) {
       setState(() => _progression = updated);
       await _persist();
+      _scheduleAutoClicker();
     }
     return _progression;
   }
