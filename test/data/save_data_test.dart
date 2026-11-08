@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gtn_2/core/creative/creative_mode.dart';
 import 'package:gtn_2/core/legacy/legacy_systems_state.dart';
 import 'package:gtn_2/core/numbers/big_number.dart';
 import 'package:gtn_2/core/progression/progression_state.dart';
@@ -29,6 +30,58 @@ void main() {
       expect(SaveData.fromJson(save.toJson()).minimum, 25);
       expect(SaveData.fromJson(save.toJson()).maximum, 150);
       expect(SaveData.fromJson(save.toJson()).settings.difficultyId, 'hard');
+    });
+
+    test('persists Creative Mode configuration and active run per save', () {
+      final creative = CreativeModeSave(
+        enabled: true,
+        rangeMin: 10,
+        rangeMax: 30,
+        effects: const [
+          CreativeModeEffect(
+            id: 'hints',
+            type: CreativeEffectType.extraHints,
+            value: 2,
+          ),
+        ],
+      );
+      final run = CreativeModeRuntime.start(creative, 21)!;
+      final persistedCreative = CreativeModeRuntime.persist(creative, run)!;
+      final save = SaveData(
+        secret: 42,
+        attempts: 0,
+        gamesWon: 0,
+        creativeMode: persistedCreative,
+      );
+
+      final restored = SaveData.fromJson(save.toJson());
+
+      expect(restored.creativeMode, isNotNull);
+      expect(
+        CreativeModeRuntime.resume(restored.creativeMode!)!.target,
+        21,
+      );
+      expect(restored.creativeMode!.effects.single.value, 2);
+    });
+
+    test('rejects malformed nested Creative Mode configuration', () {
+      final base = SaveData(secret: 42, attempts: 0, gamesWon: 0).toJson();
+      expect(
+        () => SaveData.fromJson({
+          ...base,
+          'creativeMode': {
+            'schemaVersion': 3,
+            'name': 'Bad',
+            'enabled': true,
+            'rangeMin': 1,
+            'rangeMax': 10,
+            'effects': [
+              {'id': 'bad', 'type': 'UNKNOWN', 'value': 1}
+            ],
+          },
+        }),
+        throwsFormatException,
+      );
     });
 
     test('round-trips save profile name and icon', () {
@@ -97,7 +150,7 @@ void main() {
     test('rejects unknown versions and invalid fields', () {
       expect(
         () => SaveData.fromJson({
-          'schemaVersion': 5,
+          'schemaVersion': 6,
           'secret': 42,
           'attempts': 0,
           'gamesWon': 0,

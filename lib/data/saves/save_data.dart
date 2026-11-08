@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import '../../core/creative/creative_mode.dart';
 import '../../core/progression/progression_state.dart';
 import '../../settings/game_settings.dart';
 
@@ -14,10 +17,11 @@ class SaveData {
     GameSettings? settings,
     this.profileName = '',
     this.profileIconId = 'default',
+    this.creativeMode,
   })  : progression = progression ?? ProgressionState.initial,
         settings = settings ?? GameSettings.initial;
 
-  static const currentSchemaVersion = 4;
+  static const currentSchemaVersion = 5;
   static const profileIconIds = <String>['default', 'star', 'bolt', 'crown', 'planet'];
 
   final int schemaVersion;
@@ -31,8 +35,14 @@ class SaveData {
   final GameSettings settings;
   final String profileName;
   final String profileIconId;
+  final CreativeModeSave? creativeMode;
 
-  SaveData copyWith({String? profileName, String? profileIconId}) => SaveData(
+  SaveData copyWith({
+    String? profileName,
+    String? profileIconId,
+    CreativeModeSave? creativeMode,
+    bool clearCreativeMode = false,
+  }) => SaveData(
         schemaVersion: schemaVersion,
         secret: secret,
         attempts: attempts,
@@ -44,9 +54,10 @@ class SaveData {
         settings: settings,
         profileName: profileName ?? this.profileName,
         profileIconId: profileIconId ?? this.profileIconId,
+        creativeMode: clearCreativeMode ? null : creativeMode ?? this.creativeMode,
       );
 
-  Map<String, Object> toJson() => {
+  Map<String, Object?> toJson() => {
         'schemaVersion': schemaVersion,
         'secret': secret,
         'attempts': attempts,
@@ -58,6 +69,7 @@ class SaveData {
         'settings': settings.toJson(),
         'profileName': profileName,
         'profileIconId': profileIconId,
+        'creativeMode': creativeMode?.toJson(),
       };
 
   factory SaveData.fromJson(Map<String, dynamic> json) {
@@ -72,7 +84,8 @@ class SaveData {
     final settingsJson = json['settings'];
     final profileName = json['profileName'] ?? '';
     final profileIconId = json['profileIconId'] ?? 'default';
-    if (version is! int || (version != 1 && version != 2 && version != 3 && version != currentSchemaVersion) ||
+    final creativeModeJson = json['creativeMode'];
+    if (version is! int || (version != 1 && version != 2 && version != 3 && version != 4 && version != currentSchemaVersion) ||
         secret is! int ||
         attempts is! int ||
         gamesWon is! int ||
@@ -97,6 +110,14 @@ class SaveData {
         : progressionJson is Map<String, dynamic>
             ? ProgressionState.fromJson(progressionJson)
             : throw const FormatException('Invalid progression save.');
+    final creativeMode = creativeModeJson == null
+        ? null
+        : creativeModeJson is Map<String, dynamic>
+            ? CreativeModeSave.decodeAndMigrate(jsonEncode(creativeModeJson))
+            : null;
+    if (creativeModeJson != null && creativeMode == null) {
+      throw const FormatException('Invalid Creative Mode save.');
+    }
     final settings = settingsJson == null
         ? GameSettings.initial
         : settingsJson is Map<String, dynamic>
@@ -114,6 +135,7 @@ class SaveData {
       settings: settings,
       profileName: profileName,
       profileIconId: profileIconId,
+      creativeMode: creativeMode,
     );
   }
 }
