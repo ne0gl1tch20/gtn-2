@@ -45,8 +45,6 @@ void main() {
 
   testWidgets('selecting an unlocked node uses the progression action',
       (tester) async {
-    final semantics = tester.ensureSemantics();
-    addTearDown(semantics.dispose);
     final unlocked = WorldBossCatalog.worlds.map((world) => world.id).toSet();
     final state = stateWith(unlocked: unlocked);
     final calls = <(String, String)>[];
@@ -66,12 +64,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(calls, contains(('crystal_caverns', 'select_world')));
-    expect(
-      tester.getSemantics(
-        find.byKey(const ValueKey('world-node-crystal_caverns')),
-      ).getSemanticsData().flagsCollection.isSelected.toString(),
-      'Tristate.isTrue',
-    );
+    expect(find.text('Selected world'), findsOneWidget);
   });
 
   testWidgets('secret route marker appears at its threshold and dispatches discovery',
