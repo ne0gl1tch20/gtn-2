@@ -106,7 +106,7 @@ void main() {
       return {
         title = "Sandbox check",
         description = "Restricted libraries",
-        prompt = "Are privileged libraries unavailable?",
+        prompt = (io == nil and os == nil and package == nil and debug == nil)\n          and "Libraries removed" or "Libraries available",
         options = { "Yes", "No" },
         correct_option = 1,
         success_message = "Correct!",
@@ -120,6 +120,7 @@ void main() {
       );
 
       expect(result.payload['title'], 'Sandbox check');
+      expect(result.payload['prompt'], 'Libraries removed');
     });
 
     test('terminates scripts that exceed the execution time budget', () async {
