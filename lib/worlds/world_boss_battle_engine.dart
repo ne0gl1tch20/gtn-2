@@ -200,7 +200,9 @@ class WorldBossBattleEngine {
       );
     }
 
-    final tier = systems.endlessRiftActive ? systems.endlessRiftTier.clamp(1, 1000000).toInt() : 1;
+    final tier = systems.endlessRiftActive
+        ? (systems.endlessRiftTier < 1 ? 1 : systems.endlessRiftTier)
+        : 1;
     final hp = world.hits + (systems.endlessRiftActive ? (tier - 1) * 2 : 0);
     final oldDamage = state.bossDamage[world.bossId] ?? state.bossDamage[world.id] ?? 0;
     final mistakes = Map<String, int>.of(systems.bossBattleMistakes);
