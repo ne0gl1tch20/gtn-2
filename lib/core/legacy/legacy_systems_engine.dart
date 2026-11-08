@@ -586,7 +586,8 @@ class LegacySystemsEngine {
       final tier = systems.endlessRiftBestTier + 1 > 1 ? systems.endlessRiftBestTier + 1 : 1;
       final firstWorld = WorldBossCatalog.worlds.first;
       final bossDamage = Map<String, int>.of(progression.bossDamage)
-        ..[firstWorld.bossId] = 0;
+        ..[firstWorld.bossId] = 0
+        ..[firstWorld.id] = 0;
       return _accept(
         progression.copyWith(bossDamage: Map.unmodifiable(bossDamage)),
         systems.copyWith(
