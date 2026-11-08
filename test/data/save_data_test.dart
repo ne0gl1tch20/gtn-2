@@ -239,6 +239,57 @@ void main() {
     expect(await first.hasBackup(), isTrue);
   });
 
+  test('gameplay save updates preserve profile and Creative Mode metadata', () async {
+    final directory =
+        await Directory.systemTemp.createTemp('gtn2-save-metadata-update-');
+    addTearDown(() => directory.delete(recursive: true));
+    final storage = SaveStorage(directory: directory);
+    final creative = CreativeModeSave(
+      enabled: true,
+      rangeMin: 10,
+      rangeMax: 50,
+      effects: const [
+        CreativeModeEffect(
+          id: 'extra-hints',
+          type: CreativeEffectType.extraHints,
+          value: 2,
+        ),
+      ],
+    );
+    await storage.save(SaveData(
+      secret: 42,
+      attempts: 1,
+      gamesWon: 2,
+      profileName: 'My Profile',
+      profileIconId: 'crown',
+      creativeMode: creative,
+    ));
+
+    await storage.update((current) => current!.copyWith(
+          secret: 73,
+          attempts: 4,
+          gamesWon: 3,
+          isComplete: false,
+          minimum: 1,
+          maximum: 100,
+          progression: ProgressionState.initial.copyWith(
+            money: BigNumber.fromInt(900),
+          ),
+          settings: const GameSettings(difficultyId: 'hard'),
+        ));
+
+    final restored = await storage.load();
+    expect(restored?.secret, 73);
+    expect(restored?.attempts, 4);
+    expect(restored?.gamesWon, 3);
+    expect(restored?.profileName, 'My Profile');
+    expect(restored?.profileIconId, 'crown');
+    expect(restored?.creativeMode?.enabled, isTrue);
+    expect(restored?.creativeMode?.effects.single.value, 2);
+    expect(restored?.progression.money.toString(), '900');
+    expect(restored?.settings.difficultyId, 'hard');
+  });
+
   test('persists Extreme Hardcore saves through the storage layer', () async {
     final directory =
         await Directory.systemTemp.createTemp('gtn2-extreme-save-test-');
