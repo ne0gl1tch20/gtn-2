@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 import 'arcade/arcade_page.dart';
 import 'core/automation/bot_team.dart';
+import 'core/automation/clock_rollback_policy.dart';
 import 'core/automation/guessing_bot.dart';
 import 'core/automation/offline_earnings_policy.dart';
 import 'core/game/difficulty_rules.dart';
@@ -127,7 +128,6 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
   final BotTeam _botTeam = BotTeam();
   Timer? _autoClickerTimer;
   bool _autoClickerTickRunning = false;
-  static const int _timeTravelPenaltyMillis = 24 * 60 * 60 * 1000;
   ProgressionState _progression = ProgressionState.initial;
   GameSettings _settings = GameSettings.initial;
   final TextEditingController _controller = TextEditingController();
@@ -201,18 +201,22 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
         var restoredProgression = save.progression;
         final savedAt = restoredProgression.legacySystems.lastSaveTimestamp;
         final now = DateTime.now().millisecondsSinceEpoch;
-        final timeTravelDetected = savedAt > 0 && now < savedAt;
-        if (timeTravelDetected) {
-          restoredProgression = restoredProgression.copyWith(
-            legacySystems: restoredProgression.legacySystems.copyWith(
-              autoClickerActive: false,
-              lastSaveTimestamp: now,
-              timeTravelPenaltyUntil: now + _timeTravelPenaltyMillis,
-            ),
-          );
-          shouldPersistOfflineEarnings = true;
-        }
-        final elapsedSeconds = savedAt > 0 && now >= savedAt
+        final clockCheck = ClockRollbackPolicy.check(
+          nowMillis: now,
+          lastSaveTimestamp: savedAt,
+          timeTravelPenaltyUntil: restoredProgression.legacySystems.timeTravelPenaltyUntil,
+          autoClickerActive: restoredProgression.legacySystems.autoClickerActive,
+        );
+        final timeTravelDetected = clockCheck.detected;
+        restoredProgression = restoredProgression.copyWith(
+          legacySystems: restoredProgression.legacySystems.copyWith(
+            autoClickerActive: clockCheck.autoClickerActive,
+            lastSaveTimestamp: clockCheck.lastSaveTimestamp,
+            timeTravelPenaltyUntil: clockCheck.timeTravelPenaltyUntil,
+          ),
+        );
+        shouldPersistOfflineEarnings = true;
+        final elapsedSeconds = savedAt > 0 && !timeTravelDetected
             ? ((now - savedAt) ~/ 1000)
             : 0;
         final offlineEarnings = timeTravelDetected
@@ -622,17 +626,21 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
       var nextProgression = save?.progression ?? ProgressionState.initial;
       final savedAt = nextProgression.legacySystems.lastSaveTimestamp;
       final now = DateTime.now().millisecondsSinceEpoch;
-      final timeTravelDetected = savedAt > 0 && now < savedAt;
-      if (timeTravelDetected) {
-        nextProgression = nextProgression.copyWith(
-          legacySystems: nextProgression.legacySystems.copyWith(
-            autoClickerActive: false,
-            lastSaveTimestamp: now,
-            timeTravelPenaltyUntil: now + _timeTravelPenaltyMillis,
-          ),
-        );
-      }
-      final elapsedSeconds = savedAt > 0 && now >= savedAt
+      final clockCheck = ClockRollbackPolicy.check(
+        nowMillis: now,
+        lastSaveTimestamp: savedAt,
+        timeTravelPenaltyUntil: nextProgression.legacySystems.timeTravelPenaltyUntil,
+        autoClickerActive: nextProgression.legacySystems.autoClickerActive,
+      );
+      final timeTravelDetected = clockCheck.detected;
+      nextProgression = nextProgression.copyWith(
+        legacySystems: nextProgression.legacySystems.copyWith(
+          autoClickerActive: clockCheck.autoClickerActive,
+          lastSaveTimestamp: clockCheck.lastSaveTimestamp,
+          timeTravelPenaltyUntil: clockCheck.timeTravelPenaltyUntil,
+        ),
+      );
+      final elapsedSeconds = savedAt > 0 && !timeTravelDetected
           ? ((now - savedAt) ~/ 1000)
           : 0;
       final offlineEarnings = timeTravelDetected
@@ -677,9 +685,7 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
                 : 'Save slot $slot loaded.';
         _isLoading = false;
       });
-      if (save == null || timeTravelDetected || offlineEarnings.compareTo(BigNumber.fromInt(0)) > 0) {
-        await _persist();
-      }
+      await _persist();
       _botTeam.reset(_game.minimum, _game.maximum);
       _scheduleAutoClicker();
     } on Exception {
