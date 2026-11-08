@@ -32,13 +32,30 @@ void main() {
       (WidgetTester tester) async {
     await tester.pumpWidget(buildDashboard());
     expect(find.text('Guess The Number'), findsOneWidget);
+    // The dashboard uses a lazy ListView, so scroll to the wallet before asserting it.
+    await tester.drag(find.byType(ListView).first, const Offset(0, -500));
+    await tester.pumpAndSettle();
     expect(find.text('YOUR WALLET'), findsOneWidget);
     expect(find.text('Play'), findsOneWidget);
     expect(find.text('Beyond the Numbers'), findsOneWidget);
     expect(find.text('More'), findsOneWidget);
 
+    await tester.scrollUntilVisible(
+      find.text('Daily Momentum'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Daily Momentum'), findsOneWidget);
+
+    // Return to the top before checking the Automation Lab above the wallet.
+    await tester.drag(find.byType(ListView).first, const Offset(0, 1000));
+    await tester.pumpAndSettle();
     await tester.drag(find.byType(ListView).first, const Offset(0, -500));
     await tester.pumpAndSettle();
+    expect(find.text('AUTOMATION LAB'), findsOneWidget);
+    expect(find.text('Guessing Bots'), findsOneWidget);
+    expect(find.text('NO BOTS YET'), findsOneWidget);
     expect(find.text('YOUR GUESS'), findsOneWidget);
     expect(find.text('->'), findsOneWidget);
     expect(find.text('QUICK PICK'), findsOneWidget);
@@ -47,7 +64,28 @@ void main() {
     expect(find.text('HIGH END'), findsOneWidget);
     expect(find.text('CLEAR'), findsOneWidget);
 
+    TextEditingController guessController() =>
+        tester.widget<TextField>(find.byKey(const Key('guess-input'))).controller!;
 
+    await tester.ensureVisible(find.text('LOW END'));
+    await tester.tap(find.text('LOW END'));
+    await tester.pump();
+    expect(guessController().text, '1');
+
+    await tester.ensureVisible(find.text('MIDPOINT'));
+    await tester.tap(find.text('MIDPOINT'));
+    await tester.pump();
+    expect(guessController().text, '50');
+
+    await tester.ensureVisible(find.text('HIGH END'));
+    await tester.tap(find.text('HIGH END'));
+    await tester.pump();
+    expect(guessController().text, '100');
+
+    await tester.ensureVisible(find.text('CLEAR'));
+    await tester.tap(find.text('CLEAR'));
+    await tester.pump();
+    expect(guessController().text, isEmpty);
   });
 
   testWidgets('More opens its own destination with save and dev tools',
