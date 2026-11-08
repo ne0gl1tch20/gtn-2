@@ -44,7 +44,8 @@ void main() {
     expect(find.text('Claim reward'), findsNothing);
 
     await tester.tap(find.text('Done'));
-    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text('Memory Digit Sequence'), findsOneWidget);
     expect(rewards, isEmpty);
 
     final correctAnswer = await openRound();
