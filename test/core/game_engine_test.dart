@@ -39,6 +39,49 @@ void main() {
       expect(won.attempts, 3);
     });
 
+    test('continues to the next target and keeps lifetime attempts after a win', () {
+      final engine = GameEngine(random: FixedRandom(41));
+      final initial = engine.newGame();
+      final completed = engine.guess(initial, 42);
+      final nextGame = GameEngine(random: FixedRandom(10)).newGame();
+
+      final continued = engine.continueAfterCorrect(completed, nextGame);
+
+      expect(continued.secret, 11);
+      expect(continued.attempts, 1);
+      expect(continued.isComplete, isFalse);
+      expect(continued.lastResult, GuessResult.correct);
+      expect(continued.minimum, 1);
+      expect(continued.maximum, 100);
+    });
+
+    test('bot success advances the target without consuming player attempts', () {
+      final engine = GameEngine(random: FixedRandom(41));
+      final initial = engine.newGame();
+      final completed = engine.guess(initial, 42);
+      final nextGame = GameEngine(random: FixedRandom(10)).newGame();
+
+      final continued = engine.continueAfterCorrect(
+        completed,
+        nextGame,
+        attempts: 7,
+      );
+
+      expect(continued.secret, 11);
+      expect(continued.attempts, 7);
+      expect(continued.isComplete, isFalse);
+    });
+
+    test('rejects advancing a game that was not won', () {
+      final engine = GameEngine(random: FixedRandom(41));
+      final initial = engine.newGame();
+      final missed = engine.guess(initial, 10);
+      expect(
+        () => engine.continueAfterCorrect(missed, engine.newGame()),
+        throwsArgumentError,
+      );
+    });
+
     test('does not count invalid guesses or guesses after winning', () {
       final engine = GameEngine(random: FixedRandom(41));
       final initial = engine.newGame();

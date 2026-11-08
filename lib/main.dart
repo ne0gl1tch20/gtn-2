@@ -1142,7 +1142,13 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
         _progression = nextProgression;
         if (isBot) {
           if (correct) {
-            _game = _newGameWithAdaptiveTarget(_engine.newGame());
+            final nextGame = _newGameWithAdaptiveTarget(_engine.newGame());
+            _game = _engine.continueAfterCorrect(
+              _game,
+              nextGame,
+              attempts: previousAttempts,
+            );
+            _botTeam.reset(_game.minimum, _game.maximum);
           } else {
             _game = GameState(
               secret: _game.secret,
@@ -1153,6 +1159,10 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
               maximum: _game.maximum,
             );
           }
+        } else if (correct) {
+          final nextGame = _newGameWithAdaptiveTarget(_engine.newGame());
+          _game = _engine.continueAfterCorrect(_game, nextGame);
+          _botTeam.reset(_game.minimum, _game.maximum);
         }
       }
       if (isBot) {
@@ -1190,7 +1200,7 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
           if (!isBot) _gamesWon++;
           _message = isBot
               ? '$botId guessed $guess correctly. A new round is ready.'
-              : 'Correct! You got it in ${_game.attempts} ${_game.attempts == 1 ? 'try' : 'tries'}.';
+  : 'Correct! A new number is ready.';
         case GuessResult.outOfRange:
           _message = 'Choose a number between ${_game.minimum} and ${_game.maximum}.';
         case null:
