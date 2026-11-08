@@ -617,6 +617,7 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
 
   Future<ProgressionState> _worldBossAction(String worldId, String action) async {
     final result = switch (action) {
+      'secret' => _worldBossBattleEngine.discoverSecret(_progression, worldId),
       'unlock' => _worldBossBattleEngine.unlockWorld(_progression, worldId),
       'select_world' => _worldBossBattleEngine.selectWorld(_progression, worldId),
       _ => _worldBossBattleEngine.toggleBossBattle(_progression, worldId),
