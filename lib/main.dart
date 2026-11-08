@@ -784,11 +784,12 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
       return;
     }
 
+    GuessResult? resultForMessage;
     setState(() {
       var rangeScoutActive = false;
       final previousAttempts = _game.attempts;
       _game = _engine.guess(_game, guess);
-      final resultForMessage = _game.lastResult;
+      resultForMessage = _game.lastResult;
       if (_game.attempts > previousAttempts) {
         final correct = resultForMessage == GuessResult.correct;
         final beforeGuess = _progression;
