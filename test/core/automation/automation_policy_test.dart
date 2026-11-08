@@ -132,7 +132,7 @@ void main() {
         purchasedBots: const {'bot_byte'}, sharedMemory: true, sequence: 0,
         rangeMinimum: 1, rangeMaximum: 100, currentMinimum: 1,
         currentMaximum: 100, speed: 1, speedTalentOne: false,
-        speedTalentTwo: false, speedMutator: false,
+        speedTalentTwo: false, prestigeAutoSpeed: false, speedMutator: false,
       )!;
       expect(shared.guess, 50);
     });
