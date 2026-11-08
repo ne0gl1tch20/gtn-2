@@ -71,7 +71,7 @@ class SaveStorage {
         backedUp = true;
       }
       await temporary.rename(activeFile.path);
-      // Keep the previous valid save as the one-step restore backup.
+      if (backedUp && await backup.exists()) await backup.delete();
     } on FileSystemException {
       if (backedUp && !await activeFile.exists() && await backup.exists()) {
         await backup.rename(activeFile.path);
@@ -221,7 +221,7 @@ class SaveStorage {
         backedUp = true;
       }
       await temporary.rename(_file.path);
-      if (backedUp && await backup.exists()) await backup.delete();
+      // Retain the previous valid save for explicit one-step restoration.
     } on FileSystemException {
       if (backedUp && !await _file.exists() && await backup.exists()) {
         await backup.rename(_file.path);
