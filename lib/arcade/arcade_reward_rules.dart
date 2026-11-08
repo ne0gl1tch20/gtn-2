@@ -8,6 +8,13 @@ class ArcadeRewardRules {
       reactionTimeMillis >= 0 &&
       reactionTimeMillis != tooEarlyReactionSentinel;
 
+  /// Memory Match rewards are claimable only after a submitted correct answer.
+  static bool isMemoryMatchRewardEligible({
+    required bool submitted,
+    required bool correct,
+  }) =>
+      submitted && correct;
+
   /// One guaranteed Nebula plus capped time and score bonuses.
   static int calculateNebulaReward(int playSeconds, int score) {
     final timeBonus = (playSeconds < 0 ? 0 : playSeconds ~/ 30).clamp(0, 4).toInt();
