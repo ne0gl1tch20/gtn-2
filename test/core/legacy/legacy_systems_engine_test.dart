@@ -4,7 +4,6 @@ import 'package:gtn_2/core/legacy/legacy_systems_engine.dart';
 import 'package:gtn_2/core/legacy/legacy_systems_state.dart';
 import 'package:gtn_2/core/numbers/big_number.dart';
 import 'package:gtn_2/core/progression/progression_state.dart';
-import 'package:gtn_2/worlds/world_boss_catalog.dart';
 
 void main() {
   const engine = LegacySystemsEngine();
