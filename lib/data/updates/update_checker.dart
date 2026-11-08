@@ -79,9 +79,9 @@ class UpdateChecker {
       }
       String? assetUrl(String name) {
         for (final item in assets) {
-          if (item is! Map<String, dynamic> || item['name'] != name) continue;
+          if (item is! Map<String, dynamic> || item['name'] != name) { continue; }
           final value = item['browser_download_url'];
-          if (value is String && _isReleaseAssetUrl(Uri.tryParse(value), name)) return value;
+          if (value is String && _isReleaseAssetUrl(Uri.tryParse(value), name)) { return value; }
         }
         return null;
       }
@@ -124,7 +124,7 @@ class UpdateChecker {
         runNumber: runNumber,
         commitSha: commitSha,
         sha256: checksum.toLowerCase(),
-        signingCertificateSha256: normalizeCertificateFingerprint(signingCertificate as String),
+        signingCertificateSha256: normalizeCertificateFingerprint(signingCertificate),
         apkUrl: apkUrl,
         releaseUrl: releaseUrl,
       );
@@ -231,7 +231,7 @@ class UpdateChecker {
       try {
         await for (final chunk in response.timeout(const Duration(seconds: 60))) {
           total += chunk.length;
-          if (total > maxWindowsArchiveBytes) throw const FormatException('Windows update archive exceeds the size limit.');
+          if (total > maxWindowsArchiveBytes) { throw const FormatException('Windows update archive exceeds the size limit.'); }
           sink.add(chunk);
         }
         await sink.flush();
@@ -276,7 +276,7 @@ Remove-Item -LiteralPath $temporaryDirectory -Recurse -Force -ErrorAction Silent
       );
       exit(0);
     } catch (_) {
-      if (await temporary.exists()) await temporary.delete(recursive: true);
+      if (await temporary.exists()) { await temporary.delete(recursive: true); }
       rethrow;
     } finally {
       client.close(force: true);
@@ -311,7 +311,7 @@ Remove-Item -LiteralPath $temporaryDirectory -Recurse -Force -ErrorAction Silent
       try {
         await for (final chunk in response.timeout(const Duration(seconds: 60))) {
           total += chunk.length;
-          if (total > maxApkBytes) throw const FormatException('Update APK exceeds the size limit.');
+          if (total > maxApkBytes) { throw const FormatException('Update APK exceeds the size limit.'); }
           sink.add(chunk);
         }
         await sink.flush();
@@ -338,7 +338,7 @@ Remove-Item -LiteralPath $temporaryDirectory -Recurse -Force -ErrorAction Silent
         apk.path,
         type: 'application/vnd.android.package-archive',
       );
-      if (result.type != ResultType.done) throw StateError(result.message);
+      if (result.type != ResultType.done) { throw StateError(result.message); }
     } catch (_) {
       if (await apk.exists()) await apk.delete();
       rethrow;
@@ -362,11 +362,11 @@ Remove-Item -LiteralPath $temporaryDirectory -Recurse -Force -ErrorAction Silent
     required int installedVersionCode,
     required int installedRunNumber,
   }) {
-    if (remoteVersionCode < installedVersionCode) return true;
-    if (remoteVersionCode > installedVersionCode) return false;
+    if (remoteVersionCode < installedVersionCode) { return true; }
+    if (remoteVersionCode > installedVersionCode) { return false; }
     final order = compareVersions(remoteVersionName, installedVersionName);
-    if (order < 0) return true;
-    if (order > 0) return false;
+    if (order < 0) { return true; }
+    if (order > 0) { return false; }
     return remoteRunNumber <= installedRunNumber;
   }
 
@@ -377,13 +377,13 @@ Remove-Item -LiteralPath $temporaryDirectory -Recurse -Force -ErrorAction Silent
     final b = parts(right);
     for (var i = 0; i < (a.length > b.length ? a.length : b.length); i++) {
       final comparison = (i < a.length ? a[i] : 0).compareTo(i < b.length ? b[i] : 0);
-      if (comparison != 0) return comparison;
+      if (comparison != 0) { return comparison; }
     }
     return 0;
   }
 
   Future<Map<String, dynamic>> _getJson(HttpClient client, Uri uri) async {
-    if (!_isTrustedMetadataUrl(uri)) throw const FormatException('Update metadata URL is not trusted.');
+    if (!_isTrustedMetadataUrl(uri)) { throw const FormatException('Update metadata URL is not trusted.'); }
     final request = await client.getUrl(uri);
     request.headers.set(HttpHeaders.acceptHeader, 'application/vnd.github+json');
     request.headers.set(HttpHeaders.userAgentHeader, 'GTN2-Updater');
@@ -394,10 +394,10 @@ Remove-Item -LiteralPath $temporaryDirectory -Recurse -Force -ErrorAction Silent
     final bytes = <int>[];
     await for (final chunk in response.timeout(const Duration(seconds: 30))) {
       bytes.addAll(chunk);
-      if (bytes.length > maxMetadataBytes) throw const FormatException('Update metadata is too large.');
+      if (bytes.length > maxMetadataBytes) { throw const FormatException('Update metadata is too large.'); }
     }
     final decoded = jsonDecode(utf8.decode(bytes));
-    if (decoded is! Map<String, dynamic>) throw const FormatException('Update metadata JSON is invalid.');
+    if (decoded is! Map<String, dynamic>) { throw const FormatException('Update metadata JSON is invalid.'); }
     return decoded;
   }
 
