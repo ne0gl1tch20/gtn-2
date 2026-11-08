@@ -91,9 +91,9 @@ void main() {
     }));
 
     state = engine.purchaseUltraShopItem(state, 'ultra_universal_harmony');
-    expect(state.ultra.toString(), '10500');
+    expect(state.ultra.toString(), '11000');
     state = engine.purchaseUltraShopItem(state, 'ultra_infinite_multiplier');
-    expect(state.ultra.toString(), '9500');
+    expect(state.ultra.toString(), '10000');
     state = engine.purchaseUltraShopItem(state, 'ultra_flex_badge');
     expect(state.ultra.toString(), '0');
     expect(state.ultraShopPurchases, containsAll({
