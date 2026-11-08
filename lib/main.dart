@@ -482,7 +482,9 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
     }
     final systems = _progression.legacySystems;
     if (!systems.autoClickerActive ||
-        systems.timeTravelPenaltyUntil > DateTime.now().millisecondsSinceEpoch) return;
+        systems.timeTravelPenaltyUntil > DateTime.now().millisecondsSinceEpoch) {
+      return;
+    }
     final purchasedBots = NebulaShopCatalog.botIds
         .where((id) => (_progression.nebulaItems[id] ?? 0) > 0)
         .toSet();
@@ -1007,7 +1009,7 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
           today: DateTime.now().toIso8601String().substring(0, 10),
           lootRoll: correct ? Random.secure().nextInt(1000) : null,
         ).copyWith(adaptiveTraitProfile: adaptiveProfileAfter);
-        if (isBot && botId != null) {
+        if (isBot) {
           final feedbackName = switch (resultForMessage) {
             GuessResult.tooLow => 'TOO_LOW',
             GuessResult.tooHigh => 'TOO_HIGH',
