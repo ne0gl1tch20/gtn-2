@@ -83,7 +83,7 @@ class _WorldMapPageState extends State<WorldMapPage> {
                       Row(
                         children: [
                           Expanded(
-                            child: Text(AppLocalizations.text('world_${boss.id == 'verdant_grove' ? 'verdant' : boss.id == 'crystal_caverns' ? 'crystal' : boss.id == 'ember_summit' ? 'ember' : 'nebula'}_name', boss.worldName), style: theme.textTheme.titleLarge),
+                            child: Text(AppLocalizations.text(boss.worldNameKey, boss.worldName), style: theme.textTheme.titleLarge),
                           ),
                           Text(defeated ? 'Defeated' : active ? 'Battle active' : canFight ? 'Ready to fight' : unlocked ? 'Unlocked' : canUnlock ? 'Ready to unlock' : 'Locked'),
                         ],
