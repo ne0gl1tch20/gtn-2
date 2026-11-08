@@ -133,7 +133,8 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
       }
       await storage.save(save);
       await _refresh();
-      await _select(slot);
+      await widget.onSelect(slot);
+      if (mounted) Navigator.of(context).pop();
     } catch (error) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -283,6 +284,9 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
     try {
       final storage = await SaveStorage.inApplicationDocuments(slot: slot);
       await storage.reset();
+      if (slot == widget.activeSlot) {
+        await widget.onSelect(slot);
+      }
       await _refresh();
     } finally {
       if (mounted) setState(() => _working = null);
