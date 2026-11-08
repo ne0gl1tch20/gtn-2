@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gtn_2/core/numbers/big_number.dart';
+import 'package:gtn_2/core/progression/progression_calculator.dart';
 import 'package:gtn_2/core/progression/progression_engine.dart';
 import 'package:gtn_2/core/progression/progression_state.dart';
 
@@ -102,4 +103,53 @@ void main() {
     expect(bought.nebulaItems['arcade_boost'], 1);
     expect(bought.money.toString(), '0');
   });
+  test('Prestige gain and starting capital upgrades match GTN1', () {
+    final state = ProgressionState.initial.copyWith(
+      money: BigNumber.fromInt(50000000),
+      prestigeUpgrades: const {
+        'prestige_gain_boost': 5,
+        'prestige_starting_capital': 3,
+      },
+    );
+    final result = engine.prestige(
+      state,
+      ProgressionCalculator.prestigeRules(state),
+    );
+    expect(result.prestige.toString(), '2');
+    expect(result.money.toString(), '3000');
+    expect(result.upgrades, isEmpty);
+    expect(result.prestigeUpgrades['prestige_gain_boost'], 5);
+  });
+
+  test('Ultra gain boost and Prestige starting capital match GTN1', () {
+    final state = ProgressionState.initial.copyWith(
+      money: BigNumber.fromInt(1000000000000),
+      prestige: BigNumber.fromInt(1000),
+      prestigeUpgrades: const {'prestige_starting_capital': 3},
+      ultraUpgrades: const {'ultra_gain_boost': 2},
+    );
+    final result = engine.ultra(
+      state,
+      ProgressionCalculator.ultraRules(state),
+    );
+    expect(result.ultra.toString(), '400');
+    expect(result.money.toString(), '3000');
+    expect(result.prestige.toString(), '0');
+    expect(result.prestigeUpgrades, isEmpty);
+    expect(result.ultraUpgrades['ultra_gain_boost'], 2);
+  });
+
+  test('Ultra Nebula upgrade stacks with the Nebula shop boost', () {
+    final state = ProgressionState.initial.copyWith(
+      nebulaItems: const {'nebula_boost': 1},
+      ultraUpgrades: const {'ultra_nebula_boost': 2},
+    );
+    final result = engine.awardNebulaFromArcade(
+      state,
+      BigNumber.fromInt(5),
+    );
+    expect(result.nebula.toString(), '30');
+    expect(result.nebulaEarned.toString(), '30');
+  });
+
 }
