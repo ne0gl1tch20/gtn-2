@@ -84,9 +84,29 @@ class GameHomePage extends StatefulWidget {
 class _GameHomePageState extends State<GameHomePage> {
   GameEngine _engine = GameEngine();
 
-  GameState _createGame() => GameEngine(
-        maximum: 100 * _legacySystemsEngine.rangeMultiplier(_progression.legacySystems),
-      ).newGame();
+  GameState _createGame() => _newGameWithAdaptiveTarget(
+        GameEngine(
+          maximum: 100 * _legacySystemsEngine.rangeMultiplier(_progression.legacySystems),
+        ).newGame(),
+      );
+
+  GameState _newGameWithAdaptiveTarget(GameState candidate) {
+    final systems = _progression.legacySystems;
+    final profile = systems.adaptiveTraitProfile;
+    final secret = _invisibleTraitEngine.adjustNextTarget(
+      profile: profile,
+      candidate: candidate.secret,
+      rangeMin: candidate.minimum,
+      rangeMax: candidate.maximum,
+    );
+    return GameState(
+      secret: secret,
+      attempts: 0,
+      isComplete: false,
+      minimum: candidate.minimum,
+      maximum: candidate.maximum,
+    );
+  }
   final ProgressionEngine _progressionEngine = const ProgressionEngine();
   final LegacySystemsEngine _legacySystemsEngine = const LegacySystemsEngine();
   final InvisibleTraitEngine _invisibleTraitEngine = const InvisibleTraitEngine();
@@ -199,7 +219,7 @@ class _GameHomePageState extends State<GameHomePage> {
       );
       setState(() {
         _progression = updated;
-        _game = _engine.newGame();
+        _game = _newGameWithAdaptiveTarget(_engine.newGame());
         _message = 'Prestige complete! Build your progress again.';
       });
       await _persist();
@@ -572,9 +592,6 @@ class _GameHomePageState extends State<GameHomePage> {
           activeSeasonId: _currentSeasonId(),
         );
         rangeScoutActive = traitEffects.rangeHint;
-        if (!correct && rangeScoutActive) {
-          _game = _engine.applyRangeScoutHint(_game, guess);
-        }
         final rawReward = correct
             ? (BigNumber.fromInt(1) + effects.flatBonus) *
                 _legacySystemsEngine.mutatorRewardMultiplier(legacySystems) *
@@ -607,6 +624,11 @@ class _GameHomePageState extends State<GameHomePage> {
           ultraCount: beforeGuess.ultraResets,
           currentStreak: afterReward.currentStreak,
         );
+        rangeScoutActive = rangeScoutActive ||
+            adaptiveDecision.helperIds.contains(InvisibleTraitEngine.helperRangeScout);
+        if (!correct && rangeScoutActive) {
+          _game = _engine.applyRangeScoutHint(_game, guess);
+        }
         if (correct) {
           final criticalChance = legacySystems.talents.contains('talent_crit_2')
               ? 0.15
