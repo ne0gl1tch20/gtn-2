@@ -12,6 +12,22 @@ void main() {
         upgrades: const {'upgrade_a': 3},
       );
 
+  test('migrates worlds unlocked by the previous Flutter save rules', () {
+    final oldSave = ProgressionState(
+      correctGuesses: 25,
+      upgrades: const {'upgrade_a': 5},
+      defeatedBosses: const {'verdant_grove'},
+      legacySystems: ProgressionState.initial.legacySystems.copyWith(
+        worldUnlockMigrationPending: true,
+      ),
+    );
+    final migrated = engine.migrateLegacyWorldUnlocks(oldSave);
+    expect(migrated.legacySystems.unlockedWorldIds,
+        containsAll(['verdant_grove', 'crystal_caverns']));
+    expect(migrated.legacySystems.worldUnlockMigrationPending, isFalse);
+    expect(WorldBossCatalog.isUnlocked(migrated, WorldBossCatalog.worlds[1]), isTrue);
+  });
+
   test('unlocks the next world only after its previous boss and thresholds', () {
     final first = WorldBossCatalog.worlds.first;
     final second = WorldBossCatalog.worlds[1];
