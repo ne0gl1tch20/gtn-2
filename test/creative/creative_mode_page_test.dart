@@ -45,8 +45,18 @@ void main() {
 
     await tester.tap(find.byType(Switch));
     await tester.pump();
+    await tester.scrollUntilVisible(
+      find.text('Start new run'),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
     await tester.tap(find.text('Start new run'));
     await tester.pump();
+    await tester.scrollUntilVisible(
+      find.text('Run in progress'),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
     await pumpUntilFound(tester, find.text('Run in progress'));
 
     final runningSave = await initialStorage.load();
