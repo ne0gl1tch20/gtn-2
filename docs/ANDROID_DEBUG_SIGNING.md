@@ -37,7 +37,7 @@ The main/master build job:
 
 1. Builds the Flutter debug APK.
 2. Aligns it with Android SDK \`zipalign\`.
-3. Signs it with the permanent PKCS#12 keystore using \`apksigner\`.
+3. Signs it with the permanent JKS keystore using \`apksigner\`.
 4. Runs \`apksigner verify --verbose --print-certs\` and extracts the certificate SHA-256 fingerprint.
 5. Uploads the signed APK and public certificate fingerprint as seven-day artifacts.
 
