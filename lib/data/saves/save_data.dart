@@ -15,7 +15,7 @@ class SaveData {
   })  : progression = progression ?? ProgressionState.initial,
         settings = settings ?? GameSettings.initial;
 
-  static const currentSchemaVersion = 3;
+  static const currentSchemaVersion = 4;
 
   final int schemaVersion;
   final int secret;
@@ -49,7 +49,7 @@ class SaveData {
     final maximum = json['maximum'] ?? 100;
     final progressionJson = json['progression'];
     final settingsJson = json['settings'];
-    if (version is! int || (version != 1 && version != 2 && version != currentSchemaVersion) ||
+    if (version is! int || (version != 1 && version != 2 && version != 3 && version != currentSchemaVersion) ||
         secret is! int ||
         attempts is! int ||
         gamesWon is! int ||
