@@ -36,9 +36,6 @@ class GuessingBot {
   }
 
   void observeGuess(int guess, BotFeedback feedback) {
-    if (guess < _lowerBound || guess > _upperBound) {
-      throw ArgumentError('Observed guess is outside the bot interval.');
-    }
     switch (feedback) {
       case BotFeedback.tooLow:
         _lowerBound = guess + 1;
