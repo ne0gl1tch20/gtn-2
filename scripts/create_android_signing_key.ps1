@@ -15,7 +15,8 @@ function Read-Secret([string]$Prompt) {
     }
 }
 
-$keytool = (Get-Command keytool.exe -ErrorAction SilentlyContinue)?.Source
+$keytoolCommand = Get-Command keytool.exe -ErrorAction SilentlyContinue
+$keytool = if ($keytoolCommand) { $keytoolCommand.Source } else { $null }
 if (-not $keytool) {
     $candidates = @(
         "$env:ProgramFiles\Android\Android Studio\jbr\bin\keytool.exe",
@@ -49,7 +50,7 @@ try {
     $arguments = @(
         '-genkeypair', '-v',
         '-keystore', $keystore,
-        '-storetype', 'PKCS12',
+        '-storetype', 'JKS',
         '-alias', $alias,
         '-keyalg', 'RSA',
         '-keysize', '4096',
