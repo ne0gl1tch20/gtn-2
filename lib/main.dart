@@ -1,9 +1,13 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'arcade/arcade_page.dart';
+import 'core/automation/bot_team.dart';
+import 'core/automation/guessing_bot.dart';
+import 'core/automation/offline_earnings_policy.dart';
 import 'core/game/difficulty_rules.dart';
 import 'core/game/game_engine.dart';
 import 'core/game/guess_economy_rules.dart';
@@ -84,7 +88,7 @@ class GameHomePage extends StatefulWidget {
   State<GameHomePage> createState() => _GameHomePageState();
 }
 
-class _GameHomePageState extends State<GameHomePage> {
+class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver {
   GameEngine _engine = GameEngine();
 
   int _rangeMaximum(ProgressionState progression, GameSettings settings) =>
@@ -120,6 +124,9 @@ class _GameHomePageState extends State<GameHomePage> {
   final ProgressionEngine _progressionEngine = const ProgressionEngine();
   final LegacySystemsEngine _legacySystemsEngine = const LegacySystemsEngine();
   final InvisibleTraitEngine _invisibleTraitEngine = const InvisibleTraitEngine();
+  final BotTeam _botTeam = BotTeam();
+  Timer? _autoClickerTimer;
+  bool _autoClickerTickRunning = false;
   ProgressionState _progression = ProgressionState.initial;
   GameSettings _settings = GameSettings.initial;
   final TextEditingController _controller = TextEditingController();
@@ -133,7 +140,18 @@ class _GameHomePageState extends State<GameHomePage> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _restoreSave();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _scheduleAutoClicker();
+    } else {
+      _autoClickerTimer?.cancel();
+      _autoClickerTimer = null;
+    }
   }
 
   Future<void> _restoreSave() async {
@@ -142,7 +160,22 @@ class _GameHomePageState extends State<GameHomePage> {
       final save = await storage.load();
       if (!mounted) return;
       if (save != null) {
-        final restoredProgression = save.progression;
+        var restoredProgression = save.progression;
+        final savedAt = restoredProgression.legacySystems.lastSaveTimestamp;
+        final now = DateTime.now().millisecondsSinceEpoch;
+        final elapsedSeconds = savedAt > 0 && now >= savedAt
+            ? ((now - savedAt) ~/ 1000)
+            : 0;
+        final offlineEarnings = OfflineEarningsPolicy.calculate(
+          autoClickerWasActive: restoredProgression.legacySystems.autoClickerActive,
+          elapsedSeconds: elapsedSeconds,
+        );
+        if (offlineEarnings.compareTo(BigNumber.fromInt(0)) > 0) {
+          restoredProgression = restoredProgression.copyWith(
+            money: restoredProgression.money + offlineEarnings,
+            moneyEarned: restoredProgression.moneyEarned + offlineEarnings,
+          );
+        }
         final restoredEngine = _engineFor(restoredProgression, save.settings);
         await AppLocalizations.load(save.settings.localeCode);
         setState(() {
@@ -158,7 +191,9 @@ class _GameHomePageState extends State<GameHomePage> {
           _progression = restoredProgression;
           _settings = save.settings;
           GtnApp.settingsNotifier.value = _settings;
-          _message = 'Welcome back! Your saved game is ready.';
+          _message = offlineEarnings.compareTo(BigNumber.fromInt(0)) > 0
+              ? 'Welcome back! Your Auto Clicker earned $offlineEarnings Money while you were away.'
+              : 'Welcome back! Your saved game is ready.';
         });
       }
     } on Exception {
@@ -170,11 +205,17 @@ class _GameHomePageState extends State<GameHomePage> {
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
+    _scheduleAutoClicker();
   }
 
   Future<void> _persist() async {
     try {
       final storage = await _storage;
+      _progression = _progression.copyWith(
+        legacySystems: _progression.legacySystems.copyWith(
+          lastSaveTimestamp: DateTime.now().millisecondsSinceEpoch,
+        ),
+      );
       await storage.save(
         SaveData(
           secret: _game.secret,
