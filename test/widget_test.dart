@@ -58,6 +58,8 @@ void main() {
 
     expect(find.text('More Menu'), findsOneWidget);
     expect(find.text('Save Slots'), findsOneWidget);
+    await tester.drag(find.byType(ListView).last, const Offset(0, -500));
+    await tester.pumpAndSettle();
     expect(find.text('Dev Settings'), findsOneWidget);
   });
 }
