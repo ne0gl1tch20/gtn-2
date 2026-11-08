@@ -78,7 +78,7 @@ class BotTeam {
       rangeMinimum: rangeMinimum,
       rangeMaximum: rangeMaximum,
     );
-    final guess = proposed.clamp(currentMinimum, currentMaximum);
+    final guess = proposed.clamp(currentMinimum, currentMaximum).toInt();
     return BotAction(
       botId: botId,
       guess: guess,
@@ -97,12 +97,13 @@ class BotTeam {
     required String botId,
     required int guess,
     required BotFeedback feedback,
+    required bool sharedMemory,
     required int nextRangeMinimum,
     required int nextRangeMaximum,
   }) {
-    final guesser = botId == 'auto_clicker_basic'
+    final guesser = botId == 'auto_clicker_basic' || sharedMemory
         ? _sharedGuesser
-        : _independentGuessers[botId] ?? _sharedGuesser;
+        : _independentGuessers.putIfAbsent(botId, GuessingBot.new);
     guesser.observeGuess(guess, feedback);
     if (feedback == BotFeedback.correct) {
       reset(nextRangeMinimum, nextRangeMaximum);
