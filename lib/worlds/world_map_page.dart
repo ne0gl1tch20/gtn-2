@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
 import '../core/progression/progression_state.dart';
@@ -164,7 +163,7 @@ class _WorldMapPageState extends State<WorldMapPage> {
         ],
       ),
       body: LayoutBuilder(
-        builder: (context, pageConstraints) => ListView(
+        builder: (context, _) => ListView(
           padding: const EdgeInsets.fromLTRB(12, 8, 12, 20),
           children: [
             Text(
