@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 
 import 'arcade/arcade_page.dart';
 import 'core/game/game_engine.dart';
-import 'core/legacy/legacy_systems_engine.dart';
 import 'core/legacy/invisible_trait_engine.dart';
+import 'core/legacy/legacy_systems_engine.dart';
 import 'core/numbers/big_number.dart';
 import 'core/progression/progression_calculator.dart';
 import 'core/progression/progression_engine.dart';
