@@ -595,6 +595,9 @@ class LegacySystemsEngine {
           endlessRiftTier: tier,
           activeWorldId: firstWorld.id,
           activeBossBattleWorldId: firstWorld.id,
+          unlockedWorldIds: Set.unmodifiable(
+            WorldBossCatalog.worlds.map((world) => world.id),
+          ),
           bossBattleMistakes: Map.unmodifiable({...systems.bossBattleMistakes, firstWorld.bossId: 0}),
         ),
       );
