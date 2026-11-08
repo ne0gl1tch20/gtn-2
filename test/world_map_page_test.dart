@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:gtn_2/core/progression/progression_state.dart';
 import 'package:gtn_2/core/legacy/legacy_systems_state.dart';
+import 'package:gtn_2/core/progression/progression_state.dart';
 import 'package:gtn_2/worlds/world_boss_catalog.dart';
 import 'package:gtn_2/worlds/world_map_page.dart';
 
