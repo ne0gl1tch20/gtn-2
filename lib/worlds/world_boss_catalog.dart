@@ -3,31 +3,56 @@ import '../core/progression/progression_state.dart';
 class WorldBossDefinition {
   const WorldBossDefinition({
     required this.id,
+    required this.bossId,
     required this.name,
     required this.worldName,
     required this.description,
-    required this.correctRequirement,
-    required this.upgradeRequirement,
-    required this.prestigeRequirement,
-    required this.ultraRequirement,
+    required this.x,
+    required this.y,
+    required this.secretId,
+    required this.secretAt,
+    required this.unlockCorrectGuesses,
+    required this.unlockUpgradeCount,
+    required this.unlockPrestigeCount,
+    required this.unlockUltraCount,
+    required this.fightCorrectGuesses,
+    required this.fightUpgradeCount,
+    required this.fightPrestigeCount,
+    required this.fightUltraCount,
     required this.hits,
     required this.moneyReward,
     required this.nebulaReward,
-    this.previousBossId,
+    this.unlockBossId,
   });
 
   final String id;
+  final String bossId;
   final String name;
   final String worldName;
   final String description;
-  final int correctRequirement;
-  final int upgradeRequirement;
-  final int prestigeRequirement;
-  final int ultraRequirement;
+  final double x;
+  final double y;
+  final String secretId;
+  final int secretAt;
+  final String? unlockBossId;
+  final int unlockCorrectGuesses;
+  final int unlockUpgradeCount;
+  final int unlockPrestigeCount;
+  final int unlockUltraCount;
+  final int fightCorrectGuesses;
+  final int fightUpgradeCount;
+  final int fightPrestigeCount;
+  final int fightUltraCount;
   final int hits;
   final int moneyReward;
   final int nebulaReward;
-  final String? previousBossId;
+
+  // Compatibility aliases for the earlier simplified Flutter map.
+  int get correctRequirement => fightCorrectGuesses;
+  int get upgradeRequirement => fightUpgradeCount;
+  int get prestigeRequirement => fightPrestigeCount;
+  int get ultraRequirement => fightUltraCount;
+  String? get previousBossId => unlockBossId;
 }
 
 class WorldBossCatalog {
@@ -35,59 +60,48 @@ class WorldBossCatalog {
 
   static const worlds = <WorldBossDefinition>[
     WorldBossDefinition(
-      id: 'verdant_grove',
-      name: 'Verdant Guardian',
-      worldName: 'Verdant Grove',
+      id: 'verdant_grove', bossId: 'verdant_guardian',
+      name: 'Verdant Guardian', worldName: 'Verdant Grove',
       description: 'The first guardian protects the overgrown path.',
-      correctRequirement: 10,
-      upgradeRequirement: 3,
-      prestigeRequirement: 0,
-      ultraRequirement: 0,
-      hits: 3,
-      moneyReward: 25000,
-      nebulaReward: 10,
+      x: 0.16, y: 0.24, secretId: 'whispering_hollow', secretAt: 50,
+      unlockCorrectGuesses: 0, unlockUpgradeCount: 0,
+      unlockPrestigeCount: 0, unlockUltraCount: 0,
+      fightCorrectGuesses: 10, fightUpgradeCount: 3,
+      fightPrestigeCount: 0, fightUltraCount: 0,
+      hits: 3, moneyReward: 25000, nebulaReward: 10,
     ),
     WorldBossDefinition(
-      id: 'crystal_caverns',
-      name: 'Crystal Sentinel',
-      worldName: 'Crystal Caverns',
+      id: 'crystal_caverns', bossId: 'crystal_golem',
+      name: 'Crystal Golem', worldName: 'Crystal Caverns',
       description: 'A crystal beast guards the cavern entrance.',
-      correctRequirement: 25,
-      upgradeRequirement: 5,
-      prestigeRequirement: 0,
-      ultraRequirement: 0,
-      previousBossId: 'verdant_grove',
-      hits: 5,
-      moneyReward: 100000,
-      nebulaReward: 25,
+      x: 0.43, y: 0.43, secretId: 'shard_archive', secretAt: 150,
+      unlockBossId: 'verdant_guardian', unlockCorrectGuesses: 25,
+      unlockUpgradeCount: 5, unlockPrestigeCount: 0, unlockUltraCount: 0,
+      fightCorrectGuesses: 50, fightUpgradeCount: 10,
+      fightPrestigeCount: 0, fightUltraCount: 0,
+      hits: 5, moneyReward: 100000, nebulaReward: 25,
     ),
     WorldBossDefinition(
-      id: 'ember_summit',
-      name: 'Ember Warden',
-      worldName: 'Ember Summit',
+      id: 'ember_summit', bossId: 'ember_dragon',
+      name: 'Ember Dragon', worldName: 'Ember Summit',
       description: 'A blazing guardian waits above the clouds.',
-      correctRequirement: 100,
-      upgradeRequirement: 15,
-      prestigeRequirement: 1,
-      ultraRequirement: 0,
-      previousBossId: 'crystal_caverns',
-      hits: 7,
-      moneyReward: 500000,
-      nebulaReward: 75,
+      x: 0.67, y: 0.24, secretId: 'ashen_vault', secretAt: 300,
+      unlockBossId: 'crystal_golem', unlockCorrectGuesses: 100,
+      unlockUpgradeCount: 15, unlockPrestigeCount: 1, unlockUltraCount: 0,
+      fightCorrectGuesses: 150, fightUpgradeCount: 25,
+      fightPrestigeCount: 1, fightUltraCount: 0,
+      hits: 7, moneyReward: 500000, nebulaReward: 75,
     ),
     WorldBossDefinition(
-      id: 'nebula_rift',
-      name: 'Rift Devourer',
-      worldName: 'Nebula Rift',
+      id: 'nebula_rift', bossId: 'nebula_titan',
+      name: 'Nebula Titan', worldName: 'Nebula Rift',
       description: 'The final guardian watches over the rift.',
-      correctRequirement: 250,
-      upgradeRequirement: 40,
-      prestigeRequirement: 3,
-      ultraRequirement: 1,
-      previousBossId: 'ember_summit',
-      hits: 10,
-      moneyReward: 5000000,
-      nebulaReward: 250,
+      x: 0.82, y: 0.59, secretId: 'lost_observatory', secretAt: 600,
+      unlockBossId: 'ember_dragon', unlockCorrectGuesses: 250,
+      unlockUpgradeCount: 40, unlockPrestigeCount: 3, unlockUltraCount: 1,
+      fightCorrectGuesses: 500, fightUpgradeCount: 75,
+      fightPrestigeCount: 5, fightUltraCount: 1,
+      hits: 10, moneyReward: 5000000, nebulaReward: 250,
     ),
   ];
 
@@ -95,19 +109,30 @@ class WorldBossCatalog {
       state.upgrades.values.fold(0, (sum, level) => sum + level);
 
   static bool isUnlocked(ProgressionState state, WorldBossDefinition boss) {
-    if (boss.previousBossId != null &&
-        !state.defeatedBosses.contains(boss.previousBossId)) {
+    if (boss.unlockBossId != null &&
+        !state.legacySystems.relicInventory.contains(boss.unlockBossId) &&
+        !state.defeatedBosses.contains(boss.unlockBossId) &&
+        !state.defeatedBosses.contains(boss.id)) {
       return false;
     }
-    return state.correctGuesses >= boss.correctRequirement &&
-        ownedUpgradeLevels(state) >= boss.upgradeRequirement &&
-        state.prestigeResets >= boss.prestigeRequirement &&
-        state.ultraResets >= boss.ultraRequirement;
+    return state.correctGuesses >= boss.unlockCorrectGuesses &&
+        ownedUpgradeLevels(state) >= boss.unlockUpgradeCount &&
+        state.prestigeResets >= boss.unlockPrestigeCount &&
+        state.ultraResets >= boss.unlockUltraCount;
   }
 
+  static bool canFight(ProgressionState state, WorldBossDefinition boss) =>
+      isUnlocked(state, boss) &&
+      state.correctGuesses >= boss.fightCorrectGuesses &&
+      ownedUpgradeLevels(state) >= boss.fightUpgradeCount &&
+      state.prestigeResets >= boss.fightPrestigeCount &&
+      state.ultraResets >= boss.fightUltraCount;
+
   static int damage(ProgressionState state, WorldBossDefinition boss) =>
-      (state.bossDamage[boss.id] ?? 0).clamp(0, boss.hits);
+      (state.bossDamage[boss.bossId] ?? state.bossDamage[boss.id] ?? 0)
+          .clamp(0, boss.hits);
 
   static bool isDefeated(ProgressionState state, WorldBossDefinition boss) =>
+      state.defeatedBosses.contains(boss.bossId) ||
       state.defeatedBosses.contains(boss.id);
 }
