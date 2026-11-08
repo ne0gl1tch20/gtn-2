@@ -3,24 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:gtn_2/arcade/arcade_page.dart';
 
 void main() {
-  Future<String> openMemoryMatch(WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
-      home: ArcadePage(onReward: (_, __) async {}),
-    ));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Memory Digit Sequence'));
-    await tester.pumpAndSettle();
-    await tester.pump(const Duration(seconds: 2));
-    await tester.pumpAndSettle();
-
-    final sequence = tester
-        .widgetList<Text>(find.byType(Text))
-        .map((widget) => widget.data?.trim())
-        .whereType<String>()
-        .firstWhere((value) => RegExp(r'^\\d\\s+\\d\\s+\\d$').hasMatch(value));
-    return sequence.split(RegExp(r'\\s+')).join();
-  }
-
   testWidgets('Memory Match accepts only one submitted answer',
       (WidgetTester tester) async {
     final rewards = <String>[];
