@@ -108,11 +108,11 @@ class WorldBossCatalog {
   static int ownedUpgradeLevels(ProgressionState state) =>
       state.upgrades.values.fold(0, (sum, level) => sum + level);
 
-  static bool isUnlocked(ProgressionState state, WorldBossDefinition boss) {
+  static bool canUnlock(ProgressionState state, WorldBossDefinition boss) {
+    if (isUnlocked(state, boss)) return false;
     if (boss.unlockBossId != null &&
-        !state.legacySystems.relicInventory.contains(boss.unlockBossId) &&
         !state.defeatedBosses.contains(boss.unlockBossId) &&
-        !state.defeatedBosses.contains(boss.id)) {
+        !state.legacySystems.relicInventory.contains(boss.unlockBossId)) {
       return false;
     }
     return state.correctGuesses >= boss.unlockCorrectGuesses &&
@@ -120,6 +120,9 @@ class WorldBossCatalog {
         state.prestigeResets >= boss.unlockPrestigeCount &&
         state.ultraResets >= boss.unlockUltraCount;
   }
+
+  static bool isUnlocked(ProgressionState state, WorldBossDefinition boss) =>
+      state.legacySystems.unlockedWorldIds.contains(boss.id);
 
   static bool canFight(ProgressionState state, WorldBossDefinition boss) =>
       isUnlocked(state, boss) &&
