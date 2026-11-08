@@ -56,6 +56,22 @@ class GameDashboardPage extends StatelessWidget {
   final VoidCallback onLegacyPages;
   final bool showDeveloperSettings;
 
+  void _openMoreMenu(BuildContext context, Color panel) {
+    Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (_) => _MoreMenuPage(
+          showDeveloperSettings: showDeveloperSettings,
+          onPrestige: onPrestige,
+          onNebulaShop: onNebulaShop,
+          onLegacyPages: onLegacyPages,
+          onSaveSlots: onSaveSlots,
+          onSettings: onSettings,
+          onDeveloperSettings: onDeveloperSettings,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final dark = Theme.of(context).brightness == Brightness.dark;
@@ -67,6 +83,27 @@ class GameDashboardPage extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: dark ? _bg : const Color(0xFFF5F6FC),
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(7, 8, 7, 7),
+          decoration: BoxDecoration(
+            color: dark ? const Color(0xF20A0E1C) : Colors.white,
+            border: Border(
+              top: BorderSide(color: foreground.withValues(alpha: .10)),
+            ),
+          ),
+          child: Row(
+            children: [
+              Expanded(child: _BottomNavItem(Icons.public_rounded, 'Beyond the Numbers', false, onWorldMap)),
+              Expanded(child: _BottomNavItem(Icons.sports_esports_rounded, 'Arcade', false, onArcade)),
+              Expanded(child: _BottomNavItem(Icons.play_arrow_rounded, 'Play', true, () {})),
+              Expanded(child: _BottomNavItem(Icons.upgrade_rounded, 'Upgrades', false, onUpgradeShop)),
+              Expanded(child: _BottomNavItem(Icons.menu_rounded, 'More', false, () => _openMoreMenu(context, panel))),
+            ],
+          ),
+        ),
+      ),
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -151,83 +188,7 @@ class GameDashboardPage extends StatelessWidget {
                           ],
                         ),
                       ),
-                      const SizedBox(width: 5),
-                      _TopButton(Icons.save_rounded, 'Save slots', onSaveSlots,
-                          foreground),
-                      const SizedBox(width: 5),
-                      _TopButton(Icons.tune_rounded, 'Settings', onSettings,
-                          foreground),
-                      if (showDeveloperSettings) ...[
-                        const SizedBox(width: 5),
-                        _TopButton(Icons.bug_report_rounded,
-                            'Developer settings', onDeveloperSettings,
-                            foreground),
-                      ],
                     ],
-                  ),
-                  const SizedBox(height: 14),
-                  Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: const Color(0xCC090D1B),
-                      borderRadius: BorderRadius.circular(19),
-                      border: Border.all(color: Colors.white.withValues(alpha: .09)),
-                    ),
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        children: [
-                          _NavTab(Icons.public_rounded, 'Worlds', false, onWorldMap),
-                          _NavTab(Icons.sports_esports_rounded, 'Arcade', false, onArcade),
-                          _NavTab(Icons.play_arrow_rounded, 'Play', true, () {}),
-                          _NavTab(Icons.upgrade_rounded, 'Upgrades', false, onUpgradeShop),
-                          _NavTab(Icons.menu_rounded, 'More', false, () {
-                            showModalBottomSheet<void>(
-                              context: context,
-                              showDragHandle: true,
-                              backgroundColor: panel,
-                              builder: (sheetContext) => SafeArea(
-                                child: Wrap(
-                                  children: [
-                                    ListTile(
-                                      leading: const Icon(Icons.auto_awesome_rounded, color: _gold),
-                                      title: const Text('Prestige & Ultra'),
-                                      onTap: () { Navigator.pop(sheetContext); onPrestige(); },
-                                    ),
-                                    ListTile(
-                                      leading: const Icon(Icons.diamond_rounded, color: _purple),
-                                      title: const Text('Nebula Shop'),
-                                      onTap: () { Navigator.pop(sheetContext); onNebulaShop(); },
-                                    ),
-                                    ListTile(
-                                      leading: const Icon(Icons.auto_stories_rounded),
-                                      title: const Text('Journey, Rewards & Codex'),
-                                      onTap: () { Navigator.pop(sheetContext); onLegacyPages(); },
-                                    ),
-                                    ListTile(
-                                      leading: const Icon(Icons.save_rounded),
-                                      title: const Text('Save Slots'),
-                                      onTap: () { Navigator.pop(sheetContext); onSaveSlots(); },
-                                    ),
-                                    ListTile(
-                                      leading: const Icon(Icons.settings_rounded),
-                                      title: const Text('Settings'),
-                                      onTap: () { Navigator.pop(sheetContext); onSettings(); },
-                                    ),
-                                    if (showDeveloperSettings)
-                                      ListTile(
-                                        leading: const Icon(Icons.bug_report_rounded),
-                                        title: const Text('Developer Settings'),
-                                        onTap: () { Navigator.pop(sheetContext); onDeveloperSettings(); },
-                                      ),
-                                  ],
-                                ),
-                              ),
-                            );
-                          }),
-                        ],
-                      ),
-                    ),
                   ),
                   const SizedBox(height: 14),
                   Container(
@@ -280,7 +241,7 @@ class GameDashboardPage extends StatelessWidget {
                                 Icon(Icons.circle, color: _green, size: 8),
                                 SizedBox(width: 7),
                                 Text(
-                                  'YOUR NEXT NUMBER IS WAITING',
+                                  'CURRENT RUN',
                                   style: TextStyle(
                                     color: Color(0xFF9BA5C4),
                                     fontSize: 9,
@@ -291,7 +252,7 @@ class GameDashboardPage extends StatelessWidget {
                               ],
                             ),
                             const SizedBox(height: 16),
-                            const Text('YOUR SECRET NUMBER RANGE',
+                            const Text('Find your secret number',
                                 style: TextStyle(
                                   color: Color(0xFF9BA5C4),
                                   fontSize: 9,
@@ -308,7 +269,7 @@ class GameDashboardPage extends StatelessWidget {
                                   letterSpacing: -2,
                                 )),
                             const SizedBox(height: 7),
-                            const Text('FIND THE HIDDEN NUMBER',
+                            const Text('Make your move.',
                                 style: TextStyle(
                                   color: _cyan,
                                   fontSize: 10,
@@ -368,7 +329,7 @@ class GameDashboardPage extends StatelessWidget {
                   Row(
                     children: [
                       Expanded(
-                        child: Text('YOUR JOURNEY',
+                        child: Text('MORE TO EXPLORE',
                             style: TextStyle(
                               color: muted,
                               fontSize: 11,
@@ -376,7 +337,7 @@ class GameDashboardPage extends StatelessWidget {
                               letterSpacing: 2,
                             )),
                       ),
-                      Text('Explore the game',
+                      Text('Open a section',
                           style: TextStyle(color: muted, fontSize: 11)),
                     ],
                   ),
@@ -446,8 +407,75 @@ class GameDashboardPage extends StatelessWidget {
   }
 }
 
-class _NavTab extends StatelessWidget {
-  const _NavTab(this.icon, this.label, this.selected, this.onTap);
+class _MoreMenuPage extends StatelessWidget {
+  const _MoreMenuPage({
+    required this.showDeveloperSettings,
+    required this.onPrestige,
+    required this.onNebulaShop,
+    required this.onLegacyPages,
+    required this.onSaveSlots,
+    required this.onSettings,
+    required this.onDeveloperSettings,
+  });
+
+  final bool showDeveloperSettings;
+  final VoidCallback onPrestige;
+  final VoidCallback onNebulaShop;
+  final VoidCallback onLegacyPages;
+  final VoidCallback onSaveSlots;
+  final VoidCallback onSettings;
+  final VoidCallback onDeveloperSettings;
+
+  @override
+  Widget build(BuildContext context) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    final foreground = dark ? _white : const Color(0xFF172039);
+    final muted = dark ? _muted : const Color(0xFF65708C);
+    final panel = dark ? _panel : Colors.white;
+
+    Widget entry(IconData icon, String title, String subtitle, VoidCallback onTap) {
+      return Card(
+        color: panel,
+        margin: const EdgeInsets.only(bottom: 10),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(18),
+          side: BorderSide(color: foreground.withValues(alpha: .08)),
+        ),
+        child: ListTile(
+          contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+          leading: Icon(icon, color: _purple),
+          title: Text(title, style: TextStyle(color: foreground, fontWeight: FontWeight.w800)),
+          subtitle: Text(subtitle, style: TextStyle(color: muted, fontSize: 11)),
+          trailing: Icon(Icons.chevron_right_rounded, color: muted),
+          onTap: onTap,
+        ),
+      );
+    }
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('More Hub')),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          Text('More Menu', style: Theme.of(context).textTheme.headlineSmall),
+          const SizedBox(height: 5),
+          Text('Your shortcuts, your order.', style: TextStyle(color: muted)),
+          const SizedBox(height: 18),
+          entry(Icons.auto_awesome_rounded, 'Prestige & Ultra', 'Prestige and Ultra progression', onPrestige),
+          entry(Icons.diamond_rounded, 'Nebula Shop', 'Nebula upgrades and items', onNebulaShop),
+          entry(Icons.auto_stories_rounded, 'Journey, Rewards & Codex', 'Achievements, rewards and discoveries', onLegacyPages),
+          entry(Icons.save_rounded, 'Save Slots', 'Manage your saved games', onSaveSlots),
+          entry(Icons.settings_rounded, 'Settings', 'Game preferences', onSettings),
+          if (showDeveloperSettings)
+            entry(Icons.bug_report_rounded, 'Dev Settings', 'Developer tools', onDeveloperSettings),
+        ],
+      ),
+    );
+  }
+}
+
+class _BottomNavItem extends StatelessWidget {
+  const _BottomNavItem(this.icon, this.label, this.selected, this.onTap);
 
   final IconData icon;
   final String label;
@@ -455,62 +483,34 @@ class _NavTab extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 2),
-        child: Material(
-          color: selected ? const Color(0x339B7CFF) : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
-          child: InkWell(
-            onTap: onTap,
-            borderRadius: BorderRadius.circular(12),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 11),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: selected
-                      ? _purple.withValues(alpha: .35)
-                      : Colors.transparent,
-                ),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(icon, size: 17, color: selected ? _white : _muted),
-                  const SizedBox(width: 6),
-                  Text(label, style: TextStyle(
+  Widget build(BuildContext context) => Material(
+        color: selected ? _purple.withValues(alpha: .15) : Colors.transparent,
+        borderRadius: BorderRadius.circular(13),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(13),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 7),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(icon, size: 19, color: selected ? _purple : _muted),
+                const SizedBox(height: 3),
+                Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
                     color: selected ? _white : _muted,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w900,
-                  )),
-                ],
-              ),
+                    fontSize: 8,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ],
             ),
           ),
         ),
-      );
-}
-
-class _TopButton extends StatelessWidget {
-  const _TopButton(this.icon, this.tooltip, this.onTap, this.foreground);
-  final IconData icon;
-  final String tooltip;
-  final VoidCallback onTap;
-  final Color foreground;
-
-  @override
-  Widget build(BuildContext context) => IconButton(
-        tooltip: tooltip,
-        onPressed: onTap,
-        style: IconButton.styleFrom(
-          backgroundColor: foreground.withValues(alpha: .07),
-          foregroundColor: foreground,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
-            side: BorderSide(color: foreground.withValues(alpha: .08)),
-          ),
-        ),
-        icon: Icon(icon, size: 19),
       );
 }
 
@@ -716,7 +716,7 @@ class _GuessInput extends StatelessWidget {
           children: [
             Row(
               children: [
-                Text('MAKE YOUR GUESS',
+                Text('YOUR GUESS',
                     style: TextStyle(
                       color: foreground,
                       fontSize: 11,
@@ -724,7 +724,7 @@ class _GuessInput extends StatelessWidget {
                       letterSpacing: 1.4,
                     )),
                 const Spacer(),
-                Text('${game.minimum} TO ${game.maximum}',
+                Text('WHOLE NUMBER',
                     style: TextStyle(
                       color: muted,
                       fontSize: 9,
@@ -782,17 +782,13 @@ class _GuessInput extends StatelessWidget {
                         borderRadius: BorderRadius.circular(16),
                       ),
                     ),
-                    child: const Row(
-                      children: [
-                        Text('GUESS',
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: 1,
-                            )),
-                        SizedBox(width: 6),
-                        Icon(Icons.arrow_forward_rounded, size: 17),
-                      ],
+                    child: const Text(
+                      '->',
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0,
+                      ),
                     ),
                   ),
                 ),

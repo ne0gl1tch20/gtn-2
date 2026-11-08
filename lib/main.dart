@@ -138,7 +138,7 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
   int _activeSlot = 1;
   int _gamesWon = 0;
   bool _isLoading = true;
-  String _message = 'Guess a number between 1 and 100.';
+  String _message = 'Make your move.';
 
   @override
   void initState() {
@@ -1205,7 +1205,7 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
     setState(() {
       _game = _newGameWithAdaptiveTarget(_engine.newGame());
       _botTeam.reset(_game.minimum, _game.maximum);
-      _message = 'New round! Guess a number between ${_game.minimum} and ${_game.maximum}.';
+      _message = 'Make your move.';
       _controller.clear();
     });
     await _persist();
