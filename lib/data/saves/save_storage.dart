@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:path_provider/path_provider.dart';
 
+import '../../core/creative/creative_mode.dart';
 import 'save_data.dart';
 
 class SaveStorage {
@@ -195,7 +196,8 @@ class SaveStorage {
         data.attempts < 0 ||
         data.gamesWon < 0 ||
         data.profileName.length > 24 ||
-        !SaveData.profileIconIds.contains(data.profileIconId)) {
+        !SaveData.profileIconIds.contains(data.profileIconId) ||
+        (data.creativeMode != null && !CreativeModeSave.validate(data.creativeMode!))) {
       return Future<void>.error(
         ArgumentError('Refusing to write invalid save data.'),
       );
