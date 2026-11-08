@@ -38,11 +38,18 @@ void main() {
     expect(find.text('YOUR WALLET'), findsOneWidget);
     expect(find.text('Play'), findsOneWidget);
     expect(find.text('Beyond the Numbers'), findsOneWidget);
-    expect(find.text('Daily Momentum'), findsOneWidget);
     expect(find.text('More'), findsOneWidget);
 
+    await tester.scrollUntilVisible(
+      find.text('Daily Momentum'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Daily Momentum'), findsOneWidget);
+
     // Return to the top before checking the Automation Lab above the wallet.
-    await tester.drag(find.byType(ListView).first, const Offset(0, 500));
+    await tester.drag(find.byType(ListView).first, const Offset(0, 1000));
     await tester.pumpAndSettle();
     await tester.drag(find.byType(ListView).first, const Offset(0, -500));
     await tester.pumpAndSettle();
