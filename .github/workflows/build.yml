@@ -40,6 +40,8 @@ jobs:
         run: flutter create --platforms=android --project-name=gtn_2 --org=com.jarrlyyy .
       - name: Configure Android package installation permission
         run: python3 scripts/configure_android_updater.py
+      - name: Cache Gradle distributions and dependencies
+        uses: gradle/actions/setup-gradle@v4
       - name: Install dependencies
         run: flutter pub get
       - name: Read app version
@@ -49,7 +51,15 @@ jobs:
           test -n "$version_name"
           echo "APP_VERSION=$version_name" >> "$GITHUB_ENV"
       - name: Build debug APK
-        run: flutter build apk --debug --build-name="$APP_VERSION" --build-number="$GITHUB_RUN_NUMBER" --dart-define=APP_VERSION="$APP_VERSION" --dart-define=APP_BUILD_NUMBER="$GITHUB_RUN_NUMBER"
+        shell: bash
+        run: |
+          for attempt in 1 2 3; do
+            if flutter build apk --debug --build-name="$APP_VERSION" --build-number="$GITHUB_RUN_NUMBER" --dart-define=APP_VERSION="$APP_VERSION" --dart-define=APP_BUILD_NUMBER="$GITHUB_RUN_NUMBER"; then
+              exit 0
+            fi
+            if [ "$attempt" -lt 3 ]; then sleep $((attempt * 15)); fi
+          done
+          exit 1
       - name: Upload Android APK
         uses: actions/upload-artifact@v4
         with:
