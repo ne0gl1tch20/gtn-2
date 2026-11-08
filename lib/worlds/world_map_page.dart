@@ -26,11 +26,15 @@ class _WorldMapPageState extends State<WorldMapPage> {
   late ProgressionState _state = widget.progression;
   String? _attacking;
 
-  Future<void> _runAction(WorldBossDefinition boss, String action) async {
+  Future<void> _runAction(
+    WorldBossDefinition boss,
+    String action, {
+    String? targetId,
+  }) async {
     if (_attacking != null) return;
     setState(() => _attacking = boss.id);
     try {
-      final updated = await widget.onAction(boss.id, action);
+      final updated = await widget.onAction(targetId ?? boss.id, action);
       if (mounted) setState(() => _state = updated);
     } finally {
       if (mounted) setState(() => _attacking = null);
@@ -117,6 +121,28 @@ class _WorldMapPageState extends State<WorldMapPage> {
                                           : 'World locked',
                         ),
                       ),
+                      if (unlocked && _state.correctGuesses >= boss.secretAt)
+                        OutlinedButton.icon(
+                          onPressed: _attacking != null
+                              ? null
+                              : () => _runAction(
+                                    boss,
+                                    'secret',
+                                    targetId: boss.secretId,
+                                  ),
+                          icon: Icon(
+                            _state.legacySystems.discoveredSecrets.contains(boss.secretId)
+                                ? Icons.key
+                                : Icons.lock_open_rounded,
+                          ),
+                          label: Text(
+                            _state.legacySystems.discoveredSecrets.contains(boss.secretId)
+                                ? 'Secret discovered: ${boss.secretId}'
+                                : 'Discover secret: ${boss.secretId}',
+                          ),
+                        ),
+                      if (unlocked && _state.correctGuesses < boss.secretAt)
+                        Text('Secret area unlocks at ${boss.secretAt} correct guesses.'),
                       if (canUnlock)
                         FilledButton.tonal(
                           onPressed: _attacking != null
