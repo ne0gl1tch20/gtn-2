@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'arcade/arcade_page.dart';
 import 'core/game/difficulty_rules.dart';
 import 'core/game/game_engine.dart';
+import 'core/game/guess_economy_rules.dart';
 import 'core/legacy/invisible_trait_engine.dart';
 import 'core/legacy/legacy_systems_engine.dart';
 import 'core/numbers/big_number.dart';
@@ -31,6 +32,7 @@ import 'worlds/world_map_page.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await AppLocalizations.load('en_us');
+  await UpgradeCatalog.load();
   runApp(const GtnApp());
 }
 
