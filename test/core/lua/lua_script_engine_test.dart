@@ -159,6 +159,44 @@ void main() {
       expect(engine.status().activeInstanceId, isNull);
     });
 
+    test('supports the typed developer console without raw Lua evaluation',
+        () async {
+      final engine = LuaEngine(repository: _repository());
+
+      expect(
+        await engine.executeConsoleCommand('/lua help'),
+        contains('/lua status'),
+      );
+      expect(
+        await engine.executeConsoleCommand('/lua eval'),
+        contains('disabled'),
+      );
+      expect(
+        await engine.executeConsoleCommand('/lua list'),
+        contains('number_rush'),
+      );
+      expect(
+        await engine.executeConsoleCommand('/lua inspect number_rush'),
+        contains('Number Rush'),
+      );
+      expect(
+        await engine.executeConsoleCommand('/lua run number_rush'),
+        contains('Started Number Rush'),
+      );
+      expect(
+        await engine.executeConsoleCommand('/lua status'),
+        contains('ready'),
+      );
+      expect(
+        await engine.executeConsoleCommand('/lua stop'),
+        'Lua activity stopped.',
+      );
+      expect(
+        await engine.executeConsoleCommand('/lua logs'),
+        contains('Activity started'),
+      );
+    });
+
     test('invalid answers do not consume the single answer submission',
         () async {
       final engine = LuaEngine(repository: _repository());
