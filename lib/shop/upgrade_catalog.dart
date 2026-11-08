@@ -18,7 +18,7 @@ class GameUpgrade {
   final String description;
   final double effectPerLevel;
 
-  /// Only upgrades with a verified, wired GTN1 gameplay effect appear in the shop.
+  /// Only upgrades with a verified, wired GTN1 gameplay effect appear in a shop.
   bool get gameplayImplemented => const {
         'reward_multiplier',
         'better_range',
@@ -57,64 +57,73 @@ class UpgradeCatalog {
 
   static List<GameUpgrade> get availableForGameplay =>
       List.unmodifiable(_all.where((item) => item.gameplayImplemented));
+
   static List<GameUpgrade> get availablePrestige =>
       List.unmodifiable(_prestige.where((item) => item.gameplayImplemented));
+
   static List<GameUpgrade> get availableUltra =>
       List.unmodifiable(_ultra.where((item) => item.gameplayImplemented));
 
   static Future<void> load() async {
     if (_loaded) return;
-    Future<List<GameUpgrade>> readCatalog(String path, int expectedCount) async {
+
+    Future<List<GameUpgrade>> readCatalog(
+      String path,
+      int expectedCount,
+    ) async {
       final source = await rootBundle.loadString(path);
       final decoded = jsonDecode(source);
-    if (decoded is! Map<String, dynamic> ||
-        decoded['schemaVersion'] != 1 ||
-        decoded['upgrades'] is! List) {
-      throw FormatException('Unsupported GTN1 upgrade catalog: $path');
-    }
+      if (decoded is! Map<String, dynamic> ||
+          decoded['schemaVersion'] != 1 ||
+          decoded['upgrades'] is! List) {
+        throw FormatException('Unsupported GTN1 upgrade catalog: $path');
+      }
 
-    final parsed = <GameUpgrade>[];
-    final ids = <String>{};
-    for (final raw in decoded['upgrades'] as List) {
-      if (raw is! Map<String, dynamic>) {
-        throw const FormatException('Invalid GTN1 upgrade definition.');
+      final parsed = <GameUpgrade>[];
+      final ids = <String>{};
+      for (final raw in decoded['upgrades'] as List) {
+        if (raw is! Map<String, dynamic>) {
+          throw const FormatException('Invalid GTN1 upgrade definition.');
+        }
+        final id = raw['id'];
+        final name = raw['name'];
+        final description = raw['description'];
+        final maxLevel = raw['maxLevel'];
+        final baseCost = raw['baseCost'];
+        final growthRate = raw['costMultiplier'];
+        final effect = raw['effectPerLevel'];
+        if (id is! String ||
+            id.isEmpty ||
+            !ids.add(id) ||
+            name is! String ||
+            description is! String ||
+            maxLevel is! int ||
+            maxLevel < 1 ||
+            baseCost is! String ||
+            growthRate is! num ||
+            growthRate <= 0 ||
+            effect is! num) {
+          throw FormatException('Invalid or duplicate GTN1 upgrade: $id');
+        }
+        parsed.add(GameUpgrade(
+          definition: UpgradeDefinition(
+            id: id,
+            baseCost: BigNumber.parse(baseCost),
+            growthRate: BigNumber.parse(growthRate.toString()),
+            maxLevel: maxLevel,
+          ),
+          name: name,
+          description: description,
+          effectPerLevel: effect.toDouble(),
+        ));
       }
-      final id = raw['id'];
-      final name = raw['name'];
-      final description = raw['description'];
-      final maxLevel = raw['maxLevel'];
-      final baseCost = raw['baseCost'];
-      final growthRate = raw['costMultiplier'];
-      final effect = raw['effectPerLevel'];
-      if (id is! String ||
-          id.isEmpty ||
-          !ids.add(id) ||
-          name is! String ||
-          description is! String ||
-          maxLevel is! int ||
-          maxLevel < 1 ||
-          baseCost is! String ||
-          growthRate is! num ||
-          growthRate <= 0 ||
-          effect is! num) {
-        throw FormatException('Invalid or duplicate GTN1 upgrade: $id');
+      if (parsed.length != expectedCount) {
+        throw FormatException(
+          'Expected $expectedCount GTN1 upgrades in $path, '
+          'found ${parsed.length}.',
+        );
       }
-      parsed.add(GameUpgrade(
-        definition: UpgradeDefinition(
-          id: id,
-          baseCost: BigNumber.parse(baseCost),
-          growthRate: BigNumber.parse(growthRate.toString()),
-          maxLevel: maxLevel,
-        ),
-        name: name,
-        description: description,
-        effectPerLevel: effect.toDouble(),
-      ));
-    }
-    if (parsed.length != expectedCount) {
-      throw FormatException('Expected $expectedCount GTN1 upgrades in $path, found ${parsed.length}.');
-    }
-    return List.unmodifiable(parsed);
+      return List.unmodifiable(parsed);
     }
 
     final normal = await readCatalog('assets/game/upgrades.json', 11);
@@ -126,7 +135,6 @@ class UpgradeCatalog {
     _loaded = true;
   }
 
-  static GameUpgrade byId(String id) =>
-      [..._all, ..._prestige, ..._ultra]
-          .firstWhere((upgrade) => upgrade.definition.id == id);
+  static GameUpgrade byId(String id) => [..._all, ..._prestige, ..._ultra]
+      .firstWhere((upgrade) => upgrade.definition.id == id);
 }
