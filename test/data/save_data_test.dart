@@ -203,6 +203,32 @@ void main() {
     expect(await File('${directory.path}/gtn2-save.json.corrupt').exists(), isTrue);
   });
 
+  test('persists the active save slot across storage instances', () async {
+    final directory =
+        await Directory.systemTemp.createTemp('gtn2-active-slot-test-');
+    addTearDown(() => directory.delete(recursive: true));
+    final slotOne = SaveStorage(directory: directory, slot: 1);
+    final slotTen = SaveStorage(directory: directory, slot: 10);
+
+    expect(await slotOne.loadActiveSlot(), 1);
+    await slotTen.saveActiveSlot(10);
+    expect(await slotOne.loadActiveSlot(), 10);
+    await slotOne.saveActiveSlot(3);
+    expect(await slotTen.loadActiveSlot(), 3);
+  });
+
+  test('rejects invalid active slot values without replacing the selection', () async {
+    final directory =
+        await Directory.systemTemp.createTemp('gtn2-active-slot-invalid-');
+    addTearDown(() => directory.delete(recursive: true));
+    final storage = SaveStorage(directory: directory);
+
+    await storage.saveActiveSlot(4);
+    await expectLater(storage.saveActiveSlot(0), throwsRangeError);
+    await expectLater(storage.saveActiveSlot(11), throwsRangeError);
+    expect(await storage.loadActiveSlot(), 4);
+  });
+
   test('save slots use separate files', () async {
     final directory =
         await Directory.systemTemp.createTemp('gtn2-save-slots-test-');
