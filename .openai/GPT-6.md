@@ -156,3 +156,16 @@ This checkpoint is intentionally not a completion claim:
 - The latest validation run for that fix is [#42448892131](https://github.com/ne0gl1tch20/gtn-2/actions/runs/42448892131); check its final Android and Windows results.
 - The prior run passed formatting, analysis, and Windows build but failed one Android widget test; its Android APK build was skipped.
 - The full-port APK gate remains closed.
+
+
+## Execution instruction — start at step 1 and continue through step 8
+
+Start with **Step 1** above, then work through **Steps 2–8 in order**. Continue from the real repository state, implement the next concrete gap, validate it, and move forward. Do not turn this into an endless cycle of status checks or repeatedly ask whether to continue. Do not stop after reporting a plan or after one green workflow.
+
+Keep routine progress narration to yourself; only interrupt the user when a specific decision, permission, credential, unavailable device, or other genuine blocker requires their input.
+
+**Reminder from the user (preserve this goal):**
+
+> Continue around the goal without telling me or letting me know. Do not give me the apk without honest 100% port. Follow this goal: a complete, playable flutter port thats all flutter and dart with some cpp if needed instead of broken, placeholder, mock, fake, and missing features.
+
+This is a strict release gate, not a suggestion. Never hand over or publish an APK as the finished port until honest full parity is demonstrated by the source inventory, working implementations, tests, platform builds, and real Android play-test. If the port is not fully complete, keep working through the remaining steps and withhold the APK. Do not claim 100% based on compilation or CI alone.
