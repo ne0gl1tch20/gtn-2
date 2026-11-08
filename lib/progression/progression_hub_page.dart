@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import '../core/numbers/big_number.dart';
 import '../core/progression/progression_calculator.dart';
 import '../core/progression/progression_state.dart';
-import '../shop/permanent_upgrade_shop_page.dart';
 import '../shop/permanent_shop_catalog.dart';
+import '../shop/permanent_upgrade_shop_page.dart';
 import '../shop/upgrade_catalog.dart';
 
 typedef ResetAction = Future<ProgressionState> Function();
