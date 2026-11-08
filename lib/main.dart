@@ -138,7 +138,7 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
   int _activeSlot = 1;
   int _gamesWon = 0;
   bool _isLoading = true;
-  String _message = 'Make your move.';
+  String _message = 'Guess a number between 1 and 100.';
 
   @override
   void initState() {
@@ -928,6 +928,7 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
       MaterialPageRoute<void>(
         builder: (_) => LegacyHubPage(
           progression: _progression,
+          activeSlot: _activeSlot,
           onSystemsChanged: _applyLegacyProgression,
         ),
       ),
@@ -1142,13 +1143,7 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
         _progression = nextProgression;
         if (isBot) {
           if (correct) {
-            final nextGame = _newGameWithAdaptiveTarget(_engine.newGame());
-            _game = _engine.continueAfterCorrect(
-              _game,
-              nextGame,
-              attempts: previousAttempts,
-            );
-            _botTeam.reset(_game.minimum, _game.maximum);
+            _game = _newGameWithAdaptiveTarget(_engine.newGame());
           } else {
             _game = GameState(
               secret: _game.secret,
@@ -1159,10 +1154,6 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
               maximum: _game.maximum,
             );
           }
-        } else if (correct) {
-          final nextGame = _newGameWithAdaptiveTarget(_engine.newGame());
-          _game = _engine.continueAfterCorrect(_game, nextGame);
-          _botTeam.reset(_game.minimum, _game.maximum);
         }
       }
       if (isBot) {
@@ -1200,7 +1191,7 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
           if (!isBot) _gamesWon++;
           _message = isBot
               ? '$botId guessed $guess correctly. A new round is ready.'
-  : 'Correct! A new number is ready.';
+              : 'Correct! You got it in ${_game.attempts} ${_game.attempts == 1 ? 'try' : 'tries'}.';
         case GuessResult.outOfRange:
           _message = 'Choose a number between ${_game.minimum} and ${_game.maximum}.';
         case null:
@@ -1215,7 +1206,7 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
     setState(() {
       _game = _newGameWithAdaptiveTarget(_engine.newGame());
       _botTeam.reset(_game.minimum, _game.maximum);
-      _message = 'Make your move.';
+      _message = 'New round! Guess a number between ${_game.minimum} and ${_game.maximum}.';
       _controller.clear();
     });
     await _persist();
