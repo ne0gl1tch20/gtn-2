@@ -60,11 +60,57 @@ jobs:
             if [ "$attempt" -lt 3 ]; then sleep $((attempt * 15)); fi
           done
           exit 1
+      - name: Sign Android debug APK with the permanent GTN2 key
+        shell: bash
+        env:
+          GTN2_DEBUG_KEYSTORE_BASE64: ${{ secrets.GTN2_DEBUG_KEYSTORE_BASE64 }}
+          GTN2_DEBUG_KEY_ALIAS: ${{ secrets.GTN2_DEBUG_KEY_ALIAS }}
+          GTN2_DEBUG_KEY_PASSWORD: ${{ secrets.GTN2_DEBUG_KEY_PASSWORD }}
+          GTN2_DEBUG_STORE_PASSWORD: ${{ secrets.GTN2_DEBUG_STORE_PASSWORD }}
+        run: |
+          set -euo pipefail
+          for name in GTN2_DEBUG_KEYSTORE_BASE64 GTN2_DEBUG_KEY_ALIAS GTN2_DEBUG_KEY_PASSWORD GTN2_DEBUG_STORE_PASSWORD; do
+            if [ -z "${!name:-}" ]; then
+              echo "::error::Missing required GitHub Actions secret: $name"
+              exit 1
+            fi
+          done
+          sdk_root="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-}}"
+          test -n "$sdk_root"
+          build_tools="$(find "$sdk_root/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -n 1)"
+          test -x "$build_tools/apksigner"
+          test -x "$build_tools/zipalign"
+          unsigned="build/app/outputs/flutter-apk/app-debug.apk"
+          aligned="$RUNNER_TEMP/gtn2-debug-aligned.apk"
+          signed="$RUNNER_TEMP/GuessTheNumber-debug.apk"
+          keystore="$RUNNER_TEMP/gtn2-debug-signing.jks"
+          printf '%s' "$GTN2_DEBUG_KEYSTORE_BASE64" | base64 --decode > "$keystore"
+          chmod 600 "$keystore"
+          "$build_tools/zipalign" -f -p 4 "$unsigned" "$aligned"
+          "$build_tools/apksigner" sign \
+            --ks "$keystore" \
+            --ks-key-alias "$GTN2_DEBUG_KEY_ALIAS" \
+            --ks-pass env:GTN2_DEBUG_STORE_PASSWORD \
+            --key-pass env:GTN2_DEBUG_KEY_PASSWORD \
+            --out "$signed" \
+            "$aligned"
+          "$build_tools/apksigner" verify --verbose --print-certs "$signed" | tee "$RUNNER_TEMP/gtn2-apksigner-verify.txt"
+          cert_sha="$(sed -n 's/.*Signer #1 certificate SHA-256 digest: *//p' "$RUNNER_TEMP/gtn2-apksigner-verify.txt" | head -n 1 | tr '[:upper:]' '[:lower:]')"
+          if ! [[ "$cert_sha" =~ ^[a-f0-9]{64}$ ]]; then
+            echo "::error::Could not extract the signed APK certificate SHA-256 fingerprint."
+            exit 1
+          fi
+          install -m 644 "$signed" "$unsigned"
+          mkdir -p build/signing
+          printf '%s\n' "$cert_sha" > build/signing/android-debug-certificate-sha256.txt
+          rm -f "$keystore" "$aligned" "$signed" "$RUNNER_TEMP/gtn2-apksigner-verify.txt"
       - name: Upload Android APK
         uses: actions/upload-artifact@v4
         with:
           name: gtn-2-debug-android
-          path: build/app/outputs/flutter-apk/app-debug.apk
+          path: |
+            build/app/outputs/flutter-apk/app-debug.apk
+            build/signing/android-debug-certificate-sha256.txt
           if-no-files-found: error
           retention-days: 7
 
@@ -138,17 +184,20 @@ jobs:
         run: |
           set -euo pipefail
           test -s release/android/app-debug.apk
+          test -s release/android/android-debug-certificate-sha256.txt
           test -s release/windows/gtn-2-windows.zip
           mv release/android/app-debug.apk release/android/GuessTheNumber-debug.apk
           cd release/android
           sha256sum GuessTheNumber-debug.apk > SHA256SUMS
           android_sha="$(cut -d ' ' -f 1 SHA256SUMS)"
+          android_cert_sha="$(tr -d '\r\n' < android-debug-certificate-sha256.txt | tr '[:upper:]' '[:lower:]')"
+          [[ "$android_cert_sha" =~ ^[a-f0-9]{64}$ ]]
           cd ../windows
           sha256sum gtn-2-windows.zip > SHA256SUMS-WINDOWS
           windows_sha="$(cut -d ' ' -f 1 SHA256SUMS-WINDOWS)"
           version_name="$(sed -n 's/^version: *\([^+]*\).*/\1/p' "$GITHUB_WORKSPACE/pubspec.yaml" | head -1)"
           test -n "$version_name"
-          printf '{"channel":"android-debug","packageName":"com.jarrlyyy.gtn_2","versionName":"%s","versionCode":%s,"runNumber":%s,"commit":"%s","sha256":"%s","assetName":"GuessTheNumber-debug.apk"}\n' "$version_name" "$GITHUB_RUN_NUMBER" "$GITHUB_RUN_NUMBER" "$GITHUB_SHA" "$android_sha" > "$GITHUB_WORKSPACE/release/android/update-manifest.json"
+          printf '{"channel":"android-debug","packageName":"com.jarrlyyy.gtn_2","versionName":"%s","versionCode":%s,"runNumber":%s,"commit":"%s","sha256":"%s","signingCertificateSha256":"%s","assetName":"GuessTheNumber-debug.apk"}\n' "$version_name" "$GITHUB_RUN_NUMBER" "$GITHUB_RUN_NUMBER" "$GITHUB_SHA" "$android_sha" "$android_cert_sha" > "$GITHUB_WORKSPACE/release/android/update-manifest.json"
           printf '{"channel":"windows-debug","versionName":"%s","versionCode":%s,"runNumber":%s,"commit":"%s","sha256":"%s","assetName":"gtn-2-windows.zip"}\n' "$version_name" "$GITHUB_RUN_NUMBER" "$GITHUB_RUN_NUMBER" "$GITHUB_SHA" "$windows_sha" > "$GITHUB_WORKSPACE/release/windows/windows-update-manifest.json"
       - name: Publish replaceable debug-latest release
         env:
