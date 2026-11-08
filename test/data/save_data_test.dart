@@ -63,7 +63,7 @@ void main() {
     test('rejects invalid profile metadata', () {
       final base = SaveData(secret: 42, attempts: 0, gamesWon: 0).toJson();
       expect(
-        () => SaveData.fromJson({...base, 'profileName': 'x' * 25}),
+        () => SaveData.fromJson({...base, 'profileName': List.filled(25, 'x').join()}),
         throwsFormatException,
       );
       expect(
