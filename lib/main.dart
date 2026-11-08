@@ -14,6 +14,7 @@ import 'core/game/game_engine.dart';
 import 'core/game/guess_economy_rules.dart';
 import 'core/legacy/invisible_trait_engine.dart';
 import 'core/legacy/legacy_systems_engine.dart';
+import 'creative/creative_mode_page.dart';
 import 'core/numbers/big_number.dart';
 import 'core/progression/progression_calculator.dart';
 import 'core/progression/progression_engine.dart';
@@ -939,6 +940,7 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
       MaterialPageRoute<void>(
         builder: (_) => LegacyHubPage(
           progression: _progression,
+          activeSlot: _activeSlot,
           onSystemsChanged: _applyLegacyProgression,
         ),
       ),
