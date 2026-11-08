@@ -330,6 +330,13 @@ void main() {
         }),
         throwsFormatException,
       );
+      expect(
+        () => LegacySystemsState.fromJson(<String, dynamic>{
+          ...LegacySystemsState.initial.toJson(),
+          'lastBotGuess': 501,
+        }),
+        throwsFormatException,
+      );
     });
 
     test('rejects invalid equipped relic and music references', () {
