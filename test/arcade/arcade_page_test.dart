@@ -26,8 +26,8 @@ void main() {
           .widgetList<Text>(find.byType(Text))
           .map((widget) => widget.data?.trim())
           .whereType<String>()
-          .firstWhere((value) => RegExp(r'^\\d\\s+\\d\\s+\\d$').hasMatch(value));
-      final expected = sequence.split(RegExp(r'\\s+')).join();
+          .firstWhere((value) => RegExp(r'^\d\s+\d\s+\d$').hasMatch(value));
+      final expected = sequence.split(RegExp(r'\s+')).join();
 
       await tester.pump(const Duration(seconds: 2));
       await tester.pump(const Duration(milliseconds: 100));
