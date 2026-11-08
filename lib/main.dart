@@ -212,7 +212,8 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
       final save = await storage.load();
       if (!mounted) return;
       if (save != null) {
-        var restoredProgression = save.progression;
+        var restoredProgression =
+            _worldBossBattleEngine.migrateLegacyWorldUnlocks(save.progression);
         final savedAt = restoredProgression.legacySystems.lastSaveTimestamp;
         final now = DateTime.now().millisecondsSinceEpoch;
         final clockCheck = ClockRollbackPolicy.check(
@@ -648,7 +649,9 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
       final storage = await SaveStorage.inApplicationDocuments(slot: slot);
       final save = await storage.load();
       if (!mounted) return;
-      var nextProgression = save?.progression ?? ProgressionState.initial;
+      var nextProgression = _worldBossBattleEngine.migrateLegacyWorldUnlocks(
+        save?.progression ?? ProgressionState.initial,
+      );
       final savedAt = nextProgression.legacySystems.lastSaveTimestamp;
       final now = DateTime.now().millisecondsSinceEpoch;
       final clockCheck = ClockRollbackPolicy.check(
