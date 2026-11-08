@@ -70,16 +70,16 @@ void main() {
       final initial = ProgressionState.initial.copyWith(
         prestige: BigNumber.fromInt(10000),
       );
-      final blocked = engine.buyTalent(initial, LegacySystemsState.initial, 'talent_speed_2');
+      final blocked = engine.buyTalent(initial, LegacySystemsState.initial, const TalentDefinition(id: 'talent_speed_2', cost: 500, requiredParentId: 'talent_speed_1'));
       expect(blocked.accepted, isFalse);
       expect(blocked.progression.prestige, initial.prestige);
 
-      final first = engine.buyTalent(initial, LegacySystemsState.initial, 'talent_speed_1');
+      final first = engine.buyTalent(initial, LegacySystemsState.initial, const TalentDefinition(id: 'talent_speed_1', cost: 100));
       expect(first.accepted, isTrue);
       expect(first.progression.prestige, BigNumber.fromInt(9900));
-      final second = engine.buyTalent(first.progression, first.systems, 'talent_speed_1');
+      final second = engine.buyTalent(first.progression, first.systems, const TalentDefinition(id: 'talent_speed_1', cost: 100));
       expect(second.accepted, isFalse);
-      final child = engine.buyTalent(first.progression, first.systems, 'talent_speed_2');
+      final child = engine.buyTalent(first.progression, first.systems, const TalentDefinition(id: 'talent_speed_2', cost: 500, requiredParentId: 'talent_speed_1'));
       expect(child.accepted, isTrue);
       expect(child.progression.prestige, BigNumber.fromInt(9400));
     });
