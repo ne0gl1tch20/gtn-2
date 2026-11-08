@@ -58,6 +58,7 @@ class LegacySystemsState {
     this.lastBotFeedback,
     this.lastBotId,
     this.lastSaveTimestamp = 0,
+    this.timeTravelPenaltyUntil = 0,
   });
 
   final AdaptiveTraitProfile adaptiveTraitProfile;
@@ -115,6 +116,7 @@ class LegacySystemsState {
   final String? lastBotFeedback;
   final String? lastBotId;
   final int lastSaveTimestamp;
+  final int timeTravelPenaltyUntil;
 
   static const initial = LegacySystemsState();
 
@@ -181,6 +183,7 @@ class LegacySystemsState {
     String? lastBotId,
     bool clearLastBotId = false,
     int? lastSaveTimestamp,
+    int? timeTravelPenaltyUntil,
   }) => LegacySystemsState(
     adaptiveTraitProfile: adaptiveTraitProfile ?? this.adaptiveTraitProfile,
     discoveredTraits: discoveredTraits ?? this.discoveredTraits,
@@ -237,6 +240,7 @@ class LegacySystemsState {
     lastBotFeedback: clearLastBotFeedback ? null : lastBotFeedback ?? this.lastBotFeedback,
     lastBotId: clearLastBotId ? null : lastBotId ?? this.lastBotId,
     lastSaveTimestamp: lastSaveTimestamp ?? this.lastSaveTimestamp,
+    timeTravelPenaltyUntil: timeTravelPenaltyUntil ?? this.timeTravelPenaltyUntil,
   );
 
   Map<String, Object?> toJson() => {
@@ -295,6 +299,7 @@ class LegacySystemsState {
     'lastBotFeedback': lastBotFeedback,
     'lastBotId': lastBotId,
     'lastSaveTimestamp': lastSaveTimestamp,
+    'timeTravelPenaltyUntil': timeTravelPenaltyUntil,
   };
 
   factory LegacySystemsState.fromJson(Map<String, dynamic> json) {
@@ -460,6 +465,7 @@ class LegacySystemsState {
       lastBotFeedback: lastBotFeedback as String?,
       lastBotId: lastBotId as String?,
       lastSaveTimestamp: count('lastSaveTimestamp'),
+      timeTravelPenaltyUntil: count('timeTravelPenaltyUntil'),
     );
     if (state.homeBaseLevel > 20 || state.permanentEventBoosts > 25 || state.equippedRelics.length > 4 ||
         state.stakesWon + state.stakesLost > state.stakesPlaced ||
