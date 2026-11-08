@@ -1122,7 +1122,6 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
         systemsAfter = _legacySystemsEngine.discoverEligibleTraits(
           progression: afterReward,
           systems: systemsAfter,
-          playerLevel: 1,
           activeSeasonId: _currentSeasonId(),
         );
         var nextProgression = afterReward.copyWith(legacySystems: systemsAfter);
