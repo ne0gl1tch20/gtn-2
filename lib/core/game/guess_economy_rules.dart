@@ -87,10 +87,10 @@ class GuessEconomyRules {
         mutatorMultiplier *
         difficulty *
         traitMultiplier *
-        singularity *
-        permanentMoneyMultiplier;
+        singularity;
     final minimum = BigNumber.fromInt(minimumGuessReward);
-    return calculated.compareTo(minimum) < 0 ? minimum : calculated;
+    final minimumAdjusted = calculated.compareTo(minimum) < 0 ? minimum : calculated;
+    return minimumAdjusted * permanentMoneyMultiplier;
   }
 
   static BigNumber _decimal(double value) =>
