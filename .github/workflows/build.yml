@@ -89,6 +89,7 @@ jobs:
           "$build_tools/zipalign" -f -p 4 "$unsigned" "$aligned"
           "$build_tools/apksigner" sign \
             --ks "$keystore" \
+            --ks-type JKS \
             --ks-key-alias "$GTN2_DEBUG_KEY_ALIAS" \
             --ks-pass env:GTN2_DEBUG_STORE_PASSWORD \
             --key-pass env:GTN2_DEBUG_KEY_PASSWORD \
@@ -103,14 +104,15 @@ jobs:
           install -m 644 "$signed" "$unsigned"
           mkdir -p build/signing
           printf '%s\n' "$cert_sha" > build/signing/android-debug-certificate-sha256.txt
+          mkdir -p release/android
+          cp "$unsigned" release/android/app-debug.apk
+          cp build/signing/android-debug-certificate-sha256.txt release/android/android-debug-certificate-sha256.txt
           rm -f "$keystore" "$aligned" "$signed" "$RUNNER_TEMP/gtn2-apksigner-verify.txt"
       - name: Upload Android APK
         uses: actions/upload-artifact@v4
         with:
           name: gtn-2-debug-android
-          path: |
-            build/app/outputs/flutter-apk/app-debug.apk
-            build/signing/android-debug-certificate-sha256.txt
+          path: release/android/
           if-no-files-found: error
           retention-days: 7
 
