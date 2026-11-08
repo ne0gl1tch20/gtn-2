@@ -2,6 +2,22 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:gtn_2/data/updates/update_checker.dart';
 
 void main() {
+  group('Android signing certificate fingerprints', () {
+    test('accepts compact and colon-separated SHA-256 fingerprints', () {
+      const compact = '79780effaa1db32f4264394db822a6b85dac33dc387b0f1163e6f0b8ffc94b83';
+      const separated = '79:78:0E:FF:AA:1D:B3:2F:42:64:39:4D:B8:22:A6:B8:5D:AC:33:DC:38:7B:0F:11:63:E6:F0:B8:FF:C9:4B:83';
+      expect(UpdateChecker.isValidCertificateFingerprint(compact), isTrue);
+      expect(UpdateChecker.isValidCertificateFingerprint(separated), isTrue);
+      expect(UpdateChecker.normalizeCertificateFingerprint(separated), compact);
+    });
+
+    test('rejects malformed and truncated fingerprints', () {
+      expect(UpdateChecker.isValidCertificateFingerprint('not-a-fingerprint'), isFalse);
+      expect(UpdateChecker.isValidCertificateFingerprint('a' * 63), isFalse);
+      expect(UpdateChecker.isValidCertificateFingerprint('g' * 64), isFalse);
+    });
+  });
+
   group('UpdateChecker version comparison', () {
     test('compares numeric version components', () {
       expect(UpdateChecker.compareVersions('2.0.10', '2.0.9'), greaterThan(0));
