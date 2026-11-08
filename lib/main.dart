@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import 'arcade/arcade_page.dart';
 import 'core/game/game_engine.dart';
+import 'core/legacy/invisible_trait_engine.dart';
 import 'core/legacy/legacy_systems_engine.dart';
 import 'core/numbers/big_number.dart';
 import 'core/progression/progression_calculator.dart';
@@ -83,11 +84,32 @@ class GameHomePage extends StatefulWidget {
 class _GameHomePageState extends State<GameHomePage> {
   GameEngine _engine = GameEngine();
 
-  GameState _createGame() => GameEngine(
-        maximum: 100 * _legacySystemsEngine.rangeMultiplier(_progression.legacySystems),
-      ).newGame();
+  GameState _createGame() => _newGameWithAdaptiveTarget(
+        GameEngine(
+          maximum: 100 * _legacySystemsEngine.rangeMultiplier(_progression.legacySystems),
+        ).newGame(),
+      );
+
+  GameState _newGameWithAdaptiveTarget(GameState candidate) {
+    final systems = _progression.legacySystems;
+    final profile = systems.adaptiveTraitProfile;
+    final secret = _invisibleTraitEngine.adjustNextTarget(
+      profile: profile,
+      candidate: candidate.secret,
+      rangeMin: candidate.minimum,
+      rangeMax: candidate.maximum,
+    );
+    return GameState(
+      secret: secret,
+      attempts: 0,
+      isComplete: false,
+      minimum: candidate.minimum,
+      maximum: candidate.maximum,
+    );
+  }
   final ProgressionEngine _progressionEngine = const ProgressionEngine();
   final LegacySystemsEngine _legacySystemsEngine = const LegacySystemsEngine();
+  final InvisibleTraitEngine _invisibleTraitEngine = const InvisibleTraitEngine();
   ProgressionState _progression = ProgressionState.initial;
   GameSettings _settings = GameSettings.initial;
   final TextEditingController _controller = TextEditingController();
@@ -172,6 +194,10 @@ class _GameHomePageState extends State<GameHomePage> {
       final withQuestProgress = updated.copyWith(
         legacySystems: _legacySystemsEngine.recordUpgradePurchase(
           updated.legacySystems,
+        ).copyWith(
+          adaptiveTraitProfile: _invisibleTraitEngine.observeUpgradePurchase(
+            updated.legacySystems.adaptiveTraitProfile,
+          ),
         ),
       );
       setState(() => _progression = withQuestProgress);
@@ -182,14 +208,27 @@ class _GameHomePageState extends State<GameHomePage> {
 
 
   Future<void> _prestige() async {
-    final updated = _progressionEngine.prestige(
+    var updated = _progressionEngine.prestige(
       _progression,
       ProgressionCalculator.prestigeRules(_progression),
     );
     if (updated != _progression) {
+      final existingProfile = _progression.legacySystems.adaptiveTraitProfile;
+      final profile = _invisibleTraitEngine.observeProgression(
+        updated.legacySystems.adaptiveTraitProfile,
+        prestigeDelta: updated.prestigeResets > existingProfile.prestigesObserved
+            ? updated.prestigeResets - existingProfile.prestigesObserved
+            : 0,
+        ultraDelta: updated.ultraResets > existingProfile.ultrasObserved
+            ? updated.ultraResets - existingProfile.ultrasObserved
+            : 0,
+      );
+      updated = updated.copyWith(
+        legacySystems: updated.legacySystems.copyWith(adaptiveTraitProfile: profile),
+      );
       setState(() {
         _progression = updated;
-        _game = _engine.newGame();
+        _game = _newGameWithAdaptiveTarget(_engine.newGame());
         _message = 'Prestige complete! Build your progress again.';
       });
       await _persist();
@@ -198,14 +237,27 @@ class _GameHomePageState extends State<GameHomePage> {
 
   Future<void> _ultra() async {
     if (_progression.prestige.compareTo(BigNumber.fromInt(1000)) < 0) return;
-    final updated = _progressionEngine.ultra(
+    var updated = _progressionEngine.ultra(
       _progression,
       ProgressionCalculator.ultraRules(_progression),
     );
     if (updated != _progression) {
+      final existingProfile = _progression.legacySystems.adaptiveTraitProfile;
+      final profile = _invisibleTraitEngine.observeProgression(
+        updated.legacySystems.adaptiveTraitProfile,
+        prestigeDelta: _progression.prestigeResets > existingProfile.prestigesObserved
+            ? _progression.prestigeResets - existingProfile.prestigesObserved
+            : 0,
+        ultraDelta: updated.ultraResets > existingProfile.ultrasObserved
+            ? updated.ultraResets - existingProfile.ultrasObserved
+            : 0,
+      );
+      updated = updated.copyWith(
+        legacySystems: updated.legacySystems.copyWith(adaptiveTraitProfile: profile),
+      );
       setState(() {
         _progression = updated;
-        _game = _engine.newGame();
+        _game = _newGameWithAdaptiveTarget(_engine.newGame());
         _message = 'Ultra reset complete! A new run begins.';
       });
       await _persist();
@@ -321,7 +373,7 @@ class _GameHomePageState extends State<GameHomePage> {
         _activeSlot = slot;
         _engine = nextEngine;
         _game = save == null
-            ? _engine.newGame()
+            ? _newGameWithAdaptiveTarget(_engine.newGame())
             : _engine.restore(
                 secret: save.secret,
                 attempts: save.attempts,
@@ -416,7 +468,7 @@ class _GameHomePageState extends State<GameHomePage> {
     }
     if (action == '/reset') {
       setState(() {
-        _game = _engine.newGame();
+        _game = _newGameWithAdaptiveTarget(_engine.newGame());
         _progression = ProgressionState.initial;
         _gamesWon = 0;
         _message = 'Developer reset completed.';
@@ -492,7 +544,7 @@ class _GameHomePageState extends State<GameHomePage> {
       _progression = progression;
       if (oldRange != newRange) {
         _engine = GameEngine(maximum: 100 * newRange);
-        _game = _engine.newGame();
+        _game = _newGameWithAdaptiveTarget(_engine.newGame());
         _message = 'Hardcore range changed. A fresh round is ready.';
       }
     });
@@ -554,9 +606,6 @@ class _GameHomePageState extends State<GameHomePage> {
           activeSeasonId: _currentSeasonId(),
         );
         rangeScoutActive = traitEffects.rangeHint;
-        if (!correct && rangeScoutActive) {
-          _game = _engine.applyRangeScoutHint(_game, guess);
-        }
         final rawReward = correct
             ? (BigNumber.fromInt(1) + effects.flatBonus) *
                 _legacySystemsEngine.mutatorRewardMultiplier(legacySystems) *
@@ -575,6 +624,29 @@ class _GameHomePageState extends State<GameHomePage> {
                     : 1),
           ),
         );
+        final adaptiveProfile = _invisibleTraitEngine.observeGuess(
+          profile: legacySystems.adaptiveTraitProfile,
+          correct: correct,
+          newStreak: afterReward.currentStreak,
+          reward: correct
+              ? afterReward.money - beforeGuess.money
+              : BigNumber.fromInt(0),
+        );
+        final adaptiveDecision = _invisibleTraitEngine.evaluate(
+          profile: adaptiveProfile,
+          prestigeCount: adaptiveProfile.prestigesObserved > beforeGuess.prestigeResets
+              ? adaptiveProfile.prestigesObserved
+              : beforeGuess.prestigeResets,
+          ultraCount: adaptiveProfile.ultrasObserved > beforeGuess.ultraResets
+              ? adaptiveProfile.ultrasObserved
+              : beforeGuess.ultraResets,
+          currentStreak: afterReward.currentStreak,
+        );
+        rangeScoutActive = rangeScoutActive ||
+            adaptiveDecision.helperIds.contains(InvisibleTraitEngine.helperRangeScout);
+        if (!correct && rangeScoutActive) {
+          _game = _engine.applyRangeScoutHint(_game, guess);
+        }
         if (correct) {
           final criticalChance = legacySystems.talents.contains('talent_crit_2')
               ? 0.15
@@ -590,6 +662,19 @@ class _GameHomePageState extends State<GameHomePage> {
                 Random.secure().nextDouble() < 0.10,
             nebulaBoostOwned: (beforeGuess.nebulaItems['nebula_boost'] ?? 0) > 0,
           );
+          final adaptiveBonusRate = (
+            (adaptiveDecision.helperIds.contains(InvisibleTraitEngine.helperComeback) ? 0.05 : 0.0) +
+            (adaptiveDecision.helperIds.contains(InvisibleTraitEngine.helperMomentum) ? 0.03 : 0.0) +
+            adaptiveDecision.bonusIds.length * 0.10
+          ).clamp(0.0, 0.30).toDouble();
+          if (adaptiveBonusRate > 0) {
+            final earned = afterReward.money - beforeGuess.money;
+            final adaptiveBonus = earned * BigNumber.parse(adaptiveBonusRate.toStringAsFixed(2));
+            afterReward = afterReward.copyWith(
+              money: afterReward.money + adaptiveBonus,
+              moneyEarned: afterReward.moneyEarned + adaptiveBonus,
+            );
+          }
         } else {
           final penalty = legacySystems.activeMutators.contains('mut_tax')
               ? beforeGuess.money * BigNumber.parse('0.05')
@@ -597,17 +682,31 @@ class _GameHomePageState extends State<GameHomePage> {
           final refund = penalty * BigNumber.parse(
             traitEffects.missPenaltyRefundRate.toStringAsFixed(2),
           );
+          final adaptiveRefund = adaptiveDecision.helperIds.contains(
+            InvisibleTraitEngine.helperMistakeInsurance,
+          ) ? penalty * BigNumber.parse('0.50') : BigNumber.fromInt(0);
           final extraPenalty = penalty * BigNumber.parse(
             traitEffects.riskMissPenaltyRate.toStringAsFixed(2),
           );
-          final remainingMoney = beforeGuess.money - penalty + refund - extraPenalty;
+          final remainingMoney = beforeGuess.money - penalty + refund + adaptiveRefund - extraPenalty;
           afterReward = afterReward.copyWith(
             money: remainingMoney.compareTo(BigNumber.fromInt(0)) < 0
                 ? BigNumber.fromInt(0)
                 : remainingMoney,
-            currentStreak: traitEffects.streakProtection
+            currentStreak: traitEffects.streakProtection ||
+                    adaptiveDecision.helperIds.contains(InvisibleTraitEngine.helperStreakGuard)
                 ? beforeGuess.currentStreak
                 : afterReward.currentStreak,
+          );
+        }
+        var adaptiveProfileAfter = _invisibleTraitEngine.markHelperUses(
+          adaptiveProfile,
+          adaptiveDecision.helperIds,
+        );
+        if (correct) {
+          adaptiveProfileAfter = _invisibleTraitEngine.markBonusesAwarded(
+            adaptiveProfileAfter,
+            adaptiveDecision.bonusIds,
           );
         }
         var systemsAfter = _legacySystemsEngine.recordGuessProgress(
@@ -616,7 +715,7 @@ class _GameHomePageState extends State<GameHomePage> {
           currentStreak: afterReward.currentStreak,
           today: DateTime.now().toIso8601String().substring(0, 10),
           lootRoll: correct ? Random.secure().nextInt(1000) : null,
-        );
+        ).copyWith(adaptiveTraitProfile: adaptiveProfileAfter);
         systemsAfter = _legacySystemsEngine.discoverEligibleTraits(
           progression: afterReward,
           systems: systemsAfter,
@@ -665,7 +764,7 @@ class _GameHomePageState extends State<GameHomePage> {
 
   Future<void> _newGame() async {
     setState(() {
-      _game = _engine.newGame();
+      _game = _newGameWithAdaptiveTarget(_engine.newGame());
       _message = 'New round! Guess a number between ${_game.minimum} and ${_game.maximum}.';
       _controller.clear();
     });
