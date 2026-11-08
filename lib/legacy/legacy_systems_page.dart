@@ -12,10 +12,12 @@ import 'package:path_provider/path_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../core/legacy/legacy_systems_engine.dart';
+import '../core/live_ops/live_ops.dart';
 import '../core/legacy/legacy_systems_state.dart';
 import '../core/legacy/trait_catalog_repository.dart';
 import '../core/numbers/big_number.dart';
 import '../core/progression/progression_state.dart';
+import '../data/live_ops/live_ops_repository.dart';
 import '../data/updates/update_checker.dart';
 import '../worlds/world_boss_catalog.dart';
 
@@ -52,6 +54,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
   List<Map<String, dynamic>> _relicCatalog = [];
   List<Map<String, dynamic>> _challengeCatalog = [];
   List<TraitCatalogEntry> _traitCatalog = [];
+  LiveOpsCatalog? _liveOpsCatalog;
   String? _catalogError;
 
   LegacySystemsState get _systems => _progression.legacySystems;
@@ -150,6 +153,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
           _lootSection(),
           _automationSection(),
           _challengeSection(),
+          _liveOpsSection(),
           _worldCodexSection(),
           _musicSection(),
           _aboutSection(),
@@ -294,6 +298,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
         readCatalog('assets/game/relics.json', 'relics'),
         readCatalog('assets/game/challenges.json', 'challenges'),
         TraitCatalogRepository().load(),
+        LiveOpsRepository().load(),
       ]);
       if (!mounted) return;
       setState(() {
@@ -302,6 +307,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
         _relicCatalog = results[2] as List<Map<String, dynamic>>;
         _challengeCatalog = results[3] as List<Map<String, dynamic>>;
         _traitCatalog = results[4] as List<TraitCatalogEntry>;
+        _liveOpsCatalog = results[5] as LiveOpsCatalog;
         _catalogError = null;
       });
     } catch (error) {
@@ -786,6 +792,98 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
                           ))
                       : null,
                   child: Text(claimed ? 'Claimed' : 'Claim'),
+                ),
+              );
+            }),
+        ],
+      ),
+    );
+  }
+
+  Widget _liveOpsSection() {
+    final catalog = _liveOpsCatalog;
+    if (catalog == null) {
+      return Card(
+        child: ExpansionTile(
+          leading: const Icon(Icons.event_rounded),
+          title: const Text('Seasonal Events'),
+          children: [_catalogUnavailable()],
+        ),
+      );
+    }
+    final now = DateTime.now().toUtc();
+    return Card(
+      child: ExpansionTile(
+        leading: const Icon(Icons.event_rounded),
+        title: const Text('Seasonal Events'),
+        subtitle: Text(
+          'Permanent bonus +${_systems.permanentEventBoosts} · '
+          '${_systems.liveOpsClaims.values.fold<int>(0, (sum, count) => sum + count)} claims',
+        ),
+        children: [
+          const ListTile(
+            title: Text('Event perks & permanent bonuses'),
+            subtitle: Text(
+              '+2% Money per permanent bonus level and +1 Nebula per correct guess every five levels, up to level 25.',
+            ),
+          ),
+          if (!catalog.enabled)
+            const ListTile(
+              leading: Icon(Icons.lock_outline_rounded),
+              title: Text('Seasonal events are disabled'),
+              subtitle: Text(
+                'Both live_ops and seasonal_rewards must be enabled in the pinned GTN1 feature flags.',
+              ),
+            )
+          else if (catalog.events.isEmpty)
+            const ListTile(
+              title: Text('No seasonal events are available right now.'),
+            ),
+          for (final event in catalog.events)
+            Builder(builder: (context) {
+              final claims = _systems.liveOpsClaims[event.id] ?? 0;
+              final eligible =
+                  _progression.correctGuesses >= event.minCorrectGuesses &&
+                  _progression.prestigeResets >= event.minPrestigeCount &&
+                  _progression.ultraResets >= event.minUltraCount;
+              final active = event.status == 'ACTIVE' &&
+                  event.isWithinClaimWindow(now);
+              final canClaim = catalog.enabled &&
+                  active &&
+                  eligible &&
+                  claims < event.maxClaims;
+              final status = event.status.toLowerCase();
+              return ListTile(
+                leading: Icon(
+                  claims >= event.maxClaims
+                      ? Icons.check_circle_rounded
+                      : active
+                          ? Icons.event_available_rounded
+                          : Icons.lock_outline_rounded,
+                ),
+                title: Text(event.title),
+                subtitle: Text(
+                  '${event.description}\n'
+                  'Reward: +${event.rewardNebula} Nebula · '
+                  'Claims: $claims / ${event.maxClaims}\n'
+                  'Requires ${event.minCorrectGuesses} correct guesses, '
+                  '${event.minPrestigeCount} Prestige and '
+                  '${event.minUltraCount} Ultra · Status: $status',
+                ),
+                isThreeLine: true,
+                trailing: FilledButton.tonal(
+                  onPressed: canClaim
+                      ? () => _apply(_engine.claimLiveOpsEvent(
+                            progression: _progression,
+                            systems: _systems,
+                            event: event,
+                            featureEnabled: catalog.enabled,
+                            now: now,
+                          ))
+                      : null,
+                  child: Text(
+                    claims >= event.maxClaims ? 'Max claimed' : 'Claim',
+                  ),
                 ),
               );
             }),
