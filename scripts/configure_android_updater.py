@@ -69,8 +69,8 @@ if not wrapper_properties.is_file():
     raise SystemExit(1)
 wrapper_text = wrapper_properties.read_text(encoding="utf-8")
 wrapper_text, wrapper_count = re.subn(
-    r"(?m)^(distributionUrl=.*)services\\.gradle\\.org/distributions/(.*)$",
-    r"\\1downloads.gradle.org/distributions/\\2",
+    r"(?m)^(distributionUrl=.*)services\.gradle\.org/distributions/(.*)$",
+    r"\1downloads.gradle.org/distributions/\2",
     wrapper_text,
     count=1,
 )
