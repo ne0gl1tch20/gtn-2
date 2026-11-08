@@ -102,8 +102,15 @@ class GameDashboardPage extends StatelessWidget {
                             ),
                           ],
                         ),
-                        child: const Icon(Icons.casino_rounded,
-                            color: Colors.white, size: 25),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(15),
+                          child: Image.asset(
+                            'assets/gtn1/gtn-app-logo.png',
+                            width: 44,
+                            height: 44,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
                       ),
                       const SizedBox(width: 11),
                       Expanded(
