@@ -147,7 +147,7 @@ class _ArcadeDialogState extends State<_ArcadeDialog> {
   bool _reactionFinished = false;
   int? _reactionTime;
   late final Stopwatch _reactionStopwatch = Stopwatch();
-  late final Stopwatch _roundStopwatch = Stopwatch()..start();
+  final Stopwatch _roundStopwatch = Stopwatch();
 
   late int _mathFirst = _random.nextInt(11) + 2;
   late int _mathSecond = _random.nextInt(11) + 2;
@@ -168,6 +168,7 @@ class _ArcadeDialogState extends State<_ArcadeDialog> {
   @override
   void initState() {
     super.initState();
+    _roundStopwatch.start();
     switch (widget.gameId) {
       case 'quick_guess':
         _startCountdown(10);
