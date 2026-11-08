@@ -1,4 +1,3 @@
-import '../legacy/legacy_systems_state.dart';
 import '../numbers/big_number.dart';
 import '../progression/progression_state.dart';
 import 'difficulty_rules.dart';
