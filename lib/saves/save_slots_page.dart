@@ -2,9 +2,9 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
+import '../core/game/difficulty_rules.dart';
 import '../data/saves/save_data.dart';
 import '../data/saves/save_storage.dart';
-import '../core/game/difficulty_rules.dart';
 import '../settings/game_settings.dart';
 
 typedef SaveSlotSelection = Future<void> Function(int slot);
@@ -343,7 +343,6 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
                         : 'Games won: ${save.gamesWon}';
                 return Card(
                   child: ListTile(
-                    leading: Icon(selected ? Icons.check_circle : Icons.save_outlined),
                     leading: CircleAvatar(child: Text(save == null ? '$slot' : _iconSymbol(save.profileIconId))),
                     title: Text(save?.profileName.isNotEmpty == true ? save!.profileName : 'Slot $slot'),
                     subtitle: Text(subtitle),
