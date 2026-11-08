@@ -359,7 +359,7 @@ class _GameHomePageState extends State<GameHomePage> {
         _activeSlot = slot;
         _engine = nextEngine;
         _game = save == null
-            ? _engine.newGame()
+            ? _newGameWithAdaptiveTarget(_engine.newGame())
             : _engine.restore(
                 secret: save.secret,
                 attempts: save.attempts,
