@@ -333,7 +333,17 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
                 trailing: owned
                     ? const Icon(Icons.check_circle_rounded, color: Colors.green)
                     : FilledButton(
-                        onPressed: parentReady ? () => _apply(_engine.buyTalent(_progression, _systems, id)) : null,
+                        onPressed: parentReady
+                            ? () => _apply(_engine.buyTalent(
+                                  _progression,
+                                  _systems,
+                                  TalentDefinition(
+                                    id: id,
+                                    cost: cost,
+                                    requiredParentId: parent,
+                                  ),
+                                ))
+                            : null,
                         child: const Text('Unlock'),
                       ),
               );
