@@ -156,7 +156,7 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
   }
 
   Future<void> _resumeAutoClicker() async {
-    if (!mounted) return;
+    if (!mounted || _isLoading) return;
     final systems = _progression.legacySystems;
     final now = DateTime.now().millisecondsSinceEpoch;
     final savedAt = systems.lastSaveTimestamp;
