@@ -32,8 +32,8 @@ void main() {
       (WidgetTester tester) async {
     await tester.pumpWidget(buildDashboard());
     expect(find.text('Guess The Number'), findsOneWidget);
-    // The dashboard uses a lazy ListView, so bring the wallet into the tree first.
-    await tester.scrollUntilVisible(find.text('YOUR WALLET'), 300);
+    // The dashboard uses a lazy ListView, so scroll to the wallet before asserting it.
+    await tester.drag(find.byType(ListView).first, const Offset(0, -500));
     await tester.pumpAndSettle();
     expect(find.text('YOUR WALLET'), findsOneWidget);
     expect(find.text('Play'), findsOneWidget);
@@ -41,6 +41,9 @@ void main() {
     expect(find.text('Daily Momentum'), findsOneWidget);
     expect(find.text('More'), findsOneWidget);
 
+    // Return to the top before checking the Automation Lab above the wallet.
+    await tester.drag(find.byType(ListView).first, const Offset(0, 500));
+    await tester.pumpAndSettle();
     await tester.drag(find.byType(ListView).first, const Offset(0, -500));
     await tester.pumpAndSettle();
     expect(find.text('AUTOMATION LAB'), findsOneWidget);
