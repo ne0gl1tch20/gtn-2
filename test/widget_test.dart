@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart' show ListView;
+import 'package:flutter/material.dart' show ListView, TextField;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gtn_2/main.dart';
 
@@ -21,6 +21,23 @@ void main() {
     expect(find.text('MIDPOINT'), findsOneWidget);
     expect(find.text('HIGH END'), findsOneWidget);
     expect(find.text('CLEAR'), findsOneWidget);
+
+    final field = tester.widget<TextField>(find.byType(TextField).first);
+    await tester.tap(find.text('LOW END'));
+    await tester.pump();
+    expect(field.controller?.text, '1');
+
+    await tester.tap(find.text('MIDPOINT'));
+    await tester.pump();
+    expect(field.controller?.text, '50');
+
+    await tester.tap(find.text('HIGH END'));
+    await tester.pump();
+    expect(field.controller?.text, '100');
+
+    await tester.tap(find.text('CLEAR'));
+    await tester.pump();
+    expect(field.controller?.text, isEmpty);
   });
 
   testWidgets('More opens its own destination with save and dev tools',
