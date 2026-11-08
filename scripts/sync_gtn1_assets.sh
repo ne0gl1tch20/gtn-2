@@ -51,7 +51,7 @@ while IFS= read -r -d '' file; do
   mkdir -p "$(dirname "$destination")"
   cp "$file" "$destination"
   image_count=$((image_count + 1))
-done < <(find "$WEB_SOURCE" -type f \( -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.webp' -o -iname '*.avif' -o -iname '*.gif' \) -print0)
+done < <(find "$WEB_SOURCE" -type f \( -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.webp' -o -iname '*.avif' -o -iname '*.gif' -o -iname '*.svg' \) -print0)
 
 # Ship every canonical gameplay catalog, not only the four initially ported catalogs.
 if [[ ! -d "$GAME_SOURCE" ]]; then
@@ -92,15 +92,29 @@ if [[ -d "$SOURCE_ROOT/licenses" ]]; then
   cp -a "$SOURCE_ROOT/licenses/." "$LICENSE_DEST/"
 fi
 
+
+# Preserve other first-party artwork outside the Web Play and trait package trees.
+ARTWORK_DEST="assets/gtn1/source-artwork"
+mkdir -p "$ARTWORK_DEST"
+other_artwork_count=0
+while IFS= read -r -d '' file; do
+  relative="${file#"$SOURCE_ROOT"/}"
+  destination="$ARTWORK_DEST/$relative"
+  mkdir -p "$(dirname "$destination")"
+  cp "$file" "$destination"
+  other_artwork_count=$((other_artwork_count + 1))
+done < <(find "$SOURCE_ROOT" -type f \\( -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.webp' -o -iname '*.avif' -o -iname '*.gif' -o -iname '*.svg' \\) ! -path "$WEB_SOURCE/*" ! -path "$TRAIT_SOURCE/*" -print0)
+
 cat > assets/gtn1/source-manifest.json <<EOF
 {
   "sourceRepository": "ne0gl1tch20/GuessTheNumber",
   "sourceCommit": "fe9cf567169e19059e0330d08769fe454336ef94",
   "fontFamilies": ["Manrope", "Inter", "Space Grotesk", "JetBrains Mono"],
   "bundledWebPlayImageCount": $image_count,
+  "bundledOtherArtworkCount": $other_artwork_count,
   "bundledGameCatalogCount": $game_catalog_count,
   "bundledTraitAssetCount": $trait_asset_count
 }
 EOF
 
-echo "Bundled ${#required_fonts[@]} GTN1 fonts, $image_count Web Play images, $game_catalog_count game catalogs and $trait_asset_count trait assets."
+echo "Bundled ${#required_fonts[@]} GTN1 fonts, $image_count Web Play images, $other_artwork_count other artwork files, $game_catalog_count game catalogs and $trait_asset_count trait assets."
