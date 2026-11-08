@@ -54,3 +54,11 @@ The source audit confirmed these canonical implementation areas:
 ## Merge gate
 
 Do not mark this port complete or merge the PR until the remaining work above is implemented, the relevant Flutter tests and static analysis pass, and Android/Windows builds succeed. UI presence alone is not proof that an economy, progression or updater feature works. Keep GTN 1 unchanged while using its current source as the behavioral reference.
+
+## Verified parity-pass update (2026-11-08)
+
+- The Flutter dashboard now uses GTN1's canonical `GTN_APP_LOGO.png` instead of a placeholder icon.
+- Android and Windows CI check out the same pinned GTN1 source commit and bundle the original Manrope, Inter, Space Grotesk and JetBrains Mono font files. They also copy supported image files from GTN1 Web Play assets into Flutter's asset bundle. This keeps the APK offline-capable and makes the source revision reproducible.
+- The Flutter app theme now uses the bundled Manrope family.
+- Hidden-trait discovery now checks the trait's `minLevel` gate in addition to prestige, correct guesses, best streak, season and discovered dependencies. A regression test covers the level gate.
+- These changes do not close the remaining behavioral parity items in the table above. In particular, the separate adaptive/invisible trait profile and its helper cooldown/one-time bonus behavior, complete minigame/music playback parity, and device-level updater/install verification remain unclaimed.
