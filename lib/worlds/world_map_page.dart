@@ -53,6 +53,7 @@ class _WorldMapPageState extends State<WorldMapPage> {
             Builder(builder: (context) {
               final unlocked = WorldBossCatalog.isUnlocked(_state, boss);
               final defeated = WorldBossCatalog.isDefeated(_state, boss);
+              final canFight = WorldBossCatalog.canFight(_state, boss);
               final damage = WorldBossCatalog.damage(_state, boss);
               return Card(
                 margin: const EdgeInsets.only(bottom: 12),
@@ -66,7 +67,7 @@ class _WorldMapPageState extends State<WorldMapPage> {
                           Expanded(
                             child: Text(boss.worldName, style: theme.textTheme.titleLarge),
                           ),
-                          Text(defeated ? 'Defeated' : unlocked ? 'Unlocked' : 'Locked'),
+                          Text(defeated ? 'Defeated' : canFight ? 'Ready to fight' : unlocked ? 'Unlocked' : 'Locked'),
                         ],
                       ),
                       const SizedBox(height: 4),
@@ -78,25 +79,31 @@ class _WorldMapPageState extends State<WorldMapPage> {
                       LinearProgressIndicator(value: damage / boss.hits),
                       const SizedBox(height: 8),
                       Text(
-                        'Requires ${boss.correctRequirement} correct guesses, '
-                        '${boss.upgradeRequirement} upgrade levels, '
-                        '${boss.prestigeRequirement} Prestige resets and '
-                        '${boss.ultraRequirement} Ultra resets.',
+                        'Unlock: ${boss.unlockCorrectGuesses} correct guesses, '
+                        '${boss.unlockUpgradeCount} upgrades, '
+                        '${boss.unlockPrestigeCount} Prestige and '
+                        '${boss.unlockUltraCount} Ultra.\n'
+                        'Fight: ${boss.fightCorrectGuesses} correct guesses, '
+                        '${boss.fightUpgradeCount} upgrades, '
+                        '${boss.fightPrestigeCount} Prestige and '
+                        '${boss.fightUltraCount} Ultra.',
                         style: theme.textTheme.bodySmall,
                       ),
                       const SizedBox(height: 8),
                       Text('Reward: ${boss.moneyReward} Money + ${boss.nebulaReward} Nebula'),
                       const SizedBox(height: 12),
                       FilledButton(
-                        onPressed: !unlocked || defeated || _attacking != null
+                        onPressed: !canFight || defeated || _attacking != null
                             ? null
                             : () => _attack(boss),
                         child: Text(
                           defeated
                               ? 'Victory claimed'
-                              : unlocked
+                              : canFight
                                   ? 'Attack boss'
-                                  : 'World locked',
+                                  : unlocked
+                                      ? 'Fight requirements not met'
+                                      : 'World locked',
                         ),
                       ),
                     ],
