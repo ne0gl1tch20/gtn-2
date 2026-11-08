@@ -2,7 +2,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:gtn_2/core/legacy/legacy_systems_engine.dart';
 import 'package:gtn_2/core/legacy/legacy_systems_state.dart';
 import 'package:gtn_2/core/live_ops/live_ops.dart';
-import 'package:gtn_2/core/numbers/big_number.dart';
 import 'package:gtn_2/core/progression/progression_state.dart';
 import 'package:gtn_2/data/live_ops/live_ops_repository.dart';
 
@@ -182,7 +181,7 @@ void main() {
 
       for (final result in [ineligible, disabled, expired, exhausted]) {
         expect(result.accepted, isFalse);
-        expect(result.progression.nebula, BigNumber.fromInt(0));
+        expect(result.progression.nebula.toString(), '0');
         expect(result.systems.liveOpsClaims, isEmpty);
         expect(result.systems.permanentEventBoosts, 0);
       }
