@@ -391,7 +391,7 @@ class LegacySystemsState {
     final lastBotGuess = json['lastBotGuess'];
     final lastBotFeedback = json['lastBotFeedback'];
     final lastBotId = json['lastBotId'];
-    if ((lastBotGuess != null && (lastBotGuess is! int || lastBotGuess < 1)) ||
+    if ((lastBotGuess != null && (lastBotGuess is! int || lastBotGuess < 1 || lastBotGuess > 500)) ||
         (lastBotFeedback != null && !{'TOO_LOW', 'TOO_HIGH', 'CORRECT'}.contains(lastBotFeedback)) ||
         (lastBotId != null && !{'auto_clicker_basic', 'bot_byte', 'bot_pixel'}.contains(lastBotId))) {
       throw const FormatException('Invalid bot team state.');
