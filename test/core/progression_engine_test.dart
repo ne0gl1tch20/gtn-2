@@ -72,7 +72,7 @@ void main() {
   test('permanent Prestige and Ultra shop items spend exact currency once', () {
     var state = ProgressionState.initial.copyWith(
       prestige: BigNumber.fromInt(350),
-      ultra: BigNumber.fromInt(11000),
+      ultra: BigNumber.fromInt(11500),
     );
 
     state = engine.purchasePrestigeShopItem(state, 'prestige_auto_speed');
