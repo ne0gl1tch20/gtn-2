@@ -3,7 +3,7 @@
 **Source repository:** [ne0gl1tch20/GuessTheNumber](https://github.com/ne0gl1tch20/GuessTheNumber)  
 **Source ref inspected:** `master`  
 **Target repository:** [ne0gl1tch20/gtn-2](https://github.com/ne0gl1tch20/gtn-2)  
-**Target branch:** `feature/full-gtn1-system-parity`  
+**Target branch:** `main` plus active implementation branch `port/adaptive-invisible-traits`  
 **Status:** Draft implementation. This audit is not a merge-readiness claim.
 
 ## GTN 1 source inventory
@@ -62,3 +62,18 @@ Do not mark this port complete or merge the PR until the remaining work above is
 - The Flutter app theme now uses the bundled Manrope family.
 - Hidden-trait discovery now checks the trait's `minLevel` gate in addition to prestige, correct guesses, best streak, season and discovered dependencies. A regression test covers the level gate.
 - These changes do not close the remaining behavioral parity items in the table above. In particular, the separate adaptive/invisible trait profile and its helper cooldown/one-time bonus behavior, complete minigame/music playback parity, and device-level updater/install verification remain unclaimed.
+
+
+## Adaptive trait implementation pass (2026-11-08)
+
+The active branch `port/adaptive-invisible-traits` adds the separate save-backed profile used by GTN 1's `InvisibleTraitEngine`, rather than folding its memory into visible trait discovery.
+
+Implemented in Dart on this branch:
+- Versioned per-save adaptive profile with strict counter, score, map-size and currency validation; old saves that omit the profile receive safe defaults.
+- Deterministic observation of guesses, accuracy/consistency/risk/persistence scores, long streaks and earned currency.
+- Source-matched helper eligibility, three-helper cap, per-helper cooldowns and one-time first-prestige/first-ultra/veteran bonuses.
+- Gameplay wiring for comeback and momentum rewards, mistake insurance, streak protection, Range Scout and the gentle-target bias.
+- Profile and helper-use state are persisted through the existing per-slot legacy save object.
+- Dedicated tests cover default migration, profile round-trip/invalid data, helper thresholds/cooldowns, one-time bonuses, observation and target bias.
+
+This is one behavioral subsystem pass, not a full-port completion claim. It still needs CI validation and source-parity review. Remaining major work includes connecting every canonical talent/mutator/relic effect to the actual gameplay transaction, replacing fallback catalogs and hard-coded player-level assumptions, finishing music and updater parity, auditing every source asset/catalog, and validating all screens and save migrations.
