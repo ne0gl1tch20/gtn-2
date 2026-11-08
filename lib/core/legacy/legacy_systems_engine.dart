@@ -1,3 +1,4 @@
+import '../../worlds/world_boss_battle_engine.dart';
 import '../../worlds/world_boss_catalog.dart';
 import '../numbers/big_number.dart';
 import '../progression/progression_state.dart';
@@ -390,15 +391,14 @@ class LegacySystemsEngine {
       'ember_summit': 'ember_dragon',
       'nebula_rift': 'nebula_titan',
     };
-    const previousWorld = <String, String>{
-      'crystal_caverns': 'verdant_grove',
-      'ember_summit': 'crystal_caverns',
-      'nebula_rift': 'ember_summit',
-    };
     final relicId = relicByWorld[worldId];
-    if (relicId == null || !progression.defeatedBosses.contains(worldId) ||
-        (previousWorld[worldId] != null &&
-            !progression.defeatedBosses.contains(previousWorld[worldId]))) {
+    final worldMatches =
+        WorldBossCatalog.worlds.where((world) => world.id == worldId);
+    final world = worldMatches.isEmpty ? null : worldMatches.first;
+    if (relicId == null ||
+        world == null ||
+        !systems.unlockedWorldIds.contains(worldId) ||
+        !WorldBossCatalog.isDefeated(progression, world)) {
       return _reject(progression, systems, 'Defeat this world guardian before upgrading mastery.');
     }
     final current = systems.worldMasteryLevels[worldId] ?? 1;
@@ -473,13 +473,11 @@ class LegacySystemsEngine {
     if (systems.discoveredSecrets.contains(secretId)) {
       return _reject(progression, systems, 'Secret area already discovered.');
     }
-    const previousWorld = <String, String>{
-      'crystal_caverns': 'verdant_grove',
-      'ember_summit': 'crystal_caverns',
-      'nebula_rift': 'ember_summit',
-    };
-    if ((previousWorld[worldId] != null &&
-            !progression.defeatedBosses.contains(previousWorld[worldId])) ||
+    final worldMatches =
+        WorldBossCatalog.worlds.where((world) => world.id == worldId);
+    final world = worldMatches.isEmpty ? null : worldMatches.first;
+    if (world == null ||
+        !systems.unlockedWorldIds.contains(worldId) ||
         progression.correctGuesses < thresholds[secretId]!) {
       return _reject(progression, systems, 'Secret area is still hidden.');
     }
@@ -575,25 +573,29 @@ class LegacySystemsEngine {
     required LegacySystemsState systems,
     required bool active,
   }) {
-    const allWorlds = <String>{
-      'verdant_grove', 'crystal_caverns', 'ember_summit', 'nebula_rift',
-    };
     if (active) {
       if (systems.endlessRiftActive) return _reject(progression, systems, 'Endless Rift is already active.');
-      if (!progression.defeatedBosses.containsAll(allWorlds)) {
+      if (!WorldBossCatalog.worlds.every(
+        (world) => WorldBossCatalog.isDefeated(progression, world),
+      )) {
         return _reject(progression, systems, 'Defeat all four world bosses first.');
       }
       final tier = systems.endlessRiftBestTier + 1 > 1 ? systems.endlessRiftBestTier + 1 : 1;
+      final firstWorld = WorldBossCatalog.worlds.first;
       final bossDamage = Map<String, int>.of(progression.bossDamage)
-        ..['verdant_grove'] = 0;
+        ..[firstWorld.bossId] = 0
+        ..[firstWorld.id] = 0;
       return _accept(
         progression.copyWith(bossDamage: Map.unmodifiable(bossDamage)),
         systems.copyWith(
           endlessRiftActive: true,
           endlessRiftTier: tier,
-          activeWorldId: 'verdant_grove',
-          activeBossBattleWorldId: 'verdant_grove',
-          bossBattleMistakes: Map.unmodifiable({...systems.bossBattleMistakes, 'verdant_grove': 0}),
+          activeWorldId: firstWorld.id,
+          activeBossBattleWorldId: firstWorld.id,
+          unlockedWorldIds: Set.unmodifiable(
+            WorldBossCatalog.worlds.map((world) => world.id),
+          ),
+          bossBattleMistakes: Map.unmodifiable({...systems.bossBattleMistakes, firstWorld.bossId: 0}),
         ),
       );
     }
@@ -608,44 +610,15 @@ class LegacySystemsEngine {
     ProgressionState progression,
     LegacySystemsState systems,
   ) {
-    if (!systems.endlessRiftActive || systems.activeBossBattleWorldId == null) {
-      return _reject(progression, systems, 'No Endless Rift boss is active.');
-    }
-    final worldIndex = WorldBossCatalog.worlds.indexWhere((world) => world.id == systems.activeWorldId);
-    if (worldIndex < 0) return _reject(progression, systems, 'Unknown Endless Rift world.');
-    final world = WorldBossCatalog.worlds[worldIndex];
-    final tier = systems.endlessRiftTier.clamp(1, 1000000).toInt();
-    final hp = world.hits + (tier - 1) * 2;
-    final damage = progression.bossDamage[world.id] ?? 0;
-    final nextDamage = damage + 1;
-    if (nextDamage < hp) {
-      final nextBossDamage = Map<String, int>.of(progression.bossDamage)..[world.id] = nextDamage;
-      return _accept(
-        progression.copyWith(bossDamage: Map.unmodifiable(nextBossDamage)),
-        systems,
-      );
-    }
-    final moneyReward = BigNumber.fromInt(world.moneyReward).multiplyInt(tier);
-    final nebulaReward = BigNumber.fromInt(world.nebulaReward).multiplyInt(tier);
-    final nextWorld = WorldBossCatalog.worlds[(worldIndex + 1) % WorldBossCatalog.worlds.length];
-    final nextBossDamage = Map<String, int>.of(progression.bossDamage)
-      ..[world.id] = hp
-      ..[nextWorld.id] = 0;
-    return _accept(
-      progression.copyWith(
-        money: progression.money + moneyReward,
-        moneyEarned: progression.moneyEarned + moneyReward,
-        nebula: progression.nebula + nebulaReward,
-        nebulaEarned: progression.nebulaEarned + nebulaReward,
-        bossDamage: Map.unmodifiable(nextBossDamage),
-      ),
-      systems.copyWith(
-        activeWorldId: nextWorld.id,
-        activeBossBattleWorldId: nextWorld.id,
-        endlessRiftTier: tier + 1,
-        endlessRiftBestTier: systems.endlessRiftBestTier > tier ? systems.endlessRiftBestTier : tier,
-        bossBattleMistakes: Map.unmodifiable({...systems.bossBattleMistakes, nextWorld.id: 0}),
-      ),
+    final result = const WorldBossBattleEngine().recordGuess(
+      progression.copyWith(legacySystems: systems),
+      correct: true,
+    );
+    return LegacyActionResult(
+      progression: result.progression,
+      systems: result.progression.legacySystems,
+      accepted: result.accepted,
+      message: result.message,
     );
   }
 
@@ -653,23 +626,15 @@ class LegacySystemsEngine {
     ProgressionState progression,
     LegacySystemsState systems,
   ) {
-    if (!systems.endlessRiftActive || systems.activeBossBattleWorldId == null) {
-      return _reject(progression, systems, 'No Endless Rift boss is active.');
-    }
-    final worldId = systems.activeWorldId;
-    final worldIndex = WorldBossCatalog.worlds.indexWhere((item) => item.id == worldId);
-    if (worldIndex < 0) return _reject(progression, systems, 'Unknown Endless Rift world.');
-    final world = WorldBossCatalog.worlds[worldIndex];
-    final hp = world.hits + (systems.endlessRiftTier - 1).clamp(0, 2000000).toInt() * 2;
-    final damage = progression.bossDamage[worldId] ?? 0;
-    final misses = (systems.bossBattleMistakes[worldId] ?? 0) + 1;
-    final phase = ((damage * 3) ~/ hp + 1).clamp(1, 3);
-    final interval = switch (phase) { 1 => 4, 2 => 3, _ => 2 };
-    final nextDamage = misses % interval == 0 ? (damage - 1).clamp(0, hp).toInt() : damage;
-    final bossDamage = Map<String, int>.of(progression.bossDamage)..[worldId] = nextDamage;
-    return _accept(
-      progression.copyWith(bossDamage: Map.unmodifiable(bossDamage)),
-      systems.copyWith(bossBattleMistakes: Map.unmodifiable({...systems.bossBattleMistakes, worldId: misses})),
+    final result = const WorldBossBattleEngine().recordGuess(
+      progression.copyWith(legacySystems: systems),
+      correct: false,
+    );
+    return LegacyActionResult(
+      progression: result.progression,
+      systems: result.progression.legacySystems,
+      accepted: result.accepted,
+      message: result.message,
     );
   }
 

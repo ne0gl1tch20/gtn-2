@@ -14,6 +14,7 @@ void main() {
     );
     final first = WorldBossCatalog.worlds.first;
     expect(WorldBossCatalog.isUnlocked(state, first), isTrue);
+    expect(WorldBossCatalog.canFight(state, first), isTrue);
 
     state = engine.attackWorldBoss(state, first);
     expect(state.bossDamage[first.id], 1);
@@ -28,5 +29,34 @@ void main() {
     expect(paidAgain.money, state.money);
     expect(paidAgain.nebula, state.nebula);
     expect(WorldBossCatalog.isUnlocked(state, WorldBossCatalog.worlds[1]), isFalse);
+  });
+
+  test('separates world unlock requirements from boss fight requirements', () {
+    final first = WorldBossCatalog.worlds.first;
+    final second = WorldBossCatalog.worlds[1];
+    var state = ProgressionState();
+
+    expect(WorldBossCatalog.isUnlocked(state, first), isTrue);
+    expect(WorldBossCatalog.canFight(state, first), isFalse);
+    expect(engine.attackWorldBoss(state, first), same(state));
+
+    state = state.copyWith(correctGuesses: 10, upgrades: const {'a': 3});
+    expect(WorldBossCatalog.isUnlocked(state, first), isTrue);
+    expect(WorldBossCatalog.canFight(state, first), isTrue);
+
+    state = state.copyWith(correctGuesses: 25, upgrades: const {'a': 5});
+    expect(WorldBossCatalog.isUnlocked(state, second), isFalse);
+    expect(WorldBossCatalog.canFight(state, second), isFalse);
+  });
+
+  test('matches GTN1 world identities, map positions and secret thresholds', () {
+    expect(WorldBossCatalog.worlds.map((world) => world.bossId), [
+      'verdant_guardian', 'crystal_golem', 'ember_dragon', 'nebula_titan',
+    ]);
+    expect(WorldBossCatalog.worlds.map((world) => world.secretAt), [50, 150, 300, 600]);
+    expect(WorldBossCatalog.worlds.map((world) => world.hits), [3, 5, 7, 10]);
+    expect(WorldBossCatalog.worlds.last.unlockUltraCount, 1);
+    expect(WorldBossCatalog.worlds.last.fightUltraCount, 1);
+    expect(WorldBossCatalog.worlds.last.fightPrestigeCount, 5);
   });
 }

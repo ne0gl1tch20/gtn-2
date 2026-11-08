@@ -99,7 +99,7 @@ class ProgressionState {
 
     final rawLegacy = json['legacySystems'];
     final legacySystems = rawLegacy == null
-        ? LegacySystemsState.initial
+        ? LegacySystemsState.initial.copyWith(worldUnlockMigrationPending: true)
         : rawLegacy is Map<String, dynamic>
             ? LegacySystemsState.fromJson(rawLegacy)
             : throw const FormatException('Invalid legacy systems save.');

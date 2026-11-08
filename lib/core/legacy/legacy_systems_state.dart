@@ -29,9 +29,12 @@ class LegacySystemsState {
     this.discoveredSecrets = const {},
     this.codexEntries = const {},
     this.activeWorldId = 'verdant_grove',
+    this.unlockedWorldIds = const {'verdant_grove'},
+    this.worldUnlockMigrationPending = false,
     this.endlessRiftTier = 0,
     this.endlessRiftBestTier = 0,
     this.endlessRiftActive = false,
+    this.worldBossVictories = 0,
     this.stakesPlaced = 0,
     this.stakesWon = 0,
     this.stakesLost = 0,
@@ -87,9 +90,12 @@ class LegacySystemsState {
   final Set<String> discoveredSecrets;
   final Set<String> codexEntries;
   final String activeWorldId;
+  final Set<String> unlockedWorldIds;
+  final bool worldUnlockMigrationPending;
   final int endlessRiftTier;
   final int endlessRiftBestTier;
   final bool endlessRiftActive;
+  final int worldBossVictories;
   final int stakesPlaced;
   final int stakesWon;
   final int stakesLost;
@@ -148,9 +154,12 @@ class LegacySystemsState {
     Set<String>? discoveredSecrets,
     Set<String>? codexEntries,
     String? activeWorldId,
+    Set<String>? unlockedWorldIds,
+    bool? worldUnlockMigrationPending,
     int? endlessRiftTier,
     int? endlessRiftBestTier,
     bool? endlessRiftActive,
+    int? worldBossVictories,
     int? stakesPlaced,
     int? stakesWon,
     int? stakesLost,
@@ -211,9 +220,12 @@ class LegacySystemsState {
     discoveredSecrets: discoveredSecrets ?? this.discoveredSecrets,
     codexEntries: codexEntries ?? this.codexEntries,
     activeWorldId: activeWorldId ?? this.activeWorldId,
+    unlockedWorldIds: unlockedWorldIds ?? this.unlockedWorldIds,
+    worldUnlockMigrationPending: worldUnlockMigrationPending ?? this.worldUnlockMigrationPending,
     endlessRiftTier: endlessRiftTier ?? this.endlessRiftTier,
     endlessRiftBestTier: endlessRiftBestTier ?? this.endlessRiftBestTier,
     endlessRiftActive: endlessRiftActive ?? this.endlessRiftActive,
+    worldBossVictories: worldBossVictories ?? this.worldBossVictories,
     stakesPlaced: stakesPlaced ?? this.stakesPlaced,
     stakesWon: stakesWon ?? this.stakesWon,
     stakesLost: stakesLost ?? this.stakesLost,
@@ -270,9 +282,12 @@ class LegacySystemsState {
     'discoveredSecrets': discoveredSecrets.toList()..sort(),
     'codexEntries': codexEntries.toList()..sort(),
     'activeWorldId': activeWorldId,
+    'unlockedWorldIds': unlockedWorldIds.toList(),
+    'worldUnlockMigrationPending': worldUnlockMigrationPending,
     'endlessRiftTier': endlessRiftTier,
     'endlessRiftBestTier': endlessRiftBestTier,
     'endlessRiftActive': endlessRiftActive,
+    'worldBossVictories': worldBossVictories,
     'stakesPlaced': stakesPlaced,
     'stakesWon': stakesWon,
     'stakesLost': stakesLost,
@@ -377,7 +392,11 @@ class LegacySystemsState {
     if (!{'off', 'one', 'all'}.contains(repeat)) throw const FormatException('Invalid music repeat mode.');
     final shuffle = json['musicShuffle'] ?? false;
     final endless = json['endlessRiftActive'] ?? false;
-    if (shuffle is! bool || endless is! bool) throw const FormatException('Invalid legacy boolean.');
+    final worldUnlockMigrationPending = json['worldUnlockMigrationPending'] ??
+        (json['unlockedWorldIds'] == null);
+    if (shuffle is! bool || endless is! bool || worldUnlockMigrationPending is! bool) {
+      throw const FormatException('Invalid legacy boolean.');
+    }
     final currentTrack = json['currentTrackId'];
     final lastLootTier = json['lastLootDropTier'];
     if (lastLootTier != null && !{'common', 'rare', 'epic'}.contains(lastLootTier)) {
@@ -436,9 +455,13 @@ class LegacySystemsState {
       discoveredSecrets: strings('discoveredSecrets'),
       codexEntries: strings('codexEntries'),
       activeWorldId: string('activeWorldId', fallback: 'verdant_grove'),
+      unlockedWorldIds: json['unlockedWorldIds'] == null
+          ? const {'verdant_grove'} : strings('unlockedWorldIds'),
+      worldUnlockMigrationPending: worldUnlockMigrationPending,
       endlessRiftTier: count('endlessRiftTier'),
       endlessRiftBestTier: count('endlessRiftBestTier'),
       endlessRiftActive: endless,
+      worldBossVictories: json['worldBossVictories'] == null ? 0 : count('worldBossVictories'),
       stakesPlaced: count('stakesPlaced'),
       stakesWon: count('stakesWon'),
       stakesLost: count('stakesLost'),

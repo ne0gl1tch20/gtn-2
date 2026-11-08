@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../core/progression/progression_state.dart';
+import '../i18n/app_localizations.dart';
 import '../worlds/world_boss_catalog.dart';
 import 'legacy_systems_page.dart';
 
@@ -178,8 +179,11 @@ class _LegacyDetailPage extends StatelessWidget {
                     ? Icons.verified_rounded
                     : Icons.public_rounded,
               ),
-              title: Text(boss.worldName),
-              subtitle: Text('${boss.name}\n${boss.description}'),
+              title: Text(AppLocalizations.text(boss.worldNameKey, boss.worldName)),
+              subtitle: Text(
+                '${AppLocalizations.text(boss.bossNameKey, boss.name)}\n'
+                '${AppLocalizations.text(boss.worldRequirementKey)}',
+              ),
               isThreeLine: true,
               trailing: Text(
                 progression.defeatedBosses.contains(boss.id)

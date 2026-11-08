@@ -171,7 +171,7 @@ class ProgressionEngine {
     ProgressionState state,
     WorldBossDefinition boss,
   ) {
-    if (!WorldBossCatalog.isUnlocked(state, boss) ||
+    if (!WorldBossCatalog.canFight(state, boss) ||
         WorldBossCatalog.isDefeated(state, boss)) {
       return state;
     }

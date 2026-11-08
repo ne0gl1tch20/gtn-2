@@ -31,7 +31,7 @@ import 'settings/settings_page.dart';
 import 'shop/nebula_shop_page.dart';
 import 'shop/upgrade_catalog.dart';
 import 'shop/upgrade_shop_page.dart';
-import 'worlds/world_boss_catalog.dart';
+import 'worlds/world_boss_battle_engine.dart';
 import 'worlds/world_map_page.dart';
 
 Future<void> main() async {
@@ -123,6 +123,7 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
     );
   }
   final ProgressionEngine _progressionEngine = const ProgressionEngine();
+  final WorldBossBattleEngine _worldBossBattleEngine = const WorldBossBattleEngine();
   final LegacySystemsEngine _legacySystemsEngine = const LegacySystemsEngine();
   final InvisibleTraitEngine _invisibleTraitEngine = const InvisibleTraitEngine();
   final BotTeam _botTeam = BotTeam();
@@ -211,7 +212,8 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
       final save = await storage.load();
       if (!mounted) return;
       if (save != null) {
-        var restoredProgression = save.progression;
+        var restoredProgression =
+            _worldBossBattleEngine.migrateLegacyWorldUnlocks(save.progression);
         final savedAt = restoredProgression.legacySystems.lastSaveTimestamp;
         final now = DateTime.now().millisecondsSinceEpoch;
         final clockCheck = ClockRollbackPolicy.check(
@@ -613,12 +615,35 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
   }
 
 
-  Future<ProgressionState> _attackWorldBoss(
-    WorldBossDefinition boss,
-  ) async {
-    final updated = _progressionEngine.attackWorldBoss(_progression, boss);
-    if (updated != _progression) {
-      setState(() => _progression = updated);
+  Future<ProgressionState> _worldBossAction(String worldId, String action) async {
+    if (action == 'mastery') {
+      final masteryResult = _legacySystemsEngine.upgradeWorldMastery(
+        progression: _progression,
+        systems: _progression.legacySystems,
+        worldId: worldId,
+      );
+      if (masteryResult.accepted) {
+        setState(() {
+          _progression = masteryResult.progression.copyWith(
+            legacySystems: masteryResult.systems,
+          );
+          _message = masteryResult.message;
+        });
+        await _persist();
+      }
+      return _progression;
+    }
+    final result = switch (action) {
+      'secret' => _worldBossBattleEngine.discoverSecret(_progression, worldId),
+      'unlock' => _worldBossBattleEngine.unlockWorld(_progression, worldId),
+      'select_world' => _worldBossBattleEngine.selectWorld(_progression, worldId),
+      _ => _worldBossBattleEngine.toggleBossBattle(_progression, worldId),
+    };
+    if (result.accepted) {
+      setState(() {
+        _progression = result.progression;
+        _message = result.message;
+      });
       await _persist();
     }
     return _progression;
@@ -629,7 +654,7 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
       MaterialPageRoute<void>(
         builder: (_) => WorldMapPage(
           progression: _progression,
-          onAttack: _attackWorldBoss,
+          onAction: _worldBossAction,
         ),
       ),
     );
@@ -642,7 +667,9 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
       final storage = await SaveStorage.inApplicationDocuments(slot: slot);
       final save = await storage.load();
       if (!mounted) return;
-      var nextProgression = save?.progression ?? ProgressionState.initial;
+      var nextProgression = _worldBossBattleEngine.migrateLegacyWorldUnlocks(
+        save?.progression ?? ProgressionState.initial,
+      );
       final savedAt = nextProgression.legacySystems.lastSaveTimestamp;
       final now = DateTime.now().millisecondsSinceEpoch;
       final clockCheck = ClockRollbackPolicy.check(
@@ -1096,16 +1123,11 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
           activeSeasonId: _currentSeasonId(),
         );
         var nextProgression = afterReward.copyWith(legacySystems: systemsAfter);
-        if (systemsAfter.endlessRiftActive) {
-          final riftResult = correct
-              ? _legacySystemsEngine.attackEndlessRiftBoss(nextProgression, systemsAfter)
-              : _legacySystemsEngine.recordEndlessRiftMiss(nextProgression, systemsAfter);
-          if (riftResult.accepted) {
-            nextProgression = riftResult.progression.copyWith(
-              legacySystems: riftResult.systems,
-            );
-          }
-        }
+        final bossResult = _worldBossBattleEngine.recordGuess(
+          nextProgression,
+          correct: correct,
+        );
+        if (bossResult.accepted) nextProgression = bossResult.progression;
         _progression = nextProgression;
         if (isBot) {
           if (correct) {
