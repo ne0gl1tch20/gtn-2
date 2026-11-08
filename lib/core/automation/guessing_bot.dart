@@ -41,10 +41,10 @@ class GuessingBot {
     }
     switch (feedback) {
       case BotFeedback.tooLow:
-        if (guess < _upperBound) _lowerBound = guess + 1;
+        _lowerBound = guess + 1;
         break;
       case BotFeedback.tooHigh:
-        if (guess > _lowerBound) _upperBound = guess - 1;
+        _upperBound = guess - 1;
         break;
       case BotFeedback.correct:
         break;
