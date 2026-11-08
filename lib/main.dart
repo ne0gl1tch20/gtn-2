@@ -549,7 +549,22 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
       final storage = await SaveStorage.inApplicationDocuments(slot: slot);
       final save = await storage.load();
       if (!mounted) return;
-      final nextProgression = save?.progression ?? ProgressionState.initial;
+      var nextProgression = save?.progression ?? ProgressionState.initial;
+      final savedAt = nextProgression.legacySystems.lastSaveTimestamp;
+      final now = DateTime.now().millisecondsSinceEpoch;
+      final elapsedSeconds = savedAt > 0 && now >= savedAt
+          ? ((now - savedAt) ~/ 1000)
+          : 0;
+      final offlineEarnings = OfflineEarningsPolicy.calculate(
+        autoClickerWasActive: nextProgression.legacySystems.autoClickerActive,
+        elapsedSeconds: elapsedSeconds,
+      );
+      if (offlineEarnings.compareTo(BigNumber.fromInt(0)) > 0) {
+        nextProgression = nextProgression.copyWith(
+          money: nextProgression.money + offlineEarnings,
+          moneyEarned: nextProgression.moneyEarned + offlineEarnings,
+        );
+      }
       await AppLocalizations.load(save?.settings.localeCode ?? 'en_us');
       if (!mounted) return;
       final nextSettings = save?.settings ?? GameSettings.initial;
@@ -571,12 +586,18 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
         _progression = nextProgression;
         _settings = nextSettings;
         GtnApp.settingsNotifier.value = _settings;
-        _message = save == null
-            ? 'New save slot ready. Guess a number between 1 and 100.'
-            : 'Save slot $slot loaded.';
+        _message = offlineEarnings.compareTo(BigNumber.fromInt(0)) > 0
+            ? 'Save slot $slot loaded. Auto Clicker earned $offlineEarnings Money offline.'
+            : save == null
+                ? 'New save slot ready. Guess a number between 1 and 100.'
+                : 'Save slot $slot loaded.';
         _isLoading = false;
       });
-      if (save == null) await _persist();
+      if (save == null || offlineEarnings.compareTo(BigNumber.fromInt(0)) > 0) {
+        await _persist();
+      }
+      _botTeam.reset(_game.minimum, _game.maximum);
+      _scheduleAutoClicker();
     } on Exception {
       if (mounted) {
         setState(() {
@@ -745,6 +766,7 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
       }
     });
     await _persist();
+    _scheduleAutoClicker();
   }
 
   Future<void> _openLegacyPages() async {
@@ -756,6 +778,7 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
         ),
       ),
     );
+    _scheduleAutoClicker();
   }
 
   Future<void> _openUpgradeShop() async {
@@ -1038,6 +1061,8 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _autoClickerTimer?.cancel();
     _controller.dispose();
     super.dispose();
   }
