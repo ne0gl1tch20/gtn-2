@@ -88,6 +88,63 @@ void main() {
       expect(catalog.events, hasLength(2));
     });
 
+    test('rejects timestamps without an explicit UTC offset', () async {
+      const localTimeManifest = '''
+      {"schemaVersion":1,"manifestVersion":2,"events":[
+        {"id":"local_time","title":"Local time","description":"No timezone","status":"ACTIVE","startDate":"2026-01-01T00:00:00","endDate":"2026-02-01T00:00:00Z","currencyName":"Nebula","maxClaims":1}
+      ]}
+      ''';
+      final repository = LiveOpsRepository(
+        loadAsset: (path) async =>
+            path.endsWith('feature_flags.json') ? _flags : localTimeManifest,
+      );
+
+      await expectLater(repository.load(), throwsFormatException);
+    });
+
+    test('resolves event start and end boundaries using UTC half-open windows', () {
+      final event = LiveOpsEvent(
+        id: 'boundary',
+        title: 'Boundary',
+        description: 'Boundary event',
+        status: 'ACTIVE',
+        startDate: DateTime.utc(2026, 1, 1),
+        endDate: DateTime.utc(2026, 2, 1),
+        currencyName: 'Nebula',
+        maxClaims: 1,
+        rewardNebula: 10,
+        permanentBoostPerClaim: 1,
+        minCorrectGuesses: 0,
+        minPrestigeCount: 0,
+        minUltraCount: 0,
+      );
+
+      expect(event.isWithinClaimWindow(DateTime.utc(2026, 1, 1)), isTrue);
+      expect(event.isWithinClaimWindow(DateTime.utc(2026, 1, 31, 23, 59, 59)), isTrue);
+      expect(event.isWithinClaimWindow(DateTime.utc(2026, 2, 1)), isFalse);
+      expect(event.isWithinClaimWindow(DateTime.utc(2025, 12, 31, 23, 59, 59)), isFalse);
+    });
+
+    test('preserves an explicitly archived event even inside its date window', () {
+      final event = LiveOpsEvent(
+        id: 'archived',
+        title: 'Archived',
+        description: 'Archived event',
+        status: 'ARCHIVED',
+        startDate: DateTime.utc(2026, 1, 1),
+        endDate: DateTime.utc(2027, 1, 1),
+        currencyName: 'Nebula',
+        maxClaims: 1,
+        rewardNebula: 10,
+        permanentBoostPerClaim: 1,
+        minCorrectGuesses: 0,
+        minPrestigeCount: 0,
+        minUltraCount: 0,
+      );
+
+      expect(event.resolveStatus(DateTime.utc(2026, 6, 1)).status, 'ARCHIVED');
+    });
+
     test('rejects duplicate event IDs and invalid event date windows', () async {
       const duplicateManifest = '''
       {"schemaVersion":1,"manifestVersion":2,"events":[
@@ -184,6 +241,51 @@ void main() {
         expect(result.progression.nebula.toString(), '0');
         expect(result.systems.liveOpsClaims, isEmpty);
         expect(result.systems.permanentEventBoosts, 0);
+      }
+    });
+
+    test('rejects negative claim counters without changing progression', () {
+      final result = engine.claimLiveOpsEvent(
+        progression: ProgressionState.initial.copyWith(
+          correctGuesses: 5,
+          prestigeResets: 1,
+        ),
+        systems: LegacySystemsState.initial.copyWith(
+          liveOpsClaims: const {'season_1': -1},
+        ),
+        event: event,
+        featureEnabled: true,
+        now: DateTime.utc(2026, 11, 8),
+      );
+
+      expect(result.accepted, isFalse);
+      expect(result.progression.nebula.toString(), '0');
+      expect(result.systems.liveOpsClaims['season_1'], -1);
+      expect(result.systems.permanentEventBoosts, 0);
+    });
+
+    test('rejects blank event IDs and negative reward rules', () {
+      final progression = ProgressionState.initial.copyWith(
+        correctGuesses: 5,
+        prestigeResets: 1,
+      );
+      for (final invalid in [
+        event.copyWith(id: ''),
+        event.copyWith(maxClaims: 0),
+        event.copyWith(rewardNebula: -1),
+        event.copyWith(permanentBoostPerClaim: -1),
+        event.copyWith(minCorrectGuesses: -1),
+        event.copyWith(minPrestigeCount: -1),
+        event.copyWith(minUltraCount: -1),
+      ]) {
+        final result = engine.claimLiveOpsEvent(
+          progression: progression,
+          systems: LegacySystemsState.initial,
+          event: invalid,
+          featureEnabled: true,
+          now: DateTime.utc(2026, 11, 8),
+        );
+        expect(result.accepted, isFalse);
       }
     });
 
