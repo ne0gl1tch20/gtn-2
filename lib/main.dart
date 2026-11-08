@@ -148,11 +148,47 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      _scheduleAutoClicker();
+      unawaited(_resumeAutoClicker());
     } else {
       _autoClickerTimer?.cancel();
       _autoClickerTimer = null;
     }
+  }
+
+  Future<void> _resumeAutoClicker() async {
+    if (!mounted) return;
+    final systems = _progression.legacySystems;
+    final now = DateTime.now().millisecondsSinceEpoch;
+    final savedAt = systems.lastSaveTimestamp;
+    if (savedAt > 0 && now < savedAt) {
+      setState(() {
+        _progression = _progression.copyWith(
+          legacySystems: systems.copyWith(
+            autoClickerActive: false,
+            lastSaveTimestamp: now,
+            timeTravelPenaltyUntil: now + _timeTravelPenaltyMillis,
+          ),
+        );
+        _message = 'Clock rollback detected. Auto Clicker paused for 24 hours.';
+      });
+      await _persist();
+    } else if (systems.autoClickerActive && savedAt > 0) {
+      final offlineEarnings = OfflineEarningsPolicy.calculate(
+        autoClickerWasActive: true,
+        elapsedSeconds: (now - savedAt) ~/ 1000,
+      );
+      if (offlineEarnings.compareTo(BigNumber.fromInt(0)) > 0) {
+        setState(() {
+          _progression = _progression.copyWith(
+            money: _progression.money + offlineEarnings,
+            moneyEarned: _progression.moneyEarned + offlineEarnings,
+          );
+          _message = 'Auto Clicker earned $offlineEarnings Money while the app was away.';
+        });
+        await _persist();
+      }
+    }
+    _scheduleAutoClicker();
   }
 
   Future<void> _restoreSave() async {
