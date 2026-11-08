@@ -6,12 +6,13 @@ import 'dart:math';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../core/legacy/builtin_trait_catalog.dart';
 import '../core/legacy/legacy_systems_engine.dart';
+import '../core/legacy/trait_catalog_repository.dart';
 import '../core/legacy/legacy_systems_state.dart';
 import '../core/numbers/big_number.dart';
 import '../core/progression/progression_state.dart';
@@ -50,6 +51,8 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
   List<Map<String, dynamic>> _mutatorCatalog = [];
   List<Map<String, dynamic>> _relicCatalog = [];
   List<Map<String, dynamic>> _challengeCatalog = [];
+  List<TraitCatalogEntry> _traitCatalog = [];
+  String? _catalogError;
 
   LegacySystemsState get _systems => _progression.legacySystems;
 
@@ -160,42 +163,57 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
   );
 
   Widget _traitsSection(TraitEffectSummary traits) {
-    final sorted = [...builtInTraitCatalog]
-      ..sort((a, b) => (a['id']! as String).compareTo(b['id']! as String));
     return Card(
       child: ExpansionTile(
         leading: const Icon(Icons.auto_awesome_rounded),
         title: const Text('Traits'),
-        subtitle: Text('${traits.activeTraitIds.length} active · ${_systems.discoveredTraits.length} discovered'),
+        subtitle: Text('${traits.activeTraitIds.length} active · ${_systems.discoveredTraits.length} discovered · ${_traitCatalog.length}/320 loaded'),
         children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Text('Trait activation is automatic. Hidden traits are discovered through their requirements. Effects are bounded by the original trait runtime.'),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            child: Text('Trait activation is automatic. Names, descriptions, categories and icons are read from the pinned GTN1 trait packages.'),
           ),
-          SizedBox(
-            height: 360,
-            child: ListView.builder(
-              itemCount: sorted.length,
-              itemBuilder: (context, index) {
-                final item = sorted[index];
-                final id = item['id']! as String;
-                final hidden = item['visibility'] == 'HIDDEN';
-                final discovered = _systems.discoveredTraits.contains(id);
-                final active = traits.activeTraitIds.contains(id);
-                final visible = !hidden || discovered;
-                return ListTile(
-                  dense: true,
-                  leading: Icon(
-                    active ? Icons.check_circle_rounded : hidden && !discovered ? Icons.lock_outline_rounded : Icons.circle_outlined,
-                    color: active ? Theme.of(context).colorScheme.primary : null,
-                  ),
-                  title: Text(visible ? _pretty(id) : 'Undiscovered trait'),
-                  subtitle: Text('${item['category']} · ${item['effect']}'),
-                  trailing: active ? const Text('ACTIVE') : null,
-                );
-              },
+          if (_traitCatalog.isEmpty)
+            _catalogUnavailable()
+          else
+            SizedBox(
+              height: 420,
+              child: ListView.builder(
+                itemCount: _traitCatalog.length,
+                itemBuilder: (context, index) {
+                  final trait = _traitCatalog[index];
+                  final hidden = trait.isHidden;
+                  final discovered = _systems.discoveredTraits.contains(trait.id);
+                  final active = traits.activeTraitIds.contains(trait.id);
+                  final visible = !hidden || discovered;
+                  final requirements = <String>[
+                    if (trait.minimumLevel > 1) 'Level ${trait.minimumLevel}',
+                    if (trait.minimumPrestige > 0) 'Prestige ${trait.minimumPrestige}',
+                    if (trait.minimumCorrectGuesses > 0) '${trait.minimumCorrectGuesses} correct guesses',
+                  ];
+                  final detail = visible
+                      ? '${trait.category} · ${trait.description}${!active && requirements.isNotEmpty ? '\\nRequires ${requirements.join(' · ')}' : ''}'
+                      : 'Hidden trait · keep playing to discover it';
+                  return ListTile(
+                    dense: true,
+                    leading: hidden && !discovered
+                        ? const Icon(Icons.lock_outline_rounded)
+                        : SizedBox(
+                            width: 34,
+                            height: 34,
+                            child: SvgPicture.asset(
+                              trait.iconAssetPath,
+                              fit: BoxFit.contain,
+                            ),
+                          ),
+                    title: Text(visible ? trait.title : 'Undiscovered trait'),
+                    subtitle: Text(detail),
+                    isThreeLine: visible,
+                    trailing: active ? const Text('ACTIVE') : null,
+                  );
+                },
+              ),
             ),
-          ),
           for (final entry in LegacySystemsEngine.gameplayArms.entries)
             if (traits.activeTraitIds.contains(entry.key))
               ListTile(
@@ -230,39 +248,74 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
   }
 
   Future<void> _loadSystemCatalogs() async {
+    Future<List<Map<String, dynamic>>> readCatalog(
+      String path,
+      String key,
+    ) async {
+      final decoded = jsonDecode(await rootBundle.loadString(path));
+      if (decoded is! Map<String, dynamic> ||
+          decoded['schemaVersion'] != 1 ||
+          decoded[key] is! List) {
+        throw FormatException('Invalid pinned GTN1 catalog: $path');
+      }
+      final entries = <Map<String, dynamic>>[];
+      final ids = <String>{};
+      for (final raw in decoded[key] as List) {
+        if (raw is! Map) throw FormatException('Invalid entry in $path');
+        final entry = Map<String, dynamic>.from(raw);
+        final id = entry['id'];
+        if (id is! String || id.isEmpty || !ids.add(id)) {
+          throw FormatException('Missing or duplicate ID in $path');
+        }
+        entries.add(entry);
+      }
+      if (entries.isEmpty) throw FormatException('Empty pinned GTN1 catalog: $path');
+      return List.unmodifiable(entries);
+    }
+
     try {
-      final talents = jsonDecode(await rootBundle.loadString('assets/game/talents.json')) as Map<String, dynamic>;
-      final mutators = jsonDecode(await rootBundle.loadString('assets/game/mutators.json')) as Map<String, dynamic>;
-      final relics = jsonDecode(await rootBundle.loadString('assets/game/relics.json')) as Map<String, dynamic>;
-      final challenges = jsonDecode(await rootBundle.loadString('assets/game/challenges.json')) as Map<String, dynamic>;
+      final results = await Future.wait([
+        readCatalog('assets/game/talents.json', 'talents'),
+        readCatalog('assets/game/mutators.json', 'mutators'),
+        readCatalog('assets/game/relics.json', 'relics'),
+        readCatalog('assets/game/challenges.json', 'challenges'),
+        TraitCatalogRepository().load(),
+      ]);
       if (!mounted) return;
       setState(() {
-        _talentCatalog = (talents['talents'] as List).cast<Map<String, dynamic>>();
-        _mutatorCatalog = (mutators['mutators'] as List).cast<Map<String, dynamic>>();
-        _relicCatalog = (relics['relics'] as List).cast<Map<String, dynamic>>();
-        _challengeCatalog = (challenges['challenges'] as List).cast<Map<String, dynamic>>();
+        _talentCatalog = results[0] as List<Map<String, dynamic>>;
+        _mutatorCatalog = results[1] as List<Map<String, dynamic>>;
+        _relicCatalog = results[2] as List<Map<String, dynamic>>;
+        _challengeCatalog = results[3] as List<Map<String, dynamic>>;
+        _traitCatalog = results[4] as List<TraitCatalogEntry>;
+        _catalogError = null;
       });
-    } on Exception {
-      // Keep the deterministic built-in fallback catalogs available offline.
+    } catch (error) {
+      if (!mounted) return;
+      setState(() => _catalogError = error.toString());
     }
   }
 
+  Widget _catalogUnavailable() => ListTile(
+        leading: Icon(
+          _catalogError == null ? Icons.hourglass_top_rounded : Icons.error_outline_rounded,
+        ),
+        title: Text(
+          _catalogError == null
+              ? 'Loading the pinned GTN1 catalog…'
+              : 'GTN1 catalog unavailable: $_catalogError',
+        ),
+      );
+
   Widget _talentsSection() {
-    final talents = _talentCatalog.isNotEmpty
-        ? _talentCatalog
-        : LegacySystemsEngine.talents.entries.map((entry) => <String, dynamic>{
-            'id': entry.key,
-            'name': _pretty(entry.key),
-            'description': 'Unlock this permanent talent.',
-            'cost': entry.value.cost,
-            'requiredParentId': entry.value.parent,
-          }).toList();
+    final talents = _talentCatalog;
     return Card(
       child: ExpansionTile(
         leading: const Icon(Icons.account_tree_rounded),
         title: const Text('Talent tree'),
         subtitle: Text('${_systems.talents.length} / 6 unlocked · ${_progression.prestige} Prestige'),
         children: [
+          if (talents.isEmpty) _catalogUnavailable(),
           for (final talent in talents)
             Builder(builder: (context) {
               final id = talent['id'] as String;
@@ -290,20 +343,14 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
   }
 
   Widget _mutatorsSection() {
-    final mutators = _mutatorCatalog.isNotEmpty
-        ? _mutatorCatalog
-        : const [
-            {'id': 'mut_hardcore', 'name': 'Hardcore Range', 'description': 'Double the guessing range. Rewards ×2.'},
-            {'id': 'mut_speed', 'name': 'Hyper Speed', 'description': 'Auto-clicker speed ×3, but earnings halved.'},
-            {'id': 'mut_blind', 'name': 'Blindfolded Oracle', 'description': 'Hide higher/lower feedback. Rewards ×5.'},
-            {'id': 'mut_tax', 'name': 'Heavy Taxation', 'description': 'Wrong guesses cost 5% of current Money. Rewards ×10.'},
-          ];
+    final mutators = _mutatorCatalog;
     return Card(
       child: ExpansionTile(
         leading: const Icon(Icons.tune_rounded),
         title: const Text('Mutators & challenge builder'),
         subtitle: Text('Reward multiplier ×${_engine.mutatorRewardMultiplier(_systems)}'),
         children: [
+          if (mutators.isEmpty) _catalogUnavailable(),
           for (final mutator in mutators)
             SwitchListTile(
               title: Text(mutator['name'] as String),
@@ -321,20 +368,14 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
   }
 
   Widget _relicsSection() {
-    final relics = _relicCatalog.isNotEmpty
-        ? _relicCatalog
-        : const [
-            {'id': 'verdant_guardian', 'name': 'Heartwood Sigil', 'description': 'Verdant Guardian relic.', 'unlockBossName': 'Verdant Guardian'},
-            {'id': 'crystal_golem', 'name': 'Prism Core', 'description': 'Crystal Golem relic.', 'unlockBossName': 'Crystal Golem'},
-            {'id': 'ember_dragon', 'name': 'Ember Scale', 'description': 'Ember Dragon relic.', 'unlockBossName': 'Ember Dragon'},
-            {'id': 'nebula_titan', 'name': 'Starbound Fragment', 'description': 'Nebula Titan relic.', 'unlockBossName': 'Nebula Titan'},
-          ];
+    final relics = _relicCatalog;
     return Card(
       child: ExpansionTile(
         leading: const Icon(Icons.diamond_rounded),
         title: const Text('Relic collection'),
         subtitle: Text('${_systems.relicInventory.length}/4 discovered · ${_systems.equippedRelics.length}/4 equipped'),
         children: [
+          if (relics.isEmpty) _catalogUnavailable(),
           for (final relic in relics)
             Builder(builder: (context) {
               final id = relic['id'] as String;
@@ -630,15 +671,14 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
 
   Widget _challengeSection() {
     final progress = _systems.dailyQuestDate == _today ? _systems.dailyQuestCorrectGuesses : 0;
-    final challenges = _challengeCatalog.isNotEmpty
-        ? _challengeCatalog
-        : const [{'id': 'daily_guess_50', 'name': 'Daily Number Challenge', 'description': 'Make 50 correct guesses today.', 'rewardNebula': 30}];
+    final challenges = _challengeCatalog;
     return Card(
       child: ExpansionTile(
         leading: const Icon(Icons.flag_rounded),
         title: const Text('Challenges'),
         subtitle: Text('$progress / 50 correct guesses today'),
         children: [
+          if (challenges.isEmpty) _catalogUnavailable(),
           for (final challenge in challenges)
             Builder(builder: (context) {
               final baseId = challenge['id'] as String;
@@ -1027,7 +1067,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
           ),
           const Padding(
             padding: EdgeInsets.fromLTRB(16, 0, 16, 16),
-            child: Text('Debug updates are published to the GitHub debug-latest release after both Android and Windows builds succeed. Android APK downloads are SHA-256 verified before opening the package installer. Windows packages are available from the same release.'),
+            child: Text('Debug release publishing is paused until the complete GTN1 port passes parity verification. Update installation remains disabled during this porting phase.'),
           ),
         ],
       ),
