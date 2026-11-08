@@ -67,6 +67,7 @@ void main() {
             speed: 1,
             speedTalentOne: false,
             speedTalentTwo: false,
+            prestigeAutoSpeed: false,
             speedMutator: false,
           );
       expect(action(0)?.botId, 'auto_clicker_basic');
@@ -82,7 +83,7 @@ void main() {
           purchasedBots: const {}, sharedMemory: false, sequence: 0,
           rangeMinimum: 1, rangeMaximum: 100, currentMinimum: 1,
           currentMaximum: 100, speed: 1, speedTalentOne: false,
-          speedTalentTwo: false, speedMutator: false,
+          speedTalentTwo: false, prestigeAutoSpeed: false, speedMutator: false,
         ),
         isNull,
       );
@@ -92,7 +93,7 @@ void main() {
       final team = BotTeam();
       expect(team.delayMillis(
         active: true, speed: 1, speedTalentOne: true,
-        speedTalentTwo: true, speedMutator: true,
+        speedTalentTwo: true, prestigeAutoSpeed: false, speedMutator: true,
       ), 177);
       expect(team.delayMillis(
         active: false, speed: 5, speedTalentOne: true,
