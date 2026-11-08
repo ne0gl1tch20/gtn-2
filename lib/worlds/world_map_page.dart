@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../core/progression/progression_state.dart';
+import '../i18n/app_localizations.dart';
 import 'world_boss_catalog.dart';
 
 typedef WorldBossAction = Future<ProgressionState> Function(
@@ -45,12 +46,15 @@ class _WorldMapPageState extends State<WorldMapPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('World Map')),
+      appBar: AppBar(title: Text(AppLocalizations.text('world_map_title', 'World Map'))),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           Text(
-            'Unlock each world, challenge its guardian and claim its one-time reward.',
+            AppLocalizations.text(
+              'world_map_hint',
+              'Pinch to zoom, drag to explore, and tap a world to inspect it.',
+            ),
             style: theme.textTheme.bodyLarge,
           ),
           const SizedBox(height: 16),
@@ -79,33 +83,24 @@ class _WorldMapPageState extends State<WorldMapPage> {
                       Row(
                         children: [
                           Expanded(
-                            child: Text(boss.worldName, style: theme.textTheme.titleLarge),
+                            child: Text(AppLocalizations.text('world_${boss.id == 'verdant_grove' ? 'verdant' : boss.id == 'crystal_caverns' ? 'crystal' : boss.id == 'ember_summit' ? 'ember' : 'nebula'}_name', boss.worldName), style: theme.textTheme.titleLarge),
                           ),
                           Text(defeated ? 'Defeated' : active ? 'Battle active' : canFight ? 'Ready to fight' : unlocked ? 'Unlocked' : canUnlock ? 'Ready to unlock' : 'Locked'),
                         ],
                       ),
                       const SizedBox(height: 4),
-                      Text(boss.name, style: theme.textTheme.titleMedium),
+                      Text(AppLocalizations.text(boss.bossNameKey, boss.name), style: theme.textTheme.titleMedium),
                       const SizedBox(height: 6),
-                      Text(boss.description),
+                      Text(AppLocalizations.text(boss.worldRequirementKey)),
+                      const SizedBox(height: 4),
+                      Text(AppLocalizations.text(boss.bossRequirementKey)),
                       const SizedBox(height: 10),
                       Text('Boss health: ${bossHp - damage} / $bossHp'),
                       LinearProgressIndicator(value: damage / bossHp),
                       if (active) Text('Phase $phase · Misses this phase: $misses'),
                       const SizedBox(height: 8),
-                      Text(
-                        'Unlock: ${boss.unlockCorrectGuesses} correct guesses, '
-                        '${boss.unlockUpgradeCount} upgrades, '
-                        '${boss.unlockPrestigeCount} Prestige and '
-                        '${boss.unlockUltraCount} Ultra.\n'
-                        'Fight: ${boss.fightCorrectGuesses} correct guesses, '
-                        '${boss.fightUpgradeCount} upgrades, '
-                        '${boss.fightPrestigeCount} Prestige and '
-                        '${boss.fightUltraCount} Ultra.',
-                        style: theme.textTheme.bodySmall,
-                      ),
                       const SizedBox(height: 8),
-                      Text('Reward: ${boss.moneyReward} Money + ${boss.nebulaReward} Nebula'),
+                      Text(AppLocalizations.text(boss.bossRewardKey)),
                       const SizedBox(height: 12),
                       FilledButton(
                         onPressed: defeated || _attacking != null || (!canFight && !active)
