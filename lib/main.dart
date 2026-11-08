@@ -18,6 +18,7 @@ import 'core/numbers/big_number.dart';
 import 'core/progression/progression_calculator.dart';
 import 'core/progression/progression_engine.dart';
 import 'core/progression/progression_state.dart';
+import 'core/random_events/random_event_engine.dart';
 import 'data/saves/save_data.dart';
 import 'data/saves/save_storage.dart';
 import 'dev/developer_settings_page.dart';
@@ -128,6 +129,11 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
   final InvisibleTraitEngine _invisibleTraitEngine = const InvisibleTraitEngine();
   final BotTeam _botTeam = BotTeam();
   Timer? _autoClickerTimer;
+  Timer? _randomEventTimer;
+  Timer? _randomEventClearTimer;
+  bool _randomEventRunning = false;
+  final RandomEventSelector _randomEventSelector = RandomEventSelector();
+  final RandomEventEngine _randomEventEngine = RandomEventEngine();
   bool _autoClickerTickRunning = false;
   bool _resumeCatchUpPending = false;
   ProgressionState _progression = ProgressionState.initial;
@@ -151,7 +157,12 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       unawaited(_resumeAutoClicker());
+      _startRandomEvents();
     } else {
+      _randomEventTimer?.cancel();
+      _randomEventTimer = null;
+      _randomEventClearTimer?.cancel();
+      _randomEventClearTimer = null;
       _autoClickerTimer?.cancel();
       _autoClickerTimer = null;
     }
@@ -289,6 +300,67 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
     _botTeam.reset(_game.minimum, _game.maximum);
     if (shouldPersistOfflineEarnings) await _persist();
     _scheduleAutoClicker();
+    _startRandomEvents();
+  }
+
+  void _startRandomEvents() {
+    _randomEventTimer?.cancel();
+    if (!mounted ||
+        _isLoading ||
+        WidgetsBinding.instance.lifecycleState != AppLifecycleState.resumed) {
+      return;
+    }
+    _randomEventTimer = Timer.periodic(
+      const Duration(seconds: 60),
+      (_) => unawaited(_runRandomEvent()),
+    );
+  }
+
+  Future<void> _runRandomEvent() async {
+    if (!mounted || _isLoading || _randomEventRunning) return;
+    final event = _randomEventSelector.roll();
+    if (event == null) return;
+    _randomEventRunning = true;
+    try {
+      final result = _randomEventEngine.apply(
+        progression: _progression,
+        currentRangeMin: _game.minimum,
+        currentRangeMax: _game.maximum,
+        event: event,
+      );
+      if (!mounted) return;
+      setState(() {
+        _progression = result.progression;
+        if (result.newSecret != null) {
+          _game = _engine.restore(
+            secret: result.newSecret!,
+            attempts: _game.attempts,
+            isComplete: _game.isComplete,
+            savedMinimum: _game.minimum,
+            savedMaximum: _game.maximum,
+          );
+        }
+        _message = result.message;
+      });
+      await _persist();
+      _randomEventClearTimer?.cancel();
+      _randomEventClearTimer = Timer(const Duration(seconds: 8), () async {
+        if (!mounted ||
+            _progression.legacySystems.lastRandomEventId != event.id) {
+          return;
+        }
+        setState(() {
+          _progression = _progression.copyWith(
+            legacySystems: _progression.legacySystems.copyWith(
+              clearLastRandomEvent: true,
+            ),
+          );
+        });
+        await _persist();
+      });
+    } finally {
+      _randomEventRunning = false;
+    }
   }
 
   Future<void> _persist() async {
@@ -1227,6 +1299,8 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _autoClickerTimer?.cancel();
+    _randomEventTimer?.cancel();
+    _randomEventClearTimer?.cancel();
     _controller.dispose();
     super.dispose();
   }
