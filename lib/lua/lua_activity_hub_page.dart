@@ -117,7 +117,7 @@ class _LuaActivityHubPageState extends State<LuaActivityHubPage> {
                   Text(
                     _loading
                         ? 'Loading activities…'
-                        : _scripts.length.toString() + ' registered activities',
+                        : '${_scripts.length} registered activities',
                     style: theme.textTheme.titleMedium,
                   ),
                 ],
@@ -171,20 +171,26 @@ class _LuaActivityHubPageState extends State<LuaActivityHubPage> {
                         Text(_activity!.prompt,
                             style: theme.textTheme.titleMedium),
                         const SizedBox(height: 8),
-                        for (var index = 0;
-                            index < _activity!.options.length;
-                            index++)
-                          RadioListTile<int>(
-                            contentPadding: EdgeInsets.zero,
-                            value: index,
-                            groupValue: _selectedAnswer,
-                            onChanged: _answerMessage == null
-                                ? (value) => setState(
-                                      () => _selectedAnswer = value ?? -1,
-                                    )
-                                : null,
-                            title: Text(_activity!.options[index]),
+                        RadioGroup<int>(
+                          groupValue: _selectedAnswer,
+                          onChanged: _answerMessage == null
+                              ? (value) => setState(
+                                    () => _selectedAnswer = value ?? -1,
+                                  )
+                              : null,
+                          child: Column(
+                            children: [
+                              for (var index = 0;
+                                  index < _activity!.options.length;
+                                  index++)
+                                RadioListTile<int>(
+                                  contentPadding: EdgeInsets.zero,
+                                  value: index,
+                                  title: Text(_activity!.options[index]),
+                                ),
+                            ],
                           ),
+                        ),
                         if (_answerMessage == null)
                           FilledButton(
                             onPressed:
