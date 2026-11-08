@@ -286,7 +286,7 @@ void _luaWorker(List<Object?> request) {
 
     String readText(String field, int maxLength) {
       state.getField(-1, field);
-      if (!state.isString(-1)) {
+      if (state.type(-1) != LuaType.luaString) {
         state.pop(1);
         throw FormatException('Lua activity field "' + field + '" must be a string.');
       }
@@ -323,7 +323,7 @@ void _luaWorker(List<Object?> request) {
     final options = <String>[];
     for (var index = 1; index <= optionCount; index++) {
       state.getI(-1, index);
-      if (!state.isString(-1)) {
+      if (state.type(-1) != LuaType.luaString) {
         state.pop(2);
         throw const FormatException('Activity answer options must be strings.');
       }
