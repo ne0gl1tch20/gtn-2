@@ -137,7 +137,7 @@ class TraitCatalogRepository {
     final result = <TraitCatalogEntry>[];
     const batchSize = 16;
     for (var start = 0; start < rawEntries.length; start += batchSize) {
-      final end = (start + batchSize).clamp(0, rawEntries.length);
+      final end = (start + batchSize).clamp(0, rawEntries.length).toInt();
       final batch = rawEntries.sublist(start, end);
       result.addAll(await Future.wait(batch.map(parseEntry)));
     }
