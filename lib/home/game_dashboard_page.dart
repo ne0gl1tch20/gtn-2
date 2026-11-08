@@ -727,6 +727,29 @@ class _Wallet extends StatelessWidget {
                   fontWeight: FontWeight.w900,
                   letterSpacing: 1.7,
                 )),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Text(
+                  'RUN MOMENTUM',
+                  style: TextStyle(
+                    color: muted,
+                    fontSize: 8,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 1,
+                  ),
+                ),
+                const Spacer(),
+                Text(
+                  'BEST ${state.bestStreak}',
+                  style: TextStyle(
+                    color: muted,
+                    fontSize: 8,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ],
+            ),
             const SizedBox(height: 13),
             Row(
               children: [
@@ -1067,63 +1090,4 @@ class _Action extends StatelessWidget {
           ),
         ),
       );
-}
-
-class _WorldProgress extends StatelessWidget {
-  const _WorldProgress(this.state, this.panel, this.line,
-      this.foreground, this.muted);
-  final ProgressionState state;
-  final Color panel;
-  final Color line;
-  final Color foreground;
-  final Color muted;
-
-  @override
-  Widget build(BuildContext context) {
-    final count = state.defeatedBosses.length.clamp(0, 4);
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: panel,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: line),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(Icons.explore_rounded, color: _cyan, size: 18),
-              const SizedBox(width: 8),
-              Text('WORLD EXPLORATION',
-                  style: TextStyle(
-                    color: foreground,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 1.2,
-                  )),
-              const Spacer(),
-              Text('$count / 4 bosses',
-                  style: TextStyle(color: muted, fontSize: 10)),
-            ],
-          ),
-          const SizedBox(height: 12),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(99),
-            child: LinearProgressIndicator(
-              value: count / 4,
-              minHeight: 7,
-              backgroundColor: foreground.withValues(alpha: .08),
-              valueColor: const AlwaysStoppedAnimation<Color>(_cyan),
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Defeat guardians to unlock new worlds and earn permanent rewards.',
-            style: TextStyle(color: muted, fontSize: 10, height: 1.4),
-          ),
-        ],
-      ),
-    );
-  }
 }
