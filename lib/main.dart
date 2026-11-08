@@ -451,7 +451,7 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
   void _scheduleAutoClicker() {
     _autoClickerTimer?.cancel();
     _autoClickerTimer = null;
-    if (!mounted || _isLoading ||
+    if (!mounted || _isLoading || _autoClickerTickRunning ||
         WidgetsBinding.instance.lifecycleState == AppLifecycleState.paused ||
         WidgetsBinding.instance.lifecycleState == AppLifecycleState.inactive ||
         WidgetsBinding.instance.lifecycleState == AppLifecycleState.detached) {
@@ -771,6 +771,7 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
       if (oldRange != newRange) {
         _engine = _engineFor(progression, _settings);
         _game = _newGameWithAdaptiveTarget(_engine.newGame());
+        _botTeam.reset(_game.minimum, _game.maximum);
         _message = 'Hardcore range changed. A fresh round is ready.';
       }
     });
