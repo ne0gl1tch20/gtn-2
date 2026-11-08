@@ -93,7 +93,9 @@ class SaveStorage {
     await candidate.rename(destination.path);
   }
 
-  Future<SaveData?> load() => _enqueue(() async {
+  Future<SaveData?> load() => _enqueue(_loadUnlocked);
+
+  Future<SaveData?> _loadUnlocked() async {
     final primary = await _readSave(_file);
     if (primary != null) return primary;
 
@@ -114,7 +116,18 @@ class SaveStorage {
       return backupSave;
     }
     return null;
-  });
+  }
+
+  /// Atomically reads, transforms and writes this slot within its per-file queue.
+  /// This prevents gameplay autosaves from overwriting metadata changed by another screen.
+  Future<void> update(SaveData Function(SaveData? current) transform) =>
+      _enqueue(() async {
+        final updated = transform(await _loadUnlocked());
+        if (!_isValidSave(updated)) {
+          throw ArgumentError('Refusing to write invalid save data.');
+        }
+        await _write(updated);
+      });
 
   Future<bool> hasBackup() => _enqueue(() async =>
       await _readSave(File('${_file.path}.bak')) != null);
@@ -186,18 +199,21 @@ class SaveStorage {
     await candidate.rename(_file.path);
   }
 
+  bool _isValidSave(SaveData data) =>
+      data.schemaVersion == SaveData.currentSchemaVersion &&
+      data.minimum >= 1 &&
+      data.maximum <= 500 &&
+      data.minimum <= data.maximum &&
+      data.secret >= data.minimum &&
+      data.secret <= data.maximum &&
+      data.attempts >= 0 &&
+      data.gamesWon >= 0 &&
+      data.profileName.length <= 24 &&
+      SaveData.profileIconIds.contains(data.profileIconId) &&
+      (data.creativeMode == null || CreativeModeSave.validate(data.creativeMode!));
+
   Future<void> save(SaveData data) {
-    if (data.schemaVersion != SaveData.currentSchemaVersion ||
-        data.minimum < 1 ||
-        data.maximum > 500 ||
-        data.minimum > data.maximum ||
-        data.secret < data.minimum ||
-        data.secret > data.maximum ||
-        data.attempts < 0 ||
-        data.gamesWon < 0 ||
-        data.profileName.length > 24 ||
-        !SaveData.profileIconIds.contains(data.profileIconId) ||
-        (data.creativeMode != null && !CreativeModeSave.validate(data.creativeMode!))) {
+    if (!_isValidSave(data)) {
       return Future<void>.error(
         ArgumentError('Refusing to write invalid save data.'),
       );
