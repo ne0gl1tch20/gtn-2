@@ -4,6 +4,7 @@ import 'package:gtn_2/core/legacy/legacy_systems_engine.dart';
 import 'package:gtn_2/core/legacy/legacy_systems_state.dart';
 import 'package:gtn_2/core/numbers/big_number.dart';
 import 'package:gtn_2/core/progression/progression_state.dart';
+import 'package:gtn_2/worlds/world_boss_catalog.dart';
 
 void main() {
   const engine = LegacySystemsEngine();
@@ -99,6 +100,74 @@ void main() {
         'not_a_relic',
       );
       expect(fifth.accepted, isFalse);
+    });
+  });
+
+  group('world mastery and secret progression', () {
+    test('mastery recognizes defeated boss IDs and applies the first upgrade', () {
+      final progression = ProgressionState.initial.copyWith(
+        defeatedBosses: const {'verdant_guardian'},
+        nebula: n(100),
+      );
+      final result = engine.upgradeWorldMastery(
+        progression: progression,
+        systems: LegacySystemsState.initial,
+        worldId: 'verdant_grove',
+      );
+
+      expect(result.accepted, isTrue);
+      expect(result.systems.worldMasteryLevels['verdant_grove'], 2);
+      expect(result.progression.nebula.compareTo(n(80)), 0);
+    });
+
+    test('mastery requires the preceding world boss to be defeated', () {
+      final progression = ProgressionState.initial.copyWith(
+        defeatedBosses: const {'crystal_golem'},
+        nebula: n(100),
+      );
+      final result = engine.upgradeWorldMastery(
+        progression: progression,
+        systems: LegacySystemsState.initial,
+        worldId: 'crystal_caverns',
+      );
+
+      expect(result.accepted, isFalse);
+      expect(result.progression.nebula.compareTo(n(100)), 0);
+    });
+
+    test('secret discovery recognizes previous boss IDs and requires unlock', () {
+      final progression = ProgressionState.initial.copyWith(
+        correctGuesses: 150,
+        defeatedBosses: const {'verdant_guardian'},
+      );
+      final systems = LegacySystemsState.initial.copyWith(
+        unlockedWorldIds: const {'verdant_grove', 'crystal_caverns'},
+      );
+      final result = engine.discoverSecret(
+        progression: progression,
+        systems: systems,
+        secretId: 'shard_archive',
+      );
+
+      expect(result.accepted, isTrue);
+      expect(result.systems.discoveredSecrets, contains('shard_archive'));
+      expect(result.progression.money.compareTo(n(50000)), 0);
+      expect(result.progression.nebula.compareTo(n(15)), 0);
+    });
+
+    test('secret discovery rejects a locked world even after the threshold', () {
+      final progression = ProgressionState.initial.copyWith(
+        correctGuesses: 150,
+        defeatedBosses: const {'verdant_guardian'},
+      );
+      final result = engine.discoverSecret(
+        progression: progression,
+        systems: LegacySystemsState.initial,
+        secretId: 'shard_archive',
+      );
+
+      expect(result.accepted, isFalse);
+      expect(result.progression.money.compareTo(n(0)), 0);
     });
   });
 
