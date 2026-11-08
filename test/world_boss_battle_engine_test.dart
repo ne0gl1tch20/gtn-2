@@ -145,6 +145,20 @@ void main() {
     expect(engine.recordGuess(state, correct: true).progression.money, state.money);
   });
 
+  test('normal boss rewards apply permanent Prestige and Ultra Money boosts', () {
+    var state = fightReadyState().copyWith(
+      prestigeUpgrades: const {'prestige_money_boost': 1},
+      ultraUpgrades: const {'ultra_money_boost': 1},
+    );
+    state = engine.toggleBossBattle(state, 'verdant_grove').progression;
+    for (var i = 0; i < 3; i++) {
+      state = engine.recordGuess(state, correct: true).progression;
+    }
+    // GTN1 multiplies normal boss payouts by 1.5x Prestige and 3x Ultra.
+    expect(state.money, BigNumber.fromInt(112500));
+    expect(state.moneyEarned, BigNumber.fromInt(112500));
+  });
+
   test('boss rewards include relic set, mastery, sanctuary, event and secret bonuses', () {
     final state = fightReadyState().copyWith(
       legacySystems: ProgressionState.initial.legacySystems.copyWith(
@@ -178,9 +192,11 @@ void main() {
         activeBossBattleWorldId: 'verdant_grove',
       ),
     );
-    for (var i = 0; i < 5; i++) {
+    for (var i = 0; i < 4; i++) {
       state = engine.recordGuess(state, correct: true).progression;
     }
+    expect(WorldBossCatalog.damage(state, WorldBossCatalog.worlds.first), 4);
+    state = engine.recordGuess(state, correct: true).progression;
     expect(state.money, BigNumber.fromInt(50000));
     expect(state.nebula, BigNumber.fromInt(20));
     expect(state.legacySystems.endlessRiftTier, 3);
