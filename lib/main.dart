@@ -51,6 +51,7 @@ class GtnApp extends StatelessWidget {
                 brightness: brightness,
               ),
               useMaterial3: true,
+              fontFamily: 'Manrope',
             );
         return MaterialApp(
           title: 'GuessTheNumber 2',
