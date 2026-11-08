@@ -131,9 +131,14 @@ class WorldBossCatalog {
       state.prestigeResets >= boss.fightPrestigeCount &&
       state.ultraResets >= boss.fightUltraCount;
 
-  static int damage(ProgressionState state, WorldBossDefinition boss) =>
-      (state.bossDamage[boss.bossId] ?? state.bossDamage[boss.id] ?? 0)
-          .clamp(0, boss.hits);
+  static int damage(ProgressionState state, WorldBossDefinition boss) {
+    final riftTier = state.legacySystems.endlessRiftActive
+        ? state.legacySystems.endlessRiftTier.clamp(1, 1000000).toInt()
+        : 1;
+    final hp = boss.hits + (state.legacySystems.endlessRiftActive ? (riftTier - 1) * 2 : 0);
+    return (state.bossDamage[boss.bossId] ?? state.bossDamage[boss.id] ?? 0)
+        .clamp(0, hp);
+  }
 
   static bool isDefeated(ProgressionState state, WorldBossDefinition boss) =>
       state.defeatedBosses.contains(boss.bossId) ||
