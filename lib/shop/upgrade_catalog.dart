@@ -25,7 +25,13 @@ class GameUpgrade {
   String get effectDescription => switch (definition.id) {
         'reward_multiplier' => '+25% correct-guess reward per level',
         'better_range' => '-5 maximum target range per level',
-        _ => 'Not exposed until its GTN1 gameplay effect is ported',
+        'prestige_money_boost' => '+50% Money earnings per level',
+        'prestige_gain_boost' => '+20% Prestige reward per level',
+        'prestige_starting_capital' => '+1,000 starting Money per level',
+        'ultra_money_boost' => '+200% Money earnings per level',
+        'ultra_gain_boost' => '+50% Ultra reward per level',
+        'ultra_nebula_boost' => 'Nebula rewards gain +1× per level',
+        _ => 'Source catalog entry; gameplay behavior is not yet ported',
       };
 }
 
@@ -33,21 +39,26 @@ class UpgradeCatalog {
   UpgradeCatalog._();
 
   static List<GameUpgrade> _all = const [];
+  static List<GameUpgrade> _prestige = const [];
+  static List<GameUpgrade> _ultra = const [];
   static bool _loaded = false;
 
   static List<GameUpgrade> get all => List.unmodifiable(_all);
+  static List<GameUpgrade> get prestige => List.unmodifiable(_prestige);
+  static List<GameUpgrade> get ultra => List.unmodifiable(_ultra);
 
   static List<GameUpgrade> get availableForGameplay =>
       List.unmodifiable(_all.where((item) => item.gameplayImplemented));
 
   static Future<void> load() async {
     if (_loaded) return;
-    final source = await rootBundle.loadString('assets/game/upgrades.json');
-    final decoded = jsonDecode(source);
+    Future<List<GameUpgrade>> readCatalog(String path, int expectedCount) async {
+      final source = await rootBundle.loadString(path);
+      final decoded = jsonDecode(source);
     if (decoded is! Map<String, dynamic> ||
         decoded['schemaVersion'] != 1 ||
         decoded['upgrades'] is! List) {
-      throw const FormatException('Unsupported GTN1 upgrade catalog.');
+      throw FormatException('Unsupported GTN1 upgrade catalog: $path');
     }
 
     final parsed = <GameUpgrade>[];
@@ -88,10 +99,18 @@ class UpgradeCatalog {
         effectPerLevel: effect.toDouble(),
       ));
     }
-    if (parsed.length != 11) {
-      throw FormatException('Expected 11 GTN1 upgrades, found ${parsed.length}.');
+    if (parsed.length != expectedCount) {
+      throw FormatException('Expected $expectedCount GTN1 upgrades in $path, found ${parsed.length}.');
     }
-    _all = List.unmodifiable(parsed);
+    return List.unmodifiable(parsed);
+    }
+
+    final normal = await readCatalog('assets/game/upgrades.json', 11);
+    final prestige = await readCatalog('assets/game/prestige_upgrades.json', 3);
+    final ultra = await readCatalog('assets/game/ultra_upgrades.json', 3);
+    _all = normal;
+    _prestige = prestige;
+    _ultra = ultra;
     _loaded = true;
   }
 
