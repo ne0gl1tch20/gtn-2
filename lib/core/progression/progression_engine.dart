@@ -136,6 +136,58 @@ class ProgressionEngine {
     );
   }
 
+  ProgressionState purchasePrestigeShopItem(
+    ProgressionState state,
+    String itemId,
+  ) {
+    const costs = <String, int>{
+      'prestige_auto_speed': 100,
+      'prestige_luck_charm': 250,
+    };
+    final costValue = costs[itemId];
+    if (costValue == null || state.prestigeShopPurchases.contains(itemId)) {
+      return state;
+    }
+    final cost = BigNumber.fromInt(costValue);
+    if (state.prestige.compareTo(cost) < 0) return state;
+    final purchases = Set<String>.of(state.prestigeShopPurchases)..add(itemId);
+    return state.copyWith(
+      prestige: state.prestige - cost,
+      prestigeShopPurchases: Set.unmodifiable(purchases),
+    );
+  }
+
+  ProgressionState purchaseUltraShopItem(
+    ProgressionState state,
+    String itemId,
+  ) {
+    const costs = <String, int>{
+      'ultra_universal_harmony': 500,
+      'ultra_infinite_multiplier': 1000,
+      'ultra_flex_badge': 10000,
+    };
+    final costValue = costs[itemId];
+    if (costValue == null || state.ultraShopPurchases.contains(itemId)) {
+      return state;
+    }
+    final cost = BigNumber.fromInt(costValue);
+    if (state.ultra.compareTo(cost) < 0) return state;
+    final purchases = Set<String>.of(state.ultraShopPurchases)..add(itemId);
+    return state.copyWith(
+      ultra: state.ultra - cost,
+      ultraShopPurchases: Set.unmodifiable(purchases),
+    );
+  }
+
+  ProgressionState purchasePermanentShopItem(
+    ProgressionState state, {
+    required String itemId,
+    required bool ultra,
+  }) =>
+      ultra
+          ? purchaseUltraShopItem(state, itemId)
+          : purchasePrestigeShopItem(state, itemId);
+
   ProgressionState prestige(ProgressionState state, PrestigeRules rules) {
     if (state.money.compareTo(rules.minimumMoney) < 0) return state;
     final reward = rules.rewardForMoney(state.money);
