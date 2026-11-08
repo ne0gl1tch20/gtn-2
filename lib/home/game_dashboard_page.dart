@@ -154,13 +154,6 @@ class GameDashboardPage extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('GUESS THE NUMBER',
-                                style: TextStyle(
-                                  color: muted,
-                                  fontSize: 9,
-                                  fontWeight: FontWeight.w900,
-                                  letterSpacing: 1.7,
-                                )),
                             Text('Guess The Number',
                                 style: TextStyle(
                                   color: foreground,
@@ -284,27 +277,14 @@ class GameDashboardPage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(child: _Stat(Icons.bolt_rounded,
-                          game.attempts.toString(), 'ATTEMPTS', _cyan,
-                          panel, line, foreground, muted)),
-                      const SizedBox(width: 6),
-                      Expanded(child: _Stat(Icons.check_circle_rounded,
-                          progression.correctGuesses.toString(), 'CORRECT', _gold,
-                          panel, line, foreground, muted)),
-                      const SizedBox(width: 6),
-                      Expanded(child: _Stat(Icons.local_fire_department_rounded,
-                          progression.currentStreak.toString(), 'STREAK', _green,
-                          panel, line, foreground, muted)),
-                      const SizedBox(width: 6),
-                      Expanded(child: _Stat(Icons.military_tech_rounded,
-                          progression.bestStreak.toString(), 'BEST', _purple,
-                          panel, line, foreground, muted)),
-                    ],
+                  _BotArena(
+                    progression: progression,
+                    onOpenShop: onNebulaShop,
+                    panel: panel,
+                    line: line,
+                    foreground: foreground,
+                    muted: muted,
                   ),
-                  const SizedBox(height: 12),
-                  _Wallet(progression, panel, raised, line, foreground, muted),
                   const SizedBox(height: 12),
                   _GuessInput(
                     game: game,
@@ -318,53 +298,56 @@ class GameDashboardPage extends StatelessWidget {
                     foreground: foreground,
                     muted: muted,
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(child: _Stat(Icons.bolt_rounded,
+                          game.attempts.toString(), 'ATTEMPTS', _cyan,
+                          panel, line, foreground, muted)),
+                      const SizedBox(width: 6),
+                      Expanded(child: _Stat(Icons.check_circle_rounded,
+                          progression.correctGuesses.toString(), 'CORRECT', _gold,
+                          panel, line, foreground, muted)),
+                      const SizedBox(width: 6),
+                      Expanded(child: _Stat(Icons.local_fire_department_rounded,
+                          progression.currentStreak.toString(), 'STREAK', _green,
+                          panel, line, foreground, muted)),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  _Wallet(progression, panel, raised, line, foreground, muted),
+                  const SizedBox(height: 16),
                   Row(
                     children: [
                       Expanded(
-                        child: Text('MORE TO EXPLORE',
-                            style: TextStyle(
-                              color: muted,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: 2,
-                            )),
+                        child: _Action(
+                          'Beyond the Numbers',
+                          'Explore your progression',
+                          Icons.public_rounded,
+                          _cyan,
+                          onWorldMap,
+                          panel,
+                          line,
+                          foreground,
+                          muted,
+                        ),
                       ),
-                      Text('Open a section',
-                          style: TextStyle(color: muted, fontSize: 11)),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: _Action(
+                          'Daily Momentum',
+                          'Keep the streak alive',
+                          Icons.auto_awesome_rounded,
+                          _gold,
+                          onLegacyPages,
+                          panel,
+                          line,
+                          foreground,
+                          muted,
+                        ),
+                      ),
                     ],
                   ),
-                  const SizedBox(height: 10),
-                  GridView.count(
-                    crossAxisCount: 2,
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    mainAxisSpacing: 10,
-                    crossAxisSpacing: 10,
-                    childAspectRatio: 2.05,
-                    children: [
-                      _Action('Upgrade Shop', 'Power up every guess',
-                          Icons.upgrade_rounded, _purple, onUpgradeShop,
-                          panel, line, foreground, muted),
-                      _Action('Prestige & Ultra', 'Reset. Rise. Repeat.',
-                          Icons.auto_awesome_rounded, _gold, onPrestige,
-                          panel, line, foreground, muted),
-                      _Action('Arcade', 'Play for bonus rewards',
-                          Icons.sports_esports_rounded, _cyan, onArcade,
-                          panel, line, foreground, muted),
-                      _Action('World Map', 'Challenge the guardians',
-                          Icons.public_rounded, _green, onWorldMap,
-                          panel, line, foreground, muted),
-                      _Action('Nebula Shop', 'Spend your Nebula',
-                          Icons.diamond_rounded, const Color(0xFFB7A2FF),
-                          onNebulaShop, panel, line, foreground, muted),
-                      _Action('Settings', 'Make the game yours',
-                          Icons.settings_rounded, muted, onSettings,
-                          panel, line, foreground, muted),
-                    ],
-                  ),
-                  const SizedBox(height: 14),
-                  _WorldProgress(progression, panel, line, foreground, muted),
                   if (game.isComplete) ...[
                     const SizedBox(height: 12),
                     FilledButton.icon(
@@ -378,23 +361,160 @@ class GameDashboardPage extends StatelessWidget {
                       ),
                     ),
                   ],
-                  const SizedBox(height: 12),
-                  Center(
-                    child: Text(
-                      'SAVE SLOT $activeSlot',
-                      style: TextStyle(
-                        color: muted.withValues(alpha: .7),
-                        fontSize: 9,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 1.6,
-                      ),
-                    ),
-                  ),
                 ],
               ),
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _BotArena extends StatelessWidget {
+  const _BotArena({
+    required this.progression,
+    required this.onOpenShop,
+    required this.panel,
+    required this.line,
+    required this.foreground,
+    required this.muted,
+  });
+
+  final ProgressionState progression;
+  final VoidCallback onOpenShop;
+  final Color panel;
+  final Color line;
+  final Color foreground;
+  final Color muted;
+
+  @override
+  Widget build(BuildContext context) {
+    const botIds = ['auto_clicker_basic', 'bot_byte', 'bot_pixel'];
+    final systems = progression.legacySystems;
+    final ownedBots = botIds
+        .where((id) => (progression.nebulaItems[id] ?? 0) > 0)
+        .toList(growable: false);
+    final active = systems.autoClickerActive && ownedBots.isNotEmpty;
+    final countLabel = ownedBots.isEmpty
+        ? 'NO BOTS YET'
+        : '${ownedBots.length} ${ownedBots.length == 1 ? 'BOT' : 'BOTS'}';
+    final status = ownedBots.isEmpty
+        ? 'Buy a bot in the Nebula Shop to bring the arena to life.'
+        : active
+            ? 'Your bots will show their real guesses here.'
+            : 'Your bots are owned but automation is paused.';
+    final lastGuess = systems.lastBotGuess == null
+        ? 'Waiting for your first bot guess…'
+        : '${systems.lastBotId ?? 'Bot'} guessed ${systems.lastBotGuess} · '
+            '${switch (systems.lastBotFeedback) {
+              'TOO_LOW' => 'TOO LOW',
+              'TOO_HIGH' => 'TOO HIGH',
+              'CORRECT' => 'CORRECT',
+              _ => 'WAITING',
+            }}';
+
+    return Container(
+      padding: const EdgeInsets.all(15),
+      decoration: BoxDecoration(
+        color: panel,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: line),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'AUTOMATION LAB',
+                      style: TextStyle(
+                        color: muted,
+                        fontSize: 9,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 1.3,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      'Guessing Bots',
+                      style: TextStyle(
+                        color: foreground,
+                        fontSize: 17,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
+                decoration: BoxDecoration(
+                  color: _purple.withValues(alpha: .12),
+                  borderRadius: BorderRadius.circular(99),
+                ),
+                child: Text(
+                  countLabel,
+                  style: const TextStyle(
+                    color: _purple,
+                    fontSize: 8,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: const Color(0xFF0B1123),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.white.withValues(alpha: .06)),
+            ),
+            child: Column(
+              children: [
+                Icon(
+                  active ? Icons.smart_toy_rounded : Icons.smart_toy_outlined,
+                  size: 34,
+                  color: active ? _cyan : const Color(0xFF687493),
+                ),
+                const SizedBox(height: 9),
+                Text(
+                  status,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Color(0xFFD2D9F0),
+                    fontSize: 11,
+                    height: 1.4,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  lastGuess,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(color: muted, fontSize: 9),
+                ),
+              ),
+              TextButton(
+                onPressed: onOpenShop,
+                child: const Text('Nebula Shop ↗'),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
