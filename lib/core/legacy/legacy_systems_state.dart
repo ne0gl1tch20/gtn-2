@@ -29,6 +29,7 @@ class LegacySystemsState {
     this.discoveredSecrets = const {},
     this.codexEntries = const {},
     this.activeWorldId = 'verdant_grove',
+    this.unlockedWorldIds = const {'verdant_grove'},
     this.endlessRiftTier = 0,
     this.endlessRiftBestTier = 0,
     this.endlessRiftActive = false,
@@ -88,6 +89,7 @@ class LegacySystemsState {
   final Set<String> discoveredSecrets;
   final Set<String> codexEntries;
   final String activeWorldId;
+  final Set<String> unlockedWorldIds;
   final int endlessRiftTier;
   final int endlessRiftBestTier;
   final bool endlessRiftActive;
@@ -150,6 +152,7 @@ class LegacySystemsState {
     Set<String>? discoveredSecrets,
     Set<String>? codexEntries,
     String? activeWorldId,
+    Set<String>? unlockedWorldIds,
     int? endlessRiftTier,
     int? endlessRiftBestTier,
     bool? endlessRiftActive,
@@ -214,6 +217,7 @@ class LegacySystemsState {
     discoveredSecrets: discoveredSecrets ?? this.discoveredSecrets,
     codexEntries: codexEntries ?? this.codexEntries,
     activeWorldId: activeWorldId ?? this.activeWorldId,
+    unlockedWorldIds: unlockedWorldIds ?? this.unlockedWorldIds,
     endlessRiftTier: endlessRiftTier ?? this.endlessRiftTier,
     endlessRiftBestTier: endlessRiftBestTier ?? this.endlessRiftBestTier,
     endlessRiftActive: endlessRiftActive ?? this.endlessRiftActive,
@@ -274,6 +278,7 @@ class LegacySystemsState {
     'discoveredSecrets': discoveredSecrets.toList()..sort(),
     'codexEntries': codexEntries.toList()..sort(),
     'activeWorldId': activeWorldId,
+    'unlockedWorldIds': unlockedWorldIds.toList(),
     'endlessRiftTier': endlessRiftTier,
     'endlessRiftBestTier': endlessRiftBestTier,
     'endlessRiftActive': endlessRiftActive,
@@ -441,6 +446,8 @@ class LegacySystemsState {
       discoveredSecrets: strings('discoveredSecrets'),
       codexEntries: strings('codexEntries'),
       activeWorldId: string('activeWorldId', fallback: 'verdant_grove'),
+      unlockedWorldIds: json['unlockedWorldIds'] == null
+          ? const {'verdant_grove'} : strings('unlockedWorldIds'),
       endlessRiftTier: count('endlessRiftTier'),
       endlessRiftBestTier: count('endlessRiftBestTier'),
       endlessRiftActive: endless,
