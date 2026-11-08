@@ -88,10 +88,12 @@ class NebulaShopPage extends StatefulWidget {
     super.key,
     required this.progression,
     required this.onPurchase,
+    required this.onAutomationChanged,
   });
 
   final ProgressionState progression;
   final NebulaPurchase onPurchase;
+  final Future<ProgressionState> Function(bool active) onAutomationChanged;
 
   @override
   State<NebulaShopPage> createState() => _NebulaShopPageState();
@@ -100,6 +102,18 @@ class NebulaShopPage extends StatefulWidget {
 class _NebulaShopPageState extends State<NebulaShopPage> {
   late ProgressionState _state = widget.progression;
   String? _buyingId;
+  bool _togglingAutomation = false;
+
+  Future<void> _toggleAutomation(bool active) async {
+    if (_togglingAutomation) return;
+    setState(() => _togglingAutomation = true);
+    try {
+      final updated = await widget.onAutomationChanged(active);
+      if (mounted) setState(() => _state = updated);
+    } finally {
+      if (mounted) setState(() => _togglingAutomation = false);
+    }
+  }
 
   Future<void> _buy(NebulaShopItem item) async {
     if (_buyingId != null) return;
@@ -133,6 +147,16 @@ class _NebulaShopPageState extends State<NebulaShopPage> {
             style: theme.textTheme.bodyLarge,
           ),
           const SizedBox(height: 16),
+          if (NebulaShopCatalog.botIds.any(
+            (id) => (_state.nebulaItems[id] ?? 0) > 0,
+          ))
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: const Text('Auto Clicker'),
+              subtitle: const Text('Let your owned bots guess automatically.'),
+              value: _state.legacySystems.autoClickerActive,
+              onChanged: _togglingAutomation ? null : _toggleAutomation,
+            ),
           for (final item in NebulaShopCatalog.items)
             Card(
               margin: const EdgeInsets.only(bottom: 12),
