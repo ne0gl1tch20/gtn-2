@@ -53,6 +53,7 @@ class _WorldMapPageState extends State<WorldMapPage> {
           for (final boss in WorldBossCatalog.worlds)
             Builder(builder: (context) {
               final unlocked = WorldBossCatalog.isUnlocked(_state, boss);
+              final canUnlock = WorldBossCatalog.canUnlock(_state, boss);
               final defeated = WorldBossCatalog.isDefeated(_state, boss);
               final canFight = WorldBossCatalog.canFight(_state, boss);
               final active = _state.legacySystems.activeBossBattleWorldId == boss.id;
@@ -69,7 +70,7 @@ class _WorldMapPageState extends State<WorldMapPage> {
                           Expanded(
                             child: Text(boss.worldName, style: theme.textTheme.titleLarge),
                           ),
-                          Text(defeated ? 'Defeated' : active ? 'Battle active' : canFight ? 'Ready to fight' : unlocked ? 'Unlocked' : 'Locked'),
+                          Text(defeated ? 'Defeated' : active ? 'Battle active' : canFight ? 'Ready to fight' : unlocked ? 'Unlocked' : canUnlock ? 'Ready to unlock' : 'Locked'),
                         ],
                       ),
                       const SizedBox(height: 4),
@@ -110,6 +111,13 @@ class _WorldMapPageState extends State<WorldMapPage> {
                                           : 'World locked',
                         ),
                       ),
+                      if (canUnlock)
+                        FilledButton.tonal(
+                          onPressed: _attacking != null
+                              ? null
+                              : () => _runAction(boss, 'unlock'),
+                          child: const Text('Unlock world'),
+                        ),
                       if (unlocked)
                         OutlinedButton(
                           onPressed: _attacking != null
