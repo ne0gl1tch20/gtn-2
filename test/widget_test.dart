@@ -32,6 +32,9 @@ void main() {
       (WidgetTester tester) async {
     await tester.pumpWidget(buildDashboard());
     expect(find.text('Guess The Number'), findsOneWidget);
+    // The dashboard uses a lazy ListView, so bring the wallet into the tree first.
+    await tester.scrollUntilVisible(find.text('YOUR WALLET'), 300);
+    await tester.pumpAndSettle();
     expect(find.text('YOUR WALLET'), findsOneWidget);
     expect(find.text('Play'), findsOneWidget);
     expect(find.text('Beyond the Numbers'), findsNWidgets(2));
