@@ -299,8 +299,19 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
           lastSaveTimestamp: DateTime.now().millisecondsSinceEpoch,
         ),
       );
-      await storage.save(
-        SaveData(
+      await storage.update((existing) {
+        final base = existing ??
+            SaveData(
+              secret: _game.secret,
+              attempts: _game.attempts,
+              gamesWon: _gamesWon,
+              isComplete: _game.isComplete,
+              minimum: _game.minimum,
+              maximum: _game.maximum,
+              progression: _progression,
+              settings: _settings,
+            );
+        return base.copyWith(
           secret: _game.secret,
           attempts: _game.attempts,
           gamesWon: _gamesWon,
@@ -309,8 +320,8 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
           maximum: _game.maximum,
           progression: _progression,
           settings: _settings,
-        ),
-      );
+        );
+      });
     } on Exception {
       if (mounted) {
         setState(() => _message = 'Game is still playable, but saving failed.');
