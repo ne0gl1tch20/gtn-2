@@ -22,6 +22,10 @@ class NebulaShopItem {
 class NebulaShopCatalog {
   NebulaShopCatalog._();
 
+  static const botIds = {'auto_clicker_basic', 'bot_byte', 'bot_pixel'};
+  static const botUpgradeIds = {'bot_speed_upgrade', 'bot_logic_upgrade'};
+  static const automationIds = {...botIds, ...botUpgradeIds};
+
   static final items = List<NebulaShopItem>.unmodifiable([
     NebulaShopItem(
       id: 'nebula_boost',
@@ -37,6 +41,41 @@ class NebulaShopCatalog {
       effect: 'Guaranteed 5× critical payout every 10th guess',
       price: BigNumber.fromInt(100),
     ),
+    NebulaShopItem(
+      id: 'auto_clicker_basic',
+      name: 'Auto Clicker',
+      description: 'Automatically guesses the target using real high/low feedback.',
+      effect: 'Starts the feedback-driven guessing bot',
+      price: BigNumber.fromInt(25),
+    ),
+    NebulaShopItem(
+      id: 'bot_byte',
+      name: 'Bot Byte',
+      description: 'Adds a second bot to the guessing team. Bots take turns.',
+      effect: 'Adds an independent feedback-driven bot',
+      price: BigNumber.fromInt(60),
+    ),
+    NebulaShopItem(
+      id: 'bot_pixel',
+      name: 'Bot Pixel',
+      description: 'Adds another bot to the guessing team. It takes turns with the others.',
+      effect: 'Adds a third feedback-driven bot',
+      price: BigNumber.fromInt(75),
+    ),
+    NebulaShopItem(
+      id: 'bot_speed_upgrade',
+      name: 'Bot Speed Upgrade',
+      description: 'Makes the automation team guess 50% faster.',
+      effect: '1.5× bot speed, up to the original 5× cap',
+      price: BigNumber.fromInt(35),
+    ),
+    NebulaShopItem(
+      id: 'bot_logic_upgrade',
+      name: 'Shared Memory Upgrade',
+      description: 'Lets all owned bots share their learned high/low hints.',
+      effect: 'Bots share one feedback interval instead of learning separately',
+      price: BigNumber.fromInt(50),
+    ),
   ]);
 }
 
@@ -49,10 +88,12 @@ class NebulaShopPage extends StatefulWidget {
     super.key,
     required this.progression,
     required this.onPurchase,
+    required this.onAutomationChanged,
   });
 
   final ProgressionState progression;
   final NebulaPurchase onPurchase;
+  final Future<ProgressionState> Function(bool active) onAutomationChanged;
 
   @override
   State<NebulaShopPage> createState() => _NebulaShopPageState();
@@ -61,6 +102,18 @@ class NebulaShopPage extends StatefulWidget {
 class _NebulaShopPageState extends State<NebulaShopPage> {
   late ProgressionState _state = widget.progression;
   String? _buyingId;
+  bool _togglingAutomation = false;
+
+  Future<void> _toggleAutomation(bool active) async {
+    if (_togglingAutomation) return;
+    setState(() => _togglingAutomation = true);
+    try {
+      final updated = await widget.onAutomationChanged(active);
+      if (mounted) setState(() => _state = updated);
+    } finally {
+      if (mounted) setState(() => _togglingAutomation = false);
+    }
+  }
 
   Future<void> _buy(NebulaShopItem item) async {
     if (_buyingId != null) return;
@@ -94,6 +147,23 @@ class _NebulaShopPageState extends State<NebulaShopPage> {
             style: theme.textTheme.bodyLarge,
           ),
           const SizedBox(height: 16),
+          if (NebulaShopCatalog.botIds.any(
+            (id) => (_state.nebulaItems[id] ?? 0) > 0,
+          ))
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: const Text('Auto Clicker'),
+              subtitle: Text(
+                _state.legacySystems.timeTravelPenaltyUntil > DateTime.now().millisecondsSinceEpoch
+                    ? 'Paused by clock rollback protection.'
+                    : 'Let your owned bots guess automatically.',
+              ),
+              value: _state.legacySystems.autoClickerActive,
+              onChanged: _togglingAutomation ||
+                      _state.legacySystems.timeTravelPenaltyUntil > DateTime.now().millisecondsSinceEpoch
+                  ? null
+                  : _toggleAutomation,
+            ),
           for (final item in NebulaShopCatalog.items)
             Card(
               margin: const EdgeInsets.only(bottom: 12),
@@ -122,10 +192,21 @@ class _NebulaShopPageState extends State<NebulaShopPage> {
                     const SizedBox(height: 12),
                     FilledButton(
                       onPressed: _buyingId != null ||
-                              _state.nebula.compareTo(item.price) < 0
+                              _state.nebula.compareTo(item.price) < 0 ||
+                              (NebulaShopCatalog.automationIds.contains(item.id) &&
+                                  (_state.nebulaItems[item.id] ?? 0) > 0) ||
+                              (NebulaShopCatalog.botUpgradeIds.contains(item.id) &&
+                                  !NebulaShopCatalog.botIds.any(
+                                    (id) => (_state.nebulaItems[id] ?? 0) > 0,
+                                  ))
                           ? null
                           : () => _buy(item),
-                      child: Text('Buy · ${item.price} Nebula'),
+                      child: Text(
+                        NebulaShopCatalog.automationIds.contains(item.id) &&
+                                (_state.nebulaItems[item.id] ?? 0) > 0
+                            ? 'Purchased'
+                            : 'Buy · ${item.price} Nebula',
+                      ),
                     ),
                   ],
                 ),

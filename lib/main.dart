@@ -1,9 +1,14 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'arcade/arcade_page.dart';
+import 'core/automation/bot_team.dart';
+import 'core/automation/clock_rollback_policy.dart';
+import 'core/automation/guessing_bot.dart';
+import 'core/automation/offline_earnings_policy.dart';
 import 'core/game/difficulty_rules.dart';
 import 'core/game/game_engine.dart';
 import 'core/game/guess_economy_rules.dart';
@@ -84,7 +89,7 @@ class GameHomePage extends StatefulWidget {
   State<GameHomePage> createState() => _GameHomePageState();
 }
 
-class _GameHomePageState extends State<GameHomePage> {
+class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver {
   GameEngine _engine = GameEngine();
 
   int _rangeMaximum(ProgressionState progression, GameSettings settings) =>
@@ -120,6 +125,10 @@ class _GameHomePageState extends State<GameHomePage> {
   final ProgressionEngine _progressionEngine = const ProgressionEngine();
   final LegacySystemsEngine _legacySystemsEngine = const LegacySystemsEngine();
   final InvisibleTraitEngine _invisibleTraitEngine = const InvisibleTraitEngine();
+  final BotTeam _botTeam = BotTeam();
+  Timer? _autoClickerTimer;
+  bool _autoClickerTickRunning = false;
+  bool _resumeCatchUpPending = false;
   ProgressionState _progression = ProgressionState.initial;
   GameSettings _settings = GameSettings.initial;
   final TextEditingController _controller = TextEditingController();
@@ -133,18 +142,110 @@ class _GameHomePageState extends State<GameHomePage> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _restoreSave();
   }
 
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      unawaited(_resumeAutoClicker());
+    } else {
+      _autoClickerTimer?.cancel();
+      _autoClickerTimer = null;
+    }
+  }
+
+  Future<void> _resumeAutoClicker() async {
+    if (!mounted || _isLoading) return;
+    if (_autoClickerTickRunning) {
+      _resumeCatchUpPending = true;
+      return;
+    }
+    final systems = _progression.legacySystems;
+    final now = DateTime.now().millisecondsSinceEpoch;
+    final savedAt = systems.lastSaveTimestamp;
+    final clockCheck = ClockRollbackPolicy.check(
+      nowMillis: now,
+      lastSaveTimestamp: savedAt,
+      timeTravelPenaltyUntil: systems.timeTravelPenaltyUntil,
+      autoClickerActive: systems.autoClickerActive,
+    );
+    if (clockCheck.detected) {
+      setState(() {
+        _progression = _progression.copyWith(
+          legacySystems: systems.copyWith(
+            autoClickerActive: clockCheck.autoClickerActive,
+            lastSaveTimestamp: clockCheck.lastSaveTimestamp,
+            timeTravelPenaltyUntil: clockCheck.timeTravelPenaltyUntil,
+          ),
+        );
+        _message = 'Clock rollback detected. Auto Clicker paused for 24 hours.';
+      });
+      await _persist();
+    } else {
+      final offlineEarnings = systems.autoClickerActive && savedAt > 0
+          ? OfflineEarningsPolicy.calculate(
+              autoClickerWasActive: true,
+              elapsedSeconds: (now - savedAt) ~/ 1000,
+            )
+          : BigNumber.fromInt(0);
+      if (offlineEarnings.compareTo(BigNumber.fromInt(0)) > 0) {
+        setState(() {
+          _progression = _progression.copyWith(
+            money: _progression.money + offlineEarnings,
+            moneyEarned: _progression.moneyEarned + offlineEarnings,
+          );
+          _message = 'Auto Clicker earned $offlineEarnings Money while the app was away.';
+        });
+      }
+      await _persist();
+    }
+    _scheduleAutoClicker();
+  }
+
   Future<void> _restoreSave() async {
+    var shouldPersistOfflineEarnings = false;
     try {
       final storage = await _storage;
       final save = await storage.load();
       if (!mounted) return;
       if (save != null) {
-        final restoredProgression = save.progression;
+        var restoredProgression = save.progression;
+        final savedAt = restoredProgression.legacySystems.lastSaveTimestamp;
+        final now = DateTime.now().millisecondsSinceEpoch;
+        final clockCheck = ClockRollbackPolicy.check(
+          nowMillis: now,
+          lastSaveTimestamp: savedAt,
+          timeTravelPenaltyUntil: restoredProgression.legacySystems.timeTravelPenaltyUntil,
+          autoClickerActive: restoredProgression.legacySystems.autoClickerActive,
+        );
+        final timeTravelDetected = clockCheck.detected;
+        restoredProgression = restoredProgression.copyWith(
+          legacySystems: restoredProgression.legacySystems.copyWith(
+            autoClickerActive: clockCheck.autoClickerActive,
+            lastSaveTimestamp: clockCheck.lastSaveTimestamp,
+            timeTravelPenaltyUntil: clockCheck.timeTravelPenaltyUntil,
+          ),
+        );
+        final elapsedSeconds = savedAt > 0 && !timeTravelDetected
+            ? ((now - savedAt) ~/ 1000)
+            : 0;
+        final offlineEarnings = timeTravelDetected
+            ? BigNumber.fromInt(0)
+            : OfflineEarningsPolicy.calculate(
+                autoClickerWasActive: restoredProgression.legacySystems.autoClickerActive,
+                elapsedSeconds: elapsedSeconds,
+              );
+        if (offlineEarnings.compareTo(BigNumber.fromInt(0)) > 0) {
+          restoredProgression = restoredProgression.copyWith(
+            money: restoredProgression.money + offlineEarnings,
+            moneyEarned: restoredProgression.moneyEarned + offlineEarnings,
+          );
+        }
         final restoredEngine = _engineFor(restoredProgression, save.settings);
         await AppLocalizations.load(save.settings.localeCode);
+        if (!mounted) return;
         setState(() {
           _engine = restoredEngine;
           _game = _engine.restore(
@@ -158,8 +259,13 @@ class _GameHomePageState extends State<GameHomePage> {
           _progression = restoredProgression;
           _settings = save.settings;
           GtnApp.settingsNotifier.value = _settings;
-          _message = 'Welcome back! Your saved game is ready.';
+          _message = timeTravelDetected
+              ? 'Clock rollback detected. Auto Clicker paused for 24 hours.'
+              : offlineEarnings.compareTo(BigNumber.fromInt(0)) > 0
+                  ? 'Welcome back! Your Auto Clicker earned $offlineEarnings Money while you were away.'
+                  : 'Welcome back! Your saved game is ready.';
         });
+        shouldPersistOfflineEarnings = true;
       }
     } on Exception {
       if (mounted) {
@@ -170,11 +276,19 @@ class _GameHomePageState extends State<GameHomePage> {
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
+    _botTeam.reset(_game.minimum, _game.maximum);
+    if (shouldPersistOfflineEarnings) await _persist();
+    _scheduleAutoClicker();
   }
 
   Future<void> _persist() async {
     try {
       final storage = await _storage;
+      _progression = _progression.copyWith(
+        legacySystems: _progression.legacySystems.copyWith(
+          lastSaveTimestamp: DateTime.now().millisecondsSinceEpoch,
+        ),
+      );
       await storage.save(
         SaveData(
           secret: _game.secret,
@@ -215,6 +329,7 @@ class _GameHomePageState extends State<GameHomePage> {
         if (previousRange != nextRange) {
           _engine = _engineFor(withQuestProgress, _settings);
           _game = _newGameWithAdaptiveTarget(_engine.newGame());
+          _botTeam.reset(_game.minimum, _game.maximum);
           _message = 'Your range upgrade is active. A fresh round is ready.';
         }
       });
@@ -247,6 +362,7 @@ class _GameHomePageState extends State<GameHomePage> {
         _progression = updated;
         _engine = _engineFor(updated, _settings);
         _game = _newGameWithAdaptiveTarget(_engine.newGame());
+        _botTeam.reset(_game.minimum, _game.maximum);
         _message = 'Prestige complete! Build your progress again.';
       });
       await _persist();
@@ -277,6 +393,7 @@ class _GameHomePageState extends State<GameHomePage> {
         _progression = updated;
         _engine = _engineFor(updated, _settings);
         _game = _newGameWithAdaptiveTarget(_engine.newGame());
+        _botTeam.reset(_game.minimum, _game.maximum);
         _message = 'Ultra reset complete! A new run begins.';
       });
       await _persist();
@@ -349,16 +466,138 @@ class _GameHomePageState extends State<GameHomePage> {
   Future<ProgressionState> _purchaseNebulaItem(
     NebulaShopItem item,
   ) async {
-    final updated = _progressionEngine.purchaseNebulaItem(
+    final systems = _progression.legacySystems;
+    final ownedBot = NebulaShopCatalog.botIds.any(
+      (id) => ( _progression.nebulaItems[id] ?? 0) > 0,
+    );
+    if (NebulaShopCatalog.botUpgradeIds.contains(item.id) && !ownedBot) {
+      return _progression;
+    }
+    if (NebulaShopCatalog.automationIds.contains(item.id) &&
+        (_progression.nebulaItems[item.id] ?? 0) > 0) {
+      return _progression;
+    }
+    var updated = _progressionEngine.purchaseNebulaItem(
       _progression,
       itemId: item.id,
       price: item.price,
     );
     if (updated != _progression) {
+      final isBotPurchase = NebulaShopCatalog.botIds.contains(item.id);
+      final nextSpeed = item.id == 'bot_speed_upgrade'
+          ? (systems.autoClickerSpeed * 1.5).clamp(1.0, 5.0).toDouble()
+          : systems.autoClickerSpeed;
+      updated = updated.copyWith(
+        legacySystems: systems.copyWith(
+          autoClickerActive: isBotPurchase ? true : systems.autoClickerActive,
+          autoClickerSpeed: nextSpeed,
+        ),
+      );
       setState(() => _progression = updated);
       await _persist();
+      _scheduleAutoClicker();
     }
     return _progression;
+  }
+
+  Future<ProgressionState> _setAutomationActive(bool active) async {
+    final hasBot = NebulaShopCatalog.botIds.any(
+      (id) => (_progression.nebulaItems[id] ?? 0) > 0,
+    );
+    if (!hasBot) return _progression;
+    if (active && _progression.legacySystems.timeTravelPenaltyUntil >
+        DateTime.now().millisecondsSinceEpoch) {
+      if (mounted) {
+        setState(() => _message = 'Auto Clicker is temporarily paused after a clock rollback.');
+      }
+      return _progression;
+    }
+    setState(() {
+      _progression = _progression.copyWith(
+        legacySystems: _progression.legacySystems.copyWith(
+          autoClickerActive: active,
+        ),
+      );
+    });
+    await _persist();
+    _scheduleAutoClicker();
+    return _progression;
+  }
+
+  void _scheduleAutoClicker() {
+    _autoClickerTimer?.cancel();
+    _autoClickerTimer = null;
+    if (!mounted || _isLoading || _autoClickerTickRunning ||
+        WidgetsBinding.instance.lifecycleState == AppLifecycleState.paused ||
+        WidgetsBinding.instance.lifecycleState == AppLifecycleState.inactive ||
+        WidgetsBinding.instance.lifecycleState == AppLifecycleState.detached) {
+      return;
+    }
+    final systems = _progression.legacySystems;
+    if (!systems.autoClickerActive ||
+        systems.timeTravelPenaltyUntil > DateTime.now().millisecondsSinceEpoch) {
+      return;
+    }
+    final purchasedBots = NebulaShopCatalog.botIds
+        .where((id) => (_progression.nebulaItems[id] ?? 0) > 0)
+        .toSet();
+    if (purchasedBots.isEmpty) purchasedBots.add('auto_clicker_basic');
+    final delay = _botTeam.delayMillis(
+      active: true,
+      speed: systems.autoClickerSpeed,
+      speedTalentOne: systems.talents.contains('talent_speed_1'),
+      speedTalentTwo: systems.talents.contains('talent_speed_2'),
+      speedMutator: systems.activeMutators.contains('mut_speed'),
+    );
+    _autoClickerTimer = Timer(Duration(milliseconds: delay), () async {
+      if (_autoClickerTickRunning) return;
+      _autoClickerTimer = null;
+      _autoClickerTickRunning = true;
+      try {
+        await _runAutoClickerTick();
+      } finally {
+        _autoClickerTickRunning = false;
+        if (_resumeCatchUpPending) {
+          _resumeCatchUpPending = false;
+          unawaited(_resumeAutoClicker());
+        } else {
+          _scheduleAutoClicker();
+        }
+      }
+    });
+  }
+
+  Future<void> _runAutoClickerTick() async {
+    if (!mounted || _isLoading || !_progression.legacySystems.autoClickerActive) {
+      return;
+    }
+    if (_game.isComplete) {
+      setState(() {
+        _game = _newGameWithAdaptiveTarget(_engine.newGame());
+        _botTeam.reset(_game.minimum, _game.maximum);
+        _message = 'Auto Clicker started a new round.';
+      });
+    }
+    final systems = _progression.legacySystems;
+    final purchasedBots = NebulaShopCatalog.botIds
+        .where((id) => (_progression.nebulaItems[id] ?? 0) > 0)
+        .toSet();
+    if (purchasedBots.isEmpty) purchasedBots.add('auto_clicker_basic');
+    final action = _botTeam.nextAction(
+      purchasedBots: purchasedBots,
+      sharedMemory: (_progression.nebulaItems['bot_logic_upgrade'] ?? 0) > 0,
+      sequence: systems.botActionSequence,
+      rangeMinimum: 1,
+      rangeMaximum: _rangeMaximum(_progression, _settings),
+      currentMinimum: _game.minimum,
+      currentMaximum: _game.maximum,
+      speed: systems.autoClickerSpeed,
+      speedTalentOne: systems.talents.contains('talent_speed_1'),
+      speedTalentTwo: systems.talents.contains('talent_speed_2'),
+      speedMutator: systems.activeMutators.contains('mut_speed'),
+    );
+    if (action == null) return;
+    await _submitGuess(automatedGuess: action.guess, botId: action.botId);
   }
 
   Future<void> _openNebulaShop() async {
@@ -367,6 +606,7 @@ class _GameHomePageState extends State<GameHomePage> {
         builder: (_) => NebulaShopPage(
           progression: _progression,
           onPurchase: _purchaseNebulaItem,
+          onAutomationChanged: _setAutomationActive,
         ),
       ),
     );
@@ -402,7 +642,38 @@ class _GameHomePageState extends State<GameHomePage> {
       final storage = await SaveStorage.inApplicationDocuments(slot: slot);
       final save = await storage.load();
       if (!mounted) return;
-      final nextProgression = save?.progression ?? ProgressionState.initial;
+      var nextProgression = save?.progression ?? ProgressionState.initial;
+      final savedAt = nextProgression.legacySystems.lastSaveTimestamp;
+      final now = DateTime.now().millisecondsSinceEpoch;
+      final clockCheck = ClockRollbackPolicy.check(
+        nowMillis: now,
+        lastSaveTimestamp: savedAt,
+        timeTravelPenaltyUntil: nextProgression.legacySystems.timeTravelPenaltyUntil,
+        autoClickerActive: nextProgression.legacySystems.autoClickerActive,
+      );
+      final timeTravelDetected = clockCheck.detected;
+      nextProgression = nextProgression.copyWith(
+        legacySystems: nextProgression.legacySystems.copyWith(
+          autoClickerActive: clockCheck.autoClickerActive,
+          lastSaveTimestamp: clockCheck.lastSaveTimestamp,
+          timeTravelPenaltyUntil: clockCheck.timeTravelPenaltyUntil,
+        ),
+      );
+      final elapsedSeconds = savedAt > 0 && !timeTravelDetected
+          ? ((now - savedAt) ~/ 1000)
+          : 0;
+      final offlineEarnings = timeTravelDetected
+          ? BigNumber.fromInt(0)
+          : OfflineEarningsPolicy.calculate(
+              autoClickerWasActive: nextProgression.legacySystems.autoClickerActive,
+              elapsedSeconds: elapsedSeconds,
+            );
+      if (offlineEarnings.compareTo(BigNumber.fromInt(0)) > 0) {
+        nextProgression = nextProgression.copyWith(
+          money: nextProgression.money + offlineEarnings,
+          moneyEarned: nextProgression.moneyEarned + offlineEarnings,
+        );
+      }
       await AppLocalizations.load(save?.settings.localeCode ?? 'en_us');
       if (!mounted) return;
       final nextSettings = save?.settings ?? GameSettings.initial;
@@ -424,12 +695,18 @@ class _GameHomePageState extends State<GameHomePage> {
         _progression = nextProgression;
         _settings = nextSettings;
         GtnApp.settingsNotifier.value = _settings;
-        _message = save == null
-            ? 'New save slot ready. Guess a number between 1 and 100.'
-            : 'Save slot $slot loaded.';
+        _message = timeTravelDetected
+            ? 'Clock rollback detected. Auto Clicker paused for 24 hours.'
+            : offlineEarnings.compareTo(BigNumber.fromInt(0)) > 0
+                ? 'Save slot $slot loaded. Auto Clicker earned $offlineEarnings Money offline.'
+                : save == null
+                ? 'New save slot ready. Guess a number between 1 and 100.'
+                : 'Save slot $slot loaded.';
         _isLoading = false;
       });
-      if (save == null) await _persist();
+      await _persist();
+      _botTeam.reset(_game.minimum, _game.maximum);
+      _scheduleAutoClicker();
     } on Exception {
       if (mounted) {
         setState(() {
@@ -461,6 +738,7 @@ class _GameHomePageState extends State<GameHomePage> {
       if (difficultyChanged) {
         _engine = _engineFor(_progression, settings);
         _game = _newGameWithAdaptiveTarget(_engine.newGame());
+        _botTeam.reset(_game.minimum, _game.maximum);
         _message = 'Difficulty changed to ${DifficultyRules.name(settings.difficultyId)}. A fresh round is ready.';
       }
     });
@@ -587,6 +865,13 @@ class _GameHomePageState extends State<GameHomePage> {
   }
 
   Future<void> _applyLegacyProgression(ProgressionState progression) async {
+    if (progression.legacySystems.autoClickerActive &&
+        progression.legacySystems.timeTravelPenaltyUntil > DateTime.now().millisecondsSinceEpoch) {
+      progression = progression.copyWith(
+        legacySystems: progression.legacySystems.copyWith(autoClickerActive: false),
+      );
+      setState(() => _message = 'Auto Clicker is temporarily paused after a clock rollback.');
+    }
     final oldRange = _rangeMaximum(_progression, _settings);
     final newRange = _rangeMaximum(progression, _settings);
     setState(() {
@@ -594,10 +879,12 @@ class _GameHomePageState extends State<GameHomePage> {
       if (oldRange != newRange) {
         _engine = _engineFor(progression, _settings);
         _game = _newGameWithAdaptiveTarget(_engine.newGame());
+        _botTeam.reset(_game.minimum, _game.maximum);
         _message = 'Hardcore range changed. A fresh round is ready.';
       }
     });
     await _persist();
+    _scheduleAutoClicker();
   }
 
   Future<void> _openLegacyPages() async {
@@ -609,6 +896,7 @@ class _GameHomePageState extends State<GameHomePage> {
         ),
       ),
     );
+    _scheduleAutoClicker();
   }
 
   Future<void> _openUpgradeShop() async {
@@ -629,19 +917,22 @@ class _GameHomePageState extends State<GameHomePage> {
         _ => 'autumn',
       };
 
-  Future<void> _submitGuess() async {
-    final guess = int.tryParse(_controller.text.trim());
+  Future<void> _submitGuess({int? automatedGuess, String? botId}) async {
+    final isBot = botId != null;
+    final guess = automatedGuess ?? int.tryParse(_controller.text.trim());
     if (guess == null) {
       setState(() => _message = 'Enter a whole number from ${_game.minimum} to ${_game.maximum}.');
       return;
     }
 
+    GuessResult? resultForMessage;
     setState(() {
       var rangeScoutActive = false;
       final previousAttempts = _game.attempts;
       _game = _engine.guess(_game, guess);
+      resultForMessage = _game.lastResult;
       if (_game.attempts > previousAttempts) {
-        final correct = _game.lastResult == GuessResult.correct;
+        final correct = resultForMessage == GuessResult.correct;
         final beforeGuess = _progression;
         final legacySystems = beforeGuess.legacySystems;
         final traitEffects = _legacySystemsEngine.evaluateTraits(
@@ -654,7 +945,7 @@ class _GameHomePageState extends State<GameHomePage> {
         final criticalPrecisionLevel =
             beforeGuess.prestigeUpgrades['critical_precision_boost'] ?? 0;
         final guaranteedGoldenGuess =
-            (beforeGuess.nebulaItems['golden_guess'] ?? 0) > 0 &&
+            !isBot && (beforeGuess.nebulaItems['golden_guess'] ?? 0) > 0 &&
             (beforeGuess.totalGuesses + 1) % 10 == 0;
         final isCritical = correct &&
             (guaranteedGoldenGuess ||
@@ -682,6 +973,7 @@ class _GameHomePageState extends State<GameHomePage> {
           beforeGuess,
           correct: correct,
           baseReward: rawReward,
+          isBot: isBot,
         );
         final adaptiveProfile = _invisibleTraitEngine.observeGuess(
           profile: legacySystems.adaptiveTraitProfile,
@@ -778,6 +1070,25 @@ class _GameHomePageState extends State<GameHomePage> {
           today: DateTime.now().toIso8601String().substring(0, 10),
           lootRoll: correct ? Random.secure().nextInt(1000) : null,
         ).copyWith(adaptiveTraitProfile: adaptiveProfileAfter);
+        if (isBot) {
+          final feedbackName = switch (resultForMessage) {
+            GuessResult.tooLow => 'TOO_LOW',
+            GuessResult.tooHigh => 'TOO_HIGH',
+            GuessResult.correct => 'CORRECT',
+            GuessResult.outOfRange || null => null,
+          };
+          if (feedbackName != null) {
+            systemsAfter = systemsAfter.copyWith(
+              botTotalGuesses: legacySystems.botTotalGuesses + 1,
+              botCorrectGuesses: legacySystems.botCorrectGuesses + (correct ? 1 : 0),
+              botIncorrectGuesses: legacySystems.botIncorrectGuesses + (correct ? 0 : 1),
+              botActionSequence: legacySystems.botActionSequence + 1,
+              lastBotGuess: guess,
+              lastBotFeedback: feedbackName,
+              lastBotId: botId,
+            );
+          }
+        }
         systemsAfter = _legacySystemsEngine.discoverEligibleTraits(
           progression: afterReward,
           systems: systemsAfter,
@@ -796,37 +1107,71 @@ class _GameHomePageState extends State<GameHomePage> {
           }
         }
         _progression = nextProgression;
+        if (isBot) {
+          if (correct) {
+            _game = _newGameWithAdaptiveTarget(_engine.newGame());
+          } else {
+            _game = GameState(
+              secret: _game.secret,
+              attempts: previousAttempts,
+              isComplete: false,
+              lastResult: resultForMessage,
+              minimum: _game.minimum,
+              maximum: _game.maximum,
+            );
+          }
+        }
       }
-      switch (_game.lastResult) {
+      if (isBot) {
+        final feedback = switch (resultForMessage) {
+          GuessResult.tooLow => BotFeedback.tooLow,
+          GuessResult.tooHigh => BotFeedback.tooHigh,
+          GuessResult.correct => BotFeedback.correct,
+          GuessResult.outOfRange || null => null,
+        };
+        if (feedback != null) {
+          _botTeam.observe(
+            botId: botId,
+            guess: guess,
+            feedback: feedback,
+            sharedMemory: (_progression.nebulaItems['bot_logic_upgrade'] ?? 0) > 0,
+            nextRangeMinimum: _game.minimum,
+            nextRangeMaximum: _game.maximum,
+          );
+        }
+      }
+      switch (resultForMessage) {
         case GuessResult.tooLow:
           _message = rangeScoutActive
               ? 'Range Scout narrowed the search to ${_game.minimum}–${_game.maximum}.'
               : _progression.legacySystems.activeMutators.contains('mut_blind')
                   ? 'Guess recorded. Try again.'
-                  : 'Too low. Try a higher number!';
+                  : isBot ? '$botId guessed $guess. Too low.' : 'Too low. Try a higher number!';
         case GuessResult.tooHigh:
           _message = rangeScoutActive
               ? 'Range Scout narrowed the search to ${_game.minimum}–${_game.maximum}.'
               : _progression.legacySystems.activeMutators.contains('mut_blind')
                   ? 'Guess recorded. Try again.'
-                  : 'Too high. Try a lower number!';
+                  : isBot ? '$botId guessed $guess. Too high.' : 'Too high. Try a lower number!';
         case GuessResult.correct:
-          _gamesWon++;
-          _message =
-              'Correct! You got it in ${_game.attempts} ${_game.attempts == 1 ? 'try' : 'tries'}.';
+          if (!isBot) _gamesWon++;
+          _message = isBot
+              ? '$botId guessed $guess correctly. A new round is ready.'
+              : 'Correct! You got it in ${_game.attempts} ${_game.attempts == 1 ? 'try' : 'tries'}.';
         case GuessResult.outOfRange:
           _message = 'Choose a number between ${_game.minimum} and ${_game.maximum}.';
         case null:
           break;
       }
     });
-    _controller.clear();
+    if (!isBot) _controller.clear();
     await _persist();
   }
 
   Future<void> _newGame() async {
     setState(() {
       _game = _newGameWithAdaptiveTarget(_engine.newGame());
+      _botTeam.reset(_game.minimum, _game.maximum);
       _message = 'New round! Guess a number between ${_game.minimum} and ${_game.maximum}.';
       _controller.clear();
     });
@@ -835,6 +1180,8 @@ class _GameHomePageState extends State<GameHomePage> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _autoClickerTimer?.cancel();
     _controller.dispose();
     super.dispose();
   }

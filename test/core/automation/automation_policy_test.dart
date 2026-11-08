@@ -1,0 +1,214 @@
+import 'package:flutter_test/flutter_test.dart';
+import 'package:gtn_2/core/automation/bot_team.dart';
+import 'package:gtn_2/core/automation/clock_rollback_policy.dart';
+import 'package:gtn_2/core/automation/guessing_bot.dart';
+import 'package:gtn_2/core/automation/offline_earnings_policy.dart';
+
+void main() {
+  group('GTN1 feedback-driven guessing bot', () {
+    test('uses a midpoint without receiving or reading the secret', () {
+      final bot = GuessingBot(minimum: 1, maximum: 100);
+      expect(bot.nextGuess(rangeMinimum: 1, rangeMaximum: 100), 50);
+      bot.observeGuess(50, BotFeedback.tooLow);
+      expect(bot.lowerBound, 51);
+      expect(bot.upperBound, 100);
+      expect(bot.nextGuess(rangeMinimum: 1, rangeMaximum: 100), 75);
+      bot.observeGuess(75, BotFeedback.tooHigh);
+      expect(bot.lowerBound, 51);
+      expect(bot.upperBound, 74);
+      expect(bot.nextGuess(rangeMinimum: 1, rangeMaximum: 100), 62);
+    });
+
+    test('honors a changing game range and supports singleton ranges', () {
+      final bot = GuessingBot(minimum: 1, maximum: 500);
+      expect(bot.nextGuess(rangeMinimum: 100, rangeMaximum: 200), 150);
+      expect(bot.nextGuess(rangeMinimum: 173, rangeMaximum: 173), 173);
+    });
+
+    test('rejects invalid ranges and recovers from clamped out-of-interval feedback', () {
+      expect(() => GuessingBot(minimum: 0), throwsArgumentError);
+      final bot = GuessingBot();
+      expect(
+        () => bot.nextGuess(rangeMinimum: 0, rangeMaximum: 100),
+        throwsArgumentError,
+      );
+      bot.observeGuess(101, BotFeedback.tooLow);
+      expect(bot.lowerBound, 1);
+      expect(bot.upperBound, 100);
+    });
+
+    test('never widens learned bounds after contradictory clamped feedback', () {
+      final bot = GuessingBot(minimum: 50, maximum: 100);
+      bot.observeGuess(40, BotFeedback.tooLow);
+      expect(bot.lowerBound, 50);
+      expect(bot.upperBound, 100);
+      expect(bot.nextGuess(rangeMinimum: 101, rangeMaximum: 200), 101);
+    });
+
+    test('correct feedback does not change the learned interval', () {
+      final bot = GuessingBot();
+      bot.observeGuess(50, BotFeedback.correct);
+      expect(bot.lowerBound, 1);
+      expect(bot.upperBound, 100);
+    });
+  });
+
+  group('GTN1 rotating bot team', () {
+    test('rotates through owned bots in the original order', () {
+      final team = BotTeam();
+      BotAction? action(int sequence) => team.nextAction(
+            purchasedBots: const {'bot_pixel', 'auto_clicker_basic', 'bot_byte'},
+            sharedMemory: false,
+            sequence: sequence,
+            rangeMinimum: 1,
+            rangeMaximum: 100,
+            currentMinimum: 1,
+            currentMaximum: 100,
+            speed: 1,
+            speedTalentOne: false,
+            speedTalentTwo: false,
+            speedMutator: false,
+          );
+      expect(action(0)?.botId, 'auto_clicker_basic');
+      expect(action(1)?.botId, 'bot_byte');
+      expect(action(2)?.botId, 'bot_pixel');
+      expect(action(3)?.botId, 'auto_clicker_basic');
+    });
+
+    test('does not run without an owned bot', () {
+      final team = BotTeam();
+      expect(
+        team.nextAction(
+          purchasedBots: const {}, sharedMemory: false, sequence: 0,
+          rangeMinimum: 1, rangeMaximum: 100, currentMinimum: 1,
+          currentMaximum: 100, speed: 1, speedTalentOne: false,
+          speedTalentTwo: false, speedMutator: false,
+        ),
+        isNull,
+      );
+    });
+
+    test('applies stacked speed talents and the speed mutator', () {
+      final team = BotTeam();
+      expect(team.delayMillis(
+        active: true, speed: 1, speedTalentOne: true,
+        speedTalentTwo: true, speedMutator: true,
+      ), 177);
+      expect(team.delayMillis(
+        active: false, speed: 5, speedTalentOne: true,
+        speedTalentTwo: true, speedMutator: true,
+      ), 1000);
+    });
+
+    test('independent bot memory is separate until shared memory is enabled', () {
+      final team = BotTeam();
+      final byte = team.nextAction(
+        purchasedBots: const {'bot_byte'}, sharedMemory: false, sequence: 0,
+        rangeMinimum: 1, rangeMaximum: 100, currentMinimum: 1,
+        currentMaximum: 100, speed: 1, speedTalentOne: false,
+        speedTalentTwo: false, speedMutator: false,
+      )!;
+      team.observe(
+        botId: byte.botId, guess: byte.guess, feedback: BotFeedback.tooLow,
+        sharedMemory: false, nextRangeMinimum: 1, nextRangeMaximum: 100,
+      );
+      final shared = team.nextAction(
+        purchasedBots: const {'bot_byte'}, sharedMemory: true, sequence: 0,
+        rangeMinimum: 1, rangeMaximum: 100, currentMinimum: 1,
+        currentMaximum: 100, speed: 1, speedTalentOne: false,
+        speedTalentTwo: false, speedMutator: false,
+      )!;
+      expect(shared.guess, 50);
+    });
+  });
+
+  group('GTN1 clock rollback protection', () {
+    test('backward clock disables automation for 24 hours', () {
+      const now = 1800000000000;
+      final result = ClockRollbackPolicy.check(
+        nowMillis: now,
+        lastSaveTimestamp: now + 90000,
+        timeTravelPenaltyUntil: 0,
+        autoClickerActive: true,
+      );
+      expect(result.detected, isTrue);
+      expect(result.differenceSeconds, 90);
+      expect(result.lastSaveTimestamp, now);
+      expect(result.timeTravelPenaltyUntil, now + 86400000);
+      expect(result.autoClickerActive, isFalse);
+    });
+
+    test('forward clock changes are accepted without a penalty', () {
+      const now = 1800000000000;
+      final result = ClockRollbackPolicy.check(
+        nowMillis: now,
+        lastSaveTimestamp: now - 3600000,
+        timeTravelPenaltyUntil: 0,
+        autoClickerActive: true,
+      );
+      expect(result.detected, isFalse);
+      expect(result.differenceSeconds, 0);
+      expect(result.lastSaveTimestamp, now);
+      expect(result.timeTravelPenaltyUntil, 0);
+      expect(result.autoClickerActive, isTrue);
+    });
+
+    test('preserves an existing penalty deadline when no rollback occurs', () {
+      const now = 1800000000000;
+      const penaltyUntil = now + 120000;
+      final result = ClockRollbackPolicy.check(
+        nowMillis: now,
+        lastSaveTimestamp: now,
+        timeTravelPenaltyUntil: penaltyUntil,
+        autoClickerActive: false,
+      );
+      expect(result.detected, isFalse);
+      expect(result.timeTravelPenaltyUntil, penaltyUntil);
+      expect(result.autoClickerActive, isFalse);
+    });
+  });
+
+  group('GTN1 offline earnings policy', () {
+    test('awards 500 Money per effective second while automation was active', () {
+      expect(
+        OfflineEarningsPolicy.calculate(
+          autoClickerWasActive: true,
+          elapsedSeconds: 60,
+        ).toString(),
+        '30000',
+      );
+    });
+
+    test('caps catch-up at eight hours', () {
+      expect(OfflineEarningsPolicy.effectiveSeconds(999999), 28800);
+      expect(
+        OfflineEarningsPolicy.calculate(
+          autoClickerWasActive: true,
+          elapsedSeconds: 999999,
+        ).toString(),
+        '14400000',
+      );
+    });
+
+    test('disables earnings when automation was inactive', () {
+      expect(
+        OfflineEarningsPolicy.calculate(
+          autoClickerWasActive: false,
+          elapsedSeconds: 3600,
+        ).toString(),
+        '0',
+      );
+    });
+
+    test('clamps negative elapsed time to zero', () {
+      expect(OfflineEarningsPolicy.effectiveSeconds(-30), 0);
+      expect(
+        OfflineEarningsPolicy.calculate(
+          autoClickerWasActive: true,
+          elapsedSeconds: -30,
+        ).toString(),
+        '0',
+      );
+    });
+  });
+}

@@ -57,6 +57,7 @@ class ProgressionEngine {
     BigNumber? flatBonusReward,
     GuessRewardModifiers modifiers = const GuessRewardModifiers(),
     int upgradeMultiplier = 1,
+    bool isBot = false,
   }) {
     if (upgradeMultiplier < 1 || modifiers.streakMultiplier < 1 ||
         modifiers.criticalMultiplier < 1) {
@@ -65,7 +66,8 @@ class ProgressionEngine {
     final streak = correct ? state.currentStreak + 1 : 0;
     if (!correct) {
       return state.copyWith(
-        totalGuesses: state.totalGuesses + 1, currentStreak: 0,
+        totalGuesses: state.totalGuesses + (isBot ? 0 : 1),
+        currentStreak: isBot ? state.currentStreak : 0,
       );
     }
     var reward = baseReward ?? BigNumber.fromInt(0);
@@ -80,11 +82,11 @@ class ProgressionEngine {
         .multiplyInt(modifiers.criticalMultiplier);
     return state.copyWith(
       money: state.money + reward,
-      totalGuesses: state.totalGuesses + 1,
-      correctGuesses: state.correctGuesses + 1,
+      totalGuesses: state.totalGuesses + (isBot ? 0 : 1),
+      correctGuesses: state.correctGuesses + (isBot ? 0 : 1),
       moneyEarned: state.moneyEarned + reward,
-      currentStreak: streak,
-      bestStreak: streak > state.bestStreak ? streak : state.bestStreak,
+      currentStreak: isBot ? state.currentStreak : streak,
+      bestStreak: isBot ? state.bestStreak : streak > state.bestStreak ? streak : state.bestStreak,
     );
   }
 
