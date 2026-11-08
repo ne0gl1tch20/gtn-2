@@ -7,13 +7,25 @@ import 'package:gtn_2/creative/creative_mode_page.dart';
 import 'package:gtn_2/data/saves/save_data.dart';
 import 'package:gtn_2/data/saves/save_storage.dart';
 
+class _MemorySaveStorage extends SaveStorage {
+  _MemorySaveStorage(this._save)
+      : super(directory: Directory.systemTemp, slot: 1);
+
+  SaveData? _save;
+
+  @override
+  Future<SaveData?> load() async => _save;
+
+  @override
+  Future<void> save(SaveData data) async {
+    _save = data;
+  }
+}
+
 Future<void> pumpUntilFound(WidgetTester tester, Finder finder) async {
   for (var attempt = 0; attempt < 80; attempt++) {
+    await tester.pump(const Duration(milliseconds: 25));
     if (finder.evaluate().isNotEmpty) return;
-    await tester.runAsync(
-      () => Future<void>.delayed(const Duration(milliseconds: 25)),
-    );
-    await tester.pump();
   }
   expect(finder, findsOneWidget);
 }
@@ -22,15 +34,8 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   testWidgets('Creative Mode screen persists a run and a correct guess', (tester) async {
-    final directory =
-        await Directory.systemTemp.createTemp('gtn2-creative-mode-widget-');
-    addTearDown(() async {
-      await directory.delete(recursive: true);
-    });
-    final initialStorage = SaveStorage(directory: directory, slot: 1);
-    await tester.runAsync(() => initialStorage.save(
-          SaveData(secret: 42, attempts: 0, gamesWon: 0),
-        ));
+    final initialStorage =
+        _MemorySaveStorage(SaveData(secret: 42, attempts: 0, gamesWon: 0));
 
     await tester.pumpWidget(
       MaterialApp(home: CreativeModePage(slot: 1, storage: initialStorage)),
@@ -44,7 +49,7 @@ void main() {
     await tester.pump();
     await pumpUntilFound(tester, find.text('Run in progress'));
 
-    final runningSave = await tester.runAsync(() => initialStorage.load());
+    final runningSave = await initialStorage.load();
     expect(runningSave?.creativeMode, isNotNull);
     final run = CreativeModeRuntime.resume(runningSave!.creativeMode!);
     expect(run, isNotNull);
@@ -54,7 +59,7 @@ void main() {
     await tester.pump();
     await pumpUntilFound(tester, find.text('Run complete'));
 
-    final completedSave = await tester.runAsync(() => initialStorage.load());
+    final completedSave = await initialStorage.load();
     final completedRun =
         CreativeModeRuntime.resume(completedSave!.creativeMode!);
     expect(completedRun, isNotNull);
