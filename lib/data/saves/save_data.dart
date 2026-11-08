@@ -12,10 +12,13 @@ class SaveData {
     this.maximum = 100,
     ProgressionState? progression,
     GameSettings? settings,
+    this.profileName = '',
+    this.profileIconId = 'default',
   })  : progression = progression ?? ProgressionState.initial,
         settings = settings ?? GameSettings.initial;
 
-  static const currentSchemaVersion = 3;
+  static const currentSchemaVersion = 4;
+  static const profileIconIds = <String>['default', 'star', 'bolt', 'crown', 'planet'];
 
   final int schemaVersion;
   final int secret;
@@ -26,6 +29,22 @@ class SaveData {
   final int maximum;
   final ProgressionState progression;
   final GameSettings settings;
+  final String profileName;
+  final String profileIconId;
+
+  SaveData copyWith({String? profileName, String? profileIconId}) => SaveData(
+        schemaVersion: schemaVersion,
+        secret: secret,
+        attempts: attempts,
+        gamesWon: gamesWon,
+        isComplete: isComplete,
+        minimum: minimum,
+        maximum: maximum,
+        progression: progression,
+        settings: settings,
+        profileName: profileName ?? this.profileName,
+        profileIconId: profileIconId ?? this.profileIconId,
+      );
 
   Map<String, Object> toJson() => {
         'schemaVersion': schemaVersion,
@@ -37,6 +56,8 @@ class SaveData {
         'maximum': maximum,
         'progression': progression.toJson(),
         'settings': settings.toJson(),
+        'profileName': profileName,
+        'profileIconId': profileIconId,
       };
 
   factory SaveData.fromJson(Map<String, dynamic> json) {
@@ -49,7 +70,9 @@ class SaveData {
     final maximum = json['maximum'] ?? 100;
     final progressionJson = json['progression'];
     final settingsJson = json['settings'];
-    if (version is! int || (version != 1 && version != 2 && version != currentSchemaVersion) ||
+    final profileName = json['profileName'] ?? '';
+    final profileIconId = json['profileIconId'] ?? 'default';
+    if (version is! int || (version != 1 && version != 2 && version != 3 && version != currentSchemaVersion) ||
         secret is! int ||
         attempts is! int ||
         gamesWon is! int ||
@@ -62,7 +85,11 @@ class SaveData {
         secret < minimum ||
         secret > maximum ||
         attempts < 0 ||
-        gamesWon < 0) {
+        gamesWon < 0 ||
+        profileName is! String ||
+        profileName.length > 24 ||
+        profileIconId is! String ||
+        !profileIconIds.contains(profileIconId)) {
       throw const FormatException('Unsupported or invalid save data.');
     }
     final progression = progressionJson == null
@@ -85,6 +112,8 @@ class SaveData {
       maximum: maximum,
       progression: progression,
       settings: settings,
+      profileName: profileName,
+      profileIconId: profileIconId,
     );
   }
 }
