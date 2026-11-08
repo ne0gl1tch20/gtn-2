@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart' show ListView, Scrollable;
+import 'package:flutter/material.dart' show Scrollable;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gtn_2/main.dart';
 
@@ -9,6 +9,7 @@ void main() {
     expect(find.text('Guess The Number'), findsOneWidget);
     expect(find.text('YOUR WALLET'), findsOneWidget);
 
+    // The dashboard is lazy-built, so scroll to the input instead of assuming it exists.
     await tester.scrollUntilVisible(
       find.text('MAKE YOUR GUESS'),
       200,
