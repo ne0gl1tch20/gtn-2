@@ -35,7 +35,7 @@ void main() {
       totalGuessesObserved: 10,
       failedGuessesObserved: 6,
       correctGuessesObserved: 10,
-      accuracyScore: 0.4,
+      accuracyScore: 0.7,
     );
     final decision = engine.evaluate(
       profile: profile,
@@ -106,6 +106,28 @@ void main() {
     expect(next.longStreaksObserved, 1);
     expect(next.moneyEarnedObserved, '12.5');
     expect(next.accuracyScore, closeTo(0.08, 0.000001));
+  });
+
+  test('gentle target bias eases the next target while staying in range', () {
+    const profile = AdaptiveTraitProfile(
+      totalGuessesObserved: 8,
+      failedGuessesObserved: 5,
+      accuracyScore: 0.30,
+    );
+    final adjusted = engine.adjustNextTarget(
+      profile: profile,
+      candidate: 90,
+      rangeMin: 1,
+      rangeMax: 100,
+    );
+    expect(adjusted, inInclusiveRange(1, 100));
+    expect(adjusted, lessThan(90));
+    expect(engine.adjustNextTarget(
+      profile: const AdaptiveTraitProfile(),
+      candidate: 90,
+      rangeMin: 1,
+      rangeMax: 100,
+    ), 90);
   });
 
   test('helper use persists counters and cooldown ticks', () {
