@@ -24,7 +24,12 @@ for font in "${required_fonts[@]}"; do
 done
 
 # Preserve original font license notices when present.
-find "$FONT_SOURCE" -maxdepth 1 -type f \( -iname 'OFL*' -o -iname '*license*' -o -iname '*copyright*' \) -exec cp {} "$FONT_DEST/" \\;
+find "$FONT_SOURCE" -maxdepth 1 -type f \( -iname 'OFL*' -o -iname '*license*' -o -iname '*copyright*' \) -exec cp {} "$FONT_DEST/" \;
+
+if [[ ! -d "$WEB_SOURCE" ]]; then
+  echo "Missing GTN1 Web Play asset directory: $WEB_SOURCE" >&2
+  exit 1
+fi
 
 image_count=0
 while IFS= read -r -d '' file; do
