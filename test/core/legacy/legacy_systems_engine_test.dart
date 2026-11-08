@@ -397,21 +397,28 @@ void main() {
   });
 
   group('catalog and save integrity', () {
-    test('hidden trait discovery respects player-level gates', () {
+    test('hidden trait discovery follows GTN1 progression gates, not player level', () {
       final discovered = engine.discoverEligibleTraits(
         progression: ProgressionState.initial.copyWith(correctGuesses: 100),
         systems: LegacySystemsState.initial,
+        activeSeasonId: null,
+      );
+      expect(discovered.discoveredTraits, contains('hidden_night_owl'));
+      expect(discovered.discoveredTraits, isNot(contains('hidden_century_club')));
+
+      final activation = engine.evaluateTraits(
+        progression: ProgressionState.initial.copyWith(correctGuesses: 100),
+        systems: discovered,
         playerLevel: 0,
         activeSeasonId: null,
       );
-      expect(discovered.discoveredTraits, isEmpty);
+      expect(activation.activeTraitIds, isNot(contains('hidden_night_owl')));
     });
 
     test('hidden trait dependency chains unlock in one discovery pass', () {
       final discovered = engine.discoverEligibleTraits(
         progression: ProgressionState.initial.copyWith(correctGuesses: 500),
         systems: LegacySystemsState.initial,
-        playerLevel: 1,
         activeSeasonId: null,
       );
 
