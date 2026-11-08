@@ -294,10 +294,13 @@ void main() {
 
     test('defaults world boss victories when loading older saves', () {
       final legacyJson = Map<String, dynamic>.of(LegacySystemsState.initial.toJson())
-        ..remove('worldBossVictories');
+        ..remove('worldBossVictories')
+        ..remove('unlockedWorldIds')
+        ..remove('worldUnlockMigrationPending');
       final restored = LegacySystemsState.fromJson(legacyJson);
       expect(restored.worldBossVictories, 0);
       expect(restored.unlockedWorldIds, const {'verdant_grove'});
+      expect(restored.worldUnlockMigrationPending, isTrue);
     });
 
     test('round-trips bot sequence, last feedback and save timestamp', () {
