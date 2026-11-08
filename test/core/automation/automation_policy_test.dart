@@ -24,17 +24,16 @@ void main() {
       expect(bot.nextGuess(rangeMinimum: 173, rangeMaximum: 173), 173);
     });
 
-    test('rejects invalid ranges and guesses outside the current interval', () {
+    test('rejects invalid ranges and recovers from clamped out-of-interval feedback', () {
       expect(() => GuessingBot(minimum: 0), throwsArgumentError);
       final bot = GuessingBot();
       expect(
         () => bot.nextGuess(rangeMinimum: 0, rangeMaximum: 100),
         throwsArgumentError,
       );
-      expect(
-        () => bot.observeGuess(101, BotFeedback.tooHigh),
-        throwsArgumentError,
-      );
+      bot.observeGuess(101, BotFeedback.tooLow);
+      expect(bot.lowerBound, 1);
+      expect(bot.upperBound, 100);
     });
 
     test('correct feedback does not change the learned interval', () {
