@@ -1097,7 +1097,7 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
           }
         }
       }
-      if (isBot && botId != null) {
+      if (isBot) {
         final feedback = switch (resultForMessage) {
           GuessResult.tooLow => BotFeedback.tooLow,
           GuessResult.tooHigh => BotFeedback.tooHigh,
