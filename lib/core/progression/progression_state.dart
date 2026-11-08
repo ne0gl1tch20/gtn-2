@@ -18,6 +18,7 @@ class ProgressionState {
     this.totalGuesses = 0,
     this.correctGuesses = 0,
     BigNumber? moneyEarned,
+    BigNumber? moneySpent,
     this.currentStreak = 0,
     this.bestStreak = 0,
     BigNumber? nebulaEarned,
@@ -27,6 +28,7 @@ class ProgressionState {
         ultra = ultra ?? BigNumber.fromInt(0),
         nebula = nebula ?? BigNumber.fromInt(0),
         moneyEarned = moneyEarned ?? BigNumber.fromInt(0),
+        moneySpent = moneySpent ?? BigNumber.fromInt(0),
         nebulaEarned = nebulaEarned ?? BigNumber.fromInt(0),
         legacySystems = legacySystems ?? LegacySystemsState.initial;
 
@@ -35,6 +37,7 @@ class ProgressionState {
   final Set<String> defeatedBosses;
   final int prestigeResets, ultraResets, totalGuesses, correctGuesses;
   final BigNumber moneyEarned;
+  final BigNumber moneySpent;
   final int currentStreak, bestStreak;
   final BigNumber nebulaEarned;
   final LegacySystemsState legacySystems;
@@ -57,6 +60,7 @@ class ProgressionState {
         'totalGuesses': totalGuesses,
         'correctGuesses': correctGuesses,
         'moneyEarned': moneyEarned.toString(),
+        'moneySpent': moneySpent.toString(),
         'currentStreak': currentStreak,
         'bestStreak': bestStreak,
         'nebulaEarned': nebulaEarned.toString(),
@@ -147,6 +151,7 @@ class ProgressionState {
       totalGuesses: total,
       correctGuesses: correct,
       moneyEarned: number('moneyEarned'),
+      moneySpent: json['moneySpent'] == null ? BigNumber.fromInt(0) : number('moneySpent'),
       currentStreak: streak,
       bestStreak: best,
       nebulaEarned: number('nebulaEarned'),
@@ -160,7 +165,7 @@ class ProgressionState {
     Map<String, int>? ultraUpgrades, Map<String, int>? nebulaItems,
     Map<String, int>? bossDamage, Set<String>? defeatedBosses,
     int? prestigeResets, int? ultraResets, int? totalGuesses,
-    int? correctGuesses, BigNumber? moneyEarned, int? currentStreak,
+    int? correctGuesses, BigNumber? moneyEarned, BigNumber? moneySpent, int? currentStreak,
     int? bestStreak, BigNumber? nebulaEarned,
     LegacySystemsState? legacySystems,
   }) => ProgressionState(
@@ -179,6 +184,7 @@ class ProgressionState {
     totalGuesses: totalGuesses ?? this.totalGuesses,
     correctGuesses: correctGuesses ?? this.correctGuesses,
     moneyEarned: moneyEarned ?? this.moneyEarned,
+    moneySpent: moneySpent ?? this.moneySpent,
     currentStreak: currentStreak ?? this.currentStreak,
     bestStreak: bestStreak ?? this.bestStreak,
     nebulaEarned: nebulaEarned ?? this.nebulaEarned,
