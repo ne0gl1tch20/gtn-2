@@ -13,8 +13,8 @@ void main() {
 
     test('rejects malformed and truncated fingerprints', () {
       expect(UpdateChecker.isValidCertificateFingerprint('not-a-fingerprint'), isFalse);
-      expect(UpdateChecker.isValidCertificateFingerprint('a' * 63), isFalse);
-      expect(UpdateChecker.isValidCertificateFingerprint('g' * 64), isFalse);
+      expect(UpdateChecker.isValidCertificateFingerprint(List.filled(63, 'a').join()), isFalse);
+      expect(UpdateChecker.isValidCertificateFingerprint(List.filled(64, 'g').join()), isFalse);
     });
   });
 
