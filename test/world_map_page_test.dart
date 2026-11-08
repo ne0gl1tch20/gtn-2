@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gtn_2/core/progression/progression_state.dart';
-import 'package:gtn_2/legacy/legacy_systems_state.dart';
+import 'package:gtn_2/core/legacy/legacy_systems_state.dart';
 import 'package:gtn_2/worlds/world_boss_catalog.dart';
 import 'package:gtn_2/worlds/world_map_page.dart';
 
@@ -23,8 +23,6 @@ void main() {
     required ProgressionState state,
     required WorldBossAction onAction,
   }) async {
-    await tester.view.setPhysicalSize(const Size(900, 900));
-    await tester.view.setDevicePixelRatio(1);
     await tester.pumpWidget(
       MaterialApp(
         home: WorldMapPage(progression: state, onAction: onAction),
@@ -71,7 +69,7 @@ void main() {
     expect(
       tester.getSemantics(
         find.byKey(const ValueKey('world-node-crystal_caverns')),
-      ).hasFlag(SemanticsFlag.isSelected),
+      ).getSemanticsData().flagsCollection.isSelected,
       isTrue,
     );
   });
