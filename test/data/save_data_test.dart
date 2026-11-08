@@ -167,6 +167,42 @@ void main() {
     );
   });
 
+  test('recovers the completed temporary save after an interrupted write', () async {
+    final directory =
+        await Directory.systemTemp.createTemp('gtn2-save-recovery-tmp-');
+    addTearDown(() => directory.delete(recursive: true));
+    final storage = SaveStorage(directory: directory);
+    final temporary = File('${directory.path}/gtn2-save.json.tmp');
+    await temporary.writeAsString(
+      '{"schemaVersion":3,"secret":91,"attempts":4,"gamesWon":2,"isComplete":false,"minimum":1,"maximum":100}',
+    );
+
+    final recovered = await storage.load();
+
+    expect(recovered?.secret, 91);
+    expect(await File('${directory.path}/gtn2-save.json').exists(), isTrue);
+    expect(await temporary.exists(), isFalse);
+  });
+
+  test('recovers the last known-good backup when the primary save is corrupt', () async {
+    final directory =
+        await Directory.systemTemp.createTemp('gtn2-save-recovery-bak-');
+    addTearDown(() => directory.delete(recursive: true));
+    final storage = SaveStorage(directory: directory);
+    final primary = File('${directory.path}/gtn2-save.json');
+    final backup = File('${directory.path}/gtn2-save.json.bak');
+    await primary.writeAsString('{broken json');
+    await backup.writeAsString(
+      '{"schemaVersion":3,"secret":73,"attempts":2,"gamesWon":1,"isComplete":false,"minimum":1,"maximum":100}',
+    );
+
+    final recovered = await storage.load();
+
+    expect(recovered?.secret, 73);
+    expect(await File('${directory.path}/gtn2-save.json').exists(), isTrue);
+    expect(await File('${directory.path}/gtn2-save.json.corrupt').exists(), isTrue);
+  });
+
   test('save slots use separate files', () async {
     final directory =
         await Directory.systemTemp.createTemp('gtn2-save-slots-test-');
