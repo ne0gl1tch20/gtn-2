@@ -11,6 +11,8 @@ class ProgressionState {
     this.prestigeUpgrades = const {},
     this.ultraUpgrades = const {},
     this.nebulaItems = const {},
+    this.prestigeShopPurchases = const {},
+    this.ultraShopPurchases = const {},
     this.bossDamage = const {},
     this.defeatedBosses = const {},
     this.prestigeResets = 0,
@@ -32,7 +34,7 @@ class ProgressionState {
 
   final BigNumber money, prestige, ultra, nebula;
   final Map<String, int> upgrades, prestigeUpgrades, ultraUpgrades, nebulaItems, bossDamage;
-  final Set<String> defeatedBosses;
+  final Set<String> prestigeShopPurchases, ultraShopPurchases, defeatedBosses;
   final int prestigeResets, ultraResets, totalGuesses, correctGuesses;
   final BigNumber moneyEarned;
   final int currentStreak, bestStreak;
@@ -50,6 +52,8 @@ class ProgressionState {
         'prestigeUpgrades': prestigeUpgrades,
         'ultraUpgrades': ultraUpgrades,
         'nebulaItems': nebulaItems,
+        'prestigeShopPurchases': prestigeShopPurchases.toList(),
+        'ultraShopPurchases': ultraShopPurchases.toList(),
         'bossDamage': bossDamage,
         'defeatedBosses': defeatedBosses.toList(),
         'prestigeResets': prestigeResets,
@@ -97,6 +101,20 @@ class ProgressionState {
       return Map.unmodifiable(result);
     }
 
+    Set<String> stringSet(String key) {
+      final value = json[key];
+      if (value == null) return const {};
+      if (value is! List ||
+          value.any((entry) => entry is! String || entry.isEmpty)) {
+        throw FormatException('Invalid purchase list: $key');
+      }
+      final entries = value.cast<String>();
+      if (entries.toSet().length != entries.length) {
+        throw FormatException('Duplicate purchase entry: $key');
+      }
+      return Set.unmodifiable(entries);
+    }
+
     final rawLegacy = json['legacySystems'];
     final legacySystems = rawLegacy == null
         ? LegacySystemsState.initial.copyWith(worldUnlockMigrationPending: true)
@@ -140,6 +158,8 @@ class ProgressionState {
       prestigeUpgrades: levels('prestigeUpgrades'),
       ultraUpgrades: levels('ultraUpgrades'),
       nebulaItems: levels('nebulaItems', optional: true),
+      prestigeShopPurchases: stringSet('prestigeShopPurchases'),
+      ultraShopPurchases: stringSet('ultraShopPurchases'),
       bossDamage: Map.unmodifiable(bossDamage),
       defeatedBosses: Set.unmodifiable(defeatedBosses),
       prestigeResets: count('prestigeResets'),
@@ -158,6 +178,7 @@ class ProgressionState {
     BigNumber? money, BigNumber? prestige, BigNumber? ultra, BigNumber? nebula,
     Map<String, int>? upgrades, Map<String, int>? prestigeUpgrades,
     Map<String, int>? ultraUpgrades, Map<String, int>? nebulaItems,
+    Set<String>? prestigeShopPurchases, Set<String>? ultraShopPurchases,
     Map<String, int>? bossDamage, Set<String>? defeatedBosses,
     int? prestigeResets, int? ultraResets, int? totalGuesses,
     int? correctGuesses, BigNumber? moneyEarned, int? currentStreak,
@@ -172,6 +193,8 @@ class ProgressionState {
     prestigeUpgrades: prestigeUpgrades ?? this.prestigeUpgrades,
     ultraUpgrades: ultraUpgrades ?? this.ultraUpgrades,
     nebulaItems: nebulaItems ?? this.nebulaItems,
+    prestigeShopPurchases: prestigeShopPurchases ?? this.prestigeShopPurchases,
+    ultraShopPurchases: ultraShopPurchases ?? this.ultraShopPurchases,
     bossDamage: bossDamage ?? this.bossDamage,
     defeatedBosses: defeatedBosses ?? this.defeatedBosses,
     prestigeResets: prestigeResets ?? this.prestigeResets,
