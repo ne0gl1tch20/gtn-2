@@ -41,7 +41,7 @@ LuaScriptCatalogRepository _repository({
       if (path == 'assets/gtn1/scripts/minigames/number_rush.lua') {
         return script;
       }
-      throw StateError('Unexpected asset path: ' + path);
+      throw StateError('Unexpected asset path: $path');
     },
   );
 }
