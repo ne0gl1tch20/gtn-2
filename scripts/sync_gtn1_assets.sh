@@ -7,10 +7,12 @@ FONT_SOURCE="$SOURCE_ROOT/fonts"
 WEB_SOURCE="$SOURCE_ROOT/web-play"
 GAME_SOURCE="$SOURCE_ROOT/game"
 TRAIT_SOURCE="$SOURCE_ROOT/traits"
+SCRIPT_SOURCE="$SOURCE_ROOT/scripts"
 FONT_DEST="assets/fonts"
 IMAGE_DEST="assets/gtn1/web-play"
 GAME_DEST="assets/game"
 TRAIT_DEST="assets/gtn1/traits"
+SCRIPT_DEST="assets/gtn1/scripts"
 LICENSE_DEST="assets/gtn1/licenses"
 
 required_fonts=(
@@ -82,6 +84,20 @@ if [[ "$trait_asset_count" -ne "$source_trait_asset_count" || "$trait_asset_coun
 fi
 python scripts/generate_trait_manifest.py "$TRAIT_DEST"
 
+# Bundle the pinned GTN1 Lua script catalog and all of its source files.
+if [[ ! -d "$SCRIPT_SOURCE" || ! -s "$SCRIPT_SOURCE/manifest.json" ]]; then
+  echo "Missing GTN1 Lua script catalog: $SCRIPT_SOURCE" >&2
+  exit 1
+fi
+rm -rf "$SCRIPT_DEST"
+mkdir -p "$SCRIPT_DEST"
+cp -a "$SCRIPT_SOURCE/." "$SCRIPT_DEST/"
+lua_script_count=$(find "$SCRIPT_DEST" -type f -name '*.lua' | wc -l | tr -d ' ')
+if [[ "$lua_script_count" -ne 4 ]]; then
+  echo "Incomplete GTN1 Lua script bundle: expected 4 scripts, found $lua_script_count." >&2
+  exit 1
+fi
+
 # Preserve release notes and third-party notices used by About and license screens.
 if [[ -f "$SOURCE_ROOT/changelogs.md" ]]; then
   cp "$SOURCE_ROOT/changelogs.md" "assets/gtn1/changelogs.md"
@@ -113,8 +129,9 @@ cat > assets/gtn1/source-manifest.json <<EOF
   "bundledWebPlayImageCount": $image_count,
   "bundledOtherArtworkCount": $other_artwork_count,
   "bundledGameCatalogCount": $game_catalog_count,
-  "bundledTraitAssetCount": $trait_asset_count
+  "bundledTraitAssetCount": $trait_asset_count,
+  "bundledLuaScriptCount": $lua_script_count
 }
 EOF
 
-echo "Bundled ${#required_fonts[@]} GTN1 fonts, $image_count Web Play images, $other_artwork_count other artwork files, $game_catalog_count game catalogs and $trait_asset_count trait assets."
+echo "Bundled ${#required_fonts[@]} GTN1 fonts, $image_count Web Play images, $other_artwork_count other artwork files, $game_catalog_count game catalogs, $trait_asset_count trait assets and $lua_script_count Lua scripts."
