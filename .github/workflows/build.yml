@@ -26,6 +26,8 @@ jobs:
           path: gtn1-source
       - name: Bundle GTN1 artwork and offline fonts
         run: bash scripts/sync_gtn1_assets.sh gtn1-source
+      - name: Verify complete GTN1 content bundle
+        run: python scripts/verify_gtn1_assets.py
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -69,6 +71,8 @@ jobs:
           path: gtn1-source
       - name: Bundle GTN1 artwork and offline fonts
         run: bash scripts/sync_gtn1_assets.sh gtn1-source
+      - name: Verify complete GTN1 content bundle
+        run: python scripts/verify_gtn1_assets.py
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
@@ -102,7 +106,7 @@ jobs:
   publish-debug-latest:
     name: Publish Android and Windows debug-latest
     needs: [android, windows]
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    if: false # Re-enable only after the GTN1 full-port verification gate passes.
     runs-on: ubuntu-latest
     permissions:
       contents: write
