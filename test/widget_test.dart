@@ -37,7 +37,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('YOUR WALLET'), findsOneWidget);
     expect(find.text('Play'), findsOneWidget);
-    expect(find.text('Beyond the Numbers'), findsNWidgets(2));
+    expect(find.text('Beyond the Numbers'), findsOneWidget);
     expect(find.text('Daily Momentum'), findsOneWidget);
     expect(find.text('More'), findsOneWidget);
 
