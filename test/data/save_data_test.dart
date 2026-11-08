@@ -239,6 +239,57 @@ void main() {
     expect(await first.hasBackup(), isTrue);
   });
 
+  test('gameplay save updates preserve profile and Creative Mode metadata', () async {
+    final directory =
+        await Directory.systemTemp.createTemp('gtn2-save-metadata-update-');
+    addTearDown(() => directory.delete(recursive: true));
+    final storage = SaveStorage(directory: directory);
+    final creative = CreativeModeSave(
+      enabled: true,
+      rangeMin: 10,
+      rangeMax: 50,
+      effects: const [
+        CreativeModeEffect(
+          id: 'extra-hints',
+          type: CreativeEffectType.extraHints,
+          value: 2,
+        ),
+      ],
+    );
+    await storage.save(SaveData(
+      secret: 42,
+      attempts: 1,
+      gamesWon: 2,
+      profileName: 'My Profile',
+      profileIconId: 'crown',
+      creativeMode: creative,
+    ));
+
+    await storage.update((current) => current!.copyWith(
+          secret: 73,
+          attempts: 4,
+          gamesWon: 3,
+          isComplete: false,
+          minimum: 1,
+          maximum: 100,
+          progression: ProgressionState.initial.copyWith(
+            money: BigNumber.fromInt(900),
+          ),
+          settings: const GameSettings(difficultyId: 'hard'),
+        ));
+
+    final restored = await storage.load();
+    expect(restored?.secret, 73);
+    expect(restored?.attempts, 4);
+    expect(restored?.gamesWon, 3);
+    expect(restored?.profileName, 'My Profile');
+    expect(restored?.profileIconId, 'crown');
+    expect(restored?.creativeMode?.enabled, isTrue);
+    expect(restored?.creativeMode?.effects.single.value, 2);
+    expect(restored?.progression.money.toString(), '900');
+    expect(restored?.settings.difficultyId, 'hard');
+  });
+
   test('persists Extreme Hardcore saves through the storage layer', () async {
     final directory =
         await Directory.systemTemp.createTemp('gtn2-extreme-save-test-');
@@ -384,6 +435,46 @@ void main() {
     expect(await storage.hasBackup(), isTrue);
     expect(await storage.restoreBackup(), isTrue);
     expect((await storage.load())?.secret, 73);
+  });
+
+  test('creates a save only once when two storage instances race', () async {
+    final directory =
+        await Directory.systemTemp.createTemp('gtn2-create-slot-race-');
+    addTearDown(() => directory.delete(recursive: true));
+    final first = SaveStorage(directory: directory, slot: 5);
+    final second = SaveStorage(directory: directory, slot: 5);
+    final results = await Future.wait([
+      first.createIfEmpty(
+        SaveData(secret: 31, attempts: 0, gamesWon: 0),
+      ),
+      second.createIfEmpty(
+        SaveData(secret: 82, attempts: 0, gamesWon: 0),
+      ),
+    ]);
+
+    expect(results.where((created) => created).length, 1);
+    expect([31, 82], contains((await first.load())!.secret));
+  });
+
+  test('duplicate operations cannot overwrite the same target slot', () async {
+    final directory =
+        await Directory.systemTemp.createTemp('gtn2-duplicate-slot-race-');
+    addTearDown(() => directory.delete(recursive: true));
+    final first = SaveStorage(directory: directory, slot: 1);
+    final second = SaveStorage(directory: directory, slot: 2);
+    await first.save(SaveData(secret: 31, attempts: 0, gamesWon: 0));
+    await second.save(SaveData(secret: 82, attempts: 0, gamesWon: 0));
+
+    final results = await Future.wait([
+      first.duplicateTo(3),
+      second.duplicateTo(3),
+    ]);
+
+    expect(results.where((created) => created).length, 1);
+    expect([31, 82], contains((await SaveStorage(
+      directory: directory,
+      slot: 3,
+    ).load())!.secret));
   });
 
   test('duplicates a save and its restore backup into an empty slot', () async {
