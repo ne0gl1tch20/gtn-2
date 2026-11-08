@@ -791,7 +791,6 @@ class LegacySystemsEngine {
   LegacySystemsState discoverEligibleTraits({
     required ProgressionState progression,
     required LegacySystemsState systems,
-    required int playerLevel,
     required String? activeSeasonId,
   }) {
     final discovered = Set<String>.of(systems.discoveredTraits);
@@ -811,8 +810,7 @@ class LegacySystemsEngine {
         }
         final dependencies =
             (item['dependencies']! as List<Object?>).cast<String>();
-        if (playerLevel < (item['minLevel']! as int) ||
-            progression.prestigeResets < (item['minPrestige']! as int) ||
+        if (progression.prestigeResets < (item['minPrestige']! as int) ||
             progression.correctGuesses < (item['minCorrect']! as int) ||
             progression.bestStreak < (item['minStreak']! as int) ||
             !dependencies.every(discovered.contains)) {
