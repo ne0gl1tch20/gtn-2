@@ -61,6 +61,8 @@ void main() {
     ));
     await tester.pumpAndSettle();
 
+    await tester.drag(find.byType(ListView), const Offset(0, -1200));
+    await tester.pumpAndSettle();
     expect(find.text('Prestige Shop'), findsOneWidget);
     expect(find.text('Quantum Auto-Guess'), findsOneWidget);
     final buy = find.text('Buy · 100 Prestige');
@@ -95,6 +97,8 @@ void main() {
     ));
     await tester.pumpAndSettle();
 
+    await tester.drag(find.byType(ListView), const Offset(0, -1600));
+    await tester.pumpAndSettle();
     expect(find.text('Ultra Shop'), findsOneWidget);
     expect(find.text('Universal Harmony'), findsOneWidget);
     final buy = find.text('Buy · 500 Ultra');
