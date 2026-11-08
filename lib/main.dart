@@ -631,6 +631,7 @@ class _GameHomePageState extends State<GameHomePage> {
         final rawReward = correct
             ? (BigNumber.fromInt(1) + effects.flatBonus) *
                 _legacySystemsEngine.mutatorRewardMultiplier(legacySystems) *
+                BigNumber.parse(DifficultyRules.rewardMultiplier(_settings.difficultyId).toStringAsFixed(2)) *
                 BigNumber.parse(traitEffects.correctGuessMultiplier.toStringAsFixed(2))
             : null;
         var afterReward = _progressionEngine.recordGuess(
@@ -698,9 +699,12 @@ class _GameHomePageState extends State<GameHomePage> {
             );
           }
         } else {
-          final penalty = legacySystems.activeMutators.contains('mut_tax')
+          final difficultyPenalty = beforeGuess.money *
+              BigNumber.parse(DifficultyRules.wrongGuessPenalty(_settings.difficultyId).toStringAsFixed(2));
+          final taxPenalty = legacySystems.activeMutators.contains('mut_tax')
               ? beforeGuess.money * BigNumber.parse('0.05')
               : BigNumber.fromInt(0);
+          final penalty = difficultyPenalty + taxPenalty;
           final refund = penalty * BigNumber.parse(
             traitEffects.missPenaltyRefundRate.toStringAsFixed(2),
           );
