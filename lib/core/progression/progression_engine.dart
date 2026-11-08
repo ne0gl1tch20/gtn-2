@@ -100,7 +100,9 @@ class ProgressionEngine {
     final levels = Map<String, int>.of(state.upgrades)
       ..[definition.id] = level + 1;
     return state.copyWith(
-      money: state.money - cost, upgrades: Map.unmodifiable(levels),
+      money: state.money - cost,
+      moneySpent: state.moneySpent + cost,
+      upgrades: Map.unmodifiable(levels),
     );
   }
 
