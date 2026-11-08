@@ -42,11 +42,13 @@ GTN1 is the behavioral source of truth. Do not invent new rules where a tested G
 
 - GTN1 signed remote LiveOps bundle refresh and verified script/event cache are not yet ported. GTN2 currently uses the bundled, validated event manifest and feature flags offline; do not mark remote LiveOps delivery complete.
 - The random-event timer pauses while the Flutter app is inactive and restarts its 60-second interval on resume. GTN1 runs its coroutine while the process remains alive. Verify whether background timing is required before calling lifecycle parity complete.
+- Lua parity is partial: the current sandbox uses a 500 ms wall-clock budget rather than LuaJ's exact 100,000-instruction hook, does not yet expose GTN1's full input snapshot/host API, and does not refresh the signed remote LiveOps script bundle. The developer-only Lua Testing Hub/typed command console is not yet exposed in Flutter.
 - Finish the per-feature comparison for every catalog, rule, UI action, migration and failure path. The inventory above is not an exhaustive completion certificate.
 
 ## Android CI investigation
 
 - Validation run [#587](https://github.com/ne0gl1tch20/gtn-2/actions/runs/42472569299) passed on commit `f04b3dc02690424dfb7c4de93c8d3362c78ceb02`: formatting, `flutter analyze --fatal-infos`, full `flutter test`, Android debug APK build and Windows desktop debug build.
+- After the Lua Activity Hub port, validation run [#602](https://github.com/ne0gl1tch20/gtn-2/actions/runs/42473519760) passed on commit `f3aca2e8bcfdc6e97cd940bed70fe18f869c2b67`: formatting, `flutter analyze --fatal-infos`, full `flutter test`, Android debug APK build and Windows desktop debug build.
 - The validation workflow compiles the APK but does not upload an artifact. The separate artifact workflow only runs on pushes to `main`/`master`, and the publish job remains explicitly disabled until the full parity gate passes. No APK artifact or release was published from this feature branch.
 
 The Android job failed while downloading Gradle 9.3.1 from the GitHub release asset endpoint (HTTP 504). An attempted direct-host rewrite changed the Gradle wrapper cache key, bypassing the already-populated cache, and was therefore counterproductive. That rewrite was removed from both `main` and this branch. The existing Gradle cache setup and bounded retry remain.
