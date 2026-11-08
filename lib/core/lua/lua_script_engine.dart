@@ -429,7 +429,7 @@ class LuaEngine {
         final scripts = await listScripts();
         return scripts.isEmpty
             ? 'No registered Lua scripts.'
-            : scripts.map((script) => '${script.id} — ${script.title} [${script.source}, API v${script.hostApiVersion}]').join('\\n');
+            : scripts.map((script) => '${script.id} — ${script.title} [${script.source}, API v${script.hostApiVersion}]').join('\n');
       case 'inspect':
         if (args.length < 3) return 'Usage: /lua inspect <id>';
         final entry = await inspectScript(args[2]);
@@ -446,7 +446,7 @@ class LuaEngine {
       case 'logs':
         final logs = recentDiagnostics().toList();
         final recent = logs.length > 40 ? logs.sublist(logs.length - 40) : logs;
-        return recent.isEmpty ? 'No Lua diagnostics yet.' : recent.join('\\n');
+        return recent.isEmpty ? 'No Lua diagnostics yet.' : recent.join('\n');
       case 'eval':
         return 'Lua REPL is disabled. Run a registered script with /lua run <id>.';
       default:
