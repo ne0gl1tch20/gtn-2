@@ -103,7 +103,7 @@ class BotTeam {
   }) {
     final guesser = botId == 'auto_clicker_basic' || sharedMemory
         ? _sharedGuesser
-        : _independentGuessers.putIfAbsent(botId, GuessingBot.new);
+        : _independentGuessers.putIfAbsent(botId, () => GuessingBot());
     guesser.observeGuess(guess, feedback);
     if (feedback == BotFeedback.correct) {
       reset(nextRangeMinimum, nextRangeMaximum);
