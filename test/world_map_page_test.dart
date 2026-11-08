@@ -44,6 +44,48 @@ void main() {
     expect(find.text('Verdant Grove'), findsWidgets);
   });
 
+  testWidgets('map fit, reset and zoom controls update the real viewport',
+      (tester) async {
+    final state = stateWith();
+    await pumpMap(tester, state: state, onAction: (_, __) async => state);
+
+    final viewer = tester.widget<InteractiveViewer>(
+      find.byType(InteractiveViewer),
+    );
+    expect(viewer.panEnabled, isTrue);
+    expect(viewer.scaleEnabled, isTrue);
+    final controller = viewer.transformationController!;
+
+    await tester.tap(find.byTooltip('Reset map view'));
+    await tester.pumpAndSettle();
+    expect(controller.value.getMaxScaleOnAxis(), closeTo(1, 0.001));
+
+    await tester.tap(find.byTooltip('Zoom in'));
+    await tester.pumpAndSettle();
+    expect(controller.value.getMaxScaleOnAxis(), closeTo(1.25, 0.001));
+
+    await tester.tap(find.byTooltip('Fit map to screen'));
+    await tester.pumpAndSettle();
+    final fittedScale = controller.value.getMaxScaleOnAxis();
+    expect(fittedScale, greaterThan(0.35));
+    expect(fittedScale, lessThan(1));
+  });
+
+  testWidgets('dragging the map pans its transformation', (tester) async {
+    final state = stateWith();
+    await pumpMap(tester, state: state, onAction: (_, __) async => state);
+
+    final viewer = find.byType(InteractiveViewer);
+    final controller = tester.widget<InteractiveViewer>(viewer)
+        .transformationController!;
+    final before = controller.value.clone();
+
+    await tester.drag(viewer, const Offset(40, 24));
+    await tester.pumpAndSettle();
+
+    expect(controller.value.storage, isNot(equals(before.storage)));
+  });
+
   testWidgets('selecting an unlocked node uses the progression action',
       (tester) async {
     final unlocked = WorldBossCatalog.worlds.map((world) => world.id).toSet();
