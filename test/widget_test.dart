@@ -50,6 +50,7 @@ void main() {
   testWidgets('More opens its own destination with save and dev tools',
       (WidgetTester tester) async {
     await tester.pumpWidget(const GtnApp());
+    await tester.pumpAndSettle();
     await tester.tap(find.text('More'));
     await tester.pumpAndSettle();
 
