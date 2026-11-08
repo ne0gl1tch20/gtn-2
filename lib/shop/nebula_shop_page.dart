@@ -153,9 +153,16 @@ class _NebulaShopPageState extends State<NebulaShopPage> {
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
               title: const Text('Auto Clicker'),
-              subtitle: const Text('Let your owned bots guess automatically.'),
+              subtitle: Text(
+                _state.legacySystems.timeTravelPenaltyUntil > DateTime.now().millisecondsSinceEpoch
+                    ? 'Paused by clock rollback protection.'
+                    : 'Let your owned bots guess automatically.',
+              ),
               value: _state.legacySystems.autoClickerActive,
-              onChanged: _togglingAutomation ? null : _toggleAutomation,
+              onChanged: _togglingAutomation ||
+                      _state.legacySystems.timeTravelPenaltyUntil > DateTime.now().millisecondsSinceEpoch
+                  ? null
+                  : _toggleAutomation,
             ),
           for (final item in NebulaShopCatalog.items)
             Card(
