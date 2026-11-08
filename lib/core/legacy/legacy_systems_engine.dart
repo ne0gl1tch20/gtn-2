@@ -185,9 +185,8 @@ class LegacySystemsEngine {
     final earned = after.money - before.money;
     if (earned.compareTo(_zero) <= 0) return after;
     var bonusMoney = _zero;
-    if (systems.talents.contains('talent_reward_1')) {
-      bonusMoney += earned * BigNumber.parse('0.5');
-    }
+    // talent_reward_1 is already included by GuessEconomyRules.correctGuessReward.
+    // Applying it again here would compound the 1.5× talent bonus to 2.25×.
     final eventBoost = systems.permanentEventBoosts.clamp(0, 25);
     if (eventBoost > 0) {
       bonusMoney += earned * BigNumber.parse((eventBoost * 0.02).toStringAsFixed(2));
