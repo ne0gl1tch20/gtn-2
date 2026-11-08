@@ -173,12 +173,6 @@ class LegacySystemsEngine {
     }
     if (equipped.contains('ember_dragon')) multiplier += BigNumber.parse('0.25');
     if (equipped.contains('nebula_titan')) multiplier += BigNumber.parse('0.25');
-    if (criticalHit && systems.talents.contains('talent_crit_1')) {
-      multiplier += BigNumber.fromInt(1);
-    }
-    if (criticalHit && systems.talents.contains('talent_crit_2')) {
-      multiplier += BigNumber.parse('0.5');
-    }
     return baseReward * multiplier;
   }
 
