@@ -54,7 +54,8 @@ class _WorldMapPageState extends State<WorldMapPage> {
             Builder(builder: (context) {
               final unlocked = WorldBossCatalog.isUnlocked(_state, boss);
               final canUnlock = WorldBossCatalog.canUnlock(_state, boss);
-              final defeated = WorldBossCatalog.isDefeated(_state, boss);
+              final defeated = WorldBossCatalog.isDefeated(_state, boss) &&
+                  !_state.legacySystems.endlessRiftActive;
               final canFight = WorldBossCatalog.canFight(_state, boss);
               final active = _state.legacySystems.activeBossBattleWorldId == boss.id;
               final riftTier = _state.legacySystems.endlessRiftTier.clamp(1, 1000000).toInt();
