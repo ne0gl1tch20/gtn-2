@@ -282,6 +282,9 @@ class _WorldMapPageState extends State<WorldMapPage> {
               damage: damage,
               phase: phase,
               misses: misses,
+              mastery: mastery,
+              masteryCost: masteryCost,
+              canUpgradeMastery: canUpgradeMastery,
             ),
           ],
         ),
@@ -425,6 +428,9 @@ class _WorldMapPageState extends State<WorldMapPage> {
     required int damage,
     required int phase,
     required int misses,
+    required int mastery,
+    required BigNumber masteryCost,
+    required bool canUpgradeMastery,
   }) {
     final theme = Theme.of(context);
     final worldName = AppLocalizations.text(world.worldNameKey, world.worldName);
