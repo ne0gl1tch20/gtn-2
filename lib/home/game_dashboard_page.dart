@@ -57,45 +57,16 @@ class GameDashboardPage extends StatelessWidget {
   final bool showDeveloperSettings;
 
   void _openMoreMenu(BuildContext context, Color panel) {
-    showModalBottomSheet<void>(
-      context: context,
-      showDragHandle: true,
-      backgroundColor: panel,
-      builder: (sheetContext) => SafeArea(
-        child: Wrap(
-          children: [
-            ListTile(
-              leading: const Icon(Icons.auto_awesome_rounded, color: _gold),
-              title: const Text('Prestige & Ultra'),
-              onTap: () { Navigator.pop(sheetContext); onPrestige(); },
-            ),
-            ListTile(
-              leading: const Icon(Icons.diamond_rounded, color: _purple),
-              title: const Text('Nebula Shop'),
-              onTap: () { Navigator.pop(sheetContext); onNebulaShop(); },
-            ),
-            ListTile(
-              leading: const Icon(Icons.auto_stories_rounded),
-              title: const Text('Journey, Rewards & Codex'),
-              onTap: () { Navigator.pop(sheetContext); onLegacyPages(); },
-            ),
-            ListTile(
-              leading: const Icon(Icons.save_rounded),
-              title: const Text('Save Slots'),
-              onTap: () { Navigator.pop(sheetContext); onSaveSlots(); },
-            ),
-            ListTile(
-              leading: const Icon(Icons.settings_rounded),
-              title: const Text('Settings'),
-              onTap: () { Navigator.pop(sheetContext); onSettings(); },
-            ),
-            if (showDeveloperSettings)
-              ListTile(
-                leading: const Icon(Icons.bug_report_rounded),
-                title: const Text('Developer Settings'),
-                onTap: () { Navigator.pop(sheetContext); onDeveloperSettings(); },
-              ),
-          ],
+    Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (_) => _MoreMenuPage(
+          showDeveloperSettings: showDeveloperSettings,
+          onPrestige: onPrestige,
+          onNebulaShop: onNebulaShop,
+          onLegacyPages: onLegacyPages,
+          onSaveSlots: onSaveSlots,
+          onSettings: onSettings,
+          onDeveloperSettings: onDeveloperSettings,
         ),
       ),
     );
@@ -333,6 +304,10 @@ class GameDashboardPage extends StatelessWidget {
                       Expanded(child: _Stat(Icons.local_fire_department_rounded,
                           progression.currentStreak.toString(), 'STREAK', _green,
                           panel, line, foreground, muted)),
+                      const SizedBox(width: 6),
+                      Expanded(child: _Stat(Icons.military_tech_rounded,
+                          progression.bestStreak.toString(), 'BEST', _purple,
+                          panel, line, foreground, muted)),
 
                     ],
                   ),
@@ -476,6 +451,73 @@ class _NavTab extends StatelessWidget {
           ),
         ),
       );
+}
+
+class _MoreMenuPage extends StatelessWidget {
+  const _MoreMenuPage({
+    required this.showDeveloperSettings,
+    required this.onPrestige,
+    required this.onNebulaShop,
+    required this.onLegacyPages,
+    required this.onSaveSlots,
+    required this.onSettings,
+    required this.onDeveloperSettings,
+  });
+
+  final bool showDeveloperSettings;
+  final VoidCallback onPrestige;
+  final VoidCallback onNebulaShop;
+  final VoidCallback onLegacyPages;
+  final VoidCallback onSaveSlots;
+  final VoidCallback onSettings;
+  final VoidCallback onDeveloperSettings;
+
+  @override
+  Widget build(BuildContext context) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    final foreground = dark ? _white : const Color(0xFF172039);
+    final muted = dark ? _muted : const Color(0xFF65708C);
+    final panel = dark ? _panel : Colors.white;
+
+    Widget entry(IconData icon, String title, String subtitle, VoidCallback onTap) {
+      return Card(
+        color: panel,
+        margin: const EdgeInsets.only(bottom: 10),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(18),
+          side: BorderSide(color: foreground.withValues(alpha: .08)),
+        ),
+        child: ListTile(
+          contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+          leading: Icon(icon, color: _purple),
+          title: Text(title, style: TextStyle(color: foreground, fontWeight: FontWeight.w800)),
+          subtitle: Text(subtitle, style: TextStyle(color: muted, fontSize: 11)),
+          trailing: Icon(Icons.chevron_right_rounded, color: muted),
+          onTap: onTap,
+        ),
+      );
+    }
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('More Hub')),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          Text('More Menu', style: Theme.of(context).textTheme.headlineSmall),
+          const SizedBox(height: 5),
+          Text('Your shortcuts, your order.', style: TextStyle(color: muted)),
+          const SizedBox(height: 18),
+          entry(Icons.auto_awesome_rounded, 'Prestige & Ultra', 'Prestige and Ultra progression', onPrestige),
+          entry(Icons.diamond_rounded, 'Nebula Shop', 'Nebula upgrades and items', onNebulaShop),
+          entry(Icons.auto_stories_rounded, 'Journey, Rewards & Codex', 'Achievements, rewards and discoveries', onLegacyPages),
+          entry(Icons.save_rounded, 'Save Slots', 'Manage your saved games', onSaveSlots),
+          entry(Icons.settings_rounded, 'Settings', 'Game preferences', onSettings),
+          if (showDeveloperSettings)
+            entry(Icons.bug_report_rounded, 'Dev Settings', 'Developer tools', onDeveloperSettings),
+        ],
+      ),
+    );
+  }
 }
 
 class _BottomNavItem extends StatelessWidget {
