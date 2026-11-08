@@ -860,12 +860,17 @@ class LegacySystemsEngine {
     if (event.status != 'ACTIVE' || !event.isWithinClaimWindow(now)) {
       return _reject(progression, systems, 'This event is not currently active.');
     }
-    if (event.maxClaims <= 0 ||
+    if (event.id.isEmpty ||
+        event.maxClaims <= 0 ||
         event.rewardNebula < 0 ||
         event.permanentBoostPerClaim < 0 ||
         event.minCorrectGuesses < 0 ||
         event.minPrestigeCount < 0 ||
-        event.minUltraCount < 0) {
+        event.minUltraCount < 0 ||
+        progression.correctGuesses < 0 ||
+        progression.prestigeResets < 0 ||
+        progression.ultraResets < 0 ||
+        systems.permanentEventBoosts < 0) {
       return _reject(progression, systems, 'This event has invalid reward rules.');
     }
     if (progression.correctGuesses < event.minCorrectGuesses ||
