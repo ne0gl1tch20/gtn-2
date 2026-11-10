@@ -28,6 +28,7 @@ import 'legacy/legacy_pages.dart';
 import 'progression/progression_hub_page.dart';
 import 'saves/save_slots_page.dart';
 import 'settings/game_settings.dart';
+import 'settings/music_settings_sync.dart';
 import 'settings/menu_studio_page.dart';
 import 'settings/settings_page.dart';
 import 'shop/nebula_shop_page.dart';
@@ -269,8 +270,22 @@ class _GameHomePageState extends State<GameHomePage>
             moneyEarned: restoredProgression.moneyEarned + offlineEarnings,
           );
         }
-        final restoredEngine = _engineFor(restoredProgression, save.settings);
-        await AppLocalizations.load(save.settings.localeCode);
+        final restoredSystems = restoreMusicStateFromSettings(
+          settings: save.settings,
+          systems: restoredProgression.legacySystems,
+        );
+        restoredProgression = restoredProgression.copyWith(
+          legacySystems: restoredSystems,
+        );
+        final restoredSettings = syncMusicSettingsFromLegacy(
+          settings: save.settings,
+          systems: restoredSystems,
+        );
+        final restoredEngine = _engineFor(
+          restoredProgression,
+          restoredSettings,
+        );
+        await AppLocalizations.load(restoredSettings.localeCode);
         if (!mounted) return;
         setState(() {
           _engine = restoredEngine;
@@ -283,7 +298,7 @@ class _GameHomePageState extends State<GameHomePage>
           );
           _gamesWon = save.gamesWon;
           _progression = restoredProgression;
-          _settings = save.settings;
+          _settings = restoredSettings;
           GtnApp.settingsNotifier.value = _settings;
           _message = timeTravelDetected
               ? 'Clock rollback detected. Auto Clicker paused for 24 hours.'
@@ -809,17 +824,29 @@ class _GameHomePageState extends State<GameHomePage>
     await AppLocalizations.load(settings.localeCode);
     if (!mounted) return;
     final difficultyChanged = settings.difficultyId != _settings.difficultyId;
+    final restoredSystems = restoreMusicStateFromSettings(
+      settings: settings,
+      systems: _progression.legacySystems,
+    );
+    final nextProgression = _progression.copyWith(
+      legacySystems: restoredSystems,
+    );
+    final synchronizedSettings = syncMusicSettingsFromLegacy(
+      settings: settings,
+      systems: restoredSystems,
+    );
     setState(() {
-      _settings = settings;
+      _progression = nextProgression;
+      _settings = synchronizedSettings;
       if (difficultyChanged) {
-        _engine = _engineFor(_progression, settings);
+        _engine = _engineFor(nextProgression, synchronizedSettings);
         _game = _newGameWithAdaptiveTarget(_engine.newGame());
         _botTeam.reset(_game.minimum, _game.maximum);
         _message =
             'Difficulty changed to ${DifficultyRules.name(settings.difficultyId)}. A fresh round is ready.';
       }
     });
-    GtnApp.settingsNotifier.value = settings;
+    GtnApp.settingsNotifier.value = synchronizedSettings;
     await _persist();
   }
 
@@ -856,6 +883,17 @@ class _GameHomePageState extends State<GameHomePage>
   );
 
   Future<void> _applyDeveloperSave(SaveData save) async {
+    final restoredSystems = restoreMusicStateFromSettings(
+      settings: save.settings,
+      systems: save.progression.legacySystems,
+    );
+    final restoredProgression = save.progression.copyWith(
+      legacySystems: restoredSystems,
+    );
+    final restoredSettings = syncMusicSettingsFromLegacy(
+      settings: save.settings,
+      systems: restoredSystems,
+    );
     setState(() {
       _game = _engine.restore(
         secret: save.secret,
@@ -865,8 +903,8 @@ class _GameHomePageState extends State<GameHomePage>
         savedMaximum: save.maximum,
       );
       _gamesWon = save.gamesWon;
-      _progression = save.progression;
-      _settings = save.settings;
+      _progression = restoredProgression;
+      _settings = restoredSettings;
       GtnApp.settingsNotifier.value = _settings;
       _message = 'Developer save applied.';
     });
@@ -880,9 +918,15 @@ class _GameHomePageState extends State<GameHomePage>
       return '/money N · /prestige N · /ultra N · /nebula N · /attempts N · /wins N · /reset';
     }
     if (action == '/reset') {
+      final resetSystems = restoreMusicStateFromSettings(
+        settings: _settings,
+        systems: ProgressionState.initial.legacySystems,
+      );
       setState(() {
         _game = _newGameWithAdaptiveTarget(_engine.newGame());
-        _progression = ProgressionState.initial;
+        _progression = ProgressionState.initial.copyWith(
+          legacySystems: resetSystems,
+        );
         _gamesWon = 0;
         _message = 'Developer reset completed.';
       });
@@ -964,12 +1008,18 @@ class _GameHomePageState extends State<GameHomePage>
             'Auto Clicker is temporarily paused after a clock rollback.',
       );
     }
+    final synchronizedSettings = syncMusicSettingsFromLegacy(
+      settings: _settings,
+      systems: progression.legacySystems,
+    );
     final oldRange = _rangeMaximum(_progression, _settings);
-    final newRange = _rangeMaximum(progression, _settings);
+    final newRange = _rangeMaximum(progression, synchronizedSettings);
     setState(() {
       _progression = progression;
+      _settings = synchronizedSettings;
+      GtnApp.settingsNotifier.value = synchronizedSettings;
       if (oldRange != newRange) {
-        _engine = _engineFor(progression, _settings);
+        _engine = _engineFor(progression, synchronizedSettings);
         _game = _newGameWithAdaptiveTarget(_engine.newGame());
         _botTeam.reset(_game.minimum, _game.maximum);
         _message = 'Hardcore range changed. A fresh round is ready.';
