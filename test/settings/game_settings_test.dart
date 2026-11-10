@@ -5,29 +5,61 @@ void main() {
   test('GTN1 preferences round-trip through the save model', () {
     final settings = GameSettings.initial.copyWith(
       themeMode: 'AMOLED', darkMode: true, numberNotation: 'Scientific',
+      localeCode: 'fil', difficultyId: 'hard', reduceMotion: true,
       musicEnabled: false, soundEnabled: false, vibrationEnabled: false,
-      notificationsEnabled: true, notificationIntervalHours: 48,
-      volume: .72, sfxVolume: .35, reduceFlashes: true,
-      updateCheckIntervalHours: 24, themePreset: 'Ocean',
-      customPrimaryColor: '#2196F3',
-      musicLibraryPaths: const ['/music/a.mp3'],
-      musicQueuePaths: const ['/music/a.mp3'], musicRepeatMode: 'all',
-      musicShuffle: true, tutorialSeenFeatures: const {'arcade', 'worlds'},
+      notificationsEnabled: false, notificationRemindersEnabled: false,
+      notificationProgressionEnabled: true, notificationEventsEnabled: false,
+      notificationIntervalHours: 48, volume: .72, sfxVolume: .35,
+      reduceFlashes: true, saveLogsToStorage: true, verboseLogging: true,
+      backgroundMusicPath: '/music/current.mp3',
+      musicLibraryPaths: const ['/music/a.mp3', '/music/b.mp3'],
+      musicQueuePaths: const ['/music/b.mp3', '/music/a.mp3'],
+      musicPlaylistPaths: const {'favorites': ['/music/a.mp3']},
+      musicRepeatMode: 'all', musicShuffle: true,
+      themePreset: 'Custom', customPrimaryColor: '#2196F3',
+      customSecondaryColor: '#00BCD4', customTertiaryColor: '#00C853',
+      moreScreenOrder: const ['music', 'settings', 'about'],
+      moreScreenButtonColors: const {'music': '#2196F3'},
+      webMenuStudioLayout: '{"areas":{"music":"more"}}',
+      tutorialCompleted: true,
+      tutorialSeenFeatures: const {'arcade', 'worlds'},
+      updateCheckIntervalHours: 168,
     );
     final restored = GameSettings.fromJson(settings.toJson());
     expect(restored.themeMode, 'AMOLED');
     expect(restored.numberNotation, 'Scientific');
+    expect(restored.localeCode, 'fil');
+    expect(restored.difficultyId, 'hard');
+    expect(restored.reduceMotion, isTrue);
     expect(restored.musicEnabled, isFalse);
+    expect(restored.soundEnabled, isFalse);
+    expect(restored.vibrationEnabled, isFalse);
+    expect(restored.notificationsEnabled, isFalse);
+    expect(restored.notificationRemindersEnabled, isFalse);
+    expect(restored.notificationProgressionEnabled, isTrue);
+    expect(restored.notificationEventsEnabled, isFalse);
     expect(restored.notificationIntervalHours, 48);
     expect(restored.volume, .72);
     expect(restored.sfxVolume, .35);
     expect(restored.reduceFlashes, isTrue);
-    expect(restored.updateCheckIntervalHours, 24);
-    expect(restored.customPrimaryColor, '#2196F3');
-    expect(restored.musicLibraryPaths, ['/music/a.mp3']);
+    expect(restored.saveLogsToStorage, isTrue);
+    expect(restored.verboseLogging, isTrue);
+    expect(restored.backgroundMusicPath, '/music/current.mp3');
+    expect(restored.musicLibraryPaths, ['/music/a.mp3', '/music/b.mp3']);
+    expect(restored.musicQueuePaths, ['/music/b.mp3', '/music/a.mp3']);
+    expect(restored.musicPlaylistPaths, {'favorites': ['/music/a.mp3']});
     expect(restored.musicRepeatMode, 'all');
     expect(restored.musicShuffle, isTrue);
+    expect(restored.themePreset, 'Custom');
+    expect(restored.customPrimaryColor, '#2196F3');
+    expect(restored.customSecondaryColor, '#00BCD4');
+    expect(restored.customTertiaryColor, '#00C853');
+    expect(restored.moreScreenOrder, ['music', 'settings', 'about']);
+    expect(restored.moreScreenButtonColors, {'music': '#2196F3'});
+    expect(restored.webMenuStudioLayout, '{"areas":{"music":"more"}}');
+    expect(restored.tutorialCompleted, isTrue);
     expect(restored.tutorialSeenFeatures, {'arcade', 'worlds'});
+    expect(restored.updateCheckIntervalHours, 168);
   });
 
   test('older GTN2 settings retain their original defaults', () {
