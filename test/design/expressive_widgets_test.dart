@@ -74,7 +74,7 @@ void main() {
 
     expect(find.byType(M3EAppBar), findsOneWidget);
     expect(find.byType(GtnExpressiveCard), findsOneWidget);
-    expect(find.byType(M3EButton), findsOneWidget);
+    expect(find.byType(M3EButton), findsNWidgets(2));
     expect(find.byType(TextField), findsOneWidget);
     final input = tester.widget<TextField>(find.byType(TextField));
     expect(input.style?.fontSize, 18);
