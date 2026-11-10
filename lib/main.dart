@@ -29,8 +29,8 @@ import 'legacy/legacy_systems_page.dart';
 import 'progression/progression_hub_page.dart';
 import 'saves/save_slots_page.dart';
 import 'settings/game_settings.dart';
-import 'settings/music_settings_sync.dart';
 import 'settings/menu_studio_page.dart';
+import 'settings/music_settings_sync.dart';
 import 'settings/settings_page.dart';
 import 'shop/nebula_shop_page.dart';
 import 'shop/upgrade_catalog.dart';
@@ -1056,11 +1056,9 @@ class _GameHomePageState extends State<GameHomePage>
     _scheduleAutoClicker();
   }
 
-  Future<void> _openSystems() =>
-      _openLegacySystems(LegacySystemsView.all);
+  Future<void> _openSystems() => _openLegacySystems(LegacySystemsView.all);
 
-  Future<void> _openMusic() =>
-      _openLegacySystems(LegacySystemsView.music);
+  Future<void> _openMusic() => _openLegacySystems(LegacySystemsView.music);
 
   Future<void> _openLuckyStake() =>
       _openLegacySystems(LegacySystemsView.luckyStake);

@@ -3,8 +3,8 @@ import 'package:material_ui/material_ui.dart';
 
 import '../core/game/game_engine.dart';
 import '../core/progression/progression_state.dart';
-import '../settings/game_settings.dart';
 import '../design/expressive_widgets.dart';
+import '../settings/game_settings.dart';
 
 const _purple = GtnUiTokens.purple;
 const _cyan = GtnUiTokens.cyan;
@@ -803,7 +803,10 @@ class _MoreMenuPage extends StatelessWidget {
     }
 
     final destinations =
-        <String, ({IconData icon, String title, String subtitle, VoidCallback onTap})>{
+        <
+          String,
+          ({IconData icon, String title, String subtitle, VoidCallback onTap})
+        >{
           'world_map': (
             icon: Icons.public_rounded,
             title: 'World map',
@@ -816,7 +819,7 @@ class _MoreMenuPage extends StatelessWidget {
             subtitle: 'Journey progress and rewards',
             onTap: onLegacyPages,
           ),
-'mutators': (
+          'mutators': (
             icon: Icons.tune_rounded,
             title: 'Mutators',
             subtitle: 'Open the gameplay systems hub',
