@@ -590,7 +590,10 @@ class _ArcadeDialogState extends State<_ArcadeDialog> {
   Widget build(BuildContext context) {
     return GtnExpressiveDialog(
       title: Text(widget.title),
-      content: SingleChildScrollView(child: _gameContent()),
+      content: Material(
+        color: Colors.transparent,
+        child: SingleChildScrollView(child: _gameContent()),
+      ),
       actions: [
         M3EButton.text(
           onPressed: () => Navigator.of(context).pop(),
