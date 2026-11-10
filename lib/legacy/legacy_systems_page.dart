@@ -950,9 +950,9 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
       if (!mounted || _systems.musicLibrary.isEmpty) return;
     }
     final controller = TextEditingController();
-    final name = await showDialog<String>(
+    final name = await GtnExpressiveDialog.show<String>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (context) => GtnExpressiveDialog(
         title: const Text('New playlist'),
         content: GtnExpressiveTextField(
           controller: controller,
