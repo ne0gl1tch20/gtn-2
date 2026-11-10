@@ -672,13 +672,17 @@ class _MoreMenuPage extends StatelessWidget {
           borderRadius: BorderRadius.circular(18),
           side: BorderSide(color: foreground.withValues(alpha: .08)),
         ),
-        child: ListTile(
-          contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
-          leading: Icon(icon, color: _purple),
-          title: Text(title, style: TextStyle(color: foreground, fontWeight: FontWeight.w800)),
-          subtitle: Text(subtitle, style: TextStyle(color: muted, fontSize: 11)),
-          trailing: Icon(Icons.chevron_right_rounded, color: muted),
-          onTap: onTap,
+        child: Material(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(18),
+          child: ListTile(
+            contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+            leading: Icon(icon, color: _purple),
+            title: Text(title, style: TextStyle(color: foreground, fontWeight: FontWeight.w800)),
+            subtitle: Text(subtitle, style: TextStyle(color: muted, fontSize: 11)),
+            trailing: Icon(Icons.chevron_right_rounded, color: muted),
+            onTap: onTap,
+          ),
         ),
       );
     }
