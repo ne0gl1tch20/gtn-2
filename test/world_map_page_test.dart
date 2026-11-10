@@ -40,6 +40,23 @@ void main() {
     await tester.pump(const Duration(milliseconds: 400));
   }
 
+  testWidgets('recreates GTN1 progression summary and world expedition list',
+      (tester) async {
+    final state = stateWith();
+    await pumpMap(tester, state: state, onAction: (_, __) async => state);
+
+    expect(find.text('BEYOND THE NUMBERS'), findsOneWidget);
+    expect(find.text('Your universe'), findsOneWidget);
+    expect(find.text('PRESTIGE'), findsOneWidget);
+    expect(find.text('ULTRA'), findsOneWidget);
+    expect(find.text('NEBULA'), findsOneWidget);
+    expect(find.text('WORLD EXPEDITION'), findsOneWidget);
+    expect(find.text('Worlds & bosses'), findsOneWidget);
+    expect(find.text('Verdant Grove'), findsWidgets);
+    expect(find.text('BOSS HEALTH'), findsWidgets);
+    expect(find.text('Unlock world'), findsWidgets);
+  });
+
   testWidgets('renders all four world nodes on an interactive map',
       (tester) async {
     final state = stateWith();
@@ -88,6 +105,7 @@ void main() {
         .transformationController!;
     final before = controller.value.clone();
 
+    await tester.ensureVisible(viewer);
     await tester.drag(viewer, const Offset(40, 24));
     await tester.pump(const Duration(milliseconds: 400));
 
@@ -111,11 +129,13 @@ void main() {
       },
     );
 
-    await tester.tap(find.byKey(const ValueKey('world-node-crystal_caverns')));
+    final node = find.byKey(const ValueKey('world-node-crystal_caverns'));
+    await tester.ensureVisible(node);
+    await tester.tap(node);
     await tester.pump(const Duration(milliseconds: 400));
 
     expect(calls, contains(('crystal_caverns', 'select_world')));
-    expect(find.text('Selected world'), findsOneWidget);
+    expect(find.text('Selected world'), findsWidgets);
   });
 
   testWidgets('defeated world exposes mastery and dispatches its real action',
@@ -181,6 +201,7 @@ void main() {
 
     final secret = find.byKey(const ValueKey('secret-node-whispering_hollow'));
     expect(secret, findsOneWidget);
+    await tester.ensureVisible(secret);
     await tester.tap(secret);
     await tester.pump(const Duration(milliseconds: 400));
 
