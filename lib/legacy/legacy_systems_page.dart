@@ -645,6 +645,20 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
                   );
                   return;
                 }
+                if (stake.compareTo(BigNumber.fromInt(0)) <= 0) {
+                  setState(
+                    () => _stakeResultMessage = 'Enter a valid positive stake.',
+                  );
+                  return;
+                }
+                if (_progression.money.compareTo(stake) < 0) {
+                  setState(
+                    () => _stakeResultMessage = 'Insufficient funds for this stake.',
+                  );
+                  return;
+                }
+
+                // Match GTN1: validate the wager before consuming the coin-flip RNG.
                 final won = Random.secure().nextBool();
                 final result = _engine.settleLuckyStake(
                   progression: _progression,
@@ -657,8 +671,10 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
                   await _apply(result);
                   return;
                 }
+                // Derive the displayed payout from the authoritative transaction
+                // result so the UI cannot drift from the engine's settlement math.
                 final payout = won
-                    ? stake * BigNumber.fromParts(BigInt.from(20 + streak), 1)
+                    ? result.progression.money - _progression.money + stake
                     : BigNumber.fromInt(0);
                 setState(() {
                   _stakeResultMessage = won
