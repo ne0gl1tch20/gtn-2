@@ -1,4 +1,6 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
+import '../design/expressive_widgets.dart';
 
 import '../core/numbers/big_number.dart';
 import '../core/progression/progression_state.dart';
@@ -54,7 +56,7 @@ class _PermanentUpgradeShopPageState extends State<PermanentUpgradeShopPage> {
     final currency = widget.ultra ? 'Ultra' : 'Prestige';
     final theme = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(
+      appBar: GtnExpressiveAppBar(
         leading: IconButton(
           tooltip: 'Back',
           icon: const Icon(Icons.arrow_back),
@@ -62,7 +64,7 @@ class _PermanentUpgradeShopPageState extends State<PermanentUpgradeShopPage> {
         ),
         title: Text('$currency Upgrades'),
         actions: [
-          TextButton(
+          M3EButton.text(
             onPressed: () => Navigator.of(context).pop(_state),
             child: const Text('Done'),
           ),
@@ -71,7 +73,7 @@ class _PermanentUpgradeShopPageState extends State<PermanentUpgradeShopPage> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Card(
+          GtnExpressiveCard(
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Row(
@@ -158,7 +160,7 @@ class _PermanentUpgradeCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
-            FilledButton(
+            M3EButton.filled(
               onPressed: busy || maxed || !affordable ? null : onBuy,
               child: Text(
                 maxed ? 'Max level reached' : 'Upgrade · $cost $currency',
