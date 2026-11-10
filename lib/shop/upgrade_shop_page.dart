@@ -1,4 +1,6 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
+import '../design/expressive_widgets.dart';
 
 import '../core/numbers/big_number.dart';
 import '../core/progression/progression_engine.dart';
@@ -41,7 +43,7 @@ class _UpgradeShopPageState extends State<UpgradeShopPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
+      appBar: GtnExpressiveAppBar(
         title: const Text('Upgrade Shop'),
         actions: [
           Padding(
@@ -70,7 +72,7 @@ class _UpgradeShopPageState extends State<UpgradeShopPage> {
           ),
           const SizedBox(height: 16),
           for (final upgrade in UpgradeCatalog.availableForGameplay)
-            _UpgradeCard(
+            _UpgradeGtnExpressiveCard(
               upgrade: upgrade,
               level: _progression.upgrades[upgrade.definition.id] ?? 0,
               money: _progression.money,
@@ -137,7 +139,7 @@ class _UpgradeCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
-            FilledButton(
+            M3EButton.filled(
               onPressed: busy || isMaxed || !canAfford ? null : onBuy,
               child: Text(
                 isMaxed
