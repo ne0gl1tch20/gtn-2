@@ -464,7 +464,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-            child: TextField(
+            child: GtnExpressiveTextField(
               controller: _stakeController,
               keyboardType: TextInputType.number,
               decoration: const InputDecoration(labelText: 'Stake amount', prefixText: 'Money '),
@@ -954,7 +954,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('New playlist'),
-        content: TextField(
+        content: GtnExpressiveTextField(
           controller: controller,
           autofocus: true,
           maxLength: 40,
