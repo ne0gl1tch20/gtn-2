@@ -816,13 +816,7 @@ class _MoreMenuPage extends StatelessWidget {
             subtitle: 'Journey progress and rewards',
             onTap: onLegacyPages,
           ),
-          'live_ops': (
-            icon: Icons.event_available_rounded,
-            title: 'Live events',
-            subtitle: 'Seasonal and limited-time systems',
-            onTap: onLegacyPages,
-          ),
-          'mutators': (
+'mutators': (
             icon: Icons.tune_rounded,
             title: 'Mutators',
             subtitle: 'Open the gameplay systems hub',
