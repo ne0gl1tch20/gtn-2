@@ -78,7 +78,7 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
                 maxLength: 24,
                 decoration: const InputDecoration(labelText: 'Save name (optional)'),
               ),
-              DropdownButtonFormField<String>(
+              GtnExpressiveDropdown<String>(
                 initialValue: difficulty,
                 decoration: const InputDecoration(labelText: 'Difficulty'),
                 items: [
@@ -94,8 +94,8 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
                 spacing: 8,
                 children: [
                   for (final id in SaveData.profileIconIds)
-                    ChoiceChip(
-                      label: Text(_iconSymbol(id)),
+                    GtnExpressiveChoiceChip(
+                      label: _iconSymbol(id),
                       selected: icon == id,
                       onSelected: (_) => setDialogState(() => icon = id),
                     ),
@@ -172,7 +172,7 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
                 spacing: 8,
                 children: [
                   for (final id in SaveData.profileIconIds)
-                    ChoiceChip(
+                    GtnExpressiveChoiceChip(
                       label: Text(_iconSymbol(id)),
                       selected: icon == id,
                       onSelected: (_) => setDialogState(() => icon = id),
@@ -251,7 +251,7 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
       builder: (dialogContext) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
           title: Text('Duplicate Slot $sourceSlot'),
-          content: DropdownButtonFormField<int>(
+          content: GtnExpressiveDropdown<int>(
             initialValue: target,
             decoration: const InputDecoration(labelText: 'Copy into'),
             items: [
