@@ -131,18 +131,18 @@ Sources: GTN1 `app/src/main/assets/web-play/` and `app/src/main/assets/libraries
 
 Required package: `material_3_expressive: 1.2.0` (unverified uploader accepted by project owner for this migration).
 
-- [ ] Upgrade the Flutter/Dart SDK constraint to the package's documented minimum: Flutter 3.47 / Dart 3.13
-- [ ] Add and lock `material_3_expressive: 1.2.0` and its `material_ui` dependency graph
-- [ ] Migrate Material imports from `package:flutter/material.dart` to `package:material_ui/material_ui.dart`
-- [ ] Establish one shared M3E theme with light/dark mode and GTN2 color tokens
+- [~] Upgrade the Flutter/Dart SDK constraint to the package's documented minimum: Flutter 3.47 / Dart 3.13 (implemented; CI validation pending)
+- [~] Add and pin `material_3_expressive: 1.2.0` and declare `material_ui` directly (dependency resolution succeeded in CI; lockfile generation/commit remains open)
+- [~] Migrate app and widget-test Material imports from `package:flutter/material.dart` to `package:material_ui/material_ui.dart`
+- [~] Establish one shared M3E theme with light/dark mode and GTN2 color tokens
 - [ ] Apply expressive typography, shape, spacing, elevation and motion tokens consistently
-- [ ] Use M3E buttons, cards, chips, selection controls, text inputs and progress indicators
-- [ ] Use M3E app bars, navigation bars/rails, tabs, menus and adaptive navigation
-- [ ] Use M3E dialogs, sheets, snackbars and confirmation surfaces
-- [ ] Apply the design system to Home, Gameplay, all shops, Progression, Worlds, Arcade, Creative Mode, More, save slots, Settings, Developer Settings and About/Updater
+- [~] Use M3E buttons, cards, chips, selection controls, text inputs and progress indicators
+- [~] Use M3E app bars and adaptive navigation bar; rails/tabs/menus still need screen-specific review
+- [~] Primary buttons, app bars, cards and input selectors are M3E-backed; dialog/sheet/snackbar surfaces still need screen-specific review
+- [~] Shared M3E app bars, cards, buttons and controls applied across Home, Gameplay, shops, Progression, Worlds, Arcade, Creative Mode, More, save slots, Settings, Developer Settings and About/Updater
 - [ ] Preserve keyboard, mouse, touch, focus, semantics and reduced-motion behavior
 - [ ] Verify compact Android layouts and resizable Windows layouts
-- [ ] Add widget tests for shared expressive components and critical navigation flows
+- [~] Add widget coverage for shared expressive components; full navigation-flow coverage pending
 - [ ] Verify the app does not mix old default Material controls into primary user journeys
 
 ## 7. Automated verification and release gate
@@ -173,3 +173,15 @@ For each completed checklist item, record:
 5. Any intentional difference and why it is safe.
 
 **Final completion definition:** GTN2 is complete only when every applicable item is checked with evidence, the original GTN1 behavior is preserved, and Android + Windows validation passes. A green build alone is not completion.
+
+
+## 9. Current implementation branch
+
+Implementation is consolidated in the single draft pull request [#44](https://github.com/ne0gl1tch20/gtn-2/pull/44), branch `feature/gtn1-parity-m3-expressive`.
+
+- M3 Expressive 1.2.0 is pinned exactly at the project owner's direction despite the publisher being unverified.
+- The application shell uses `M3EMaterialApp`, a shared M3E theme and the existing Manrope font.
+- Shared wrappers use actual M3E app bars, cards, text fields, switches, chips and dropdown menus; primary buttons, progress indicators, sliders and the bottom navigation use M3E widgets directly.
+- All app-level Flutter Material imports in the migrated screens and affected widget tests now use `material_ui`.
+- The implementation is not yet considered verified. Flutter analysis, tests, Android/Windows builds and runtime checks must pass before the relevant boxes are changed from `[~]` to `[x]`.
+- This UI implementation does not close the outstanding gameplay, Lua, Web Play, native service, save-migration, audio or updater parity items above.
