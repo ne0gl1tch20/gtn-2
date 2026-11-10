@@ -119,8 +119,8 @@ class GtnExpressiveCard extends StatelessWidget {
   }
 }
 
-/// Text-field adapter that preserves the existing TextField call sites while
-/// rendering the native M3 Expressive floating-label input.
+/// Native Flutter input styled after GTN1 Web Play. M3 Expressive is reserved
+/// for the surrounding interactive controls so the original input styling stays intact.
 class GtnExpressiveTextField extends StatelessWidget {
   const GtnExpressiveTextField({
     super.key,
