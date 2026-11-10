@@ -23,10 +23,12 @@ void main() {
     expect(find.text('GAME PREFERENCES'), findsOneWidget);
     expect(find.text('Language & gameplay'), findsOneWidget);
     expect(find.text('Appearance'), findsOneWidget);
+    await tester.scrollUntilVisible(find.text('Visual comfort'), 300);
     expect(find.text('Visual comfort'), findsOneWidget);
     expect(find.text('Language'), findsOneWidget);
     expect(find.text('Difficulty'), findsOneWidget);
     expect(find.text('Dark theme'), findsOneWidget);
+    await tester.scrollUntilVisible(find.text('Reduce motion'), 300);
     expect(find.text('Reduce motion'), findsOneWidget);
   });
 }
