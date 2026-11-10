@@ -116,15 +116,6 @@ void main() {
     expect(find.text('Music'), findsOneWidget);
     expect(find.text('Settings'), findsOneWidget);
     expect(find.text('Save Slots'), findsOneWidget);
-    await tester.scrollUntilVisible(
-      find.text('Lucky Stake'),
-      250,
-      scrollable: find.byType(Scrollable).last,
-    );
-    await tester.pumpAndSettle();
-    expect(find.text('Lucky Stake'), findsOneWidget);
-    expect(find.text('Lua hub'), findsNothing);
-    expect(find.text('Live events'), findsNothing);
     expect(
       tester.getTopLeft(find.text('Music')).dy,
       lessThan(tester.getTopLeft(find.text('Settings')).dy),
@@ -142,6 +133,15 @@ void main() {
       ),
       findsOneWidget,
     );
+    await tester.scrollUntilVisible(
+      find.text('Lucky Stake'),
+      250,
+      scrollable: find.byType(Scrollable).last,
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Lucky Stake'), findsOneWidget);
+    expect(find.text('Lua hub'), findsNothing);
+    expect(find.text('Live events'), findsNothing);
     await tester.scrollUntilVisible(
       find.text('Dev Settings'),
       300,
