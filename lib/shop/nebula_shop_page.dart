@@ -152,7 +152,7 @@ class _NebulaShopPageState extends State<NebulaShopPage> {
           if (NebulaShopCatalog.botIds.any(
             (id) => (_state.nebulaItems[id] ?? 0) > 0,
           ))
-            SwitchListTile(
+            GtnExpressiveSwitchTile(
               contentPadding: EdgeInsets.zero,
               title: const Text('Auto Clicker'),
               subtitle: Text(
