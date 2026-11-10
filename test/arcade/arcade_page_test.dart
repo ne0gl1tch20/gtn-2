@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
+import 'package:gtn_2/design/expressive_widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gtn_2/arcade/arcade_page.dart';
 
@@ -35,7 +36,7 @@ void main() {
 
     await tester.pump(const Duration(seconds: 2));
     await tester.pump(const Duration(milliseconds: 100));
-    await tester.enterText(find.byType(TextField), '000');
+    await tester.enterText(find.byType(GtnExpressiveTextField), '000');
     await tester.tap(find.text('Submit'));
     await tester.pump(const Duration(milliseconds: 100));
 
