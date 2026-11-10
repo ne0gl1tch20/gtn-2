@@ -32,7 +32,6 @@ class GameSettings {
     this.moreScreenOrder = const [
       'world_map',
       'achievements',
-      'live_ops',
       'mutators',
       'talent',
       'relics',
