@@ -85,7 +85,6 @@ class _MenuStudioPageState extends State<MenuStudioPage> {
 
   void _reorder(int oldIndex, int newIndex) {
     setState(() {
-      if (newIndex > oldIndex) newIndex--;
       final item = _order.removeAt(oldIndex);
       _order.insert(newIndex, item);
     });
@@ -129,7 +128,7 @@ class _MenuStudioPageState extends State<MenuStudioPage> {
               padding: const EdgeInsets.fromLTRB(12, 8, 12, 16),
               buildDefaultDragHandles: false,
               itemCount: _order.length,
-              onReorder: _reorder,
+              onReorderItem: _reorder,
               itemBuilder: (context, index) {
                 final id = _order[index];
                 final color = _colors[id] ?? '';
