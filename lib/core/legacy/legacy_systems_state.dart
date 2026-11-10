@@ -204,16 +204,20 @@ class LegacySystemsState {
     homeBaseLevel: homeBaseLevel ?? this.homeBaseLevel,
     dailyQuestDate: dailyQuestDate ?? this.dailyQuestDate,
     dailyQuestGuesses: dailyQuestGuesses ?? this.dailyQuestGuesses,
-    dailyQuestCorrectGuesses: dailyQuestCorrectGuesses ?? this.dailyQuestCorrectGuesses,
+    dailyQuestCorrectGuesses:
+        dailyQuestCorrectGuesses ?? this.dailyQuestCorrectGuesses,
     dailyQuestBestStreak: dailyQuestBestStreak ?? this.dailyQuestBestStreak,
-    dailyQuestUpgradePurchases: dailyQuestUpgradePurchases ?? this.dailyQuestUpgradePurchases,
+    dailyQuestUpgradePurchases:
+        dailyQuestUpgradePurchases ?? this.dailyQuestUpgradePurchases,
     claimedDailyQuests: claimedDailyQuests ?? this.claimedDailyQuests,
     lastDailyRewardDate: lastDailyRewardDate ?? this.lastDailyRewardDate,
     dailyRewardStreak: dailyRewardStreak ?? this.dailyRewardStreak,
     lootChests: lootChests ?? this.lootChests,
     lootDropsFound: lootDropsFound ?? this.lootDropsFound,
     lootChestsOpened: lootChestsOpened ?? this.lootChestsOpened,
-    lastLootDropTier: clearLastLootDropTier ? null : lastLootDropTier ?? this.lastLootDropTier,
+    lastLootDropTier: clearLastLootDropTier
+        ? null
+        : lastLootDropTier ?? this.lastLootDropTier,
     lootEventId: lootEventId ?? this.lootEventId,
     completedChallenges: completedChallenges ?? this.completedChallenges,
     worldMasteryLevels: worldMasteryLevels ?? this.worldMasteryLevels,
@@ -221,7 +225,8 @@ class LegacySystemsState {
     codexEntries: codexEntries ?? this.codexEntries,
     activeWorldId: activeWorldId ?? this.activeWorldId,
     unlockedWorldIds: unlockedWorldIds ?? this.unlockedWorldIds,
-    worldUnlockMigrationPending: worldUnlockMigrationPending ?? this.worldUnlockMigrationPending,
+    worldUnlockMigrationPending:
+        worldUnlockMigrationPending ?? this.worldUnlockMigrationPending,
     endlessRiftTier: endlessRiftTier ?? this.endlessRiftTier,
     endlessRiftBestTier: endlessRiftBestTier ?? this.endlessRiftBestTier,
     endlessRiftActive: endlessRiftActive ?? this.endlessRiftActive,
@@ -234,14 +239,20 @@ class LegacySystemsState {
     musicPlaylists: musicPlaylists ?? this.musicPlaylists,
     musicRepeatMode: musicRepeatMode ?? this.musicRepeatMode,
     musicShuffle: musicShuffle ?? this.musicShuffle,
-    currentTrackId: clearCurrentTrack ? null : currentTrackId ?? this.currentTrackId,
+    currentTrackId: clearCurrentTrack
+        ? null
+        : currentTrackId ?? this.currentTrackId,
     permanentEventBoosts: permanentEventBoosts ?? this.permanentEventBoosts,
     endgameRewardsClaimed: endgameRewardsClaimed ?? this.endgameRewardsClaimed,
     codexRewardClaimed: codexRewardClaimed ?? this.codexRewardClaimed,
-    activeBossBattleWorldId: clearActiveBossBattle ? null : activeBossBattleWorldId ?? this.activeBossBattleWorldId,
+    activeBossBattleWorldId: clearActiveBossBattle
+        ? null
+        : activeBossBattleWorldId ?? this.activeBossBattleWorldId,
     bossBattleMistakes: bossBattleMistakes ?? this.bossBattleMistakes,
     liveOpsClaims: liveOpsClaims ?? this.liveOpsClaims,
-    lastRandomEventId: clearLastRandomEvent ? null : lastRandomEventId ?? this.lastRandomEventId,
+    lastRandomEventId: clearLastRandomEvent
+        ? null
+        : lastRandomEventId ?? this.lastRandomEventId,
     autoClickerActive: autoClickerActive ?? this.autoClickerActive,
     autoClickerSpeed: autoClickerSpeed ?? this.autoClickerSpeed,
     botTotalGuesses: botTotalGuesses ?? this.botTotalGuesses,
@@ -249,10 +260,13 @@ class LegacySystemsState {
     botIncorrectGuesses: botIncorrectGuesses ?? this.botIncorrectGuesses,
     botActionSequence: botActionSequence ?? this.botActionSequence,
     lastBotGuess: clearLastBotGuess ? null : lastBotGuess ?? this.lastBotGuess,
-    lastBotFeedback: clearLastBotFeedback ? null : lastBotFeedback ?? this.lastBotFeedback,
+    lastBotFeedback: clearLastBotFeedback
+        ? null
+        : lastBotFeedback ?? this.lastBotFeedback,
     lastBotId: clearLastBotId ? null : lastBotId ?? this.lastBotId,
     lastSaveTimestamp: lastSaveTimestamp ?? this.lastSaveTimestamp,
-    timeTravelPenaltyUntil: timeTravelPenaltyUntil ?? this.timeTravelPenaltyUntil,
+    timeTravelPenaltyUntil:
+        timeTravelPenaltyUntil ?? this.timeTravelPenaltyUntil,
   );
 
   Map<String, Object?> toJson() => {
@@ -327,13 +341,18 @@ class LegacySystemsState {
       return Set.unmodifiable(value.cast<String>());
     }
 
-    Map<String, int> intMap(String key, {Map<String, int> fallback = const {}}) {
+    Map<String, int> intMap(
+      String key, {
+      Map<String, int> fallback = const {},
+    }) {
       final value = json[key];
       if (value == null) return fallback;
       if (value is! Map) throw FormatException('Invalid legacy save map: $key');
       final result = <String, int>{};
       for (final entry in value.entries) {
-        if (entry.key is! String || entry.value is! int || (entry.value as int) < 0) {
+        if (entry.key is! String ||
+            entry.value is! int ||
+            (entry.value as int) < 0) {
           throw FormatException('Invalid legacy save map entry: $key');
         }
         result[entry.key as String] = entry.value as int;
@@ -343,20 +362,26 @@ class LegacySystemsState {
 
     int count(String key, {int fallback = 0}) {
       final value = json[key] ?? fallback;
-      if (value is! int || value < 0) throw FormatException('Invalid legacy save count: $key');
+      if (value is! int || value < 0) {
+        throw FormatException('Invalid legacy save count: $key');
+      }
       return value;
     }
 
     String string(String key, {String fallback = ''}) {
       final value = json[key] ?? fallback;
-      if (value is! String) throw FormatException('Invalid legacy save value: $key');
+      if (value is! String) {
+        throw FormatException('Invalid legacy save value: $key');
+      }
       return value;
     }
 
     final rawArms = json['selectedTraitArms'];
     final arms = <String, String>{};
     if (rawArms != null) {
-      if (rawArms is! Map) throw const FormatException('Invalid selected trait arms.');
+      if (rawArms is! Map) {
+        throw const FormatException('Invalid selected trait arms.');
+      }
       for (final entry in rawArms.entries) {
         if (entry.key is! String || entry.value is! String) {
           throw const FormatException('Invalid selected trait arm entry.');
@@ -367,13 +392,19 @@ class LegacySystemsState {
     final rawPlaylists = json['musicPlaylists'];
     final playlists = <String, List<String>>{};
     if (rawPlaylists != null) {
-      if (rawPlaylists is! Map) throw const FormatException('Invalid music playlists.');
+      if (rawPlaylists is! Map) {
+        throw const FormatException('Invalid music playlists.');
+      }
       for (final entry in rawPlaylists.entries) {
         final value = entry.value;
-        if (entry.key is! String || value is! List || value.any((item) => item is! String)) {
+        if (entry.key is! String ||
+            value is! List ||
+            value.any((item) => item is! String)) {
           throw const FormatException('Invalid music playlist entry.');
         }
-        playlists[entry.key as String] = List.unmodifiable(value.cast<String>());
+        playlists[entry.key as String] = List.unmodifiable(
+          value.cast<String>(),
+        );
       }
     }
     List<String> paths(String key) {
@@ -384,22 +415,31 @@ class LegacySystemsState {
       return List.unmodifiable(value.cast<String>());
     }
 
-    final chests = intMap('lootChests', fallback: const {'common': 0, 'rare': 0, 'epic': 0});
+    final chests = intMap(
+      'lootChests',
+      fallback: const {'common': 0, 'rare': 0, 'epic': 0},
+    );
     if (chests.keys.any((key) => !{'common', 'rare', 'epic'}.contains(key))) {
       throw const FormatException('Unknown loot chest tier.');
     }
     final repeat = string('musicRepeatMode', fallback: 'off');
-    if (!{'off', 'one', 'all'}.contains(repeat)) throw const FormatException('Invalid music repeat mode.');
+    if (!{'off', 'one', 'all'}.contains(repeat)) {
+      throw const FormatException('Invalid music repeat mode.');
+    }
     final shuffle = json['musicShuffle'] ?? false;
     final endless = json['endlessRiftActive'] ?? false;
-    final worldUnlockMigrationPending = json['worldUnlockMigrationPending'] ??
+    final worldUnlockMigrationPending =
+        json['worldUnlockMigrationPending'] ??
         (json['unlockedWorldIds'] == null);
-    if (shuffle is! bool || endless is! bool || worldUnlockMigrationPending is! bool) {
+    if (shuffle is! bool ||
+        endless is! bool ||
+        worldUnlockMigrationPending is! bool) {
       throw const FormatException('Invalid legacy boolean.');
     }
     final currentTrack = json['currentTrackId'];
     final lastLootTier = json['lastLootDropTier'];
-    if (lastLootTier != null && !{'common', 'rare', 'epic'}.contains(lastLootTier)) {
+    if (lastLootTier != null &&
+        !{'common', 'rare', 'epic'}.contains(lastLootTier)) {
       throw const FormatException('Invalid last loot drop tier.');
     }
     final codexClaimed = json['codexRewardClaimed'] ?? false;
@@ -410,18 +450,31 @@ class LegacySystemsState {
     final lastBotGuess = json['lastBotGuess'];
     final lastBotFeedback = json['lastBotFeedback'];
     final lastBotId = json['lastBotId'];
-    if ((lastBotGuess != null && (lastBotGuess is! int || lastBotGuess < 1 || lastBotGuess > 500)) ||
-        (lastBotFeedback != null && !{'TOO_LOW', 'TOO_HIGH', 'CORRECT'}.contains(lastBotFeedback)) ||
-        (lastBotId != null && !{'auto_clicker_basic', 'bot_byte', 'bot_pixel'}.contains(lastBotId))) {
+    if ((lastBotGuess != null &&
+            (lastBotGuess is! int || lastBotGuess < 1 || lastBotGuess > 500)) ||
+        (lastBotFeedback != null &&
+            !{'TOO_LOW', 'TOO_HIGH', 'CORRECT'}.contains(lastBotFeedback)) ||
+        (lastBotId != null &&
+            !{
+              'auto_clicker_basic',
+              'bot_byte',
+              'bot_pixel',
+            }.contains(lastBotId))) {
       throw const FormatException('Invalid bot team state.');
     }
-    if (codexClaimed is! bool || autoActive is! bool || autoSpeed is! num ||
-        !autoSpeed.isFinite || autoSpeed < 1 || autoSpeed > 5 ||
+    if (codexClaimed is! bool ||
+        autoActive is! bool ||
+        autoSpeed is! num ||
+        !autoSpeed.isFinite ||
+        autoSpeed < 1 ||
+        autoSpeed > 5 ||
         (activeBoss != null && activeBoss is! String) ||
         (lastEvent != null && lastEvent is! String)) {
       throw const FormatException('Invalid extended legacy state.');
     }
-    if (currentTrack != null && currentTrack is! String) throw const FormatException('Invalid current music track.');
+    if (currentTrack != null && currentTrack is! String) {
+      throw const FormatException('Invalid current music track.');
+    }
     final rawAdaptiveProfile = json['adaptiveTraitProfile'];
     if (rawAdaptiveProfile != null && rawAdaptiveProfile is! Map) {
       throw const FormatException('Invalid adaptive trait profile.');
@@ -429,7 +482,9 @@ class LegacySystemsState {
     final state = LegacySystemsState(
       adaptiveTraitProfile: rawAdaptiveProfile == null
           ? const AdaptiveTraitProfile()
-          : AdaptiveTraitProfile.fromJson(Map<String, dynamic>.from(rawAdaptiveProfile as Map)),
+          : AdaptiveTraitProfile.fromJson(
+              Map<String, dynamic>.from(rawAdaptiveProfile as Map),
+            ),
       discoveredTraits: strings('discoveredTraits'),
       selectedTraitArms: Map.unmodifiable(arms),
       activeMutators: strings('activeMutators'),
@@ -456,12 +511,15 @@ class LegacySystemsState {
       codexEntries: strings('codexEntries'),
       activeWorldId: string('activeWorldId', fallback: 'verdant_grove'),
       unlockedWorldIds: json['unlockedWorldIds'] == null
-          ? const {'verdant_grove'} : strings('unlockedWorldIds'),
+          ? const {'verdant_grove'}
+          : strings('unlockedWorldIds'),
       worldUnlockMigrationPending: worldUnlockMigrationPending,
       endlessRiftTier: count('endlessRiftTier'),
       endlessRiftBestTier: count('endlessRiftBestTier'),
       endlessRiftActive: endless,
-      worldBossVictories: json['worldBossVictories'] == null ? 0 : count('worldBossVictories'),
+      worldBossVictories: json['worldBossVictories'] == null
+          ? 0
+          : count('worldBossVictories'),
       stakesPlaced: count('stakesPlaced'),
       stakesWon: count('stakesWon'),
       stakesLost: count('stakesLost'),
@@ -490,19 +548,26 @@ class LegacySystemsState {
       lastSaveTimestamp: count('lastSaveTimestamp'),
       timeTravelPenaltyUntil: count('timeTravelPenaltyUntil'),
     );
-    if (state.homeBaseLevel > 20 || state.permanentEventBoosts > 25 || state.equippedRelics.length > 4 ||
+    if (state.homeBaseLevel > 20 ||
+        state.permanentEventBoosts > 25 ||
+        state.equippedRelics.length > 4 ||
         state.stakesWon + state.stakesLost > state.stakesPlaced ||
         state.dailyQuestCorrectGuesses > state.dailyQuestGuesses ||
         state.dailyRewardStreak > 7 ||
-        state.botCorrectGuesses + state.botIncorrectGuesses > state.botTotalGuesses) {
+        state.botCorrectGuesses + state.botIncorrectGuesses >
+            state.botTotalGuesses) {
       throw const FormatException('Legacy save invariants failed.');
     }
     if (!state.relicInventory.containsAll(state.equippedRelics)) {
       throw const FormatException('Equipped relic is not owned.');
     }
     if (!state.musicLibrary.toSet().containsAll(state.musicQueue) ||
-        state.musicPlaylists.values.any((list) => !state.musicLibrary.toSet().containsAll(list))) {
-      throw const FormatException('Music queue or playlist references a missing track.');
+        state.musicPlaylists.values.any(
+          (list) => !state.musicLibrary.toSet().containsAll(list),
+        )) {
+      throw const FormatException(
+        'Music queue or playlist references a missing track.',
+      );
     }
     return state;
   }

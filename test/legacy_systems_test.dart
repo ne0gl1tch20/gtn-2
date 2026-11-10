@@ -34,9 +34,15 @@ void main() {
         playerLevel: 1,
         activeSeasonId: null,
       );
-      expect(effects.activeTraitIds, containsAll({
-        'combo_momentum', 'mistake_insurance', 'risk_reward', 'streak_guard',
-      }));
+      expect(
+        effects.activeTraitIds,
+        containsAll({
+          'combo_momentum',
+          'mistake_insurance',
+          'risk_reward',
+          'streak_guard',
+        }),
+      );
       // Burst: 5 × 3% = 15%; high-risk: +40%.
       expect(effects.correctGuessMultiplier, 1.55);
       expect(effects.missPenaltyRefundRate, 0.75);
@@ -66,23 +72,50 @@ void main() {
   });
 
   group('authoritative legacy transactions', () {
-    test('talent purchases enforce canonical cost, prerequisites and duplicates', () {
-      final initial = ProgressionState.initial.copyWith(
-        prestige: BigNumber.fromInt(10000),
-      );
-      final blocked = engine.buyTalent(initial, LegacySystemsState.initial, const TalentDefinition(id: 'talent_speed_2', cost: 500, requiredParentId: 'talent_speed_1'));
-      expect(blocked.accepted, isFalse);
-      expect(blocked.progression.prestige, initial.prestige);
+    test(
+      'talent purchases enforce canonical cost, prerequisites and duplicates',
+      () {
+        final initial = ProgressionState.initial.copyWith(
+          prestige: BigNumber.fromInt(10000),
+        );
+        final blocked = engine.buyTalent(
+          initial,
+          LegacySystemsState.initial,
+          const TalentDefinition(
+            id: 'talent_speed_2',
+            cost: 500,
+            requiredParentId: 'talent_speed_1',
+          ),
+        );
+        expect(blocked.accepted, isFalse);
+        expect(blocked.progression.prestige, initial.prestige);
 
-      final first = engine.buyTalent(initial, LegacySystemsState.initial, const TalentDefinition(id: 'talent_speed_1', cost: 100));
-      expect(first.accepted, isTrue);
-      expect(first.progression.prestige, BigNumber.fromInt(9900));
-      final second = engine.buyTalent(first.progression, first.systems, const TalentDefinition(id: 'talent_speed_1', cost: 100));
-      expect(second.accepted, isFalse);
-      final child = engine.buyTalent(first.progression, first.systems, const TalentDefinition(id: 'talent_speed_2', cost: 500, requiredParentId: 'talent_speed_1'));
-      expect(child.accepted, isTrue);
-      expect(child.progression.prestige, BigNumber.fromInt(9400));
-    });
+        final first = engine.buyTalent(
+          initial,
+          LegacySystemsState.initial,
+          const TalentDefinition(id: 'talent_speed_1', cost: 100),
+        );
+        expect(first.accepted, isTrue);
+        expect(first.progression.prestige, BigNumber.fromInt(9900));
+        final second = engine.buyTalent(
+          first.progression,
+          first.systems,
+          const TalentDefinition(id: 'talent_speed_1', cost: 100),
+        );
+        expect(second.accepted, isFalse);
+        final child = engine.buyTalent(
+          first.progression,
+          first.systems,
+          const TalentDefinition(
+            id: 'talent_speed_2',
+            cost: 500,
+            requiredParentId: 'talent_speed_1',
+          ),
+        );
+        expect(child.accepted, isTrue);
+        expect(child.progression.prestige, BigNumber.fromInt(9400));
+      },
+    );
 
     test('Home Base uses canonical linear restoration cost and level cap', () {
       final state = ProgressionState.initial.copyWith(
@@ -96,19 +129,33 @@ void main() {
       expect(second.accepted, isTrue);
       expect(second.progression.money, BigNumber.fromInt(0));
       expect(second.systems.homeBaseLevel, 2);
-      expect(engine.upgradeHomeBase(second.progression, second.systems).accepted, isFalse);
+      expect(
+        engine.upgradeHomeBase(second.progression, second.systems).accepted,
+        isFalse,
+      );
     });
 
     test('mutators reject unknown IDs and apply shared reward multipliers', () {
       final invalid = engine.setMutator(
-        ProgressionState.initial, LegacySystemsState.initial, 'not_real', true,
+        ProgressionState.initial,
+        LegacySystemsState.initial,
+        'not_real',
+        true,
       );
       expect(invalid.accepted, isFalse);
       final enabled = engine.setMutator(
-        ProgressionState.initial, LegacySystemsState.initial, 'mut_hardcore', true,
+        ProgressionState.initial,
+        LegacySystemsState.initial,
+        'mut_hardcore',
+        true,
       );
       final all = enabled.systems.copyWith(
-        activeMutators: const {'mut_hardcore', 'mut_speed', 'mut_blind', 'mut_tax'},
+        activeMutators: const {
+          'mut_hardcore',
+          'mut_speed',
+          'mut_blind',
+          'mut_tax',
+        },
       );
       expect(engine.mutatorRewardMultiplier(all), BigNumber.fromInt(300));
       expect(engine.rangeMultiplier(all), 2);
@@ -117,7 +164,10 @@ void main() {
     test('relic equipment requires ownership and is capped at four', () {
       var systems = LegacySystemsState.initial.copyWith(
         relicInventory: const {
-          'verdant_guardian', 'crystal_golem', 'ember_dragon', 'nebula_titan',
+          'verdant_guardian',
+          'crystal_golem',
+          'ember_dragon',
+          'nebula_titan',
         },
       );
       for (final id in systems.relicInventory) {
@@ -127,7 +177,9 @@ void main() {
       }
       expect(systems.equippedRelics, hasLength(4));
       expect(
-        engine.equipRelic(ProgressionState.initial, systems, 'unknown_relic').accepted,
+        engine
+            .equipRelic(ProgressionState.initial, systems, 'unknown_relic')
+            .accepted,
         isFalse,
       );
     });
@@ -159,25 +211,33 @@ void main() {
       expect(lost.systems.stakesLost, 1);
     });
 
-    test('daily reward is consecutive, capped at day seven and one claim per day', () {
-      final yesterday = LegacySystemsState.initial.copyWith(
-        lastDailyRewardDate: '2026-11-06',
-        dailyRewardStreak: 6,
-      );
-      final today = engine.claimDailyReward(
-        progression: ProgressionState.initial,
-        systems: yesterday,
-        today: '2026-11-07',
-      );
-      expect(today.accepted, isTrue);
-      expect(today.progression.nebula, BigNumber.fromInt(50));
-      expect(today.systems.dailyRewardStreak, 7);
-      expect(engine.claimDailyReward(
-        progression: today.progression,
-        systems: today.systems,
-        today: '2026-11-07',
-      ).accepted, isFalse);
-    });
+    test(
+      'daily reward is consecutive, capped at day seven and one claim per day',
+      () {
+        final yesterday = LegacySystemsState.initial.copyWith(
+          lastDailyRewardDate: '2026-11-06',
+          dailyRewardStreak: 6,
+        );
+        final today = engine.claimDailyReward(
+          progression: ProgressionState.initial,
+          systems: yesterday,
+          today: '2026-11-07',
+        );
+        expect(today.accepted, isTrue);
+        expect(today.progression.nebula, BigNumber.fromInt(50));
+        expect(today.systems.dailyRewardStreak, 7);
+        expect(
+          engine
+              .claimDailyReward(
+                progression: today.progression,
+                systems: today.systems,
+                today: '2026-11-07',
+              )
+              .accepted,
+          isFalse,
+        );
+      },
+    );
 
     test('daily quests are claim-once and validate objective progress', () {
       final ready = LegacySystemsState.initial.copyWith(
@@ -192,12 +252,17 @@ void main() {
       );
       expect(claimed.accepted, isTrue);
       expect(claimed.progression.money, BigNumber.fromInt(10000));
-      expect(engine.claimDailyQuest(
-        progression: claimed.progression,
-        systems: claimed.systems,
-        questId: 'daily_guesses_10',
-        today: '2026-11-07',
-      ).accepted, isFalse);
+      expect(
+        engine
+            .claimDailyQuest(
+              progression: claimed.progression,
+              systems: claimed.systems,
+              questId: 'daily_guesses_10',
+              today: '2026-11-07',
+            )
+            .accepted,
+        isFalse,
+      );
     });
 
     test('loot chest consumes one chest and pays only the selected reward', () {
@@ -214,12 +279,17 @@ void main() {
       expect(result.progression.nebula, BigNumber.fromInt(5));
       expect(result.progression.money, BigNumber.fromInt(0));
       expect(result.systems.lootChests['common'], 0);
-      expect(engine.openLootChest(
-        progression: result.progression,
-        systems: result.systems,
-        tier: 'common',
-        rewardNebula: false,
-      ).accepted, isFalse);
+      expect(
+        engine
+            .openLootChest(
+              progression: result.progression,
+              systems: result.systems,
+              tier: 'common',
+              rewardNebula: false,
+            )
+            .accepted,
+        isFalse,
+      );
     });
   });
 }

@@ -13,7 +13,10 @@ void main() {
     test('stacks the canonical reward multipliers and range rule', () {
       final systems = LegacySystemsState.initial.copyWith(
         activeMutators: const {
-          'mut_hardcore', 'mut_speed', 'mut_blind', 'mut_tax',
+          'mut_hardcore',
+          'mut_speed',
+          'mut_blind',
+          'mut_tax',
         },
       );
       expect(engine.mutatorRewardMultiplier(systems).compareTo(n(300)), 0);
@@ -22,7 +25,10 @@ void main() {
 
     test('rejects unknown mutators without changing state', () {
       final result = engine.setMutator(
-        ProgressionState.initial, LegacySystemsState.initial, 'mut_fake', true,
+        ProgressionState.initial,
+        LegacySystemsState.initial,
+        'mut_fake',
+        true,
       );
       expect(result.accepted, isFalse);
       expect(result.systems.activeMutators, isEmpty);
@@ -33,17 +39,37 @@ void main() {
     test('requires parent talent, spends prestige and rejects duplicates', () {
       final progression = ProgressionState.initial.copyWith(prestige: n(10000));
       final systems = LegacySystemsState.initial;
-      final blocked = engine.buyTalent(progression, systems, const TalentDefinition(id: 'talent_speed_2', cost: 500, requiredParentId: 'talent_speed_1'));
+      final blocked = engine.buyTalent(
+        progression,
+        systems,
+        const TalentDefinition(
+          id: 'talent_speed_2',
+          cost: 500,
+          requiredParentId: 'talent_speed_1',
+        ),
+      );
       expect(blocked.accepted, isFalse);
-      final first = engine.buyTalent(progression, systems, const TalentDefinition(id: 'talent_speed_1', cost: 100));
+      final first = engine.buyTalent(
+        progression,
+        systems,
+        const TalentDefinition(id: 'talent_speed_1', cost: 100),
+      );
       expect(first.accepted, isTrue);
       expect(first.progression.prestige.compareTo(n(9900)), 0);
       final duplicate = engine.buyTalent(
-        first.progression, first.systems, const TalentDefinition(id: 'talent_speed_1', cost: 100),
+        first.progression,
+        first.systems,
+        const TalentDefinition(id: 'talent_speed_1', cost: 100),
       );
       expect(duplicate.accepted, isFalse);
       final second = engine.buyTalent(
-        first.progression, first.systems, const TalentDefinition(id: 'talent_speed_2', cost: 500, requiredParentId: 'talent_speed_1'),
+        first.progression,
+        first.systems,
+        const TalentDefinition(
+          id: 'talent_speed_2',
+          cost: 500,
+          requiredParentId: 'talent_speed_1',
+        ),
       );
       expect(second.accepted, isTrue);
       expect(second.progression.prestige.compareTo(n(9400)), 0);
@@ -52,16 +78,23 @@ void main() {
     test('rejects malformed catalog definitions without mutating state', () {
       final progression = ProgressionState.initial.copyWith(prestige: n(1000));
       final emptyId = engine.buyTalent(
-        progression, LegacySystemsState.initial,
+        progression,
+        LegacySystemsState.initial,
         const TalentDefinition(id: '', cost: 100),
       );
       final nonPositiveCost = engine.buyTalent(
-        progression, LegacySystemsState.initial,
+        progression,
+        LegacySystemsState.initial,
         const TalentDefinition(id: 'invalid_cost', cost: 0),
       );
       final selfParent = engine.buyTalent(
-        progression, LegacySystemsState.initial,
-        const TalentDefinition(id: 'self_parent', cost: 100, requiredParentId: 'self_parent'),
+        progression,
+        LegacySystemsState.initial,
+        const TalentDefinition(
+          id: 'self_parent',
+          cost: 100,
+          requiredParentId: 'self_parent',
+        ),
       );
       expect(emptyId.accepted, isFalse);
       expect(nonPositiveCost.accepted, isFalse);
@@ -72,7 +105,9 @@ void main() {
 
     test('rejects purchases when prestige is insufficient', () {
       final result = engine.buyTalent(
-        ProgressionState.initial, LegacySystemsState.initial, const TalentDefinition(id: 'talent_speed_1', cost: 100),
+        ProgressionState.initial,
+        LegacySystemsState.initial,
+        const TalentDefinition(id: 'talent_speed_1', cost: 100),
       );
       expect(result.accepted, isFalse);
       expect(result.progression.prestige.compareTo(n(0)), 0);
@@ -99,12 +134,17 @@ void main() {
 
     test('only owned relics can be equipped and four is the cap', () {
       final empty = engine.equipRelic(
-        ProgressionState.initial, LegacySystemsState.initial, 'verdant_guardian',
+        ProgressionState.initial,
+        LegacySystemsState.initial,
+        'verdant_guardian',
       );
       expect(empty.accepted, isFalse);
       final owned = LegacySystemsState.initial.copyWith(
         relicInventory: const {
-          'verdant_guardian', 'crystal_golem', 'ember_dragon', 'nebula_titan',
+          'verdant_guardian',
+          'crystal_golem',
+          'ember_dragon',
+          'nebula_titan',
         },
       );
       var state = owned;
@@ -116,7 +156,9 @@ void main() {
       expect(state.equippedRelics, hasLength(4));
       final fifth = engine.equipRelic(
         ProgressionState.initial,
-        state.copyWith(relicInventory: {...state.relicInventory, 'not_a_relic'}),
+        state.copyWith(
+          relicInventory: {...state.relicInventory, 'not_a_relic'},
+        ),
         'not_a_relic',
       );
       expect(fifth.accepted, isFalse);
@@ -124,21 +166,24 @@ void main() {
   });
 
   group('world mastery and secret progression', () {
-    test('mastery recognizes defeated boss IDs and applies the first upgrade', () {
-      final progression = ProgressionState.initial.copyWith(
-        defeatedBosses: const {'verdant_guardian'},
-        nebula: n(100),
-      );
-      final result = engine.upgradeWorldMastery(
-        progression: progression,
-        systems: LegacySystemsState.initial,
-        worldId: 'verdant_grove',
-      );
+    test(
+      'mastery recognizes defeated boss IDs and applies the first upgrade',
+      () {
+        final progression = ProgressionState.initial.copyWith(
+          defeatedBosses: const {'verdant_guardian'},
+          nebula: n(100),
+        );
+        final result = engine.upgradeWorldMastery(
+          progression: progression,
+          systems: LegacySystemsState.initial,
+          worldId: 'verdant_grove',
+        );
 
-      expect(result.accepted, isTrue);
-      expect(result.systems.worldMasteryLevels['verdant_grove'], 2);
-      expect(result.progression.nebula.compareTo(n(80)), 0);
-    });
+        expect(result.accepted, isTrue);
+        expect(result.systems.worldMasteryLevels['verdant_grove'], 2);
+        expect(result.progression.nebula.compareTo(n(80)), 0);
+      },
+    );
 
     test('mastery requires the world to be unlocked and its boss defeated', () {
       final defeatedButLocked = ProgressionState.initial.copyWith(
@@ -254,20 +299,23 @@ void main() {
       expect(result.progression.nebula.compareTo(n(15)), 0);
     });
 
-    test('secret discovery rejects a locked world even after the threshold', () {
-      final progression = ProgressionState.initial.copyWith(
-        correctGuesses: 150,
-        defeatedBosses: const {'verdant_guardian'},
-      );
-      final result = engine.discoverSecret(
-        progression: progression,
-        systems: LegacySystemsState.initial,
-        secretId: 'shard_archive',
-      );
+    test(
+      'secret discovery rejects a locked world even after the threshold',
+      () {
+        final progression = ProgressionState.initial.copyWith(
+          correctGuesses: 150,
+          defeatedBosses: const {'verdant_guardian'},
+        );
+        final result = engine.discoverSecret(
+          progression: progression,
+          systems: LegacySystemsState.initial,
+          secretId: 'shard_archive',
+        );
 
-      expect(result.accepted, isFalse);
-      expect(result.progression.money.compareTo(n(0)), 0);
-    });
+        expect(result.accepted, isFalse);
+        expect(result.progression.money.compareTo(n(0)), 0);
+      },
+    );
   });
 
   group('lucky stake and rewards', () {
@@ -290,12 +338,18 @@ void main() {
     test('rejects non-positive and unaffordable stakes atomically', () {
       final progression = ProgressionState.initial.copyWith(money: n(5));
       final zero = engine.settleLuckyStake(
-        progression: progression, systems: LegacySystemsState.initial,
-        stake: n(0), won: true, currentStreak: 0,
+        progression: progression,
+        systems: LegacySystemsState.initial,
+        stake: n(0),
+        won: true,
+        currentStreak: 0,
       );
       final unaffordable = engine.settleLuckyStake(
-        progression: progression, systems: LegacySystemsState.initial,
-        stake: n(10), won: false, currentStreak: 0,
+        progression: progression,
+        systems: LegacySystemsState.initial,
+        stake: n(10),
+        won: false,
+        currentStreak: 0,
       );
       expect(zero.accepted, isFalse);
       expect(unaffordable.accepted, isFalse);
@@ -308,10 +362,16 @@ void main() {
     test('starts a fresh run and advances tiers with scaled boss rewards', () {
       final defeated = ProgressionState.initial.copyWith(
         defeatedBosses: const {
-          'verdant_grove', 'crystal_caverns', 'ember_summit', 'nebula_rift',
+          'verdant_grove',
+          'crystal_caverns',
+          'ember_summit',
+          'nebula_rift',
         },
         bossDamage: const {
-          'verdant_grove': 3, 'crystal_caverns': 5, 'ember_summit': 7, 'nebula_rift': 10,
+          'verdant_grove': 3,
+          'crystal_caverns': 5,
+          'ember_summit': 7,
+          'nebula_rift': 10,
         },
       );
       final started = engine.setEndlessRift(
@@ -341,7 +401,10 @@ void main() {
     test('misses regress Rift boss damage according to its current phase', () {
       final defeated = ProgressionState.initial.copyWith(
         defeatedBosses: const {
-          'verdant_grove', 'crystal_caverns', 'ember_summit', 'nebula_rift',
+          'verdant_grove',
+          'crystal_caverns',
+          'ember_summit',
+          'nebula_rift',
         },
       );
       final started = engine.setEndlessRift(
@@ -358,34 +421,40 @@ void main() {
       }
       final firstMiss = engine.recordEndlessRiftMiss(progression, systems);
       expect(firstMiss.progression.bossDamage['verdant_grove'], 2);
-      final secondMiss = engine.recordEndlessRiftMiss(firstMiss.progression, firstMiss.systems);
+      final secondMiss = engine.recordEndlessRiftMiss(
+        firstMiss.progression,
+        firstMiss.systems,
+      );
       expect(secondMiss.progression.bossDamage['verdant_grove'], 1);
     });
   });
   group('daily rewards and challenge claims', () {
-    test('prevents duplicate daily rewards and advances a consecutive streak', () {
-      final first = engine.claimDailyReward(
-        progression: ProgressionState.initial,
-        systems: LegacySystemsState.initial,
-        today: '2026-11-07',
-      );
-      expect(first.accepted, isTrue);
-      expect(first.progression.nebula.compareTo(n(5)), 0);
-      final duplicate = engine.claimDailyReward(
-        progression: first.progression,
-        systems: first.systems,
-        today: '2026-11-07',
-      );
-      expect(duplicate.accepted, isFalse);
-      final next = engine.claimDailyReward(
-        progression: first.progression,
-        systems: first.systems,
-        today: '2026-11-08',
-      );
-      expect(next.accepted, isTrue);
-      expect(next.systems.dailyRewardStreak, 2);
-      expect(next.progression.nebula.compareTo(n(15)), 0);
-    });
+    test(
+      'prevents duplicate daily rewards and advances a consecutive streak',
+      () {
+        final first = engine.claimDailyReward(
+          progression: ProgressionState.initial,
+          systems: LegacySystemsState.initial,
+          today: '2026-11-07',
+        );
+        expect(first.accepted, isTrue);
+        expect(first.progression.nebula.compareTo(n(5)), 0);
+        final duplicate = engine.claimDailyReward(
+          progression: first.progression,
+          systems: first.systems,
+          today: '2026-11-07',
+        );
+        expect(duplicate.accepted, isFalse);
+        final next = engine.claimDailyReward(
+          progression: first.progression,
+          systems: first.systems,
+          today: '2026-11-08',
+        );
+        expect(next.accepted, isTrue);
+        expect(next.systems.dailyRewardStreak, 2);
+        expect(next.progression.nebula.compareTo(n(15)), 0);
+      },
+    );
 
     test('requires eligibility and prevents duplicate challenge rewards', () {
       final blocked = engine.claimChallenge(
@@ -418,23 +487,29 @@ void main() {
   });
 
   group('catalog and save integrity', () {
-    test('hidden trait discovery follows GTN1 progression gates, not player level', () {
-      final discovered = engine.discoverEligibleTraits(
-        progression: ProgressionState.initial.copyWith(correctGuesses: 100),
-        systems: LegacySystemsState.initial,
-        activeSeasonId: null,
-      );
-      expect(discovered.discoveredTraits, contains('hidden_night_owl'));
-      expect(discovered.discoveredTraits, isNot(contains('hidden_century_club')));
+    test(
+      'hidden trait discovery follows GTN1 progression gates, not player level',
+      () {
+        final discovered = engine.discoverEligibleTraits(
+          progression: ProgressionState.initial.copyWith(correctGuesses: 100),
+          systems: LegacySystemsState.initial,
+          activeSeasonId: null,
+        );
+        expect(discovered.discoveredTraits, contains('hidden_night_owl'));
+        expect(
+          discovered.discoveredTraits,
+          isNot(contains('hidden_century_club')),
+        );
 
-      final activation = engine.evaluateTraits(
-        progression: ProgressionState.initial.copyWith(correctGuesses: 100),
-        systems: discovered,
-        playerLevel: 0,
-        activeSeasonId: null,
-      );
-      expect(activation.activeTraitIds, isNot(contains('hidden_night_owl')));
-    });
+        final activation = engine.evaluateTraits(
+          progression: ProgressionState.initial.copyWith(correctGuesses: 100),
+          systems: discovered,
+          playerLevel: 0,
+          activeSeasonId: null,
+        );
+        expect(activation.activeTraitIds, isNot(contains('hidden_night_owl')));
+      },
+    );
 
     test('hidden trait dependency chains unlock in one discovery pass', () {
       final discovered = engine.discoverEligibleTraits(
@@ -477,19 +552,25 @@ void main() {
         stakesLost: 2,
         musicLibrary: const ['track_a', 'track_b'],
         musicQueue: const ['track_b'],
-        musicPlaylists: const {'favorites': ['track_a']},
+        musicPlaylists: const {
+          'favorites': ['track_a'],
+        },
         currentTrackId: 'track_b',
         worldBossVictories: 12,
         unlockedWorldIds: const {'verdant_grove', 'crystal_caverns'},
       );
-      expect(LegacySystemsState.fromJson(systems.toJson()).toJson(), systems.toJson());
+      expect(
+        LegacySystemsState.fromJson(systems.toJson()).toJson(),
+        systems.toJson(),
+      );
     });
 
     test('defaults world boss victories when loading older saves', () {
-      final legacyJson = Map<String, dynamic>.of(LegacySystemsState.initial.toJson())
-        ..remove('worldBossVictories')
-        ..remove('unlockedWorldIds')
-        ..remove('worldUnlockMigrationPending');
+      final legacyJson =
+          Map<String, dynamic>.of(LegacySystemsState.initial.toJson())
+            ..remove('worldBossVictories')
+            ..remove('unlockedWorldIds')
+            ..remove('worldUnlockMigrationPending');
       final restored = LegacySystemsState.fromJson(legacyJson);
       expect(restored.worldBossVictories, 0);
       expect(restored.unlockedWorldIds, const {'verdant_grove'});

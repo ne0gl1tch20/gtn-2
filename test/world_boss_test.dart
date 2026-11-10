@@ -8,10 +8,7 @@ void main() {
   const engine = ProgressionEngine();
 
   test('world bosses unlock in order and pay only once after final hit', () {
-    var state = ProgressionState(
-      correctGuesses: 10,
-      upgrades: const {'a': 3},
-    );
+    var state = ProgressionState(correctGuesses: 10, upgrades: const {'a': 3});
     final first = WorldBossCatalog.worlds.first;
     expect(WorldBossCatalog.isUnlocked(state, first), isTrue);
     expect(WorldBossCatalog.canFight(state, first), isTrue);
@@ -28,7 +25,10 @@ void main() {
     final paidAgain = engine.attackWorldBoss(state, first);
     expect(paidAgain.money, state.money);
     expect(paidAgain.nebula, state.nebula);
-    expect(WorldBossCatalog.isUnlocked(state, WorldBossCatalog.worlds[1]), isFalse);
+    expect(
+      WorldBossCatalog.isUnlocked(state, WorldBossCatalog.worlds[1]),
+      isFalse,
+    );
   });
 
   test('separates world unlock requirements from boss fight requirements', () {
@@ -49,14 +49,25 @@ void main() {
     expect(WorldBossCatalog.canFight(state, second), isFalse);
   });
 
-  test('matches GTN1 world identities, map positions and secret thresholds', () {
-    expect(WorldBossCatalog.worlds.map((world) => world.bossId), [
-      'verdant_guardian', 'crystal_golem', 'ember_dragon', 'nebula_titan',
-    ]);
-    expect(WorldBossCatalog.worlds.map((world) => world.secretAt), [50, 150, 300, 600]);
-    expect(WorldBossCatalog.worlds.map((world) => world.hits), [3, 5, 7, 10]);
-    expect(WorldBossCatalog.worlds.last.unlockUltraCount, 1);
-    expect(WorldBossCatalog.worlds.last.fightUltraCount, 1);
-    expect(WorldBossCatalog.worlds.last.fightPrestigeCount, 5);
-  });
+  test(
+    'matches GTN1 world identities, map positions and secret thresholds',
+    () {
+      expect(WorldBossCatalog.worlds.map((world) => world.bossId), [
+        'verdant_guardian',
+        'crystal_golem',
+        'ember_dragon',
+        'nebula_titan',
+      ]);
+      expect(WorldBossCatalog.worlds.map((world) => world.secretAt), [
+        50,
+        150,
+        300,
+        600,
+      ]);
+      expect(WorldBossCatalog.worlds.map((world) => world.hits), [3, 5, 7, 10]);
+      expect(WorldBossCatalog.worlds.last.unlockUltraCount, 1);
+      expect(WorldBossCatalog.worlds.last.fightUltraCount, 1);
+      expect(WorldBossCatalog.worlds.last.fightPrestigeCount, 5);
+    },
+  );
 }

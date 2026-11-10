@@ -7,30 +7,33 @@ import 'package:gtn_2/core/progression/progression_state.dart';
 void main() {
   const engine = ProgressionEngine();
 
-  test('bot guesses award rewards without changing player guess or streak stats', () {
-    final before = ProgressionState.initial.copyWith(
-      totalGuesses: 12,
-      correctGuesses: 7,
-      currentStreak: 4,
-      bestStreak: 9,
-    );
-    final correct = engine.recordGuess(
-      before,
-      correct: true,
-      baseReward: BigNumber.fromInt(25),
-      isBot: true,
-    );
-    expect(correct.money.toString(), '25');
-    expect(correct.moneyEarned.toString(), '25');
-    expect(correct.totalGuesses, 12);
-    expect(correct.correctGuesses, 7);
-    expect(correct.currentStreak, 4);
-    expect(correct.bestStreak, 9);
+  test(
+    'bot guesses award rewards without changing player guess or streak stats',
+    () {
+      final before = ProgressionState.initial.copyWith(
+        totalGuesses: 12,
+        correctGuesses: 7,
+        currentStreak: 4,
+        bestStreak: 9,
+      );
+      final correct = engine.recordGuess(
+        before,
+        correct: true,
+        baseReward: BigNumber.fromInt(25),
+        isBot: true,
+      );
+      expect(correct.money.toString(), '25');
+      expect(correct.moneyEarned.toString(), '25');
+      expect(correct.totalGuesses, 12);
+      expect(correct.correctGuesses, 7);
+      expect(correct.currentStreak, 4);
+      expect(correct.bestStreak, 9);
 
-    final miss = engine.recordGuess(before, correct: false, isBot: true);
-    expect(miss.totalGuesses, 12);
-    expect(miss.currentStreak, 4);
-  });
+      final miss = engine.recordGuess(before, correct: false, isBot: true);
+      expect(miss.totalGuesses, 12);
+      expect(miss.currentStreak, 4);
+    },
+  );
 
   test('correct guesses award exact money and update streak stats', () {
     var state = engine.recordGuess(
@@ -38,7 +41,8 @@ void main() {
       correct: true,
       baseReward: BigNumber.parse('1.25'),
       modifiers: const GuessRewardModifiers(
-        streakMultiplier: 2, criticalMultiplier: 3,
+        streakMultiplier: 2,
+        criticalMultiplier: 3,
       ),
     );
     expect(state.money.toString(), '7.5');
@@ -53,13 +57,17 @@ void main() {
 
   test('upgrade pricing follows baseCost times growthRate to level', () {
     final upgrade = UpgradeDefinition(
-      id: 'income', baseCost: BigNumber.fromInt(10),
-      growthRate: BigNumber.fromInt(2), maxLevel: 3,
+      id: 'income',
+      baseCost: BigNumber.fromInt(10),
+      growthRate: BigNumber.fromInt(2),
+      maxLevel: 3,
     );
     expect(upgrade.costAtLevel(0).toString(), '10');
     expect(upgrade.costAtLevel(1).toString(), '20');
     expect(upgrade.costAtLevel(2).toString(), '40');
-    var state = ProgressionState.initial.copyWith(money: BigNumber.fromInt(100));
+    var state = ProgressionState.initial.copyWith(
+      money: BigNumber.fromInt(100),
+    );
     state = engine.purchaseUpgrade(state, upgrade);
     expect(state.money.toString(), '90');
     expect(state.upgrades['income'], 1);
@@ -69,44 +77,64 @@ void main() {
     expect(engine.purchaseUpgrade(state, upgrade), same(state));
   });
 
-  test('Prestige soft-resets normal upgrades and preserves permanent progress', () {
-    final state = ProgressionState.initial.copyWith(
-      money: BigNumber.fromInt(150), prestige: BigNumber.fromInt(4),
-      ultra: BigNumber.fromInt(2), nebula: BigNumber.fromInt(30),
-      upgrades: const {'income': 4}, prestigeUpgrades: const {'permanent': 2},
-    );
-    final result = engine.prestige(state, PrestigeRules(
-      minimumMoney: BigNumber.fromInt(100),
-      rewardForMoney: (_) => BigNumber.fromInt(2),
-    ));
-    expect(result.money.toString(), '0');
-    expect(result.prestige.toString(), '6');
-    expect(result.ultra.toString(), '2');
-    expect(result.nebula.toString(), '30');
-    expect(result.upgrades, isEmpty);
-    expect(result.prestigeUpgrades['permanent'], 2);
-    expect(result.prestigeResets, 1);
-  });
+  test(
+    'Prestige soft-resets normal upgrades and preserves permanent progress',
+    () {
+      final state = ProgressionState.initial.copyWith(
+        money: BigNumber.fromInt(150),
+        prestige: BigNumber.fromInt(4),
+        ultra: BigNumber.fromInt(2),
+        nebula: BigNumber.fromInt(30),
+        upgrades: const {'income': 4},
+        prestigeUpgrades: const {'permanent': 2},
+      );
+      final result = engine.prestige(
+        state,
+        PrestigeRules(
+          minimumMoney: BigNumber.fromInt(100),
+          rewardForMoney: (_) => BigNumber.fromInt(2),
+        ),
+      );
+      expect(result.money.toString(), '0');
+      expect(result.prestige.toString(), '6');
+      expect(result.ultra.toString(), '2');
+      expect(result.nebula.toString(), '30');
+      expect(result.upgrades, isEmpty);
+      expect(result.prestigeUpgrades['permanent'], 2);
+      expect(result.prestigeResets, 1);
+    },
+  );
 
   test('Prestige is unavailable below configured threshold', () {
-    final state = ProgressionState.initial.copyWith(money: BigNumber.fromInt(99));
-    final result = engine.prestige(state, PrestigeRules(
-      minimumMoney: BigNumber.fromInt(100),
-      rewardForMoney: (_) => BigNumber.fromInt(1),
-    ));
+    final state = ProgressionState.initial.copyWith(
+      money: BigNumber.fromInt(99),
+    );
+    final result = engine.prestige(
+      state,
+      PrestigeRules(
+        minimumMoney: BigNumber.fromInt(100),
+        rewardForMoney: (_) => BigNumber.fromInt(1),
+      ),
+    );
     expect(result, same(state));
   });
 
   test('Ultra payout is capped at 2,000 and resets Prestige progression', () {
     final state = ProgressionState.initial.copyWith(
-      money: BigNumber.fromInt(1000000), prestige: BigNumber.fromInt(50),
-      prestigeResets: 3, upgrades: const {'income': 5},
-      prestigeUpgrades: const {'permanent': 1}, nebula: BigNumber.fromInt(25),
+      money: BigNumber.fromInt(1000000),
+      prestige: BigNumber.fromInt(50),
+      prestigeResets: 3,
+      upgrades: const {'income': 5},
+      prestigeUpgrades: const {'permanent': 1},
+      nebula: BigNumber.fromInt(25),
     );
-    final result = engine.ultra(state, UltraRules(
-      minimumMoney: BigNumber.fromInt(100),
-      rewardForMoney: (_) => 2500,
-    ));
+    final result = engine.ultra(
+      state,
+      UltraRules(
+        minimumMoney: BigNumber.fromInt(100),
+        rewardForMoney: (_) => 2500,
+      ),
+    );
     expect(result.ultra.toString(), '2000');
     expect(result.money.toString(), '0');
     expect(result.prestige.toString(), '0');
@@ -119,7 +147,8 @@ void main() {
 
   test('Arcade Nebula rewards and 25-Nebula shop purchases are separate', () {
     final rewarded = engine.awardNebulaFromArcade(
-      ProgressionState.initial, BigNumber.fromInt(30),
+      ProgressionState.initial,
+      BigNumber.fromInt(30),
     );
     expect(rewarded.nebula.toString(), '30');
     expect(rewarded.nebulaEarned.toString(), '30');
@@ -153,10 +182,7 @@ void main() {
       prestigeUpgrades: const {'prestige_starting_capital': 3},
       ultraUpgrades: const {'ultra_gain_boost': 2},
     );
-    final result = engine.ultra(
-      state,
-      ProgressionCalculator.ultraRules(state),
-    );
+    final result = engine.ultra(state, ProgressionCalculator.ultraRules(state));
     expect(result.ultra.toString(), '400');
     expect(result.money.toString(), '3000');
     expect(result.prestige.toString(), '0');
@@ -169,12 +195,8 @@ void main() {
       nebulaItems: const {'nebula_boost': 1},
       ultraUpgrades: const {'ultra_nebula_boost': 2},
     );
-    final result = engine.awardNebulaFromArcade(
-      state,
-      BigNumber.fromInt(5),
-    );
+    final result = engine.awardNebulaFromArcade(state, BigNumber.fromInt(5));
     expect(result.nebula.toString(), '30');
     expect(result.nebulaEarned.toString(), '30');
   });
-
 }

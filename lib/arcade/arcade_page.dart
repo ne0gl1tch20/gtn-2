@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:flutter/material.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../core/numbers/big_number.dart';
+import '../design/expressive_widgets.dart';
 import 'arcade_catalog.dart';
 import 'arcade_reward_rules.dart';
 
@@ -25,84 +27,123 @@ class _ArcadePageState extends State<ArcadePage> {
   late Future<List<ArcadeGameDefinition>> _catalog = ArcadeCatalog.load();
 
   IconData _iconFor(String id) => switch (id) {
-        'quick_guess' => Icons.timer_rounded,
-        'reaction_test' => Icons.flash_on_rounded,
-        'lucky_number' => Icons.card_giftcard_rounded,
-        'memory_match' => Icons.memory_rounded,
-        'number_rush' => Icons.numbers_rounded,
-        'math_blitz' => Icons.calculate_rounded,
-        'memory_grid' => Icons.grid_on_rounded,
-        _ => Icons.sports_esports_rounded,
-      };
+    'quick_guess' => Icons.timer_rounded,
+    'reaction_test' => Icons.flash_on_rounded,
+    'lucky_number' => Icons.card_giftcard_rounded,
+    'memory_match' => Icons.memory_rounded,
+    'number_rush' => Icons.numbers_rounded,
+    'math_blitz' => Icons.calculate_rounded,
+    'memory_grid' => Icons.grid_on_rounded,
+    _ => Icons.sports_esports_rounded,
+  };
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final dark = theme.brightness == Brightness.dark;
     return Scaffold(
-      appBar: AppBar(title: const Text('Arcade')),
+      appBar: GtnExpressiveAppBar(title: const Text('Arcade')),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Text(
-            'Play the original seven GTN1 minigames to earn Nebula and Money.',
-            style: Theme.of(context).textTheme.bodyLarge,
-          ),
-          const SizedBox(height: 16),
           FutureBuilder<List<ArcadeGameDefinition>>(
             future: _catalog,
             builder: (context, snapshot) {
-              if (snapshot.connectionState != ConnectionState.done) {
-                return const Padding(
-                  padding: EdgeInsets.all(32),
-                  child: Center(child: CircularProgressIndicator()),
-                );
-              }
-              if (snapshot.hasError || !snapshot.hasData) {
-                return Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
+              final games = snapshot.data ?? const <ArcadeGameDefinition>[];
+              return GtnExpressiveCard(
+                margin: EdgeInsets.zero,
+                padding: const EdgeInsets.all(20),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(26),
+                  side: BorderSide(
+                    color: dark ? GtnUiTokens.line : const Color(0x180D1530),
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Row(
                       children: [
-                        const Icon(Icons.error_outline_rounded, size: 32),
-                        const SizedBox(height: 8),
-                        const Text('The original Arcade catalog could not be loaded.'),
-                        const SizedBox(height: 8),
-                        FilledButton(
-                          onPressed: () => setState(() {
-                            _catalog = ArcadeCatalog.load();
-                          }),
-                          child: const Text('Retry'),
+                        Container(
+                          width: 42,
+                          height: 42,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(14),
+                            gradient: const LinearGradient(
+                              colors: [GtnUiTokens.purple, GtnUiTokens.cyan],
+                            ),
+                          ),
+                          child: const Icon(
+                            Icons.sports_esports_rounded,
+                            color: Color(0xFF080B16),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'QUICK CHALLENGES',
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  color: GtnUiTokens.cyan,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: 1.2,
+                                ),
+                              ),
+                              Text(
+                                'Arcade',
+                                style: theme.textTheme.headlineSmall?.copyWith(
+                                  fontWeight: FontWeight.w900,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        _ArcadeCountChip(
+                          label:
+                              '${games.isEmpty ? ArcadeCatalog.expectedIds.length : games.length} GAMES',
                         ),
                       ],
                     ),
-                  ),
-                );
-              }
-
-              return Column(
-                children: [
-                  for (final game in snapshot.data!)
-                    Card(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      child: ListTile(
-                        contentPadding: const EdgeInsets.all(16),
-                        leading: Icon(_iconFor(game.id), size: 32),
-                        title: Text(game.name),
-                        subtitle: Padding(
-                          padding: const EdgeInsets.only(top: 6),
-                          child: Text(game.description),
-                        ),
-                        trailing: const Icon(Icons.play_arrow_rounded),
-                        onTap: () => showDialog<void>(
-                          context: context,
-                          builder: (_) => _ArcadeDialog(
-                            gameId: game.id,
-                            title: game.name,
-                            onReward: widget.onReward,
-                          ),
-                        ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Play the original GTN1 minigames to earn Nebula and Money.',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: dark
+                            ? GtnUiTokens.muted
+                            : const Color(0xFF65708C),
+                        height: 1.5,
                       ),
                     ),
-                ],
+                    const SizedBox(height: 16),
+                    if (snapshot.connectionState != ConnectionState.done)
+                      const Padding(
+                        padding: EdgeInsets.all(32),
+                        child: Center(child: M3EProgressIndicator.circular()),
+                      )
+                    else if (snapshot.hasError || !snapshot.hasData)
+                      _ArcadeCatalogError(
+                        onRetry: () => setState(() {
+                          _catalog = ArcadeCatalog.load();
+                        }),
+                      )
+                    else
+                      for (final game in games)
+                        _ArcadeCatalogEntry(
+                          game: game,
+                          icon: _iconFor(game.id),
+                          onPlay: () => GtnExpressiveDialog.show<void>(
+                            context,
+                            builder: (_) => _ArcadeDialog(
+                              gameId: game.id,
+                              title: game.name,
+                              onReward: widget.onReward,
+                            ),
+                          ),
+                        ),
+                  ],
+                ),
               );
             },
           ),
@@ -110,6 +151,130 @@ class _ArcadePageState extends State<ArcadePage> {
       ),
     );
   }
+}
+
+class _ArcadeCountChip extends StatelessWidget {
+  const _ArcadeCountChip({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) => DecoratedBox(
+    decoration: BoxDecoration(
+      color: GtnUiTokens.purple.withValues(alpha: .12),
+      borderRadius: BorderRadius.circular(9),
+      border: Border.all(color: GtnUiTokens.purple.withValues(alpha: .24)),
+    ),
+    child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
+      child: Text(
+        label,
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+          color: GtnUiTokens.purple,
+          fontWeight: FontWeight.w900,
+          letterSpacing: .6,
+        ),
+      ),
+    ),
+  );
+}
+
+class _ArcadeCatalogEntry extends StatelessWidget {
+  const _ArcadeCatalogEntry({
+    required this.game,
+    required this.icon,
+    required this.onPlay,
+  });
+
+  final ArcadeGameDefinition game;
+  final IconData icon;
+  final VoidCallback onPlay;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final dark = theme.brightness == Brightness.dark;
+    return GtnExpressiveCard(
+      margin: const EdgeInsets.only(bottom: 10),
+      color: dark ? GtnUiTokens.raisedPanel : const Color(0xFFF0F1FA),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(18),
+        side: BorderSide(
+          color: dark ? GtnUiTokens.line : const Color(0x180D1530),
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Row(
+          children: [
+            Container(
+              width: 38,
+              height: 38,
+              decoration: BoxDecoration(
+                color: GtnUiTokens.purple.withValues(alpha: .14),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, color: GtnUiTokens.purple, size: 21),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    game.name,
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    game.description,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: dark ? GtnUiTokens.muted : const Color(0xFF65708C),
+                      height: 1.4,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            M3EButton.tonal(
+              onPressed: onPlay,
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.play_arrow_rounded, size: 17),
+                  SizedBox(width: 2),
+                  Text('Play'),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ArcadeCatalogError extends StatelessWidget {
+  const _ArcadeCatalogError({required this.onRetry});
+
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.all(16),
+    child: Column(
+      children: [
+        const Icon(Icons.error_outline_rounded, size: 32),
+        const SizedBox(height: 8),
+        const Text('The original Arcade catalog could not be loaded.'),
+        const SizedBox(height: 8),
+        M3EButton.filled(onPressed: onRetry, child: const Text('Retry')),
+      ],
+    ),
+  );
 }
 
 class _ArcadeDialog extends StatefulWidget {
@@ -136,10 +301,12 @@ class _ArcadeDialogState extends State<_ArcadeDialog> {
   int _target = 1;
   int? _chosenBox;
   late final int _winningBox = _random.nextInt(3) + 1;
-  late final List<int> _sequence =
-      List.generate(3, (_) => _random.nextInt(9) + 1);
-  late final List<int> _numbers =
-      (List<int>.generate(5, (i) => i + 1)..shuffle(_random));
+  late final List<int> _sequence = List.generate(
+    3,
+    (_) => _random.nextInt(9) + 1,
+  );
+  late final List<int> _numbers = (List<int>.generate(5, (i) => i + 1)
+    ..shuffle(_random));
   int _nextNumber = 1;
   bool _finished = false;
   bool _sequenceVisible = true;
@@ -155,14 +322,16 @@ class _ArcadeDialogState extends State<_ArcadeDialog> {
   late int _mathSecond = _random.nextInt(11) + 2;
   late int _mathOperation = _random.nextInt(3);
   int get _mathAnswer => switch (_mathOperation) {
-        0 => _mathFirst + _mathSecond,
-        1 => _mathFirst * _mathSecond,
-        _ => _mathFirst - _mathSecond,
-      };
+    0 => _mathFirst + _mathSecond,
+    1 => _mathFirst * _mathSecond,
+    _ => _mathFirst - _mathSecond,
+  };
   late List<int> _mathChoices = _choicesFor(_mathAnswer);
 
-  late final List<int> _gridCards =
-      (List<int>.generate(16, (index) => index ~/ 2 + 1)..shuffle(_random));
+  late final List<int> _gridCards = (List<int>.generate(
+    16,
+    (index) => index ~/ 2 + 1,
+  )..shuffle(_random));
   final List<int> _gridSelected = [];
   final Set<int> _gridMatched = {};
   int _gridMoves = 0;
@@ -231,8 +400,7 @@ class _ArcadeDialogState extends State<_ArcadeDialog> {
         _reactionTime != null &&
         ArcadeRewardRules.isReactionTestRewardEligible(_reactionTime!)) {
       await widget.onReward(BigNumber.fromInt(1), BigNumber.fromInt(2000));
-    } else if (widget.gameId == 'lucky_number' &&
-        _chosenBox == _winningBox) {
+    } else if (widget.gameId == 'lucky_number' && _chosenBox == _winningBox) {
       await widget.onReward(BigNumber.fromInt(1), BigNumber.fromInt(5000));
     } else if (widget.gameId == 'memory_match' &&
         ArcadeRewardRules.isMemoryMatchRewardEligible(
@@ -350,14 +518,16 @@ class _ArcadeDialogState extends State<_ArcadeDialog> {
             ),
             if (!_finished) ...[
               Text('Guess the target: $_target'),
-              TextField(
+              GtnExpressiveTextField(
                 controller: _input,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(labelText: 'Your guess (1–9)'),
+                decoration: const InputDecoration(
+                  labelText: 'Your guess (1–9)',
+                ),
                 onSubmitted: (_) => _guess(),
               ),
               const SizedBox(height: 8),
-              FilledButton(onPressed: _guess, child: const Text('Guess')),
+              M3EButton.filled(onPressed: _guess, child: const Text('Guess')),
             ] else
               const Text('Time is up!'),
           ],
@@ -369,13 +539,13 @@ class _ArcadeDialogState extends State<_ArcadeDialog> {
             Text(
               _reactionFinished
                   ? (_reactionTime == ArcadeRewardRules.tooEarlyReactionSentinel
-                      ? 'Too early!'
-                      : 'Reaction: ${_reactionTime}ms')
+                        ? 'Too early!'
+                        : 'Reaction: ${_reactionTime}ms')
                   : (_reactionReady ? 'TAP NOW!' : 'Wait for green…'),
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 12),
-            FilledButton(
+            M3EButton.filled(
               onPressed: _reactionFinished ? null : _tapReaction,
               child: const Text('TAP'),
             ),
@@ -392,7 +562,7 @@ class _ArcadeDialogState extends State<_ArcadeDialog> {
                 spacing: 8,
                 children: [
                   for (var i = 1; i <= 3; i++)
-                    FilledButton(
+                    M3EButton.filled(
                       onPressed: () => setState(() => _chosenBox = i),
                       child: Text('Box $i'),
                     ),
@@ -417,12 +587,12 @@ class _ArcadeDialogState extends State<_ArcadeDialog> {
               )
             else if (!_memorySubmitted) ...[
               const Text('Enter the three digits in the same order.'),
-              TextField(
+              GtnExpressiveTextField(
                 controller: _input,
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(labelText: 'Sequence'),
               ),
-              FilledButton(
+              M3EButton.filled(
                 onPressed: () => setState(() {
                   _memoryCorrect = _input.text.trim() == _sequence.join();
                   _memorySubmitted = true;
@@ -447,20 +617,20 @@ class _ArcadeDialogState extends State<_ArcadeDialog> {
               spacing: 8,
               children: [
                 for (final number in _numbers)
-                  FilledButton(
+                  M3EButton.filled(
                     onPressed: _finished
                         ? null
                         : () => setState(() {
-                              if (number == _nextNumber) {
-                                if (_nextNumber == 5) {
-                                  _finished = true;
-                                } else {
-                                  _nextNumber++;
-                                }
+                            if (number == _nextNumber) {
+                              if (_nextNumber == 5) {
+                                _finished = true;
                               } else {
-                                _nextNumber = 1;
+                                _nextNumber++;
                               }
-                            }),
+                            } else {
+                              _nextNumber = 1;
+                            }
+                          }),
                     child: Text('$number'),
                   ),
               ],
@@ -474,12 +644,9 @@ class _ArcadeDialogState extends State<_ArcadeDialog> {
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('Score: $_score'),
-                Text('Time: ${_timeLeft}s'),
-              ],
+              children: [Text('Score: $_score'), Text('Time: ${_timeLeft}s')],
             ),
-            LinearProgressIndicator(value: _timeLeft / 60),
+            M3EProgressIndicator.linearWavy(value: _timeLeft / 60),
             const SizedBox(height: 12),
             if (!_finished) ...[
               Text(
@@ -493,7 +660,7 @@ class _ArcadeDialogState extends State<_ArcadeDialog> {
                 runSpacing: 8,
                 children: [
                   for (final option in _mathChoices)
-                    FilledButton(
+                    M3EButton.filled(
                       onPressed: () => _answerMath(option),
                       child: Text('$option'),
                     ),
@@ -511,12 +678,9 @@ class _ArcadeDialogState extends State<_ArcadeDialog> {
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('Score: $_score'),
-                Text('Time: ${_timeLeft}s'),
-              ],
+              children: [Text('Score: $_score'), Text('Time: ${_timeLeft}s')],
             ),
-            LinearProgressIndicator(value: _timeLeft / 60),
+            M3EProgressIndicator.linearWavy(value: _timeLeft / 60),
             const SizedBox(height: 8),
             Text('Find all 8 matching pairs. Moves: $_gridMoves'),
             const SizedBox(height: 8),
@@ -532,16 +696,14 @@ class _ArcadeDialogState extends State<_ArcadeDialog> {
                   childAspectRatio: 1.15,
                 ),
                 itemBuilder: (context, index) {
-                  final revealed = _gridSelected.contains(index) ||
+                  final revealed =
+                      _gridSelected.contains(index) ||
                       _gridMatched.contains(index);
-                  return FilledButton(
+                  return M3EButton.filled(
                     onPressed: revealed || _gridSelected.length >= 2
                         ? null
                         : () => _flipGridCard(index),
-                    style: FilledButton.styleFrom(
-                      padding: EdgeInsets.zero,
-                      minimumSize: Size.zero,
-                    ),
+
                     child: Text(
                       revealed ? '${_gridCards[index]}' : '?',
                       style: Theme.of(context).textTheme.titleLarge,
@@ -585,16 +747,19 @@ class _ArcadeDialogState extends State<_ArcadeDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
+    return GtnExpressiveDialog(
       title: Text(widget.title),
-      content: SingleChildScrollView(child: _gameContent()),
+      content: Material(
+        color: Colors.transparent,
+        child: SingleChildScrollView(child: _gameContent()),
+      ),
       actions: [
-        TextButton(
+        M3EButton.text(
           onPressed: () => Navigator.of(context).pop(),
           child: const Text('Close'),
         ),
         if (_canClaim)
-          FilledButton(
+          M3EButton.filled(
             onPressed: _claim,
             child: Text(
               widget.gameId == 'memory_match' && !_memoryCorrect

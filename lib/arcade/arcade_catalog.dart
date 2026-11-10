@@ -60,12 +60,14 @@ class ArcadeCatalog {
           multiplier <= 0) {
         throw FormatException('Invalid or duplicate GTN1 minigame: $id');
       }
-      games.add(ArcadeGameDefinition(
-        id: id,
-        name: name,
-        description: description,
-        rewardMultiplier: multiplier.toDouble(),
-      ));
+      games.add(
+        ArcadeGameDefinition(
+          id: id,
+          name: name,
+          description: description,
+          rewardMultiplier: multiplier.toDouble(),
+        ),
+      );
     }
 
     if (games.length != expectedIds.length ||

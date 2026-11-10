@@ -1,7 +1,9 @@
-import 'package:flutter/material.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../core/numbers/big_number.dart';
 import '../core/progression/progression_state.dart';
+import '../design/expressive_widgets.dart';
 
 class NebulaShopItem {
   const NebulaShopItem({
@@ -44,7 +46,8 @@ class NebulaShopCatalog {
     NebulaShopItem(
       id: 'auto_clicker_basic',
       name: 'Auto Clicker',
-      description: 'Automatically guesses the target using real high/low feedback.',
+      description:
+          'Automatically guesses the target using real high/low feedback.',
       effect: 'Starts the feedback-driven guessing bot',
       price: BigNumber.fromInt(25),
     ),
@@ -79,9 +82,7 @@ class NebulaShopCatalog {
   ]);
 }
 
-typedef NebulaPurchase = Future<ProgressionState> Function(
-  NebulaShopItem item,
-);
+typedef NebulaPurchase = Future<ProgressionState> Function(NebulaShopItem item);
 
 class NebulaShopPage extends StatefulWidget {
   const NebulaShopPage({
@@ -130,7 +131,7 @@ class _NebulaShopPageState extends State<NebulaShopPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(
+      appBar: GtnExpressiveAppBar(
         title: const Text('Nebula Shop'),
         actions: [
           Padding(
@@ -150,22 +151,25 @@ class _NebulaShopPageState extends State<NebulaShopPage> {
           if (NebulaShopCatalog.botIds.any(
             (id) => (_state.nebulaItems[id] ?? 0) > 0,
           ))
-            SwitchListTile(
+            GtnExpressiveSwitchTile(
               contentPadding: EdgeInsets.zero,
               title: const Text('Auto Clicker'),
               subtitle: Text(
-                _state.legacySystems.timeTravelPenaltyUntil > DateTime.now().millisecondsSinceEpoch
+                _state.legacySystems.timeTravelPenaltyUntil >
+                        DateTime.now().millisecondsSinceEpoch
                     ? 'Paused by clock rollback protection.'
                     : 'Let your owned bots guess automatically.',
               ),
               value: _state.legacySystems.autoClickerActive,
-              onChanged: _togglingAutomation ||
-                      _state.legacySystems.timeTravelPenaltyUntil > DateTime.now().millisecondsSinceEpoch
+              onChanged:
+                  _togglingAutomation ||
+                      _state.legacySystems.timeTravelPenaltyUntil >
+                          DateTime.now().millisecondsSinceEpoch
                   ? null
                   : _toggleAutomation,
             ),
           for (final item in NebulaShopCatalog.items)
-            Card(
+            GtnExpressiveCard(
               margin: const EdgeInsets.only(bottom: 12),
               child: Padding(
                 padding: const EdgeInsets.all(16),
@@ -175,7 +179,10 @@ class _NebulaShopPageState extends State<NebulaShopPage> {
                     Row(
                       children: [
                         Expanded(
-                          child: Text(item.name, style: theme.textTheme.titleMedium),
+                          child: Text(
+                            item.name,
+                            style: theme.textTheme.titleMedium,
+                          ),
                         ),
                         Text('Owned: ${_state.nebulaItems[item.id] ?? 0}'),
                       ],
@@ -190,12 +197,17 @@ class _NebulaShopPageState extends State<NebulaShopPage> {
                       ),
                     ),
                     const SizedBox(height: 12),
-                    FilledButton(
-                      onPressed: _buyingId != null ||
+                    M3EButton.filled(
+                      onPressed:
+                          _buyingId != null ||
                               _state.nebula.compareTo(item.price) < 0 ||
-                              (NebulaShopCatalog.automationIds.contains(item.id) &&
+                              (NebulaShopCatalog.automationIds.contains(
+                                    item.id,
+                                  ) &&
                                   (_state.nebulaItems[item.id] ?? 0) > 0) ||
-                              (NebulaShopCatalog.botUpgradeIds.contains(item.id) &&
+                              (NebulaShopCatalog.botUpgradeIds.contains(
+                                    item.id,
+                                  ) &&
                                   !NebulaShopCatalog.botIds.any(
                                     (id) => (_state.nebulaItems[id] ?? 0) > 0,
                                   ))

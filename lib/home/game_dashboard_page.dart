@@ -1,24 +1,28 @@
-import 'package:flutter/material.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../core/game/game_engine.dart';
 import '../core/progression/progression_state.dart';
+import '../design/expressive_widgets.dart';
+import '../settings/game_settings.dart';
 
-const _purple = Color(0xFF9B7CFF);
-const _cyan = Color(0xFF62E8FF);
-const _gold = Color(0xFFFFD66B);
-const _green = Color(0xFF63F5A4);
-const _bg = Color(0xFF080B16);
-const _panel = Color(0xFF11172A);
-const _raised = Color(0xFF171F36);
-const _line = Color(0x20FFFFFF);
-const _white = Color(0xFFF7F8FF);
-const _muted = Color(0xFF9BA5C4);
+const _purple = GtnUiTokens.purple;
+const _cyan = GtnUiTokens.cyan;
+const _gold = GtnUiTokens.gold;
+const _green = GtnUiTokens.green;
+const _bg = GtnUiTokens.background;
+const _panel = GtnUiTokens.panel;
+const _raised = GtnUiTokens.raisedPanel;
+const _line = GtnUiTokens.line;
+const _white = GtnUiTokens.foreground;
+const _muted = GtnUiTokens.muted;
 
 class GameDashboardPage extends StatelessWidget {
   const GameDashboardPage({
     super.key,
     required this.game,
     required this.progression,
+    required this.settings,
     required this.activeSlot,
     required this.loading,
     required this.message,
@@ -34,11 +38,15 @@ class GameDashboardPage extends StatelessWidget {
     required this.onSettings,
     required this.onDeveloperSettings,
     required this.onLegacyPages,
+    required this.onMusic,
+    required this.onLuckyStake,
+    required this.onSystems,
     this.showDeveloperSettings = false,
   });
 
   final GameState game;
   final ProgressionState progression;
+  final GameSettings settings;
   final int activeSlot;
   final bool loading;
   final String message;
@@ -54,12 +62,16 @@ class GameDashboardPage extends StatelessWidget {
   final VoidCallback onSettings;
   final VoidCallback onDeveloperSettings;
   final VoidCallback onLegacyPages;
+  final VoidCallback onMusic;
+  final VoidCallback onLuckyStake;
+  final VoidCallback onSystems;
   final bool showDeveloperSettings;
 
   void _openMoreMenu(BuildContext context, Color panel) {
     Navigator.of(context).push<void>(
       MaterialPageRoute<void>(
         builder: (_) => _MoreMenuPage(
+          settings: settings,
           showDeveloperSettings: showDeveloperSettings,
           onPrestige: onPrestige,
           onNebulaShop: onNebulaShop,
@@ -67,6 +79,11 @@ class GameDashboardPage extends StatelessWidget {
           onSaveSlots: onSaveSlots,
           onSettings: onSettings,
           onDeveloperSettings: onDeveloperSettings,
+          onWorldMap: onWorldMap,
+          onArcade: onArcade,
+          onMusic: onMusic,
+          onLuckyStake: onLuckyStake,
+          onSystems: onSystems,
         ),
       ),
     );
@@ -75,6 +92,8 @@ class GameDashboardPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dark = Theme.of(context).brightness == Brightness.dark;
+    final compact = MediaQuery.sizeOf(context).width <= 430;
+    final horizontalPadding = compact ? 12.0 : 16.0;
     final foreground = dark ? _white : const Color(0xFF172039);
     final muted = dark ? _muted : const Color(0xFF65708C);
     final panel = dark ? _panel : Colors.white;
@@ -83,26 +102,90 @@ class GameDashboardPage extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: dark ? _bg : const Color(0xFFF5F6FC),
-      bottomNavigationBar: SafeArea(
-        top: false,
-        child: Container(
-          padding: const EdgeInsets.fromLTRB(7, 8, 7, 7),
-          decoration: BoxDecoration(
-            color: dark ? const Color(0xF20A0E1C) : Colors.white,
-            border: Border(
-              top: BorderSide(color: foreground.withValues(alpha: .10)),
-            ),
-          ),
-          child: Row(
-            children: [
-              Expanded(child: _BottomNavItem(Icons.public_rounded, 'Beyond the Numbers', false, onWorldMap)),
-              Expanded(child: _BottomNavItem(Icons.sports_esports_rounded, 'Arcade', false, onArcade)),
-              Expanded(child: _BottomNavItem(Icons.play_arrow_rounded, 'Play', true, () {})),
-              Expanded(child: _BottomNavItem(Icons.upgrade_rounded, 'Upgrades', false, onUpgradeShop)),
-              Expanded(child: _BottomNavItem(Icons.menu_rounded, 'More', false, () => _openMoreMenu(context, panel))),
+      bottomNavigationBar: LayoutBuilder(
+        builder: (context, constraints) {
+          void selectDestination(int index) {
+            switch (index) {
+              case 0:
+                onWorldMap();
+                break;
+              case 1:
+                onArcade();
+                break;
+              case 2:
+                break;
+              case 3:
+                onUpgradeShop();
+                break;
+              case 4:
+                _openMoreMenu(context, panel);
+                break;
+            }
+          }
+
+          // The M3E bar switches to a wide horizontal-chip layout on larger
+          // windows. Keep the GTN1 five-item labels inside the available width
+          // with the standard adaptive M3 bar on tablets and desktop windows.
+          if (constraints.maxWidth > 600) {
+            return NavigationBar(
+              selectedIndex: 2,
+              onDestinationSelected: selectDestination,
+              labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+              height: 76,
+              backgroundColor: panel,
+              indicatorColor: _purple.withValues(alpha: .18),
+              destinations: const [
+                NavigationDestination(
+                  icon: Icon(Icons.public_rounded),
+                  label: 'Beyond the Numbers',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.sports_esports_rounded),
+                  label: 'Arcade',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.play_arrow_rounded),
+                  label: 'Play',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.upgrade_rounded),
+                  label: 'Upgrades',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.menu_rounded),
+                  label: 'More',
+                ),
+              ],
+            );
+          }
+
+          return M3ENavigationBar(
+            destinations: const [
+              M3ENavigationBarDestination(
+                icon: Icon(Icons.public_rounded),
+                label: 'Beyond the Numbers',
+              ),
+              M3ENavigationBarDestination(
+                icon: Icon(Icons.sports_esports_rounded),
+                label: 'Arcade',
+              ),
+              M3ENavigationBarDestination(
+                icon: Icon(Icons.play_arrow_rounded),
+                label: 'Play',
+              ),
+              M3ENavigationBarDestination(
+                icon: Icon(Icons.upgrade_rounded),
+                label: 'Upgrades',
+              ),
+              M3ENavigationBarDestination(
+                icon: Icon(Icons.menu_rounded),
+                label: 'More',
+              ),
             ],
-          ),
-        ),
+            selectedIndex: 2,
+            onDestinationSelected: selectDestination,
+          );
+        },
       ),
       body: Container(
         decoration: BoxDecoration(
@@ -119,15 +202,20 @@ class GameDashboardPage extends StatelessWidget {
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 720),
               child: ListView(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
+                padding: EdgeInsets.fromLTRB(
+                  horizontalPadding,
+                  12,
+                  horizontalPadding,
+                  28,
+                ),
                 children: [
                   Row(
                     children: [
                       Container(
-                        width: 44,
-                        height: 44,
+                        width: 42,
+                        height: 42,
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(15),
+                          borderRadius: BorderRadius.circular(12),
                           gradient: const LinearGradient(
                             colors: [_purple, Color(0xFF6651D9)],
                           ),
@@ -140,11 +228,11 @@ class GameDashboardPage extends StatelessWidget {
                           ],
                         ),
                         child: ClipRRect(
-                          borderRadius: BorderRadius.circular(15),
+                          borderRadius: BorderRadius.circular(12),
                           child: Image.asset(
                             'assets/gtn1/gtn-app-logo.png',
-                            width: 44,
-                            height: 44,
+                            width: 42,
+                            height: 42,
                             fit: BoxFit.cover,
                           ),
                         ),
@@ -154,41 +242,54 @@ class GameDashboardPage extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Guess The Number',
-                                style: TextStyle(
-                                  color: foreground,
-                                  fontSize: 19,
-                                  fontWeight: FontWeight.w900,
-                                )),
+                            Text(
+                              'Guess The Number',
+                              style: TextStyle(
+                                color: foreground,
+                                fontFamily: 'SpaceGrotesk',
+                                fontSize: 18,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
                           ],
                         ),
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 7,
+                        ),
                         decoration: BoxDecoration(
                           color: foreground.withValues(alpha: .06),
                           borderRadius: BorderRadius.circular(99),
-                          border: Border.all(color: foreground.withValues(alpha: .08)),
+                          border: Border.all(
+                            color: foreground.withValues(alpha: .08),
+                          ),
                         ),
                         child: Row(
                           children: [
                             const Icon(Icons.circle, color: _green, size: 7),
                             const SizedBox(width: 6),
-                            Text('ONLINE', style: TextStyle(
-                              color: muted, fontSize: 8,
-                              fontWeight: FontWeight.w900, letterSpacing: 1,
-                            )),
+                            Text(
+                              'ONLINE',
+                              style: TextStyle(
+                                color: muted,
+                                fontSize: 8,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: 1,
+                              ),
+                            ),
                           ],
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 18),
                   Container(
-                    padding: const EdgeInsets.all(23),
-                    constraints: const BoxConstraints(minHeight: 188),
+                    padding: EdgeInsets.all(compact ? 21 : 25),
+                    constraints: BoxConstraints(minHeight: compact ? 190 : 205),
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(28),
+                      borderRadius: BorderRadius.circular(32),
                       gradient: const LinearGradient(
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
@@ -198,7 +299,9 @@ class GameDashboardPage extends StatelessWidget {
                           Color(0xFF10172B),
                         ],
                       ),
-                      border: Border.all(color: Colors.white.withValues(alpha: .1)),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: .1),
+                      ),
                       boxShadow: const [
                         BoxShadow(
                           color: Color(0x33000000),
@@ -207,73 +310,106 @@ class GameDashboardPage extends StatelessWidget {
                         ),
                       ],
                     ),
-                    child: Stack(
-                      children: [
-                        Positioned(
-                          right: -30,
-                          top: -55,
-                          child: Container(
-                            width: 190,
-                            height: 190,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              gradient: RadialGradient(
-                                colors: [
-                                  _cyan.withValues(alpha: .24),
-                                  _cyan.withValues(alpha: 0),
-                                ],
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(32),
+                      child: Stack(
+                        children: [
+                          Positioned(
+                            right: -80,
+                            top: -95,
+                            child: Container(
+                              width: 220,
+                              height: 220,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                gradient: RadialGradient(
+                                  colors: [
+                                    _cyan.withValues(alpha: .24),
+                                    _cyan.withValues(alpha: 0),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Row(
-                              children: [
-                                Icon(Icons.circle, color: _green, size: 8),
-                                SizedBox(width: 7),
-                                Text(
-                                  'CURRENT RUN',
-                                  style: TextStyle(
-                                    color: Color(0xFF9BA5C4),
-                                    fontSize: 9,
-                                    fontWeight: FontWeight.w900,
-                                    letterSpacing: 1.4,
+                          const Positioned(
+                            right: 24,
+                            top: 28,
+                            child: _HeroSparkle(size: 5, opacity: .8),
+                          ),
+                          const Positioned(
+                            right: 12,
+                            top: 88,
+                            child: _HeroSparkle(size: 4, opacity: .55),
+                          ),
+                          const Positioned(
+                            right: 78,
+                            bottom: 26,
+                            child: _HeroSparkle(size: 5, opacity: .7),
+                          ),
+                          const Positioned(
+                            right: 132,
+                            top: 44,
+                            child: _HeroSparkle(size: 3, opacity: .45),
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Row(
+                                children: [
+                                  Icon(Icons.circle, color: _green, size: 8),
+                                  SizedBox(width: 7),
+                                  Text(
+                                    'CURRENT RUN',
+                                    style: TextStyle(
+                                      color: Color(0xFF9BA5C4),
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w900,
+                                      letterSpacing: 1.7,
+                                    ),
                                   ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 16),
-                            const Text('Find your secret number',
+                                ],
+                              ),
+                              const SizedBox(height: 16),
+                              const Text(
+                                'Find your secret number',
                                 style: TextStyle(
                                   color: Color(0xFF9BA5C4),
-                                  fontSize: 9,
-                                  fontWeight: FontWeight.w900,
-                                  letterSpacing: 1.4,
-                                )),
-                            const SizedBox(height: 9),
-                            Text('${game.minimum} — ${game.maximum}',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 43,
-                                  height: 1,
-                                  fontWeight: FontWeight.w900,
-                                  letterSpacing: -2,
-                                )),
-                            const SizedBox(height: 7),
-                            const SizedBox(height: 12),
-                            Text(message,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              ShaderMask(
+                                shaderCallback: (bounds) =>
+                                    const LinearGradient(
+                                      colors: [Colors.white, _cyan],
+                                    ).createShader(bounds),
+                                child: Text(
+                                  '${game.minimum} — ${game.maximum}',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: compact ? 35 : 42,
+                                    height: 1,
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: -2.5,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 15),
+                              Text(
+                                message,
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                                 style: const TextStyle(
                                   color: Color(0xFFD2D9F0),
-                                  fontSize: 12,
+                                  fontSize: 13,
                                   height: 1.4,
-                                )),
-                          ],
-                        ),
-                      ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -301,17 +437,44 @@ class GameDashboardPage extends StatelessWidget {
                   const SizedBox(height: 12),
                   Row(
                     children: [
-                      Expanded(child: _Stat(Icons.bolt_rounded,
-                          game.attempts.toString(), 'ATTEMPTS', _cyan,
-                          panel, line, foreground, muted)),
+                      Expanded(
+                        child: _Stat(
+                          Icons.bolt_rounded,
+                          game.attempts.toString(),
+                          'ATTEMPTS',
+                          _cyan,
+                          panel,
+                          line,
+                          foreground,
+                          muted,
+                        ),
+                      ),
                       const SizedBox(width: 6),
-                      Expanded(child: _Stat(Icons.check_circle_rounded,
-                          progression.correctGuesses.toString(), 'CORRECT', _gold,
-                          panel, line, foreground, muted)),
+                      Expanded(
+                        child: _Stat(
+                          Icons.check_circle_rounded,
+                          progression.correctGuesses.toString(),
+                          'CORRECT',
+                          _gold,
+                          panel,
+                          line,
+                          foreground,
+                          muted,
+                        ),
+                      ),
                       const SizedBox(width: 6),
-                      Expanded(child: _Stat(Icons.local_fire_department_rounded,
-                          progression.currentStreak.toString(), 'STREAK', _green,
-                          panel, line, foreground, muted)),
+                      Expanded(
+                        child: _Stat(
+                          Icons.local_fire_department_rounded,
+                          progression.currentStreak.toString(),
+                          'STREAK',
+                          _green,
+                          panel,
+                          line,
+                          foreground,
+                          muted,
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 12),
@@ -350,15 +513,11 @@ class GameDashboardPage extends StatelessWidget {
                   ),
                   if (game.isComplete) ...[
                     const SizedBox(height: 12),
-                    FilledButton.icon(
+                    M3EButton.icon(
+                      style: M3EButtonStyle.filled,
                       onPressed: loading ? null : onNewGame,
                       icon: const Icon(Icons.refresh_rounded),
                       label: const Text('Start another round'),
-                      style: FilledButton.styleFrom(
-                        minimumSize: const Size.fromHeight(52),
-                        backgroundColor: _purple,
-                        foregroundColor: Colors.white,
-                      ),
                     ),
                   ],
                 ],
@@ -369,6 +528,31 @@ class GameDashboardPage extends StatelessWidget {
       ),
     );
   }
+}
+
+class _HeroSparkle extends StatelessWidget {
+  const _HeroSparkle({required this.size, required this.opacity});
+
+  final double size;
+  final double opacity;
+
+  @override
+  Widget build(BuildContext context) => IgnorePointer(
+    child: Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: opacity),
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: _cyan.withValues(alpha: opacity * .45),
+            blurRadius: size * 2.4,
+          ),
+        ],
+      ),
+    ),
+  );
 }
 
 class _BotArena extends StatelessWidget {
@@ -402,17 +586,17 @@ class _BotArena extends StatelessWidget {
     final status = ownedBots.isEmpty
         ? 'Buy a bot in the Nebula Shop to bring the arena to life.'
         : active
-            ? 'Your bots will show their real guesses here.'
-            : 'Your bots are owned but automation is paused.';
+        ? 'Your bots will show their real guesses here.'
+        : 'Your bots are owned but automation is paused.';
     final lastGuess = systems.lastBotGuess == null
         ? 'Waiting for your first bot guess…'
         : '${systems.lastBotId ?? 'Bot'} guessed ${systems.lastBotGuess} · '
-            '${switch (systems.lastBotFeedback) {
-              'TOO_LOW' => 'TOO LOW',
-              'TOO_HIGH' => 'TOO HIGH',
-              'CORRECT' => 'CORRECT',
-              _ => 'WAITING',
-            }}';
+              '${switch (systems.lastBotFeedback) {
+                'TOO_LOW' => 'TOO LOW',
+                'TOO_HIGH' => 'TOO HIGH',
+                'CORRECT' => 'CORRECT',
+                _ => 'WAITING',
+              }}';
 
     return Container(
       padding: const EdgeInsets.all(15),
@@ -508,7 +692,7 @@ class _BotArena extends StatelessWidget {
                   style: TextStyle(color: muted, fontSize: 9),
                 ),
               ),
-              TextButton(
+              M3EButton.text(
                 onPressed: onOpenShop,
                 child: const Text('Nebula Shop ↗'),
               ),
@@ -522,6 +706,7 @@ class _BotArena extends StatelessWidget {
 
 class _MoreMenuPage extends StatelessWidget {
   const _MoreMenuPage({
+    required this.settings,
     required this.showDeveloperSettings,
     required this.onPrestige,
     required this.onNebulaShop,
@@ -529,8 +714,14 @@ class _MoreMenuPage extends StatelessWidget {
     required this.onSaveSlots,
     required this.onSettings,
     required this.onDeveloperSettings,
+    required this.onWorldMap,
+    required this.onArcade,
+    required this.onMusic,
+    required this.onLuckyStake,
+    required this.onSystems,
   });
 
+  final GameSettings settings;
   final bool showDeveloperSettings;
   final VoidCallback onPrestige;
   final VoidCallback onNebulaShop;
@@ -538,6 +729,17 @@ class _MoreMenuPage extends StatelessWidget {
   final VoidCallback onSaveSlots;
   final VoidCallback onSettings;
   final VoidCallback onDeveloperSettings;
+  final VoidCallback onWorldMap;
+  final VoidCallback onArcade;
+  final VoidCallback onMusic;
+  final VoidCallback onLuckyStake;
+  final VoidCallback onSystems;
+
+  Color _destinationColor(String? hex) {
+    if (hex == null || hex.isEmpty) return _purple;
+    final value = int.tryParse(hex.replaceFirst('#', ''), radix: 16);
+    return value == null ? _purple : Color(value | 0xFF000000);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -546,27 +748,190 @@ class _MoreMenuPage extends StatelessWidget {
     final muted = dark ? _muted : const Color(0xFF65708C);
     final panel = dark ? _panel : Colors.white;
 
-    Widget entry(IconData icon, String title, String subtitle, VoidCallback onTap) {
-      return Card(
+    Widget entry(
+      IconData icon,
+      String title,
+      String subtitle,
+      VoidCallback onTap,
+      Color accent,
+    ) {
+      return GtnExpressiveCard(
         color: panel,
         margin: const EdgeInsets.only(bottom: 10),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(18),
-          side: BorderSide(color: foreground.withValues(alpha: .08)),
+          side: BorderSide(color: accent.withValues(alpha: .22)),
         ),
-        child: ListTile(
-          contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
-          leading: Icon(icon, color: _purple),
-          title: Text(title, style: TextStyle(color: foreground, fontWeight: FontWeight.w800)),
-          subtitle: Text(subtitle, style: TextStyle(color: muted, fontSize: 11)),
-          trailing: Icon(Icons.chevron_right_rounded, color: muted),
-          onTap: onTap,
+        child: Material(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(18),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(18),
+            onTap: onTap,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 13),
+              child: Row(
+                children: [
+                  Icon(icon, color: accent),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title,
+                          style: TextStyle(
+                            color: foreground,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          subtitle,
+                          style: TextStyle(color: muted, fontSize: 11),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Icon(Icons.chevron_right_rounded, color: muted),
+                ],
+              ),
+            ),
+          ),
         ),
       );
     }
 
+    final destinations =
+        <
+          String,
+          ({IconData icon, String title, String subtitle, VoidCallback onTap})
+        >{
+          'world_map': (
+            icon: Icons.public_rounded,
+            title: 'World map',
+            subtitle: 'Explore unlocked worlds and bosses',
+            onTap: onWorldMap,
+          ),
+          'achievements': (
+            icon: Icons.emoji_events_rounded,
+            title: 'Achievements',
+            subtitle: 'Journey progress and rewards',
+            onTap: onLegacyPages,
+          ),
+          'mutators': (
+            icon: Icons.tune_rounded,
+            title: 'Mutators',
+            subtitle: 'Open the gameplay systems hub',
+            onTap: onSystems,
+          ),
+          'talent': (
+            icon: Icons.psychology_alt_rounded,
+            title: 'Talents',
+            subtitle: 'Open the gameplay systems hub',
+            onTap: onSystems,
+          ),
+          'relics': (
+            icon: Icons.auto_awesome_rounded,
+            title: 'Relics',
+            subtitle: 'Open the gameplay systems hub',
+            onTap: onSystems,
+          ),
+          'home_base': (
+            icon: Icons.home_work_rounded,
+            title: 'Home Base',
+            subtitle: 'Open the gameplay systems hub',
+            onTap: onSystems,
+          ),
+          'codex': (
+            icon: Icons.menu_book_rounded,
+            title: 'Codex',
+            subtitle: 'Discoveries and lore entries',
+            onTap: onLegacyPages,
+          ),
+          'endgame': (
+            icon: Icons.flag_rounded,
+            title: 'Endgame',
+            subtitle: 'Prestige and Ultra progression',
+            onTap: onPrestige,
+          ),
+          'arcade': (
+            icon: Icons.sports_esports_rounded,
+            title: 'Arcade',
+            subtitle: 'Play minigames and earn rewards',
+            onTap: onArcade,
+          ),
+          'stats': (
+            icon: Icons.query_stats_rounded,
+            title: 'Statistics',
+            subtitle: 'Review your gameplay records',
+            onTap: onLegacyPages,
+          ),
+          'changelog': (
+            icon: Icons.history_rounded,
+            title: 'Changelog',
+            subtitle: 'Review version history',
+            onTap: onLegacyPages,
+          ),
+          'settings': (
+            icon: Icons.settings_rounded,
+            title: 'Settings',
+            subtitle: 'Game preferences and Menu Studio',
+            onTap: onSettings,
+          ),
+          'about': (
+            icon: Icons.info_outline_rounded,
+            title: 'About',
+            subtitle: 'Credits, links and app information',
+            onTap: onLegacyPages,
+          ),
+          'staking': (
+            icon: Icons.casino_rounded,
+            title: 'Lucky Stake',
+            subtitle: 'Risk Money for streak-based rewards',
+            onTap: onLuckyStake,
+          ),
+          'ultra': (
+            icon: Icons.bolt_rounded,
+            title: 'Ultra',
+            subtitle: 'Permanent progression upgrades',
+            onTap: onPrestige,
+          ),
+          'prestige': (
+            icon: Icons.auto_awesome_rounded,
+            title: 'Prestige',
+            subtitle: 'Reset and advance your progression',
+            onTap: onPrestige,
+          ),
+          'save_slots': (
+            icon: Icons.save_rounded,
+            title: 'Save Slots',
+            subtitle: 'Manage your saved games',
+            onTap: onSaveSlots,
+          ),
+          'music': (
+            icon: Icons.library_music_rounded,
+            title: 'Music',
+            subtitle: 'Offline library, playlists and queue',
+            onTap: onMusic,
+          ),
+          'nebula': (
+            icon: Icons.diamond_rounded,
+            title: 'Nebula Shop',
+            subtitle: 'Permanent Nebula upgrades and items',
+            onTap: onNebulaShop,
+          ),
+        };
+    final orderedIds = settings.moreScreenOrder
+        .where(destinations.containsKey)
+        .toSet()
+        .toList();
+    for (final id in destinations.keys) {
+      if (!orderedIds.contains(id)) orderedIds.add(id);
+    }
+
     return Scaffold(
-      appBar: AppBar(title: const Text('More Hub')),
+      appBar: GtnExpressiveAppBar(title: const Text('More Hub')),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -574,62 +939,39 @@ class _MoreMenuPage extends StatelessWidget {
           const SizedBox(height: 5),
           Text('Your shortcuts, your order.', style: TextStyle(color: muted)),
           const SizedBox(height: 18),
-          entry(Icons.auto_awesome_rounded, 'Prestige & Ultra', 'Prestige and Ultra progression', onPrestige),
-          entry(Icons.diamond_rounded, 'Nebula Shop', 'Nebula upgrades and items', onNebulaShop),
-          entry(Icons.auto_stories_rounded, 'Journey, Rewards & Codex', 'Achievements, rewards and discoveries', onLegacyPages),
-          entry(Icons.save_rounded, 'Save Slots', 'Manage your saved games', onSaveSlots),
-          entry(Icons.settings_rounded, 'Settings', 'Game preferences', onSettings),
+          for (final id in orderedIds)
+            entry(
+              destinations[id]!.icon,
+              destinations[id]!.title,
+              destinations[id]!.subtitle,
+              destinations[id]!.onTap,
+              _destinationColor(settings.moreScreenButtonColors[id]),
+            ),
           if (showDeveloperSettings)
-            entry(Icons.bug_report_rounded, 'Dev Settings', 'Developer tools', onDeveloperSettings),
+            entry(
+              Icons.bug_report_rounded,
+              'Dev Settings',
+              'Developer tools',
+              onDeveloperSettings,
+              _destinationColor(null),
+            ),
         ],
       ),
     );
   }
 }
 
-class _BottomNavItem extends StatelessWidget {
-  const _BottomNavItem(this.icon, this.label, this.selected, this.onTap);
-
-  final IconData icon;
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) => Material(
-        color: selected ? _purple.withValues(alpha: .15) : Colors.transparent,
-        borderRadius: BorderRadius.circular(13),
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(13),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 7),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(icon, size: 19, color: selected ? _purple : _muted),
-                const SizedBox(height: 3),
-                Text(
-                  label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: selected ? _white : _muted,
-                    fontSize: 8,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-}
-
 class _Stat extends StatelessWidget {
-  const _Stat(this.icon, this.value, this.label, this.color, this.panel,
-      this.line, this.foreground, this.muted);
+  const _Stat(
+    this.icon,
+    this.value,
+    this.label,
+    this.color,
+    this.panel,
+    this.line,
+    this.foreground,
+    this.muted,
+  );
   final IconData icon;
   final String value;
   final String label;
@@ -641,40 +983,50 @@ class _Stat extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 5),
-        decoration: BoxDecoration(
-          color: panel,
-          borderRadius: BorderRadius.circular(19),
-          border: Border.all(color: line),
+    padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 10),
+    decoration: BoxDecoration(
+      color: panel,
+      borderRadius: BorderRadius.circular(20),
+      border: Border.all(color: line),
+    ),
+    child: Column(
+      children: [
+        Icon(icon, color: color, size: 19),
+        const SizedBox(height: 7),
+        Text(
+          value,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            color: foreground,
+            fontSize: MediaQuery.sizeOf(context).width <= 430 ? 20 : 22,
+            fontWeight: FontWeight.w900,
+          ),
         ),
-        child: Column(
-          children: [
-            Icon(icon, color: color, size: 19),
-            const SizedBox(height: 7),
-            Text(value,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: foreground,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w900,
-                )),
-            const SizedBox(height: 3),
-            Text(label,
-                style: TextStyle(
-                  color: muted,
-                  fontSize: 8,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 1,
-                )),
-          ],
+        const SizedBox(height: 3),
+        Text(
+          label,
+          style: TextStyle(
+            color: muted,
+            fontSize: 8,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 1,
+          ),
         ),
-      );
+      ],
+    ),
+  );
 }
 
 class _Wallet extends StatelessWidget {
-  const _Wallet(this.state, this.panel, this.raised, this.line,
-      this.foreground, this.muted);
+  const _Wallet(
+    this.state,
+    this.panel,
+    this.raised,
+    this.line,
+    this.foreground,
+    this.muted,
+  );
   final ProgressionState state;
   final Color panel;
   final Color raised;
@@ -684,96 +1036,138 @@ class _Wallet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.all(17),
-        decoration: BoxDecoration(
-          color: panel,
-          borderRadius: BorderRadius.circular(22),
-          border: Border.all(color: line),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    padding: const EdgeInsets.all(17),
+    decoration: BoxDecoration(
+      color: panel,
+      borderRadius: BorderRadius.circular(24),
+      border: Border.all(color: line),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
           children: [
-            Row(
-              children: [
-                const Icon(Icons.account_balance_wallet_rounded,
-                    color: _gold, size: 17),
-                const SizedBox(width: 8),
-                Text('YOUR WALLET',
-                    style: TextStyle(
-                      color: muted,
-                      fontSize: 10,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 1.5,
-                    )),
-                const Spacer(),
-                Text('${state.moneyEarned} earned',
-                    style: const TextStyle(color: _green, fontSize: 10)),
-              ],
+            const Icon(
+              Icons.account_balance_wallet_rounded,
+              color: _gold,
+              size: 17,
             ),
-            const SizedBox(height: 12),
-            Text(state.money.toString(),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  color: _gold,
-                  fontSize: 28,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: -.8,
-                )),
-            Text('MONEY',
-                style: TextStyle(
-                  color: muted,
-                  fontSize: 8,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 1.7,
-                )),
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                Text(
-                  'RUN MOMENTUM',
-                  style: TextStyle(
-                    color: muted,
-                    fontSize: 8,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 1,
-                  ),
-                ),
-                const Spacer(),
-                Text(
-                  'BEST ${state.bestStreak}',
-                  style: TextStyle(
-                    color: muted,
-                    fontSize: 8,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-              ],
+            const SizedBox(width: 8),
+            Text(
+              'YOUR WALLET',
+              style: TextStyle(
+                color: muted,
+                fontSize: 10,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 1.5,
+              ),
             ),
-            const SizedBox(height: 13),
-            Row(
-              children: [
-                Expanded(child: _Currency(Icons.auto_awesome_rounded,
-                    'PRESTIGE', state.prestige.toString(), _purple,
-                    raised, foreground, muted)),
-                const SizedBox(width: 7),
-                Expanded(child: _Currency(Icons.bolt_rounded,
-                    'ULTRA', state.ultra.toString(), _cyan,
-                    raised, foreground, muted)),
-                const SizedBox(width: 7),
-                Expanded(child: _Currency(Icons.diamond_rounded,
-                    'NEBULA', state.nebula.toString(),
-                    const Color(0xFFB7A2FF), raised, foreground, muted)),
-              ],
+            const Spacer(),
+            Text(
+              '${state.moneyEarned} earned',
+              style: const TextStyle(color: _green, fontSize: 10),
             ),
           ],
         ),
-      );
+        const SizedBox(height: 12),
+        Text(
+          state.money.toString(),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(
+            color: _gold,
+            fontSize: 28,
+            fontWeight: FontWeight.w900,
+            letterSpacing: -.8,
+          ),
+        ),
+        Text(
+          'MONEY',
+          style: TextStyle(
+            color: muted,
+            fontSize: 8,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 1.7,
+          ),
+        ),
+        const SizedBox(height: 10),
+        Row(
+          children: [
+            Text(
+              'RUN MOMENTUM',
+              style: TextStyle(
+                color: muted,
+                fontSize: 8,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 1,
+              ),
+            ),
+            const Spacer(),
+            Text(
+              'BEST ${state.bestStreak}',
+              style: TextStyle(
+                color: muted,
+                fontSize: 8,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 13),
+        Row(
+          children: [
+            Expanded(
+              child: _Currency(
+                Icons.auto_awesome_rounded,
+                'PRESTIGE',
+                state.prestige.toString(),
+                _purple,
+                raised,
+                foreground,
+                muted,
+              ),
+            ),
+            const SizedBox(width: 7),
+            Expanded(
+              child: _Currency(
+                Icons.bolt_rounded,
+                'ULTRA',
+                state.ultra.toString(),
+                _cyan,
+                raised,
+                foreground,
+                muted,
+              ),
+            ),
+            const SizedBox(width: 7),
+            Expanded(
+              child: _Currency(
+                Icons.diamond_rounded,
+                'NEBULA',
+                state.nebula.toString(),
+                const Color(0xFFB7A2FF),
+                raised,
+                foreground,
+                muted,
+              ),
+            ),
+          ],
+        ),
+      ],
+    ),
+  );
 }
 
 class _Currency extends StatelessWidget {
-  const _Currency(this.icon, this.label, this.value, this.color,
-      this.background, this.foreground, this.muted);
+  const _Currency(
+    this.icon,
+    this.label,
+    this.value,
+    this.color,
+    this.background,
+    this.foreground,
+    this.muted,
+  );
   final IconData icon;
   final String label;
   final String value;
@@ -784,35 +1178,39 @@ class _Currency extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 10),
-        decoration: BoxDecoration(
-          color: background,
-          borderRadius: BorderRadius.circular(14),
+    padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 10),
+    decoration: BoxDecoration(
+      color: background,
+      borderRadius: BorderRadius.circular(14),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, color: color, size: 15),
+        const SizedBox(height: 6),
+        Text(
+          value,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            color: foreground,
+            fontSize: 12,
+            fontWeight: FontWeight.w900,
+          ),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(icon, color: color, size: 15),
-            const SizedBox(height: 6),
-            Text(value,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: foreground,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w900,
-                )),
-            const SizedBox(height: 2),
-            Text(label,
-                style: TextStyle(
-                  color: muted,
-                  fontSize: 7,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: .8,
-                )),
-          ],
+        const SizedBox(height: 2),
+        Text(
+          label,
+          style: TextStyle(
+            color: muted,
+            fontSize: 7,
+            fontWeight: FontWeight.w900,
+            letterSpacing: .8,
+          ),
         ),
-      );
+      ],
+    ),
+  );
 }
 
 class _GuessInput extends StatelessWidget {
@@ -841,156 +1239,128 @@ class _GuessInput extends StatelessWidget {
 
   void _setGuess(int value) {
     controller.text = value.toString();
-    controller.selection = TextSelection.collapsed(offset: controller.text.length);
+    controller.selection = TextSelection.collapsed(
+      offset: controller.text.length,
+    );
   }
 
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.all(17),
-        decoration: BoxDecoration(
-          color: panel,
-          borderRadius: BorderRadius.circular(23),
-          border: Border.all(color: line),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    padding: const EdgeInsets.all(18),
+    decoration: BoxDecoration(
+      color: panel,
+      borderRadius: BorderRadius.circular(28),
+      border: Border.all(color: line),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
           children: [
-            Row(
-              children: [
-                Text('YOUR GUESS',
-                    style: TextStyle(
-                      color: foreground,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 1.4,
-                    )),
-                const Spacer(),
-                Text('WHOLE NUMBER',
-                    style: TextStyle(
-                      color: muted,
-                      fontSize: 9,
-                      fontWeight: FontWeight.w800,
-                    )),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    key: const Key('guess-input'),
-                    controller: controller,
-                    enabled: enabled,
-                    keyboardType: TextInputType.number,
-                    textInputAction: TextInputAction.done,
-                    onSubmitted: (_) => onGuess(),
-                    style: TextStyle(
-                      color: foreground,
-                      fontSize: 19,
-                      fontWeight: FontWeight.w800,
-                    ),
-                    decoration: InputDecoration(
-                      hintText: 'Enter a number',
-                      hintStyle: TextStyle(color: muted.withValues(alpha: .75)),
-                      filled: true,
-                      fillColor: raised,
-                      contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 15, vertical: 16),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: BorderSide(color: line),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: BorderSide(color: line),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: const BorderSide(color: _purple, width: 1.5),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 9),
-                SizedBox(
-                  height: 56,
-                  child: FilledButton(
-                    onPressed: enabled ? onGuess : null,
-                    style: FilledButton.styleFrom(
-                      backgroundColor: _purple,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 18),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
-                    child: const Text(
-                      '->',
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 0,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'QUICK PICK',
-                style: TextStyle(
-                  color: muted,
-                  fontSize: 9,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 1,
-                ),
+            Text(
+              'YOUR GUESS',
+              style: TextStyle(
+                color: foreground,
+                fontSize: 11,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 1.4,
               ),
             ),
-            const SizedBox(height: 7),
-            Wrap(
-              spacing: 7,
-              runSpacing: 7,
-              children: [
-                _QuickGuessButton(
-                  label: 'LOW END',
-                  enabled: enabled,
-                  onPressed: () => _setGuess(game.minimum),
-                ),
-                _QuickGuessButton(
-                  label: 'MIDPOINT',
-                  enabled: enabled,
-                  onPressed: () => _setGuess(
-                    game.minimum + (game.maximum - game.minimum) ~/ 2,
-                  ),
-                ),
-                _QuickGuessButton(
-                  label: 'HIGH END',
-                  enabled: enabled,
-                  onPressed: () => _setGuess(game.maximum),
-                ),
-                _QuickGuessButton(
-                  label: 'CLEAR',
-                  enabled: enabled,
-                  onPressed: () {
-                    controller.clear();
-                    controller.selection = const TextSelection.collapsed(offset: 0);
-                  },
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
+            const Spacer(),
             Text(
-              completed
-                  ? 'You found it! Start another round when you are ready.'
-                  : 'Every correct guess earns Money. Build your streak for bigger rewards.',
-              style: TextStyle(color: muted, fontSize: 10, height: 1.4),
+              'WHOLE NUMBER',
+              style: TextStyle(
+                color: muted,
+                fontSize: 9,
+                fontWeight: FontWeight.w800,
+              ),
             ),
           ],
         ),
-      );
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: GtnExpressiveTextField(
+                key: const Key('guess-input'),
+                controller: controller,
+                enabled: enabled,
+                keyboardType: TextInputType.number,
+                textInputAction: TextInputAction.done,
+                onSubmitted: (_) => onGuess(),
+                decoration: const InputDecoration(hintText: 'Enter a number'),
+              ),
+            ),
+            const SizedBox(width: 9),
+            SizedBox(
+              width: MediaQuery.sizeOf(context).width <= 430 ? 100 : 116,
+              height: 56,
+              child: M3EButton.filled(
+                onPressed: enabled ? onGuess : null,
+                child: const Text(
+                  '->',
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: Text(
+            'QUICK PICK',
+            style: TextStyle(
+              color: muted,
+              fontSize: 9,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 1,
+            ),
+          ),
+        ),
+        const SizedBox(height: 7),
+        Wrap(
+          spacing: 7,
+          runSpacing: 7,
+          children: [
+            _QuickGuessButton(
+              label: 'LOW END',
+              enabled: enabled,
+              onPressed: () => _setGuess(game.minimum),
+            ),
+            _QuickGuessButton(
+              label: 'MIDPOINT',
+              enabled: enabled,
+              onPressed: () =>
+                  _setGuess(game.minimum + (game.maximum - game.minimum) ~/ 2),
+            ),
+            _QuickGuessButton(
+              label: 'HIGH END',
+              enabled: enabled,
+              onPressed: () => _setGuess(game.maximum),
+            ),
+            _QuickGuessButton(
+              label: 'CLEAR',
+              enabled: enabled,
+              onPressed: () {
+                controller.clear();
+                controller.selection = const TextSelection.collapsed(offset: 0);
+              },
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Text(
+          completed ? 'You found it! Start another round when you are ready.' : 'Every correct guess earns Money. Build your streak for bigger rewards.',
+          style: TextStyle(color: muted, fontSize: 10, height: 1.4),
+        ),
+      ],
+    ),
+  );
 }
 
 class _QuickGuessButton extends StatelessWidget {
@@ -1005,25 +1375,27 @@ class _QuickGuessButton extends StatelessWidget {
   final VoidCallback onPressed;
 
   @override
-  Widget build(BuildContext context) => OutlinedButton(
-        onPressed: enabled ? onPressed : null,
-        style: OutlinedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
-          visualDensity: VisualDensity.compact,
-          foregroundColor: _muted,
-          side: const BorderSide(color: _line),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        ),
-        child: Text(
-          label,
-          style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w900),
-        ),
-      );
+  Widget build(BuildContext context) => M3EButton.outlined(
+    onPressed: enabled ? onPressed : null,
+    child: Text(
+      label,
+      style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w900),
+    ),
+  );
 }
 
 class _Action extends StatelessWidget {
-  const _Action(this.title, this.subtitle, this.icon, this.color, this.onTap,
-      this.panel, this.line, this.foreground, this.muted);
+  const _Action(
+    this.title,
+    this.subtitle,
+    this.icon,
+    this.color,
+    this.onTap,
+    this.panel,
+    this.line,
+    this.foreground,
+    this.muted,
+  );
   final String title;
   final String subtitle;
   final IconData icon;
@@ -1036,58 +1408,58 @@ class _Action extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Material(
-        color: panel,
-        borderRadius: BorderRadius.circular(19),
-        child: InkWell(
-          onTap: onTap,
+    color: panel,
+    borderRadius: BorderRadius.circular(19),
+    child: InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(19),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(19),
-          child: Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(19),
-              border: Border.all(color: line),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 35,
-                  height: 35,
-                  decoration: BoxDecoration(
-                    color: color.withValues(alpha: .14),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(icon, color: color, size: 19),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(title,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color: foreground,
-                            fontSize: 10,
-                            fontWeight: FontWeight.w900,
-                          )),
-                      const SizedBox(height: 3),
-                      Text(subtitle,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color: muted,
-                            fontSize: 8,
-                            height: 1.2,
-                          )),
-                    ],
-                  ),
-                ),
-                Icon(Icons.chevron_right_rounded, color: muted, size: 16),
-              ],
-            ),
-          ),
+          border: Border.all(color: line),
         ),
-      );
+        child: Row(
+          children: [
+            Container(
+              width: 35,
+              height: 35,
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: .14),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, color: color, size: 19),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: foreground,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    subtitle,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(color: muted, fontSize: 8, height: 1.2),
+                  ),
+                ],
+              ),
+            ),
+            Icon(Icons.chevron_right_rounded, color: muted, size: 16),
+          ],
+        ),
+      ),
+    ),
+  );
 }

@@ -24,7 +24,11 @@ void main() {
           prestige: BigNumber.fromInt(4),
           upgrades: const {'income': 2},
         ),
-        settings: const GameSettings(darkMode: false, reduceMotion: true, difficultyId: 'hard'),
+        settings: const GameSettings(
+          darkMode: false,
+          reduceMotion: true,
+          difficultyId: 'hard',
+        ),
       );
       expect(SaveData.fromJson(save.toJson()).toJson(), save.toJson());
       expect(SaveData.fromJson(save.toJson()).minimum, 25);
@@ -57,10 +61,7 @@ void main() {
       final restored = SaveData.fromJson(save.toJson());
 
       expect(restored.creativeMode, isNotNull);
-      expect(
-        CreativeModeRuntime.resume(restored.creativeMode!)!.target,
-        21,
-      );
+      expect(CreativeModeRuntime.resume(restored.creativeMode!)!.target, 21);
       expect(restored.creativeMode!.effects.single.value, 2);
     });
 
@@ -76,7 +77,7 @@ void main() {
             'rangeMin': 1,
             'rangeMax': 10,
             'effects': [
-              {'id': 'bad', 'type': 'UNKNOWN', 'value': 1}
+              {'id': 'bad', 'type': 'UNKNOWN', 'value': 1},
             ],
           },
         }),
@@ -95,18 +96,22 @@ void main() {
       final restored = SaveData.fromJson(save.toJson());
       expect(restored.profileName, 'My Run');
       expect(restored.profileIconId, 'planet');
-      expect(restored.copyWith(profileName: 'New Name').profileIconId, 'planet');
+      expect(
+        restored.copyWith(profileName: 'New Name').profileIconId,
+        'planet',
+      );
     });
 
     test('migrates old saves without profile fields', () {
-      final oldSave = SaveData(
-        schemaVersion: 3,
-        secret: 42,
-        attempts: 0,
-        gamesWon: 0,
-      ).toJson()
-        ..remove('profileName')
-        ..remove('profileIconId');
+      final oldSave =
+          SaveData(
+              schemaVersion: 3,
+              secret: 42,
+              attempts: 0,
+              gamesWon: 0,
+            ).toJson()
+            ..remove('profileName')
+            ..remove('profileIconId');
       final migrated = SaveData.fromJson(oldSave);
       expect(migrated.schemaVersion, SaveData.currentSchemaVersion);
       expect(migrated.profileName, isEmpty);
@@ -116,7 +121,10 @@ void main() {
     test('rejects invalid profile metadata', () {
       final base = SaveData(secret: 42, attempts: 0, gamesWon: 0).toJson();
       expect(
-        () => SaveData.fromJson({...base, 'profileName': List.filled(25, 'x').join()}),
+        () => SaveData.fromJson({
+          ...base,
+          'profileName': List.filled(25, 'x').join(),
+        }),
         throwsFormatException,
       );
       expect(
@@ -139,10 +147,7 @@ void main() {
       expect(restored.maximum, 500);
       expect(restored.settings.difficultyId, 'extreme');
       expect(
-        () => SaveData.fromJson({
-          ...save.toJson(),
-          'maximum': 501,
-        }),
+        () => SaveData.fromJson({...save.toJson(), 'maximum': 501}),
         throwsFormatException,
       );
     });
@@ -183,7 +188,10 @@ void main() {
       expect(save.schemaVersion, SaveData.currentSchemaVersion);
       expect(save.minimum, 1);
       expect(save.maximum, 100);
-      expect(save.progression.legacySystems.toJson(), LegacySystemsState.initial.toJson());
+      expect(
+        save.progression.legacySystems.toJson(),
+        LegacySystemsState.initial.toJson(),
+      );
     });
 
     test('migrates schema 1 saves and preserves nested legacy systems', () {
@@ -207,8 +215,7 @@ void main() {
   });
 
   test('saves and loads through a temporary file safely', () async {
-    final directory =
-        await Directory.systemTemp.createTemp('gtn2-save-test-');
+    final directory = await Directory.systemTemp.createTemp('gtn2-save-test-');
     addTearDown(() => directory.delete(recursive: true));
     final storage = SaveStorage(directory: directory);
     final first = SaveData(secret: 42, attempts: 4, gamesWon: 1);
@@ -221,51 +228,61 @@ void main() {
     expect((await storage.load())?.toJson(), second.toJson());
   });
 
-  test('serializes writes across separate storage instances for one slot', () async {
-    final directory =
-        await Directory.systemTemp.createTemp('gtn2-save-instance-queue-');
-    addTearDown(() => directory.delete(recursive: true));
-    final first = SaveStorage(directory: directory, slot: 3);
-    final second = SaveStorage(directory: directory, slot: 3);
+  test(
+    'serializes writes across separate storage instances for one slot',
+    () async {
+      final directory = await Directory.systemTemp.createTemp(
+        'gtn2-save-instance-queue-',
+      );
+      addTearDown(() => directory.delete(recursive: true));
+      final first = SaveStorage(directory: directory, slot: 3);
+      final second = SaveStorage(directory: directory, slot: 3);
 
-    await Future.wait([
-      first.save(SaveData(secret: 31, attempts: 1, gamesWon: 1)),
-      second.save(SaveData(secret: 82, attempts: 2, gamesWon: 2)),
-    ]);
+      await Future.wait([
+        first.save(SaveData(secret: 31, attempts: 1, gamesWon: 1)),
+        second.save(SaveData(secret: 82, attempts: 2, gamesWon: 2)),
+      ]);
 
-    final restored = await first.load();
-    expect(restored, isNotNull);
-    expect([31, 82], contains(restored!.secret));
-    expect(await first.hasBackup(), isTrue);
-  });
+      final restored = await first.load();
+      expect(restored, isNotNull);
+      expect([31, 82], contains(restored!.secret));
+      expect(await first.hasBackup(), isTrue);
+    },
+  );
 
-  test('gameplay save updates preserve profile and Creative Mode metadata', () async {
-    final directory =
-        await Directory.systemTemp.createTemp('gtn2-save-metadata-update-');
-    addTearDown(() => directory.delete(recursive: true));
-    final storage = SaveStorage(directory: directory);
-    final creative = CreativeModeSave(
-      enabled: true,
-      rangeMin: 10,
-      rangeMax: 50,
-      effects: const [
-        CreativeModeEffect(
-          id: 'extra-hints',
-          type: CreativeEffectType.extraHints,
-          value: 2,
+  test(
+    'gameplay save updates preserve profile and Creative Mode metadata',
+    () async {
+      final directory = await Directory.systemTemp.createTemp(
+        'gtn2-save-metadata-update-',
+      );
+      addTearDown(() => directory.delete(recursive: true));
+      final storage = SaveStorage(directory: directory);
+      final creative = CreativeModeSave(
+        enabled: true,
+        rangeMin: 10,
+        rangeMax: 50,
+        effects: const [
+          CreativeModeEffect(
+            id: 'extra-hints',
+            type: CreativeEffectType.extraHints,
+            value: 2,
+          ),
+        ],
+      );
+      await storage.save(
+        SaveData(
+          secret: 42,
+          attempts: 1,
+          gamesWon: 2,
+          profileName: 'My Profile',
+          profileIconId: 'crown',
+          creativeMode: creative,
         ),
-      ],
-    );
-    await storage.save(SaveData(
-      secret: 42,
-      attempts: 1,
-      gamesWon: 2,
-      profileName: 'My Profile',
-      profileIconId: 'crown',
-      creativeMode: creative,
-    ));
+      );
 
-    await storage.update((current) => current!.copyWith(
+      await storage.update(
+        (current) => current!.copyWith(
           secret: 73,
           attempts: 4,
           gamesWon: 3,
@@ -276,23 +293,26 @@ void main() {
             money: BigNumber.fromInt(900),
           ),
           settings: const GameSettings(difficultyId: 'hard'),
-        ));
+        ),
+      );
 
-    final restored = await storage.load();
-    expect(restored?.secret, 73);
-    expect(restored?.attempts, 4);
-    expect(restored?.gamesWon, 3);
-    expect(restored?.profileName, 'My Profile');
-    expect(restored?.profileIconId, 'crown');
-    expect(restored?.creativeMode?.enabled, isTrue);
-    expect(restored?.creativeMode?.effects.single.value, 2);
-    expect(restored?.progression.money.toString(), '900');
-    expect(restored?.settings.difficultyId, 'hard');
-  });
+      final restored = await storage.load();
+      expect(restored?.secret, 73);
+      expect(restored?.attempts, 4);
+      expect(restored?.gamesWon, 3);
+      expect(restored?.profileName, 'My Profile');
+      expect(restored?.profileIconId, 'crown');
+      expect(restored?.creativeMode?.enabled, isTrue);
+      expect(restored?.creativeMode?.effects.single.value, 2);
+      expect(restored?.progression.money.toString(), '900');
+      expect(restored?.settings.difficultyId, 'hard');
+    },
+  );
 
   test('persists Extreme Hardcore saves through the storage layer', () async {
-    final directory =
-        await Directory.systemTemp.createTemp('gtn2-extreme-save-test-');
+    final directory = await Directory.systemTemp.createTemp(
+      'gtn2-extreme-save-test-',
+    );
     addTearDown(() => directory.delete(recursive: true));
     final storage = SaveStorage(directory: directory);
     final extremeSave = SaveData(
@@ -312,63 +332,81 @@ void main() {
     expect(restored?.settings.difficultyId, 'extreme');
   });
 
-  test('rejects save data whose secret is outside its configured range', () async {
-    final directory =
-        await Directory.systemTemp.createTemp('gtn2-invalid-range-save-test-');
-    addTearDown(() => directory.delete(recursive: true));
-    final storage = SaveStorage(directory: directory);
+  test(
+    'rejects save data whose secret is outside its configured range',
+    () async {
+      final directory = await Directory.systemTemp.createTemp(
+        'gtn2-invalid-range-save-test-',
+      );
+      addTearDown(() => directory.delete(recursive: true));
+      final storage = SaveStorage(directory: directory);
 
-    await expectLater(
-      storage.save(SaveData(
-        secret: 501,
-        attempts: 0,
-        gamesWon: 0,
-        minimum: 1,
-        maximum: 500,
-      )),
-      throwsArgumentError,
-    );
-  });
+      await expectLater(
+        storage.save(
+          SaveData(
+            secret: 501,
+            attempts: 0,
+            gamesWon: 0,
+            minimum: 1,
+            maximum: 500,
+          ),
+        ),
+        throwsArgumentError,
+      );
+    },
+  );
 
-  test('recovers the completed temporary save after an interrupted write', () async {
-    final directory =
-        await Directory.systemTemp.createTemp('gtn2-save-recovery-tmp-');
-    addTearDown(() => directory.delete(recursive: true));
-    final storage = SaveStorage(directory: directory);
-    final temporary = File('${directory.path}/gtn2-save.json.tmp');
-    await temporary.writeAsString(
-      '{"schemaVersion":3,"secret":91,"attempts":4,"gamesWon":2,"isComplete":false,"minimum":1,"maximum":100}',
-    );
+  test(
+    'recovers the completed temporary save after an interrupted write',
+    () async {
+      final directory = await Directory.systemTemp.createTemp(
+        'gtn2-save-recovery-tmp-',
+      );
+      addTearDown(() => directory.delete(recursive: true));
+      final storage = SaveStorage(directory: directory);
+      final temporary = File('${directory.path}/gtn2-save.json.tmp');
+      await temporary.writeAsString(
+        '{"schemaVersion":3,"secret":91,"attempts":4,"gamesWon":2,"isComplete":false,"minimum":1,"maximum":100}',
+      );
 
-    final recovered = await storage.load();
+      final recovered = await storage.load();
 
-    expect(recovered?.secret, 91);
-    expect(await File('${directory.path}/gtn2-save.json').exists(), isTrue);
-    expect(await temporary.exists(), isFalse);
-  });
+      expect(recovered?.secret, 91);
+      expect(await File('${directory.path}/gtn2-save.json').exists(), isTrue);
+      expect(await temporary.exists(), isFalse);
+    },
+  );
 
-  test('recovers the last known-good backup when the primary save is corrupt', () async {
-    final directory =
-        await Directory.systemTemp.createTemp('gtn2-save-recovery-bak-');
-    addTearDown(() => directory.delete(recursive: true));
-    final storage = SaveStorage(directory: directory);
-    final primary = File('${directory.path}/gtn2-save.json');
-    final backup = File('${directory.path}/gtn2-save.json.bak');
-    await primary.writeAsString('{broken json');
-    await backup.writeAsString(
-      '{"schemaVersion":3,"secret":73,"attempts":2,"gamesWon":1,"isComplete":false,"minimum":1,"maximum":100}',
-    );
+  test(
+    'recovers the last known-good backup when the primary save is corrupt',
+    () async {
+      final directory = await Directory.systemTemp.createTemp(
+        'gtn2-save-recovery-bak-',
+      );
+      addTearDown(() => directory.delete(recursive: true));
+      final storage = SaveStorage(directory: directory);
+      final primary = File('${directory.path}/gtn2-save.json');
+      final backup = File('${directory.path}/gtn2-save.json.bak');
+      await primary.writeAsString('{broken json');
+      await backup.writeAsString(
+        '{"schemaVersion":3,"secret":73,"attempts":2,"gamesWon":1,"isComplete":false,"minimum":1,"maximum":100}',
+      );
 
-    final recovered = await storage.load();
+      final recovered = await storage.load();
 
-    expect(recovered?.secret, 73);
-    expect(await File('${directory.path}/gtn2-save.json').exists(), isTrue);
-    expect(await File('${directory.path}/gtn2-save.json.corrupt').exists(), isTrue);
-  });
+      expect(recovered?.secret, 73);
+      expect(await File('${directory.path}/gtn2-save.json').exists(), isTrue);
+      expect(
+        await File('${directory.path}/gtn2-save.json.corrupt').exists(),
+        isTrue,
+      );
+    },
+  );
 
   test('persists the active save slot across storage instances', () async {
-    final directory =
-        await Directory.systemTemp.createTemp('gtn2-active-slot-test-');
+    final directory = await Directory.systemTemp.createTemp(
+      'gtn2-active-slot-test-',
+    );
     addTearDown(() => directory.delete(recursive: true));
     final slotOne = SaveStorage(directory: directory, slot: 1);
     final slotTen = SaveStorage(directory: directory, slot: 10);
@@ -380,49 +418,71 @@ void main() {
     expect(await slotTen.loadActiveSlot(), 3);
   });
 
-  test('rejects invalid active slot values without replacing the selection', () async {
-    final directory =
-        await Directory.systemTemp.createTemp('gtn2-active-slot-invalid-');
-    addTearDown(() => directory.delete(recursive: true));
-    final storage = SaveStorage(directory: directory);
+  test(
+    'rejects invalid active slot values without replacing the selection',
+    () async {
+      final directory = await Directory.systemTemp.createTemp(
+        'gtn2-active-slot-invalid-',
+      );
+      addTearDown(() => directory.delete(recursive: true));
+      final storage = SaveStorage(directory: directory);
 
-    await storage.saveActiveSlot(4);
-    await expectLater(storage.saveActiveSlot(0), throwsRangeError);
-    await expectLater(storage.saveActiveSlot(11), throwsRangeError);
-    expect(await storage.loadActiveSlot(), 4);
-  });
+      await storage.saveActiveSlot(4);
+      await expectLater(storage.saveActiveSlot(0), throwsRangeError);
+      await expectLater(storage.saveActiveSlot(11), throwsRangeError);
+      expect(await storage.loadActiveSlot(), 4);
+    },
+  );
 
-  test('recovers active-slot metadata from a completed temporary file', () async {
-    final directory =
-        await Directory.systemTemp.createTemp('gtn2-active-slot-tmp-');
-    addTearDown(() => directory.delete(recursive: true));
-    final storage = SaveStorage(directory: directory);
-    final temporary = File('${directory.path}/gtn2-active-slot.json.tmp');
-    await temporary.writeAsString('{"schemaVersion":1,"slot":8}');
+  test(
+    'recovers active-slot metadata from a completed temporary file',
+    () async {
+      final directory = await Directory.systemTemp.createTemp(
+        'gtn2-active-slot-tmp-',
+      );
+      addTearDown(() => directory.delete(recursive: true));
+      final storage = SaveStorage(directory: directory);
+      final temporary = File('${directory.path}/gtn2-active-slot.json.tmp');
+      await temporary.writeAsString('{"schemaVersion":1,"slot":8}');
 
-    expect(await storage.loadActiveSlot(), 8);
-    expect(await File('${directory.path}/gtn2-active-slot.json').exists(), isTrue);
-    expect(await temporary.exists(), isFalse);
-  });
+      expect(await storage.loadActiveSlot(), 8);
+      expect(
+        await File('${directory.path}/gtn2-active-slot.json').exists(),
+        isTrue,
+      );
+      expect(await temporary.exists(), isFalse);
+    },
+  );
 
-  test('recovers active-slot metadata from backup when primary is corrupt', () async {
-    final directory =
-        await Directory.systemTemp.createTemp('gtn2-active-slot-bak-');
-    addTearDown(() => directory.delete(recursive: true));
-    final storage = SaveStorage(directory: directory);
-    final primary = File('${directory.path}/gtn2-active-slot.json');
-    final backup = File('${directory.path}/gtn2-active-slot.json.bak');
-    await primary.writeAsString('{broken json');
-    await backup.writeAsString('{"schemaVersion":1,"slot":6}');
+  test(
+    'recovers active-slot metadata from backup when primary is corrupt',
+    () async {
+      final directory = await Directory.systemTemp.createTemp(
+        'gtn2-active-slot-bak-',
+      );
+      addTearDown(() => directory.delete(recursive: true));
+      final storage = SaveStorage(directory: directory);
+      final primary = File('${directory.path}/gtn2-active-slot.json');
+      final backup = File('${directory.path}/gtn2-active-slot.json.bak');
+      await primary.writeAsString('{broken json');
+      await backup.writeAsString('{"schemaVersion":1,"slot":6}');
 
-    expect(await storage.loadActiveSlot(), 6);
-    expect(await File('${directory.path}/gtn2-active-slot.json').exists(), isTrue);
-    expect(await File('${directory.path}/gtn2-active-slot.json.corrupt').exists(), isTrue);
-  });
+      expect(await storage.loadActiveSlot(), 6);
+      expect(
+        await File('${directory.path}/gtn2-active-slot.json').exists(),
+        isTrue,
+      );
+      expect(
+        await File('${directory.path}/gtn2-active-slot.json.corrupt').exists(),
+        isTrue,
+      );
+    },
+  );
 
   test('retains and restores the previous valid save', () async {
-    final directory =
-        await Directory.systemTemp.createTemp('gtn2-save-restore-test-');
+    final directory = await Directory.systemTemp.createTemp(
+      'gtn2-save-restore-test-',
+    );
     addTearDown(() => directory.delete(recursive: true));
     final storage = SaveStorage(directory: directory);
     await storage.save(SaveData(secret: 42, attempts: 1, gamesWon: 1));
@@ -438,18 +498,15 @@ void main() {
   });
 
   test('creates a save only once when two storage instances race', () async {
-    final directory =
-        await Directory.systemTemp.createTemp('gtn2-create-slot-race-');
+    final directory = await Directory.systemTemp.createTemp(
+      'gtn2-create-slot-race-',
+    );
     addTearDown(() => directory.delete(recursive: true));
     final first = SaveStorage(directory: directory, slot: 5);
     final second = SaveStorage(directory: directory, slot: 5);
     final results = await Future.wait([
-      first.createIfEmpty(
-        SaveData(secret: 31, attempts: 0, gamesWon: 0),
-      ),
-      second.createIfEmpty(
-        SaveData(secret: 82, attempts: 0, gamesWon: 0),
-      ),
+      first.createIfEmpty(SaveData(secret: 31, attempts: 0, gamesWon: 0)),
+      second.createIfEmpty(SaveData(secret: 82, attempts: 0, gamesWon: 0)),
     ]);
 
     expect(results.where((created) => created).length, 1);
@@ -457,8 +514,9 @@ void main() {
   });
 
   test('duplicate operations cannot overwrite the same target slot', () async {
-    final directory =
-        await Directory.systemTemp.createTemp('gtn2-duplicate-slot-race-');
+    final directory = await Directory.systemTemp.createTemp(
+      'gtn2-duplicate-slot-race-',
+    );
     addTearDown(() => directory.delete(recursive: true));
     final first = SaveStorage(directory: directory, slot: 1);
     final second = SaveStorage(directory: directory, slot: 2);
@@ -471,15 +529,18 @@ void main() {
     ]);
 
     expect(results.where((created) => created).length, 1);
-    expect([31, 82], contains((await SaveStorage(
-      directory: directory,
-      slot: 3,
-    ).load())!.secret));
+    expect(
+      [31, 82],
+      contains(
+        (await SaveStorage(directory: directory, slot: 3).load())!.secret,
+      ),
+    );
   });
 
   test('duplicates a save and its restore backup into an empty slot', () async {
-    final directory =
-        await Directory.systemTemp.createTemp('gtn2-save-duplicate-test-');
+    final directory = await Directory.systemTemp.createTemp(
+      'gtn2-save-duplicate-test-',
+    );
     addTearDown(() => directory.delete(recursive: true));
     final source = SaveStorage(directory: directory, slot: 1);
     final target = SaveStorage(directory: directory, slot: 2);
@@ -494,8 +555,9 @@ void main() {
   });
 
   test('reset removes the save and all recovery files', () async {
-    final directory =
-        await Directory.systemTemp.createTemp('gtn2-save-reset-test-');
+    final directory = await Directory.systemTemp.createTemp(
+      'gtn2-save-reset-test-',
+    );
     addTearDown(() => directory.delete(recursive: true));
     final storage = SaveStorage(directory: directory, slot: 4);
     await storage.save(SaveData(secret: 42, attempts: 1, gamesWon: 1));
@@ -508,12 +570,16 @@ void main() {
   });
 
   test('save slots use separate files', () async {
-    final directory =
-        await Directory.systemTemp.createTemp('gtn2-save-slots-test-');
+    final directory = await Directory.systemTemp.createTemp(
+      'gtn2-save-slots-test-',
+    );
     addTearDown(() => directory.delete(recursive: true));
     final firstSlot = SaveStorage(directory: directory, slot: 1);
     final secondSlot = SaveStorage(directory: directory, slot: 2);
-    final tenthSlot = SaveStorage(directory: directory, slot: SaveStorage.maxSaveSlots);
+    final tenthSlot = SaveStorage(
+      directory: directory,
+      slot: SaveStorage.maxSaveSlots,
+    );
     await firstSlot.save(SaveData(secret: 11, attempts: 0, gamesWon: 0));
     await secondSlot.save(SaveData(secret: 22, attempts: 0, gamesWon: 0));
     await tenthSlot.save(SaveData(secret: 99, attempts: 0, gamesWon: 0));
@@ -527,18 +593,13 @@ void main() {
   });
 
   test('rejects save slots outside the original ten-slot range', () async {
-    final directory =
-        await Directory.systemTemp.createTemp('gtn2-save-slot-range-');
+    final directory = await Directory.systemTemp.createTemp(
+      'gtn2-save-slot-range-',
+    );
     addTearDown(() => directory.delete(recursive: true));
 
     expect(SaveStorage.maxSaveSlots, 10);
-    expect(
-      () => SaveStorage(directory: directory, slot: 0),
-      throwsRangeError,
-    );
-    expect(
-      () => SaveStorage(directory: directory, slot: 11),
-      throwsRangeError,
-    );
+    expect(() => SaveStorage(directory: directory, slot: 0), throwsRangeError);
+    expect(() => SaveStorage(directory: directory, slot: 11), throwsRangeError);
   });
 }

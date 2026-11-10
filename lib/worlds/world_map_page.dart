@@ -1,9 +1,11 @@
 import 'dart:math' as math;
 
-import 'package:flutter/material.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../core/numbers/big_number.dart';
 import '../core/progression/progression_state.dart';
+import '../design/expressive_widgets.dart';
 import '../i18n/app_localizations.dart';
 import 'world_boss_catalog.dart';
 
@@ -56,9 +58,9 @@ class _WorldMapPageState extends State<WorldMapPage> {
   }
 
   WorldBossDefinition get _selectedWorld => WorldBossCatalog.worlds.firstWhere(
-        (world) => world.id == _selectedWorldId,
-        orElse: () => WorldBossCatalog.worlds.first,
-      );
+    (world) => world.id == _selectedWorldId,
+    orElse: () => WorldBossCatalog.worlds.first,
+  );
 
   Future<void> _selectWorld(WorldBossDefinition world) async {
     if (_state.legacySystems.endlessRiftActive &&
@@ -96,14 +98,15 @@ class _WorldMapPageState extends State<WorldMapPage> {
   }
 
   void _resetMap(BoxConstraints constraints) {
-    final scale = math.min(
-      constraints.maxWidth / _mapWidth,
-      constraints.maxHeight / _mapHeight,
-    ).clamp(0.35, 0.9).toDouble();
-    final verticalOffset =
-        (constraints.maxHeight - _mapHeight * scale) / 2;
-    final horizontalOffset =
-        (constraints.maxWidth - _mapWidth * scale) / 2;
+    final scale = math
+        .min(
+          constraints.maxWidth / _mapWidth,
+          constraints.maxHeight / _mapHeight,
+        )
+        .clamp(0.35, 0.9)
+        .toDouble();
+    final verticalOffset = (constraints.maxHeight - _mapHeight * scale) / 2;
+    final horizontalOffset = (constraints.maxWidth - _mapWidth * scale) / 2;
     _transformController.value = Matrix4.identity()
       ..translateByDouble(horizontalOffset, verticalOffset, 0, 1)
       ..scaleByDouble(scale, scale, scale, 1);
@@ -111,7 +114,8 @@ class _WorldMapPageState extends State<WorldMapPage> {
 
   void _zoom(double factor) {
     final current = _transformController.value;
-    final next = Matrix4.copy(current)..scaleByDouble(factor, factor, factor, 1);
+    final next = Matrix4.copy(current)
+      ..scaleByDouble(factor, factor, factor, 1);
     final scale = next.getMaxScaleOnAxis();
     if (scale >= 0.35 && scale <= 3.0) {
       _transformController.value = next;
@@ -123,7 +127,8 @@ class _WorldMapPageState extends State<WorldMapPage> {
     final theme = Theme.of(context);
     final selected = _selectedWorld;
     final selectedUnlocked = WorldBossCatalog.isUnlocked(_state, selected);
-    final selectedDefeated = WorldBossCatalog.isDefeated(_state, selected) &&
+    final selectedDefeated =
+        WorldBossCatalog.isDefeated(_state, selected) &&
         !_state.legacySystems.endlessRiftActive;
     final selectedActive =
         _state.legacySystems.activeBossBattleWorldId == selected.id;
@@ -132,7 +137,8 @@ class _WorldMapPageState extends State<WorldMapPage> {
     final riftTier = _state.legacySystems.endlessRiftTier < 1
         ? 1
         : _state.legacySystems.endlessRiftTier;
-    final hp = selected.hits +
+    final hp =
+        selected.hits +
         (_state.legacySystems.endlessRiftActive ? (riftTier - 1) * 2 : 0);
     final damage = WorldBossCatalog.damage(_state, selected).clamp(0, hp);
     final phase = ((damage * 3) ~/ hp + 1).clamp(1, 3);
@@ -145,29 +151,35 @@ class _WorldMapPageState extends State<WorldMapPage> {
       'ember_dragon',
       'nebula_titan',
     };
-    final secretDiscount = _state.legacySystems.discoveredSecrets
-            .contains(selected.secretId)
+    final secretDiscount =
+        _state.legacySystems.discoveredSecrets.contains(selected.secretId)
         ? 0.20
         : 0.0;
-    final sanctuaryDiscount =
-        (_state.legacySystems.homeBaseLevel * 0.01).clamp(0.0, 0.20);
-    final relicDiscount = _state.legacySystems.equippedRelics
-            .containsAll(bossRelics)
+    final sanctuaryDiscount = (_state.legacySystems.homeBaseLevel * 0.01).clamp(
+      0.0,
+      0.20,
+    );
+    final relicDiscount =
+        _state.legacySystems.equippedRelics.containsAll(bossRelics)
         ? 0.10
         : 0.0;
-    final masteryDiscount =
-        (secretDiscount + sanctuaryDiscount + relicDiscount).clamp(0.0, 0.40);
-    final masteryCost = BigNumber.fromInt(10 * (mastery + 1)) *
+    final masteryDiscount = (secretDiscount + sanctuaryDiscount + relicDiscount)
+        .clamp(0.0, 0.40);
+    final masteryCost =
+        BigNumber.fromInt(10 * (mastery + 1)) *
         BigNumber.parse((1 - masteryDiscount).toStringAsFixed(2));
-    final canUpgradeMastery = mastery < 10 &&
-        _state.nebula.compareTo(masteryCost) >= 0;
+    final canUpgradeMastery =
+        mastery < 10 && _state.nebula.compareTo(masteryCost) >= 0;
 
     return Scaffold(
-      appBar: AppBar(
+      appBar: GtnExpressiveAppBar(
         title: Text(AppLocalizations.text('world_map_title', 'World Map')),
         actions: [
           IconButton(
-            tooltip: AppLocalizations.text('map_fit_screen', 'Fit map to screen'),
+            tooltip: AppLocalizations.text(
+              'map_fit_screen',
+              'Fit map to screen',
+            ),
             onPressed: () {
               // The viewport callback installs a correctly sized fit transform.
               setState(() {});
@@ -192,10 +204,15 @@ class _WorldMapPageState extends State<WorldMapPage> {
           ),
         ],
       ),
-      body: LayoutBuilder(
-        builder: (context, _) => ListView(
-          padding: const EdgeInsets.fromLTRB(12, 8, 12, 20),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(12, 8, 12, 20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            _buildProgressionSummary(context),
+            const SizedBox(height: 12),
+            _buildWorldList(context),
+            const SizedBox(height: 16),
             Text(
               AppLocalizations.text(
                 'world_map_hint',
@@ -257,7 +274,10 @@ class _WorldMapPageState extends State<WorldMapPage> {
                               for (final world in WorldBossCatalog.worlds)
                                 _buildWorldNode(context, world),
                               for (final world in WorldBossCatalog.worlds)
-                                if (WorldBossCatalog.isUnlocked(_state, world) &&
+                                if (WorldBossCatalog.isUnlocked(
+                                      _state,
+                                      world,
+                                    ) &&
                                     _state.correctGuesses >= world.secretAt)
                                   _buildSecretNode(context, world),
                             ],
@@ -295,6 +315,448 @@ class _WorldMapPageState extends State<WorldMapPage> {
   bool _fitRequested = false;
   bool _hasInitializedTransform = false;
 
+  Widget _buildProgressionSummary(BuildContext context) {
+    final theme = Theme.of(context);
+    final activeWorld = WorldBossCatalog.worlds.firstWhere(
+      (world) => world.id == _state.legacySystems.activeWorldId,
+      orElse: () => WorldBossCatalog.worlds.first,
+    );
+    final defeatedCount = WorldBossCatalog.worlds
+        .where((world) => WorldBossCatalog.isDefeated(_state, world))
+        .length;
+    final riftBest = _state.legacySystems.endlessRiftBestTier;
+    return GtnExpressiveCard(
+      margin: EdgeInsets.zero,
+      padding: const EdgeInsets.all(18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.explore_rounded, color: GtnUiTokens.purple),
+              const SizedBox(width: 9),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'BEYOND THE NUMBERS',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: GtnUiTokens.cyan,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 1.1,
+                      ),
+                    ),
+                    Text(
+                      AppLocalizations.text(
+                        'web_ui_your_universe',
+                        'Your universe',
+                      ),
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              _StatusChip(
+                label: '${WorldBossCatalog.worlds.length} WORLDS',
+                color: GtnUiTokens.purple,
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              Expanded(
+                child: _ProgressionCurrencyTile(
+                  label: 'PRESTIGE',
+                  value: _state.prestige.toString(),
+                  detail: '${_state.prestigeResets} ascensions',
+                  color: GtnUiTokens.purple,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _ProgressionCurrencyTile(
+                  label: 'ULTRA',
+                  value: _state.ultra.toString(),
+                  detail: '${_state.ultraResets} resets',
+                  color: GtnUiTokens.cyan,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _ProgressionCurrencyTile(
+                  label: 'NEBULA',
+                  value: _state.nebula.toString(),
+                  detail: 'Cosmic currency',
+                  color: GtnUiTokens.gold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  GtnUiTokens.green.withValues(alpha: .10),
+                  GtnUiTokens.cyan.withValues(alpha: .04),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(19),
+              border: Border.all(
+                color: GtnUiTokens.green.withValues(alpha: .14),
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 42,
+                  height: 42,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF1C584E), Color(0xFF143047)],
+                    ),
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: const Icon(
+                    Icons.auto_awesome_rounded,
+                    color: Color(0xFFA7FFDA),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'CURRENT REALM',
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: GtnUiTokens.muted,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: .9,
+                        ),
+                      ),
+                      Text(
+                        AppLocalizations.text(
+                          activeWorld.worldNameKey,
+                          activeWorld.worldName,
+                        ),
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      Text(
+                        'Your adventure is taking shape.',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: GtnUiTokens.muted,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Column(
+                  children: [
+                    Text(
+                      '$defeatedCount',
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        color: GtnUiTokens.green,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    Text(
+                      'BOSSES',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: GtnUiTokens.muted,
+                        letterSpacing: .8,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: _ProgressionMiniTile(
+                  icon: Icons.home_rounded,
+                  value: 'Lv. ${_state.legacySystems.homeBaseLevel}',
+                  label: 'Home base',
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _ProgressionMiniTile(
+                  icon: Icons.all_inclusive_rounded,
+                  value: 'Tier ${riftBest < 1 ? 0 : riftBest}',
+                  label: 'Endless Rift best',
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _ProgressionMiniTile(
+                  icon: Icons.shield_rounded,
+                  value: '$defeatedCount',
+                  label: 'Bosses defeated',
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildWorldList(BuildContext context) {
+    final theme = Theme.of(context);
+    return GtnExpressiveCard(
+      margin: EdgeInsets.zero,
+      padding: const EdgeInsets.all(18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.layers_rounded, color: GtnUiTokens.purple),
+              const SizedBox(width: 9),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'WORLD EXPEDITION',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: GtnUiTokens.cyan,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 1.1,
+                      ),
+                    ),
+                    Text(
+                      'Worlds & bosses',
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              _StatusChip(label: 'READY', color: GtnUiTokens.green),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Unlock new realms and challenge their guardians. Boss rules and rewards are handled by the game engine.',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: GtnUiTokens.muted,
+              height: 1.5,
+            ),
+          ),
+          const SizedBox(height: 14),
+          for (final world in WorldBossCatalog.worlds)
+            _buildWorldEntry(context, world),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildWorldEntry(BuildContext context, WorldBossDefinition world) {
+    final theme = Theme.of(context);
+    final unlocked = WorldBossCatalog.isUnlocked(_state, world);
+    final defeated =
+        WorldBossCatalog.isDefeated(_state, world) &&
+        !_state.legacySystems.endlessRiftActive;
+    final active = _state.legacySystems.activeBossBattleWorldId == world.id;
+    final canUnlock = WorldBossCatalog.canUnlock(_state, world);
+    final canFight = WorldBossCatalog.canFight(_state, world);
+    final selected = _selectedWorldId == world.id;
+    final riftTier = _state.legacySystems.endlessRiftTier < 1
+        ? 1
+        : _state.legacySystems.endlessRiftTier;
+    final hp =
+        world.hits +
+        (_state.legacySystems.endlessRiftActive ? (riftTier - 1) * 2 : 0);
+    final damage = WorldBossCatalog.damage(_state, world).clamp(0, hp);
+    final remaining = (hp - damage).clamp(0, hp);
+    final busy = _busyAction != null;
+    final status = defeated
+        ? 'CLEARED'
+        : active
+        ? 'BATTLE LIVE'
+        : unlocked
+        ? 'UNLOCKED'
+        : 'LOCKED';
+    final statusColor = defeated
+        ? GtnUiTokens.green
+        : unlocked
+        ? GtnUiTokens.purple
+        : GtnUiTokens.muted;
+    final name = AppLocalizations.text(world.worldNameKey, world.worldName);
+    final bossName = AppLocalizations.text(world.bossNameKey, world.name);
+    final requirement = !unlocked
+        ? AppLocalizations.text(
+            world.worldRequirementKey,
+            'World unlock requirements are not met.',
+          )
+        : !canFight && !active && !defeated
+        ? AppLocalizations.text(
+            world.bossRequirementKey,
+            'Boss battle requirements are not met.',
+          )
+        : null;
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(13),
+      decoration: BoxDecoration(
+        color: theme.brightness == Brightness.dark
+            ? const Color(0xFF0B1020)
+            : const Color(0xFFF1F3FA),
+        borderRadius: BorderRadius.circular(17),
+        border: Border.all(
+          color: selected
+              ? GtnUiTokens.purple.withValues(alpha: .5)
+              : theme.colorScheme.outlineVariant.withValues(alpha: .45),
+        ),
+        gradient: selected
+            ? LinearGradient(
+                colors: [
+                  GtnUiTokens.purple.withValues(alpha: .10),
+                  Colors.transparent,
+                ],
+              )
+            : null,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      name,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      bossName,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: GtnUiTokens.muted,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              _StatusChip(label: status, color: statusColor),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'BOSS HEALTH',
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: GtnUiTokens.muted,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: .8,
+                  ),
+                ),
+              ),
+              Text(
+                '$remaining / $hp HP',
+                style: theme.textTheme.labelSmall?.copyWith(
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(9),
+            child: Stack(
+              children: [
+                Container(
+                  height: 5,
+                  color: theme.colorScheme.onSurface.withValues(alpha: .08),
+                ),
+                FractionallySizedBox(
+                  widthFactor: hp == 0 ? 0 : remaining / hp,
+                  child: Container(
+                    height: 5,
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [GtnUiTokens.danger, Color(0xFFFFB16D)],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (requirement != null) ...[
+            const SizedBox(height: 10),
+            Text(
+              requirement,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: GtnUiTokens.muted,
+              ),
+            ),
+          ],
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              if (!unlocked)
+                M3EButton.tonal(
+                  onPressed: canUnlock && !busy
+                      ? () => _runAction(world.id, 'unlock')
+                      : null,
+                  child: Text(
+                    canUnlock ? 'Unlock world' : 'Requirements pending',
+                  ),
+                ),
+              M3EButton.filled(
+                onPressed: (active || canFight) && !busy && !defeated
+                    ? () => _runAction(world.id, 'boss')
+                    : null,
+                child: Text(
+                  active
+                      ? 'Leave battle'
+                      : defeated && !_state.legacySystems.endlessRiftActive
+                      ? 'Boss defeated'
+                      : 'Start battle',
+                ),
+              ),
+              if (unlocked)
+                M3EButton.icon(
+                  style: M3EButtonStyle.text,
+                  onPressed: busy
+                      ? null
+                      : () => _runAction(world.id, 'select_world'),
+                  icon: const Icon(Icons.check_circle_outline),
+                  label: Text(
+                    _state.legacySystems.activeWorldId == world.id
+                        ? 'Selected world'
+                        : 'Select world',
+                  ),
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildWorldNode(BuildContext context, WorldBossDefinition world) {
     final theme = Theme.of(context);
     final unlocked = WorldBossCatalog.isUnlocked(_state, world);
@@ -305,10 +767,10 @@ class _WorldMapPageState extends State<WorldMapPage> {
     final status = defeated
         ? AppLocalizations.text('boss_defeated', 'Defeated')
         : active
-            ? AppLocalizations.text('boss_battle_active', 'Battle active')
-            : unlocked
-                ? AppLocalizations.text('world_status_unlocked', 'Unlocked')
-                : AppLocalizations.text('world_status_locked', 'Locked');
+        ? AppLocalizations.text('boss_battle_active', 'Battle active')
+        : unlocked
+        ? AppLocalizations.text('world_status_unlocked', 'Unlocked')
+        : AppLocalizations.text('world_status_locked', 'Locked');
     final icon = switch (world.id) {
       'verdant_grove' => Icons.forest,
       'crystal_caverns' => Icons.diamond,
@@ -336,8 +798,8 @@ class _WorldMapPageState extends State<WorldMapPage> {
                 color: selected
                     ? theme.colorScheme.primaryContainer
                     : unlocked
-                        ? theme.colorScheme.secondaryContainer
-                        : theme.colorScheme.surfaceContainerHighest,
+                    ? theme.colorScheme.secondaryContainer
+                    : theme.colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
                   color: selected
@@ -348,7 +810,9 @@ class _WorldMapPageState extends State<WorldMapPage> {
                 boxShadow: selected
                     ? [
                         BoxShadow(
-                          color: theme.colorScheme.primary.withValues(alpha: 0.2),
+                          color: theme.colorScheme.primary.withValues(
+                            alpha: 0.2,
+                          ),
                           blurRadius: 18,
                           spreadRadius: 2,
                         ),
@@ -358,16 +822,29 @@ class _WorldMapPageState extends State<WorldMapPage> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(icon, color: unlocked
-                      ? theme.colorScheme.primary
-                      : theme.colorScheme.onSurfaceVariant),
+                  Icon(
+                    icon,
+                    color: unlocked
+                        ? theme.colorScheme.primary
+                        : theme.colorScheme.onSurfaceVariant,
+                  ),
                   const SizedBox(height: 3),
-                  Text(name, textAlign: TextAlign.center,
-                      maxLines: 2, overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.labelMedium),
+                  Text(
+                    name,
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.labelMedium,
+                  ),
                   const SizedBox(height: 2),
                   Text(
-                    defeated ? '★' : active ? '⚔' : unlocked ? '●' : '🔒',
+                    defeated
+                        ? '★'
+                        : active
+                        ? '⚔'
+                        : unlocked
+                        ? '●'
+                        : '🔒',
                     style: theme.textTheme.labelSmall,
                   ),
                 ],
@@ -380,15 +857,23 @@ class _WorldMapPageState extends State<WorldMapPage> {
   }
 
   Widget _buildSecretNode(BuildContext context, WorldBossDefinition world) {
-    final found = _state.legacySystems.discoveredSecrets.contains(world.secretId);
+    final found = _state.legacySystems.discoveredSecrets.contains(
+      world.secretId,
+    );
     final theme = Theme.of(context);
     return Positioned(
       left: world.x * _mapWidth - 17,
       top: world.y * _mapHeight + 45,
       child: Tooltip(
         message: found
-            ? AppLocalizations.text('secret_discovered', 'Secret area discovered')
-            : AppLocalizations.text('secret_available', 'Hidden route discovered'),
+            ? AppLocalizations.text(
+                'secret_discovered',
+                'Secret area discovered',
+              )
+            : AppLocalizations.text(
+                'secret_available',
+                'Hidden route discovered',
+              ),
         child: Semantics(
           button: true,
           label: 'Secret area: ${world.secretId}',
@@ -406,8 +891,11 @@ class _WorldMapPageState extends State<WorldMapPage> {
               child: SizedBox(
                 width: 38,
                 height: 38,
-                child: Icon(Icons.key, size: 18,
-                    color: theme.colorScheme.tertiary),
+                child: Icon(
+                  Icons.key,
+                  size: 18,
+                  color: theme.colorScheme.tertiary,
+                ),
               ),
             ),
           ),
@@ -433,12 +921,16 @@ class _WorldMapPageState extends State<WorldMapPage> {
     required bool canUpgradeMastery,
   }) {
     final theme = Theme.of(context);
-    final worldName = AppLocalizations.text(world.worldNameKey, world.worldName);
+    final worldName = AppLocalizations.text(
+      world.worldNameKey,
+      world.worldName,
+    );
     final bossName = AppLocalizations.text(world.bossNameKey, world.name);
-    final discovered =
-        _state.legacySystems.discoveredSecrets.contains(world.secretId);
+    final discovered = _state.legacySystems.discoveredSecrets.contains(
+      world.secretId,
+    );
     final busy = _busyAction != null;
-    return Card(
+    return GtnExpressiveCard(
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -453,15 +945,15 @@ class _WorldMapPageState extends State<WorldMapPage> {
                   label: defeated
                       ? 'Defeated'
                       : active
-                          ? 'Battle active'
-                          : unlocked
-                              ? 'Unlocked'
-                              : 'Locked',
+                      ? 'Battle active'
+                      : unlocked
+                      ? 'Unlocked'
+                      : 'Locked',
                   color: defeated
                       ? theme.colorScheme.tertiary
                       : unlocked
-                          ? theme.colorScheme.primary
-                          : theme.colorScheme.onSurfaceVariant,
+                      ? theme.colorScheme.primary
+                      : theme.colorScheme.onSurfaceVariant,
                 ),
               ],
             ),
@@ -469,19 +961,23 @@ class _WorldMapPageState extends State<WorldMapPage> {
             Text(bossName, style: theme.textTheme.titleMedium),
             const SizedBox(height: 8),
             if (!unlocked)
-              Text(AppLocalizations.text(
-                world.worldRequirementKey,
-                'World unlock requirements are not met.',
-              ))
+              Text(
+                AppLocalizations.text(
+                  world.worldRequirementKey,
+                  'World unlock requirements are not met.',
+                ),
+              )
             else
-              Text(AppLocalizations.text(
-                world.bossRequirementKey,
-                'Boss battle requirements',
-              )),
+              Text(
+                AppLocalizations.text(
+                  world.bossRequirementKey,
+                  'Boss battle requirements',
+                ),
+              ),
             const SizedBox(height: 8),
             if (unlocked && !defeated) ...[
               Text('Boss HP: ${(hp - damage).clamp(0, hp)} / $hp'),
-              LinearProgressIndicator(
+              M3EProgressIndicator.linearWavy(
                 value: (damage / hp).clamp(0.0, 1.0),
               ),
               const SizedBox(height: 4),
@@ -510,16 +1006,15 @@ class _WorldMapPageState extends State<WorldMapPage> {
                 ),
               ),
               if (_state.legacySystems.endlessRiftActive)
-                Text('Endless Rift · Tier $riftTierLabel',
-                    style: theme.textTheme.labelMedium),
+                Text(
+                  'Endless Rift · Tier $riftTierLabel',
+                  style: theme.textTheme.labelMedium,
+                ),
               const SizedBox(height: 8),
             ],
             if (unlocked && !defeated)
               Text(
-                AppLocalizations.text(
-                  world.bossRewardKey,
-                  'Victory rewards',
-                ),
+                AppLocalizations.text(world.bossRewardKey, 'Victory rewards'),
                 style: theme.textTheme.bodySmall,
               ),
             if (unlocked && _state.correctGuesses >= world.secretAt)
@@ -536,14 +1031,14 @@ class _WorldMapPageState extends State<WorldMapPage> {
               ),
             const SizedBox(height: 12),
             if (!unlocked)
-              FilledButton.tonal(
+              M3EButton.tonal(
                 onPressed: canUnlock && !busy
                     ? () => _runAction(world.id, 'unlock')
                     : null,
                 child: const Text('Unlock world'),
               )
             else if (!defeated)
-              FilledButton(
+              M3EButton.filled(
                 onPressed: (active || canFight) && !busy
                     ? () => _runAction(world.id, 'boss')
                     : null,
@@ -571,13 +1066,16 @@ class _WorldMapPageState extends State<WorldMapPage> {
                   color: theme.colorScheme.tertiary,
                 ),
               ),
-              FilledButton.tonal(
+              M3EButton.tonal(
                 onPressed: canUpgradeMastery && !busy
                     ? () => _runAction(world.id, 'mastery')
                     : null,
                 child: Text(
                   mastery >= 10
-                      ? AppLocalizations.text('world_mastery_max', 'Mastery maxed')
+                      ? AppLocalizations.text(
+                          'world_mastery_max',
+                          'Mastery maxed',
+                        )
                       : AppLocalizations.text(
                           'world_mastery_upgrade',
                           'Increase mastery · $masteryCost Nebula',
@@ -586,14 +1084,17 @@ class _WorldMapPageState extends State<WorldMapPage> {
               ),
             ],
             if (unlocked)
-              TextButton.icon(
+              M3EButton.icon(
+                style: M3EButtonStyle.text,
                 onPressed: busy
                     ? null
                     : () => _runAction(world.id, 'select_world'),
                 icon: const Icon(Icons.check_circle_outline),
-                label: Text(_state.legacySystems.activeWorldId == world.id
-                    ? 'Selected world'
-                    : 'Select world'),
+                label: Text(
+                  _state.legacySystems.activeWorldId == world.id
+                      ? 'Selected world'
+                      : 'Select world',
+                ),
               ),
           ],
         ),
@@ -607,6 +1108,123 @@ class _WorldMapPageState extends State<WorldMapPage> {
   }
 }
 
+class _ProgressionCurrencyTile extends StatelessWidget {
+  const _ProgressionCurrencyTile({
+    required this.label,
+    required this.value,
+    required this.detail,
+    required this.color,
+  });
+
+  final String label;
+  final String value;
+  final String detail;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      constraints: const BoxConstraints(minWidth: 0),
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 12),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface.withValues(alpha: .45),
+        borderRadius: BorderRadius.circular(17),
+        border: Border.all(
+          color: theme.colorScheme.outlineVariant.withValues(alpha: .4),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: GtnUiTokens.muted,
+              fontWeight: FontWeight.w900,
+              letterSpacing: .6,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.titleMedium?.copyWith(
+              color: color,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          const SizedBox(height: 3),
+          Text(
+            detail,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: GtnUiTokens.muted,
+              fontSize: 9,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ProgressionMiniTile extends StatelessWidget {
+  const _ProgressionMiniTile({
+    required this.icon,
+    required this.value,
+    required this.label,
+  });
+
+  final IconData icon;
+  final String value;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 11),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface.withValues(alpha: .25),
+        borderRadius: BorderRadius.circular(15),
+        border: Border.all(
+          color: theme.colorScheme.outlineVariant.withValues(alpha: .3),
+        ),
+      ),
+      child: Column(
+        children: [
+          Icon(icon, size: 17, color: GtnUiTokens.purple),
+          const SizedBox(height: 5),
+          Text(
+            value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.labelLarge?.copyWith(
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            label,
+            maxLines: 2,
+            textAlign: TextAlign.center,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: GtnUiTokens.muted,
+              fontSize: 8,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _StatusChip extends StatelessWidget {
   const _StatusChip({required this.label, required this.color});
 
@@ -615,15 +1233,15 @@ class _StatusChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => DecoratedBox(
-        decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.12),
-          borderRadius: BorderRadius.circular(30),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-          child: Text(label, style: Theme.of(context).textTheme.labelSmall),
-        ),
-      );
+    decoration: BoxDecoration(
+      color: color.withValues(alpha: 0.12),
+      borderRadius: BorderRadius.circular(30),
+    ),
+    child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      child: Text(label, style: Theme.of(context).textTheme.labelSmall),
+    ),
+  );
 }
 
 class _WorldRoutesPainter extends CustomPainter {
@@ -651,7 +1269,8 @@ class _WorldRoutesPainter extends CustomPainter {
         .map((world) => Offset(world.x * size.width, world.y * size.height))
         .toList(growable: false);
     for (final (from, to) in routes) {
-      final bothUnlocked = unlockedIds.contains(worlds[from].id) &&
+      final bothUnlocked =
+          unlockedIds.contains(worlds[from].id) &&
           unlockedIds.contains(worlds[to].id);
       final paint = Paint()
         ..color = bothUnlocked
@@ -665,8 +1284,7 @@ class _WorldRoutesPainter extends CustomPainter {
 
     for (var i = 0; i < worlds.length; i++) {
       final world = worlds[i];
-      if (correctGuesses >= world.secretAt &&
-          unlockedIds.contains(world.id)) {
+      if (correctGuesses >= world.secretAt && unlockedIds.contains(world.id)) {
         final secretPaint = Paint()
           ..color = colorScheme.tertiary.withValues(
             alpha: discoveredSecrets.contains(world.secretId) ? 0.9 : 0.45,
@@ -677,11 +1295,7 @@ class _WorldRoutesPainter extends CustomPainter {
         final start = points[i];
         final end = points[i] + const Offset(38, 52);
         canvas.drawLine(start, end, secretPaint);
-        canvas.drawCircle(
-          end,
-          5,
-          Paint()..color = colorScheme.tertiary,
-        );
+        canvas.drawCircle(end, 5, Paint()..color = colorScheme.tertiary);
       }
     }
 
@@ -691,10 +1305,11 @@ class _WorldRoutesPainter extends CustomPainter {
         points[i],
         selected ? 54 : 48,
         Paint()
-          ..color = (unlockedIds.contains(worlds[i].id)
-                  ? colorScheme.primary
-                  : colorScheme.outline)
-              .withValues(alpha: selected ? 0.16 : 0.08),
+          ..color =
+              (unlockedIds.contains(worlds[i].id)
+                      ? colorScheme.primary
+                      : colorScheme.outline)
+                  .withValues(alpha: selected ? 0.16 : 0.08),
       );
     }
   }

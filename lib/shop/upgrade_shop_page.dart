@@ -1,8 +1,10 @@
-import 'package:flutter/material.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../core/numbers/big_number.dart';
 import '../core/progression/progression_engine.dart';
 import '../core/progression/progression_state.dart';
+import '../design/expressive_widgets.dart';
 import 'upgrade_catalog.dart';
 
 typedef UpgradePurchase = Future<ProgressionState> Function(
@@ -41,7 +43,7 @@ class _UpgradeShopPageState extends State<UpgradeShopPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
+      appBar: GtnExpressiveAppBar(
         title: const Text('Upgrade Shop'),
         actions: [
           Padding(
@@ -106,7 +108,7 @@ class _UpgradeCard extends StatelessWidget {
     final canAfford = money.compareTo(cost) >= 0;
     final theme = Theme.of(context);
 
-    return Card(
+    return GtnExpressiveCard(
       margin: const EdgeInsets.only(bottom: 12),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -116,10 +118,7 @@ class _UpgradeCard extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  child: Text(
-                    upgrade.name,
-                    style: theme.textTheme.titleMedium,
-                  ),
+                  child: Text(upgrade.name, style: theme.textTheme.titleMedium),
                 ),
                 Text(
                   maxLevel == null ? 'Lv. $level' : 'Lv. $level / $maxLevel',
@@ -137,12 +136,10 @@ class _UpgradeCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
-            FilledButton(
+            M3EButton.filled(
               onPressed: busy || isMaxed || !canAfford ? null : onBuy,
               child: Text(
-                isMaxed
-                    ? 'Max level reached'
-                    : 'Upgrade · $cost Money',
+                isMaxed ? 'Max level reached' : 'Upgrade · $cost Money',
               ),
             ),
             if (!isMaxed && !canAfford)

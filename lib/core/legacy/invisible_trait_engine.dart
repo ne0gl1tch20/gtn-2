@@ -2,7 +2,10 @@ import '../numbers/big_number.dart';
 import 'adaptive_trait_profile.dart';
 
 class AdaptiveTraitDecision {
-  const AdaptiveTraitDecision({this.helperIds = const {}, this.bonusIds = const {}});
+  const AdaptiveTraitDecision({
+    this.helperIds = const {},
+    this.bonusIds = const {},
+  });
   final Set<String> helperIds;
   final Set<String> bonusIds;
 }
@@ -31,10 +34,14 @@ class InvisibleTraitEngine {
     final tick = profile.totalGuessesObserved + 1;
     return profile.copyWith(
       totalGuessesObserved: tick,
-      correctGuessesObserved: profile.correctGuessesObserved + (correct ? 1 : 0),
+      correctGuessesObserved:
+          profile.correctGuessesObserved + (correct ? 1 : 0),
       failedGuessesObserved: profile.failedGuessesObserved + (correct ? 0 : 1),
-      longStreaksObserved: profile.longStreaksObserved + (newStreak >= longStreakThreshold ? 1 : 0),
-      moneyEarnedObserved: (BigNumber.parse(profile.moneyEarnedObserved) + reward).toString(),
+      longStreaksObserved:
+          profile.longStreaksObserved +
+          (newStreak >= longStreakThreshold ? 1 : 0),
+      moneyEarnedObserved:
+          (BigNumber.parse(profile.moneyEarnedObserved) + reward).toString(),
       consistencyScore: _smooth(profile.consistencyScore, correct ? 1 : 0),
       accuracyScore: _smooth(profile.accuracyScore, correct ? 1 : 0),
       riskScore: _smooth(profile.riskScore, correct ? 0 : 1),
@@ -81,7 +88,8 @@ class InvisibleTraitEngine {
     final helpers = <String>{};
 
     void offer(String id) {
-      if (!_cooldownActive(profile, id, tick) && helpers.length < maxHelpersPerGuess) {
+      if (!_cooldownActive(profile, id, tick) &&
+          helpers.length < maxHelpersPerGuess) {
         helpers.add(id);
       }
     }
@@ -110,7 +118,8 @@ class InvisibleTraitEngine {
     }
 
     final bonuses = <String>{};
-    if (prestigeCount >= 1 && !profile.awardedBonuses.contains(bonusFirstPrestige)) {
+    if (prestigeCount >= 1 &&
+        !profile.awardedBonuses.contains(bonusFirstPrestige)) {
       bonuses.add(bonusFirstPrestige);
     }
     if (ultraCount >= 1 && !profile.awardedBonuses.contains(bonusFirstUltra)) {
@@ -139,20 +148,25 @@ class InvisibleTraitEngine {
       ultraCount: 0,
       currentStreak: 0,
     );
-    if (rangeMax <= rangeMin || !decision.helperIds.contains(helperGentleTarget)) {
+    if (rangeMax <= rangeMin ||
+        !decision.helperIds.contains(helperGentleTarget)) {
       return safeCandidate;
     }
     final midpoint = rangeMin / 2 + rangeMax / 2;
-    final strength = (gentleTargetBaseStrength +
-            (gentleTargetAccuracyCeiling - profile.accuracyScore) * 0.20)
-        .clamp(gentleTargetBaseStrength, gentleTargetMaxStrength);
+    final strength =
+        (gentleTargetBaseStrength +
+                (gentleTargetAccuracyCeiling - profile.accuracyScore) * 0.20)
+            .clamp(gentleTargetBaseStrength, gentleTargetMaxStrength);
     return (safeCandidate + (midpoint - safeCandidate) * strength)
         .toInt()
         .clamp(rangeMin, rangeMax)
         .toInt();
   }
 
-  AdaptiveTraitProfile markHelperUses(AdaptiveTraitProfile profile, Set<String> helperIds) {
+  AdaptiveTraitProfile markHelperUses(
+    AdaptiveTraitProfile profile,
+    Set<String> helperIds,
+  ) {
     if (helperIds.isEmpty) return profile;
     final tick = profile.totalGuessesObserved;
     final uses = Map<String, int>.of(profile.helperUses);
@@ -167,10 +181,16 @@ class InvisibleTraitEngine {
     );
   }
 
-  AdaptiveTraitProfile markBonusesAwarded(AdaptiveTraitProfile profile, Set<String> bonusIds) {
+  AdaptiveTraitProfile markBonusesAwarded(
+    AdaptiveTraitProfile profile,
+    Set<String> bonusIds,
+  ) {
     if (bonusIds.isEmpty) return profile;
     return profile.copyWith(
-      awardedBonuses: Set.unmodifiable({...profile.awardedBonuses, ...bonusIds}),
+      awardedBonuses: Set.unmodifiable({
+        ...profile.awardedBonuses,
+        ...bonusIds,
+      }),
     );
   }
 
@@ -187,7 +207,9 @@ class InvisibleTraitEngine {
   };
 
   double _smooth(double previous, double sample) =>
-      (previous * scoreDecay + sample * (1 - scoreDecay)).clamp(0.0, 1.0).toDouble();
+      (previous * scoreDecay + sample * (1 - scoreDecay))
+          .clamp(0.0, 1.0)
+          .toDouble();
 
   static const maxHelpersPerGuess = 3;
   static const longStreakThreshold = 10;

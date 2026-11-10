@@ -2,7 +2,8 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
+import 'package:material_ui/material_ui.dart';
 
 import 'arcade/arcade_page.dart';
 import 'core/automation/bot_team.dart';
@@ -24,9 +25,12 @@ import 'dev/developer_settings_page.dart';
 import 'home/game_dashboard_page.dart';
 import 'i18n/app_localizations.dart';
 import 'legacy/legacy_pages.dart';
+import 'legacy/legacy_systems_page.dart';
 import 'progression/progression_hub_page.dart';
 import 'saves/save_slots_page.dart';
 import 'settings/game_settings.dart';
+import 'settings/menu_studio_page.dart';
+import 'settings/music_settings_sync.dart';
 import 'settings/settings_page.dart';
 import 'shop/nebula_shop_page.dart';
 import 'shop/upgrade_catalog.dart';
@@ -51,33 +55,39 @@ class GtnApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return ValueListenableBuilder<Map<String, dynamic>>(
       valueListenable: AppLocalizations.catalog,
-      builder: (context, translations, _) => ValueListenableBuilder<GameSettings>(
-      valueListenable: settingsNotifier,
-      builder: (context, settings, _) {
-        ThemeData makeTheme(Brightness brightness) => ThemeData(
-              colorScheme: ColorScheme.fromSeed(
-                seedColor: const Color(0xFF7C5CFC),
-                brightness: brightness,
-              ),
-              useMaterial3: true,
-              fontFamily: 'Manrope',
-            );
-        return MaterialApp(
-          title: 'GuessTheNumber 2',
-          debugShowCheckedModeBanner: false,
-          theme: makeTheme(Brightness.light),
-          darkTheme: makeTheme(Brightness.dark),
-          themeMode: settings.darkMode ? ThemeMode.dark : ThemeMode.light,
-          builder: (context, child) => MediaQuery(
-            data: MediaQuery.of(context).copyWith(
-              disableAnimations: settings.reduceMotion,
-            ),
-            child: child ?? const SizedBox.shrink(),
+      builder: (context, translations, _) =>
+          ValueListenableBuilder<GameSettings>(
+            valueListenable: settingsNotifier,
+            builder: (context, settings, _) {
+              return M3EMaterialApp(
+                title: 'GuessTheNumber 2',
+                data: M3EThemeData.light(
+                  seedColor: Color(
+                    0xFF000000 |
+                        int.parse(
+                          settings.customPrimaryColor.substring(1),
+                          radix: 16,
+                        ),
+                  ),
+                ),
+                fontFamily: 'Manrope',
+                autoTheming: false,
+                dynamicColoring: false,
+                initialTheme: settings.themeMode == 'System'
+                    ? MediaQuery.platformBrightnessOf(context)
+                    : settings.darkMode
+                    ? Brightness.dark
+                    : Brightness.light,
+                debugShowCheckedModeBanner: false,
+                appBuilder: (context, child) => MediaQuery(
+                  data: MediaQuery.of(context)
+                      .copyWith(disableAnimations: settings.reduceMotion),
+                  child: child ?? const SizedBox.shrink(),
+                ),
+                home: const GameHomePage(),
+              );
+            },
           ),
-          home: const GameHomePage(),
-        );
-      },
-    ),
     );
   }
 }
@@ -89,21 +99,22 @@ class GameHomePage extends StatefulWidget {
   State<GameHomePage> createState() => _GameHomePageState();
 }
 
-class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver {
+class _GameHomePageState extends State<GameHomePage>
+    with WidgetsBindingObserver {
   GameEngine _engine = GameEngine();
 
   int _rangeMaximum(ProgressionState progression, GameSettings settings) =>
       DifficultyRules.rangeMaximum(
         settings.difficultyId,
         progression.upgrades['better_range'] ?? 0,
-      ) * _legacySystemsEngine.rangeMultiplier(progression.legacySystems);
+      ) *
+      _legacySystemsEngine.rangeMultiplier(progression.legacySystems);
 
   GameEngine _engineFor(ProgressionState progression, GameSettings settings) =>
       GameEngine(maximum: _rangeMaximum(progression, settings));
 
-  GameState _createGame() => _newGameWithAdaptiveTarget(
-        _engineFor(_progression, _settings).newGame(),
-      );
+  GameState _createGame() =>
+      _newGameWithAdaptiveTarget(_engineFor(_progression, _settings).newGame());
 
   GameState _newGameWithAdaptiveTarget(GameState candidate) {
     final systems = _progression.legacySystems;
@@ -122,10 +133,13 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
       maximum: candidate.maximum,
     );
   }
+
   final ProgressionEngine _progressionEngine = const ProgressionEngine();
-  final WorldBossBattleEngine _worldBossBattleEngine = const WorldBossBattleEngine();
+  final WorldBossBattleEngine _worldBossBattleEngine =
+      const WorldBossBattleEngine();
   final LegacySystemsEngine _legacySystemsEngine = const LegacySystemsEngine();
-  final InvisibleTraitEngine _invisibleTraitEngine = const InvisibleTraitEngine();
+  final InvisibleTraitEngine _invisibleTraitEngine =
+      const InvisibleTraitEngine();
   final BotTeam _botTeam = BotTeam();
   Timer? _autoClickerTimer;
   bool _autoClickerTickRunning = false;
@@ -197,7 +211,8 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
             money: _progression.money + offlineEarnings,
             moneyEarned: _progression.moneyEarned + offlineEarnings,
           );
-          _message = 'Auto Clicker earned $offlineEarnings Money while the app was away.';
+          _message =
+              'Auto Clicker earned $offlineEarnings Money while the app was away.';
         });
       }
       await _persist();
@@ -220,15 +235,17 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
         _activeSlot = activeSlot;
       });
       if (save != null) {
-        var restoredProgression =
-            _worldBossBattleEngine.migrateLegacyWorldUnlocks(save.progression);
+        var restoredProgression = _worldBossBattleEngine
+            .migrateLegacyWorldUnlocks(save.progression);
         final savedAt = restoredProgression.legacySystems.lastSaveTimestamp;
         final now = DateTime.now().millisecondsSinceEpoch;
         final clockCheck = ClockRollbackPolicy.check(
           nowMillis: now,
           lastSaveTimestamp: savedAt,
-          timeTravelPenaltyUntil: restoredProgression.legacySystems.timeTravelPenaltyUntil,
-          autoClickerActive: restoredProgression.legacySystems.autoClickerActive,
+          timeTravelPenaltyUntil:
+              restoredProgression.legacySystems.timeTravelPenaltyUntil,
+          autoClickerActive:
+              restoredProgression.legacySystems.autoClickerActive,
         );
         final timeTravelDetected = clockCheck.detected;
         restoredProgression = restoredProgression.copyWith(
@@ -244,7 +261,8 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
         final offlineEarnings = timeTravelDetected
             ? BigNumber.fromInt(0)
             : OfflineEarningsPolicy.calculate(
-                autoClickerWasActive: restoredProgression.legacySystems.autoClickerActive,
+                autoClickerWasActive:
+                    restoredProgression.legacySystems.autoClickerActive,
                 elapsedSeconds: elapsedSeconds,
               );
         if (offlineEarnings.compareTo(BigNumber.fromInt(0)) > 0) {
@@ -253,8 +271,22 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
             moneyEarned: restoredProgression.moneyEarned + offlineEarnings,
           );
         }
-        final restoredEngine = _engineFor(restoredProgression, save.settings);
-        await AppLocalizations.load(save.settings.localeCode);
+        final restoredSystems = restoreMusicStateFromSettings(
+          settings: save.settings,
+          systems: restoredProgression.legacySystems,
+        );
+        restoredProgression = restoredProgression.copyWith(
+          legacySystems: restoredSystems,
+        );
+        final restoredSettings = syncMusicSettingsFromLegacy(
+          settings: save.settings,
+          systems: restoredSystems,
+        );
+        final restoredEngine = _engineFor(
+          restoredProgression,
+          restoredSettings,
+        );
+        await AppLocalizations.load(restoredSettings.localeCode);
         if (!mounted) return;
         setState(() {
           _engine = restoredEngine;
@@ -267,13 +299,13 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
           );
           _gamesWon = save.gamesWon;
           _progression = restoredProgression;
-          _settings = save.settings;
+          _settings = restoredSettings;
           GtnApp.settingsNotifier.value = _settings;
           _message = timeTravelDetected
               ? 'Clock rollback detected. Auto Clicker paused for 24 hours.'
               : offlineEarnings.compareTo(BigNumber.fromInt(0)) > 0
-                  ? 'Welcome back! Your Auto Clicker earned $offlineEarnings Money while you were away.'
-                  : 'Welcome back! Your saved game is ready.';
+              ? 'Welcome back! Your Auto Clicker earned $offlineEarnings Money while you were away.'
+              : 'Welcome back! Your saved game is ready.';
         });
         shouldPersistOfflineEarnings = true;
       }
@@ -300,7 +332,8 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
         ),
       );
       await storage.update((existing) {
-        final base = existing ??
+        final base =
+            existing ??
             SaveData(
               secret: _game.secret,
               attempts: _game.attempts,
@@ -332,18 +365,22 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
   Future<ProgressionState> _purchaseUpgrade(
     UpgradeDefinition definition,
   ) async {
-    final updated = _progressionEngine.purchaseUpgrade(_progression, definition);
+    final updated = _progressionEngine.purchaseUpgrade(
+      _progression,
+      definition,
+    );
     if (updated != _progression) {
       final previousRange = _rangeMaximum(_progression, _settings);
       final nextRange = _rangeMaximum(updated, _settings);
       final withQuestProgress = updated.copyWith(
-        legacySystems: _legacySystemsEngine.recordUpgradePurchase(
-          updated.legacySystems,
-        ).copyWith(
-          adaptiveTraitProfile: _invisibleTraitEngine.observeUpgradePurchase(
-            updated.legacySystems.adaptiveTraitProfile,
-          ),
-        ),
+        legacySystems: _legacySystemsEngine
+            .recordUpgradePurchase(updated.legacySystems)
+            .copyWith(
+              adaptiveTraitProfile: _invisibleTraitEngine
+                  .observeUpgradePurchase(
+                    updated.legacySystems.adaptiveTraitProfile,
+                  ),
+            ),
       );
       setState(() {
         _progression = withQuestProgress;
@@ -359,7 +396,6 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
     return _progression;
   }
 
-
   Future<void> _prestige() async {
     var updated = _progressionEngine.prestige(
       _progression,
@@ -369,7 +405,8 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
       final existingProfile = _progression.legacySystems.adaptiveTraitProfile;
       final profile = _invisibleTraitEngine.observeProgression(
         updated.legacySystems.adaptiveTraitProfile,
-        prestigeDelta: updated.prestigeResets > existingProfile.prestigesObserved
+        prestigeDelta:
+            updated.prestigeResets > existingProfile.prestigesObserved
             ? updated.prestigeResets - existingProfile.prestigesObserved
             : 0,
         ultraDelta: updated.ultraResets > existingProfile.ultrasObserved
@@ -377,7 +414,9 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
             : 0,
       );
       updated = updated.copyWith(
-        legacySystems: updated.legacySystems.copyWith(adaptiveTraitProfile: profile),
+        legacySystems: updated.legacySystems.copyWith(
+          adaptiveTraitProfile: profile,
+        ),
       );
       setState(() {
         _progression = updated;
@@ -400,7 +439,8 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
       final existingProfile = _progression.legacySystems.adaptiveTraitProfile;
       final profile = _invisibleTraitEngine.observeProgression(
         updated.legacySystems.adaptiveTraitProfile,
-        prestigeDelta: _progression.prestigeResets > existingProfile.prestigesObserved
+        prestigeDelta:
+            _progression.prestigeResets > existingProfile.prestigesObserved
             ? _progression.prestigeResets - existingProfile.prestigesObserved
             : 0,
         ultraDelta: updated.ultraResets > existingProfile.ultrasObserved
@@ -408,7 +448,9 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
             : 0,
       );
       updated = updated.copyWith(
-        legacySystems: updated.legacySystems.copyWith(adaptiveTraitProfile: profile),
+        legacySystems: updated.legacySystems.copyWith(
+          adaptiveTraitProfile: profile,
+        ),
       );
       setState(() {
         _progression = updated;
@@ -460,11 +502,7 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
     );
   }
 
-
-  Future<void> _awardArcadeReward(
-    BigNumber nebula,
-    BigNumber money,
-  ) async {
+  Future<void> _awardArcadeReward(BigNumber nebula, BigNumber money) async {
     setState(() {
       _progression = _progressionEngine.awardArcadeReward(
         _progression,
@@ -483,13 +521,10 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
     );
   }
 
-
-  Future<ProgressionState> _purchaseNebulaItem(
-    NebulaShopItem item,
-  ) async {
+  Future<ProgressionState> _purchaseNebulaItem(NebulaShopItem item) async {
     final systems = _progression.legacySystems;
     final ownedBot = NebulaShopCatalog.botIds.any(
-      (id) => ( _progression.nebulaItems[id] ?? 0) > 0,
+      (id) => (_progression.nebulaItems[id] ?? 0) > 0,
     );
     if (NebulaShopCatalog.botUpgradeIds.contains(item.id) && !ownedBot) {
       return _progression;
@@ -526,10 +561,14 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
       (id) => (_progression.nebulaItems[id] ?? 0) > 0,
     );
     if (!hasBot) return _progression;
-    if (active && _progression.legacySystems.timeTravelPenaltyUntil >
-        DateTime.now().millisecondsSinceEpoch) {
+    if (active &&
+        _progression.legacySystems.timeTravelPenaltyUntil >
+            DateTime.now().millisecondsSinceEpoch) {
       if (mounted) {
-        setState(() => _message = 'Auto Clicker is temporarily paused after a clock rollback.');
+        setState(
+          () => _message =
+              'Auto Clicker is temporarily paused after a clock rollback.',
+        );
       }
       return _progression;
     }
@@ -548,7 +587,9 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
   void _scheduleAutoClicker() {
     _autoClickerTimer?.cancel();
     _autoClickerTimer = null;
-    if (!mounted || _isLoading || _autoClickerTickRunning ||
+    if (!mounted ||
+        _isLoading ||
+        _autoClickerTickRunning ||
         WidgetsBinding.instance.lifecycleState == AppLifecycleState.paused ||
         WidgetsBinding.instance.lifecycleState == AppLifecycleState.inactive ||
         WidgetsBinding.instance.lifecycleState == AppLifecycleState.detached) {
@@ -556,7 +597,8 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
     }
     final systems = _progression.legacySystems;
     if (!systems.autoClickerActive ||
-        systems.timeTravelPenaltyUntil > DateTime.now().millisecondsSinceEpoch) {
+        systems.timeTravelPenaltyUntil >
+            DateTime.now().millisecondsSinceEpoch) {
       return;
     }
     final purchasedBots = NebulaShopCatalog.botIds
@@ -589,7 +631,9 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
   }
 
   Future<void> _runAutoClickerTick() async {
-    if (!mounted || _isLoading || !_progression.legacySystems.autoClickerActive) {
+    if (!mounted ||
+        _isLoading ||
+        !_progression.legacySystems.autoClickerActive) {
       return;
     }
     if (_game.isComplete) {
@@ -633,8 +677,10 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
     );
   }
 
-
-  Future<ProgressionState> _worldBossAction(String worldId, String action) async {
+  Future<ProgressionState> _worldBossAction(
+    String worldId,
+    String action,
+  ) async {
     if (action == 'mastery') {
       final masteryResult = _legacySystemsEngine.upgradeWorldMastery(
         progression: _progression,
@@ -655,7 +701,10 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
     final result = switch (action) {
       'secret' => _worldBossBattleEngine.discoverSecret(_progression, worldId),
       'unlock' => _worldBossBattleEngine.unlockWorld(_progression, worldId),
-      'select_world' => _worldBossBattleEngine.selectWorld(_progression, worldId),
+      'select_world' => _worldBossBattleEngine.selectWorld(
+        _progression,
+        worldId,
+      ),
       _ => _worldBossBattleEngine.toggleBossBattle(_progression, worldId),
     };
     if (result.accepted) {
@@ -671,14 +720,11 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
   Future<void> _openWorldMap() async {
     await Navigator.of(context).push<void>(
       MaterialPageRoute<void>(
-        builder: (_) => WorldMapPage(
-          progression: _progression,
-          onAction: _worldBossAction,
-        ),
+        builder: (_) =>
+            WorldMapPage(progression: _progression, onAction: _worldBossAction),
       ),
     );
   }
-
 
   Future<void> _switchSaveSlot(int slot) async {
     setState(() => _isLoading = true);
@@ -694,7 +740,8 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
       final clockCheck = ClockRollbackPolicy.check(
         nowMillis: now,
         lastSaveTimestamp: savedAt,
-        timeTravelPenaltyUntil: nextProgression.legacySystems.timeTravelPenaltyUntil,
+        timeTravelPenaltyUntil:
+            nextProgression.legacySystems.timeTravelPenaltyUntil,
         autoClickerActive: nextProgression.legacySystems.autoClickerActive,
       );
       final timeTravelDetected = clockCheck.detected;
@@ -711,7 +758,8 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
       final offlineEarnings = timeTravelDetected
           ? BigNumber.fromInt(0)
           : OfflineEarningsPolicy.calculate(
-              autoClickerWasActive: nextProgression.legacySystems.autoClickerActive,
+              autoClickerWasActive:
+                  nextProgression.legacySystems.autoClickerActive,
               elapsedSeconds: elapsedSeconds,
             );
       if (offlineEarnings.compareTo(BigNumber.fromInt(0)) > 0) {
@@ -745,10 +793,10 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
         _message = timeTravelDetected
             ? 'Clock rollback detected. Auto Clicker paused for 24 hours.'
             : offlineEarnings.compareTo(BigNumber.fromInt(0)) > 0
-                ? 'Save slot $slot loaded. Auto Clicker earned $offlineEarnings Money offline.'
-                : save == null
-                ? 'New save slot ready. Guess a number between 1 and 100.'
-                : 'Save slot $slot loaded.';
+            ? 'Save slot $slot loaded. Auto Clicker earned $offlineEarnings Money offline.'
+            : save == null
+            ? 'New save slot ready. Guess a number between 1 and 100.'
+            : 'Save slot $slot loaded.';
         _isLoading = false;
       });
       await _persist();
@@ -767,29 +815,39 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
   Future<void> _openSaveSlots() async {
     await Navigator.of(context).push<void>(
       MaterialPageRoute<void>(
-        builder: (_) => SaveSlotsPage(
-          activeSlot: _activeSlot,
-          onSelect: _switchSaveSlot,
-        ),
+        builder: (_) =>
+            SaveSlotsPage(activeSlot: _activeSlot, onSelect: _switchSaveSlot),
       ),
     );
   }
-
 
   Future<void> _updateSettings(GameSettings settings) async {
     await AppLocalizations.load(settings.localeCode);
     if (!mounted) return;
     final difficultyChanged = settings.difficultyId != _settings.difficultyId;
+    final restoredSystems = restoreMusicStateFromSettings(
+      settings: settings,
+      systems: _progression.legacySystems,
+    );
+    final nextProgression = _progression.copyWith(
+      legacySystems: restoredSystems,
+    );
+    final synchronizedSettings = syncMusicSettingsFromLegacy(
+      settings: settings,
+      systems: restoredSystems,
+    );
     setState(() {
-      _settings = settings;
+      _progression = nextProgression;
+      _settings = synchronizedSettings;
       if (difficultyChanged) {
-        _engine = _engineFor(_progression, settings);
+        _engine = _engineFor(nextProgression, synchronizedSettings);
         _game = _newGameWithAdaptiveTarget(_engine.newGame());
         _botTeam.reset(_game.minimum, _game.maximum);
-        _message = 'Difficulty changed to ${DifficultyRules.name(settings.difficultyId)}. A fresh round is ready.';
+        _message =
+            'Difficulty changed to ${DifficultyRules.name(settings.difficultyId)}. A fresh round is ready.';
       }
     });
-    GtnApp.settingsNotifier.value = settings;
+    GtnApp.settingsNotifier.value = synchronizedSettings;
     await _persist();
   }
 
@@ -799,24 +857,44 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
         builder: (_) => SettingsPage(
           settings: _settings,
           onChanged: _updateSettings,
+          onOpenMenuStudio: _openMenuStudio,
         ),
       ),
     );
   }
 
+  Future<void> _openMenuStudio() async {
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (_) =>
+            MenuStudioPage(settings: _settings, onChanged: _updateSettings),
+      ),
+    );
+  }
 
   SaveData _currentSaveData() => SaveData(
-        secret: _game.secret,
-        attempts: _game.attempts,
-        gamesWon: _gamesWon,
-        isComplete: _game.isComplete,
-        minimum: _game.minimum,
-        maximum: _game.maximum,
-        progression: _progression,
-        settings: _settings,
-      );
+    secret: _game.secret,
+    attempts: _game.attempts,
+    gamesWon: _gamesWon,
+    isComplete: _game.isComplete,
+    minimum: _game.minimum,
+    maximum: _game.maximum,
+    progression: _progression,
+    settings: _settings,
+  );
 
   Future<void> _applyDeveloperSave(SaveData save) async {
+    final restoredSystems = restoreMusicStateFromSettings(
+      settings: save.settings,
+      systems: save.progression.legacySystems,
+    );
+    final restoredProgression = save.progression.copyWith(
+      legacySystems: restoredSystems,
+    );
+    final restoredSettings = syncMusicSettingsFromLegacy(
+      settings: save.settings,
+      systems: restoredSystems,
+    );
     setState(() {
       _game = _engine.restore(
         secret: save.secret,
@@ -826,8 +904,8 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
         savedMaximum: save.maximum,
       );
       _gamesWon = save.gamesWon;
-      _progression = save.progression;
-      _settings = save.settings;
+      _progression = restoredProgression;
+      _settings = restoredSettings;
       GtnApp.settingsNotifier.value = _settings;
       _message = 'Developer save applied.';
     });
@@ -841,9 +919,15 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
       return '/money N · /prestige N · /ultra N · /nebula N · /attempts N · /wins N · /reset';
     }
     if (action == '/reset') {
+      final resetSystems = restoreMusicStateFromSettings(
+        settings: _settings,
+        systems: ProgressionState.initial.legacySystems,
+      );
       setState(() {
         _game = _newGameWithAdaptiveTarget(_engine.newGame());
-        _progression = ProgressionState.initial;
+        _progression = ProgressionState.initial.copyWith(
+          legacySystems: resetSystems,
+        );
         _gamesWon = 0;
         _message = 'Developer reset completed.';
       });
@@ -913,18 +997,30 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
 
   Future<void> _applyLegacyProgression(ProgressionState progression) async {
     if (progression.legacySystems.autoClickerActive &&
-        progression.legacySystems.timeTravelPenaltyUntil > DateTime.now().millisecondsSinceEpoch) {
+        progression.legacySystems.timeTravelPenaltyUntil >
+            DateTime.now().millisecondsSinceEpoch) {
       progression = progression.copyWith(
-        legacySystems: progression.legacySystems.copyWith(autoClickerActive: false),
+        legacySystems: progression.legacySystems.copyWith(
+          autoClickerActive: false,
+        ),
       );
-      setState(() => _message = 'Auto Clicker is temporarily paused after a clock rollback.');
+      setState(
+        () => _message =
+            'Auto Clicker is temporarily paused after a clock rollback.',
+      );
     }
+    final synchronizedSettings = syncMusicSettingsFromLegacy(
+      settings: _settings,
+      systems: progression.legacySystems,
+    );
     final oldRange = _rangeMaximum(_progression, _settings);
-    final newRange = _rangeMaximum(progression, _settings);
+    final newRange = _rangeMaximum(progression, synchronizedSettings);
     setState(() {
       _progression = progression;
+      _settings = synchronizedSettings;
+      GtnApp.settingsNotifier.value = synchronizedSettings;
       if (oldRange != newRange) {
-        _engine = _engineFor(progression, _settings);
+        _engine = _engineFor(progression, synchronizedSettings);
         _game = _newGameWithAdaptiveTarget(_engine.newGame());
         _botTeam.reset(_game.minimum, _game.maximum);
         _message = 'Hardcore range changed. A fresh round is ready.';
@@ -947,6 +1043,26 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
     _scheduleAutoClicker();
   }
 
+  Future<void> _openLegacySystems(LegacySystemsView view) async {
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (_) => LegacySystemsPage(
+          progression: _progression,
+          onChanged: _applyLegacyProgression,
+          view: view,
+        ),
+      ),
+    );
+    _scheduleAutoClicker();
+  }
+
+  Future<void> _openSystems() => _openLegacySystems(LegacySystemsView.all);
+
+  Future<void> _openMusic() => _openLegacySystems(LegacySystemsView.music);
+
+  Future<void> _openLuckyStake() =>
+      _openLegacySystems(LegacySystemsView.luckyStake);
+
   Future<void> _openUpgradeShop() async {
     await Navigator.of(context).push<void>(
       MaterialPageRoute<void>(
@@ -959,17 +1075,20 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
   }
 
   String? _currentSeasonId() => switch (DateTime.now().month) {
-        12 || 1 || 2 => 'winter',
-        3 || 4 || 5 => 'spring',
-        6 || 7 || 8 => 'summer',
-        _ => 'autumn',
-      };
+    12 || 1 || 2 => 'winter',
+    3 || 4 || 5 => 'spring',
+    6 || 7 || 8 => 'summer',
+    _ => 'autumn',
+  };
 
   Future<void> _submitGuess({int? automatedGuess, String? botId}) async {
     final isBot = botId != null;
     final guess = automatedGuess ?? int.tryParse(_controller.text.trim());
     if (guess == null) {
-      setState(() => _message = 'Enter a whole number from ${_game.minimum} to ${_game.maximum}.');
+      setState(
+        () => _message =
+            'Enter a whole number from ${_game.minimum} to ${_game.maximum}.',
+      );
       return;
     }
 
@@ -993,9 +1112,11 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
         final criticalPrecisionLevel =
             beforeGuess.prestigeUpgrades['critical_precision_boost'] ?? 0;
         final guaranteedGoldenGuess =
-            !isBot && (beforeGuess.nebulaItems['golden_guess'] ?? 0) > 0 &&
+            !isBot &&
+            (beforeGuess.nebulaItems['golden_guess'] ?? 0) > 0 &&
             (beforeGuess.totalGuesses + 1) % 10 == 0;
-        final isCritical = correct &&
+        final isCritical =
+            correct &&
             (guaranteedGoldenGuess ||
                 Random.secure().nextDouble() <
                     GuessEconomyRules.criticalChance(criticalPrecisionLevel));
@@ -1011,8 +1132,9 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
                 hasTalentReward: false,
                 isCritical: isCritical,
                 difficultyId: _settings.difficultyId,
-                mutatorMultiplier:
-                    _legacySystemsEngine.mutatorRewardMultiplier(legacySystems),
+                mutatorMultiplier: _legacySystemsEngine.mutatorRewardMultiplier(
+                  legacySystems,
+                ),
                 traitMultiplier: BigNumber.parse(
                   traitEffects.correctGuessMultiplier.toStringAsFixed(2),
                 ),
@@ -1036,7 +1158,8 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
         );
         final adaptiveDecision = _invisibleTraitEngine.evaluate(
           profile: adaptiveProfile,
-          prestigeCount: adaptiveProfile.prestigesObserved > beforeGuess.prestigeResets
+          prestigeCount:
+              adaptiveProfile.prestigesObserved > beforeGuess.prestigeResets
               ? adaptiveProfile.prestigesObserved
               : beforeGuess.prestigeResets,
           ultraCount: adaptiveProfile.ultrasObserved > beforeGuess.ultraResets
@@ -1044,8 +1167,11 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
               : beforeGuess.ultraResets,
           currentStreak: afterReward.currentStreak,
         );
-        rangeScoutActive = rangeScoutActive ||
-            adaptiveDecision.helperIds.contains(InvisibleTraitEngine.helperRangeScout);
+        rangeScoutActive =
+            rangeScoutActive ||
+            adaptiveDecision.helperIds.contains(
+              InvisibleTraitEngine.helperRangeScout,
+            );
         if (!correct && rangeScoutActive) {
           _game = _engine.applyRangeScoutHint(_game, guess);
         }
@@ -1053,53 +1179,84 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
           final criticalChance = legacySystems.talents.contains('talent_crit_2')
               ? 0.15
               : legacySystems.talents.contains('talent_crit_1')
-                  ? 0.05
-                  : 0.0;
+              ? 0.05
+              : 0.0;
           afterReward = _legacySystemsEngine.applyCorrectGuessBonuses(
             before: beforeGuess,
             after: afterReward,
             systems: legacySystems,
             criticalHit: Random.secure().nextDouble() < criticalChance,
-            crystalCoreProc: legacySystems.equippedRelics.contains('crystal_golem') &&
+            crystalCoreProc:
+                legacySystems.equippedRelics.contains('crystal_golem') &&
                 Random.secure().nextDouble() < 0.10,
-            nebulaBoostOwned: (beforeGuess.nebulaItems['nebula_boost'] ?? 0) > 0,
+            nebulaBoostOwned:
+                (beforeGuess.nebulaItems['nebula_boost'] ?? 0) > 0,
           );
-          final adaptiveBonusRate = (
-            (adaptiveDecision.helperIds.contains(InvisibleTraitEngine.helperComeback) ? 0.05 : 0.0) +
-            (adaptiveDecision.helperIds.contains(InvisibleTraitEngine.helperMomentum) ? 0.03 : 0.0) +
-            adaptiveDecision.bonusIds.length * 0.10
-          ).clamp(0.0, 0.30).toDouble();
+          final adaptiveBonusRate =
+              ((adaptiveDecision.helperIds.contains(
+                            InvisibleTraitEngine.helperComeback,
+                          )
+                          ? 0.05
+                          : 0.0) +
+                      (adaptiveDecision.helperIds.contains(
+                            InvisibleTraitEngine.helperMomentum,
+                          )
+                          ? 0.03
+                          : 0.0) +
+                      adaptiveDecision.bonusIds.length * 0.10)
+                  .clamp(0.0, 0.30)
+                  .toDouble();
           if (adaptiveBonusRate > 0) {
             final earned = afterReward.money - beforeGuess.money;
-            final adaptiveBonus = earned * BigNumber.parse(adaptiveBonusRate.toStringAsFixed(2));
+            final adaptiveBonus =
+                earned * BigNumber.parse(adaptiveBonusRate.toStringAsFixed(2));
             afterReward = afterReward.copyWith(
               money: afterReward.money + adaptiveBonus,
               moneyEarned: afterReward.moneyEarned + adaptiveBonus,
             );
           }
         } else {
-          final difficultyPenalty = beforeGuess.money *
-              BigNumber.parse(DifficultyRules.wrongGuessPenalty(_settings.difficultyId).toStringAsFixed(2));
+          final difficultyPenalty =
+              beforeGuess.money *
+              BigNumber.parse(
+                DifficultyRules.wrongGuessPenalty(_settings.difficultyId)
+                    .toStringAsFixed(2),
+              );
           final taxPenalty = legacySystems.activeMutators.contains('mut_tax')
               ? beforeGuess.money * BigNumber.parse('0.05')
               : BigNumber.fromInt(0);
           final penalty = difficultyPenalty + taxPenalty;
-          final refund = penalty * BigNumber.parse(
-            traitEffects.missPenaltyRefundRate.toStringAsFixed(2),
-          );
-          final adaptiveRefund = adaptiveDecision.helperIds.contains(
-            InvisibleTraitEngine.helperMistakeInsurance,
-          ) ? penalty * BigNumber.parse('0.50') : BigNumber.fromInt(0);
-          final extraPenalty = penalty * BigNumber.parse(
-            traitEffects.riskMissPenaltyRate.toStringAsFixed(2),
-          );
-          final remainingMoney = beforeGuess.money - penalty + refund + adaptiveRefund - extraPenalty;
+          final refund =
+              penalty *
+              BigNumber.parse(
+                traitEffects.missPenaltyRefundRate.toStringAsFixed(2),
+              );
+          final adaptiveRefund =
+              adaptiveDecision.helperIds.contains(
+                InvisibleTraitEngine.helperMistakeInsurance,
+              )
+              ? penalty * BigNumber.parse('0.50')
+              : BigNumber.fromInt(0);
+          final extraPenalty =
+              penalty *
+              BigNumber.parse(
+                traitEffects.riskMissPenaltyRate.toStringAsFixed(2),
+              );
+          final remainingMoney =
+              beforeGuess.money -
+              penalty +
+              refund +
+              adaptiveRefund -
+              extraPenalty;
           afterReward = afterReward.copyWith(
             money: remainingMoney.compareTo(BigNumber.fromInt(0)) < 0
                 ? BigNumber.fromInt(0)
                 : remainingMoney,
-            currentStreak: traitEffects.streakProtection ||
-                    adaptiveDecision.helperIds.contains(InvisibleTraitEngine.helperStreakGuard)
+            currentStreak:
+                traitEffects.streakProtection ||
+                    adaptiveDecision.helperIds.contains(
+                      InvisibleTraitEngine.helperStreakGuard,
+                    )
                 ? beforeGuess.currentStreak
                 : afterReward.currentStreak,
           );
@@ -1114,13 +1271,15 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
             adaptiveDecision.bonusIds,
           );
         }
-        var systemsAfter = _legacySystemsEngine.recordGuessProgress(
-          legacySystems,
-          correct: correct,
-          currentStreak: afterReward.currentStreak,
-          today: DateTime.now().toIso8601String().substring(0, 10),
-          lootRoll: correct ? Random.secure().nextInt(1000) : null,
-        ).copyWith(adaptiveTraitProfile: adaptiveProfileAfter);
+        var systemsAfter = _legacySystemsEngine
+            .recordGuessProgress(
+              legacySystems,
+              correct: correct,
+              currentStreak: afterReward.currentStreak,
+              today: DateTime.now().toIso8601String().substring(0, 10),
+              lootRoll: correct ? Random.secure().nextInt(1000) : null,
+            )
+            .copyWith(adaptiveTraitProfile: adaptiveProfileAfter);
         if (isBot) {
           final feedbackName = switch (resultForMessage) {
             GuessResult.tooLow => 'TOO_LOW',
@@ -1131,8 +1290,10 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
           if (feedbackName != null) {
             systemsAfter = systemsAfter.copyWith(
               botTotalGuesses: legacySystems.botTotalGuesses + 1,
-              botCorrectGuesses: legacySystems.botCorrectGuesses + (correct ? 1 : 0),
-              botIncorrectGuesses: legacySystems.botIncorrectGuesses + (correct ? 0 : 1),
+              botCorrectGuesses:
+                  legacySystems.botCorrectGuesses + (correct ? 1 : 0),
+              botIncorrectGuesses:
+                  legacySystems.botIncorrectGuesses + (correct ? 0 : 1),
               botActionSequence: legacySystems.botActionSequence + 1,
               lastBotGuess: guess,
               lastBotFeedback: feedbackName,
@@ -1189,7 +1350,8 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
             botId: botId,
             guess: guess,
             feedback: feedback,
-            sharedMemory: (_progression.nebulaItems['bot_logic_upgrade'] ?? 0) > 0,
+            sharedMemory:
+                (_progression.nebulaItems['bot_logic_upgrade'] ?? 0) > 0,
             nextRangeMinimum: _game.minimum,
             nextRangeMaximum: _game.maximum,
           );
@@ -1200,21 +1362,26 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
           _message = rangeScoutActive
               ? 'Range Scout narrowed the search to ${_game.minimum}–${_game.maximum}.'
               : _progression.legacySystems.activeMutators.contains('mut_blind')
-                  ? 'Guess recorded. Try again.'
-                  : isBot ? '$botId guessed $guess. Too low.' : 'Too low. Try a higher number!';
+              ? 'Guess recorded. Try again.'
+              : isBot
+              ? '$botId guessed $guess. Too low.'
+              : 'Too low. Try a higher number!';
         case GuessResult.tooHigh:
           _message = rangeScoutActive
               ? 'Range Scout narrowed the search to ${_game.minimum}–${_game.maximum}.'
               : _progression.legacySystems.activeMutators.contains('mut_blind')
-                  ? 'Guess recorded. Try again.'
-                  : isBot ? '$botId guessed $guess. Too high.' : 'Too high. Try a lower number!';
+              ? 'Guess recorded. Try again.'
+              : isBot
+              ? '$botId guessed $guess. Too high.'
+              : 'Too high. Try a lower number!';
         case GuessResult.correct:
           if (!isBot) _gamesWon++;
           _message = isBot
               ? '$botId guessed $guess correctly. A new round is ready.'
-  : 'Correct! A new number is ready.';
+              : 'Correct! A new number is ready.';
         case GuessResult.outOfRange:
-          _message = 'Choose a number between ${_game.minimum} and ${_game.maximum}.';
+          _message =
+              'Choose a number between ${_game.minimum} and ${_game.maximum}.';
         case null:
           break;
       }
@@ -1246,6 +1413,7 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
     return GameDashboardPage(
       game: _game,
       progression: _progression,
+      settings: _settings,
       activeSlot: _activeSlot,
       loading: _isLoading,
       message: _message,
@@ -1261,6 +1429,9 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
       onSettings: _openSettings,
       onDeveloperSettings: _openDeveloperSettings,
       onLegacyPages: _openLegacyPages,
+      onMusic: _openMusic,
+      onLuckyStake: _openLuckyStake,
+      onSystems: _openSystems,
       showDeveloperSettings: kDebugMode,
     );
   }

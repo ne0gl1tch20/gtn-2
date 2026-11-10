@@ -18,11 +18,17 @@ class SaveData {
     this.profileName = '',
     this.profileIconId = 'default',
     this.creativeMode,
-  })  : progression = progression ?? ProgressionState.initial,
-        settings = settings ?? GameSettings.initial;
+  }) : progression = progression ?? ProgressionState.initial,
+       settings = settings ?? GameSettings.initial;
 
   static const currentSchemaVersion = 5;
-  static const profileIconIds = <String>['default', 'star', 'bolt', 'crown', 'planet'];
+  static const profileIconIds = <String>[
+    'default',
+    'star',
+    'bolt',
+    'crown',
+    'planet',
+  ];
 
   final int schemaVersion;
   final int secret;
@@ -51,36 +57,35 @@ class SaveData {
     String? profileIconId,
     CreativeModeSave? creativeMode,
     bool clearCreativeMode = false,
-  }) =>
-      SaveData(
-        schemaVersion: schemaVersion ?? this.schemaVersion,
-        secret: secret ?? this.secret,
-        attempts: attempts ?? this.attempts,
-        gamesWon: gamesWon ?? this.gamesWon,
-        isComplete: isComplete ?? this.isComplete,
-        minimum: minimum ?? this.minimum,
-        maximum: maximum ?? this.maximum,
-        progression: progression ?? this.progression,
-        settings: settings ?? this.settings,
-        profileName: profileName ?? this.profileName,
-        profileIconId: profileIconId ?? this.profileIconId,
-        creativeMode: clearCreativeMode ? null : creativeMode ?? this.creativeMode,
-      );
+  }) => SaveData(
+    schemaVersion: schemaVersion ?? this.schemaVersion,
+    secret: secret ?? this.secret,
+    attempts: attempts ?? this.attempts,
+    gamesWon: gamesWon ?? this.gamesWon,
+    isComplete: isComplete ?? this.isComplete,
+    minimum: minimum ?? this.minimum,
+    maximum: maximum ?? this.maximum,
+    progression: progression ?? this.progression,
+    settings: settings ?? this.settings,
+    profileName: profileName ?? this.profileName,
+    profileIconId: profileIconId ?? this.profileIconId,
+    creativeMode: clearCreativeMode ? null : creativeMode ?? this.creativeMode,
+  );
 
   Map<String, Object?> toJson() => {
-        'schemaVersion': schemaVersion,
-        'secret': secret,
-        'attempts': attempts,
-        'gamesWon': gamesWon,
-        'isComplete': isComplete,
-        'minimum': minimum,
-        'maximum': maximum,
-        'progression': progression.toJson(),
-        'settings': settings.toJson(),
-        'profileName': profileName,
-        'profileIconId': profileIconId,
-        'creativeMode': creativeMode?.toJson(),
-      };
+    'schemaVersion': schemaVersion,
+    'secret': secret,
+    'attempts': attempts,
+    'gamesWon': gamesWon,
+    'isComplete': isComplete,
+    'minimum': minimum,
+    'maximum': maximum,
+    'progression': progression.toJson(),
+    'settings': settings.toJson(),
+    'profileName': profileName,
+    'profileIconId': profileIconId,
+    'creativeMode': creativeMode?.toJson(),
+  };
 
   factory SaveData.fromJson(Map<String, dynamic> json) {
     final version = json['schemaVersion'];
@@ -95,7 +100,12 @@ class SaveData {
     final profileName = json['profileName'] ?? '';
     final profileIconId = json['profileIconId'] ?? 'default';
     final creativeModeJson = json['creativeMode'];
-    if (version is! int || (version != 1 && version != 2 && version != 3 && version != 4 && version != currentSchemaVersion) ||
+    if (version is! int ||
+        (version != 1 &&
+            version != 2 &&
+            version != 3 &&
+            version != 4 &&
+            version != currentSchemaVersion) ||
         secret is! int ||
         attempts is! int ||
         gamesWon is! int ||
@@ -118,21 +128,21 @@ class SaveData {
     final progression = progressionJson == null
         ? ProgressionState.initial
         : progressionJson is Map<String, dynamic>
-            ? ProgressionState.fromJson(progressionJson)
-            : throw const FormatException('Invalid progression save.');
+        ? ProgressionState.fromJson(progressionJson)
+        : throw const FormatException('Invalid progression save.');
     final creativeMode = creativeModeJson == null
         ? null
         : creativeModeJson is Map<String, dynamic>
-            ? CreativeModeSave.decodeAndMigrate(jsonEncode(creativeModeJson))
-            : null;
+        ? CreativeModeSave.decodeAndMigrate(jsonEncode(creativeModeJson))
+        : null;
     if (creativeModeJson != null && creativeMode == null) {
       throw const FormatException('Invalid Creative Mode save.');
     }
     final settings = settingsJson == null
         ? GameSettings.initial
         : settingsJson is Map<String, dynamic>
-            ? GameSettings.fromJson(settingsJson)
-            : throw const FormatException('Invalid settings save.');
+        ? GameSettings.fromJson(settingsJson)
+        : throw const FormatException('Invalid settings save.');
     return SaveData(
       schemaVersion: currentSchemaVersion,
       secret: secret,

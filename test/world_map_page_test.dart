@@ -1,39 +1,65 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gtn_2/core/legacy/legacy_systems_state.dart';
 import 'package:gtn_2/core/numbers/big_number.dart';
 import 'package:gtn_2/core/progression/progression_state.dart';
 import 'package:gtn_2/worlds/world_boss_catalog.dart';
 import 'package:gtn_2/worlds/world_map_page.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
+import 'package:material_ui/material_ui.dart';
 
 void main() {
   ProgressionState stateWith({
     Set<String> unlocked = const {'verdant_grove'},
     int correctGuesses = 0,
-  }) =>
-      ProgressionState(
-        correctGuesses: correctGuesses,
-        legacySystems: LegacySystemsState.initial.copyWith(
-          unlockedWorldIds: unlocked,
-          worldUnlockMigrationPending: false,
-        ),
-      );
+  }) => ProgressionState(
+    correctGuesses: correctGuesses,
+    legacySystems: LegacySystemsState.initial.copyWith(
+      unlockedWorldIds: unlocked,
+      worldUnlockMigrationPending: false,
+    ),
+  );
 
   Future<void> pumpMap(
     WidgetTester tester, {
     required ProgressionState state,
     required WorldBossAction onAction,
   }) async {
+    // Use bounded frames: the expressive controls and map viewport can keep
+    // scheduling animations, so waiting for global idle with pumpAndSettle is
+    // not deterministic for this screen.
     await tester.pumpWidget(
-      MaterialApp(
+      M3EMaterialApp(
+        data: M3EThemeData.light(seedColor: const Color(0xFF7C5CFC)),
+        fontFamily: 'Manrope',
+        autoTheming: false,
+        initialTheme: Brightness.light,
         home: WorldMapPage(progression: state, onAction: onAction),
       ),
     );
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 400));
   }
 
-  testWidgets('renders all four world nodes on an interactive map',
-      (tester) async {
+  testWidgets('recreates GTN1 progression summary and world expedition list', (
+    tester,
+  ) async {
+    final state = stateWith();
+    await pumpMap(tester, state: state, onAction: (_, __) async => state);
+
+    expect(find.text('BEYOND THE NUMBERS'), findsOneWidget);
+    expect(find.text('Your universe'), findsOneWidget);
+    expect(find.text('PRESTIGE'), findsOneWidget);
+    expect(find.text('ULTRA'), findsOneWidget);
+    expect(find.text('NEBULA'), findsOneWidget);
+    expect(find.text('WORLD EXPEDITION'), findsOneWidget);
+    expect(find.text('Worlds & bosses'), findsOneWidget);
+    expect(find.text('Verdant Grove'), findsWidgets);
+    expect(find.text('BOSS HEALTH'), findsWidgets);
+    expect(find.text('Requirements pending'), findsWidgets);
+  });
+
+  testWidgets('renders all four world nodes on an interactive map', (
+    tester,
+  ) async {
     final state = stateWith();
     await pumpMap(tester, state: state, onAction: (_, __) async => state);
 
@@ -44,8 +70,9 @@ void main() {
     expect(find.text('Verdant Grove'), findsWidgets);
   });
 
-  testWidgets('map fit, reset and zoom controls update the real viewport',
-      (tester) async {
+  testWidgets('map fit, reset and zoom controls update the real viewport', (
+    tester,
+  ) async {
     final state = stateWith();
     await pumpMap(tester, state: state, onAction: (_, __) async => state);
 
@@ -57,15 +84,15 @@ void main() {
     final controller = viewer.transformationController!;
 
     await tester.tap(find.byTooltip('Reset map view'));
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 400));
     expect(controller.value.getMaxScaleOnAxis(), closeTo(1, 0.001));
 
     await tester.tap(find.byTooltip('Zoom in'));
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 400));
     expect(controller.value.getMaxScaleOnAxis(), closeTo(1.25, 0.001));
 
     await tester.tap(find.byTooltip('Fit map to screen'));
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 400));
     final fittedScale = controller.value.getMaxScaleOnAxis();
     expect(fittedScale, greaterThan(0.35));
     expect(fittedScale, lessThan(1));
@@ -76,18 +103,21 @@ void main() {
     await pumpMap(tester, state: state, onAction: (_, __) async => state);
 
     final viewer = find.byType(InteractiveViewer);
-    final controller = tester.widget<InteractiveViewer>(viewer)
+    final controller = tester
+        .widget<InteractiveViewer>(viewer)
         .transformationController!;
     final before = controller.value.clone();
 
+    await tester.ensureVisible(viewer);
     await tester.drag(viewer, const Offset(40, 24));
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 400));
 
     expect(controller.value.storage, isNot(equals(before.storage)));
   });
 
-  testWidgets('selecting an unlocked node uses the progression action',
-      (tester) async {
+  testWidgets('selecting an unlocked node uses the progression action', (
+    tester,
+  ) async {
     final unlocked = WorldBossCatalog.worlds.map((world) => world.id).toSet();
     final state = stateWith(unlocked: unlocked);
     final calls = <(String, String)>[];
@@ -103,15 +133,18 @@ void main() {
       },
     );
 
-    await tester.tap(find.byKey(const ValueKey('world-node-crystal_caverns')));
-    await tester.pumpAndSettle();
+    final node = find.byKey(const ValueKey('world-node-crystal_caverns'));
+    await tester.ensureVisible(node);
+    await tester.tap(node);
+    await tester.pump(const Duration(milliseconds: 400));
 
     expect(calls, contains(('crystal_caverns', 'select_world')));
-    expect(find.text('Selected world'), findsOneWidget);
+    expect(find.text('Selected world'), findsWidgets);
   });
 
-  testWidgets('defeated world exposes mastery and dispatches its real action',
-      (tester) async {
+  testWidgets('defeated world exposes mastery and dispatches its real action', (
+    tester,
+  ) async {
     final state = stateWith().copyWith(
       defeatedBosses: const {'verdant_guardian'},
       nebula: BigNumber.fromInt(1000),
@@ -142,41 +175,46 @@ void main() {
     expect(find.textContaining('World mastery: 1 / 10'), findsOneWidget);
     final upgrade = find.ancestor(
       of: find.textContaining('Increase mastery'),
-      matching: find.byType(FilledButton),
+      matching: find.byType(M3EButton),
     );
     expect(upgrade, findsOneWidget);
     await tester.ensureVisible(upgrade);
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 400));
     await tester.tap(upgrade);
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 400));
 
     expect(actionId, 'verdant_grove');
     expect(actionName, 'mastery');
     expect(find.textContaining('World mastery: 2 / 10'), findsOneWidget);
   });
 
-  testWidgets('secret route marker appears at its threshold and dispatches discovery',
-      (tester) async {
-    final state = stateWith(correctGuesses: 50);
-    String? actionId;
-    String? actionName;
+  testWidgets(
+    'secret route marker appears at its threshold and dispatches discovery',
+    (tester) async {
+      final state = stateWith(correctGuesses: 50);
+      String? actionId;
+      String? actionName;
 
-    await pumpMap(
-      tester,
-      state: state,
-      onAction: (id, action) async {
-        actionId = id;
-        actionName = action;
-        return state;
-      },
-    );
+      await pumpMap(
+        tester,
+        state: state,
+        onAction: (id, action) async {
+          actionId = id;
+          actionName = action;
+          return state;
+        },
+      );
 
-    final secret = find.byKey(const ValueKey('secret-node-whispering_hollow'));
-    expect(secret, findsOneWidget);
-    await tester.tap(secret);
-    await tester.pumpAndSettle();
+      final secret = find.byKey(
+        const ValueKey('secret-node-whispering_hollow'),
+      );
+      expect(secret, findsOneWidget);
+      await tester.ensureVisible(secret);
+      await tester.tap(secret);
+      await tester.pump(const Duration(milliseconds: 400));
 
-    expect(actionId, 'whispering_hollow');
-    expect(actionName, 'secret');
-  });
+      expect(actionId, 'whispering_hollow');
+      expect(actionName, 'secret');
+    },
+  );
 }

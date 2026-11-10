@@ -1,7 +1,9 @@
-import 'package:flutter/material.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../core/numbers/big_number.dart';
 import '../core/progression/progression_state.dart';
+import '../design/expressive_widgets.dart';
 import 'upgrade_catalog.dart';
 
 typedef PermanentUpgradePurchase = Future<ProgressionState> Function(
@@ -29,14 +31,15 @@ class _PermanentUpgradeShopPageState extends State<PermanentUpgradeShopPage> {
   late ProgressionState _state = widget.progression;
   String? _buyingId;
 
-  List<GameUpgrade> get _catalog =>
-      widget.ultra ? UpgradeCatalog.availableUltra : UpgradeCatalog.availablePrestige;
+  List<GameUpgrade> get _catalog => widget.ultra
+      ? UpgradeCatalog.availableUltra
+      : UpgradeCatalog.availablePrestige;
 
   BigNumber get _balance => widget.ultra ? _state.ultra : _state.prestige;
 
-  int _level(String id) => (widget.ultra
-      ? _state.ultraUpgrades[id]
-      : _state.prestigeUpgrades[id]) ?? 0;
+  int _level(String id) =>
+      (widget.ultra ? _state.ultraUpgrades[id] : _state.prestigeUpgrades[id]) ??
+      0;
 
   Future<void> _buy(GameUpgrade upgrade) async {
     if (_buyingId != null) return;
@@ -54,7 +57,7 @@ class _PermanentUpgradeShopPageState extends State<PermanentUpgradeShopPage> {
     final currency = widget.ultra ? 'Ultra' : 'Prestige';
     final theme = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(
+      appBar: GtnExpressiveAppBar(
         leading: IconButton(
           tooltip: 'Back',
           icon: const Icon(Icons.arrow_back),
@@ -62,7 +65,7 @@ class _PermanentUpgradeShopPageState extends State<PermanentUpgradeShopPage> {
         ),
         title: Text('$currency Upgrades'),
         actions: [
-          TextButton(
+          M3EButton.text(
             onPressed: () => Navigator.of(context).pop(_state),
             child: const Text('Done'),
           ),
@@ -71,7 +74,7 @@ class _PermanentUpgradeShopPageState extends State<PermanentUpgradeShopPage> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Card(
+          GtnExpressiveCard(
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Row(
@@ -84,10 +87,7 @@ class _PermanentUpgradeShopPageState extends State<PermanentUpgradeShopPage> {
                       style: theme.textTheme.titleMedium,
                     ),
                   ),
-                  Text(
-                    _balance.toString(),
-                    style: theme.textTheme.titleLarge,
-                  ),
+                  Text(_balance.toString(), style: theme.textTheme.titleLarge),
                 ],
               ),
             ),
@@ -133,7 +133,7 @@ class _PermanentUpgradeCard extends StatelessWidget {
     final affordable = balance.compareTo(cost) >= 0;
     final theme = Theme.of(context);
 
-    return Card(
+    return GtnExpressiveCard(
       margin: const EdgeInsets.only(bottom: 12),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -158,7 +158,7 @@ class _PermanentUpgradeCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
-            FilledButton(
+            M3EButton.filled(
               onPressed: busy || maxed || !affordable ? null : onBuy,
               child: Text(
                 maxed ? 'Max level reached' : 'Upgrade · $cost $currency',

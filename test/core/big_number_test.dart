@@ -15,8 +15,7 @@ void main() {
         '0.3',
       );
       expect(
-        (BigNumber.parse('100000000000000000000.01') -
-                BigNumber.parse('0.01'))
+        (BigNumber.parse('100000000000000000000.01') - BigNumber.parse('0.01'))
             .toString(),
         '100000000000000000000',
       );
@@ -27,8 +26,10 @@ void main() {
         (BigNumber.parse('12.5') * BigNumber.parse('0.08')).toString(),
         '1',
       );
-      expect(BigNumber.parse('999999999999999999').multiplyInt(3).toString(),
-          '2999999999999999997');
+      expect(
+        BigNumber.parse('999999999999999999').multiplyInt(3).toString(),
+        '2999999999999999997',
+      );
     });
 
     test('compares values at different scales', () {
