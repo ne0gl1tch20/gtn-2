@@ -10,7 +10,8 @@ on:
 permissions:
   contents: write
 
-# CI formatting is committed before the Android and Windows validation jobs.
+# CI formatting is committed before Android and Windows validation jobs.
+# Keep the release artifact short-lived and traceable to this exact build.
 
 concurrency:
   group: validate-${{ github.ref }}
