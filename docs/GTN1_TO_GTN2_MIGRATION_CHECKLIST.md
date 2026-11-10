@@ -144,7 +144,7 @@ Sources: GTN1 `app/src/main/assets/web-play/` and `app/src/main/assets/libraries
 
 ### GTN1 screen inventory and native Flutter destination map
 
-Source: pinned GTN1 `web-play/index.html`, `styles.css`, and all seven files in `web-play/`. The 21 HTML screen roots and their primary responsibilities have been inventoried. A destination marked [~] means a plausible Dart page/route exists; it does **not** mean the whole screen has been visually or behaviorally ported.
+Source: pinned GTN1 `web-play/index.html`, `styles.css`, and all seven files in `web-play/`. The 22 HTML screen roots and their primary responsibilities have been inventoried. A destination marked [~] means a plausible Dart page/route exists; it does **not** mean the whole screen has been visually or behaviorally ported.
 
 | GTN1 screen / root | GTN1 responsibility and visual surfaces | GTN2 native Dart destination | Status |
 |---|---|---|---|
