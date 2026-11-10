@@ -362,23 +362,26 @@ class LegacySystemsState {
 
     int count(String key, {int fallback = 0}) {
       final value = json[key] ?? fallback;
-      if (value is! int || value < 0)
+      if (value is! int || value < 0) {
         throw FormatException('Invalid legacy save count: $key');
+      }
       return value;
     }
 
     String string(String key, {String fallback = ''}) {
       final value = json[key] ?? fallback;
-      if (value is! String)
+      if (value is! String) {
         throw FormatException('Invalid legacy save value: $key');
+      }
       return value;
     }
 
     final rawArms = json['selectedTraitArms'];
     final arms = <String, String>{};
     if (rawArms != null) {
-      if (rawArms is! Map)
+      if (rawArms is! Map) {
         throw const FormatException('Invalid selected trait arms.');
+      }
       for (final entry in rawArms.entries) {
         if (entry.key is! String || entry.value is! String) {
           throw const FormatException('Invalid selected trait arm entry.');
@@ -389,8 +392,9 @@ class LegacySystemsState {
     final rawPlaylists = json['musicPlaylists'];
     final playlists = <String, List<String>>{};
     if (rawPlaylists != null) {
-      if (rawPlaylists is! Map)
+      if (rawPlaylists is! Map) {
         throw const FormatException('Invalid music playlists.');
+      }
       for (final entry in rawPlaylists.entries) {
         final value = entry.value;
         if (entry.key is! String ||
@@ -419,8 +423,9 @@ class LegacySystemsState {
       throw const FormatException('Unknown loot chest tier.');
     }
     final repeat = string('musicRepeatMode', fallback: 'off');
-    if (!{'off', 'one', 'all'}.contains(repeat))
+    if (!{'off', 'one', 'all'}.contains(repeat)) {
       throw const FormatException('Invalid music repeat mode.');
+    }
     final shuffle = json['musicShuffle'] ?? false;
     final endless = json['endlessRiftActive'] ?? false;
     final worldUnlockMigrationPending =
@@ -467,8 +472,9 @@ class LegacySystemsState {
         (lastEvent != null && lastEvent is! String)) {
       throw const FormatException('Invalid extended legacy state.');
     }
-    if (currentTrack != null && currentTrack is! String)
+    if (currentTrack != null && currentTrack is! String) {
       throw const FormatException('Invalid current music track.');
+    }
     final rawAdaptiveProfile = json['adaptiveTraitProfile'];
     if (rawAdaptiveProfile != null && rawAdaptiveProfile is! Map) {
       throw const FormatException('Invalid adaptive trait profile.');

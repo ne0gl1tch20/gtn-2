@@ -112,8 +112,9 @@ class ProgressionState {
     final rawBossDamage = json['bossDamage'];
     final bossDamage = <String, int>{};
     if (rawBossDamage != null) {
-      if (rawBossDamage is! Map)
+      if (rawBossDamage is! Map) {
         throw const FormatException('Invalid boss damage map.');
+      }
       for (final entry in rawBossDamage.entries) {
         if (entry.key is! String ||
             entry.value is! int ||

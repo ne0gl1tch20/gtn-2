@@ -94,8 +94,9 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
                         ),
                     ],
                     onChanged: (value) {
-                      if (value != null)
+                      if (value != null) {
                         setDialogState(() => difficulty = value);
+                      }
                     },
                   ),
                   const SizedBox(height: 12),

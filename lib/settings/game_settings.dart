@@ -240,8 +240,9 @@ class GameSettings {
     Map<String, List<String>> readPlaylists() {
       final value = json['musicPlaylistPaths'];
       if (value == null) return const {};
-      if (value is! Map)
+      if (value is! Map) {
         throw const FormatException('Invalid music playlists.');
+      }
       final result = <String, List<String>>{};
       for (final entry in value.entries) {
         if (entry.key is! String ||
