@@ -160,15 +160,15 @@ Source: pinned GTN1 `web-play/index.html`, `styles.css`, and all seven files in 
 | `relics` | Relic collection, rarity, equipment slots and equip state | `lib/legacy/legacy_systems_page.dart` | [~] Native section exists; visual comparison open |
 | `codex` | Discovery collection, completion progress and claim-once reward | `lib/legacy/legacy_pages.dart` / legacy systems | [~] Native section exists; visual comparison open |
 | `changelog` | Release notes and rendered changelog content | `lib/legacy/legacy_pages.dart` + `assets/changelogs.md` | [~] Native Dart screen reads canonical GTN1 Markdown; parser fidelity and visual audit remain open |
-| `about` | App information, open-source licenses and attribution | `lib/legacy/legacy_pages.dart` | [~] Basic destination exists; licenses/content parity open |
-| `music` | Offline music player, track list, playback controls and state | No confirmed dedicated Flutter screen | [ ] Needs screen and native audio-service audit |
-| `settings` | Gameplay, appearance, audio, locale, accessibility and menu customization | `lib/settings/settings_page.dart` | [~] Native grouped hierarchy and supported controls recreated; full preference model and Menu Studio remain open |
+| `about` | App information, socials/source links, open-source licenses and attribution | `lib/legacy/legacy_pages.dart` | [~] Social links and source GTN1 license credits recreated; full dependency/license audit and updater status parity remain open |
+| `music` | Offline player, import, metadata, seek, queue, playlists, shuffle and repeat | `LegacySystemsPage(view: music)` + `LegacySystemsState` | [~] Dedicated native route now has import/playback, seek, queue, playlists, shuffle and repeat; metadata/album art, app-scoped completion, background service and media notifications remain open |
+| `settings` | Gameplay, notation, appearance, custom colors, audio/haptics, notifications, update interval, accessibility and Menu Studio | `lib/settings/settings_page.dart` + `lib/settings/game_settings.dart` | [~] Full GTN1 preference fields serialize and render in native groups; notification delivery, scheduled update checks, Menu Studio and tutorial replay remain open |
 | `prestige` | Prestige reset, currency, upgrades and shop | `lib/progression/progression_hub_page.dart` | [~] Engine and destination exist; screen-level comparison open |
 | `ultra` | Ultra progression, reset and upgrades | `lib/progression/progression_hub_page.dart` | [~] Engine and destination exist; screen-level comparison open |
 | `talent` | Talent web/tree, prerequisites, purchase and active effects | `lib/legacy/legacy_systems_page.dart` | [~] Catalog/section exists; graph layout and effects need audit |
 | `mutators` | Mutator catalog, selection, stacking and gameplay effects | `lib/legacy/legacy_systems_page.dart` | [~] Catalog/section exists; selection and effect parity open |
 | `stats` | Accuracy, guesses, currencies, playtime, streaks, arcade and boss metrics | `lib/legacy/legacy_pages.dart` | [~] Native statistics section exists; metric-by-metric audit open |
-| `stake` | Lucky Stake eligibility, wager, streak multiplier, result and payout | No confirmed dedicated Flutter screen | [ ] Needs dedicated native screen and transaction parity audit |
+| `stake` | Lucky Stake eligibility, 50/50 wager, streak multiplier, result and payout | `LegacySystemsPage(view: luckyStake)` + `LegacySystemsEngine.settleLuckyStake` | [~] Dedicated route and source-matched 2.0× + 0.1×/streak payout; randomization and transaction tests exist, full visual comparison remains open |
 | `traits` | Traits & Loadout, unlock state, selected arms and active gameplay traits | `lib/legacy/legacy_systems_page.dart` | [~] Native trait section exists; 320 trait rule audit remains open |
 
 ### Web Play JavaScript module responsibility map
@@ -275,3 +275,11 @@ Implementation is consolidated in the single draft pull request [#44](https://gi
 - All app-level Flutter Material imports in the migrated screens and affected widget tests now use `material_ui`.
 - The implementation is not yet considered verified. Flutter analysis, tests, Android/Windows builds and runtime checks must pass before the relevant boxes are changed from `[~]` to `[x]`.
 - This UI implementation does not close the outstanding gameplay, Lua, Web Play, native service, save-migration, audio or updater parity items above.
+
+
+### Verified source behavior notes (November 2026)
+
+- **Settings model:** The Kotlin `GameSettings` data class and Web Play settings groups were compared field-by-field. Dart now persists theme mode, number notation, locale, difficulty, audio toggles/levels, haptics, notification preferences/frequency, update-check interval, reduced motion/flashes, theme preset/custom colors, music library/queue/playlists/repeat/shuffle, More-menu layout metadata, and tutorial completion metadata. Older four-field GTN2 saves still decode with defaults. Unit tests cover round-trip, legacy decode and invalid values. Platform notification scheduling, automatic update scheduling and Menu Studio actions are not claimed as implemented.
+- **Lucky Stake:** GTN1 `DesktopLuckyStakeContent.kt` uses a 50/50 random result and a win multiplier of `2.0 + 0.1 × current streak`. The Dart engine's decimal-scale multiplier and payout test were checked against that formula. A dedicated route now exposes current streak, available Money, wager input and result feedback.
+- **Music:** GTN1 `MusicPlayerScreen.kt` uses an application-scoped manager and exposes current track metadata/art, playback position, seek, previous/next, shuffle/repeat, import, queue editing and playlist membership. GTN2's dedicated route now exposes native import/playback, seek, queue, playlist, shuffle and repeat controls. Metadata/art, queue reordering, OS media controls and a persistent background playback service remain unported and are intentionally still marked partial.
+- **About:** The native screen now includes the original GTN1 social/source links and its listed library credits. This is not a substitute for the full generated dependency license inventory.

@@ -20,6 +20,7 @@ void main() {
     expect(find.text('Language & Numbers'), findsOneWidget);
     expect(find.text('Number notation'), findsOneWidget);
     expect(find.text('Appearance'), findsOneWidget);
+    await tester.scrollUntilVisible(find.text('Audio & Haptics'), 350);
     expect(find.text('Audio & Haptics'), findsOneWidget);
     await tester.scrollUntilVisible(find.text('Notifications'), 350);
     expect(find.text('Notifications'), findsOneWidget);
