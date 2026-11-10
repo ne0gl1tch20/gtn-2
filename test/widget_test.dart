@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:gtn_2/core/game/game_engine.dart';
 import 'package:gtn_2/core/progression/progression_state.dart';
 import 'package:gtn_2/home/game_dashboard_page.dart';
+import 'package:gtn_2/design/expressive_widgets.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -70,7 +71,7 @@ void main() {
     expect(find.text('CLEAR'), findsOneWidget);
 
     TextEditingController guessController() =>
-        tester.widget<TextField>(find.byKey(const Key('guess-input'))).controller!;
+        tester.widget<GtnExpressiveTextField>(find.byKey(const Key('guess-input'))).controller!;
 
     await tester.ensureVisible(find.text('LOW END'));
     await tester.tap(find.text('LOW END'));
