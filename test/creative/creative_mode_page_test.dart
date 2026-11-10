@@ -49,7 +49,7 @@ void main() {
     await tester.pump();
     await pumpUntilFound(tester, find.text('Enable Creative Mode'));
 
-    await tester.tap(find.byType(Switch));
+    await tester.tap(find.byType(M3ESwitch));
     await tester.pump();
     await tester.scrollUntilVisible(
       find.text('Start new run'),
