@@ -645,15 +645,13 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
                   );
                   return;
                 }
-                if (stake.compareTo(BigNumber.fromInt(0)) <= 0) {
+                final validationError = _engine.validateLuckyStake(
+                  progression: _progression,
+                  stake: stake,
+                );
+                if (validationError != null) {
                   setState(
-                    () => _stakeResultMessage = 'Enter a valid positive stake.',
-                  );
-                  return;
-                }
-                if (_progression.money.compareTo(stake) < 0) {
-                  setState(
-                    () => _stakeResultMessage = 'Insufficient funds for this stake.',
+                    () => _stakeResultMessage = validationError,
                   );
                   return;
                 }
