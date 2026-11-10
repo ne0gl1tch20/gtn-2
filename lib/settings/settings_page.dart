@@ -342,14 +342,18 @@ class SettingsPage extends StatelessWidget {
           ),
           if (onOpenMenuStudio != null)
             GtnExpressiveCard(
-              child: ListTile(
-                leading: const Icon(Icons.palette_rounded),
-                title: const Text('Menu Studio'),
-                subtitle: const Text(
-                  'Reorder More destinations and customize their colors.',
+              child: Material(
+                color: Colors.transparent,
+                borderRadius: BorderRadius.circular(24),
+                child: ListTile(
+                  leading: const Icon(Icons.palette_rounded),
+                  title: const Text('Menu Studio'),
+                  subtitle: const Text(
+                    'Reorder More destinations and customize their colors.',
+                  ),
+                  trailing: const Icon(Icons.chevron_right_rounded),
+                  onTap: onOpenMenuStudio,
                 ),
-                trailing: const Icon(Icons.chevron_right_rounded),
-                onTap: onOpenMenuStudio,
               ),
             ),
           const Padding(
