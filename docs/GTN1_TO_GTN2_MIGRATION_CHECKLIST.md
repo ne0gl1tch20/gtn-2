@@ -142,6 +142,56 @@ Sources: GTN1 `app/src/main/assets/web-play/` and `app/src/main/assets/libraries
 - [ ] Match screen transitions, micro-interactions, feedback, animation timing and reduced-motion behavior
 - [ ] Verify accessibility semantics, contrast, touch targets, keyboard and mouse behavior
 
+### GTN1 screen inventory and native Flutter destination map
+
+Source: pinned GTN1 `web-play/index.html`, `styles.css`, and all seven files in `web-play/`. The 21 HTML screen roots and their primary responsibilities have been inventoried. A destination marked [~] means a plausible Dart page/route exists; it does **not** mean the whole screen has been visually or behaviorally ported.
+
+| GTN1 screen / root | GTN1 responsibility and visual surfaces | GTN2 native Dart destination | Status |
+|---|---|---|---|
+| `play` | Main guess dashboard, hero, range, guess input, stats, wallet, quick actions, bot arena | `lib/home/game_dashboard_page.dart` | [~] Dashboard pass only |
+| `worlds` | Universe overview, world cards, guardian status, unlock progress | `lib/worlds/world_map_page.dart` plus progression hub entry | [~] Map exists; screen composition differs |
+| `arcade` | Minigame catalog, active game panel, score and reward state | `lib/arcade/arcade_page.dart` | [~] Native page exists; catalog and game-by-game visual audit open |
+| `upgrades` | Money upgrade catalog, levels, costs, purchase actions | `lib/shop/upgrade_shop_page.dart` | [~] Native page exists; source layout comparison open |
+| `more` | Player profile entry and grouped destinations for secondary screens | Main navigation in `lib/main.dart` | [~] Destination routing exists; native More landing page needs parity review |
+| `rewards` | Daily Nebula reward, streak, schedule, claim feedback | `lib/legacy/legacy_pages.dart` and progression actions in `lib/main.dart` | [~] Claim flow exists; dedicated screen parity open |
+| `journey` | Run summary, history, progress and playtime | `lib/legacy/legacy_pages.dart` | [~] Native section exists; full data/layout comparison open |
+| `shop` | Nebula shop catalog, owned/equipped state, item purchases | `lib/shop/nebula_shop_page.dart` | [~] Native page exists; visual comparison open |
+| `homebase` | Home Base / Sanctuary level, bonus, restoration action | `lib/progression/progression_hub_page.dart` and legacy systems | [~] Functionality exists; dedicated screen parity open |
+| `relics` | Relic collection, rarity, equipment slots and equip state | `lib/legacy/legacy_systems_page.dart` | [~] Native section exists; visual comparison open |
+| `codex` | Discovery collection, completion progress and claim-once reward | `lib/legacy/legacy_pages.dart` / legacy systems | [~] Native section exists; visual comparison open |
+| `changelog` | Release notes and rendered changelog content | No confirmed dedicated Flutter destination | [ ] Needs native screen and content source audit |
+| `about` | App information, open-source licenses and attribution | `lib/legacy/legacy_pages.dart` | [~] Basic destination exists; licenses/content parity open |
+| `music` | Offline music player, track list, playback controls and state | No confirmed dedicated Flutter screen | [ ] Needs screen and native audio-service audit |
+| `settings` | Gameplay, appearance, audio, locale, accessibility and menu customization | `lib/settings/settings_page.dart` | [~] Settings exist; Menu Studio and all preference parity open |
+| `prestige` | Prestige reset, currency, upgrades and shop | `lib/progression/progression_hub_page.dart` | [~] Engine and destination exist; screen-level comparison open |
+| `ultra` | Ultra progression, reset and upgrades | `lib/progression/progression_hub_page.dart` | [~] Engine and destination exist; screen-level comparison open |
+| `talent` | Talent web/tree, prerequisites, purchase and active effects | `lib/legacy/legacy_systems_page.dart` | [~] Catalog/section exists; graph layout and effects need audit |
+| `mutators` | Mutator catalog, selection, stacking and gameplay effects | `lib/legacy/legacy_systems_page.dart` | [~] Catalog/section exists; selection and effect parity open |
+| `stats` | Accuracy, guesses, currencies, playtime, streaks, arcade and boss metrics | `lib/legacy/legacy_pages.dart` | [~] Native statistics section exists; metric-by-metric audit open |
+| `stake` | Lucky Stake eligibility, wager, streak multiplier, result and payout | No confirmed dedicated Flutter screen | [ ] Needs dedicated native screen and transaction parity audit |
+| `traits` | Traits & Loadout, unlock state, selected arms and active gameplay traits | `lib/legacy/legacy_systems_page.dart` | [~] Native trait section exists; 320 trait rule audit remains open |
+
+### Web Play JavaScript module responsibility map
+
+| GTN1 JavaScript module | Responsibilities discovered in source | Dart migration destination |
+|---|---|---|
+| `app.js` | Screen activation, state rendering, bridge requests, catalogs, upgrades, world/reward rendering, tutorials, music UI, statistics, stake UI, changelog, settings, feedback and arcade lifecycle | Existing Dart page widgets plus `GameHomePage`, `ProgressionEngine`, `LegacySystemsEngine`, save storage and platform services. Every bridge action must resolve to a validated Dart action; no JS runtime is carried into GTN2. |
+| `menu-studio.js` | Reorder navigation and More destinations, move entries between areas, color customization, preview, reset and persisted layout | Native settings subpage/editor backed by `GameSettings` and save persistence. Not yet confirmed implemented. |
+| `trait-extension-host.js` | Mount and coordinate the trait extension host | Dart trait catalog/runtime integration; extension lifecycle and permission behavior still need explicit design. |
+| `vue-bot-arena.js` | Vue-driven bot arena presentation and interaction | Native Dart bot arena widget using the existing `BotTeam`/automation state. Dashboard widget exists; complete interaction parity open. |
+| `vue-jarrlyy-adapter.js` | Vue/Jarrlyy UI event and component adapter | Native Flutter component/event adapters in `lib/design/`; map each event contract and component rather than porting Vue. |
+
+### CSS and Jarrlyy UI SDK visual audit groups
+
+- [~] Global foundation: bundled font faces, color variables, background, centered app width, responsive breakpoints, focus rings and reduced-motion rules.
+- [~] Shared surfaces: cards, progression cards, catalog entries, panels, chips, currency tiles, progress tracks, boss cards, quest rows and loot cards.
+- [~] Navigation and menus: screen tabs, More links, settings groups, menu editor rows, active/disabled states and responsive navigation.
+- [~] Gameplay: hero, feedback, sparkle field, input shell, quick actions, bot arena, stats and wallet.
+- [ ] Screen-specific visuals: world cards/map, daily rewards, journey summaries, upgrade/shop catalogs, Home Base, relics, codex, changelog, About/licenses, music player, prestige, Ultra, talent graph, mutators, statistics and Lucky Stake.
+- [ ] Jarrlyy SDK: audit its base/advanced CSS and component/event APIs against the native Flutter adapters. Do not assume CSS selector coverage proves component behavior parity.
+
+This inventory is a route and responsibility audit, not proof of visual parity. Each destination remains open until its full markup, CSS rules, JavaScript state transitions and user-visible interactions have been compared with the Dart screen at matching viewport sizes.
+
 ### Player dashboard source-to-widget map
 
 Reference: GTN1 `app/src/main/assets/web-play/index.html` and `styles.css`.
