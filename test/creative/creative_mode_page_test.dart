@@ -1,6 +1,7 @@
 import 'dart:io';
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gtn_2/core/creative/creative_mode.dart';
 import 'package:gtn_2/creative/creative_mode_page.dart';
@@ -38,7 +39,11 @@ void main() {
         _MemorySaveStorage(SaveData(secret: 42, attempts: 0, gamesWon: 0));
 
     await tester.pumpWidget(
-      MaterialApp(home: CreativeModePage(slot: 1, storage: initialStorage)),
+      M3EMaterialApp(
+        data: M3EThemeData.light(seedColor: const Color(0xFF7C5CFC)),
+        fontFamily: 'Manrope',
+        autoTheming: false,
+        initialTheme: Brightness.light,home: CreativeModePage(slot: 1, storage: initialStorage)),
     );
     await tester.pump();
     await pumpUntilFound(tester, find.text('Enable Creative Mode'));
