@@ -650,9 +650,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
                   stake: stake,
                 );
                 if (validationError != null) {
-                  setState(
-                    () => _stakeResultMessage = validationError,
-                  );
+                  setState(() => _stakeResultMessage = validationError);
                   return;
                 }
 
