@@ -113,14 +113,18 @@ class GameDashboardPage extends StatelessWidget {
           switch (index) {
             case 0:
               onWorldMap();
+              break;
             case 1:
               onArcade();
+              break;
             case 2:
               break;
             case 3:
               onUpgradeShop();
+              break;
             case 4:
               _openMoreMenu(context, panel);
+              break;
           }
         },
       ),
@@ -375,12 +379,7 @@ class GameDashboardPage extends StatelessWidget {
                       onPressed: loading ? null : onNewGame,
                       icon: const Icon(Icons.refresh_rounded),
                       label: const Text('Start another round'),
-                      style: FilledButton.styleFrom(
-                        minimumSize: const Size.fromHeight(52),
-                        backgroundColor: _purple,
-                        foregroundColor: Colors.white,
-                      ),
-                    ),
+                                          ),
                   ],
                 ],
               ),
@@ -898,38 +897,14 @@ class _GuessInput extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  child: TextField(
+                  child: GtnExpressiveTextField(
                     key: const Key('guess-input'),
                     controller: controller,
                     enabled: enabled,
                     keyboardType: TextInputType.number,
                     textInputAction: TextInputAction.done,
                     onSubmitted: (_) => onGuess(),
-                    style: TextStyle(
-                      color: foreground,
-                      fontSize: 19,
-                      fontWeight: FontWeight.w800,
-                    ),
-                    decoration: InputDecoration(
-                      hintText: 'Enter a number',
-                      hintStyle: TextStyle(color: muted.withValues(alpha: .75)),
-                      filled: true,
-                      fillColor: raised,
-                      contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 15, vertical: 16),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: BorderSide(color: line),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: BorderSide(color: line),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: const BorderSide(color: _purple, width: 1.5),
-                      ),
-                    ),
+                    decoration: const InputDecoration(hintText: 'Enter a number'),
                   ),
                 ),
                 const SizedBox(width: 9),
@@ -937,14 +912,7 @@ class _GuessInput extends StatelessWidget {
                   height: 56,
                   child: M3EButton.filled(
                     onPressed: enabled ? onGuess : null,
-                    style: FilledButton.styleFrom(
-                      backgroundColor: _purple,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 18),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
+                                        ),
                     child: const Text(
                       '->',
                       style: TextStyle(
@@ -1028,14 +996,7 @@ class _QuickGuessButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) => M3EButton.outlined(
         onPressed: enabled ? onPressed : null,
-        style: OutlinedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
-          visualDensity: VisualDensity.compact,
-          foregroundColor: _muted,
-          side: const BorderSide(color: _line),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        ),
-        child: Text(
+                child: Text(
           label,
           style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w900),
         ),
