@@ -95,7 +95,7 @@ class _ArcadePageState extends State<ArcadePage> {
                         ),
                         trailing: const Icon(Icons.play_arrow_rounded),
                         onTap: () => GtnExpressiveDialog.show<void>(
-                          context: context,
+                          context,
                           builder: (_) => _ArcadeDialog(
                             gameId: game.id,
                             title: game.name,
