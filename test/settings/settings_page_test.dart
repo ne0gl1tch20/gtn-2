@@ -32,3 +32,28 @@ void main() {
     expect(find.text('Reduce flashes'), findsOneWidget);
   });
 }
+
+
+  testWidgets('Settings exposes diagnostics and Menu Studio', (tester) async {
+    var openedMenuStudio = false;
+    await tester.pumpWidget(
+      M3EMaterialApp(
+        data: M3EThemeData.light(seedColor: const Color(0xFF7C5CFC)),
+        fontFamily: 'Manrope',
+        autoTheming: false,
+        initialTheme: Brightness.dark,
+        home: SettingsPage(
+          settings: GameSettings.initial,
+          onChanged: (_) async {},
+          onOpenMenuStudio: () => openedMenuStudio = true,
+        ),
+      ),
+    );
+
+    await tester.scrollUntilVisible(find.text('Save logs to storage'), 350);
+    expect(find.text('Save logs to storage'), findsOneWidget);
+    expect(find.text('Verbose logging'), findsOneWidget);
+    await tester.scrollUntilVisible(find.text('Menu Studio'), 350);
+    await tester.tap(find.text('Menu Studio'));
+    expect(openedMenuStudio, isTrue);
+  });
