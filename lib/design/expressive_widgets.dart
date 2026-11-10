@@ -194,19 +194,12 @@ class GtnExpressiveTextField extends StatelessWidget {
         fontSize: 18,
         fontWeight: FontWeight.w800,
       ),
-      decoration: InputDecoration(
-        labelText: decoration?.labelText,
-        hintText: decoration?.hintText,
-        helperText: decoration?.helperText,
-        errorText: decoration?.errorText,
-        prefixText: decoration?.prefixText,
-        suffixText: decoration?.suffixText,
+      decoration: (decoration ?? const InputDecoration()).copyWith(
         filled: true,
-        fillColor: dark ? const Color(0xFF080D1B) : const Color(0xFFF0F1FA),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 16,
-        ),
+        fillColor: decoration?.fillColor ??
+            (dark ? const Color(0xFF080D1B) : const Color(0xFFF0F1FA)),
+        contentPadding: decoration?.contentPadding ??
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         border: OutlineInputBorder(
           borderRadius: radius,
           borderSide: BorderSide(color: borderColor),
@@ -226,7 +219,8 @@ class GtnExpressiveTextField extends StatelessWidget {
           borderRadius: radius,
           borderSide: BorderSide(color: borderColor.withValues(alpha: .5)),
         ),
-        hintStyle: TextStyle(color: hintColor.withValues(alpha: .8)),
+        hintStyle: decoration?.hintStyle ??
+            TextStyle(color: hintColor.withValues(alpha: .8)),
       ),
     );
   }
