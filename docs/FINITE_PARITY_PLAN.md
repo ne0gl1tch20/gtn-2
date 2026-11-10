@@ -8,7 +8,7 @@
 - **Target:** GTN2's existing Android and Windows targets.
 - **Included:** Features, screens, game rules, content, settings, save behavior and platform behavior that exist in the pinned GTN1 source and apply to the target platform.
 - **Not included:** New features, redesigns beyond reproducing GTN1, speculative improvements, unrelated refactors, extra platforms, or features added to GTN1 after the pinned commit.
-- **Inventory boundary:** The current migration audit identifies 107 Kotlin source files, 52 Kotlin test files, 22 Web Play screen roots, 5 JavaScript modules, 24 Jarrlyy UI SDK files, 4 Lua scripts, 17 game JSON catalogs, 320 trait IDs and 23 locale files. Confirm these counts once against the pinned source commit, record any correction here, then freeze the inventory. These are finite source sets, not invitations to discover more work indefinitely.
+- **Inventory boundary:** The pinned-source tree verification records 107 production Kotlin files, 49 Kotlin test files, one Web Play HTML shell, 5 Web Play JavaScript modules, 1 Web Play stylesheet, 24 Jarrlyy UI SDK files, 4 shipped core Lua scripts, 17 game JSON catalogs, 320 trait definitions and 23 locale files. The earlier 52-test / 22-screen-root figures were not supported by the pinned tree and are corrected here. The 24-file SDK count includes demo and TypeScript support files; only runtime-used files need behavioral mapping. See `docs/GTN1_SOURCE_INVENTORY.md` for the exact paths and counting rules. These are finite source sets, not invitations to discover more work indefinitely. These are finite source sets, not invitations to discover more work indefinitely.
 
 ## Rules that prevent scope creep
 
@@ -25,9 +25,9 @@
 ### Stage 1 — Freeze and map the source (one-time)
 
 - [ ] Record the exact GTN1 source commit used by the port.
-- [ ] Confirm the finite inventory counts above against that commit.
+- [x] Confirm the finite inventory counts above against that commit (see `docs/GTN1_SOURCE_INVENTORY.md`).
 - [ ] Map every Kotlin source file to a GTN2 implementation, a grouped replacement, or a documented not-applicable item.
-- [ ] Map all 22 Web Play screen roots and the five JavaScript modules to native Flutter destinations and behaviors.
+- [ ] Map the single Web Play HTML shell, its route/screen renderers and the five JavaScript modules to native Flutter destinations and behaviors.
 - [ ] Map the 24 SDK files to the Flutter components/events that are actually used by those screens.
 - [ ] List all 17 catalogs, 320 trait IDs, four Lua scripts and 23 locales in the source-to-target manifest.
 - [ ] Freeze this inventory. No new feature categories may be added after this stage.
