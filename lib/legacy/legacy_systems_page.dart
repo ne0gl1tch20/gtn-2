@@ -50,6 +50,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
   static final AudioPlayer _sharedAudioPlayer = AudioPlayer();
   final AudioPlayer _audioPlayer = _sharedAudioPlayer;
   StreamSubscription<Duration>? _musicPositionSubscription;
+  StreamSubscription<PlayerState>? _musicStateSubscription;
   StreamSubscription<Duration>? _musicDurationSubscription;
   Duration _musicPosition = Duration.zero;
   Duration _musicDuration = Duration.zero;
@@ -74,6 +75,13 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
   void initState() {
     super.initState();
     _loadSystemCatalogs();
+    _isPlaying = _audioPlayer.state == PlayerState.playing;
+    _musicStateSubscription = _audioPlayer.onPlayerStateChanged.listen((state) {
+      final playing = state == PlayerState.playing;
+      if (mounted && _isPlaying != playing) {
+        setState(() => _isPlaying = playing);
+      }
+    });
     _trackCompleteSubscription = _audioPlayer.onPlayerComplete.listen((_) {
       _playNextTrack();
     });
@@ -129,6 +137,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
     _trackCompleteSubscription?.cancel();
     _musicPositionSubscription?.cancel();
     _musicDurationSubscription?.cancel();
+    _musicStateSubscription?.cancel();
     super.dispose();
   }
 
@@ -1273,10 +1282,6 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
   }
 
   Future<void> _createPlaylist() async {
-    if (_systems.musicLibrary.isEmpty) {
-      await _importMusicTracks();
-      if (!mounted || _systems.musicLibrary.isEmpty) return;
-    }
     final controller = TextEditingController();
     final name = await GtnExpressiveDialog.show<String>(
       context,
@@ -1307,7 +1312,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
       return;
     }
     final playlists = Map<String, List<String>>.of(_systems.musicPlaylists)
-      ..[name] = List<String>.unmodifiable(_systems.musicLibrary);
+      ..[name] = const <String>[];
     await _saveSystems(
       _systems.copyWith(musicPlaylists: Map.unmodifiable(playlists)),
     );
@@ -1327,6 +1332,125 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
     await _saveSystems(
       _systems.copyWith(musicQueue: List<String>.unmodifiable(queue)),
     );
+  }
+
+  Future<void> _moveQueuedTrack(int fromIndex, int toIndex) async {
+    final queue = [..._systems.musicQueue];
+    if (fromIndex < 0 ||
+        fromIndex >= queue.length ||
+        toIndex < 0 ||
+        toIndex >= queue.length ||
+        fromIndex == toIndex) {
+      return;
+    }
+    final track = queue.removeAt(fromIndex);
+    queue.insert(toIndex, track);
+    await _saveSystems(
+      _systems.copyWith(musicQueue: List<String>.unmodifiable(queue)),
+    );
+  }
+
+  Future<void> _editPlaylist(String name) async {
+    final selected = Set<String>.from(
+      _systems.musicPlaylists[name] ?? const <String>[],
+    );
+    final updated = await GtnExpressiveDialog.show<List<String>>(
+      context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setDialogState) => GtnExpressiveDialog(
+          title: Text('Edit $name'),
+          content: SizedBox(
+            width: 420,
+            height: 360,
+            child: _systems.musicLibrary.isEmpty
+                ? const Center(child: Text('Import audio files to add tracks.'))
+                : ListView(
+                    children: [
+                      for (final track in _systems.musicLibrary)
+                        CheckboxListTile(
+                          dense: true,
+                          value: selected.contains(track),
+                          title: Text(_displayMusicTrack(track)),
+                          onChanged: (included) {
+                            setDialogState(() {
+                              if (included ?? false) {
+                                selected.add(track);
+                              } else {
+                                selected.remove(track);
+                              }
+                            });
+                          },
+                        ),
+                    ],
+                  ),
+          ),
+          actions: [
+            M3EButton.text(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('Cancel'),
+            ),
+            M3EButton.filled(
+              onPressed: () => Navigator.pop(
+                dialogContext,
+                List<String>.unmodifiable(selected),
+              ),
+              child: const Text('Save'),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (updated == null) return;
+    final playlists = Map<String, List<String>>.of(_systems.musicPlaylists)
+      ..[name] = updated;
+    await _saveSystems(
+      _systems.copyWith(musicPlaylists: Map.unmodifiable(playlists)),
+    );
+  }
+
+  Future<void> _removeMusicTrack(String path) async {
+    final wasPlaying = _systems.currentTrackId == path;
+    if (wasPlaying) {
+      await _audioPlayer.stop();
+    }
+    final library = [..._systems.musicLibrary]..remove(path);
+    final queue = [..._systems.musicQueue]..remove(path);
+    final playlists = _systems.musicPlaylists.map(
+      (name, tracks) => MapEntry(
+        name,
+        List<String>.unmodifiable(tracks.where((track) => track != path)),
+      ),
+    );
+    await _saveSystems(
+      _systems.copyWith(
+        musicLibrary: List<String>.unmodifiable(library),
+        musicQueue: List<String>.unmodifiable(queue),
+        musicPlaylists: Map.unmodifiable(playlists),
+        clearCurrentTrack: wasPlaying,
+      ),
+    );
+    if (wasPlaying && mounted) {
+      setState(() {
+        _isPlaying = false;
+        _musicPosition = Duration.zero;
+        _musicDuration = Duration.zero;
+      });
+    }
+    try {
+      await File(path).delete();
+    } on FileSystemException {
+      // The library entry is removed even if the imported file is already gone.
+    }
+  }
+
+  String _displayMusicTrack(String path) =>
+      path.split(Platform.pathSeparator).last;
+
+  String _formatMusicDuration(Duration duration) {
+    final seconds = duration.inSeconds;
+    final minutesText = (seconds ~/ 60).toString().padLeft(2, '0');
+    final secondsText = (seconds % 60).toString().padLeft(2, '0');
+    return '$minutesText:$secondsText';
   }
 
   Future<void> _playPlaylist(List<String> tracks) async {
@@ -1384,12 +1508,17 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
                   onPressed: _systems.musicQueue.isEmpty
                       ? null
                       : () async {
+                          if (_musicPosition > const Duration(seconds: 3)) {
+                            await _audioPlayer.seek(Duration.zero);
+                            return;
+                          }
                           final index = _systems.musicQueue.indexOf(
                             _systems.currentTrackId ?? '',
                           );
-                          final previous =
-                              (index - 1 + _systems.musicQueue.length) %
-                              _systems.musicQueue.length;
+                          final previous = (index - 1).clamp(
+                            0,
+                            _systems.musicQueue.length - 1,
+                          );
                           await _playTrack(_systems.musicQueue[previous]);
                         },
                   icon: const Icon(Icons.skip_previous_rounded),
@@ -1430,6 +1559,16 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
             ),
           ),
           Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(_formatMusicDuration(_musicPosition)),
+                Text(_formatMusicDuration(_musicDuration)),
+              ],
+            ),
+          ),
+          Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             child: M3EButton.icon(
               style: M3EButtonStyle.tonal,
@@ -1444,7 +1583,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
               style: M3EButtonStyle.tonal,
               onPressed: _createPlaylist,
               icon: const Icon(Icons.playlist_add_rounded),
-              label: const Text('Create playlist from library'),
+              label: const Text('Create playlist'),
             ),
           ),
           ListTile(
@@ -1471,10 +1610,29 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
-              trailing: IconButton(
-                tooltip: 'Remove from queue',
-                onPressed: () => _removeQueuedTrack(queueIndex),
-                icon: const Icon(Icons.close_rounded),
+              trailing: Wrap(
+                spacing: 0,
+                children: [
+                  IconButton(
+                    tooltip: 'Move up',
+                    onPressed: queueIndex == 0
+                        ? null
+                        : () => _moveQueuedTrack(queueIndex, queueIndex - 1),
+                    icon: const Icon(Icons.arrow_upward_rounded),
+                  ),
+                  IconButton(
+                    tooltip: 'Move down',
+                    onPressed: queueIndex == _systems.musicQueue.length - 1
+                        ? null
+                        : () => _moveQueuedTrack(queueIndex, queueIndex + 1),
+                    icon: const Icon(Icons.arrow_downward_rounded),
+                  ),
+                  IconButton(
+                    tooltip: 'Remove from queue',
+                    onPressed: () => _removeQueuedTrack(queueIndex),
+                    icon: const Icon(Icons.close_rounded),
+                  ),
+                ],
               ),
               onTap: () => _playTrack(_systems.musicQueue[queueIndex]),
             ),
@@ -1483,11 +1641,26 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
               leading: const Icon(Icons.queue_music_rounded),
               title: Text(playlist.key),
               subtitle: Text('${playlist.value.length} tracks'),
-              onTap: () => _playPlaylist(playlist.value),
-              trailing: IconButton(
-                tooltip: 'Delete playlist',
-                onPressed: () => _deletePlaylist(playlist.key),
-                icon: const Icon(Icons.delete_outline_rounded),
+              onTap: () => _editPlaylist(playlist.key),
+              trailing: Wrap(
+                spacing: 0,
+                children: [
+                  IconButton(
+                    tooltip: 'Play playlist',
+                    onPressed: () => _playPlaylist(playlist.value),
+                    icon: const Icon(Icons.play_arrow_rounded),
+                  ),
+                  IconButton(
+                    tooltip: 'Edit playlist',
+                    onPressed: () => _editPlaylist(playlist.key),
+                    icon: const Icon(Icons.edit_outlined),
+                  ),
+                  IconButton(
+                    tooltip: 'Delete playlist',
+                    onPressed: () => _deletePlaylist(playlist.key),
+                    icon: const Icon(Icons.delete_outline_rounded),
+                  ),
+                ],
               ),
             ),
           GtnExpressiveSwitchTile(
@@ -1534,6 +1707,11 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
                     tooltip: 'Add to queue',
                     onPressed: () => _enqueueMusicTrack(track),
                     icon: const Icon(Icons.queue_music_rounded),
+                  ),
+                  IconButton(
+                    tooltip: 'Remove from library',
+                    onPressed: () => _removeMusicTrack(track),
+                    icon: const Icon(Icons.delete_outline_rounded),
                   ),
                 ],
               ),
