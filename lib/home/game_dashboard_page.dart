@@ -912,7 +912,6 @@ class _GuessInput extends StatelessWidget {
                   height: 56,
                   child: M3EButton.filled(
                     onPressed: enabled ? onGuess : null,
-                                        ),
                     child: const Text(
                       '->',
                       style: TextStyle(
@@ -996,7 +995,7 @@ class _QuickGuessButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) => M3EButton.outlined(
         onPressed: enabled ? onPressed : null,
-                child: Text(
+        child: Text(
           label,
           style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w900),
         ),
