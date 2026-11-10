@@ -925,11 +925,10 @@ class _MoreMenuPage extends StatelessWidget {
             onTap: onNebulaShop,
           ),
         };
-    final orderedIds = <String>[
-      for (final id in settings.moreScreenOrder)
-        if (destinations.containsKey(id))
-          id,
-    ];
+    final orderedIds = settings.moreScreenOrder
+        .where(destinations.containsKey)
+        .toSet()
+        .toList();
     for (final id in destinations.keys) {
       if (!orderedIds.contains(id)) orderedIds.add(id);
     }
