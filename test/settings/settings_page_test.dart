@@ -26,19 +26,39 @@ void main() {
     expect(find.text('Language & Numbers'), findsOneWidget);
     expect(find.text('Number notation'), findsOneWidget);
     expect(find.text('Appearance'), findsOneWidget);
-    await tester.ensureVisible(find.text('Audio & Haptics'));
+    await tester.scrollUntilVisible(
+      find.text('Audio & Haptics'),
+      250,
+      scrollable: find.byType(Scrollable).first,
+    );
     await tester.pumpAndSettle();
     expect(find.text('Audio & Haptics'), findsOneWidget);
-    await tester.ensureVisible(find.text('Notifications'));
+    await tester.scrollUntilVisible(
+      find.text('Notifications'),
+      250,
+      scrollable: find.byType(Scrollable).first,
+    );
     await tester.pumpAndSettle();
     expect(find.text('Notifications'), findsOneWidget);
-    await tester.ensureVisible(find.text('Updates'));
+    await tester.scrollUntilVisible(
+      find.text('Updates'),
+      250,
+      scrollable: find.byType(Scrollable).first,
+    );
     await tester.pumpAndSettle();
     expect(find.text('Updates'), findsOneWidget);
-    await tester.ensureVisible(find.text('Accessibility'));
+    await tester.scrollUntilVisible(
+      find.text('Accessibility'),
+      250,
+      scrollable: find.byType(Scrollable).first,
+    );
     await tester.pumpAndSettle();
     expect(find.text('Accessibility'), findsOneWidget);
-    await tester.ensureVisible(find.text('Reduce flashes'));
+    await tester.scrollUntilVisible(
+      find.text('Reduce flashes'),
+      250,
+      scrollable: find.byType(Scrollable).first,
+    );
     await tester.pumpAndSettle();
     expect(find.text('Reduce flashes'), findsOneWidget);
   });
@@ -60,11 +80,19 @@ void main() {
     );
 
     await tester.pumpAndSettle();
-    await tester.ensureVisible(find.text('Save logs to storage'));
+    await tester.scrollUntilVisible(
+      find.text('Save logs to storage'),
+      250,
+      scrollable: find.byType(Scrollable).first,
+    );
     await tester.pumpAndSettle();
     expect(find.text('Save logs to storage'), findsOneWidget);
     expect(find.text('Verbose logging'), findsOneWidget);
-    await tester.ensureVisible(find.text('Menu Studio'));
+    await tester.scrollUntilVisible(
+      find.text('Menu Studio'),
+      250,
+      scrollable: find.byType(Scrollable).first,
+    );
     await tester.pumpAndSettle();
     await tester.tap(find.text('Menu Studio'));
     expect(openedMenuStudio, isTrue);
