@@ -319,6 +319,22 @@ void main() {
   });
 
   group('lucky stake and rewards', () {
+    test('preflight validation rejects invalid wagers before a coin flip', () {
+      final funds = ProgressionState.initial.copyWith(money: n(5));
+      expect(
+        engine.validateLuckyStake(progression: funds, stake: n(0)),
+        'Stake must be positive.',
+      );
+      expect(
+        engine.validateLuckyStake(progression: funds, stake: n(6)),
+        'Not enough Money.',
+      );
+      expect(
+        engine.validateLuckyStake(progression: funds, stake: n(5)),
+        isNull,
+      );
+    });
+
     test('settles a winning stake with the GTN1 streak multiplier', () {
       final result = engine.settleLuckyStake(
         progression: ProgressionState.initial.copyWith(money: n(100)),
