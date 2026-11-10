@@ -106,7 +106,6 @@ void main() {
       throwsFormatException,
     );
   });
-}
 
   test('system theme preserves the legacy dark mode fallback', () {
     final settings = GameSettings.initial;
@@ -114,3 +113,4 @@ void main() {
     expect(restored.themeMode, 'System');
     expect(restored.darkMode, isTrue);
   });
+}
