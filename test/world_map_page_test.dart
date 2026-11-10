@@ -34,7 +34,7 @@ void main() {
         home: WorldMapPage(progression: state, onAction: onAction),
       ),
     );
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 400));
   }
 
   testWidgets('renders all four world nodes on an interactive map',
@@ -62,15 +62,15 @@ void main() {
     final controller = viewer.transformationController!;
 
     await tester.tap(find.byTooltip('Reset map view'));
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 400));
     expect(controller.value.getMaxScaleOnAxis(), closeTo(1, 0.001));
 
     await tester.tap(find.byTooltip('Zoom in'));
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 400));
     expect(controller.value.getMaxScaleOnAxis(), closeTo(1.25, 0.001));
 
     await tester.tap(find.byTooltip('Fit map to screen'));
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 400));
     final fittedScale = controller.value.getMaxScaleOnAxis();
     expect(fittedScale, greaterThan(0.35));
     expect(fittedScale, lessThan(1));
@@ -86,7 +86,7 @@ void main() {
     final before = controller.value.clone();
 
     await tester.drag(viewer, const Offset(40, 24));
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 400));
 
     expect(controller.value.storage, isNot(equals(before.storage)));
   });
@@ -109,7 +109,7 @@ void main() {
     );
 
     await tester.tap(find.byKey(const ValueKey('world-node-crystal_caverns')));
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 400));
 
     expect(calls, contains(('crystal_caverns', 'select_world')));
     expect(find.text('Selected world'), findsOneWidget);
@@ -151,9 +151,9 @@ void main() {
     );
     expect(upgrade, findsOneWidget);
     await tester.ensureVisible(upgrade);
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 400));
     await tester.tap(upgrade);
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 400));
 
     expect(actionId, 'verdant_grove');
     expect(actionName, 'mastery');
@@ -179,7 +179,7 @@ void main() {
     final secret = find.byKey(const ValueKey('secret-node-whispering_hollow'));
     expect(secret, findsOneWidget);
     await tester.tap(secret);
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 400));
 
     expect(actionId, 'whispering_hollow');
     expect(actionName, 'secret');
