@@ -310,7 +310,9 @@ class GameSettings {
     }
 
     return GameSettings(
-      darkMode: themeMode == 'Dark' || themeMode == 'AMOLED',
+      darkMode: themeMode == 'System'
+          ? darkMode
+          : themeMode == 'Dark' || themeMode == 'AMOLED',
       reduceMotion: read<bool>('reduceMotion', false),
       localeCode: locale,
       difficultyId: difficulty,
