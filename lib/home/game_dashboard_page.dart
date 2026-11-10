@@ -148,10 +148,10 @@ class GameDashboardPage extends StatelessWidget {
                   Row(
                     children: [
                       Container(
-                        width: 44,
-                        height: 44,
+                        width: 42,
+                        height: 42,
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(15),
+                          borderRadius: BorderRadius.circular(12),
                           gradient: const LinearGradient(
                             colors: [_purple, Color(0xFF6651D9)],
                           ),
@@ -167,8 +167,8 @@ class GameDashboardPage extends StatelessWidget {
                           borderRadius: BorderRadius.circular(15),
                           child: Image.asset(
                             'assets/gtn1/gtn-app-logo.png',
-                            width: 44,
-                            height: 44,
+                            width: 42,
+                            height: 42,
                             fit: BoxFit.cover,
                           ),
                         ),
@@ -181,8 +181,9 @@ class GameDashboardPage extends StatelessWidget {
                             Text('Guess The Number',
                                 style: TextStyle(
                                   color: foreground,
-                                  fontSize: 19,
-                                  fontWeight: FontWeight.w900,
+                                  fontFamily: 'SpaceGrotesk',
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w700,
                                 )),
                           ],
                         ),
@@ -207,12 +208,12 @@ class GameDashboardPage extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 18),
                   Container(
-                    padding: const EdgeInsets.all(23),
-                    constraints: const BoxConstraints(minHeight: 188),
+                    padding: const EdgeInsets.all(25),
+                    constraints: const BoxConstraints(minHeight: 205),
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(28),
+                      borderRadius: BorderRadius.circular(32),
                       gradient: const LinearGradient(
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
@@ -234,11 +235,11 @@ class GameDashboardPage extends StatelessWidget {
                     child: Stack(
                       children: [
                         Positioned(
-                          right: -30,
-                          top: -55,
+                          right: -80,
+                          top: -95,
                           child: Container(
-                            width: 190,
-                            height: 190,
+                            width: 220,
+                            height: 220,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               gradient: RadialGradient(
@@ -261,9 +262,9 @@ class GameDashboardPage extends StatelessWidget {
                                   'CURRENT RUN',
                                   style: TextStyle(
                                     color: Color(0xFF9BA5C4),
-                                    fontSize: 9,
+                                    fontSize: 10,
                                     fontWeight: FontWeight.w900,
-                                    letterSpacing: 1.4,
+                                    letterSpacing: 1.7,
                                   ),
                                 ),
                               ],
@@ -272,19 +273,23 @@ class GameDashboardPage extends StatelessWidget {
                             const Text('Find your secret number',
                                 style: TextStyle(
                                   color: Color(0xFF9BA5C4),
-                                  fontSize: 9,
-                                  fontWeight: FontWeight.w900,
-                                  letterSpacing: 1.4,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
                                 )),
-                            const SizedBox(height: 9),
-                            Text('${game.minimum} — ${game.maximum}',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 43,
-                                  height: 1,
-                                  fontWeight: FontWeight.w900,
-                                  letterSpacing: -2,
-                                )),
+                            const SizedBox(height: 4),
+                            ShaderMask(
+                              shaderCallback: (bounds) => const LinearGradient(
+                                colors: [Colors.white, _cyan],
+                              ).createShader(bounds),
+                              child: Text('${game.minimum} — ${game.maximum}',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 42,
+                                    height: 1,
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: -2.5,
+                                  )),
+                            ),
                             const SizedBox(height: 7),
                             const SizedBox(height: 12),
                             Text(message,
@@ -292,7 +297,7 @@ class GameDashboardPage extends StatelessWidget {
                                 overflow: TextOverflow.ellipsis,
                                 style: const TextStyle(
                                   color: Color(0xFFD2D9F0),
-                                  fontSize: 12,
+                                  fontSize: 13,
                                   height: 1.4,
                                 )),
                           ],
