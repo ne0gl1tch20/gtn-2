@@ -29,6 +29,7 @@ import 'progression/progression_hub_page.dart';
 import 'saves/save_slots_page.dart';
 import 'settings/game_settings.dart';
 import 'settings/settings_page.dart';
+import 'settings/menu_studio_page.dart';
 import 'shop/nebula_shop_page.dart';
 import 'shop/upgrade_catalog.dart';
 import 'shop/upgrade_shop_page.dart';
@@ -795,11 +796,22 @@ class _GameHomePageState extends State<GameHomePage> with WidgetsBindingObserver
         builder: (_) => SettingsPage(
           settings: _settings,
           onChanged: _updateSettings,
+          onOpenMenuStudio: _openMenuStudio,
         ),
       ),
     );
   }
 
+  Future<void> _openMenuStudio() async {
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (_) => MenuStudioPage(
+          settings: _settings,
+          onChanged: _updateSettings,
+        ),
+      ),
+    );
+  }
 
   SaveData _currentSaveData() => SaveData(
         secret: _game.secret,
