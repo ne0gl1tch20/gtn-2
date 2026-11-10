@@ -304,6 +304,16 @@ class LegacySystemsEngine {
     );
   }
 
+  /// Validates a wager before the caller consumes randomness.
+  String? validateLuckyStake({
+    required ProgressionState progression,
+    required BigNumber stake,
+  }) {
+    if (stake.compareTo(_zero) <= 0) return 'Stake must be positive.';
+    if (progression.money.compareTo(stake) < 0) return 'Not enough Money.';
+    return null;
+  }
+
   LegacyActionResult settleLuckyStake({
     required ProgressionState progression,
     required LegacySystemsState systems,
@@ -311,11 +321,12 @@ class LegacySystemsEngine {
     required bool won,
     required int currentStreak,
   }) {
-    if (stake.compareTo(_zero) <= 0) {
-      return _reject(progression, systems, 'Stake must be positive.');
-    }
-    if (progression.money.compareTo(stake) < 0) {
-      return _reject(progression, systems, 'Not enough Money.');
+    final validationError = validateLuckyStake(
+      progression: progression,
+      stake: stake,
+    );
+    if (validationError != null) {
+      return _reject(progression, systems, validationError);
     }
     final payout = won
         ? stake * BigNumber.fromParts(BigInt.from(20 + currentStreak), 1)
