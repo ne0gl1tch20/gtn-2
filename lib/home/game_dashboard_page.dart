@@ -87,47 +87,89 @@ class GameDashboardPage extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: dark ? _bg : const Color(0xFFF5F6FC),
-      bottomNavigationBar: M3ENavigationBar(
-        destinations: const [
-          M3ENavigationBarDestination(
-            icon: Icon(Icons.public_rounded),
-            label: 'Beyond the Numbers',
-          ),
-          M3ENavigationBarDestination(
-            icon: Icon(Icons.sports_esports_rounded),
-            label: 'Arcade',
-          ),
-          M3ENavigationBarDestination(
-            icon: Icon(Icons.play_arrow_rounded),
-            label: 'Play',
-          ),
-          M3ENavigationBarDestination(
-            icon: Icon(Icons.upgrade_rounded),
-            label: 'Upgrades',
-          ),
-          M3ENavigationBarDestination(
-            icon: Icon(Icons.menu_rounded),
-            label: 'More',
-          ),
-        ],
-        selectedIndex: 2,
-        onDestinationSelected: (index) {
-          switch (index) {
-            case 0:
-              onWorldMap();
-              break;
-            case 1:
-              onArcade();
-              break;
-            case 2:
-              break;
-            case 3:
-              onUpgradeShop();
-              break;
-            case 4:
-              _openMoreMenu(context, panel);
-              break;
+      bottomNavigationBar: LayoutBuilder(
+        builder: (context, constraints) {
+          void selectDestination(int index) {
+            switch (index) {
+              case 0:
+                onWorldMap();
+                break;
+              case 1:
+                onArcade();
+                break;
+              case 2:
+                break;
+              case 3:
+                onUpgradeShop();
+                break;
+              case 4:
+                _openMoreMenu(context, panel);
+                break;
+            }
           }
+
+          // The M3E bar switches to a wide horizontal-chip layout on larger
+          // windows. Keep the GTN1 five-item labels inside the available width
+          // with the standard adaptive M3 bar on tablets and desktop windows.
+          if (constraints.maxWidth > 600) {
+            return NavigationBar(
+              selectedIndex: 2,
+              onDestinationSelected: selectDestination,
+              labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+              height: 76,
+              backgroundColor: panel,
+              indicatorColor: _purple.withValues(alpha: .18),
+              destinations: const [
+                NavigationDestination(
+                  icon: Icon(Icons.public_rounded),
+                  label: 'Beyond the Numbers',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.sports_esports_rounded),
+                  label: 'Arcade',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.play_arrow_rounded),
+                  label: 'Play',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.upgrade_rounded),
+                  label: 'Upgrades',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.menu_rounded),
+                  label: 'More',
+                ),
+              ],
+            );
+          }
+
+          return M3ENavigationBar(
+            destinations: const [
+              M3ENavigationBarDestination(
+                icon: Icon(Icons.public_rounded),
+                label: 'Beyond the Numbers',
+              ),
+              M3ENavigationBarDestination(
+                icon: Icon(Icons.sports_esports_rounded),
+                label: 'Arcade',
+              ),
+              M3ENavigationBarDestination(
+                icon: Icon(Icons.play_arrow_rounded),
+                label: 'Play',
+              ),
+              M3ENavigationBarDestination(
+                icon: Icon(Icons.upgrade_rounded),
+                label: 'Upgrades',
+              ),
+              M3ENavigationBarDestination(
+                icon: Icon(Icons.menu_rounded),
+                label: 'More',
+              ),
+            ],
+            selectedIndex: 2,
+            onDestinationSelected: selectDestination,
+          );
         },
       ),
       body: Container(
