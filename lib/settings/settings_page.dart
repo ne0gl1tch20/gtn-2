@@ -26,7 +26,7 @@ class SettingsPage extends StatelessWidget {
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 18, 16, 8),
-            child: DropdownButtonFormField<String>(
+            child: GtnExpressiveDropdown<String>(
               initialValue: settings.localeCode,
               decoration: InputDecoration(
                 labelText: AppLocalizations.text('language', 'Language'),
@@ -43,7 +43,7 @@ class SettingsPage extends StatelessWidget {
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-            child: DropdownButtonFormField<String>(
+            child: GtnExpressiveDropdown<String>(
               initialValue: settings.difficultyId,
               decoration: const InputDecoration(
                 labelText: 'Difficulty',
@@ -62,14 +62,14 @@ class SettingsPage extends StatelessWidget {
               },
             ),
           ),
-          SwitchListTile(
+          GtnExpressiveSwitchTile(
             secondary: const Icon(Icons.dark_mode_rounded),
             title: Text(AppLocalizations.text('dark_mode', 'Dark theme')),
             subtitle: Text(AppLocalizations.text('dark_mode_desc', 'Use the darker GTN 2 appearance.')),
             value: settings.darkMode,
             onChanged: (value) => onChanged(settings.copyWith(darkMode: value)),
           ),
-          SwitchListTile(
+          GtnExpressiveSwitchTile(
             secondary: const Icon(Icons.motion_photos_off_rounded),
             title: Text(AppLocalizations.text('reduce_motion', 'Reduce motion')),
             subtitle: Text(AppLocalizations.text('reduce_motion_desc', 'Disable most interface animations.')),
