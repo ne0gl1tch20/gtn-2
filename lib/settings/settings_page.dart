@@ -1,7 +1,7 @@
 import 'package:material_ui/material_ui.dart';
-import '../design/expressive_widgets.dart';
 
 import '../core/game/difficulty_rules.dart';
+import '../design/expressive_widgets.dart';
 import '../i18n/app_localizations.dart';
 import 'game_settings.dart';
 
