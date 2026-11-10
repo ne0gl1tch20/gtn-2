@@ -91,7 +91,7 @@ void main() {
     expect(find.byType(M3ESlider), findsOneWidget);
 
     await tester.tap(find.text('Show dialog'));
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 400));
     expect(find.byType(M3EDialog), findsOneWidget);
     expect(find.text('M3E dialog'), findsOneWidget);
     controller.dispose();
