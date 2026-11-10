@@ -118,6 +118,7 @@ void main() {
     expect(find.text('Save Slots'), findsOneWidget);
     expect(find.text('Lucky Stake'), findsOneWidget);
     expect(find.text('Lua hub'), findsNothing);
+    expect(find.text('Live events'), findsNothing);
     expect(
       tester.getTopLeft(find.text('Music')).dy,
       lessThan(tester.getTopLeft(find.text('Settings')).dy),
