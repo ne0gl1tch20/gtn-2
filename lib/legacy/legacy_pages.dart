@@ -1,6 +1,7 @@
 import 'package:flutter/services.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../core/progression/progression_state.dart';
 import '../creative/creative_mode_page.dart';
@@ -244,10 +245,62 @@ class _LegacyDetailPage extends StatelessWidget {
         Text('Guess The Number 2', style: Theme.of(context).textTheme.headlineSmall),
         const SizedBox(height: 8),
         const Text(
-          'A Flutter-based continuation of Guess The Number. This build includes the core number-guessing loop, progression currencies, upgrades, Arcade minigames, world guardians and local save slots.',
+          'A Flutter-based continuation of Guess The Number. Game progress is stored locally on this device.',
         ),
         const SizedBox(height: 16),
-        const Text('Built with Flutter and Dart. Game progress is stored locally on this device.'),
+        GtnExpressiveCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const ListTile(
+                leading: Icon(Icons.link_rounded),
+                title: Text('Socials & source code'),
+                subtitle: Text('These links open in your external browser.'),
+              ),
+              for (final link in const [
+                ('YouTube · @theg0ldne0_01', 'https://www.youtube.com/@theg0ldne0_01'),
+                ('Instagram · theg0ldne0_01', 'https://www.instagram.com/theg0ldne0_01/'),
+                ('NameMC · PearlSteve15', 'https://namemc.com/profile/PearlSteve15'),
+                ('GitHub · Source code', 'https://github.com/ne0gl1tch20'),
+                ('Official website', 'https://ne0gl1tch20.github.io/GuessTheNumber'),
+              ])
+                ListTile(
+                  dense: true,
+                  title: Text(link.$1),
+                  trailing: const Icon(Icons.open_in_new_rounded),
+                  onTap: () => launchUrl(Uri.parse(link.$2), mode: LaunchMode.externalApplication),
+                ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+        GtnExpressiveCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const ListTile(
+                leading: Icon(Icons.code_rounded),
+                title: Text('Open-source libraries'),
+                subtitle: Text('Credits and licenses listed in the original GTN1 About screen.'),
+              ),
+              for (final item in const [
+                ('Jetpack Compose', 'Apache 2.0 · Google / Android Open Source Project'),
+                ('Material 3', 'Apache 2.0 · Google'),
+                ('Kotlinx Serialization', 'Apache 2.0 · JetBrains'),
+                ('Kotlinx Coroutines', 'Apache 2.0 · JetBrains'),
+                ('DataStore Preferences', 'Apache 2.0 · Google'),
+                ('Navigation Compose', 'Apache 2.0 · Google'),
+                ('LuaJ', 'MIT · LuaJ project; James Roseborough and Ian Farmer'),
+                ('Jarrlyy UI SDK', 'Project component · Jarrlyy'),
+              ])
+                ListTile(
+                  dense: true,
+                  title: Text(item.$1),
+                  subtitle: Text(item.$2),
+                ),
+            ],
+          ),
+        ),
       ];
 
   Widget _valueCard(String label, String value, IconData icon) => GtnExpressiveCard(
