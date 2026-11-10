@@ -370,7 +370,10 @@ class GtnExpressiveDialog extends StatelessWidget {
   }) {
     return M3EDialog.show<T>(
       context,
-      dialog: Builder(builder: builder),
+      dialog: Material(
+        type: MaterialType.transparency,
+        child: Builder(builder: builder),
+      ),
       barrierDismissible: barrierDismissible,
       resizeToAvoidBottomInset: resizeToAvoidBottomInset,
     );
