@@ -39,7 +39,9 @@ class AppLocalizations {
         ? code
         : 'en_us';
     final english = await _read('en_us');
-    final overlay = safeCode == 'en_us' ? <String, dynamic>{} : await _read(safeCode);
+    final overlay = safeCode == 'en_us'
+        ? <String, dynamic>{}
+        : await _read(safeCode);
     currentCode = safeCode;
     catalog.value = <String, dynamic>{...english, ...overlay};
   }

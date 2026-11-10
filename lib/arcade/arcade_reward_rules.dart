@@ -5,19 +5,19 @@ class ArcadeRewardRules {
   static const int tooEarlyReactionSentinel = 9999;
 
   static bool isReactionTestRewardEligible(int reactionTimeMillis) =>
-      reactionTimeMillis >= 0 &&
-      reactionTimeMillis != tooEarlyReactionSentinel;
+      reactionTimeMillis >= 0 && reactionTimeMillis != tooEarlyReactionSentinel;
 
   /// Memory Match rewards are claimable only after a submitted correct answer.
   static bool isMemoryMatchRewardEligible({
     required bool submitted,
     required bool correct,
-  }) =>
-      submitted && correct;
+  }) => submitted && correct;
 
   /// One guaranteed Nebula plus capped time and score bonuses.
   static int calculateNebulaReward(int playSeconds, int score) {
-    final timeBonus = (playSeconds < 0 ? 0 : playSeconds ~/ 30).clamp(0, 4).toInt();
+    final timeBonus = (playSeconds < 0 ? 0 : playSeconds ~/ 30)
+        .clamp(0, 4)
+        .toInt();
     final scoreBonus = (score < 0 ? 0 : score ~/ 5).clamp(0, 5).toInt();
     return (1 + timeBonus + scoreBonus).clamp(0, 10).toInt();
   }

@@ -187,7 +187,12 @@ class GameDashboardPage extends StatelessWidget {
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 720),
               child: ListView(
-                padding: EdgeInsets.fromLTRB(horizontalPadding, 12, horizontalPadding, 28),
+                padding: EdgeInsets.fromLTRB(
+                  horizontalPadding,
+                  12,
+                  horizontalPadding,
+                  28,
+                ),
                 children: [
                   Row(
                     children: [
@@ -222,31 +227,43 @@ class GameDashboardPage extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Guess The Number',
-                                style: TextStyle(
-                                  color: foreground,
-                                  fontFamily: 'SpaceGrotesk',
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w700,
-                                )),
+                            Text(
+                              'Guess The Number',
+                              style: TextStyle(
+                                color: foreground,
+                                fontFamily: 'SpaceGrotesk',
+                                fontSize: 18,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
                           ],
                         ),
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 7,
+                        ),
                         decoration: BoxDecoration(
                           color: foreground.withValues(alpha: .06),
                           borderRadius: BorderRadius.circular(99),
-                          border: Border.all(color: foreground.withValues(alpha: .08)),
+                          border: Border.all(
+                            color: foreground.withValues(alpha: .08),
+                          ),
                         ),
                         child: Row(
                           children: [
                             const Icon(Icons.circle, color: _green, size: 7),
                             const SizedBox(width: 6),
-                            Text('ONLINE', style: TextStyle(
-                              color: muted, fontSize: 8,
-                              fontWeight: FontWeight.w900, letterSpacing: 1,
-                            )),
+                            Text(
+                              'ONLINE',
+                              style: TextStyle(
+                                color: muted,
+                                fontSize: 8,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: 1,
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -255,9 +272,7 @@ class GameDashboardPage extends StatelessWidget {
                   const SizedBox(height: 18),
                   Container(
                     padding: EdgeInsets.all(compact ? 21 : 25),
-                    constraints: BoxConstraints(
-                      minHeight: compact ? 190 : 205,
-                    ),
+                    constraints: BoxConstraints(minHeight: compact ? 190 : 205),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(32),
                       gradient: const LinearGradient(
@@ -269,7 +284,9 @@ class GameDashboardPage extends StatelessWidget {
                           Color(0xFF10172B),
                         ],
                       ),
-                      border: Border.all(color: Colors.white.withValues(alpha: .1)),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: .1),
+                      ),
                       boxShadow: const [
                         BoxShadow(
                           color: Color(0x33000000),
@@ -281,96 +298,103 @@ class GameDashboardPage extends StatelessWidget {
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(32),
                       child: Stack(
-                      children: [
-                        Positioned(
-                          right: -80,
-                          top: -95,
-                          child: Container(
-                            width: 220,
-                            height: 220,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              gradient: RadialGradient(
-                                colors: [
-                                  _cyan.withValues(alpha: .24),
-                                  _cyan.withValues(alpha: 0),
-                                ],
+                        children: [
+                          Positioned(
+                            right: -80,
+                            top: -95,
+                            child: Container(
+                              width: 220,
+                              height: 220,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                gradient: RadialGradient(
+                                  colors: [
+                                    _cyan.withValues(alpha: .24),
+                                    _cyan.withValues(alpha: 0),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                        const Positioned(
-                          right: 24,
-                          top: 28,
-                          child: _HeroSparkle(size: 5, opacity: .8),
-                        ),
-                        const Positioned(
-                          right: 12,
-                          top: 88,
-                          child: _HeroSparkle(size: 4, opacity: .55),
-                        ),
-                        const Positioned(
-                          right: 78,
-                          bottom: 26,
-                          child: _HeroSparkle(size: 5, opacity: .7),
-                        ),
-                        const Positioned(
-                          right: 132,
-                          top: 44,
-                          child: _HeroSparkle(size: 3, opacity: .45),
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Row(
-                              children: [
-                                Icon(Icons.circle, color: _green, size: 8),
-                                SizedBox(width: 7),
-                                Text(
-                                  'CURRENT RUN',
-                                  style: TextStyle(
-                                    color: Color(0xFF9BA5C4),
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w900,
-                                    letterSpacing: 1.7,
+                          const Positioned(
+                            right: 24,
+                            top: 28,
+                            child: _HeroSparkle(size: 5, opacity: .8),
+                          ),
+                          const Positioned(
+                            right: 12,
+                            top: 88,
+                            child: _HeroSparkle(size: 4, opacity: .55),
+                          ),
+                          const Positioned(
+                            right: 78,
+                            bottom: 26,
+                            child: _HeroSparkle(size: 5, opacity: .7),
+                          ),
+                          const Positioned(
+                            right: 132,
+                            top: 44,
+                            child: _HeroSparkle(size: 3, opacity: .45),
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Row(
+                                children: [
+                                  Icon(Icons.circle, color: _green, size: 8),
+                                  SizedBox(width: 7),
+                                  Text(
+                                    'CURRENT RUN',
+                                    style: TextStyle(
+                                      color: Color(0xFF9BA5C4),
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w900,
+                                      letterSpacing: 1.7,
+                                    ),
                                   ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 16),
-                            const Text('Find your secret number',
+                                ],
+                              ),
+                              const SizedBox(height: 16),
+                              const Text(
+                                'Find your secret number',
                                 style: TextStyle(
                                   color: Color(0xFF9BA5C4),
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
-                                )),
-                            const SizedBox(height: 4),
-                            ShaderMask(
-                              shaderCallback: (bounds) => const LinearGradient(
-                                colors: [Colors.white, _cyan],
-                              ).createShader(bounds),
-                              child: Text('${game.minimum} — ${game.maximum}',
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              ShaderMask(
+                                shaderCallback: (bounds) =>
+                                    const LinearGradient(
+                                      colors: [Colors.white, _cyan],
+                                    ).createShader(bounds),
+                                child: Text(
+                                  '${game.minimum} — ${game.maximum}',
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontSize: compact ? 35 : 42,
                                     height: 1,
                                     fontWeight: FontWeight.w900,
                                     letterSpacing: -2.5,
-                                  )),
-                            ),
-                            const SizedBox(height: 15),
-                            Text(message,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 15),
+                              Text(
+                                message,
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                                 style: const TextStyle(
                                   color: Color(0xFFD2D9F0),
                                   fontSize: 13,
                                   height: 1.4,
-                                )),
-                          ],
-                        ),
-                      ],
-                    ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -398,17 +422,44 @@ class GameDashboardPage extends StatelessWidget {
                   const SizedBox(height: 12),
                   Row(
                     children: [
-                      Expanded(child: _Stat(Icons.bolt_rounded,
-                          game.attempts.toString(), 'ATTEMPTS', _cyan,
-                          panel, line, foreground, muted)),
+                      Expanded(
+                        child: _Stat(
+                          Icons.bolt_rounded,
+                          game.attempts.toString(),
+                          'ATTEMPTS',
+                          _cyan,
+                          panel,
+                          line,
+                          foreground,
+                          muted,
+                        ),
+                      ),
                       const SizedBox(width: 6),
-                      Expanded(child: _Stat(Icons.check_circle_rounded,
-                          progression.correctGuesses.toString(), 'CORRECT', _gold,
-                          panel, line, foreground, muted)),
+                      Expanded(
+                        child: _Stat(
+                          Icons.check_circle_rounded,
+                          progression.correctGuesses.toString(),
+                          'CORRECT',
+                          _gold,
+                          panel,
+                          line,
+                          foreground,
+                          muted,
+                        ),
+                      ),
                       const SizedBox(width: 6),
-                      Expanded(child: _Stat(Icons.local_fire_department_rounded,
-                          progression.currentStreak.toString(), 'STREAK', _green,
-                          panel, line, foreground, muted)),
+                      Expanded(
+                        child: _Stat(
+                          Icons.local_fire_department_rounded,
+                          progression.currentStreak.toString(),
+                          'STREAK',
+                          _green,
+                          panel,
+                          line,
+                          foreground,
+                          muted,
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 12),
@@ -448,11 +499,11 @@ class GameDashboardPage extends StatelessWidget {
                   if (game.isComplete) ...[
                     const SizedBox(height: 12),
                     M3EButton.icon(
-                style: M3EButtonStyle.filled,
+                      style: M3EButtonStyle.filled,
                       onPressed: loading ? null : onNewGame,
                       icon: const Icon(Icons.refresh_rounded),
                       label: const Text('Start another round'),
-                                          ),
+                    ),
                   ],
                 ],
               ),
@@ -472,21 +523,21 @@ class _HeroSparkle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => IgnorePointer(
-        child: Container(
-          width: size,
-          height: size,
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: opacity),
-            shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: _cyan.withValues(alpha: opacity * .45),
-                blurRadius: size * 2.4,
-              ),
-            ],
+    child: Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: opacity),
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: _cyan.withValues(alpha: opacity * .45),
+            blurRadius: size * 2.4,
           ),
-        ),
-      );
+        ],
+      ),
+    ),
+  );
 }
 
 class _BotArena extends StatelessWidget {
@@ -520,17 +571,17 @@ class _BotArena extends StatelessWidget {
     final status = ownedBots.isEmpty
         ? 'Buy a bot in the Nebula Shop to bring the arena to life.'
         : active
-            ? 'Your bots will show their real guesses here.'
-            : 'Your bots are owned but automation is paused.';
+        ? 'Your bots will show their real guesses here.'
+        : 'Your bots are owned but automation is paused.';
     final lastGuess = systems.lastBotGuess == null
         ? 'Waiting for your first bot guess…'
         : '${systems.lastBotId ?? 'Bot'} guessed ${systems.lastBotGuess} · '
-            '${switch (systems.lastBotFeedback) {
-              'TOO_LOW' => 'TOO LOW',
-              'TOO_HIGH' => 'TOO HIGH',
-              'CORRECT' => 'CORRECT',
-              _ => 'WAITING',
-            }}';
+              '${switch (systems.lastBotFeedback) {
+                'TOO_LOW' => 'TOO LOW',
+                'TOO_HIGH' => 'TOO HIGH',
+                'CORRECT' => 'CORRECT',
+                _ => 'WAITING',
+              }}';
 
     return Container(
       padding: const EdgeInsets.all(15),
@@ -664,7 +715,12 @@ class _MoreMenuPage extends StatelessWidget {
     final muted = dark ? _muted : const Color(0xFF65708C);
     final panel = dark ? _panel : Colors.white;
 
-    Widget entry(IconData icon, String title, String subtitle, VoidCallback onTap) {
+    Widget entry(
+      IconData icon,
+      String title,
+      String subtitle,
+      VoidCallback onTap,
+    ) {
       return GtnExpressiveCard(
         color: panel,
         margin: const EdgeInsets.only(bottom: 10),
@@ -679,24 +735,33 @@ class _MoreMenuPage extends StatelessWidget {
             borderRadius: BorderRadius.circular(18),
             onTap: onTap,
             child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 13),
-            child: Row(
-              children: [
-                Icon(icon, color: _purple),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(title, style: TextStyle(color: foreground, fontWeight: FontWeight.w800)),
-                      const SizedBox(height: 3),
-                      Text(subtitle, style: TextStyle(color: muted, fontSize: 11)),
-                    ],
+              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 13),
+              child: Row(
+                children: [
+                  Icon(icon, color: _purple),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title,
+                          style: TextStyle(
+                            color: foreground,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          subtitle,
+                          style: TextStyle(color: muted, fontSize: 11),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                Icon(Icons.chevron_right_rounded, color: muted),
-              ],
-            ),
+                  Icon(Icons.chevron_right_rounded, color: muted),
+                ],
+              ),
             ),
           ),
         ),
@@ -712,13 +777,43 @@ class _MoreMenuPage extends StatelessWidget {
           const SizedBox(height: 5),
           Text('Your shortcuts, your order.', style: TextStyle(color: muted)),
           const SizedBox(height: 18),
-          entry(Icons.auto_awesome_rounded, 'Prestige & Ultra', 'Prestige and Ultra progression', onPrestige),
-          entry(Icons.diamond_rounded, 'Nebula Shop', 'Nebula upgrades and items', onNebulaShop),
-          entry(Icons.auto_stories_rounded, 'Journey, Rewards & Codex', 'Achievements, rewards and discoveries', onLegacyPages),
-          entry(Icons.save_rounded, 'Save Slots', 'Manage your saved games', onSaveSlots),
-          entry(Icons.settings_rounded, 'Settings', 'Game preferences', onSettings),
+          entry(
+            Icons.auto_awesome_rounded,
+            'Prestige & Ultra',
+            'Prestige and Ultra progression',
+            onPrestige,
+          ),
+          entry(
+            Icons.diamond_rounded,
+            'Nebula Shop',
+            'Nebula upgrades and items',
+            onNebulaShop,
+          ),
+          entry(
+            Icons.auto_stories_rounded,
+            'Journey, Rewards & Codex',
+            'Achievements, rewards and discoveries',
+            onLegacyPages,
+          ),
+          entry(
+            Icons.save_rounded,
+            'Save Slots',
+            'Manage your saved games',
+            onSaveSlots,
+          ),
+          entry(
+            Icons.settings_rounded,
+            'Settings',
+            'Game preferences',
+            onSettings,
+          ),
           if (showDeveloperSettings)
-            entry(Icons.bug_report_rounded, 'Dev Settings', 'Developer tools', onDeveloperSettings),
+            entry(
+              Icons.bug_report_rounded,
+              'Dev Settings',
+              'Developer tools',
+              onDeveloperSettings,
+            ),
         ],
       ),
     );
@@ -726,8 +821,16 @@ class _MoreMenuPage extends StatelessWidget {
 }
 
 class _Stat extends StatelessWidget {
-  const _Stat(this.icon, this.value, this.label, this.color, this.panel,
-      this.line, this.foreground, this.muted);
+  const _Stat(
+    this.icon,
+    this.value,
+    this.label,
+    this.color,
+    this.panel,
+    this.line,
+    this.foreground,
+    this.muted,
+  );
   final IconData icon;
   final String value;
   final String label;
@@ -739,40 +842,50 @@ class _Stat extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 10),
-        decoration: BoxDecoration(
-          color: panel,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: line),
+    padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 10),
+    decoration: BoxDecoration(
+      color: panel,
+      borderRadius: BorderRadius.circular(20),
+      border: Border.all(color: line),
+    ),
+    child: Column(
+      children: [
+        Icon(icon, color: color, size: 19),
+        const SizedBox(height: 7),
+        Text(
+          value,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            color: foreground,
+            fontSize: MediaQuery.sizeOf(context).width <= 430 ? 20 : 22,
+            fontWeight: FontWeight.w900,
+          ),
         ),
-        child: Column(
-          children: [
-            Icon(icon, color: color, size: 19),
-            const SizedBox(height: 7),
-            Text(value,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: foreground,
-                  fontSize: MediaQuery.sizeOf(context).width <= 430 ? 20 : 22,
-                  fontWeight: FontWeight.w900,
-                )),
-            const SizedBox(height: 3),
-            Text(label,
-                style: TextStyle(
-                  color: muted,
-                  fontSize: 8,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 1,
-                )),
-          ],
+        const SizedBox(height: 3),
+        Text(
+          label,
+          style: TextStyle(
+            color: muted,
+            fontSize: 8,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 1,
+          ),
         ),
-      );
+      ],
+    ),
+  );
 }
 
 class _Wallet extends StatelessWidget {
-  const _Wallet(this.state, this.panel, this.raised, this.line,
-      this.foreground, this.muted);
+  const _Wallet(
+    this.state,
+    this.panel,
+    this.raised,
+    this.line,
+    this.foreground,
+    this.muted,
+  );
   final ProgressionState state;
   final Color panel;
   final Color raised;
@@ -782,96 +895,138 @@ class _Wallet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.all(17),
-        decoration: BoxDecoration(
-          color: panel,
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: line),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    padding: const EdgeInsets.all(17),
+    decoration: BoxDecoration(
+      color: panel,
+      borderRadius: BorderRadius.circular(24),
+      border: Border.all(color: line),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
           children: [
-            Row(
-              children: [
-                const Icon(Icons.account_balance_wallet_rounded,
-                    color: _gold, size: 17),
-                const SizedBox(width: 8),
-                Text('YOUR WALLET',
-                    style: TextStyle(
-                      color: muted,
-                      fontSize: 10,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 1.5,
-                    )),
-                const Spacer(),
-                Text('${state.moneyEarned} earned',
-                    style: const TextStyle(color: _green, fontSize: 10)),
-              ],
+            const Icon(
+              Icons.account_balance_wallet_rounded,
+              color: _gold,
+              size: 17,
             ),
-            const SizedBox(height: 12),
-            Text(state.money.toString(),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  color: _gold,
-                  fontSize: 28,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: -.8,
-                )),
-            Text('MONEY',
-                style: TextStyle(
-                  color: muted,
-                  fontSize: 8,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 1.7,
-                )),
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                Text(
-                  'RUN MOMENTUM',
-                  style: TextStyle(
-                    color: muted,
-                    fontSize: 8,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 1,
-                  ),
-                ),
-                const Spacer(),
-                Text(
-                  'BEST ${state.bestStreak}',
-                  style: TextStyle(
-                    color: muted,
-                    fontSize: 8,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-              ],
+            const SizedBox(width: 8),
+            Text(
+              'YOUR WALLET',
+              style: TextStyle(
+                color: muted,
+                fontSize: 10,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 1.5,
+              ),
             ),
-            const SizedBox(height: 13),
-            Row(
-              children: [
-                Expanded(child: _Currency(Icons.auto_awesome_rounded,
-                    'PRESTIGE', state.prestige.toString(), _purple,
-                    raised, foreground, muted)),
-                const SizedBox(width: 7),
-                Expanded(child: _Currency(Icons.bolt_rounded,
-                    'ULTRA', state.ultra.toString(), _cyan,
-                    raised, foreground, muted)),
-                const SizedBox(width: 7),
-                Expanded(child: _Currency(Icons.diamond_rounded,
-                    'NEBULA', state.nebula.toString(),
-                    const Color(0xFFB7A2FF), raised, foreground, muted)),
-              ],
+            const Spacer(),
+            Text(
+              '${state.moneyEarned} earned',
+              style: const TextStyle(color: _green, fontSize: 10),
             ),
           ],
         ),
-      );
+        const SizedBox(height: 12),
+        Text(
+          state.money.toString(),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(
+            color: _gold,
+            fontSize: 28,
+            fontWeight: FontWeight.w900,
+            letterSpacing: -.8,
+          ),
+        ),
+        Text(
+          'MONEY',
+          style: TextStyle(
+            color: muted,
+            fontSize: 8,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 1.7,
+          ),
+        ),
+        const SizedBox(height: 10),
+        Row(
+          children: [
+            Text(
+              'RUN MOMENTUM',
+              style: TextStyle(
+                color: muted,
+                fontSize: 8,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 1,
+              ),
+            ),
+            const Spacer(),
+            Text(
+              'BEST ${state.bestStreak}',
+              style: TextStyle(
+                color: muted,
+                fontSize: 8,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 13),
+        Row(
+          children: [
+            Expanded(
+              child: _Currency(
+                Icons.auto_awesome_rounded,
+                'PRESTIGE',
+                state.prestige.toString(),
+                _purple,
+                raised,
+                foreground,
+                muted,
+              ),
+            ),
+            const SizedBox(width: 7),
+            Expanded(
+              child: _Currency(
+                Icons.bolt_rounded,
+                'ULTRA',
+                state.ultra.toString(),
+                _cyan,
+                raised,
+                foreground,
+                muted,
+              ),
+            ),
+            const SizedBox(width: 7),
+            Expanded(
+              child: _Currency(
+                Icons.diamond_rounded,
+                'NEBULA',
+                state.nebula.toString(),
+                const Color(0xFFB7A2FF),
+                raised,
+                foreground,
+                muted,
+              ),
+            ),
+          ],
+        ),
+      ],
+    ),
+  );
 }
 
 class _Currency extends StatelessWidget {
-  const _Currency(this.icon, this.label, this.value, this.color,
-      this.background, this.foreground, this.muted);
+  const _Currency(
+    this.icon,
+    this.label,
+    this.value,
+    this.color,
+    this.background,
+    this.foreground,
+    this.muted,
+  );
   final IconData icon;
   final String label;
   final String value;
@@ -882,35 +1037,39 @@ class _Currency extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 10),
-        decoration: BoxDecoration(
-          color: background,
-          borderRadius: BorderRadius.circular(14),
+    padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 10),
+    decoration: BoxDecoration(
+      color: background,
+      borderRadius: BorderRadius.circular(14),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, color: color, size: 15),
+        const SizedBox(height: 6),
+        Text(
+          value,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            color: foreground,
+            fontSize: 12,
+            fontWeight: FontWeight.w900,
+          ),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(icon, color: color, size: 15),
-            const SizedBox(height: 6),
-            Text(value,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: foreground,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w900,
-                )),
-            const SizedBox(height: 2),
-            Text(label,
-                style: TextStyle(
-                  color: muted,
-                  fontSize: 7,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: .8,
-                )),
-          ],
+        const SizedBox(height: 2),
+        Text(
+          label,
+          style: TextStyle(
+            color: muted,
+            fontSize: 7,
+            fontWeight: FontWeight.w900,
+            letterSpacing: .8,
+          ),
         ),
-      );
+      ],
+    ),
+  );
 }
 
 class _GuessInput extends StatelessWidget {
@@ -939,125 +1098,128 @@ class _GuessInput extends StatelessWidget {
 
   void _setGuess(int value) {
     controller.text = value.toString();
-    controller.selection = TextSelection.collapsed(offset: controller.text.length);
+    controller.selection = TextSelection.collapsed(
+      offset: controller.text.length,
+    );
   }
 
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.all(18),
-        decoration: BoxDecoration(
-          color: panel,
-          borderRadius: BorderRadius.circular(28),
-          border: Border.all(color: line),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    padding: const EdgeInsets.all(18),
+    decoration: BoxDecoration(
+      color: panel,
+      borderRadius: BorderRadius.circular(28),
+      border: Border.all(color: line),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
           children: [
-            Row(
-              children: [
-                Text('YOUR GUESS',
-                    style: TextStyle(
-                      color: foreground,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 1.4,
-                    )),
-                const Spacer(),
-                Text('WHOLE NUMBER',
-                    style: TextStyle(
-                      color: muted,
-                      fontSize: 9,
-                      fontWeight: FontWeight.w800,
-                    )),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: GtnExpressiveTextField(
-                    key: const Key('guess-input'),
-                    controller: controller,
-                    enabled: enabled,
-                    keyboardType: TextInputType.number,
-                    textInputAction: TextInputAction.done,
-                    onSubmitted: (_) => onGuess(),
-                    decoration: const InputDecoration(hintText: 'Enter a number'),
-                  ),
-                ),
-                const SizedBox(width: 9),
-                SizedBox(
-                  width: MediaQuery.sizeOf(context).width <= 430 ? 100 : 116,
-                  height: 56,
-                  child: M3EButton.filled(
-                    onPressed: enabled ? onGuess : null,
-                    child: const Text(
-                      '->',
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 0,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'QUICK PICK',
-                style: TextStyle(
-                  color: muted,
-                  fontSize: 9,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 1,
-                ),
+            Text(
+              'YOUR GUESS',
+              style: TextStyle(
+                color: foreground,
+                fontSize: 11,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 1.4,
               ),
             ),
-            const SizedBox(height: 7),
-            Wrap(
-              spacing: 7,
-              runSpacing: 7,
-              children: [
-                _QuickGuessButton(
-                  label: 'LOW END',
-                  enabled: enabled,
-                  onPressed: () => _setGuess(game.minimum),
-                ),
-                _QuickGuessButton(
-                  label: 'MIDPOINT',
-                  enabled: enabled,
-                  onPressed: () => _setGuess(
-                    game.minimum + (game.maximum - game.minimum) ~/ 2,
-                  ),
-                ),
-                _QuickGuessButton(
-                  label: 'HIGH END',
-                  enabled: enabled,
-                  onPressed: () => _setGuess(game.maximum),
-                ),
-                _QuickGuessButton(
-                  label: 'CLEAR',
-                  enabled: enabled,
-                  onPressed: () {
-                    controller.clear();
-                    controller.selection = const TextSelection.collapsed(offset: 0);
-                  },
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
+            const Spacer(),
             Text(
-              completed
-                  ? 'You found it! Start another round when you are ready.'
-                  : 'Every correct guess earns Money. Build your streak for bigger rewards.',
-              style: TextStyle(color: muted, fontSize: 10, height: 1.4),
+              'WHOLE NUMBER',
+              style: TextStyle(
+                color: muted,
+                fontSize: 9,
+                fontWeight: FontWeight.w800,
+              ),
             ),
           ],
         ),
-      );
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: GtnExpressiveTextField(
+                key: const Key('guess-input'),
+                controller: controller,
+                enabled: enabled,
+                keyboardType: TextInputType.number,
+                textInputAction: TextInputAction.done,
+                onSubmitted: (_) => onGuess(),
+                decoration: const InputDecoration(hintText: 'Enter a number'),
+              ),
+            ),
+            const SizedBox(width: 9),
+            SizedBox(
+              width: MediaQuery.sizeOf(context).width <= 430 ? 100 : 116,
+              height: 56,
+              child: M3EButton.filled(
+                onPressed: enabled ? onGuess : null,
+                child: const Text(
+                  '->',
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: Text(
+            'QUICK PICK',
+            style: TextStyle(
+              color: muted,
+              fontSize: 9,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 1,
+            ),
+          ),
+        ),
+        const SizedBox(height: 7),
+        Wrap(
+          spacing: 7,
+          runSpacing: 7,
+          children: [
+            _QuickGuessButton(
+              label: 'LOW END',
+              enabled: enabled,
+              onPressed: () => _setGuess(game.minimum),
+            ),
+            _QuickGuessButton(
+              label: 'MIDPOINT',
+              enabled: enabled,
+              onPressed: () =>
+                  _setGuess(game.minimum + (game.maximum - game.minimum) ~/ 2),
+            ),
+            _QuickGuessButton(
+              label: 'HIGH END',
+              enabled: enabled,
+              onPressed: () => _setGuess(game.maximum),
+            ),
+            _QuickGuessButton(
+              label: 'CLEAR',
+              enabled: enabled,
+              onPressed: () {
+                controller.clear();
+                controller.selection = const TextSelection.collapsed(offset: 0);
+              },
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Text(
+          completed ? 'You found it! Start another round when you are ready.' : 'Every correct guess earns Money. Build your streak for bigger rewards.',
+          style: TextStyle(color: muted, fontSize: 10, height: 1.4),
+        ),
+      ],
+    ),
+  );
 }
 
 class _QuickGuessButton extends StatelessWidget {
@@ -1073,17 +1235,26 @@ class _QuickGuessButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => M3EButton.outlined(
-        onPressed: enabled ? onPressed : null,
-        child: Text(
-          label,
-          style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w900),
-        ),
-      );
+    onPressed: enabled ? onPressed : null,
+    child: Text(
+      label,
+      style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w900),
+    ),
+  );
 }
 
 class _Action extends StatelessWidget {
-  const _Action(this.title, this.subtitle, this.icon, this.color, this.onTap,
-      this.panel, this.line, this.foreground, this.muted);
+  const _Action(
+    this.title,
+    this.subtitle,
+    this.icon,
+    this.color,
+    this.onTap,
+    this.panel,
+    this.line,
+    this.foreground,
+    this.muted,
+  );
   final String title;
   final String subtitle;
   final IconData icon;
@@ -1096,58 +1267,58 @@ class _Action extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Material(
-        color: panel,
-        borderRadius: BorderRadius.circular(19),
-        child: InkWell(
-          onTap: onTap,
+    color: panel,
+    borderRadius: BorderRadius.circular(19),
+    child: InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(19),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(19),
-          child: Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(19),
-              border: Border.all(color: line),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 35,
-                  height: 35,
-                  decoration: BoxDecoration(
-                    color: color.withValues(alpha: .14),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(icon, color: color, size: 19),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(title,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color: foreground,
-                            fontSize: 10,
-                            fontWeight: FontWeight.w900,
-                          )),
-                      const SizedBox(height: 3),
-                      Text(subtitle,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color: muted,
-                            fontSize: 8,
-                            height: 1.2,
-                          )),
-                    ],
-                  ),
-                ),
-                Icon(Icons.chevron_right_rounded, color: muted, size: 16),
-              ],
-            ),
-          ),
+          border: Border.all(color: line),
         ),
-      );
+        child: Row(
+          children: [
+            Container(
+              width: 35,
+              height: 35,
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: .14),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, color: color, size: 19),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: foreground,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    subtitle,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(color: muted, fontSize: 8, height: 1.2),
+                  ),
+                ],
+              ),
+            ),
+            Icon(Icons.chevron_right_rounded, color: muted, size: 16),
+          ],
+        ),
+      ),
+    ),
+  );
 }

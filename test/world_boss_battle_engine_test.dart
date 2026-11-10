@@ -7,10 +7,8 @@ import 'package:gtn_2/worlds/world_boss_catalog.dart';
 void main() {
   const engine = WorldBossBattleEngine();
 
-  ProgressionState fightReadyState() => ProgressionState(
-        correctGuesses: 10,
-        upgrades: const {'upgrade_a': 3},
-      );
+  ProgressionState fightReadyState() =>
+      ProgressionState(correctGuesses: 10, upgrades: const {'upgrade_a': 3});
 
   test('secret discovery pays the original reward once and records its Codex entry', () {
     final state = ProgressionState(correctGuesses: 50);
@@ -20,30 +18,40 @@ void main() {
     expect(discovered.progression.moneyEarned, BigNumber.fromInt(10000));
     expect(discovered.progression.nebula, BigNumber.fromInt(5));
     expect(discovered.progression.nebulaEarned, BigNumber.fromInt(5));
-    expect(discovered.progression.legacySystems.discoveredSecrets,
-        contains('whispering_hollow'));
-    expect(discovered.progression.legacySystems.codexEntries,
-        contains('secret:whispering_hollow'));
+    expect(
+      discovered.progression.legacySystems.discoveredSecrets,
+      contains('whispering_hollow'),
+    );
+    expect(
+      discovered.progression.legacySystems.codexEntries,
+      contains('secret:whispering_hollow'),
+    );
 
-    final repeated = engine.discoverSecret(discovered.progression, 'whispering_hollow');
+    final repeated = engine.discoverSecret(
+      discovered.progression,
+      'whispering_hollow',
+    );
     expect(repeated.accepted, isFalse);
     expect(repeated.progression.money, discovered.progression.money);
     expect(repeated.progression.nebula, discovered.progression.nebula);
   });
 
-  test('secret discovery requires both its threshold and an unlocked world', () {
-    final tooEarly = engine.discoverSecret(
-      ProgressionState(correctGuesses: 49),
-      'whispering_hollow',
-    );
-    expect(tooEarly.accepted, isFalse);
+  test(
+    'secret discovery requires both its threshold and an unlocked world',
+    () {
+      final tooEarly = engine.discoverSecret(
+        ProgressionState(correctGuesses: 49),
+        'whispering_hollow',
+      );
+      expect(tooEarly.accepted, isFalse);
 
-    final lockedWorld = engine.discoverSecret(
-      ProgressionState(correctGuesses: 150),
-      'shard_archive',
-    );
-    expect(lockedWorld.accepted, isFalse);
-  });
+      final lockedWorld = engine.discoverSecret(
+        ProgressionState(correctGuesses: 150),
+        'shard_archive',
+      );
+      expect(lockedWorld.accepted, isFalse);
+    },
+  );
 
   test('migrates worlds unlocked by the previous Flutter save rules', () {
     final oldSave = ProgressionState(
@@ -55,35 +63,45 @@ void main() {
       ),
     );
     final migrated = engine.migrateLegacyWorldUnlocks(oldSave);
-    expect(migrated.legacySystems.unlockedWorldIds,
-        containsAll(['verdant_grove', 'crystal_caverns']));
+    expect(
+      migrated.legacySystems.unlockedWorldIds,
+      containsAll(['verdant_grove', 'crystal_caverns']),
+    );
     expect(migrated.legacySystems.worldUnlockMigrationPending, isFalse);
-    expect(WorldBossCatalog.isUnlocked(migrated, WorldBossCatalog.worlds[1]), isTrue);
+    expect(
+      WorldBossCatalog.isUnlocked(migrated, WorldBossCatalog.worlds[1]),
+      isTrue,
+    );
   });
 
-  test('unlocks the next world only after its previous boss and thresholds', () {
-    final first = WorldBossCatalog.worlds.first;
-    final second = WorldBossCatalog.worlds[1];
-    var state = ProgressionState(
-      correctGuesses: 25,
-      upgrades: const {'upgrade_a': 5},
-    );
-    expect(WorldBossCatalog.canUnlock(state, second), isFalse);
+  test(
+    'unlocks the next world only after its previous boss and thresholds',
+    () {
+      final first = WorldBossCatalog.worlds.first;
+      final second = WorldBossCatalog.worlds[1];
+      var state = ProgressionState(
+        correctGuesses: 25,
+        upgrades: const {'upgrade_a': 5},
+      );
+      expect(WorldBossCatalog.canUnlock(state, second), isFalse);
 
-    state = state.copyWith(
-      defeatedBosses: const {'verdant_guardian'},
-      legacySystems: state.legacySystems.copyWith(
-        relicInventory: const {'verdant_guardian'},
-      ),
-    );
-    expect(WorldBossCatalog.canUnlock(state, second), isTrue);
-    final unlocked = engine.unlockWorld(state, second.id);
-    expect(unlocked.accepted, isTrue);
-    expect(unlocked.progression.legacySystems.unlockedWorldIds,
-        containsAll([first.id, second.id]));
-    expect(unlocked.progression.legacySystems.activeWorldId, second.id);
-    expect(WorldBossCatalog.isUnlocked(unlocked.progression, second), isTrue);
-  });
+      state = state.copyWith(
+        defeatedBosses: const {'verdant_guardian'},
+        legacySystems: state.legacySystems.copyWith(
+          relicInventory: const {'verdant_guardian'},
+        ),
+      );
+      expect(WorldBossCatalog.canUnlock(state, second), isTrue);
+      final unlocked = engine.unlockWorld(state, second.id);
+      expect(unlocked.accepted, isTrue);
+      expect(
+        unlocked.progression.legacySystems.unlockedWorldIds,
+        containsAll([first.id, second.id]),
+      );
+      expect(unlocked.progression.legacySystems.activeWorldId, second.id);
+      expect(WorldBossCatalog.isUnlocked(unlocked.progression, second), isTrue);
+    },
+  );
 
   test('starts and stops only an eligible world boss battle', () {
     final locked = engine.toggleBossBattle(ProgressionState(), 'verdant_grove');
@@ -91,28 +109,41 @@ void main() {
 
     final started = engine.toggleBossBattle(fightReadyState(), 'verdant_grove');
     expect(started.accepted, isTrue);
-    expect(started.progression.legacySystems.activeBossBattleWorldId, 'verdant_grove');
+    expect(
+      started.progression.legacySystems.activeBossBattleWorldId,
+      'verdant_grove',
+    );
 
-    final stopped = engine.toggleBossBattle(started.progression, 'verdant_grove');
+    final stopped = engine.toggleBossBattle(
+      started.progression,
+      'verdant_grove',
+    );
     expect(stopped.accepted, isTrue);
     expect(stopped.progression.legacySystems.activeBossBattleWorldId, isNull);
   });
 
-  test('correct guesses hit the boss and phase changes reset miss counters', () {
-    var state = engine.toggleBossBattle(fightReadyState(), 'verdant_grove').progression;
-    var result = engine.recordGuess(state, correct: false);
-    state = result.progression;
-    expect(state.legacySystems.bossBattleMistakes['verdant_guardian'], 1);
-    expect(state.bossDamage['verdant_guardian'], 0);
+  test(
+    'correct guesses hit the boss and phase changes reset miss counters',
+    () {
+      var state = engine
+          .toggleBossBattle(fightReadyState(), 'verdant_grove')
+          .progression;
+      var result = engine.recordGuess(state, correct: false);
+      state = result.progression;
+      expect(state.legacySystems.bossBattleMistakes['verdant_guardian'], 1);
+      expect(state.bossDamage['verdant_guardian'], 0);
 
-    result = engine.recordGuess(state, correct: true);
-    state = result.progression;
-    expect(state.bossDamage['verdant_guardian'], 1);
-    expect(state.legacySystems.bossBattleMistakes['verdant_guardian'], 0);
-  });
+      result = engine.recordGuess(state, correct: true);
+      state = result.progression;
+      expect(state.bossDamage['verdant_guardian'], 1);
+      expect(state.legacySystems.bossBattleMistakes['verdant_guardian'], 0);
+    },
+  );
 
   test('miss regression follows 4, 3 and 2 misses across boss phases', () {
-    var state = engine.toggleBossBattle(fightReadyState(), 'verdant_grove').progression;
+    var state = engine
+        .toggleBossBattle(fightReadyState(), 'verdant_grove')
+        .progression;
     for (var i = 0; i < 4; i++) {
       state = engine.recordGuess(state, correct: false).progression;
     }
@@ -127,37 +158,51 @@ void main() {
     expect(state.bossDamage['verdant_guardian'], 0);
   });
 
-  test('normal boss defeat pays rewards once and records relic, codex and mastery', () {
-    var state = engine.toggleBossBattle(fightReadyState(), 'verdant_grove').progression;
-    for (var i = 0; i < 3; i++) {
-      state = engine.recordGuess(state, correct: true).progression;
-    }
-    expect(state.money, BigNumber.fromInt(25000));
-    expect(state.moneyEarned, BigNumber.fromInt(25000));
-    expect(state.nebula, BigNumber.fromInt(10));
-    expect(state.nebulaEarned, BigNumber.fromInt(10));
-    expect(state.defeatedBosses, contains('verdant_guardian'));
-    expect(state.legacySystems.relicInventory, contains('verdant_guardian'));
-    expect(state.legacySystems.codexEntries, containsAll(['world:verdant_grove', 'boss:verdant_guardian']));
-    expect(state.legacySystems.worldMasteryLevels['verdant_grove'], 1);
-    expect(state.legacySystems.worldBossVictories, 1);
-    expect(state.legacySystems.activeBossBattleWorldId, isNull);
-    expect(engine.recordGuess(state, correct: true).progression.money, state.money);
-  });
+  test(
+    'normal boss defeat pays rewards once and records relic, codex and mastery',
+    () {
+      var state = engine
+          .toggleBossBattle(fightReadyState(), 'verdant_grove')
+          .progression;
+      for (var i = 0; i < 3; i++) {
+        state = engine.recordGuess(state, correct: true).progression;
+      }
+      expect(state.money, BigNumber.fromInt(25000));
+      expect(state.moneyEarned, BigNumber.fromInt(25000));
+      expect(state.nebula, BigNumber.fromInt(10));
+      expect(state.nebulaEarned, BigNumber.fromInt(10));
+      expect(state.defeatedBosses, contains('verdant_guardian'));
+      expect(state.legacySystems.relicInventory, contains('verdant_guardian'));
+      expect(
+        state.legacySystems.codexEntries,
+        containsAll(['world:verdant_grove', 'boss:verdant_guardian']),
+      );
+      expect(state.legacySystems.worldMasteryLevels['verdant_grove'], 1);
+      expect(state.legacySystems.worldBossVictories, 1);
+      expect(state.legacySystems.activeBossBattleWorldId, isNull);
+      expect(
+        engine.recordGuess(state, correct: true).progression.money,
+        state.money,
+      );
+    },
+  );
 
-  test('normal boss rewards apply permanent Prestige and Ultra Money boosts', () {
-    var state = fightReadyState().copyWith(
-      prestigeUpgrades: const {'prestige_money_boost': 1},
-      ultraUpgrades: const {'ultra_money_boost': 1},
-    );
-    state = engine.toggleBossBattle(state, 'verdant_grove').progression;
-    for (var i = 0; i < 3; i++) {
-      state = engine.recordGuess(state, correct: true).progression;
-    }
-    // GTN1 multiplies normal boss payouts by 1.5x Prestige and 3x Ultra.
-    expect(state.money, BigNumber.fromInt(112500));
-    expect(state.moneyEarned, BigNumber.fromInt(112500));
-  });
+  test(
+    'normal boss rewards apply permanent Prestige and Ultra Money boosts',
+    () {
+      var state = fightReadyState().copyWith(
+        prestigeUpgrades: const {'prestige_money_boost': 1},
+        ultraUpgrades: const {'ultra_money_boost': 1},
+      );
+      state = engine.toggleBossBattle(state, 'verdant_grove').progression;
+      for (var i = 0; i < 3; i++) {
+        state = engine.recordGuess(state, correct: true).progression;
+      }
+      // GTN1 multiplies normal boss payouts by 1.5x Prestige and 3x Ultra.
+      expect(state.money, BigNumber.fromInt(112500));
+      expect(state.moneyEarned, BigNumber.fromInt(112500));
+    },
+  );
 
   test('boss rewards include relic set, mastery, sanctuary, event and secret bonuses', () {
     final state = fightReadyState().copyWith(
@@ -165,7 +210,10 @@ void main() {
         activeWorldId: 'verdant_grove',
         activeBossBattleWorldId: 'verdant_grove',
         equippedRelics: const {
-          'verdant_guardian', 'crystal_golem', 'ember_dragon', 'nebula_titan',
+          'verdant_guardian',
+          'crystal_golem',
+          'ember_dragon',
+          'nebula_titan',
         },
         worldMasteryLevels: const {'verdant_grove': 5},
         homeBaseLevel: 20,
@@ -206,17 +254,20 @@ void main() {
     expect(state.legacySystems.worldBossVictories, 1);
   });
 
-  test('selecting a different world cannot interrupt an active Endless Rift', () {
-    final state = fightReadyState().copyWith(
-      legacySystems: ProgressionState.initial.legacySystems.copyWith(
-        endlessRiftActive: true,
-        endlessRiftTier: 1,
-        activeWorldId: 'verdant_grove',
-        activeBossBattleWorldId: 'verdant_grove',
-      ),
-    );
-    final result = engine.selectWorld(state, 'crystal_caverns');
-    expect(result.accepted, isFalse);
-    expect(result.progression.legacySystems.activeWorldId, 'verdant_grove');
-  });
+  test(
+    'selecting a different world cannot interrupt an active Endless Rift',
+    () {
+      final state = fightReadyState().copyWith(
+        legacySystems: ProgressionState.initial.legacySystems.copyWith(
+          endlessRiftActive: true,
+          endlessRiftTier: 1,
+          activeWorldId: 'verdant_grove',
+          activeBossBattleWorldId: 'verdant_grove',
+        ),
+      );
+      final result = engine.selectWorld(state, 'crystal_caverns');
+      expect(result.accepted, isFalse);
+      expect(result.progression.legacySystems.activeWorldId, 'verdant_grove');
+    },
+  );
 }

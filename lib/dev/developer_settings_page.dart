@@ -76,9 +76,9 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
       }
     } on Object catch (error) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Could not apply save: $error')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Could not apply save: $error')));
       }
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -92,9 +92,14 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Text('Developer Console', style: Theme.of(context).textTheme.titleLarge),
+          Text(
+            'Developer Console',
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
           const SizedBox(height: 8),
-          const Text('Try /help, /money 1000000, /prestige 10, /ultra 1, /nebula 100 or /reset.'),
+          const Text(
+            'Try /help, /money 1000000, /prestige 10, /ultra 1, /nebula 100 or /reset.',
+          ),
           const SizedBox(height: 12),
           GtnExpressiveTextField(
             controller: _command,
@@ -130,9 +135,14 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
             ),
           ],
           const SizedBox(height: 24),
-          Text('Save Editor (JSON)', style: Theme.of(context).textTheme.titleLarge),
+          Text(
+            'Save Editor (JSON)',
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
           const SizedBox(height: 8),
-          const Text('Edit the current slot save directly. Invalid or incompatible JSON is rejected.'),
+          const Text(
+            'Edit the current slot save directly. Invalid or incompatible JSON is rejected.',
+          ),
           const SizedBox(height: 8),
           GtnExpressiveTextField(
             controller: _json,

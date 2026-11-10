@@ -44,7 +44,7 @@ class TraitCatalogEntry {
 
 class TraitCatalogRepository {
   TraitCatalogRepository({TraitAssetLoader? loadAsset})
-      : _loadAsset = loadAsset ?? rootBundle.loadString;
+    : _loadAsset = loadAsset ?? rootBundle.loadString;
 
   static const manifestAsset = 'assets/gtn1/traits/catalog-manifest.json';
   static const sourceCommit = 'fe9cf567169e19059e0330d08769fe454336ef94';
@@ -52,7 +52,10 @@ class TraitCatalogRepository {
   final TraitAssetLoader _loadAsset;
 
   Future<List<TraitCatalogEntry>> load() async {
-    final manifest = _decodeObject(await _loadAsset(manifestAsset), manifestAsset);
+    final manifest = _decodeObject(
+      await _loadAsset(manifestAsset),
+      manifestAsset,
+    );
     if (manifest['schemaVersion'] != 1 ||
         manifest['sourceCommit'] != sourceCommit ||
         manifest['traitCount'] != 320) {
@@ -123,8 +126,11 @@ class TraitCatalogRepository {
         effects: _stringSet(definition['effects'], 'effects', id),
         minimumLevel: _requiredInt(activation, 'minimumLevel', id),
         minimumPrestige: _requiredInt(activation, 'minimumPrestige', id),
-        minimumCorrectGuesses:
-            _requiredInt(activation, 'minimumCorrectGuesses', id),
+        minimumCorrectGuesses: _requiredInt(
+          activation,
+          'minimumCorrectGuesses',
+          id,
+        ),
         dependencies: _stringSet(rules['dependencies'], 'dependencies', id),
         conflicts: _stringSet(rules['conflicts'], 'conflicts', id),
         seasonId: season as String?,

@@ -3,7 +3,8 @@ import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
 
 /// Preferred-size wrapper that routes application app bars through M3 Expressive.
-class GtnExpressiveAppBar extends StatelessWidget implements PreferredSizeWidget {
+class GtnExpressiveAppBar extends StatelessWidget
+    implements PreferredSizeWidget {
   const GtnExpressiveAppBar({
     super.key,
     this.title,
@@ -34,17 +35,17 @@ class GtnExpressiveAppBar extends StatelessWidget implements PreferredSizeWidget
 
   @override
   Widget build(BuildContext context) => M3EAppBar.top(
-        title: title,
-        titleText: titleText,
-        leading: leading,
-        actions: actions,
-        centerTitle: centerTitle,
-        backgroundColor: backgroundColor,
-        foregroundColor: foregroundColor,
-        elevation: elevation,
-        toolbarHeight: toolbarHeight,
-        automaticallyImplyLeading: automaticallyImplyLeading,
-      );
+    title: title,
+    titleText: titleText,
+    leading: leading,
+    actions: actions,
+    centerTitle: centerTitle,
+    backgroundColor: backgroundColor,
+    foregroundColor: foregroundColor,
+    elevation: elevation,
+    toolbarHeight: toolbarHeight,
+    automaticallyImplyLeading: automaticallyImplyLeading,
+  );
 }
 
 /// GTN1 visual tokens. These intentionally preserve the Web Play identity while
@@ -93,9 +94,11 @@ class GtnExpressiveCard extends StatelessWidget {
         ? shape! as RoundedRectangleBorder
         : null;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final radius = roundedShape?.borderRadius.resolve(TextDirection.ltr).topLeft.x ??
+    final radius =
+        roundedShape?.borderRadius.resolve(TextDirection.ltr).topLeft.x ??
         GtnUiTokens.radius;
-    final side = roundedShape?.side ??
+    final side =
+        roundedShape?.side ??
         BorderSide(color: isDark ? GtnUiTokens.line : const Color(0x180D1530));
     return Padding(
       padding: margin,
@@ -106,11 +109,13 @@ class GtnExpressiveCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(radius),
           border: Border.fromBorderSide(side),
           boxShadow: (elevation ?? 0) > 0
-              ? [BoxShadow(
-                  color: Colors.black.withValues(alpha: isDark ? .22 : .08),
-                  blurRadius: (elevation ?? 0) * 5,
-                  offset: Offset(0, (elevation ?? 0) * 1.5),
-                )]
+              ? [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: isDark ? .22 : .08),
+                    blurRadius: (elevation ?? 0) * 5,
+                    offset: Offset(0, (elevation ?? 0) * 1.5),
+                  ),
+                ]
               : const [],
         ),
         child: child,
@@ -196,9 +201,11 @@ class GtnExpressiveTextField extends StatelessWidget {
       ),
       decoration: (decoration ?? const InputDecoration()).copyWith(
         filled: true,
-        fillColor: decoration?.fillColor ??
+        fillColor:
+            decoration?.fillColor ??
             (dark ? const Color(0xFF080D1B) : const Color(0xFFF0F1FA)),
-        contentPadding: decoration?.contentPadding ??
+        contentPadding:
+            decoration?.contentPadding ??
             const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         border: OutlineInputBorder(
           borderRadius: radius,
@@ -210,16 +217,14 @@ class GtnExpressiveTextField extends StatelessWidget {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: radius,
-          borderSide: const BorderSide(
-            color: GtnUiTokens.purple,
-            width: 1.4,
-          ),
+          borderSide: const BorderSide(color: GtnUiTokens.purple, width: 1.4),
         ),
         disabledBorder: OutlineInputBorder(
           borderRadius: radius,
           borderSide: BorderSide(color: borderColor.withValues(alpha: .5)),
         ),
-        hintStyle: decoration?.hintStyle ??
+        hintStyle:
+            decoration?.hintStyle ??
             TextStyle(color: hintColor.withValues(alpha: .8)),
       ),
     );
@@ -247,12 +252,12 @@ class GtnExpressiveSwitchTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ListTile(
-        contentPadding: contentPadding,
-        leading: secondary,
-        title: title,
-        subtitle: subtitle,
-        trailing: M3ESwitch(value: value, onChanged: onChanged),
-      );
+    contentPadding: contentPadding,
+    leading: secondary,
+    title: title,
+    subtitle: subtitle,
+    trailing: M3ESwitch(value: value, onChanged: onChanged),
+  );
 }
 
 /// Choice chip adapter backed by the M3 Expressive filter-chip interaction.
@@ -270,11 +275,11 @@ class GtnExpressiveChoiceChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => M3EChip(
-        label: label,
-        type: M3EChipType.filter,
-        selected: selected,
-        onPressed: onSelected == null ? null : () => onSelected!(!selected),
-      );
+    label: label,
+    type: M3EChipType.filter,
+    selected: selected,
+    onPressed: onSelected == null ? null : () => onSelected!(!selected),
+  );
 }
 
 /// Single-select dropdown adapter backed by M3EDropdownMenu.
@@ -325,7 +330,8 @@ class GtnExpressiveDropdown<T> extends StatelessWidget {
           singleSelect: true,
           enabled: onChanged != null,
           fieldStyle: M3EDropdownFieldStyle(
-            hintText: decoration?.hintText ??
+            hintText:
+                decoration?.hintText ??
                 decoration?.labelText ??
                 'Select an option',
           ),
@@ -381,7 +387,9 @@ class GtnExpressiveDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final headline = title is Text ? (title as Text).data ?? '' : title.toString();
+    final headline = title is Text
+        ? (title as Text).data ?? ''
+        : title.toString();
     return M3EDialog(
       title: headline,
       content: content,

@@ -25,14 +25,14 @@ class CreativeModeEffect {
   final int value;
 
   Map<String, Object> toJson() => {
-        'id': id,
-        'type': switch (type) {
-          CreativeEffectType.rangeScale => 'RANGE_SCALE',
-          CreativeEffectType.extraHints => 'EXTRA_HINTS',
-          CreativeEffectType.attemptLimit => 'ATTEMPT_LIMIT',
-        },
-        'value': value,
-      };
+    'id': id,
+    'type': switch (type) {
+      CreativeEffectType.rangeScale => 'RANGE_SCALE',
+      CreativeEffectType.extraHints => 'EXTRA_HINTS',
+      CreativeEffectType.attemptLimit => 'ATTEMPT_LIMIT',
+    },
+    'value': value,
+  };
 
   factory CreativeModeEffect.fromJson(Map<String, dynamic> json) {
     final id = json['id'];
@@ -73,15 +73,15 @@ class CreativeModeRunSnapshot {
   final bool completed;
 
   Map<String, Object> toJson() => {
-        'runId': runId,
-        'rangeMin': rangeMin,
-        'rangeMax': rangeMax,
-        'target': target,
-        'attemptsUsed': attemptsUsed,
-        'correctGuesses': correctGuesses,
-        'hintsUsed': hintsUsed,
-        'completed': completed,
-      };
+    'runId': runId,
+    'rangeMin': rangeMin,
+    'rangeMax': rangeMax,
+    'target': target,
+    'attemptsUsed': attemptsUsed,
+    'correctGuesses': correctGuesses,
+    'hintsUsed': hintsUsed,
+    'completed': completed,
+  };
 
   factory CreativeModeRunSnapshot.fromJson(Map<String, dynamic> json) {
     final runId = json['runId'];
@@ -146,26 +146,25 @@ class CreativeModeSave {
     List<CreativeModeEffect>? effects,
     CreativeModeRunSnapshot? activeRun,
     bool clearActiveRun = false,
-  }) =>
-      CreativeModeSave(
-        schemaVersion: schemaVersion,
-        name: name ?? this.name,
-        enabled: enabled ?? this.enabled,
-        rangeMin: rangeMin ?? this.rangeMin,
-        rangeMax: rangeMax ?? this.rangeMax,
-        effects: effects ?? this.effects,
-        activeRun: clearActiveRun ? null : activeRun ?? this.activeRun,
-      );
+  }) => CreativeModeSave(
+    schemaVersion: schemaVersion,
+    name: name ?? this.name,
+    enabled: enabled ?? this.enabled,
+    rangeMin: rangeMin ?? this.rangeMin,
+    rangeMax: rangeMax ?? this.rangeMax,
+    effects: effects ?? this.effects,
+    activeRun: clearActiveRun ? null : activeRun ?? this.activeRun,
+  );
 
   Map<String, Object?> toJson() => {
-        'schemaVersion': schemaVersion,
-        'name': name,
-        'enabled': enabled,
-        'rangeMin': rangeMin,
-        'rangeMax': rangeMax,
-        'effects': effects.map((effect) => effect.toJson()).toList(),
-        'activeRun': activeRun?.toJson(),
-      };
+    'schemaVersion': schemaVersion,
+    'name': name,
+    'enabled': enabled,
+    'rangeMin': rangeMin,
+    'rangeMax': rangeMax,
+    'effects': effects.map((effect) => effect.toJson()).toList(),
+    'activeRun': activeRun?.toJson(),
+  };
 
   static bool validate(CreativeModeSave save) {
     if (save.schemaVersion != currentSchemaVersion ||
@@ -207,8 +206,7 @@ class CreativeModeSave {
       run.correctGuesses <= run.attemptsUsed &&
       run.hintsUsed >= 0 &&
       run.hintsUsed <= 10 &&
-      (!run.completed ||
-          (run.attemptsUsed > 0 && run.correctGuesses > 0));
+      (!run.completed || (run.attemptsUsed > 0 && run.correctGuesses > 0));
 
   static String encode(CreativeModeSave save) {
     if (!validate(save)) {
@@ -240,10 +238,14 @@ class CreativeModeSave {
       final effects = version == 1
           ? <CreativeModeEffect>[]
           : effectsJson
-              .map((item) => item is Map<String, dynamic>
-                  ? CreativeModeEffect.fromJson(item)
-                  : throw const FormatException('Invalid creative-mode effect.'))
-              .toList();
+                .map(
+                  (item) => item is Map<String, dynamic>
+                      ? CreativeModeEffect.fromJson(item)
+                      : throw const FormatException(
+                          'Invalid creative-mode effect.',
+                        ),
+                )
+                .toList();
       final activeRunJson = decoded['activeRun'];
       final migrated = CreativeModeSave(
         schemaVersion: currentSchemaVersion,
@@ -255,10 +257,10 @@ class CreativeModeSave {
         activeRun: version < 3
             ? null
             : activeRunJson == null
-                ? null
-                : activeRunJson is Map<String, dynamic>
-                    ? CreativeModeRunSnapshot.fromJson(activeRunJson)
-                    : throw const FormatException('Invalid active creative run.'),
+            ? null
+            : activeRunJson is Map<String, dynamic>
+            ? CreativeModeRunSnapshot.fromJson(activeRunJson)
+            : throw const FormatException('Invalid active creative run.'),
       );
       return validate(migrated) ? migrated : null;
     } on FormatException {
@@ -350,28 +352,27 @@ class CreativeModeRun {
     int? correctGuesses,
     int? hintsUsed,
     bool? completed,
-  }) =>
-      CreativeModeRun(
-        runId: runId,
-        rangeMin: rangeMin,
-        rangeMax: rangeMax,
-        target: target,
-        attemptsUsed: attemptsUsed ?? this.attemptsUsed,
-        correctGuesses: correctGuesses ?? this.correctGuesses,
-        hintsUsed: hintsUsed ?? this.hintsUsed,
-        completed: completed ?? this.completed,
-      );
+  }) => CreativeModeRun(
+    runId: runId,
+    rangeMin: rangeMin,
+    rangeMax: rangeMax,
+    target: target,
+    attemptsUsed: attemptsUsed ?? this.attemptsUsed,
+    correctGuesses: correctGuesses ?? this.correctGuesses,
+    hintsUsed: hintsUsed ?? this.hintsUsed,
+    completed: completed ?? this.completed,
+  );
 
   CreativeModeRunSnapshot toSnapshot() => CreativeModeRunSnapshot(
-        runId: runId,
-        rangeMin: rangeMin,
-        rangeMax: rangeMax,
-        target: target,
-        attemptsUsed: attemptsUsed,
-        correctGuesses: correctGuesses,
-        hintsUsed: hintsUsed,
-        completed: completed,
-      );
+    runId: runId,
+    rangeMin: rangeMin,
+    rangeMax: rangeMax,
+    target: target,
+    attemptsUsed: attemptsUsed,
+    correctGuesses: correctGuesses,
+    hintsUsed: hintsUsed,
+    completed: completed,
+  );
 }
 
 class CreativeGuessDecision {
@@ -434,10 +435,7 @@ class CreativeModeRuntime {
     );
   }
 
-  static CreativeModeSave? persist(
-    CreativeModeSave save,
-    CreativeModeRun run,
-  ) {
+  static CreativeModeSave? persist(CreativeModeSave save, CreativeModeRun run) {
     if (!_matchesRules(save, run)) return null;
     return save.copyWith(activeRun: run.toSnapshot());
   }
@@ -453,8 +451,7 @@ class CreativeModeRuntime {
         run.rangeMin == rules.rangeMin &&
         run.rangeMax == rules.rangeMax &&
         run.hintsUsed <= rules.extraHints &&
-        (rules.attemptLimit == null ||
-            run.attemptsUsed <= rules.attemptLimit!);
+        (rules.attemptLimit == null || run.attemptsUsed <= rules.attemptLimit!);
   }
 
   static CreativeGuessDecision submitGuess(
@@ -491,8 +488,7 @@ class CreativeModeRuntime {
         accepted: false,
       );
     }
-    if (rules.attemptLimit != null &&
-        run.attemptsUsed >= rules.attemptLimit!) {
+    if (rules.attemptLimit != null && run.attemptsUsed >= rules.attemptLimit!) {
       return CreativeGuessDecision(
         outcome: CreativeGuessOutcome.attemptLimit,
         run: run,
@@ -525,10 +521,7 @@ class CreativeModeRuntime {
     );
   }
 
-  static CreativeModeRun? useHint(
-    CreativeModeSave save,
-    CreativeModeRun run,
-  ) {
+  static CreativeModeRun? useHint(CreativeModeSave save, CreativeModeRun run) {
     final rules = CreativeModeEffectPolicy.resolve(save);
     if (rules == null ||
         !save.enabled ||

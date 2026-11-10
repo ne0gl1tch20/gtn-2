@@ -37,13 +37,16 @@ void main() {
       expect(bot.upperBound, 100);
     });
 
-    test('never widens learned bounds after contradictory clamped feedback', () {
-      final bot = GuessingBot(minimum: 50, maximum: 100);
-      bot.observeGuess(40, BotFeedback.tooLow);
-      expect(bot.lowerBound, 50);
-      expect(bot.upperBound, 100);
-      expect(bot.nextGuess(rangeMinimum: 101, rangeMaximum: 200), 101);
-    });
+    test(
+      'never widens learned bounds after contradictory clamped feedback',
+      () {
+        final bot = GuessingBot(minimum: 50, maximum: 100);
+        bot.observeGuess(40, BotFeedback.tooLow);
+        expect(bot.lowerBound, 50);
+        expect(bot.upperBound, 100);
+        expect(bot.nextGuess(rangeMinimum: 101, rangeMaximum: 200), 101);
+      },
+    );
 
     test('correct feedback does not change the learned interval', () {
       final bot = GuessingBot();
@@ -57,18 +60,18 @@ void main() {
     test('rotates through owned bots in the original order', () {
       final team = BotTeam();
       BotAction? action(int sequence) => team.nextAction(
-            purchasedBots: const {'bot_pixel', 'auto_clicker_basic', 'bot_byte'},
-            sharedMemory: false,
-            sequence: sequence,
-            rangeMinimum: 1,
-            rangeMaximum: 100,
-            currentMinimum: 1,
-            currentMaximum: 100,
-            speed: 1,
-            speedTalentOne: false,
-            speedTalentTwo: false,
-            speedMutator: false,
-          );
+        purchasedBots: const {'bot_pixel', 'auto_clicker_basic', 'bot_byte'},
+        sharedMemory: false,
+        sequence: sequence,
+        rangeMinimum: 1,
+        rangeMaximum: 100,
+        currentMinimum: 1,
+        currentMaximum: 100,
+        speed: 1,
+        speedTalentOne: false,
+        speedTalentTwo: false,
+        speedMutator: false,
+      );
       expect(action(0)?.botId, 'auto_clicker_basic');
       expect(action(1)?.botId, 'bot_byte');
       expect(action(2)?.botId, 'bot_pixel');
@@ -79,10 +82,17 @@ void main() {
       final team = BotTeam();
       expect(
         team.nextAction(
-          purchasedBots: const {}, sharedMemory: false, sequence: 0,
-          rangeMinimum: 1, rangeMaximum: 100, currentMinimum: 1,
-          currentMaximum: 100, speed: 1, speedTalentOne: false,
-          speedTalentTwo: false, speedMutator: false,
+          purchasedBots: const {},
+          sharedMemory: false,
+          sequence: 0,
+          rangeMinimum: 1,
+          rangeMaximum: 100,
+          currentMinimum: 1,
+          currentMaximum: 100,
+          speed: 1,
+          speedTalentOne: false,
+          speedTalentTwo: false,
+          speedMutator: false,
         ),
         isNull,
       );
@@ -90,36 +100,69 @@ void main() {
 
     test('applies stacked speed talents and the speed mutator', () {
       final team = BotTeam();
-      expect(team.delayMillis(
-        active: true, speed: 1, speedTalentOne: true,
-        speedTalentTwo: true, speedMutator: true,
-      ), 177);
-      expect(team.delayMillis(
-        active: false, speed: 5, speedTalentOne: true,
-        speedTalentTwo: true, speedMutator: true,
-      ), 1000);
+      expect(
+        team.delayMillis(
+          active: true,
+          speed: 1,
+          speedTalentOne: true,
+          speedTalentTwo: true,
+          speedMutator: true,
+        ),
+        177,
+      );
+      expect(
+        team.delayMillis(
+          active: false,
+          speed: 5,
+          speedTalentOne: true,
+          speedTalentTwo: true,
+          speedMutator: true,
+        ),
+        1000,
+      );
     });
 
-    test('independent bot memory is separate until shared memory is enabled', () {
-      final team = BotTeam();
-      final byte = team.nextAction(
-        purchasedBots: const {'bot_byte'}, sharedMemory: false, sequence: 0,
-        rangeMinimum: 1, rangeMaximum: 100, currentMinimum: 1,
-        currentMaximum: 100, speed: 1, speedTalentOne: false,
-        speedTalentTwo: false, speedMutator: false,
-      )!;
-      team.observe(
-        botId: byte.botId, guess: byte.guess, feedback: BotFeedback.tooLow,
-        sharedMemory: false, nextRangeMinimum: 1, nextRangeMaximum: 100,
-      );
-      final shared = team.nextAction(
-        purchasedBots: const {'bot_byte'}, sharedMemory: true, sequence: 0,
-        rangeMinimum: 1, rangeMaximum: 100, currentMinimum: 1,
-        currentMaximum: 100, speed: 1, speedTalentOne: false,
-        speedTalentTwo: false, speedMutator: false,
-      )!;
-      expect(shared.guess, 50);
-    });
+    test(
+      'independent bot memory is separate until shared memory is enabled',
+      () {
+        final team = BotTeam();
+        final byte = team.nextAction(
+          purchasedBots: const {'bot_byte'},
+          sharedMemory: false,
+          sequence: 0,
+          rangeMinimum: 1,
+          rangeMaximum: 100,
+          currentMinimum: 1,
+          currentMaximum: 100,
+          speed: 1,
+          speedTalentOne: false,
+          speedTalentTwo: false,
+          speedMutator: false,
+        )!;
+        team.observe(
+          botId: byte.botId,
+          guess: byte.guess,
+          feedback: BotFeedback.tooLow,
+          sharedMemory: false,
+          nextRangeMinimum: 1,
+          nextRangeMaximum: 100,
+        );
+        final shared = team.nextAction(
+          purchasedBots: const {'bot_byte'},
+          sharedMemory: true,
+          sequence: 0,
+          rangeMinimum: 1,
+          rangeMaximum: 100,
+          currentMinimum: 1,
+          currentMaximum: 100,
+          speed: 1,
+          speedTalentOne: false,
+          speedTalentTwo: false,
+          speedMutator: false,
+        )!;
+        expect(shared.guess, 50);
+      },
+    );
   });
 
   group('GTN1 clock rollback protection', () {
@@ -169,15 +212,18 @@ void main() {
   });
 
   group('GTN1 offline earnings policy', () {
-    test('awards 500 Money per effective second while automation was active', () {
-      expect(
-        OfflineEarningsPolicy.calculate(
-          autoClickerWasActive: true,
-          elapsedSeconds: 60,
-        ).toString(),
-        '30000',
-      );
-    });
+    test(
+      'awards 500 Money per effective second while automation was active',
+      () {
+        expect(
+          OfflineEarningsPolicy.calculate(
+            autoClickerWasActive: true,
+            elapsedSeconds: 60,
+          ).toString(),
+          '30000',
+        );
+      },
+    );
 
     test('caps catch-up at eight hours', () {
       expect(OfflineEarningsPolicy.effectiveSeconds(999999), 28800);

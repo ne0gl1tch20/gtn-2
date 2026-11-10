@@ -22,16 +22,20 @@ class ProgressionState {
     this.bestStreak = 0,
     BigNumber? nebulaEarned,
     LegacySystemsState? legacySystems,
-  })  : money = money ?? BigNumber.fromInt(0),
-        prestige = prestige ?? BigNumber.fromInt(0),
-        ultra = ultra ?? BigNumber.fromInt(0),
-        nebula = nebula ?? BigNumber.fromInt(0),
-        moneyEarned = moneyEarned ?? BigNumber.fromInt(0),
-        nebulaEarned = nebulaEarned ?? BigNumber.fromInt(0),
-        legacySystems = legacySystems ?? LegacySystemsState.initial;
+  }) : money = money ?? BigNumber.fromInt(0),
+       prestige = prestige ?? BigNumber.fromInt(0),
+       ultra = ultra ?? BigNumber.fromInt(0),
+       nebula = nebula ?? BigNumber.fromInt(0),
+       moneyEarned = moneyEarned ?? BigNumber.fromInt(0),
+       nebulaEarned = nebulaEarned ?? BigNumber.fromInt(0),
+       legacySystems = legacySystems ?? LegacySystemsState.initial;
 
   final BigNumber money, prestige, ultra, nebula;
-  final Map<String, int> upgrades, prestigeUpgrades, ultraUpgrades, nebulaItems, bossDamage;
+  final Map<String, int> upgrades,
+      prestigeUpgrades,
+      ultraUpgrades,
+      nebulaItems,
+      bossDamage;
   final Set<String> defeatedBosses;
   final int prestigeResets, ultraResets, totalGuesses, correctGuesses;
   final BigNumber moneyEarned;
@@ -42,26 +46,26 @@ class ProgressionState {
   static final initial = ProgressionState();
 
   Map<String, Object> toJson() => {
-        'money': money.toString(),
-        'prestige': prestige.toString(),
-        'ultra': ultra.toString(),
-        'nebula': nebula.toString(),
-        'upgrades': upgrades,
-        'prestigeUpgrades': prestigeUpgrades,
-        'ultraUpgrades': ultraUpgrades,
-        'nebulaItems': nebulaItems,
-        'bossDamage': bossDamage,
-        'defeatedBosses': defeatedBosses.toList(),
-        'prestigeResets': prestigeResets,
-        'ultraResets': ultraResets,
-        'totalGuesses': totalGuesses,
-        'correctGuesses': correctGuesses,
-        'moneyEarned': moneyEarned.toString(),
-        'currentStreak': currentStreak,
-        'bestStreak': bestStreak,
-        'nebulaEarned': nebulaEarned.toString(),
-        'legacySystems': legacySystems.toJson(),
-      };
+    'money': money.toString(),
+    'prestige': prestige.toString(),
+    'ultra': ultra.toString(),
+    'nebula': nebula.toString(),
+    'upgrades': upgrades,
+    'prestigeUpgrades': prestigeUpgrades,
+    'ultraUpgrades': ultraUpgrades,
+    'nebulaItems': nebulaItems,
+    'bossDamage': bossDamage,
+    'defeatedBosses': defeatedBosses.toList(),
+    'prestigeResets': prestigeResets,
+    'ultraResets': ultraResets,
+    'totalGuesses': totalGuesses,
+    'correctGuesses': correctGuesses,
+    'moneyEarned': moneyEarned.toString(),
+    'currentStreak': currentStreak,
+    'bestStreak': bestStreak,
+    'nebulaEarned': nebulaEarned.toString(),
+    'legacySystems': legacySystems.toJson(),
+  };
 
   factory ProgressionState.fromJson(Map<String, dynamic> json) {
     BigNumber number(String key) {
@@ -88,7 +92,8 @@ class ProgressionState {
       if (value is! Map) throw FormatException('Invalid upgrade map: $key');
       final result = <String, int>{};
       for (final entry in value.entries) {
-        if (entry.key is! String || entry.value is! int ||
+        if (entry.key is! String ||
+            entry.value is! int ||
             (entry.value as int) < 0) {
           throw FormatException('Invalid upgrade level: $key');
         }
@@ -101,15 +106,18 @@ class ProgressionState {
     final legacySystems = rawLegacy == null
         ? LegacySystemsState.initial.copyWith(worldUnlockMigrationPending: true)
         : rawLegacy is Map<String, dynamic>
-            ? LegacySystemsState.fromJson(rawLegacy)
-            : throw const FormatException('Invalid legacy systems save.');
+        ? LegacySystemsState.fromJson(rawLegacy)
+        : throw const FormatException('Invalid legacy systems save.');
 
     final rawBossDamage = json['bossDamage'];
     final bossDamage = <String, int>{};
     if (rawBossDamage != null) {
-      if (rawBossDamage is! Map) throw const FormatException('Invalid boss damage map.');
+      if (rawBossDamage is! Map)
+        throw const FormatException('Invalid boss damage map.');
       for (final entry in rawBossDamage.entries) {
-        if (entry.key is! String || entry.value is! int || (entry.value as int) < 0) {
+        if (entry.key is! String ||
+            entry.value is! int ||
+            (entry.value as int) < 0) {
           throw const FormatException('Invalid boss damage entry.');
         }
         bossDamage[entry.key as String] = entry.value as int;
@@ -118,7 +126,8 @@ class ProgressionState {
     final rawDefeated = json['defeatedBosses'];
     final defeatedBosses = <String>{};
     if (rawDefeated != null) {
-      if (rawDefeated is! List || rawDefeated.any((value) => value is! String)) {
+      if (rawDefeated is! List ||
+          rawDefeated.any((value) => value is! String)) {
         throw const FormatException('Invalid defeated boss list.');
       }
       defeatedBosses.addAll(rawDefeated.cast<String>());
@@ -155,13 +164,24 @@ class ProgressionState {
   }
 
   ProgressionState copyWith({
-    BigNumber? money, BigNumber? prestige, BigNumber? ultra, BigNumber? nebula,
-    Map<String, int>? upgrades, Map<String, int>? prestigeUpgrades,
-    Map<String, int>? ultraUpgrades, Map<String, int>? nebulaItems,
-    Map<String, int>? bossDamage, Set<String>? defeatedBosses,
-    int? prestigeResets, int? ultraResets, int? totalGuesses,
-    int? correctGuesses, BigNumber? moneyEarned, int? currentStreak,
-    int? bestStreak, BigNumber? nebulaEarned,
+    BigNumber? money,
+    BigNumber? prestige,
+    BigNumber? ultra,
+    BigNumber? nebula,
+    Map<String, int>? upgrades,
+    Map<String, int>? prestigeUpgrades,
+    Map<String, int>? ultraUpgrades,
+    Map<String, int>? nebulaItems,
+    Map<String, int>? bossDamage,
+    Set<String>? defeatedBosses,
+    int? prestigeResets,
+    int? ultraResets,
+    int? totalGuesses,
+    int? correctGuesses,
+    BigNumber? moneyEarned,
+    int? currentStreak,
+    int? bestStreak,
+    BigNumber? nebulaEarned,
     LegacySystemsState? legacySystems,
   }) => ProgressionState(
     money: money ?? this.money,

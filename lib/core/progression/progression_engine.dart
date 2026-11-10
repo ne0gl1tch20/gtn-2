@@ -4,7 +4,9 @@ import 'progression_state.dart';
 
 class UpgradeDefinition {
   UpgradeDefinition({
-    required this.id, required this.baseCost, required this.growthRate,
+    required this.id,
+    required this.baseCost,
+    required this.growthRate,
     this.maxLevel,
   });
   final String id;
@@ -19,7 +21,8 @@ class UpgradeDefinition {
 
 class GuessRewardModifiers {
   const GuessRewardModifiers({
-    this.streakMultiplier = 1, this.criticalMultiplier = 1,
+    this.streakMultiplier = 1,
+    this.criticalMultiplier = 1,
   });
   final int streakMultiplier, criticalMultiplier;
 }
@@ -37,7 +40,8 @@ class PrestigeRules {
 
 class UltraRules {
   const UltraRules({
-    required this.minimumMoney, required this.rewardForMoney,
+    required this.minimumMoney,
+    required this.rewardForMoney,
     this.resetPrestigeUpgrades = true,
     this.startingCapital,
   });
@@ -59,7 +63,8 @@ class ProgressionEngine {
     int upgradeMultiplier = 1,
     bool isBot = false,
   }) {
-    if (upgradeMultiplier < 1 || modifiers.streakMultiplier < 1 ||
+    if (upgradeMultiplier < 1 ||
+        modifiers.streakMultiplier < 1 ||
         modifiers.criticalMultiplier < 1) {
       throw ArgumentError('Reward multipliers must be at least one.');
     }
@@ -86,21 +91,28 @@ class ProgressionEngine {
       correctGuesses: state.correctGuesses + (isBot ? 0 : 1),
       moneyEarned: state.moneyEarned + reward,
       currentStreak: isBot ? state.currentStreak : streak,
-      bestStreak: isBot ? state.bestStreak : streak > state.bestStreak ? streak : state.bestStreak,
+      bestStreak: isBot
+          ? state.bestStreak
+          : streak > state.bestStreak
+          ? streak
+          : state.bestStreak,
     );
   }
 
   ProgressionState purchaseUpgrade(
-    ProgressionState state, UpgradeDefinition definition,
+    ProgressionState state,
+    UpgradeDefinition definition,
   ) {
     final level = state.upgrades[definition.id] ?? 0;
-    if (definition.maxLevel != null && level >= definition.maxLevel!) return state;
+    if (definition.maxLevel != null && level >= definition.maxLevel!)
+      return state;
     final cost = definition.costAtLevel(level);
     if (state.money.compareTo(cost) < 0) return state;
     final levels = Map<String, int>.of(state.upgrades)
       ..[definition.id] = level + 1;
     return state.copyWith(
-      money: state.money - cost, upgrades: Map.unmodifiable(levels),
+      money: state.money - cost,
+      upgrades: Map.unmodifiable(levels),
     );
   }
 
@@ -109,7 +121,8 @@ class ProgressionEngine {
     UpgradeDefinition definition,
   ) {
     final level = state.prestigeUpgrades[definition.id] ?? 0;
-    if (definition.maxLevel != null && level >= definition.maxLevel!) return state;
+    if (definition.maxLevel != null && level >= definition.maxLevel!)
+      return state;
     final cost = definition.costAtLevel(level);
     if (state.prestige.compareTo(cost) < 0) return state;
     final levels = Map<String, int>.of(state.prestigeUpgrades)
@@ -125,7 +138,8 @@ class ProgressionEngine {
     UpgradeDefinition definition,
   ) {
     final level = state.ultraUpgrades[definition.id] ?? 0;
-    if (definition.maxLevel != null && level >= definition.maxLevel!) return state;
+    if (definition.maxLevel != null && level >= definition.maxLevel!)
+      return state;
     final cost = definition.costAtLevel(level);
     if (state.ultra.compareTo(cost) < 0) return state;
     final levels = Map<String, int>.of(state.ultraUpgrades)
@@ -160,7 +174,8 @@ class ProgressionEngine {
       ultra: state.ultra + BigNumber.fromInt(reward),
       upgrades: const {},
       prestigeUpgrades: rules.resetPrestigeUpgrades
-          ? const {} : state.prestigeUpgrades,
+          ? const {}
+          : state.prestigeUpgrades,
       ultraResets: state.ultraResets + 1,
       prestigeResets: 0,
       currentStreak: 0,
@@ -219,10 +234,9 @@ class ProgressionEngine {
     if (nebulaReward.compareTo(zero) < 0 || moneyReward.compareTo(zero) < 0) {
       throw ArgumentError('Arcade rewards cannot be negative.');
     }
-    final nebulaUpgradeLevel =
-        (state.ultraUpgrades['ultra_nebula_boost'] ?? 0).clamp(0, 15);
-    final shopMultiplier =
-        (state.nebulaItems['nebula_boost'] ?? 0) > 0 ? 2 : 1;
+    final nebulaUpgradeLevel = (state.ultraUpgrades['ultra_nebula_boost'] ?? 0)
+        .clamp(0, 15);
+    final shopMultiplier = (state.nebulaItems['nebula_boost'] ?? 0) > 0 ? 2 : 1;
     final nebulaMultiplier = (1 + nebulaUpgradeLevel) * shopMultiplier;
     final actualNebulaReward = nebulaReward.multiplyInt(nebulaMultiplier);
     return state.copyWith(
@@ -234,15 +248,17 @@ class ProgressionEngine {
   }
 
   ProgressionState awardNebulaFromArcade(
-    ProgressionState state, BigNumber reward,
+    ProgressionState state,
+    BigNumber reward,
   ) {
     if (reward.compareTo(BigNumber.fromInt(0)) < 0) {
       throw ArgumentError('Nebula reward cannot be negative.');
     }
-    final ultraLevel =
-        (state.ultraUpgrades['ultra_nebula_boost'] ?? 0).clamp(0, 15);
-    final shopMultiplier =
-        (state.nebulaItems['nebula_boost'] ?? 0) > 0 ? 2 : 1;
+    final ultraLevel = (state.ultraUpgrades['ultra_nebula_boost'] ?? 0).clamp(
+      0,
+      15,
+    );
+    final shopMultiplier = (state.nebulaItems['nebula_boost'] ?? 0) > 0 ? 2 : 1;
     final actualReward = reward.multiplyInt((1 + ultraLevel) * shopMultiplier);
     return state.copyWith(
       nebula: state.nebula + actualReward,

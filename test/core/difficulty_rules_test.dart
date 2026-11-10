@@ -52,7 +52,10 @@ void main() {
       });
       expect(oldSettings.difficultyId, DifficultyRules.classic);
       const settings = GameSettings(difficultyId: DifficultyRules.extreme);
-      expect(GameSettings.fromJson(settings.toJson()).difficultyId, DifficultyRules.extreme);
+      expect(
+        GameSettings.fromJson(settings.toJson()).difficultyId,
+        DifficultyRules.extreme,
+      );
     });
 
     test('settings reject unknown difficulty identifiers', () {

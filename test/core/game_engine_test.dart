@@ -39,38 +39,44 @@ void main() {
       expect(won.attempts, 3);
     });
 
-    test('continues to the next target and keeps lifetime attempts after a win', () {
-      final engine = GameEngine(random: FixedRandom(41));
-      final initial = engine.newGame();
-      final completed = engine.guess(initial, 42);
-      final nextGame = GameEngine(random: FixedRandom(10)).newGame();
+    test(
+      'continues to the next target and keeps lifetime attempts after a win',
+      () {
+        final engine = GameEngine(random: FixedRandom(41));
+        final initial = engine.newGame();
+        final completed = engine.guess(initial, 42);
+        final nextGame = GameEngine(random: FixedRandom(10)).newGame();
 
-      final continued = engine.continueAfterCorrect(completed, nextGame);
+        final continued = engine.continueAfterCorrect(completed, nextGame);
 
-      expect(continued.secret, 11);
-      expect(continued.attempts, 1);
-      expect(continued.isComplete, isFalse);
-      expect(continued.lastResult, GuessResult.correct);
-      expect(continued.minimum, 1);
-      expect(continued.maximum, 100);
-    });
+        expect(continued.secret, 11);
+        expect(continued.attempts, 1);
+        expect(continued.isComplete, isFalse);
+        expect(continued.lastResult, GuessResult.correct);
+        expect(continued.minimum, 1);
+        expect(continued.maximum, 100);
+      },
+    );
 
-    test('bot success advances the target without consuming player attempts', () {
-      final engine = GameEngine(random: FixedRandom(41));
-      final initial = engine.newGame();
-      final completed = engine.guess(initial, 42);
-      final nextGame = GameEngine(random: FixedRandom(10)).newGame();
+    test(
+      'bot success advances the target without consuming player attempts',
+      () {
+        final engine = GameEngine(random: FixedRandom(41));
+        final initial = engine.newGame();
+        final completed = engine.guess(initial, 42);
+        final nextGame = GameEngine(random: FixedRandom(10)).newGame();
 
-      final continued = engine.continueAfterCorrect(
-        completed,
-        nextGame,
-        attempts: 7,
-      );
+        final continued = engine.continueAfterCorrect(
+          completed,
+          nextGame,
+          attempts: 7,
+        );
 
-      expect(continued.secret, 11);
-      expect(continued.attempts, 7);
-      expect(continued.isComplete, isFalse);
-    });
+        expect(continued.secret, 11);
+        expect(continued.attempts, 7);
+        expect(continued.isComplete, isFalse);
+      },
+    );
 
     test('rejects advancing a game that was not won', () {
       final engine = GameEngine(random: FixedRandom(41));
@@ -108,10 +114,16 @@ void main() {
       expect(engine.guess(narrowed, 50).lastResult, GuessResult.outOfRange);
       expect(engine.guess(narrowed, 75).lastResult, GuessResult.correct);
       final lastPossible = engine.applyRangeScoutHint(
-        engine.guess(engine.restore(
-          secret: 75, attempts: 1, isComplete: false,
-          savedMinimum: 1, savedMaximum: 75,
-        ), 74),
+        engine.guess(
+          engine.restore(
+            secret: 75,
+            attempts: 1,
+            isComplete: false,
+            savedMinimum: 1,
+            savedMaximum: 75,
+          ),
+          74,
+        ),
         74,
       );
       expect(lastPossible.minimum, 75);

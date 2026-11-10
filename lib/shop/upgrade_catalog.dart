@@ -20,27 +20,27 @@ class GameUpgrade {
 
   /// Only upgrades with a verified, wired GTN1 gameplay effect appear in a shop.
   bool get gameplayImplemented => const {
-        'reward_multiplier',
-        'better_range',
-        'prestige_money_boost',
-        'prestige_gain_boost',
-        'prestige_starting_capital',
-        'ultra_money_boost',
-        'ultra_gain_boost',
-        'ultra_nebula_boost',
-      }.contains(definition.id);
+    'reward_multiplier',
+    'better_range',
+    'prestige_money_boost',
+    'prestige_gain_boost',
+    'prestige_starting_capital',
+    'ultra_money_boost',
+    'ultra_gain_boost',
+    'ultra_nebula_boost',
+  }.contains(definition.id);
 
   String get effectDescription => switch (definition.id) {
-        'reward_multiplier' => '+25% correct-guess reward per level',
-        'better_range' => '-5 maximum target range per level',
-        'prestige_money_boost' => '+50% Money earnings per level',
-        'prestige_gain_boost' => '+20% Prestige reward per level',
-        'prestige_starting_capital' => '+1,000 starting Money per level',
-        'ultra_money_boost' => '+200% Money earnings per level',
-        'ultra_gain_boost' => '+50% Ultra reward per level',
-        'ultra_nebula_boost' => 'Nebula rewards gain +1× per level',
-        _ => 'Source catalog entry; gameplay behavior is not yet ported',
-      };
+    'reward_multiplier' => '+25% correct-guess reward per level',
+    'better_range' => '-5 maximum target range per level',
+    'prestige_money_boost' => '+50% Money earnings per level',
+    'prestige_gain_boost' => '+20% Prestige reward per level',
+    'prestige_starting_capital' => '+1,000 starting Money per level',
+    'ultra_money_boost' => '+200% Money earnings per level',
+    'ultra_gain_boost' => '+50% Ultra reward per level',
+    'ultra_nebula_boost' => 'Nebula rewards gain +1× per level',
+    _ => 'Source catalog entry; gameplay behavior is not yet ported',
+  };
 }
 
 class UpgradeCatalog {
@@ -105,17 +105,19 @@ class UpgradeCatalog {
             effect is! num) {
           throw FormatException('Invalid or duplicate GTN1 upgrade: $id');
         }
-        parsed.add(GameUpgrade(
-          definition: UpgradeDefinition(
-            id: id,
-            baseCost: BigNumber.parse(baseCost),
-            growthRate: BigNumber.parse(growthRate.toString()),
-            maxLevel: maxLevel,
+        parsed.add(
+          GameUpgrade(
+            definition: UpgradeDefinition(
+              id: id,
+              baseCost: BigNumber.parse(baseCost),
+              growthRate: BigNumber.parse(growthRate.toString()),
+              maxLevel: maxLevel,
+            ),
+            name: name,
+            description: description,
+            effectPerLevel: effect.toDouble(),
           ),
-          name: name,
-          description: description,
-          effectPerLevel: effect.toDouble(),
-        ));
+        );
       }
       if (parsed.length != expectedCount) {
         throw FormatException(
@@ -135,6 +137,9 @@ class UpgradeCatalog {
     _loaded = true;
   }
 
-  static GameUpgrade byId(String id) => [..._all, ..._prestige, ..._ultra]
-      .firstWhere((upgrade) => upgrade.definition.id == id);
+  static GameUpgrade byId(String id) => [
+    ..._all,
+    ..._prestige,
+    ..._ultra,
+  ].firstWhere((upgrade) => upgrade.definition.id == id);
 }

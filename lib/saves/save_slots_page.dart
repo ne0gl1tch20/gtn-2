@@ -65,57 +65,70 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
     final nameController = TextEditingController();
     var difficulty = DifficultyRules.classic;
     var icon = 'default';
-    final result = await GtnExpressiveDialog.show<({String name, String difficulty, String icon})>(
-                          context,
-      builder: (dialogContext) => StatefulBuilder(
-        builder: (context, setDialogState) => GtnExpressiveDialog(
-          title: Text('Create Slot $slot'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              GtnExpressiveTextField(
-                controller: nameController,
-                maxLength: 24,
-                decoration: const InputDecoration(labelText: 'Save name (optional)'),
-              ),
-              GtnExpressiveDropdown<String>(
-                initialValue: difficulty,
-                decoration: const InputDecoration(labelText: 'Difficulty'),
-                items: [
-                  for (final id in DifficultyRules.ids)
-                    DropdownMenuItem(value: id, child: Text(DifficultyRules.name(id))),
-                ],
-                onChanged: (value) {
-                  if (value != null) setDialogState(() => difficulty = value);
-                },
-              ),
-              const SizedBox(height: 12),
-              Wrap(
-                spacing: 8,
+    final result =
+        await GtnExpressiveDialog.show<
+          ({String name, String difficulty, String icon})
+        >(
+          context,
+          builder: (dialogContext) => StatefulBuilder(
+            builder: (context, setDialogState) => GtnExpressiveDialog(
+              title: Text('Create Slot $slot'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  for (final id in SaveData.profileIconIds)
-                    GtnExpressiveChoiceChip(
-                      label: _iconSymbol(id),
-                      selected: icon == id,
-                      onSelected: (_) => setDialogState(() => icon = id),
+                  GtnExpressiveTextField(
+                    controller: nameController,
+                    maxLength: 24,
+                    decoration: const InputDecoration(
+                      labelText: 'Save name (optional)',
                     ),
+                  ),
+                  GtnExpressiveDropdown<String>(
+                    initialValue: difficulty,
+                    decoration: const InputDecoration(labelText: 'Difficulty'),
+                    items: [
+                      for (final id in DifficultyRules.ids)
+                        DropdownMenuItem(
+                          value: id,
+                          child: Text(DifficultyRules.name(id)),
+                        ),
+                    ],
+                    onChanged: (value) {
+                      if (value != null)
+                        setDialogState(() => difficulty = value);
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 8,
+                    children: [
+                      for (final id in SaveData.profileIconIds)
+                        GtnExpressiveChoiceChip(
+                          label: _iconSymbol(id),
+                          selected: icon == id,
+                          onSelected: (_) => setDialogState(() => icon = id),
+                        ),
+                    ],
+                  ),
                 ],
               ),
-            ],
-          ),
-          actions: [
-            M3EButton.text(onPressed: () => Navigator.pop(dialogContext), child: const Text('Cancel')),
-            M3EButton.filled(
-              onPressed: () => Navigator.pop(
-                dialogContext,
-                (name: nameController.text.trim(), difficulty: difficulty, icon: icon),
-              ),
-              child: const Text('Create'),
+              actions: [
+                M3EButton.text(
+                  onPressed: () => Navigator.pop(dialogContext),
+                  child: const Text('Cancel'),
+                ),
+                M3EButton.filled(
+                  onPressed: () => Navigator.pop(dialogContext, (
+                    name: nameController.text.trim(),
+                    difficulty: difficulty,
+                    icon: icon,
+                  )),
+                  child: const Text('Create'),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
-    );
+          ),
+        );
     nameController.dispose();
     if (result == null || !mounted) return;
     setState(() => _working = slot);
@@ -126,14 +139,18 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
         attempts: 0,
         gamesWon: 0,
         maximum: maximum,
-        settings: GameSettings.initial.copyWith(difficultyId: result.difficulty),
+        settings: GameSettings.initial.copyWith(
+          difficultyId: result.difficulty,
+        ),
         profileName: result.name,
         profileIconId: result.icon,
       );
       final storage = await SaveStorage.inApplicationDocuments(slot: slot);
       final created = await storage.createIfEmpty(save);
       if (!created) {
-        throw StateError('This slot is no longer empty or contains recoverable data.');
+        throw StateError(
+          'This slot is no longer empty or contains recoverable data.',
+        );
       }
       await _refresh();
       await widget.onSelect(slot);
@@ -156,7 +173,7 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
     final nameController = TextEditingController(text: current.profileName);
     var icon = current.profileIconId;
     final result = await GtnExpressiveDialog.show<({String name, String icon})>(
-                          context,
+      context,
       builder: (dialogContext) => StatefulBuilder(
         builder: (context, setDialogState) => GtnExpressiveDialog(
           title: Text('Edit Slot $slot Profile'),
@@ -182,12 +199,15 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
             ],
           ),
           actions: [
-            M3EButton.text(onPressed: () => Navigator.pop(dialogContext), child: const Text('Cancel')),
+            M3EButton.text(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('Cancel'),
+            ),
             M3EButton.filled(
-              onPressed: () => Navigator.pop(
-                dialogContext,
-                (name: nameController.text.trim(), icon: icon),
-              ),
+              onPressed: () => Navigator.pop(dialogContext, (
+                name: nameController.text.trim(),
+                icon: icon,
+              )),
               child: const Text('Save'),
             ),
           ],
@@ -214,18 +234,16 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
   }
 
   String _iconSymbol(String id) => switch (id) {
-        'star' => '⭐',
-        'bolt' => '⚡',
-        'crown' => '👑',
-        'planet' => '🪐',
-        _ => '🎮',
-      };
+    'star' => '⭐',
+    'bolt' => '⚡',
+    'crown' => '👑',
+    'planet' => '🪐',
+    _ => '🎮',
+  };
 
   Future<void> _openCreativeMode(int slot) async {
     await Navigator.of(context).push<void>(
-      MaterialPageRoute<void>(
-        builder: (_) => CreativeModePage(slot: slot),
-      ),
+      MaterialPageRoute<void>(builder: (_) => CreativeModePage(slot: slot)),
     );
     await _refresh();
   }
@@ -234,7 +252,9 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
     final emptySlots = <int>[];
     for (var slot = 1; slot <= SaveStorage.maxSaveSlots; slot++) {
       final storage = await SaveStorage.inApplicationDocuments(slot: slot);
-      if (slot != sourceSlot && await storage.load() == null && !await storage.hasBackup()) {
+      if (slot != sourceSlot &&
+          await storage.load() == null &&
+          !await storage.hasBackup()) {
         emptySlots.add(slot);
       }
     }
@@ -247,7 +267,7 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
     }
     var target = emptySlots.first;
     final selected = await GtnExpressiveDialog.show<int>(
-                          context,
+      context,
       builder: (dialogContext) => StatefulBuilder(
         builder: (context, setDialogState) => GtnExpressiveDialog(
           title: Text('Duplicate Slot $sourceSlot'),
@@ -263,8 +283,14 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
             },
           ),
           actions: [
-            M3EButton.text(onPressed: () => Navigator.pop(dialogContext), child: const Text('Cancel')),
-            M3EButton.filled(onPressed: () => Navigator.pop(dialogContext, target), child: const Text('Duplicate')),
+            M3EButton.text(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('Cancel'),
+            ),
+            M3EButton.filled(
+              onPressed: () => Navigator.pop(dialogContext, target),
+              child: const Text('Duplicate'),
+            ),
           ],
         ),
       ),
@@ -276,7 +302,13 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
       final success = await source.duplicateTo(selected);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(success ? 'Copied Slot $sourceSlot to Slot $selected.' : 'Could not duplicate this save.')),
+        SnackBar(
+          content: Text(
+            success
+                ? 'Copied Slot $sourceSlot to Slot $selected.'
+                : 'Could not duplicate this save.',
+          ),
+        ),
       );
       await _refresh();
     } finally {
@@ -286,13 +318,21 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
 
   Future<void> _reset(int slot) async {
     final confirmed = await GtnExpressiveDialog.show<bool>(
-                          context,
+      context,
       builder: (dialogContext) => GtnExpressiveDialog(
         title: Text('Reset Slot $slot?'),
-        content: const Text('This permanently deletes the save and its restore backup.'),
+        content: const Text(
+          'This permanently deletes the save and its restore backup.',
+        ),
         actions: [
-          M3EButton.text(onPressed: () => Navigator.pop(dialogContext, false), child: const Text('Cancel')),
-          M3EButton.filled(onPressed: () => Navigator.pop(dialogContext, true), child: const Text('Reset')),
+          M3EButton.text(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Cancel'),
+          ),
+          M3EButton.filled(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('Reset'),
+          ),
         ],
       ),
     );
@@ -312,13 +352,21 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
 
   Future<void> _restore(int slot) async {
     final confirmed = await GtnExpressiveDialog.show<bool>(
-                          context,
+      context,
       builder: (dialogContext) => GtnExpressiveDialog(
         title: Text('Restore Slot $slot backup?'),
-        content: const Text('The current save will become the backup, so you can switch back if needed.'),
+        content: const Text(
+          'The current save will become the backup, so you can switch back if needed.',
+        ),
         actions: [
-          M3EButton.text(onPressed: () => Navigator.pop(dialogContext, false), child: const Text('Cancel')),
-          M3EButton.filled(onPressed: () => Navigator.pop(dialogContext, true), child: const Text('Restore')),
+          M3EButton.text(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Cancel'),
+          ),
+          M3EButton.filled(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('Restore'),
+          ),
         ],
       ),
     );
@@ -329,7 +377,13 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
       final success = await storage.restoreBackup();
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(success ? 'Restored Slot $slot backup.' : 'No valid backup could be restored.')),
+        SnackBar(
+          content: Text(
+            success
+                ? 'Restored Slot $slot backup.'
+                : 'No valid backup could be restored.',
+          ),
+        ),
       );
       await _refresh();
     } finally {
@@ -344,7 +398,9 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          const Text('Your saves stay on this device. Choose a slot to continue or manage its backup.'),
+          const Text(
+            'Your saves stay on this device. Choose a slot to continue or manage its backup.',
+          ),
           const SizedBox(height: 12),
           for (var slot = 1; slot <= SaveStorage.maxSaveSlots; slot++)
             FutureBuilder<SaveData?>(
@@ -353,47 +409,100 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
                 final save = snapshot.data;
                 final selected = widget.activeSlot == slot;
                 final busy = _switching == slot || _working == slot;
-                final subtitle = snapshot.connectionState != ConnectionState.done
+                final subtitle =
+                    snapshot.connectionState != ConnectionState.done
                     ? 'Checking save…'
                     : save == null
-                        ? 'Empty slot'
-                        : 'Games won: ${save.gamesWon}';
+                    ? 'Empty slot'
+                    : 'Games won: ${save.gamesWon}';
                 return GtnExpressiveCard(
                   child: ListTile(
-                    leading: CircleAvatar(child: Text(save == null ? '$slot' : _iconSymbol(save.profileIconId))),
-                    title: Text(save?.profileName.isNotEmpty == true ? save!.profileName : 'Slot $slot'),
+                    leading: CircleAvatar(
+                      child: Text(
+                        save == null
+                            ? '$slot'
+                            : _iconSymbol(save.profileIconId),
+                      ),
+                    ),
+                    title: Text(
+                      save?.profileName.isNotEmpty == true
+                          ? save!.profileName
+                          : 'Slot $slot',
+                    ),
                     subtitle: Text(subtitle),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         if (busy)
-                          const SizedBox(width: 20, height: 20, child: M3EProgressIndicator.circular(strokeWidth: 2))
+                          const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: M3EProgressIndicator.circular(
+                              strokeWidth: 2,
+                            ),
+                          )
                         else if (selected)
                           const Text('Active'),
                         PopupMenuButton<String>(
-                          enabled: _switching == null && _working == null && snapshot.connectionState == ConnectionState.done,
+                          enabled:
+                              _switching == null &&
+                              _working == null &&
+                              snapshot.connectionState == ConnectionState.done,
                           onSelected: (action) {
                             switch (action) {
-                              case 'creative': _openCreativeMode(slot);
-                              case 'create': _create(slot);
-                              case 'profile': _editProfile(slot);
-                              case 'duplicate': _duplicate(slot);
-                              case 'restore': _restore(slot);
-                              case 'reset': _reset(slot);
+                              case 'creative':
+                                _openCreativeMode(slot);
+                              case 'create':
+                                _create(slot);
+                              case 'profile':
+                                _editProfile(slot);
+                              case 'duplicate':
+                                _duplicate(slot);
+                              case 'restore':
+                                _restore(slot);
+                              case 'reset':
+                                _reset(slot);
                             }
                           },
                           itemBuilder: (context) => [
-                            if (save == null) const PopupMenuItem(value: 'create', child: Text('Create save')),
-                            if (save != null) const PopupMenuItem(value: 'creative', child: Text('Creative Mode')),
-                            if (save != null) const PopupMenuItem(value: 'profile', child: Text('Edit profile')),
-                            if (save != null) const PopupMenuItem(value: 'duplicate', child: Text('Duplicate')),
-                            const PopupMenuItem(value: 'restore', child: Text('Restore backup')),
-                            if (save != null) const PopupMenuItem(value: 'reset', child: Text('Reset slot')),
+                            if (save == null)
+                              const PopupMenuItem(
+                                value: 'create',
+                                child: Text('Create save'),
+                              ),
+                            if (save != null)
+                              const PopupMenuItem(
+                                value: 'creative',
+                                child: Text('Creative Mode'),
+                              ),
+                            if (save != null)
+                              const PopupMenuItem(
+                                value: 'profile',
+                                child: Text('Edit profile'),
+                              ),
+                            if (save != null)
+                              const PopupMenuItem(
+                                value: 'duplicate',
+                                child: Text('Duplicate'),
+                              ),
+                            const PopupMenuItem(
+                              value: 'restore',
+                              child: Text('Restore backup'),
+                            ),
+                            if (save != null)
+                              const PopupMenuItem(
+                                value: 'reset',
+                                child: Text('Reset slot'),
+                              ),
                           ],
                         ),
                       ],
                     ),
-                    onTap: _switching != null || _working != null || selected || save == null
+                    onTap:
+                        _switching != null ||
+                            _working != null ||
+                            selected ||
+                            save == null
                         ? null
                         : () => _select(slot),
                   ),

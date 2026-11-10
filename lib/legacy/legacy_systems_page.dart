@@ -21,7 +21,9 @@ import '../data/updates/update_checker.dart';
 import '../design/expressive_widgets.dart';
 import '../worlds/world_boss_catalog.dart';
 
-typedef LegacyProgressionChanged = Future<void> Function(ProgressionState progression);
+typedef LegacyProgressionChanged = Future<void> Function(
+  ProgressionState progression,
+);
 
 enum LegacySystemsView { all, music, luckyStake }
 
@@ -75,10 +77,14 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
     _trackCompleteSubscription = _audioPlayer.onPlayerComplete.listen((_) {
       _playNextTrack();
     });
-    _musicPositionSubscription = _audioPlayer.onPositionChanged.listen((position) {
+    _musicPositionSubscription = _audioPlayer.onPositionChanged.listen((
+      position,
+    ) {
       if (mounted) setState(() => _musicPosition = position);
     });
-    _musicDurationSubscription = _audioPlayer.onDurationChanged.listen((duration) {
+    _musicDurationSubscription = _audioPlayer.onDurationChanged.listen((
+      duration,
+    ) {
       if (mounted) setState(() => _musicDuration = duration);
     });
   }
@@ -95,7 +101,11 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
     if (!result.accepted) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(result.message.isEmpty ? 'Action rejected.' : result.message)),
+          SnackBar(
+            content: Text(
+              result.message.isEmpty ? 'Action rejected.' : result.message,
+            ),
+          ),
         );
       }
       return;
@@ -131,34 +141,52 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
       activeSeasonId: _seasonId(DateTime.now()),
     );
     return Scaffold(
-      appBar: GtnExpressiveAppBar(title: Text(switch (widget.view) { LegacySystemsView.all => 'GTN 1 Systems', LegacySystemsView.music => 'Music', LegacySystemsView.luckyStake => 'Lucky Stake' })),
+      appBar: GtnExpressiveAppBar(
+        title: Text(switch (widget.view) {
+          LegacySystemsView.all => 'GTN 1 Systems',
+          LegacySystemsView.music => 'Music',
+          LegacySystemsView.luckyStake => 'Lucky Stake',
+        }),
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          if (widget.view == LegacySystemsView.all) GtnExpressiveCard(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Legacy systems', style: Theme.of(context).textTheme.titleLarge),
-                  const SizedBox(height: 6),
-                  Text('Persistent gameplay systems ported from the original Kotlin game. Purchases and rewards are validated by the Dart engine.'),
-                  const SizedBox(height: 10),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      _statChip('Traits', '${traitState.activeTraitIds.length}/320'),
-                      _statChip('Talents', '${_systems.talents.length}/6'),
-                      _statChip('Relics', '${_systems.equippedRelics.length}/4'),
-                      _statChip('Sanctuary', 'Lv ${_systems.homeBaseLevel}'),
-                    ],
-                  ),
-                ],
+          if (widget.view == LegacySystemsView.all)
+            GtnExpressiveCard(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Legacy systems',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      'Persistent gameplay systems ported from the original Kotlin game. Purchases and rewards are validated by the Dart engine.',
+                    ),
+                    const SizedBox(height: 10),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        _statChip(
+                          'Traits',
+                          '${traitState.activeTraitIds.length}/320',
+                        ),
+                        _statChip('Talents', '${_systems.talents.length}/6'),
+                        _statChip(
+                          'Relics',
+                          '${_systems.equippedRelics.length}/4',
+                        ),
+                        _statChip('Sanctuary', 'Lv ${_systems.homeBaseLevel}'),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
           if (widget.view == LegacySystemsView.all) ...[
             _traitsSection(traitState),
             _talentsSection(),
@@ -166,8 +194,11 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
             _relicsSection(),
             _homeBaseSection(),
           ],
-          if (widget.view == LegacySystemsView.all || widget.view == LegacySystemsView.luckyStake)
-            _stakeSection(expanded: widget.view == LegacySystemsView.luckyStake),
+          if (widget.view == LegacySystemsView.all ||
+              widget.view == LegacySystemsView.luckyStake)
+            _stakeSection(
+              expanded: widget.view == LegacySystemsView.luckyStake,
+            ),
           if (widget.view == LegacySystemsView.all) ...[
             _dailySection(),
             _lootSection(),
@@ -175,7 +206,8 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
             _challengeSection(),
             _worldCodexSection(),
           ],
-          if (widget.view == LegacySystemsView.all || widget.view == LegacySystemsView.music)
+          if (widget.view == LegacySystemsView.all ||
+              widget.view == LegacySystemsView.music)
             _musicSection(expanded: widget.view == LegacySystemsView.music),
           if (widget.view == LegacySystemsView.all) _aboutSection(),
         ],
@@ -193,11 +225,15 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
       child: ExpansionTile(
         leading: const Icon(Icons.auto_awesome_rounded),
         title: const Text('Traits'),
-        subtitle: Text('${traits.activeTraitIds.length} active · ${_systems.discoveredTraits.length} discovered · ${_traitCatalog.length}/320 loaded'),
+        subtitle: Text(
+          '${traits.activeTraitIds.length} active · ${_systems.discoveredTraits.length} discovered · ${_traitCatalog.length}/320 loaded',
+        ),
         children: [
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 16),
-            child: Text('Trait activation is automatic. Names, descriptions, categories and icons are read from the pinned GTN1 trait packages.'),
+            child: Text(
+              'Trait activation is automatic. Names, descriptions, categories and icons are read from the pinned GTN1 trait packages.',
+            ),
           ),
           if (_traitCatalog.isEmpty)
             _catalogUnavailable()
@@ -209,13 +245,17 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
                 itemBuilder: (context, index) {
                   final trait = _traitCatalog[index];
                   final hidden = trait.isHidden;
-                  final discovered = _systems.discoveredTraits.contains(trait.id);
+                  final discovered = _systems.discoveredTraits.contains(
+                    trait.id,
+                  );
                   final active = traits.activeTraitIds.contains(trait.id);
                   final visible = !hidden || discovered;
                   final requirements = <String>[
                     if (trait.minimumLevel > 1) 'Level ${trait.minimumLevel}',
-                    if (trait.minimumPrestige > 0) 'Prestige ${trait.minimumPrestige}',
-                    if (trait.minimumCorrectGuesses > 0) '${trait.minimumCorrectGuesses} correct guesses',
+                    if (trait.minimumPrestige > 0)
+                      'Prestige ${trait.minimumPrestige}',
+                    if (trait.minimumCorrectGuesses > 0)
+                      '${trait.minimumCorrectGuesses} correct guesses',
                   ];
                   final detail = visible
                       ? '${trait.category} · ${trait.description}${!active && requirements.isNotEmpty ? '\nRequires ${requirements.join(' · ')}' : ''}'
@@ -246,7 +286,9 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
                 title: Text('${_pretty(entry.key)} strategy'),
                 subtitle: const Text('Choose how this gameplay trait behaves.'),
                 trailing: GtnExpressiveDropdown<String>(
-                  value: _systems.selectedTraitArms[entry.key] ?? entry.value.first,
+                  value:
+                      _systems.selectedTraitArms[entry.key] ??
+                      entry.value.first,
                   items: [
                     for (final arm in entry.value)
                       DropdownMenuItem<String>(
@@ -256,14 +298,16 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
                   ],
                   onChanged: (arm) {
                     if (arm != null) {
-                      _apply(_engine.selectTraitArm(
-                        progression: _progression,
-                        systems: _systems,
-                        traitId: entry.key,
-                        armId: arm,
-                        playerLevel: 1,
-                        activeSeasonId: _seasonId(DateTime.now()),
-                      ));
+                      _apply(
+                        _engine.selectTraitArm(
+                          progression: _progression,
+                          systems: _systems,
+                          traitId: entry.key,
+                          armId: arm,
+                          playerLevel: 1,
+                          activeSeasonId: _seasonId(DateTime.now()),
+                        ),
+                      );
                     }
                   },
                 ),
@@ -295,16 +339,20 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
         }
         entries.add(entry);
       }
-      if (entries.isEmpty) throw FormatException('Empty pinned GTN1 catalog: $path');
+      if (entries.isEmpty)
+        throw FormatException('Empty pinned GTN1 catalog: $path');
       if (key == 'talents') {
         final talentIds = entries.map((entry) => entry['id'] as String).toSet();
         for (final entry in entries) {
           final id = entry['id'] as String;
           final cost = entry['cost'];
           final parent = entry['requiredParentId'];
-          if (cost is! int || cost <= 0 ||
+          if (cost is! int ||
+              cost <= 0 ||
               (parent != null &&
-                  (parent is! String || parent == id || !talentIds.contains(parent)))) {
+                  (parent is! String ||
+                      parent == id ||
+                      !talentIds.contains(parent)))) {
             throw FormatException('Invalid GTN1 talent definition: $id');
           }
         }
@@ -336,15 +384,17 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
   }
 
   Widget _catalogUnavailable() => ListTile(
-        leading: Icon(
-          _catalogError == null ? Icons.hourglass_top_rounded : Icons.error_outline_rounded,
-        ),
-        title: Text(
-          _catalogError == null
-              ? 'Loading the pinned GTN1 catalog…'
-              : 'GTN1 catalog unavailable: $_catalogError',
-        ),
-      );
+    leading: Icon(
+      _catalogError == null
+          ? Icons.hourglass_top_rounded
+          : Icons.error_outline_rounded,
+    ),
+    title: Text(
+      _catalogError == null
+          ? 'Loading the pinned GTN1 catalog…'
+          : 'GTN1 catalog unavailable: $_catalogError',
+    ),
+  );
 
   Widget _talentsSection() {
     final talents = _talentCatalog;
@@ -352,40 +402,52 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
       child: ExpansionTile(
         leading: const Icon(Icons.account_tree_rounded),
         title: const Text('Talent tree'),
-        subtitle: Text('${_systems.talents.length} / 6 unlocked · ${_progression.prestige} Prestige'),
+        subtitle: Text(
+          '${_systems.talents.length} / 6 unlocked · ${_progression.prestige} Prestige',
+        ),
         children: [
           if (talents.isEmpty) _catalogUnavailable(),
           for (final talent in talents)
-            Builder(builder: (context) {
-              final id = talent['id'] as String;
-              final name = talent['name'] as String? ?? _pretty(id);
-              final description = talent['description'] as String? ?? '';
-              final cost = talent['cost'] as int;
-              final parent = talent['requiredParentId'] as String?;
-              final owned = _systems.talents.contains(id);
-              final parentReady = parent == null || _systems.talents.contains(parent);
-              return ListTile(
-                title: Text(name),
-                subtitle: Text('$description\nCost: $cost Prestige${parent == null ? '' : ' · Requires ${_pretty(parent)}'}'),
-                isThreeLine: true,
-                trailing: owned
-                    ? const Icon(Icons.check_circle_rounded, color: Colors.green)
-                    : M3EButton.filled(
-                        onPressed: parentReady
-                            ? () => _apply(_engine.buyTalent(
-                                  _progression,
-                                  _systems,
-                                  TalentDefinition(
-                                    id: id,
-                                    cost: cost,
-                                    requiredParentId: parent,
+            Builder(
+              builder: (context) {
+                final id = talent['id'] as String;
+                final name = talent['name'] as String? ?? _pretty(id);
+                final description = talent['description'] as String? ?? '';
+                final cost = talent['cost'] as int;
+                final parent = talent['requiredParentId'] as String?;
+                final owned = _systems.talents.contains(id);
+                final parentReady =
+                    parent == null || _systems.talents.contains(parent);
+                return ListTile(
+                  title: Text(name),
+                  subtitle: Text(
+                    '$description\nCost: $cost Prestige${parent == null ? '' : ' · Requires ${_pretty(parent)}'}',
+                  ),
+                  isThreeLine: true,
+                  trailing: owned
+                      ? const Icon(
+                          Icons.check_circle_rounded,
+                          color: Colors.green,
+                        )
+                      : M3EButton.filled(
+                          onPressed: parentReady
+                              ? () => _apply(
+                                  _engine.buyTalent(
+                                    _progression,
+                                    _systems,
+                                    TalentDefinition(
+                                      id: id,
+                                      cost: cost,
+                                      requiredParentId: parent,
+                                    ),
                                   ),
-                                ))
-                            : null,
-                        child: const Text('Unlock'),
-                      ),
-              );
-            }),
+                                )
+                              : null,
+                          child: const Text('Unlock'),
+                        ),
+                );
+              },
+            ),
         ],
       ),
     );
@@ -397,7 +459,9 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
       child: ExpansionTile(
         leading: const Icon(Icons.tune_rounded),
         title: const Text('Mutators & challenge builder'),
-        subtitle: Text('Reward multiplier ×${_engine.mutatorRewardMultiplier(_systems)}'),
+        subtitle: Text(
+          'Reward multiplier ×${_engine.mutatorRewardMultiplier(_systems)}',
+        ),
         children: [
           if (mutators.isEmpty) _catalogUnavailable(),
           for (final mutator in mutators)
@@ -405,11 +469,20 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
               title: Text(mutator['name'] as String),
               subtitle: Text(mutator['description'] as String),
               value: _systems.activeMutators.contains(mutator['id']),
-              onChanged: (value) => _apply(_engine.setMutator(_progression, _systems, mutator['id'] as String, value)),
+              onChanged: (value) => _apply(
+                _engine.setMutator(
+                  _progression,
+                  _systems,
+                  mutator['id'] as String,
+                  value,
+                ),
+              ),
             ),
           const Padding(
             padding: EdgeInsets.fromLTRB(16, 0, 16, 12),
-            child: Text('Custom and weekly challenge rewards are claim-once transactions. Challenge objective tracking is connected to the save model.'),
+            child: Text(
+              'Custom and weekly challenge rewards are claim-once transactions. Challenge objective tracking is connected to the save model.',
+            ),
           ),
         ],
       ),
@@ -422,33 +495,48 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
       child: ExpansionTile(
         leading: const Icon(Icons.diamond_rounded),
         title: const Text('Relic collection'),
-        subtitle: Text('${_systems.relicInventory.length}/4 discovered · ${_systems.equippedRelics.length}/4 equipped'),
+        subtitle: Text(
+          '${_systems.relicInventory.length}/4 discovered · ${_systems.equippedRelics.length}/4 equipped',
+        ),
         children: [
           if (relics.isEmpty) _catalogUnavailable(),
           for (final relic in relics)
-            Builder(builder: (context) {
-              final id = relic['id'] as String;
-              final owned = _systems.relicInventory.contains(id);
-              final equipped = _systems.equippedRelics.contains(id);
-              return ListTile(
-                leading: Icon(owned ? Icons.diamond_rounded : Icons.lock_outline_rounded),
-                title: Text(relic['name'] as String),
-                subtitle: Text('${relic['description']}\nEarned from ${relic['unlockBossName']}'),
-                isThreeLine: true,
-                trailing: M3EButton.tonal(
-                  onPressed: owned ? () => _apply(_engine.equipRelic(_progression, _systems, id)) : null,
-                  child: Text(equipped ? 'Unequip' : 'Equip'),
-                ),
-              );
-            }),
+            Builder(
+              builder: (context) {
+                final id = relic['id'] as String;
+                final owned = _systems.relicInventory.contains(id);
+                final equipped = _systems.equippedRelics.contains(id);
+                return ListTile(
+                  leading: Icon(
+                    owned ? Icons.diamond_rounded : Icons.lock_outline_rounded,
+                  ),
+                  title: Text(relic['name'] as String),
+                  subtitle: Text(
+                    '${relic['description']}\nEarned from ${relic['unlockBossName']}',
+                  ),
+                  isThreeLine: true,
+                  trailing: M3EButton.tonal(
+                    onPressed: owned
+                        ? () => _apply(
+                            _engine.equipRelic(_progression, _systems, id),
+                          )
+                        : null,
+                    child: Text(equipped ? 'Unequip' : 'Equip'),
+                  ),
+                );
+              },
+            ),
           const Padding(
             padding: EdgeInsets.fromLTRB(16, 0, 16, 12),
-            child: Text('Set bonus: 2 relics +10%, 3 relics +20%, 4 relics +35% Money. Individual relic bonuses are applied by the backend.'),
+            child: Text(
+              'Set bonus: 2 relics +10%, 3 relics +20%, 4 relics +35% Money. Individual relic bonuses are applied by the backend.',
+            ),
           ),
         ],
       ),
     );
   }
+
   Widget _homeBaseSection() {
     final level = _systems.homeBaseLevel;
     final cost = BigNumber.fromInt(50000 * (level + 1));
@@ -458,9 +546,18 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
         title: const Text('Home Base'),
         subtitle: Text('Sanctuary level $level / 20 · +${level * 2}% Money'),
         children: [
-          for (final milestone in const [(1, 'Portal Chamber'), (3, 'Relic Forge'), (5, 'Star Archive'), (10, 'Cosmic Observatory')])
+          for (final milestone in const [
+            (1, 'Portal Chamber'),
+            (3, 'Relic Forge'),
+            (5, 'Star Archive'),
+            (10, 'Cosmic Observatory'),
+          ])
             ListTile(
-              leading: Icon(level >= milestone.$1 ? Icons.check_circle_rounded : Icons.lock_outline_rounded),
+              leading: Icon(
+                level >= milestone.$1
+                    ? Icons.check_circle_rounded
+                    : Icons.lock_outline_rounded,
+              ),
               title: Text(milestone.$2),
               subtitle: Text('Unlocks at level ${milestone.$1}'),
             ),
@@ -468,9 +565,14 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
             padding: const EdgeInsets.all(12),
             child: M3EButton.filled(
               onPressed: level < 20 && _progression.money.compareTo(cost) >= 0
-                  ? () => _apply(_engine.upgradeHomeBase(_progression, _systems))
+                  ? () =>
+                        _apply(_engine.upgradeHomeBase(_progression, _systems))
                   : null,
-              child: Text(level >= 20 ? 'Fully restored' : 'Restore next level · $cost Money'),
+              child: Text(
+                level >= 20
+                    ? 'Fully restored'
+                    : 'Restore next level · $cost Money',
+              ),
             ),
           ),
         ],
@@ -486,18 +588,24 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
         initiallyExpanded: expanded,
         leading: const Icon(Icons.casino_rounded),
         title: const Text('Lucky Stake'),
-        subtitle: Text('Wins: ${_systems.stakesWon} · Losses: ${_systems.stakesLost}'),
+        subtitle: Text(
+          'Wins: ${_systems.stakesWon} · Losses: ${_systems.stakesLost}',
+        ),
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Current streak: $streak · Win multiplier: ${multiplier.toStringAsFixed(1)}×'),
+                Text(
+                  'Current streak: $streak · Win multiplier: ${multiplier.toStringAsFixed(1)}×',
+                ),
                 const SizedBox(height: 4),
                 Text('Money available: ${_progression.money}'),
                 const SizedBox(height: 6),
-                const Text('Stake money on a 50/50 coin flip. A win pays your stake multiplied by 2.0× plus 0.1× for each current streak point. A loss forfeits the stake.'),
+                const Text(
+                  'Stake money on a 50/50 coin flip. A win pays your stake multiplied by 2.0× plus 0.1× for each current streak point. A loss forfeits the stake.',
+                ),
               ],
             ),
           ),
@@ -507,7 +615,10 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
               controller: _stakeController,
               keyboardType: TextInputType.number,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              decoration: const InputDecoration(labelText: 'Stake amount', prefixText: 'Money '),
+              decoration: const InputDecoration(
+                labelText: 'Stake amount',
+                prefixText: 'Money ',
+              ),
             ),
           ),
           Padding(
@@ -518,7 +629,10 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
                 try {
                   stake = BigNumber.parse(_stakeController.text.trim());
                 } on FormatException {
-                  setState(() => _stakeResultMessage = 'Enter a valid whole-number stake.');
+                  setState(
+                    () => _stakeResultMessage =
+                        'Enter a valid whole-number stake.',
+                  );
                   return;
                 }
                 final won = Random.secure().nextBool();
@@ -564,14 +678,16 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
   }
 
   Widget _dailySection() {
-    final daily = _systems.dailyQuestDate == _today ? _systems : _systems.copyWith(
-      dailyQuestDate: _today,
-      dailyQuestGuesses: 0,
-      dailyQuestCorrectGuesses: 0,
-      dailyQuestBestStreak: 0,
-      dailyQuestUpgradePurchases: 0,
-      claimedDailyQuests: const {},
-    );
+    final daily = _systems.dailyQuestDate == _today
+        ? _systems
+        : _systems.copyWith(
+            dailyQuestDate: _today,
+            dailyQuestGuesses: 0,
+            dailyQuestCorrectGuesses: 0,
+            dailyQuestBestStreak: 0,
+            dailyQuestUpgradePurchases: 0,
+            claimedDailyQuests: const {},
+          );
     const quests = <(String, String, int)>[
       ('daily_guesses_10', 'Make 10 guesses', 10),
       ('daily_correct_5', 'Get 5 correct guesses', 5),
@@ -592,22 +708,31 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
         children: [
           ListTile(
             title: const Text('Daily login reward'),
-            subtitle: Text(_systems.lastDailyRewardDate == _today ? 'Claimed today' : 'Claim your daily Nebula'),
+            subtitle: Text(
+              _systems.lastDailyRewardDate == _today
+                  ? 'Claimed today'
+                  : 'Claim your daily Nebula',
+            ),
             trailing: M3EButton.filled(
               onPressed: _systems.lastDailyRewardDate == _today
                   ? null
-                  : () => _apply(_engine.claimDailyReward(
+                  : () => _apply(
+                      _engine.claimDailyReward(
                         progression: _progression,
                         systems: _systems,
                         today: _today,
-                        traitNebulaBonus: _engine.evaluateTraits(
-                          progression: _progression,
-                          systems: _systems,
-                          playerLevel: 1,
-                          activeSeasonId: _seasonId(DateTime.now()),
-                        ).nebulaBonusPerClaim,
-                        nebulaBoostOwned: (_progression.nebulaItems['nebula_boost'] ?? 0) > 0,
-                      )),
+                        traitNebulaBonus: _engine
+                            .evaluateTraits(
+                              progression: _progression,
+                              systems: _systems,
+                              playerLevel: 1,
+                              activeSeasonId: _seasonId(DateTime.now()),
+                            )
+                            .nebulaBonusPerClaim,
+                        nebulaBoostOwned:
+                            (_progression.nebulaItems['nebula_boost'] ?? 0) > 0,
+                      ),
+                    ),
               child: const Text('Claim'),
             ),
           ),
@@ -616,16 +741,26 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
               title: Text(quest.$2),
               subtitle: Text('${progress[quest.$1]} / ${quest.$3}'),
               trailing: M3EButton.tonal(
-                onPressed: progress[quest.$1]! >= quest.$3 && !daily.claimedDailyQuests.contains(quest.$1)
-                    ? () => _apply(_engine.claimDailyQuest(
+                onPressed:
+                    progress[quest.$1]! >= quest.$3 &&
+                        !daily.claimedDailyQuests.contains(quest.$1)
+                    ? () => _apply(
+                        _engine.claimDailyQuest(
                           progression: _progression,
                           systems: daily,
                           questId: quest.$1,
                           today: _today,
-                          nebulaBoostOwned: (_progression.nebulaItems['nebula_boost'] ?? 0) > 0,
-                        ))
+                          nebulaBoostOwned:
+                              (_progression.nebulaItems['nebula_boost'] ?? 0) >
+                              0,
+                        ),
+                      )
                     : null,
-                child: Text(daily.claimedDailyQuests.contains(quest.$1) ? 'Claimed' : 'Claim'),
+                child: Text(
+                  daily.claimedDailyQuests.contains(quest.$1)
+                      ? 'Claimed'
+                      : 'Claim',
+                ),
               ),
             ),
         ],
@@ -646,12 +781,14 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
               subtitle: Text('Owned: ${_systems.lootChests[tier] ?? 0}'),
               trailing: M3EButton.tonal(
                 onPressed: (_systems.lootChests[tier] ?? 0) > 0
-                    ? () => _apply(_engine.openLootChest(
+                    ? () => _apply(
+                        _engine.openLootChest(
                           progression: _progression,
                           systems: _systems,
                           tier: tier,
                           rewardNebula: Random.secure().nextBool(),
-                        ))
+                        ),
+                      )
                     : null,
                 child: const Text('Open'),
               ),
@@ -662,12 +799,16 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
   }
 
   Widget _automationSection() {
-    final ownedBots = const ['auto_clicker_basic', 'bot_byte', 'bot_pixel']
-        .where((id) => (_progression.nebulaItems[id] ?? 0) > 0)
-        .toList();
+    final ownedBots = const [
+      'auto_clicker_basic',
+      'bot_byte',
+      'bot_pixel',
+    ].where((id) => (_progression.nebulaItems[id] ?? 0) > 0).toList();
     final hasBot = ownedBots.isNotEmpty;
-    final sharedMemory = (_progression.nebulaItems['bot_logic_upgrade'] ?? 0) > 0;
-    final timeTravelLocked = _systems.timeTravelPenaltyUntil > DateTime.now().millisecondsSinceEpoch;
+    final sharedMemory =
+        (_progression.nebulaItems['bot_logic_upgrade'] ?? 0) > 0;
+    final timeTravelLocked =
+        _systems.timeTravelPenaltyUntil > DateTime.now().millisecondsSinceEpoch;
     return GtnExpressiveCard(
       child: ExpansionTile(
         leading: const Icon(Icons.smart_toy_rounded),
@@ -684,14 +825,13 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
               timeTravelLocked
                   ? 'Paused by clock rollback protection.'
                   : hasBot
-                      ? 'Bots use real game feedback and take turns guessing.'
-                      : 'Buy Auto Clicker in the Nebula Shop to unlock this control.',
+                  ? 'Bots use real game feedback and take turns guessing.'
+                  : 'Buy Auto Clicker in the Nebula Shop to unlock this control.',
             ),
             value: _systems.autoClickerActive,
             onChanged: hasBot && !timeTravelLocked
-                ? (active) => _saveSystems(
-                      _systems.copyWith(autoClickerActive: active),
-                    )
+                ? (active) =>
+                      _saveSystems(_systems.copyWith(autoClickerActive: active))
                 : null,
           ),
           ListTile(
@@ -700,11 +840,15 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
           ),
           ListTile(
             title: const Text('Bot speed'),
-            subtitle: Text('${_systems.autoClickerSpeed.toStringAsFixed(2)}× base speed'),
+            subtitle: Text(
+              '${_systems.autoClickerSpeed.toStringAsFixed(2)}× base speed',
+            ),
           ),
           ListTile(
             title: const Text('Memory mode'),
-            subtitle: Text(sharedMemory ? 'Shared Memory enabled' : 'Independent bot memory'),
+            subtitle: Text(
+              sharedMemory ? 'Shared Memory enabled' : 'Independent bot memory',
+            ),
           ),
           ListTile(
             title: const Text('Bot guesses'),
@@ -715,7 +859,9 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
           if (_systems.lastBotGuess != null)
             ListTile(
               title: Text('Last guess: ${_systems.lastBotGuess}'),
-              subtitle: Text('${_systems.lastBotId ?? 'Bot'} · ${_systems.lastBotFeedback ?? 'No feedback'}'),
+              subtitle: Text(
+                '${_systems.lastBotId ?? 'Bot'} · ${_systems.lastBotFeedback ?? 'No feedback'}',
+              ),
             ),
         ],
       ),
@@ -738,8 +884,10 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
       if (bytes == null || bytes.isEmpty || bytes.length > 100 * 1024 * 1024) {
         continue;
       }
-      final extension = track.extension?.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '') ?? 'audio';
-      final safeName = 'track_${DateTime.now().microsecondsSinceEpoch}_${imported.length}.$extension';
+      final extension =
+          track.extension?.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '') ?? 'audio';
+      final safeName =
+          'track_${DateTime.now().microsecondsSinceEpoch}_${imported.length}.$extension';
       final destination = File('${musicDirectory.path}/$safeName');
       await destination.writeAsBytes(bytes, flush: true);
       imported.add(destination.path);
@@ -747,16 +895,23 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
     if (imported.isEmpty) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No supported audio files could be imported.')),
+          const SnackBar(
+            content: Text('No supported audio files could be imported.'),
+          ),
         );
       }
       return;
     }
-    await _saveSystems(_systems.copyWith(
-      musicLibrary: List.unmodifiable({..._systems.musicLibrary, ...imported}),
-      musicQueue: List.unmodifiable({..._systems.musicQueue, ...imported}),
-      currentTrackId: _systems.currentTrackId ?? imported.first,
-    ));
+    await _saveSystems(
+      _systems.copyWith(
+        musicLibrary: List.unmodifiable({
+          ..._systems.musicLibrary,
+          ...imported,
+        }),
+        musicQueue: List.unmodifiable({..._systems.musicQueue, ...imported}),
+        currentTrackId: _systems.currentTrackId ?? imported.first,
+      ),
+    );
     await _playTrack(imported.first);
   }
 
@@ -821,7 +976,9 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
   }
 
   Widget _challengeSection() {
-    final progress = _systems.dailyQuestDate == _today ? _systems.dailyQuestCorrectGuesses : 0;
+    final progress = _systems.dailyQuestDate == _today
+        ? _systems.dailyQuestCorrectGuesses
+        : 0;
     final challenges = _challengeCatalog;
     return GtnExpressiveCard(
       child: ExpansionTile(
@@ -831,30 +988,39 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
         children: [
           if (challenges.isEmpty) _catalogUnavailable(),
           for (final challenge in challenges)
-            Builder(builder: (context) {
-              final baseId = challenge['id'] as String;
-              final claimId = '$baseId:$_today';
-              final reward = challenge['rewardNebula'] as int;
-              final claimed = _systems.completedChallenges.contains(claimId);
-              final eligible = progress >= 50;
-              return ListTile(
-                title: Text(challenge['name'] as String),
-                subtitle: Text('${challenge['description']} Reward: $reward Nebula.'),
-                trailing: M3EButton.tonal(
-                  onPressed: eligible && !claimed
-                      ? () => _apply(_engine.claimChallenge(
-                            progression: _progression,
-                            systems: _systems,
-                            challengeId: claimId,
-                            nebulaReward: reward,
-                            eligible: eligible,
-                            nebulaBoostOwned: (_progression.nebulaItems['nebula_boost'] ?? 0) > 0,
-                          ))
-                      : null,
-                  child: Text(claimed ? 'Claimed' : 'Claim'),
-                ),
-              );
-            }),
+            Builder(
+              builder: (context) {
+                final baseId = challenge['id'] as String;
+                final claimId = '$baseId:$_today';
+                final reward = challenge['rewardNebula'] as int;
+                final claimed = _systems.completedChallenges.contains(claimId);
+                final eligible = progress >= 50;
+                return ListTile(
+                  title: Text(challenge['name'] as String),
+                  subtitle: Text(
+                    '${challenge['description']} Reward: $reward Nebula.',
+                  ),
+                  trailing: M3EButton.tonal(
+                    onPressed: eligible && !claimed
+                        ? () => _apply(
+                            _engine.claimChallenge(
+                              progression: _progression,
+                              systems: _systems,
+                              challengeId: claimId,
+                              nebulaReward: reward,
+                              eligible: eligible,
+                              nebulaBoostOwned:
+                                  (_progression.nebulaItems['nebula_boost'] ??
+                                      0) >
+                                  0,
+                            ),
+                          )
+                        : null,
+                    child: Text(claimed ? 'Claimed' : 'Claim'),
+                  ),
+                );
+              },
+            ),
         ],
       ),
     );
@@ -876,15 +1042,43 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
       ('mastery_all_5', 'Reach mastery level 5 in every world'),
     ];
     const requiredCodexEntries = <String>{
-      'world:verdant_grove', 'world:crystal_caverns', 'world:ember_summit', 'world:nebula_rift',
-      'boss:verdant_guardian', 'boss:crystal_golem', 'boss:ember_dragon', 'boss:nebula_titan',
-      'secret:whispering_hollow', 'secret:shard_archive', 'secret:ashen_vault', 'secret:lost_observatory',
+      'world:verdant_grove',
+      'world:crystal_caverns',
+      'world:ember_summit',
+      'world:nebula_rift',
+      'boss:verdant_guardian',
+      'boss:crystal_golem',
+      'boss:ember_dragon',
+      'boss:nebula_titan',
+      'secret:whispering_hollow',
+      'secret:shard_archive',
+      'secret:ashen_vault',
+      'secret:lost_observatory',
     };
-    final codexCount = requiredCodexEntries.where(_systems.codexEntries.contains).length;
-    final codexComplete = _systems.codexEntries.containsAll(requiredCodexEntries);
-    const allWorldIds = <String>{'verdant_grove', 'crystal_caverns', 'ember_summit', 'nebula_rift'};
-    const allSecretIds = <String>{'whispering_hollow', 'shard_archive', 'ashen_vault', 'lost_observatory'};
-    const allRelicIds = <String>{'verdant_guardian', 'crystal_golem', 'ember_dragon', 'nebula_titan'};
+    final codexCount = requiredCodexEntries
+        .where(_systems.codexEntries.contains)
+        .length;
+    final codexComplete = _systems.codexEntries.containsAll(
+      requiredCodexEntries,
+    );
+    const allWorldIds = <String>{
+      'verdant_grove',
+      'crystal_caverns',
+      'ember_summit',
+      'nebula_rift',
+    };
+    const allSecretIds = <String>{
+      'whispering_hollow',
+      'shard_archive',
+      'ashen_vault',
+      'lost_observatory',
+    };
+    const allRelicIds = <String>{
+      'verdant_guardian',
+      'crystal_golem',
+      'ember_dragon',
+      'nebula_titan',
+    };
     final allWorldsDefeated = WorldBossCatalog.worlds.every(
       (world) => WorldBossCatalog.isDefeated(_progression, world),
     );
@@ -894,64 +1088,105 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
       'all_relics': _systems.relicInventory.containsAll(allRelicIds),
       'sanctuary_10': _systems.homeBaseLevel >= 10,
       'rift_tier_10': _systems.endlessRiftBestTier >= 10,
-      'mastery_all_5': allWorldIds.every((id) => (_systems.worldMasteryLevels[id] ?? 0) >= 5),
+      'mastery_all_5': allWorldIds.every(
+        (id) => (_systems.worldMasteryLevels[id] ?? 0) >= 5,
+      ),
     };
     return GtnExpressiveCard(
       child: ExpansionTile(
         leading: const Icon(Icons.public_rounded),
         title: const Text('World mastery, secrets & Codex'),
-        subtitle: Text('$codexCount / 12 Codex discoveries · ${_systems.discoveredSecrets.length}/4 secrets'),
+        subtitle: Text(
+          '$codexCount / 12 Codex discoveries · ${_systems.discoveredSecrets.length}/4 secrets',
+        ),
         children: [
           for (final world in WorldBossCatalog.worlds)
-            Builder(builder: (context) {
-              final defeated = WorldBossCatalog.isDefeated(_progression, world);
-              final level = _systems.worldMasteryLevels[world.id] ?? (defeated ? 1 : 0);
-              final canUpgrade = defeated && level < 10;
-              return ListTile(
-                leading: Icon(defeated ? Icons.verified_rounded : Icons.public_rounded),
-                title: Text(world.worldName),
-                subtitle: Text('${world.name} · Mastery $level / 10'),
-                trailing: M3EButton.tonal(
-                  onPressed: canUpgrade
-                      ? () => _apply(_engine.upgradeWorldMastery(
-                            progression: _progression,
-                            systems: _systems,
-                            worldId: world.id,
-                          ))
-                      : null,
-                  child: Text(level >= 10 ? 'MAX' : defeated ? 'Upgrade' : 'Locked'),
-                ),
-              );
-            }),
+            Builder(
+              builder: (context) {
+                final defeated = WorldBossCatalog.isDefeated(
+                  _progression,
+                  world,
+                );
+                final level =
+                    _systems.worldMasteryLevels[world.id] ?? (defeated ? 1 : 0);
+                final canUpgrade = defeated && level < 10;
+                return ListTile(
+                  leading: Icon(
+                    defeated ? Icons.verified_rounded : Icons.public_rounded,
+                  ),
+                  title: Text(world.worldName),
+                  subtitle: Text('${world.name} · Mastery $level / 10'),
+                  trailing: M3EButton.tonal(
+                    onPressed: canUpgrade
+                        ? () => _apply(
+                            _engine.upgradeWorldMastery(
+                              progression: _progression,
+                              systems: _systems,
+                              worldId: world.id,
+                            ),
+                          )
+                        : null,
+                    child: Text(
+                      level >= 10
+                          ? 'MAX'
+                          : defeated
+                          ? 'Upgrade'
+                          : 'Locked',
+                    ),
+                  ),
+                );
+              },
+            ),
           const Divider(height: 12),
           for (final secret in secrets)
-            Builder(builder: (context) {
-              final discovered = _systems.discoveredSecrets.contains(secret.$1);
-              final previousBossReady = secret.$4 == null || _progression.defeatedBosses.contains(secret.$4);
-              final eligible = _progression.correctGuesses >= secret.$3 && previousBossReady;
-              return ListTile(
-                leading: Icon(discovered ? Icons.key_rounded : Icons.lock_outline_rounded),
-                title: Text(discovered ? secret.$2 : 'Hidden area'),
-                subtitle: Text(discovered ? 'Discovered' : 'Requires ${secret.$3} correct guesses and prior world progress'),
-                trailing: M3EButton.tonal(
-                  onPressed: eligible && !discovered
-                      ? () => _apply(_engine.discoverSecret(
-                            progression: _progression,
-                            systems: _systems,
-                            secretId: secret.$1,
-                          ))
-                      : null,
-                  child: Text(discovered ? 'Found' : 'Discover'),
-                ),
-              );
-            }),
+            Builder(
+              builder: (context) {
+                final discovered = _systems.discoveredSecrets.contains(
+                  secret.$1,
+                );
+                final previousBossReady =
+                    secret.$4 == null ||
+                    _progression.defeatedBosses.contains(secret.$4);
+                final eligible =
+                    _progression.correctGuesses >= secret.$3 &&
+                    previousBossReady;
+                return ListTile(
+                  leading: Icon(
+                    discovered ? Icons.key_rounded : Icons.lock_outline_rounded,
+                  ),
+                  title: Text(discovered ? secret.$2 : 'Hidden area'),
+                  subtitle: Text(
+                    discovered
+                        ? 'Discovered'
+                        : 'Requires ${secret.$3} correct guesses and prior world progress',
+                  ),
+                  trailing: M3EButton.tonal(
+                    onPressed: eligible && !discovered
+                        ? () => _apply(
+                            _engine.discoverSecret(
+                              progression: _progression,
+                              systems: _systems,
+                              secretId: secret.$1,
+                            ),
+                          )
+                        : null,
+                    child: Text(discovered ? 'Found' : 'Discover'),
+                  ),
+                );
+              },
+            ),
           ListTile(
             leading: const Icon(Icons.menu_book_rounded),
             title: const Text('Complete the Codex'),
             subtitle: Text('$codexCount / 12 entries · Reward: 100 Nebula'),
             trailing: M3EButton.tonal(
               onPressed: codexComplete && !_systems.codexRewardClaimed
-                  ? () => _apply(_engine.claimCodexCompletionReward(_progression, _systems))
+                  ? () => _apply(
+                      _engine.claimCodexCompletionReward(
+                        _progression,
+                        _systems,
+                      ),
+                    )
                   : null,
               child: Text(_systems.codexRewardClaimed ? 'Claimed' : 'Claim'),
             ),
@@ -962,45 +1197,72 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
               title: Text(reward.$2),
               subtitle: Text('Claim once when the goal is complete.'),
               trailing: M3EButton.tonal(
-                onPressed: endgameEligibility[reward.$1] == true && !_systems.endgameRewardsClaimed.contains(reward.$1)
-                    ? () => _apply(_engine.claimEndgameReward(_progression, _systems, reward.$1))
+                onPressed:
+                    endgameEligibility[reward.$1] == true &&
+                        !_systems.endgameRewardsClaimed.contains(reward.$1)
+                    ? () => _apply(
+                        _engine.claimEndgameReward(
+                          _progression,
+                          _systems,
+                          reward.$1,
+                        ),
+                      )
                     : null,
-                child: Text(_systems.endgameRewardsClaimed.contains(reward.$1) ? 'Claimed' : 'Claim'),
+                child: Text(
+                  _systems.endgameRewardsClaimed.contains(reward.$1)
+                      ? 'Claimed'
+                      : 'Claim',
+                ),
               ),
             ),
           if (_systems.endlessRiftActive)
-            Builder(builder: (context) {
-              final world = WorldBossCatalog.worlds.firstWhere(
-                (item) => item.id == _systems.activeWorldId,
-              );
-              final hp = world.hits + (_systems.endlessRiftTier - 1) * 2;
-              final damage = (_progression.bossDamage[world.id] ?? 0).clamp(0, hp);
-              return ListTile(
-                leading: const Icon(Icons.all_inclusive_rounded),
-                title: Text('Endless Rift · Tier ${_systems.endlessRiftTier}'),
-                subtitle: Text('${world.name} · Boss HP: ${hp - damage} / $hp remaining. Correct guesses attack; misses can regress damage.'),
-                isThreeLine: true,
-                trailing: M3EButton.tonal(
-                  onPressed: () => _apply(_engine.setEndlessRift(
-                    progression: _progression,
-                    systems: _systems,
-                    active: false,
-                  )),
-                  child: const Text('Leave'),
-                ),
-              );
-            }),
+            Builder(
+              builder: (context) {
+                final world = WorldBossCatalog.worlds.firstWhere(
+                  (item) => item.id == _systems.activeWorldId,
+                );
+                final hp = world.hits + (_systems.endlessRiftTier - 1) * 2;
+                final damage = (_progression.bossDamage[world.id] ?? 0).clamp(
+                  0,
+                  hp,
+                );
+                return ListTile(
+                  leading: const Icon(Icons.all_inclusive_rounded),
+                  title: Text(
+                    'Endless Rift · Tier ${_systems.endlessRiftTier}',
+                  ),
+                  subtitle: Text(
+                    '${world.name} · Boss HP: ${hp - damage} / $hp remaining. Correct guesses attack; misses can regress damage.',
+                  ),
+                  isThreeLine: true,
+                  trailing: M3EButton.tonal(
+                    onPressed: () => _apply(
+                      _engine.setEndlessRift(
+                        progression: _progression,
+                        systems: _systems,
+                        active: false,
+                      ),
+                    ),
+                    child: const Text('Leave'),
+                  ),
+                );
+              },
+            ),
           if (allWorldsDefeated && !_systems.endlessRiftActive)
             ListTile(
               leading: const Icon(Icons.all_inclusive_rounded),
               title: const Text('Endless Rift unlocked'),
-              subtitle: Text('Best tier: ${_systems.endlessRiftBestTier} · Rematch all four guardians in sequence.'),
+              subtitle: Text(
+                'Best tier: ${_systems.endlessRiftBestTier} · Rematch all four guardians in sequence.',
+              ),
               trailing: M3EButton.tonal(
-                onPressed: () => _apply(_engine.setEndlessRift(
-                  progression: _progression,
-                  systems: _systems,
-                  active: true,
-                )),
+                onPressed: () => _apply(
+                  _engine.setEndlessRift(
+                    progression: _progression,
+                    systems: _systems,
+                    active: true,
+                  ),
+                ),
                 child: const Text('Enter'),
               ),
             ),
@@ -1008,6 +1270,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
       ),
     );
   }
+
   Future<void> _createPlaylist() async {
     if (_systems.musicLibrary.isEmpty) {
       await _importMusicTracks();
@@ -1015,7 +1278,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
     }
     final controller = TextEditingController();
     final name = await GtnExpressiveDialog.show<String>(
-                          context,
+      context,
       builder: (context) => GtnExpressiveDialog(
         title: const Text('New playlist'),
         content: GtnExpressiveTextField(
@@ -1025,51 +1288,79 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
           decoration: const InputDecoration(labelText: 'Playlist name'),
         ),
         actions: [
-          M3EButton.text(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
-          M3EButton.filled(onPressed: () => Navigator.pop(context, controller.text.trim()), child: const Text('Create')),
+          M3EButton.text(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          M3EButton.filled(
+            onPressed: () => Navigator.pop(context, controller.text.trim()),
+            child: const Text('Create'),
+          ),
         ],
       ),
     );
     controller.dispose();
-    if (name == null || name.isEmpty || _systems.musicPlaylists.containsKey(name)) return;
+    if (name == null ||
+        name.isEmpty ||
+        _systems.musicPlaylists.containsKey(name))
+      return;
     final playlists = Map<String, List<String>>.of(_systems.musicPlaylists)
       ..[name] = List<String>.unmodifiable(_systems.musicLibrary);
-    await _saveSystems(_systems.copyWith(musicPlaylists: Map.unmodifiable(playlists)));
+    await _saveSystems(
+      _systems.copyWith(musicPlaylists: Map.unmodifiable(playlists)),
+    );
   }
 
   Future<void> _enqueueMusicTrack(String path) async {
     if (_systems.musicQueue.contains(path)) return;
-    await _saveSystems(_systems.copyWith(
-      musicQueue: List<String>.unmodifiable([..._systems.musicQueue, path]),
-    ));
+    await _saveSystems(
+      _systems.copyWith(
+        musicQueue: List<String>.unmodifiable([..._systems.musicQueue, path]),
+      ),
+    );
   }
 
   Future<void> _removeQueuedTrack(int index) async {
     final queue = [..._systems.musicQueue]..removeAt(index);
-    await _saveSystems(_systems.copyWith(musicQueue: List<String>.unmodifiable(queue)));
+    await _saveSystems(
+      _systems.copyWith(musicQueue: List<String>.unmodifiable(queue)),
+    );
   }
 
   Future<void> _playPlaylist(List<String> tracks) async {
-    final valid = tracks.where((track) => _systems.musicLibrary.contains(track) && File(track).existsSync()).toList();
+    final valid = tracks
+        .where(
+          (track) =>
+              _systems.musicLibrary.contains(track) && File(track).existsSync(),
+        )
+        .toList();
     if (valid.isEmpty) return;
-    await _saveSystems(_systems.copyWith(
-      musicQueue: List<String>.unmodifiable(valid),
-      currentTrackId: valid.first,
-    ));
+    await _saveSystems(
+      _systems.copyWith(
+        musicQueue: List<String>.unmodifiable(valid),
+        currentTrackId: valid.first,
+      ),
+    );
     await _playTrack(valid.first);
   }
 
   Future<void> _deletePlaylist(String name) async {
-    final playlists = Map<String, List<String>>.of(_systems.musicPlaylists)..remove(name);
-    await _saveSystems(_systems.copyWith(musicPlaylists: Map.unmodifiable(playlists)));
+    final playlists = Map<String, List<String>>.of(_systems.musicPlaylists)
+      ..remove(name);
+    await _saveSystems(
+      _systems.copyWith(musicPlaylists: Map.unmodifiable(playlists)),
+    );
   }
+
   Widget _musicSection({bool expanded = false}) {
     return GtnExpressiveCard(
       child: ExpansionTile(
         initiallyExpanded: expanded,
         leading: const Icon(Icons.library_music_rounded),
         title: const Text('Offline music player'),
-        subtitle: Text('${_systems.musicLibrary.length} tracks · ${_systems.musicPlaylists.length} playlists'),
+        subtitle: Text(
+          '${_systems.musicLibrary.length} tracks · ${_systems.musicPlaylists.length} playlists',
+        ),
         children: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -1079,28 +1370,40 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
                   child: Text(
                     _systems.currentTrackId == null
                         ? 'No track selected'
-                        : _systems.currentTrackId!.split(Platform.pathSeparator).last,
+                        : _systems.currentTrackId!
+                              .split(Platform.pathSeparator)
+                              .last,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
                 IconButton(
                   tooltip: 'Previous track',
-                  onPressed: _systems.musicQueue.isEmpty ? null : () async {
-                    final index = _systems.musicQueue.indexOf(_systems.currentTrackId ?? '');
-                    final previous = (index - 1 + _systems.musicQueue.length) % _systems.musicQueue.length;
-                    await _playTrack(_systems.musicQueue[previous]);
-                  },
+                  onPressed: _systems.musicQueue.isEmpty
+                      ? null
+                      : () async {
+                          final index = _systems.musicQueue.indexOf(
+                            _systems.currentTrackId ?? '',
+                          );
+                          final previous =
+                              (index - 1 + _systems.musicQueue.length) %
+                              _systems.musicQueue.length;
+                          await _playTrack(_systems.musicQueue[previous]);
+                        },
                   icon: const Icon(Icons.skip_previous_rounded),
                 ),
                 IconButton(
                   tooltip: _isPlaying ? 'Pause' : 'Play',
                   onPressed: _toggleMusicPlayback,
-                  icon: Icon(_isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded),
+                  icon: Icon(
+                    _isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
+                  ),
                 ),
                 IconButton(
                   tooltip: 'Next track',
-                  onPressed: _systems.musicQueue.isEmpty ? null : _playNextTrack,
+                  onPressed: _systems.musicQueue.isEmpty
+                      ? null
+                      : _playNextTrack,
                   icon: const Icon(Icons.skip_next_rounded),
                 ),
               ],
@@ -1111,17 +1414,23 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
             child: Slider(
               value: _musicDuration.inMilliseconds <= 0
                   ? 0
-                  : _musicPosition.inMilliseconds.clamp(0, _musicDuration.inMilliseconds).toDouble(),
-              max: _musicDuration.inMilliseconds <= 0 ? 1 : _musicDuration.inMilliseconds.toDouble(),
+                  : _musicPosition.inMilliseconds
+                        .clamp(0, _musicDuration.inMilliseconds)
+                        .toDouble(),
+              max: _musicDuration.inMilliseconds <= 0
+                  ? 1
+                  : _musicDuration.inMilliseconds.toDouble(),
               onChanged: _musicDuration.inMilliseconds <= 0
                   ? null
-                  : (value) => _audioPlayer.seek(Duration(milliseconds: value.round())),
+                  : (value) => _audioPlayer.seek(
+                      Duration(milliseconds: value.round()),
+                    ),
             ),
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             child: M3EButton.icon(
-                style: M3EButtonStyle.tonal,
+              style: M3EButtonStyle.tonal,
               onPressed: _importMusicTracks,
               icon: const Icon(Icons.add_rounded),
               label: const Text('Import audio files'),
@@ -1130,7 +1439,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
             child: M3EButton.icon(
-                        style: M3EButtonStyle.tonal,
+              style: M3EButtonStyle.tonal,
               onPressed: _createPlaylist,
               icon: const Icon(Icons.playlist_add_rounded),
               label: const Text('Create playlist from library'),
@@ -1145,12 +1454,21 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
               child: const Text('Clear'),
             ),
           ),
-          for (var queueIndex = 0; queueIndex < _systems.musicQueue.length; queueIndex++)
+          for (
+            var queueIndex = 0;
+            queueIndex < _systems.musicQueue.length;
+            queueIndex++
+          )
             ListTile(
               dense: true,
               leading: Text('${queueIndex + 1}'),
-              title: Text(_systems.musicQueue[queueIndex].split(Platform.pathSeparator).last,
-                  maxLines: 1, overflow: TextOverflow.ellipsis),
+              title: Text(
+                _systems.musicQueue[queueIndex]
+                    .split(Platform.pathSeparator)
+                    .last,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
               trailing: IconButton(
                 tooltip: 'Remove from queue',
                 onPressed: () => _removeQueuedTrack(queueIndex),
@@ -1173,7 +1491,8 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
           GtnExpressiveSwitchTile(
             title: const Text('Shuffle'),
             value: _systems.musicShuffle,
-            onChanged: (value) => _saveSystems(_systems.copyWith(musicShuffle: value)),
+            onChanged: (value) =>
+                _saveSystems(_systems.copyWith(musicShuffle: value)),
           ),
           ListTile(
             title: const Text('Repeat mode'),
@@ -1186,7 +1505,8 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
                 DropdownMenuItem(value: 'all', child: Text('All')),
               ],
               onChanged: (value) {
-                if (value != null) _saveSystems(_systems.copyWith(musicRepeatMode: value));
+                if (value != null)
+                  _saveSystems(_systems.copyWith(musicRepeatMode: value));
               },
             ),
           ),
@@ -1194,11 +1514,26 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
             ListTile(
               dense: true,
               leading: const Icon(Icons.music_note_rounded),
-              title: Text(track.split(Platform.pathSeparator).last, maxLines: 1, overflow: TextOverflow.ellipsis),
-              trailing: Wrap(spacing: 0, children: [
-                IconButton(tooltip: 'Play track', onPressed: () => _playTrack(track), icon: const Icon(Icons.play_circle_outline_rounded)),
-                IconButton(tooltip: 'Add to queue', onPressed: () => _enqueueMusicTrack(track), icon: const Icon(Icons.queue_music_rounded)),
-              ]),
+              title: Text(
+                track.split(Platform.pathSeparator).last,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              trailing: Wrap(
+                spacing: 0,
+                children: [
+                  IconButton(
+                    tooltip: 'Play track',
+                    onPressed: () => _playTrack(track),
+                    icon: const Icon(Icons.play_circle_outline_rounded),
+                  ),
+                  IconButton(
+                    tooltip: 'Add to queue',
+                    onPressed: () => _enqueueMusicTrack(track),
+                    icon: const Icon(Icons.queue_music_rounded),
+                  ),
+                ],
+              ),
             ),
         ],
       ),
@@ -1210,18 +1545,29 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
       child: ExpansionTile(
         leading: const Icon(Icons.info_outline_rounded),
         title: const Text('About & updater'),
-        subtitle: Text('Version ${UpdateChecker.currentVersionName} · Flutter / Dart'),
+        subtitle: Text(
+          'Version ${UpdateChecker.currentVersionName} · Flutter / Dart',
+        ),
         children: [
           const ListTile(
             title: Text('Guess The Number 2'),
-            subtitle: Text('Flutter continuation of the original Kotlin game. Offline-first local saves.'),
+            subtitle: Text(
+              'Flutter continuation of the original Kotlin game. Offline-first local saves.',
+            ),
           ),
           ListTile(
             leading: const Icon(Icons.system_update_rounded),
             title: const Text('Check for updates'),
-            subtitle: Text(_updateMessage ?? 'Check the GitHub release feed for a newer build.'),
+            subtitle: Text(
+              _updateMessage ??
+                  'Check the GitHub release feed for a newer build.',
+            ),
             trailing: _checkingUpdate
-                ? const SizedBox(width: 20, height: 20, child: M3EProgressIndicator.circular(strokeWidth: 2))
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: M3EProgressIndicator.circular(strokeWidth: 2),
+                  )
                 : const Icon(Icons.refresh_rounded),
             onTap: _checkingUpdate ? null : _checkForUpdate,
           ),
@@ -1233,7 +1579,9 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
           if (_availableUpdate != null || _availableWindowsUpdate != null) ...[
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-              child: SelectableText('SHA-256: ${_availableUpdate?.sha256 ?? _availableWindowsUpdate!.sha256}'),
+              child: SelectableText(
+                'SHA-256: ${_availableUpdate?.sha256 ?? _availableWindowsUpdate!.sha256}',
+              ),
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
@@ -1247,7 +1595,10 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
               child: M3EButton.text(
-                onPressed: () => _openGithubUrl(_availableUpdate?.releaseUrl ?? _availableWindowsUpdate!.releaseUrl),
+                onPressed: () => _openGithubUrl(
+                  _availableUpdate?.releaseUrl ??
+                      _availableWindowsUpdate!.releaseUrl,
+                ),
                 child: const Text('View release notes'),
               ),
             ),
@@ -1255,7 +1606,9 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
           ListTile(
             leading: const Icon(Icons.article_outlined),
             title: const Text('Open-source licenses'),
-            subtitle: const Text('View notices for Flutter and bundled packages.'),
+            subtitle: const Text(
+              'View notices for Flutter and bundled packages.',
+            ),
             onTap: () => showLicensePage(
               context: context,
               applicationName: 'Guess The Number 2',
@@ -1269,7 +1622,9 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
           ),
           const Padding(
             padding: EdgeInsets.fromLTRB(16, 0, 16, 16),
-            child: Text('Debug release publishing is paused until the complete GTN1 port passes parity verification. Update installation remains disabled during this porting phase.'),
+            child: Text(
+              'Debug release publishing is paused until the complete GTN1 port passes parity verification. Update installation remains disabled during this porting phase.',
+            ),
           ),
         ],
       ),
@@ -1312,7 +1667,9 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
               : 'A verified Android update is available.';
         });
       } else {
-        throw UnsupportedError('In-app updates are available on Android and Windows builds.');
+        throw UnsupportedError(
+          'In-app updates are available on Android and Windows builds.',
+        );
       }
     } catch (error) {
       if (!mounted) return;
@@ -1341,13 +1698,16 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
       } else if (Platform.isAndroid && update != null) {
         await UpdateChecker().downloadAndInstall(update);
         if (mounted) {
-          setState(() => _updateMessage =
-              'APK verified. Android package installer opened; follow its prompts to finish.');
+          setState(
+            () => _updateMessage = 'APK verified. Android package installer opened; follow its prompts to finish.',
+          );
         }
       }
     } catch (error) {
       if (mounted) {
-        setState(() => _updateMessage = 'Update installation could not start: $error');
+        setState(
+          () => _updateMessage = 'Update installation could not start: $error',
+        );
       }
     } finally {
       if (mounted) setState(() => _checkingUpdate = false);
@@ -1356,8 +1716,13 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
 
   bool _isGithubUrl(String value) {
     final uri = Uri.tryParse(value);
-    return uri != null && uri.scheme == 'https' &&
-        {'github.com', 'api.github.com', 'raw.githubusercontent.com'}.contains(uri.host);
+    return uri != null &&
+        uri.scheme == 'https' &&
+        {
+          'github.com',
+          'api.github.com',
+          'raw.githubusercontent.com',
+        }.contains(uri.host);
   }
 
   Future<void> _openGithubUrl(String value) async {

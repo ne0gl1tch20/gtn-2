@@ -7,35 +7,36 @@ import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
 
 Widget buildDashboard() => M3EMaterialApp(
-        data: M3EThemeData.light(seedColor: const Color(0xFF7C5CFC)),
-        fontFamily: 'Manrope',
-        autoTheming: false,
-        initialTheme: Brightness.light,
-      home: GameDashboardPage(
-        game: const GameState(secret: 42, attempts: 0, isComplete: false),
-        progression: ProgressionState.initial,
-        activeSlot: 1,
-        loading: false,
-        message: 'Make your move.',
-        controller: TextEditingController(),
-        onGuess: () {},
-        onNewGame: () {},
-        onUpgradeShop: () {},
-        onPrestige: () {},
-        onArcade: () {},
-        onNebulaShop: () {},
-        onWorldMap: () {},
-        onSaveSlots: () {},
-        onSettings: () {},
-        onDeveloperSettings: () {},
-        onLegacyPages: () {},
-        showDeveloperSettings: true,
-      ),
-    );
+  data: M3EThemeData.light(seedColor: const Color(0xFF7C5CFC)),
+  fontFamily: 'Manrope',
+  autoTheming: false,
+  initialTheme: Brightness.light,
+  home: GameDashboardPage(
+    game: const GameState(secret: 42, attempts: 0, isComplete: false),
+    progression: ProgressionState.initial,
+    activeSlot: 1,
+    loading: false,
+    message: 'Make your move.',
+    controller: TextEditingController(),
+    onGuess: () {},
+    onNewGame: () {},
+    onUpgradeShop: () {},
+    onPrestige: () {},
+    onArcade: () {},
+    onNebulaShop: () {},
+    onWorldMap: () {},
+    onSaveSlots: () {},
+    onSettings: () {},
+    onDeveloperSettings: () {},
+    onLegacyPages: () {},
+    showDeveloperSettings: true,
+  ),
+);
 
 void main() {
-  testWidgets('shows the HTML-facing dashboard and quick-pick controls',
-      (WidgetTester tester) async {
+  testWidgets('shows the HTML-facing dashboard and quick-pick controls', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(buildDashboard());
     expect(find.text('Guess The Number'), findsOneWidget);
     // The dashboard uses a lazy ListView, so scroll to the wallet before asserting it.
@@ -70,8 +71,9 @@ void main() {
     expect(find.text('HIGH END'), findsOneWidget);
     expect(find.text('CLEAR'), findsOneWidget);
 
-    TextEditingController guessController() =>
-        tester.widget<GtnExpressiveTextField>(find.byKey(const Key('guess-input'))).controller!;
+    TextEditingController guessController() => tester
+        .widget<GtnExpressiveTextField>(find.byKey(const Key('guess-input')))
+        .controller!;
 
     await tester.ensureVisible(find.text('LOW END'));
     await tester.tap(find.text('LOW END'));
@@ -94,8 +96,9 @@ void main() {
     expect(guessController().text, isEmpty);
   });
 
-  testWidgets('More opens its own destination with save and dev tools',
-      (WidgetTester tester) async {
+  testWidgets('More opens its own destination with save and dev tools', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(buildDashboard());
     await tester.tap(find.text('More'));
     await tester.pumpAndSettle();
