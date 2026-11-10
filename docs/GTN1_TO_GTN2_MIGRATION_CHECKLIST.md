@@ -142,6 +142,23 @@ Sources: GTN1 `app/src/main/assets/web-play/` and `app/src/main/assets/libraries
 - [ ] Match screen transitions, micro-interactions, feedback, animation timing and reduced-motion behavior
 - [ ] Verify accessibility semantics, contrast, touch targets, keyboard and mouse behavior
 
+### Player dashboard source-to-widget map
+
+Reference: GTN1 `app/src/main/assets/web-play/index.html` and `styles.css`.
+
+| GTN1 HTML/CSS surface | Native Dart target | Status |
+|---|---|---|
+| `.topbar`, `.brand-lockup`, `.live-pill` | `GameDashboardPage` header row | [~] Logo, spacing, Space Grotesk heading and status pill mapped |
+| `.hero-card`, `.hero-glow`, `.range`, `.feedback`, `.sparkle-field` | `GameDashboardPage` hero panel and `_HeroSparkle` | [~] Gradient, 32px radius, 205px minimum height, cyan glow, range gradient and sparkle accents mapped |
+| `.bot-arena-card`, `.bot-arena-stage` | `_BotArena` | [~] Dart widget and real progression state; visual comparison pending |
+| `.guess-card`, `.input-shell`, `.guess-tool-buttons` | `_GuessInput` and `GtnExpressiveTextField` | [~] Native TextField now reproduces the dark inset input, 18px radius, 18px bold text and purple focus border; M3E buttons/chips remain selective accents |
+| `.stats-grid`, `.stat-card` | `_Stat` | [~] Three-column statistic layout and original palette mapped |
+| `.economy-card`, `.progress-track`, `.progress-fill` | `_Wallet` | [~] Save-backed currency and momentum values; visual comparison pending |
+| `.quick-actions`, `.action-card` | `_Action` | [~] Native InkWell cards with original compact hierarchy |
+| `.screen-nav` | `M3ENavigationBar` | [~] Native navigation retains M3E expressive motion; bottom placement is the chosen Flutter navigation adaptation |
+
+The table records partial implementation, not verified pixel parity. Each row remains open until screenshots and interaction behavior are compared at matching viewport sizes.
+
 ### Native Flutter implementation
 - [~] Recreate all UI in Dart widgets; Dart remains the only UI and gameplay runtime
 - [~] Centralize GTN1 palette and reusable surface primitives in `lib/design/`
