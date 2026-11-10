@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:material_ui/material_ui.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
-import '../design/expressive_widgets.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../core/numbers/big_number.dart';
+import '../design/expressive_widgets.dart';
 import 'arcade_catalog.dart';
 import 'arcade_reward_rules.dart';
 
