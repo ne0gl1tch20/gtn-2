@@ -162,7 +162,7 @@ Source: pinned GTN1 `web-play/index.html`, `styles.css`, and all seven files in 
 | `changelog` | Release notes and rendered changelog content | `lib/legacy/legacy_pages.dart` + `assets/changelogs.md` | [~] Native Dart screen reads canonical GTN1 Markdown; parser fidelity and visual audit remain open |
 | `about` | App information, open-source licenses and attribution | `lib/legacy/legacy_pages.dart` | [~] Basic destination exists; licenses/content parity open |
 | `music` | Offline music player, track list, playback controls and state | No confirmed dedicated Flutter screen | [ ] Needs screen and native audio-service audit |
-| `settings` | Gameplay, appearance, audio, locale, accessibility and menu customization | `lib/settings/settings_page.dart` | [~] Settings exist; Menu Studio and all preference parity open |
+| `settings` | Gameplay, appearance, audio, locale, accessibility and menu customization | `lib/settings/settings_page.dart` | [~] Native grouped hierarchy and supported controls recreated; full preference model and Menu Studio remain open |
 | `prestige` | Prestige reset, currency, upgrades and shop | `lib/progression/progression_hub_page.dart` | [~] Engine and destination exist; screen-level comparison open |
 | `ultra` | Ultra progression, reset and upgrades | `lib/progression/progression_hub_page.dart` | [~] Engine and destination exist; screen-level comparison open |
 | `talent` | Talent web/tree, prerequisites, purchase and active effects | `lib/legacy/legacy_systems_page.dart` | [~] Catalog/section exists; graph layout and effects need audit |
