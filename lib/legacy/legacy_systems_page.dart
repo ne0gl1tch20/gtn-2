@@ -951,7 +951,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
     }
     final controller = TextEditingController();
     final name = await GtnExpressiveDialog.show<String>(
-      context: context,
+                          context,
       builder: (context) => GtnExpressiveDialog(
         title: const Text('New playlist'),
         content: GtnExpressiveTextField(
