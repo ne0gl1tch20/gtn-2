@@ -20,7 +20,10 @@ class WorldBossBattleEngine {
   const WorldBossBattleEngine();
 
   static const _bossIds = {
-    'verdant_guardian', 'crystal_golem', 'ember_dragon', 'nebula_titan',
+    'verdant_guardian',
+    'crystal_golem',
+    'ember_dragon',
+    'nebula_titan',
   };
 
   ProgressionState migrateLegacyWorldUnlocks(ProgressionState state) {
@@ -35,7 +38,8 @@ class WorldBossBattleEngine {
           state.defeatedBosses.contains(previousWorld.id) ||
           state.defeatedBosses.contains(previousWorld.bossId) ||
           systems.relicInventory.contains(previousWorld.bossId);
-      final wasUnlockedByLegacyFlutter = previousBossDefeated &&
+      final wasUnlockedByLegacyFlutter =
+          previousBossDefeated &&
           state.correctGuesses >= world.unlockCorrectGuesses &&
           totalUpgrades >= world.unlockUpgradeCount &&
           state.prestigeResets >= world.unlockPrestigeCount &&
@@ -50,8 +54,13 @@ class WorldBossBattleEngine {
     );
   }
 
-  WorldBossActionResult discoverSecret(ProgressionState state, String secretId) {
-    final matches = WorldBossCatalog.worlds.where((item) => item.secretId == secretId);
+  WorldBossActionResult discoverSecret(
+    ProgressionState state,
+    String secretId,
+  ) {
+    final matches = WorldBossCatalog.worlds.where(
+      (item) => item.secretId == secretId,
+    );
     final world = matches.isEmpty ? null : matches.first;
     if (world == null ||
         !WorldBossCatalog.isUnlocked(state, world) ||
@@ -102,7 +111,9 @@ class WorldBossBattleEngine {
     final world = matches.isEmpty ? null : matches.first;
     if (world == null || !WorldBossCatalog.canUnlock(state, world)) {
       return WorldBossActionResult(
-        progression: state, accepted: false, message: 'World unlock requirements are not met.',
+        progression: state,
+        accepted: false,
+        message: 'World unlock requirements are not met.',
       );
     }
     final unlocked = Set<String>.of(state.legacySystems.unlockedWorldIds)
@@ -125,18 +136,23 @@ class WorldBossBattleEngine {
     final world = matches.isEmpty ? null : matches.first;
     if (world == null || !WorldBossCatalog.isUnlocked(state, world)) {
       return WorldBossActionResult(
-        progression: state, accepted: false, message: 'World is locked.',
+        progression: state,
+        accepted: false,
+        message: 'World is locked.',
       );
     }
     if (state.legacySystems.endlessRiftActive &&
         worldId != state.legacySystems.activeWorldId) {
       return WorldBossActionResult(
-        progression: state, accepted: false, message: 'Stop the Endless Rift before changing worlds.',
+        progression: state,
+        accepted: false,
+        message: 'Stop the Endless Rift before changing worlds.',
       );
     }
     final systems = state.legacySystems.copyWith(
       activeWorldId: worldId,
-      clearActiveBossBattle: state.legacySystems.activeBossBattleWorldId != worldId,
+      clearActiveBossBattle:
+          state.legacySystems.activeBossBattleWorldId != worldId,
     );
     return WorldBossActionResult(
       progression: state.copyWith(legacySystems: systems),
@@ -145,20 +161,28 @@ class WorldBossBattleEngine {
     );
   }
 
-  WorldBossActionResult toggleBossBattle(ProgressionState state, String worldId) {
+  WorldBossActionResult toggleBossBattle(
+    ProgressionState state,
+    String worldId,
+  ) {
     final matches = WorldBossCatalog.worlds.where((item) => item.id == worldId);
     final world = matches.isEmpty ? null : matches.first;
-    if (world == null || !WorldBossCatalog.isUnlocked(state, world) ||
+    if (world == null ||
+        !WorldBossCatalog.isUnlocked(state, world) ||
         (WorldBossCatalog.isDefeated(state, world) &&
             !state.legacySystems.endlessRiftActive)) {
       return WorldBossActionResult(
-        progression: state, accepted: false, message: 'Boss battle is not available.',
+        progression: state,
+        accepted: false,
+        message: 'Boss battle is not available.',
       );
     }
     if (state.legacySystems.activeBossBattleWorldId == worldId) {
       return WorldBossActionResult(
         progression: state.copyWith(
-          legacySystems: state.legacySystems.copyWith(clearActiveBossBattle: true),
+          legacySystems: state.legacySystems.copyWith(
+            clearActiveBossBattle: true,
+          ),
         ),
         accepted: true,
         message: 'Boss battle paused.',
@@ -167,7 +191,9 @@ class WorldBossBattleEngine {
     if (!state.legacySystems.endlessRiftActive &&
         !WorldBossCatalog.canFight(state, world)) {
       return WorldBossActionResult(
-        progression: state, accepted: false, message: 'Boss fight requirements are not met.',
+        progression: state,
+        accepted: false,
+        message: 'Boss fight requirements are not met.',
       );
     }
     final mistakes = Map<String, int>.of(state.legacySystems.bossBattleMistakes)
@@ -190,13 +216,18 @@ class WorldBossBattleEngine {
     required bool correct,
   }) {
     final systems = state.legacySystems;
-    final matches = WorldBossCatalog.worlds
-        .where((item) => item.id == systems.activeBossBattleWorldId);
+    final matches = WorldBossCatalog.worlds.where(
+      (item) => item.id == systems.activeBossBattleWorldId,
+    );
     final world = matches.isEmpty ? null : matches.first;
-    if (world == null || !WorldBossCatalog.isUnlocked(state, world) ||
-        (WorldBossCatalog.isDefeated(state, world) && !systems.endlessRiftActive)) {
+    if (world == null ||
+        !WorldBossCatalog.isUnlocked(state, world) ||
+        (WorldBossCatalog.isDefeated(state, world) &&
+            !systems.endlessRiftActive)) {
       return WorldBossActionResult(
-        progression: state, accepted: false, message: 'No active world boss.',
+        progression: state,
+        accepted: false,
+        message: 'No active world boss.',
       );
     }
 
@@ -204,14 +235,19 @@ class WorldBossBattleEngine {
         ? (systems.endlessRiftTier < 1 ? 1 : systems.endlessRiftTier)
         : 1;
     final hp = world.hits + (systems.endlessRiftActive ? (tier - 1) * 2 : 0);
-    final oldDamage = state.bossDamage[world.bossId] ?? state.bossDamage[world.id] ?? 0;
+    final oldDamage =
+        state.bossDamage[world.bossId] ?? state.bossDamage[world.id] ?? 0;
     final mistakes = Map<String, int>.of(systems.bossBattleMistakes);
     final damage = Map<String, int>.of(state.bossDamage);
 
     if (!correct) {
       final nextMisses = (mistakes[world.bossId] ?? 0) + 1;
       final phase = ((oldDamage * 3) ~/ hp + 1).clamp(1, 3);
-      final interval = switch (phase) { 1 => 4, 2 => 3, _ => 2 };
+      final interval = switch (phase) {
+        1 => 4,
+        2 => 3,
+        _ => 2,
+      };
       final nextDamage = nextMisses % interval == 0
           ? (oldDamage - 1).clamp(0, hp).toInt()
           : oldDamage;
@@ -221,7 +257,9 @@ class WorldBossBattleEngine {
       return WorldBossActionResult(
         progression: state.copyWith(
           bossDamage: Map.unmodifiable(damage),
-          legacySystems: systems.copyWith(bossBattleMistakes: Map.unmodifiable(mistakes)),
+          legacySystems: systems.copyWith(
+            bossBattleMistakes: Map.unmodifiable(mistakes),
+          ),
         ),
         accepted: true,
         message: 'Boss resisted the miss.',
@@ -238,7 +276,9 @@ class WorldBossBattleEngine {
       return WorldBossActionResult(
         progression: state.copyWith(
           bossDamage: Map.unmodifiable(damage),
-          legacySystems: systems.copyWith(bossBattleMistakes: Map.unmodifiable(mistakes)),
+          legacySystems: systems.copyWith(
+            bossBattleMistakes: Map.unmodifiable(mistakes),
+          ),
         ),
         accepted: true,
         message: 'Boss hit: $nextDamage/$hp.',
@@ -255,7 +295,8 @@ class WorldBossBattleEngine {
     final moneyReward = systems.endlessRiftActive
         ? riftMoneyReward
         : riftMoneyReward * GuessEconomyRules.moneyEarningMultiplier(state);
-    final nebulaReward = (baseNebula + BigNumber.fromInt(bonusNebula)) * rewardMultiplier;
+    final nebulaReward =
+        (baseNebula + BigNumber.fromInt(bonusNebula)) * rewardMultiplier;
     damage[world.bossId] = hp;
     damage[world.id] = hp;
     final nextSystems = systems.copyWith(
@@ -264,7 +305,9 @@ class WorldBossBattleEngine {
     );
 
     if (systems.endlessRiftActive) {
-      final nextIndex = (WorldBossCatalog.worlds.indexOf(world) + 1) % WorldBossCatalog.worlds.length;
+      final nextIndex =
+          (WorldBossCatalog.worlds.indexOf(world) + 1) %
+          WorldBossCatalog.worlds.length;
       final nextWorld = WorldBossCatalog.worlds[nextIndex];
       damage[nextWorld.bossId] = 0;
       damage[nextWorld.id] = 0;
@@ -281,7 +324,8 @@ class WorldBossBattleEngine {
             activeBossBattleWorldId: nextWorld.id,
             endlessRiftTier: tier + 1,
             endlessRiftBestTier: systems.endlessRiftBestTier > tier
-                ? systems.endlessRiftBestTier : tier,
+                ? systems.endlessRiftBestTier
+                : tier,
             bossBattleMistakes: Map.unmodifiable(mistakes),
           ),
         ),
@@ -321,19 +365,42 @@ class WorldBossBattleEngine {
     ProgressionState state,
     WorldBossDefinition world,
   ) {
-    final relicCount = state.legacySystems.equippedRelics.intersection(_bossIds).length;
-    final setRate = switch (relicCount) { 2 => 0.10, 3 => 0.20, 4 => 0.35, _ => 0.0 };
-    final masteryRate = (state.legacySystems.worldMasteryLevels[world.id] ?? 0)
-        .clamp(0, 10).toDouble() * 0.02;
-    final sanctuaryRate = (state.legacySystems.homeBaseLevel.clamp(0, 20) * 0.02)
-        .clamp(0.0, 0.40).toDouble();
-    final eventRate = state.legacySystems.permanentEventBoosts.clamp(0, 25).toDouble() * 0.02;
-    final secretRate = state.legacySystems.discoveredSecrets.contains(world.secretId) ? 0.05 : 0.0;
-    final bonusMoney = BigNumber.fromInt(world.moneyReward) *
-        BigNumber.parse((setRate + masteryRate + sanctuaryRate + eventRate + secretRate).toStringAsFixed(2));
-    final bonusNebula = (relicCount == 4 ? 10 : 0) +
+    final relicCount = state.legacySystems.equippedRelics
+        .intersection(_bossIds)
+        .length;
+    final setRate = switch (relicCount) {
+      2 => 0.10,
+      3 => 0.20,
+      4 => 0.35,
+      _ => 0.0,
+    };
+    final masteryRate =
+        (state.legacySystems.worldMasteryLevels[world.id] ?? 0)
+            .clamp(0, 10)
+            .toDouble() *
+        0.02;
+    final sanctuaryRate =
+        (state.legacySystems.homeBaseLevel.clamp(0, 20) * 0.02)
+            .clamp(0.0, 0.40)
+            .toDouble();
+    final eventRate =
+        state.legacySystems.permanentEventBoosts.clamp(0, 25).toDouble() * 0.02;
+    final secretRate =
+        state.legacySystems.discoveredSecrets.contains(world.secretId)
+        ? 0.05
+        : 0.0;
+    final bonusMoney =
+        BigNumber.fromInt(world.moneyReward) *
+        BigNumber.parse(
+          (setRate + masteryRate + sanctuaryRate + eventRate + secretRate)
+              .toStringAsFixed(2),
+        );
+    final bonusNebula =
+        (relicCount == 4 ? 10 : 0) +
         ((state.legacySystems.worldMasteryLevels[world.id] ?? 0) >= 5 ? 5 : 0) +
-        (state.legacySystems.discoveredSecrets.contains(world.secretId) ? 5 : 0);
+        (state.legacySystems.discoveredSecrets.contains(world.secretId)
+            ? 5
+            : 0);
     return (bonusMoney, bonusNebula);
   }
 }

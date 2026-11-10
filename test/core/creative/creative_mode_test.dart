@@ -5,13 +5,12 @@ void main() {
   CreativeModeSave config({
     List<CreativeModeEffect> effects = const [],
     bool enabled = true,
-  }) =>
-      CreativeModeSave(
-        enabled: enabled,
-        rangeMin: 10,
-        rangeMax: 20,
-        effects: effects,
-      );
+  }) => CreativeModeSave(
+    enabled: enabled,
+    rangeMin: 10,
+    rangeMax: 20,
+    effects: effects,
+  );
 
   test('starts a run inside the validated configured range', () {
     final save = config(
@@ -55,27 +54,30 @@ void main() {
     expect(after.outcome, CreativeGuessOutcome.completed);
   });
 
-  test('out-of-range guesses and exhausted attempt limits do not consume attempts', () {
-    final save = config(
-      effects: const [
-        CreativeModeEffect(
-          id: 'limit',
-          type: CreativeEffectType.attemptLimit,
-          value: 1,
-        ),
-      ],
-    );
-    final run = CreativeModeRuntime.start(save, 15)!;
-    final outside = CreativeModeRuntime.submitGuess(save, run, 9);
-    expect(outside.outcome, CreativeGuessOutcome.outOfRange);
-    expect(outside.run.attemptsUsed, 0);
-    final first = CreativeModeRuntime.submitGuess(save, run, 12);
-    expect(first.run.attemptsUsed, 1);
-    final blocked = CreativeModeRuntime.submitGuess(save, first.run, 15);
-    expect(blocked.outcome, CreativeGuessOutcome.attemptLimit);
-    expect(blocked.accepted, isFalse);
-    expect(blocked.run.attemptsUsed, 1);
-  });
+  test(
+    'out-of-range guesses and exhausted attempt limits do not consume attempts',
+    () {
+      final save = config(
+        effects: const [
+          CreativeModeEffect(
+            id: 'limit',
+            type: CreativeEffectType.attemptLimit,
+            value: 1,
+          ),
+        ],
+      );
+      final run = CreativeModeRuntime.start(save, 15)!;
+      final outside = CreativeModeRuntime.submitGuess(save, run, 9);
+      expect(outside.outcome, CreativeGuessOutcome.outOfRange);
+      expect(outside.run.attemptsUsed, 0);
+      final first = CreativeModeRuntime.submitGuess(save, run, 12);
+      expect(first.run.attemptsUsed, 1);
+      final blocked = CreativeModeRuntime.submitGuess(save, first.run, 15);
+      expect(blocked.outcome, CreativeGuessOutcome.attemptLimit);
+      expect(blocked.accepted, isFalse);
+      expect(blocked.run.attemptsUsed, 1);
+    },
+  );
 
   test('hints are bounded and unavailable after completion', () {
     final save = config(
@@ -96,10 +98,7 @@ void main() {
   });
 
   test('disabled configuration and targets outside range cannot start', () {
-    expect(
-      CreativeModeRuntime.start(config(enabled: false), 15),
-      isNull,
-    );
+    expect(CreativeModeRuntime.start(config(enabled: false), 15), isNull);
     expect(CreativeModeRuntime.start(config(), 21), isNull);
   });
 

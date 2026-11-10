@@ -20,11 +20,7 @@ class BotAction {
 /// Search intervals intentionally remain in-memory, matching GTN1 where the
 /// bot guessers are reset to the active range when the game is loaded.
 class BotTeam {
-  static const botIds = <String>[
-    'auto_clicker_basic',
-    'bot_byte',
-    'bot_pixel',
-  ];
+  static const botIds = <String>['auto_clicker_basic', 'bot_byte', 'bot_pixel'];
 
   final GuessingBot _sharedGuesser = GuessingBot();
   final Map<String, GuessingBot> _independentGuessers = {};
@@ -45,7 +41,8 @@ class BotTeam {
   }) {
     final talentMultiplier =
         (speedTalentOne ? 1.25 : 1.0) * (speedTalentTwo ? 1.5 : 1.0);
-    final effectiveSpeed = speed * talentMultiplier * (speedMutator ? 3.0 : 1.0);
+    final effectiveSpeed =
+        speed * talentMultiplier * (speedMutator ? 3.0 : 1.0);
     if (!active || effectiveSpeed <= 0) return 1000;
     return (1000.0 / effectiveSpeed).toInt();
   }
@@ -66,7 +63,8 @@ class BotTeam {
     if (purchasedBots.isEmpty) return null;
     final ownedBots = botIds.where(purchasedBots.contains).toList();
     if (ownedBots.isEmpty) return null;
-    if (currentMinimum < rangeMinimum || currentMaximum > rangeMaximum ||
+    if (currentMinimum < rangeMinimum ||
+        currentMaximum > rangeMaximum ||
         currentMinimum > currentMaximum) {
       throw ArgumentError('Current game range must be inside the bot range.');
     }

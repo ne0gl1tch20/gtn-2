@@ -9,8 +9,12 @@ import 'save_data.dart';
 
 class SaveStorage {
   SaveStorage({required Directory directory, int slot = 1})
-      : slot = slot,
-        _file = File(slot == 1 ? '${directory.path}/gtn2-save.json' : '${directory.path}/gtn2-save-slot$slot.json') {
+    : slot = slot,
+      _file = File(
+        slot == 1
+            ? '${directory.path}/gtn2-save.json'
+            : '${directory.path}/gtn2-save-slot$slot.json',
+      ) {
     if (slot < 1 || slot > maxSaveSlots) {
       throw RangeError.range(slot, 1, maxSaveSlots, 'slot');
     }
@@ -129,15 +133,17 @@ class SaveStorage {
         await _write(updated);
       });
 
-  Future<bool> hasBackup() => _enqueue(() async =>
-      await _readSave(File('${_file.path}.bak')) != null);
+  Future<bool> hasBackup() =>
+      _enqueue(() async => await _readSave(File('${_file.path}.bak')) != null);
 
   Future<bool> duplicateTo(int targetSlot) async {
     if (targetSlot == slot) return false;
-    final snapshot = await _enqueue(() async => (
-          current: await _loadUnlocked(),
-          previous: await _readSave(File('${_file.path}.bak')),
-        ));
+    final snapshot = await _enqueue(
+      () async => (
+        current: await _loadUnlocked(),
+        previous: await _readSave(File('${_file.path}.bak')),
+      ),
+    );
     final current = snapshot.current;
     if (current == null) return false;
     final target = SaveStorage(directory: _file.parent, slot: targetSlot);
@@ -159,21 +165,21 @@ class SaveStorage {
   }
 
   Future<bool> createIfEmpty(SaveData data) => _enqueue(() async {
-        if (!_isValidSave(data)) {
-          throw ArgumentError('Refusing to create invalid save data.');
-        }
-        final existing = await _loadUnlocked();
-        final backup = File('${_file.path}.bak');
-        final temporary = File('${_file.path}.tmp');
-        if (existing != null ||
-            await _file.exists() ||
-            await backup.exists() ||
-            await temporary.exists()) {
-          return false;
-        }
-        await _write(data);
-        return true;
-      });
+    if (!_isValidSave(data)) {
+      throw ArgumentError('Refusing to create invalid save data.');
+    }
+    final existing = await _loadUnlocked();
+    final backup = File('${_file.path}.bak');
+    final temporary = File('${_file.path}.tmp');
+    if (existing != null ||
+        await _file.exists() ||
+        await backup.exists() ||
+        await temporary.exists()) {
+      return false;
+    }
+    await _write(data);
+    return true;
+  });
 
   Future<bool> restoreBackup() => _enqueue(() async {
     final backup = File('${_file.path}.bak');
@@ -234,7 +240,8 @@ class SaveStorage {
       data.gamesWon >= 0 &&
       data.profileName.length <= 24 &&
       SaveData.profileIconIds.contains(data.profileIconId) &&
-      (data.creativeMode == null || CreativeModeSave.validate(data.creativeMode!));
+      (data.creativeMode == null ||
+          CreativeModeSave.validate(data.creativeMode!));
 
   Future<void> save(SaveData data) {
     if (!_isValidSave(data)) {

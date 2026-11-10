@@ -5,22 +5,29 @@ import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
 
 void main() {
-  testWidgets('Memory Match locks the round after one incorrect answer',
-      (WidgetTester tester) async {
+  testWidgets('Memory Match locks the round after one incorrect answer', (
+    WidgetTester tester,
+  ) async {
     final rewards = <String>[];
-    await tester.pumpWidget(M3EMaterialApp(
+    await tester.pumpWidget(
+      M3EMaterialApp(
         data: M3EThemeData.light(seedColor: const Color(0xFF7C5CFC)),
         fontFamily: 'Manrope',
         autoTheming: false,
         initialTheme: Brightness.light,
-      home: ArcadePage(onReward: (nebula, money) async {
-        rewards.add('${nebula.toString()}:${money.toString()}');
-      }),
-    ));
+        home: ArcadePage(
+          onReward: (nebula, money) async {
+            rewards.add('${nebula.toString()}:${money.toString()}');
+          },
+        ),
+      ),
+    );
 
-    for (var attempt = 0;
-        attempt < 20 && find.text('Memory Digit Sequence').evaluate().isEmpty;
-        attempt++) {
+    for (
+      var attempt = 0;
+      attempt < 20 && find.text('Memory Digit Sequence').evaluate().isEmpty;
+      attempt++
+    ) {
       await tester.pump(const Duration(milliseconds: 100));
     }
     expect(find.text('Memory Digit Sequence'), findsOneWidget);

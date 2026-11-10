@@ -118,10 +118,7 @@ class _UpgradeCard extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  child: Text(
-                    upgrade.name,
-                    style: theme.textTheme.titleMedium,
-                  ),
+                  child: Text(upgrade.name, style: theme.textTheme.titleMedium),
                 ),
                 Text(
                   maxLevel == null ? 'Lv. $level' : 'Lv. $level / $maxLevel',
@@ -142,9 +139,7 @@ class _UpgradeCard extends StatelessWidget {
             M3EButton.filled(
               onPressed: busy || isMaxed || !canAfford ? null : onBuy,
               child: Text(
-                isMaxed
-                    ? 'Max level reached'
-                    : 'Upgrade · $cost Money',
+                isMaxed ? 'Max level reached' : 'Upgrade · $cost Money',
               ),
             ),
             if (!isMaxed && !canAfford)

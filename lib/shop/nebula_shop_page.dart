@@ -46,7 +46,8 @@ class NebulaShopCatalog {
     NebulaShopItem(
       id: 'auto_clicker_basic',
       name: 'Auto Clicker',
-      description: 'Automatically guesses the target using real high/low feedback.',
+      description:
+          'Automatically guesses the target using real high/low feedback.',
       effect: 'Starts the feedback-driven guessing bot',
       price: BigNumber.fromInt(25),
     ),
@@ -81,9 +82,7 @@ class NebulaShopCatalog {
   ]);
 }
 
-typedef NebulaPurchase = Future<ProgressionState> Function(
-  NebulaShopItem item,
-);
+typedef NebulaPurchase = Future<ProgressionState> Function(NebulaShopItem item);
 
 class NebulaShopPage extends StatefulWidget {
   const NebulaShopPage({
@@ -156,13 +155,16 @@ class _NebulaShopPageState extends State<NebulaShopPage> {
               contentPadding: EdgeInsets.zero,
               title: const Text('Auto Clicker'),
               subtitle: Text(
-                _state.legacySystems.timeTravelPenaltyUntil > DateTime.now().millisecondsSinceEpoch
+                _state.legacySystems.timeTravelPenaltyUntil >
+                        DateTime.now().millisecondsSinceEpoch
                     ? 'Paused by clock rollback protection.'
                     : 'Let your owned bots guess automatically.',
               ),
               value: _state.legacySystems.autoClickerActive,
-              onChanged: _togglingAutomation ||
-                      _state.legacySystems.timeTravelPenaltyUntil > DateTime.now().millisecondsSinceEpoch
+              onChanged:
+                  _togglingAutomation ||
+                      _state.legacySystems.timeTravelPenaltyUntil >
+                          DateTime.now().millisecondsSinceEpoch
                   ? null
                   : _toggleAutomation,
             ),
@@ -177,7 +179,10 @@ class _NebulaShopPageState extends State<NebulaShopPage> {
                     Row(
                       children: [
                         Expanded(
-                          child: Text(item.name, style: theme.textTheme.titleMedium),
+                          child: Text(
+                            item.name,
+                            style: theme.textTheme.titleMedium,
+                          ),
                         ),
                         Text('Owned: ${_state.nebulaItems[item.id] ?? 0}'),
                       ],
@@ -193,11 +198,16 @@ class _NebulaShopPageState extends State<NebulaShopPage> {
                     ),
                     const SizedBox(height: 12),
                     M3EButton.filled(
-                      onPressed: _buyingId != null ||
+                      onPressed:
+                          _buyingId != null ||
                               _state.nebula.compareTo(item.price) < 0 ||
-                              (NebulaShopCatalog.automationIds.contains(item.id) &&
+                              (NebulaShopCatalog.automationIds.contains(
+                                    item.id,
+                                  ) &&
                                   (_state.nebulaItems[item.id] ?? 0) > 0) ||
-                              (NebulaShopCatalog.botUpgradeIds.contains(item.id) &&
+                              (NebulaShopCatalog.botUpgradeIds.contains(
+                                    item.id,
+                                  ) &&
                                   !NebulaShopCatalog.botIds.any(
                                     (id) => (_state.nebulaItems[id] ?? 0) > 0,
                                   ))

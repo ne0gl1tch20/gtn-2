@@ -11,14 +11,13 @@ void main() {
   ProgressionState stateWith({
     Set<String> unlocked = const {'verdant_grove'},
     int correctGuesses = 0,
-  }) =>
-      ProgressionState(
-        correctGuesses: correctGuesses,
-        legacySystems: LegacySystemsState.initial.copyWith(
-          unlockedWorldIds: unlocked,
-          worldUnlockMigrationPending: false,
-        ),
-      );
+  }) => ProgressionState(
+    correctGuesses: correctGuesses,
+    legacySystems: LegacySystemsState.initial.copyWith(
+      unlockedWorldIds: unlocked,
+      worldUnlockMigrationPending: false,
+    ),
+  );
 
   Future<void> pumpMap(
     WidgetTester tester, {
@@ -40,8 +39,9 @@ void main() {
     await tester.pump(const Duration(milliseconds: 400));
   }
 
-  testWidgets('recreates GTN1 progression summary and world expedition list',
-      (tester) async {
+  testWidgets('recreates GTN1 progression summary and world expedition list', (
+    tester,
+  ) async {
     final state = stateWith();
     await pumpMap(tester, state: state, onAction: (_, __) async => state);
 
@@ -57,8 +57,9 @@ void main() {
     expect(find.text('Requirements pending'), findsWidgets);
   });
 
-  testWidgets('renders all four world nodes on an interactive map',
-      (tester) async {
+  testWidgets('renders all four world nodes on an interactive map', (
+    tester,
+  ) async {
     final state = stateWith();
     await pumpMap(tester, state: state, onAction: (_, __) async => state);
 
@@ -69,8 +70,9 @@ void main() {
     expect(find.text('Verdant Grove'), findsWidgets);
   });
 
-  testWidgets('map fit, reset and zoom controls update the real viewport',
-      (tester) async {
+  testWidgets('map fit, reset and zoom controls update the real viewport', (
+    tester,
+  ) async {
     final state = stateWith();
     await pumpMap(tester, state: state, onAction: (_, __) async => state);
 
@@ -101,7 +103,8 @@ void main() {
     await pumpMap(tester, state: state, onAction: (_, __) async => state);
 
     final viewer = find.byType(InteractiveViewer);
-    final controller = tester.widget<InteractiveViewer>(viewer)
+    final controller = tester
+        .widget<InteractiveViewer>(viewer)
         .transformationController!;
     final before = controller.value.clone();
 
@@ -112,8 +115,9 @@ void main() {
     expect(controller.value.storage, isNot(equals(before.storage)));
   });
 
-  testWidgets('selecting an unlocked node uses the progression action',
-      (tester) async {
+  testWidgets('selecting an unlocked node uses the progression action', (
+    tester,
+  ) async {
     final unlocked = WorldBossCatalog.worlds.map((world) => world.id).toSet();
     final state = stateWith(unlocked: unlocked);
     final calls = <(String, String)>[];
@@ -138,8 +142,9 @@ void main() {
     expect(find.text('Selected world'), findsWidgets);
   });
 
-  testWidgets('defeated world exposes mastery and dispatches its real action',
-      (tester) async {
+  testWidgets('defeated world exposes mastery and dispatches its real action', (
+    tester,
+  ) async {
     final state = stateWith().copyWith(
       defeatedBosses: const {'verdant_guardian'},
       nebula: BigNumber.fromInt(1000),
@@ -183,29 +188,33 @@ void main() {
     expect(find.textContaining('World mastery: 2 / 10'), findsOneWidget);
   });
 
-  testWidgets('secret route marker appears at its threshold and dispatches discovery',
-      (tester) async {
-    final state = stateWith(correctGuesses: 50);
-    String? actionId;
-    String? actionName;
+  testWidgets(
+    'secret route marker appears at its threshold and dispatches discovery',
+    (tester) async {
+      final state = stateWith(correctGuesses: 50);
+      String? actionId;
+      String? actionName;
 
-    await pumpMap(
-      tester,
-      state: state,
-      onAction: (id, action) async {
-        actionId = id;
-        actionName = action;
-        return state;
-      },
-    );
+      await pumpMap(
+        tester,
+        state: state,
+        onAction: (id, action) async {
+          actionId = id;
+          actionName = action;
+          return state;
+        },
+      );
 
-    final secret = find.byKey(const ValueKey('secret-node-whispering_hollow'));
-    expect(secret, findsOneWidget);
-    await tester.ensureVisible(secret);
-    await tester.tap(secret);
-    await tester.pump(const Duration(milliseconds: 400));
+      final secret = find.byKey(
+        const ValueKey('secret-node-whispering_hollow'),
+      );
+      expect(secret, findsOneWidget);
+      await tester.ensureVisible(secret);
+      await tester.tap(secret);
+      await tester.pump(const Duration(milliseconds: 400));
 
-    expect(actionId, 'whispering_hollow');
-    expect(actionName, 'secret');
-  });
+      expect(actionId, 'whispering_hollow');
+      expect(actionName, 'secret');
+    },
+  );
 }

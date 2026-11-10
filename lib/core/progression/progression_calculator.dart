@@ -41,15 +41,18 @@ class ProgressionCalculator {
         ? (numerator * BigInt.from(10).pow(shift)) ~/ denominator
         : numerator ~/ (denominator * BigInt.from(10).pow(-shift));
     final digits = scaled.toString().padLeft(17, '0');
-    final mantissa = double.parse('${digits.substring(0, 1)}.${digits.substring(1, 16)}');
-    final reward = (100 * (exponent + ((math.log(mantissa) / math.ln10)))).floor();
+    final mantissa = double.parse(
+      '${digits.substring(0, 1)}.${digits.substring(1, 16)}',
+    );
+    final reward = (100 * (exponent + ((math.log(mantissa) / math.ln10))))
+        .floor();
     return reward.clamp(0, 2000);
   }
 
   static PrestigeRules prestigeRules(ProgressionState state) {
     final requirement = prestigeRequirement(state.prestigeResets);
-    final gainLevel =
-        (state.prestigeUpgrades['prestige_gain_boost'] ?? 0).clamp(0, 25);
+    final gainLevel = (state.prestigeUpgrades['prestige_gain_boost'] ?? 0)
+        .clamp(0, 25);
     final startingLevel =
         (state.prestigeUpgrades['prestige_starting_capital'] ?? 0).clamp(0, 30);
     final gainMultiplier = BigNumber.parse(
@@ -58,16 +61,17 @@ class ProgressionCalculator {
     return PrestigeRules(
       minimumMoney: requirement,
       startingCapital: BigNumber.fromInt(startingLevel * 1000),
-      rewardForMoney: (money) => _floorToInteger(
-        prestigeReward(money, requirement) * gainMultiplier,
-      ),
+      rewardForMoney: (money) =>
+          _floorToInteger(prestigeReward(money, requirement) * gainMultiplier),
     );
   }
 
   static UltraRules ultraRules(ProgressionState state) {
     final requirement = ultraRequirement(state.ultraResets);
-    final gainLevel =
-        (state.ultraUpgrades['ultra_gain_boost'] ?? 0).clamp(0, 10);
+    final gainLevel = (state.ultraUpgrades['ultra_gain_boost'] ?? 0).clamp(
+      0,
+      10,
+    );
     final startingLevel =
         (state.prestigeUpgrades['prestige_starting_capital'] ?? 0).clamp(0, 30);
     final gainMultiplier = BigNumber.parse(

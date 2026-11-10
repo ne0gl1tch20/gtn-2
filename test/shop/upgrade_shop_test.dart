@@ -10,18 +10,26 @@ void main() {
 
   setUpAll(UpgradeCatalog.load);
 
-  test('canonical catalog contains eleven unique source upgrade definitions', () {
-    final ids = UpgradeCatalog.all.map((item) => item.definition.id).toSet();
-    expect(ids.length, 11);
-    expect(UpgradeCatalog.all.length, 11);
-  });
+  test(
+    'canonical catalog contains eleven unique source upgrade definitions',
+    () {
+      final ids = UpgradeCatalog.all.map((item) => item.definition.id).toSet();
+      expect(ids.length, 11);
+      expect(UpgradeCatalog.all.length, 11);
+    },
+  );
 
-  test('only the source upgrades with wired effects are offered for purchase', () {
-    expect(
-      UpgradeCatalog.availableForGameplay.map((item) => item.definition.id).toSet(),
-      {'reward_multiplier', 'better_range'},
-    );
-  });
+  test(
+    'only the source upgrades with wired effects are offered for purchase',
+    () {
+      expect(
+        UpgradeCatalog.availableForGameplay
+            .map((item) => item.definition.id)
+            .toSet(),
+        {'reward_multiplier', 'better_range'},
+      );
+    },
+  );
 
   test('reward multiplier purchase spends the exact canonical cost', () {
     final upgrade = UpgradeCatalog.byId('reward_multiplier').definition;
@@ -84,5 +92,4 @@ void main() {
     expect(result.ultra.toString(), '0');
     expect(result.ultraUpgrades['ultra_money_boost'], 1);
   });
-
 }

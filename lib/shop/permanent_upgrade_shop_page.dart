@@ -31,14 +31,15 @@ class _PermanentUpgradeShopPageState extends State<PermanentUpgradeShopPage> {
   late ProgressionState _state = widget.progression;
   String? _buyingId;
 
-  List<GameUpgrade> get _catalog =>
-      widget.ultra ? UpgradeCatalog.availableUltra : UpgradeCatalog.availablePrestige;
+  List<GameUpgrade> get _catalog => widget.ultra
+      ? UpgradeCatalog.availableUltra
+      : UpgradeCatalog.availablePrestige;
 
   BigNumber get _balance => widget.ultra ? _state.ultra : _state.prestige;
 
-  int _level(String id) => (widget.ultra
-      ? _state.ultraUpgrades[id]
-      : _state.prestigeUpgrades[id]) ?? 0;
+  int _level(String id) =>
+      (widget.ultra ? _state.ultraUpgrades[id] : _state.prestigeUpgrades[id]) ??
+      0;
 
   Future<void> _buy(GameUpgrade upgrade) async {
     if (_buyingId != null) return;
@@ -86,10 +87,7 @@ class _PermanentUpgradeShopPageState extends State<PermanentUpgradeShopPage> {
                       style: theme.textTheme.titleMedium,
                     ),
                   ),
-                  Text(
-                    _balance.toString(),
-                    style: theme.textTheme.titleLarge,
-                  ),
+                  Text(_balance.toString(), style: theme.textTheme.titleLarge),
                 ],
               ),
             ),

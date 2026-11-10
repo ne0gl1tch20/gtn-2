@@ -21,13 +21,10 @@ class GameState {
 }
 
 class GameEngine {
-  GameEngine({
-    Random? random,
-    int minimum = 1,
-    int maximum = 100,
-  })  : _random = random ?? Random.secure(),
-        minimum = minimum,
-        maximum = maximum {
+  GameEngine({Random? random, int minimum = 1, int maximum = 100})
+    : _random = random ?? Random.secure(),
+      minimum = minimum,
+      maximum = maximum {
     if (minimum >= maximum) {
       throw ArgumentError('minimum must be less than maximum.');
     }
@@ -38,12 +35,12 @@ class GameEngine {
   final int maximum;
 
   GameState newGame() => GameState(
-        secret: minimum + _random.nextInt(maximum - minimum + 1),
-        attempts: 0,
-        isComplete: false,
-        minimum: minimum,
-        maximum: maximum,
-      );
+    secret: minimum + _random.nextInt(maximum - minimum + 1),
+    attempts: 0,
+    isComplete: false,
+    minimum: minimum,
+    maximum: maximum,
+  );
 
   /// Continues the endless GTN1 loop after a correct guess.
   ///
@@ -56,7 +53,9 @@ class GameEngine {
     int? attempts,
   }) {
     if (!completed.isComplete || completed.lastResult != GuessResult.correct) {
-      throw ArgumentError('Only a completed correct guess can advance the game.');
+      throw ArgumentError(
+        'Only a completed correct guess can advance the game.',
+      );
     }
     if (nextGame.isComplete ||
         nextGame.minimum > nextGame.maximum ||
@@ -139,8 +138,8 @@ class GameEngine {
     final result = value == state.secret
         ? GuessResult.correct
         : value < state.secret
-            ? GuessResult.tooLow
-            : GuessResult.tooHigh;
+        ? GuessResult.tooLow
+        : GuessResult.tooHigh;
     return GameState(
       secret: state.secret,
       attempts: state.attempts + 1,

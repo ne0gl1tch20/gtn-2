@@ -32,16 +32,16 @@ class GuessEconomyRules {
 
   /// GTN1's permanent Money upgrades apply to every money reward.
   static BigNumber moneyEarningMultiplier(ProgressionState state) {
-    final prestigeLevel =
-        (state.prestigeUpgrades['prestige_money_boost'] ?? 0).clamp(0, 50);
-    final ultraLevel =
-        (state.ultraUpgrades['ultra_money_boost'] ?? 0).clamp(0, 20);
+    final prestigeLevel = (state.prestigeUpgrades['prestige_money_boost'] ?? 0)
+        .clamp(0, 50);
+    final ultraLevel = (state.ultraUpgrades['ultra_money_boost'] ?? 0).clamp(
+      0,
+      20,
+    );
     final prestige = BigNumber.parse(
       (1.0 + prestigeLevel * 0.5).toStringAsFixed(2),
     );
-    final ultra = BigNumber.parse(
-      (1.0 + ultraLevel * 2.0).toStringAsFixed(2),
-    );
+    final ultra = BigNumber.parse((1.0 + ultraLevel * 2.0).toStringAsFixed(2));
     return prestige * ultra;
   }
 
@@ -71,13 +71,11 @@ class GuessEconomyRules {
     );
     final upgrade = _decimal(1.0 + rewardMultiplierLevel * 0.25);
     final talent = BigNumber.parse(hasTalentReward ? '1.5' : '1');
-    final difficulty = _decimal(
-      DifficultyRules.rewardMultiplier(difficultyId),
-    );
-    final singularity =
-        BigNumber.parse(infiniteSingularityOwned ? '2' : '1');
+    final difficulty = _decimal(DifficultyRules.rewardMultiplier(difficultyId));
+    final singularity = BigNumber.parse(infiniteSingularityOwned ? '2' : '1');
 
-    final calculated = base *
+    final calculated =
+        base *
         streak *
         frenzy *
         critical *
@@ -88,7 +86,9 @@ class GuessEconomyRules {
         traitMultiplier *
         singularity;
     final minimum = BigNumber.fromInt(minimumGuessReward);
-    final minimumAdjusted = calculated.compareTo(minimum) < 0 ? minimum : calculated;
+    final minimumAdjusted = calculated.compareTo(minimum) < 0
+        ? minimum
+        : calculated;
     return minimumAdjusted * permanentMoneyMultiplier;
   }
 

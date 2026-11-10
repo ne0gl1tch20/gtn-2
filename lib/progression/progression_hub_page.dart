@@ -23,7 +23,7 @@ class ProgressionHubPage extends StatefulWidget {
   final ResetAction onPrestige;
   final ResetAction onUltra;
   final Future<ProgressionState> Function(GameUpgrade upgrade, bool ultra)
-      onPurchasePermanentUpgrade;
+  onPurchasePermanentUpgrade;
 
   @override
   State<ProgressionHubPage> createState() => _ProgressionHubPageState();
@@ -62,12 +62,14 @@ class _ProgressionHubPageState extends State<ProgressionHubPage> {
 
   @override
   Widget build(BuildContext context) {
-    final prestigeRequirement =
-        ProgressionCalculator.prestigeRequirement(_state.prestigeResets);
+    final prestigeRequirement = ProgressionCalculator.prestigeRequirement(
+      _state.prestigeResets,
+    );
     final prestigeReward = ProgressionCalculator.prestigeRules(_state)
         .rewardForMoney(_state.money);
-    final ultraRequirement =
-        ProgressionCalculator.ultraRequirement(_state.ultraResets);
+    final ultraRequirement = ProgressionCalculator.ultraRequirement(
+      _state.ultraResets,
+    );
     final ultraReward = ProgressionCalculator.ultraRules(_state)
         .rewardForMoney(_state.money);
     final hasPrestigeForUltra =
@@ -97,7 +99,8 @@ class _ProgressionHubPageState extends State<ProgressionHubPage> {
                   ),
                   const SizedBox(height: 12),
                   M3EButton.filled(
-                    onPressed: _busy ||
+                    onPressed:
+                        _busy ||
                             _state.money.compareTo(prestigeRequirement) < 0 ||
                             prestigeReward.compareTo(BigNumber.fromInt(0)) <= 0
                         ? null
@@ -105,7 +108,7 @@ class _ProgressionHubPageState extends State<ProgressionHubPage> {
                     child: const Text('Prestige reset'),
                   ),
                   M3EButton.icon(
-                style: M3EButtonStyle.outlined,
+                    style: M3EButtonStyle.outlined,
                     onPressed: _busy ? null : () => _openPermanentShop(false),
                     icon: const Icon(Icons.upgrade),
                     label: const Text('Prestige upgrades'),
@@ -133,7 +136,8 @@ class _ProgressionHubPageState extends State<ProgressionHubPage> {
                   ),
                   const SizedBox(height: 12),
                   M3EButton.filled(
-                    onPressed: _busy ||
+                    onPressed:
+                        _busy ||
                             !hasPrestigeForUltra ||
                             _state.money.compareTo(ultraRequirement) < 0 ||
                             ultraReward <= 0
@@ -142,7 +146,7 @@ class _ProgressionHubPageState extends State<ProgressionHubPage> {
                     child: const Text('Ultra reset'),
                   ),
                   M3EButton.icon(
-                        style: M3EButtonStyle.outlined,
+                    style: M3EButtonStyle.outlined,
                     onPressed: _busy ? null : () => _openPermanentShop(true),
                     icon: const Icon(Icons.auto_awesome),
                     label: const Text('Ultra upgrades'),

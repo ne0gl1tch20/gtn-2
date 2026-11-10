@@ -58,9 +58,9 @@ class _WorldMapPageState extends State<WorldMapPage> {
   }
 
   WorldBossDefinition get _selectedWorld => WorldBossCatalog.worlds.firstWhere(
-        (world) => world.id == _selectedWorldId,
-        orElse: () => WorldBossCatalog.worlds.first,
-      );
+    (world) => world.id == _selectedWorldId,
+    orElse: () => WorldBossCatalog.worlds.first,
+  );
 
   Future<void> _selectWorld(WorldBossDefinition world) async {
     if (_state.legacySystems.endlessRiftActive &&
@@ -98,14 +98,15 @@ class _WorldMapPageState extends State<WorldMapPage> {
   }
 
   void _resetMap(BoxConstraints constraints) {
-    final scale = math.min(
-      constraints.maxWidth / _mapWidth,
-      constraints.maxHeight / _mapHeight,
-    ).clamp(0.35, 0.9).toDouble();
-    final verticalOffset =
-        (constraints.maxHeight - _mapHeight * scale) / 2;
-    final horizontalOffset =
-        (constraints.maxWidth - _mapWidth * scale) / 2;
+    final scale = math
+        .min(
+          constraints.maxWidth / _mapWidth,
+          constraints.maxHeight / _mapHeight,
+        )
+        .clamp(0.35, 0.9)
+        .toDouble();
+    final verticalOffset = (constraints.maxHeight - _mapHeight * scale) / 2;
+    final horizontalOffset = (constraints.maxWidth - _mapWidth * scale) / 2;
     _transformController.value = Matrix4.identity()
       ..translateByDouble(horizontalOffset, verticalOffset, 0, 1)
       ..scaleByDouble(scale, scale, scale, 1);
@@ -113,7 +114,8 @@ class _WorldMapPageState extends State<WorldMapPage> {
 
   void _zoom(double factor) {
     final current = _transformController.value;
-    final next = Matrix4.copy(current)..scaleByDouble(factor, factor, factor, 1);
+    final next = Matrix4.copy(current)
+      ..scaleByDouble(factor, factor, factor, 1);
     final scale = next.getMaxScaleOnAxis();
     if (scale >= 0.35 && scale <= 3.0) {
       _transformController.value = next;
@@ -125,7 +127,8 @@ class _WorldMapPageState extends State<WorldMapPage> {
     final theme = Theme.of(context);
     final selected = _selectedWorld;
     final selectedUnlocked = WorldBossCatalog.isUnlocked(_state, selected);
-    final selectedDefeated = WorldBossCatalog.isDefeated(_state, selected) &&
+    final selectedDefeated =
+        WorldBossCatalog.isDefeated(_state, selected) &&
         !_state.legacySystems.endlessRiftActive;
     final selectedActive =
         _state.legacySystems.activeBossBattleWorldId == selected.id;
@@ -134,7 +137,8 @@ class _WorldMapPageState extends State<WorldMapPage> {
     final riftTier = _state.legacySystems.endlessRiftTier < 1
         ? 1
         : _state.legacySystems.endlessRiftTier;
-    final hp = selected.hits +
+    final hp =
+        selected.hits +
         (_state.legacySystems.endlessRiftActive ? (riftTier - 1) * 2 : 0);
     final damage = WorldBossCatalog.damage(_state, selected).clamp(0, hp);
     final phase = ((damage * 3) ~/ hp + 1).clamp(1, 3);
@@ -147,29 +151,35 @@ class _WorldMapPageState extends State<WorldMapPage> {
       'ember_dragon',
       'nebula_titan',
     };
-    final secretDiscount = _state.legacySystems.discoveredSecrets
-            .contains(selected.secretId)
+    final secretDiscount =
+        _state.legacySystems.discoveredSecrets.contains(selected.secretId)
         ? 0.20
         : 0.0;
-    final sanctuaryDiscount =
-        (_state.legacySystems.homeBaseLevel * 0.01).clamp(0.0, 0.20);
-    final relicDiscount = _state.legacySystems.equippedRelics
-            .containsAll(bossRelics)
+    final sanctuaryDiscount = (_state.legacySystems.homeBaseLevel * 0.01).clamp(
+      0.0,
+      0.20,
+    );
+    final relicDiscount =
+        _state.legacySystems.equippedRelics.containsAll(bossRelics)
         ? 0.10
         : 0.0;
-    final masteryDiscount =
-        (secretDiscount + sanctuaryDiscount + relicDiscount).clamp(0.0, 0.40);
-    final masteryCost = BigNumber.fromInt(10 * (mastery + 1)) *
+    final masteryDiscount = (secretDiscount + sanctuaryDiscount + relicDiscount)
+        .clamp(0.0, 0.40);
+    final masteryCost =
+        BigNumber.fromInt(10 * (mastery + 1)) *
         BigNumber.parse((1 - masteryDiscount).toStringAsFixed(2));
-    final canUpgradeMastery = mastery < 10 &&
-        _state.nebula.compareTo(masteryCost) >= 0;
+    final canUpgradeMastery =
+        mastery < 10 && _state.nebula.compareTo(masteryCost) >= 0;
 
     return Scaffold(
       appBar: GtnExpressiveAppBar(
         title: Text(AppLocalizations.text('world_map_title', 'World Map')),
         actions: [
           IconButton(
-            tooltip: AppLocalizations.text('map_fit_screen', 'Fit map to screen'),
+            tooltip: AppLocalizations.text(
+              'map_fit_screen',
+              'Fit map to screen',
+            ),
             onPressed: () {
               // The viewport callback installs a correctly sized fit transform.
               setState(() {});
@@ -264,7 +274,10 @@ class _WorldMapPageState extends State<WorldMapPage> {
                               for (final world in WorldBossCatalog.worlds)
                                 _buildWorldNode(context, world),
                               for (final world in WorldBossCatalog.worlds)
-                                if (WorldBossCatalog.isUnlocked(_state, world) &&
+                                if (WorldBossCatalog.isUnlocked(
+                                      _state,
+                                      world,
+                                    ) &&
                                     _state.correctGuesses >= world.secretAt)
                                   _buildSecretNode(context, world),
                             ],
@@ -302,7 +315,6 @@ class _WorldMapPageState extends State<WorldMapPage> {
   bool _fitRequested = false;
   bool _hasInitializedTransform = false;
 
-
   Widget _buildProgressionSummary(BuildContext context) {
     final theme = Theme.of(context);
     final activeWorld = WorldBossCatalog.worlds.firstWhere(
@@ -336,7 +348,10 @@ class _WorldMapPageState extends State<WorldMapPage> {
                       ),
                     ),
                     Text(
-                      AppLocalizations.text('web_ui_your_universe', 'Your universe'),
+                      AppLocalizations.text(
+                        'web_ui_your_universe',
+                        'Your universe',
+                      ),
                       style: theme.textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.w900,
                       ),
@@ -530,10 +545,7 @@ class _WorldMapPageState extends State<WorldMapPage> {
                   ],
                 ),
               ),
-              _StatusChip(
-                label: 'READY',
-                color: GtnUiTokens.green,
-              ),
+              _StatusChip(label: 'READY', color: GtnUiTokens.green),
             ],
           ),
           const SizedBox(height: 8),
@@ -552,13 +564,11 @@ class _WorldMapPageState extends State<WorldMapPage> {
     );
   }
 
-  Widget _buildWorldEntry(
-    BuildContext context,
-    WorldBossDefinition world,
-  ) {
+  Widget _buildWorldEntry(BuildContext context, WorldBossDefinition world) {
     final theme = Theme.of(context);
     final unlocked = WorldBossCatalog.isUnlocked(_state, world);
-    final defeated = WorldBossCatalog.isDefeated(_state, world) &&
+    final defeated =
+        WorldBossCatalog.isDefeated(_state, world) &&
         !_state.legacySystems.endlessRiftActive;
     final active = _state.legacySystems.activeBossBattleWorldId == world.id;
     final canUnlock = WorldBossCatalog.canUnlock(_state, world);
@@ -567,7 +577,8 @@ class _WorldMapPageState extends State<WorldMapPage> {
     final riftTier = _state.legacySystems.endlessRiftTier < 1
         ? 1
         : _state.legacySystems.endlessRiftTier;
-    final hp = world.hits +
+    final hp =
+        world.hits +
         (_state.legacySystems.endlessRiftActive ? (riftTier - 1) * 2 : 0);
     final damage = WorldBossCatalog.damage(_state, world).clamp(0, hp);
     final remaining = (hp - damage).clamp(0, hp);
@@ -575,15 +586,15 @@ class _WorldMapPageState extends State<WorldMapPage> {
     final status = defeated
         ? 'CLEARED'
         : active
-            ? 'BATTLE LIVE'
-            : unlocked
-                ? 'UNLOCKED'
-                : 'LOCKED';
+        ? 'BATTLE LIVE'
+        : unlocked
+        ? 'UNLOCKED'
+        : 'LOCKED';
     final statusColor = defeated
         ? GtnUiTokens.green
         : unlocked
-            ? GtnUiTokens.purple
-            : GtnUiTokens.muted;
+        ? GtnUiTokens.purple
+        : GtnUiTokens.muted;
     final name = AppLocalizations.text(world.worldNameKey, world.worldName);
     final bossName = AppLocalizations.text(world.bossNameKey, world.name);
     final requirement = !unlocked
@@ -592,11 +603,11 @@ class _WorldMapPageState extends State<WorldMapPage> {
             'World unlock requirements are not met.',
           )
         : !canFight && !active && !defeated
-            ? AppLocalizations.text(
-                world.bossRequirementKey,
-                'Boss battle requirements are not met.',
-              )
-            : null;
+        ? AppLocalizations.text(
+            world.bossRequirementKey,
+            'Boss battle requirements are not met.',
+          )
+        : null;
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(13),
@@ -710,7 +721,9 @@ class _WorldMapPageState extends State<WorldMapPage> {
                   onPressed: canUnlock && !busy
                       ? () => _runAction(world.id, 'unlock')
                       : null,
-                  child: Text(canUnlock ? 'Unlock world' : 'Requirements pending'),
+                  child: Text(
+                    canUnlock ? 'Unlock world' : 'Requirements pending',
+                  ),
                 ),
               M3EButton.filled(
                 onPressed: (active || canFight) && !busy && !defeated
@@ -720,8 +733,8 @@ class _WorldMapPageState extends State<WorldMapPage> {
                   active
                       ? 'Leave battle'
                       : defeated && !_state.legacySystems.endlessRiftActive
-                          ? 'Boss defeated'
-                          : 'Start battle',
+                      ? 'Boss defeated'
+                      : 'Start battle',
                 ),
               ),
               if (unlocked)
@@ -754,10 +767,10 @@ class _WorldMapPageState extends State<WorldMapPage> {
     final status = defeated
         ? AppLocalizations.text('boss_defeated', 'Defeated')
         : active
-            ? AppLocalizations.text('boss_battle_active', 'Battle active')
-            : unlocked
-                ? AppLocalizations.text('world_status_unlocked', 'Unlocked')
-                : AppLocalizations.text('world_status_locked', 'Locked');
+        ? AppLocalizations.text('boss_battle_active', 'Battle active')
+        : unlocked
+        ? AppLocalizations.text('world_status_unlocked', 'Unlocked')
+        : AppLocalizations.text('world_status_locked', 'Locked');
     final icon = switch (world.id) {
       'verdant_grove' => Icons.forest,
       'crystal_caverns' => Icons.diamond,
@@ -785,8 +798,8 @@ class _WorldMapPageState extends State<WorldMapPage> {
                 color: selected
                     ? theme.colorScheme.primaryContainer
                     : unlocked
-                        ? theme.colorScheme.secondaryContainer
-                        : theme.colorScheme.surfaceContainerHighest,
+                    ? theme.colorScheme.secondaryContainer
+                    : theme.colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
                   color: selected
@@ -797,7 +810,9 @@ class _WorldMapPageState extends State<WorldMapPage> {
                 boxShadow: selected
                     ? [
                         BoxShadow(
-                          color: theme.colorScheme.primary.withValues(alpha: 0.2),
+                          color: theme.colorScheme.primary.withValues(
+                            alpha: 0.2,
+                          ),
                           blurRadius: 18,
                           spreadRadius: 2,
                         ),
@@ -807,16 +822,29 @@ class _WorldMapPageState extends State<WorldMapPage> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(icon, color: unlocked
-                      ? theme.colorScheme.primary
-                      : theme.colorScheme.onSurfaceVariant),
+                  Icon(
+                    icon,
+                    color: unlocked
+                        ? theme.colorScheme.primary
+                        : theme.colorScheme.onSurfaceVariant,
+                  ),
                   const SizedBox(height: 3),
-                  Text(name, textAlign: TextAlign.center,
-                      maxLines: 2, overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.labelMedium),
+                  Text(
+                    name,
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.labelMedium,
+                  ),
                   const SizedBox(height: 2),
                   Text(
-                    defeated ? '★' : active ? '⚔' : unlocked ? '●' : '🔒',
+                    defeated
+                        ? '★'
+                        : active
+                        ? '⚔'
+                        : unlocked
+                        ? '●'
+                        : '🔒',
                     style: theme.textTheme.labelSmall,
                   ),
                 ],
@@ -829,15 +857,23 @@ class _WorldMapPageState extends State<WorldMapPage> {
   }
 
   Widget _buildSecretNode(BuildContext context, WorldBossDefinition world) {
-    final found = _state.legacySystems.discoveredSecrets.contains(world.secretId);
+    final found = _state.legacySystems.discoveredSecrets.contains(
+      world.secretId,
+    );
     final theme = Theme.of(context);
     return Positioned(
       left: world.x * _mapWidth - 17,
       top: world.y * _mapHeight + 45,
       child: Tooltip(
         message: found
-            ? AppLocalizations.text('secret_discovered', 'Secret area discovered')
-            : AppLocalizations.text('secret_available', 'Hidden route discovered'),
+            ? AppLocalizations.text(
+                'secret_discovered',
+                'Secret area discovered',
+              )
+            : AppLocalizations.text(
+                'secret_available',
+                'Hidden route discovered',
+              ),
         child: Semantics(
           button: true,
           label: 'Secret area: ${world.secretId}',
@@ -855,8 +891,11 @@ class _WorldMapPageState extends State<WorldMapPage> {
               child: SizedBox(
                 width: 38,
                 height: 38,
-                child: Icon(Icons.key, size: 18,
-                    color: theme.colorScheme.tertiary),
+                child: Icon(
+                  Icons.key,
+                  size: 18,
+                  color: theme.colorScheme.tertiary,
+                ),
               ),
             ),
           ),
@@ -882,10 +921,14 @@ class _WorldMapPageState extends State<WorldMapPage> {
     required bool canUpgradeMastery,
   }) {
     final theme = Theme.of(context);
-    final worldName = AppLocalizations.text(world.worldNameKey, world.worldName);
+    final worldName = AppLocalizations.text(
+      world.worldNameKey,
+      world.worldName,
+    );
     final bossName = AppLocalizations.text(world.bossNameKey, world.name);
-    final discovered =
-        _state.legacySystems.discoveredSecrets.contains(world.secretId);
+    final discovered = _state.legacySystems.discoveredSecrets.contains(
+      world.secretId,
+    );
     final busy = _busyAction != null;
     return GtnExpressiveCard(
       child: Padding(
@@ -902,15 +945,15 @@ class _WorldMapPageState extends State<WorldMapPage> {
                   label: defeated
                       ? 'Defeated'
                       : active
-                          ? 'Battle active'
-                          : unlocked
-                              ? 'Unlocked'
-                              : 'Locked',
+                      ? 'Battle active'
+                      : unlocked
+                      ? 'Unlocked'
+                      : 'Locked',
                   color: defeated
                       ? theme.colorScheme.tertiary
                       : unlocked
-                          ? theme.colorScheme.primary
-                          : theme.colorScheme.onSurfaceVariant,
+                      ? theme.colorScheme.primary
+                      : theme.colorScheme.onSurfaceVariant,
                 ),
               ],
             ),
@@ -918,15 +961,19 @@ class _WorldMapPageState extends State<WorldMapPage> {
             Text(bossName, style: theme.textTheme.titleMedium),
             const SizedBox(height: 8),
             if (!unlocked)
-              Text(AppLocalizations.text(
-                world.worldRequirementKey,
-                'World unlock requirements are not met.',
-              ))
+              Text(
+                AppLocalizations.text(
+                  world.worldRequirementKey,
+                  'World unlock requirements are not met.',
+                ),
+              )
             else
-              Text(AppLocalizations.text(
-                world.bossRequirementKey,
-                'Boss battle requirements',
-              )),
+              Text(
+                AppLocalizations.text(
+                  world.bossRequirementKey,
+                  'Boss battle requirements',
+                ),
+              ),
             const SizedBox(height: 8),
             if (unlocked && !defeated) ...[
               Text('Boss HP: ${(hp - damage).clamp(0, hp)} / $hp'),
@@ -959,16 +1006,15 @@ class _WorldMapPageState extends State<WorldMapPage> {
                 ),
               ),
               if (_state.legacySystems.endlessRiftActive)
-                Text('Endless Rift · Tier $riftTierLabel',
-                    style: theme.textTheme.labelMedium),
+                Text(
+                  'Endless Rift · Tier $riftTierLabel',
+                  style: theme.textTheme.labelMedium,
+                ),
               const SizedBox(height: 8),
             ],
             if (unlocked && !defeated)
               Text(
-                AppLocalizations.text(
-                  world.bossRewardKey,
-                  'Victory rewards',
-                ),
+                AppLocalizations.text(world.bossRewardKey, 'Victory rewards'),
                 style: theme.textTheme.bodySmall,
               ),
             if (unlocked && _state.correctGuesses >= world.secretAt)
@@ -1026,7 +1072,10 @@ class _WorldMapPageState extends State<WorldMapPage> {
                     : null,
                 child: Text(
                   mastery >= 10
-                      ? AppLocalizations.text('world_mastery_max', 'Mastery maxed')
+                      ? AppLocalizations.text(
+                          'world_mastery_max',
+                          'Mastery maxed',
+                        )
                       : AppLocalizations.text(
                           'world_mastery_upgrade',
                           'Increase mastery · $masteryCost Nebula',
@@ -1041,9 +1090,11 @@ class _WorldMapPageState extends State<WorldMapPage> {
                     ? null
                     : () => _runAction(world.id, 'select_world'),
                 icon: const Icon(Icons.check_circle_outline),
-                label: Text(_state.legacySystems.activeWorldId == world.id
-                    ? 'Selected world'
-                    : 'Select world'),
+                label: Text(
+                  _state.legacySystems.activeWorldId == world.id
+                      ? 'Selected world'
+                      : 'Select world',
+                ),
               ),
           ],
         ),
@@ -1056,7 +1107,6 @@ class _WorldMapPageState extends State<WorldMapPage> {
     return tier < 1 ? '1' : '$tier';
   }
 }
-
 
 class _ProgressionCurrencyTile extends StatelessWidget {
   const _ProgressionCurrencyTile({
@@ -1175,7 +1225,6 @@ class _ProgressionMiniTile extends StatelessWidget {
   }
 }
 
-
 class _StatusChip extends StatelessWidget {
   const _StatusChip({required this.label, required this.color});
 
@@ -1184,15 +1233,15 @@ class _StatusChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => DecoratedBox(
-        decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.12),
-          borderRadius: BorderRadius.circular(30),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-          child: Text(label, style: Theme.of(context).textTheme.labelSmall),
-        ),
-      );
+    decoration: BoxDecoration(
+      color: color.withValues(alpha: 0.12),
+      borderRadius: BorderRadius.circular(30),
+    ),
+    child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      child: Text(label, style: Theme.of(context).textTheme.labelSmall),
+    ),
+  );
 }
 
 class _WorldRoutesPainter extends CustomPainter {
@@ -1220,7 +1269,8 @@ class _WorldRoutesPainter extends CustomPainter {
         .map((world) => Offset(world.x * size.width, world.y * size.height))
         .toList(growable: false);
     for (final (from, to) in routes) {
-      final bothUnlocked = unlockedIds.contains(worlds[from].id) &&
+      final bothUnlocked =
+          unlockedIds.contains(worlds[from].id) &&
           unlockedIds.contains(worlds[to].id);
       final paint = Paint()
         ..color = bothUnlocked
@@ -1234,8 +1284,7 @@ class _WorldRoutesPainter extends CustomPainter {
 
     for (var i = 0; i < worlds.length; i++) {
       final world = worlds[i];
-      if (correctGuesses >= world.secretAt &&
-          unlockedIds.contains(world.id)) {
+      if (correctGuesses >= world.secretAt && unlockedIds.contains(world.id)) {
         final secretPaint = Paint()
           ..color = colorScheme.tertiary.withValues(
             alpha: discoveredSecrets.contains(world.secretId) ? 0.9 : 0.45,
@@ -1246,11 +1295,7 @@ class _WorldRoutesPainter extends CustomPainter {
         final start = points[i];
         final end = points[i] + const Offset(38, 52);
         canvas.drawLine(start, end, secretPaint);
-        canvas.drawCircle(
-          end,
-          5,
-          Paint()..color = colorScheme.tertiary,
-        );
+        canvas.drawCircle(end, 5, Paint()..color = colorScheme.tertiary);
       }
     }
 
@@ -1260,10 +1305,11 @@ class _WorldRoutesPainter extends CustomPainter {
         points[i],
         selected ? 54 : 48,
         Paint()
-          ..color = (unlockedIds.contains(worlds[i].id)
-                  ? colorScheme.primary
-                  : colorScheme.outline)
-              .withValues(alpha: selected ? 0.16 : 0.08),
+          ..color =
+              (unlockedIds.contains(worlds[i].id)
+                      ? colorScheme.primary
+                      : colorScheme.outline)
+                  .withValues(alpha: selected ? 0.16 : 0.08),
       );
     }
   }

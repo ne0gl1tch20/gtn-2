@@ -34,12 +34,15 @@ void main() {
     expect(ArcadeRewardRules.calculateNebulaReward(-10, -5), 1);
   });
 
-  test('Money rewards use GTN1 score and time inputs with a one-million cap', () {
-    expect(ArcadeRewardRules.calculateMoneyReward(0, 0), 0);
-    expect(ArcadeRewardRules.calculateMoneyReward(60, 5), 3000);
-    expect(ArcadeRewardRules.calculateMoneyReward(600, 10000), 1000000);
-    expect(ArcadeRewardRules.calculateMoneyReward(-10, -5), 0);
-  });
+  test(
+    'Money rewards use GTN1 score and time inputs with a one-million cap',
+    () {
+      expect(ArcadeRewardRules.calculateMoneyReward(0, 0), 0);
+      expect(ArcadeRewardRules.calculateMoneyReward(60, 5), 3000);
+      expect(ArcadeRewardRules.calculateMoneyReward(600, 10000), 1000000);
+      expect(ArcadeRewardRules.calculateMoneyReward(-10, -5), 0);
+    },
+  );
 
   test('reaction test rejects early and negative reaction times', () {
     expect(ArcadeRewardRules.isReactionTestRewardEligible(250), isTrue);

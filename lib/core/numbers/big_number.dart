@@ -49,10 +49,8 @@ class BigNumber implements Comparable<BigNumber> {
   BigNumber operator -(BigNumber other) =>
       this + BigNumber.fromParts(-other.coefficient, other.scale);
 
-  BigNumber operator *(BigNumber other) => BigNumber.fromParts(
-        coefficient * other.coefficient,
-        scale + other.scale,
-      );
+  BigNumber operator *(BigNumber other) =>
+      BigNumber.fromParts(coefficient * other.coefficient, scale + other.scale);
 
   BigNumber multiplyInt(int value) =>
       BigNumber.fromParts(coefficient * BigInt.from(value), scale);
@@ -92,6 +90,5 @@ class BigNumber implements Comparable<BigNumber> {
     return negative ? '-$result' : result;
   }
 
-  static BigInt _powerOfTen(int exponent) =>
-      BigInt.from(10).pow(exponent);
+  static BigInt _powerOfTen(int exponent) => BigInt.from(10).pow(exponent);
 }

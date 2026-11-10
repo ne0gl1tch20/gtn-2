@@ -5,14 +5,19 @@ import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
 
 void main() {
-  testWidgets('Settings recreates the full GTN1 preference groups', (tester) async {
+  testWidgets('Settings recreates the full GTN1 preference groups', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       M3EMaterialApp(
         data: M3EThemeData.light(seedColor: const Color(0xFF7C5CFC)),
         fontFamily: 'Manrope',
         autoTheming: false,
         initialTheme: Brightness.dark,
-        home: SettingsPage(settings: GameSettings.initial, onChanged: (_) async {}),
+        home: SettingsPage(
+          settings: GameSettings.initial,
+          onChanged: (_) async {},
+        ),
       ),
     );
 
