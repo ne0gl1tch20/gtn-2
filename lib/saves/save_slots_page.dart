@@ -66,7 +66,7 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
     var difficulty = DifficultyRules.classic;
     var icon = 'default';
     final result = await GtnExpressiveDialog.show<({String name, String difficulty, String icon})>(
-      context: context,
+                          context,
       builder: (dialogContext) => StatefulBuilder(
         builder: (context, setDialogState) => GtnExpressiveDialog(
           title: Text('Create Slot $slot'),
@@ -156,7 +156,7 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
     final nameController = TextEditingController(text: current.profileName);
     var icon = current.profileIconId;
     final result = await GtnExpressiveDialog.show<({String name, String icon})>(
-      context: context,
+                          context,
       builder: (dialogContext) => StatefulBuilder(
         builder: (context, setDialogState) => GtnExpressiveDialog(
           title: Text('Edit Slot $slot Profile'),
@@ -247,7 +247,7 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
     }
     var target = emptySlots.first;
     final selected = await GtnExpressiveDialog.show<int>(
-      context: context,
+                          context,
       builder: (dialogContext) => StatefulBuilder(
         builder: (context, setDialogState) => GtnExpressiveDialog(
           title: Text('Duplicate Slot $sourceSlot'),
@@ -286,7 +286,7 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
 
   Future<void> _reset(int slot) async {
     final confirmed = await GtnExpressiveDialog.show<bool>(
-      context: context,
+                          context,
       builder: (dialogContext) => GtnExpressiveDialog(
         title: Text('Reset Slot $slot?'),
         content: const Text('This permanently deletes the save and its restore backup.'),
@@ -312,7 +312,7 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
 
   Future<void> _restore(int slot) async {
     final confirmed = await GtnExpressiveDialog.show<bool>(
-      context: context,
+                          context,
       builder: (dialogContext) => GtnExpressiveDialog(
         title: Text('Restore Slot $slot backup?'),
         content: const Text('The current save will become the backup, so you can switch back if needed.'),
