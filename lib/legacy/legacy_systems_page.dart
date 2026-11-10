@@ -5,11 +5,10 @@ import 'dart:math';
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:material_ui/material_ui.dart';
-import 'package:material_3_expressive/material_3_expressive.dart';
-import '../design/expressive_widgets.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter/services.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -19,6 +18,7 @@ import '../core/legacy/trait_catalog_repository.dart';
 import '../core/numbers/big_number.dart';
 import '../core/progression/progression_state.dart';
 import '../data/updates/update_checker.dart';
+import '../design/expressive_widgets.dart';
 import '../worlds/world_boss_catalog.dart';
 
 typedef LegacyProgressionChanged = Future<void> Function(ProgressionState progression);
