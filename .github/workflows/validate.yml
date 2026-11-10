@@ -10,6 +10,8 @@ on:
 permissions:
   contents: write
 
+# CI formatting is committed before the Android and Windows validation jobs.
+
 concurrency:
   group: validate-${{ github.ref }}
   cancel-in-progress: true
