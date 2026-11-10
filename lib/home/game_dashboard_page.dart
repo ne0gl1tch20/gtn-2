@@ -3,6 +3,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../core/game/game_engine.dart';
 import '../core/progression/progression_state.dart';
+import '../settings/game_settings.dart';
 import '../design/expressive_widgets.dart';
 
 const _purple = GtnUiTokens.purple;
@@ -21,6 +22,7 @@ class GameDashboardPage extends StatelessWidget {
     super.key,
     required this.game,
     required this.progression,
+    required this.settings,
     required this.activeSlot,
     required this.loading,
     required this.message,
@@ -36,11 +38,15 @@ class GameDashboardPage extends StatelessWidget {
     required this.onSettings,
     required this.onDeveloperSettings,
     required this.onLegacyPages,
+    required this.onMusic,
+    required this.onLuckyStake,
+    required this.onSystems,
     this.showDeveloperSettings = false,
   });
 
   final GameState game;
   final ProgressionState progression;
+  final GameSettings settings;
   final int activeSlot;
   final bool loading;
   final String message;
@@ -56,12 +62,16 @@ class GameDashboardPage extends StatelessWidget {
   final VoidCallback onSettings;
   final VoidCallback onDeveloperSettings;
   final VoidCallback onLegacyPages;
+  final VoidCallback onMusic;
+  final VoidCallback onLuckyStake;
+  final VoidCallback onSystems;
   final bool showDeveloperSettings;
 
   void _openMoreMenu(BuildContext context, Color panel) {
     Navigator.of(context).push<void>(
       MaterialPageRoute<void>(
         builder: (_) => _MoreMenuPage(
+          settings: settings,
           showDeveloperSettings: showDeveloperSettings,
           onPrestige: onPrestige,
           onNebulaShop: onNebulaShop,
@@ -69,6 +79,11 @@ class GameDashboardPage extends StatelessWidget {
           onSaveSlots: onSaveSlots,
           onSettings: onSettings,
           onDeveloperSettings: onDeveloperSettings,
+          onWorldMap: onWorldMap,
+          onArcade: onArcade,
+          onMusic: onMusic,
+          onLuckyStake: onLuckyStake,
+          onSystems: onSystems,
         ),
       ),
     );
@@ -691,6 +706,7 @@ class _BotArena extends StatelessWidget {
 
 class _MoreMenuPage extends StatelessWidget {
   const _MoreMenuPage({
+    required this.settings,
     required this.showDeveloperSettings,
     required this.onPrestige,
     required this.onNebulaShop,
@@ -698,8 +714,14 @@ class _MoreMenuPage extends StatelessWidget {
     required this.onSaveSlots,
     required this.onSettings,
     required this.onDeveloperSettings,
+    required this.onWorldMap,
+    required this.onArcade,
+    required this.onMusic,
+    required this.onLuckyStake,
+    required this.onSystems,
   });
 
+  final GameSettings settings;
   final bool showDeveloperSettings;
   final VoidCallback onPrestige;
   final VoidCallback onNebulaShop;
@@ -707,6 +729,17 @@ class _MoreMenuPage extends StatelessWidget {
   final VoidCallback onSaveSlots;
   final VoidCallback onSettings;
   final VoidCallback onDeveloperSettings;
+  final VoidCallback onWorldMap;
+  final VoidCallback onArcade;
+  final VoidCallback onMusic;
+  final VoidCallback onLuckyStake;
+  final VoidCallback onSystems;
+
+  Color _destinationColor(String? hex) {
+    if (hex == null || hex.isEmpty) return _purple;
+    final value = int.tryParse(hex.replaceFirst('#', ''), radix: 16);
+    return value == null ? _purple : Color(value | 0xFF000000);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -720,13 +753,14 @@ class _MoreMenuPage extends StatelessWidget {
       String title,
       String subtitle,
       VoidCallback onTap,
+      Color accent,
     ) {
       return GtnExpressiveCard(
         color: panel,
         margin: const EdgeInsets.only(bottom: 10),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(18),
-          side: BorderSide(color: foreground.withValues(alpha: .08)),
+          side: BorderSide(color: accent.withValues(alpha: .22)),
         ),
         child: Material(
           color: Colors.transparent,
@@ -738,7 +772,7 @@ class _MoreMenuPage extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 13),
               child: Row(
                 children: [
-                  Icon(icon, color: _purple),
+                  Icon(icon, color: accent),
                   const SizedBox(width: 14),
                   Expanded(
                     child: Column(
@@ -768,6 +802,138 @@ class _MoreMenuPage extends StatelessWidget {
       );
     }
 
+    final destinations =
+        <String, ({IconData icon, String title, String subtitle, VoidCallback onTap})>{
+          'world_map': (
+            icon: Icons.public_rounded,
+            title: 'World map',
+            subtitle: 'Explore unlocked worlds and bosses',
+            onTap: onWorldMap,
+          ),
+          'achievements': (
+            icon: Icons.emoji_events_rounded,
+            title: 'Achievements',
+            subtitle: 'Journey progress and rewards',
+            onTap: onLegacyPages,
+          ),
+          'live_ops': (
+            icon: Icons.event_available_rounded,
+            title: 'Live events',
+            subtitle: 'Seasonal and limited-time systems',
+            onTap: onLegacyPages,
+          ),
+          'mutators': (
+            icon: Icons.tune_rounded,
+            title: 'Mutators',
+            subtitle: 'Open the gameplay systems hub',
+            onTap: onSystems,
+          ),
+          'talent': (
+            icon: Icons.psychology_alt_rounded,
+            title: 'Talents',
+            subtitle: 'Open the gameplay systems hub',
+            onTap: onSystems,
+          ),
+          'relics': (
+            icon: Icons.auto_awesome_rounded,
+            title: 'Relics',
+            subtitle: 'Open the gameplay systems hub',
+            onTap: onSystems,
+          ),
+          'home_base': (
+            icon: Icons.home_work_rounded,
+            title: 'Home Base',
+            subtitle: 'Open the gameplay systems hub',
+            onTap: onSystems,
+          ),
+          'codex': (
+            icon: Icons.menu_book_rounded,
+            title: 'Codex',
+            subtitle: 'Discoveries and lore entries',
+            onTap: onLegacyPages,
+          ),
+          'endgame': (
+            icon: Icons.flag_rounded,
+            title: 'Endgame',
+            subtitle: 'Prestige and Ultra progression',
+            onTap: onPrestige,
+          ),
+          'arcade': (
+            icon: Icons.sports_esports_rounded,
+            title: 'Arcade',
+            subtitle: 'Play minigames and earn rewards',
+            onTap: onArcade,
+          ),
+          'stats': (
+            icon: Icons.query_stats_rounded,
+            title: 'Statistics',
+            subtitle: 'Review your gameplay records',
+            onTap: onLegacyPages,
+          ),
+          'changelog': (
+            icon: Icons.history_rounded,
+            title: 'Changelog',
+            subtitle: 'Review version history',
+            onTap: onLegacyPages,
+          ),
+          'settings': (
+            icon: Icons.settings_rounded,
+            title: 'Settings',
+            subtitle: 'Game preferences and Menu Studio',
+            onTap: onSettings,
+          ),
+          'about': (
+            icon: Icons.info_outline_rounded,
+            title: 'About',
+            subtitle: 'Credits, links and app information',
+            onTap: onLegacyPages,
+          ),
+          'staking': (
+            icon: Icons.casino_rounded,
+            title: 'Lucky Stake',
+            subtitle: 'Risk Money for streak-based rewards',
+            onTap: onLuckyStake,
+          ),
+          'ultra': (
+            icon: Icons.bolt_rounded,
+            title: 'Ultra',
+            subtitle: 'Permanent progression upgrades',
+            onTap: onPrestige,
+          ),
+          'prestige': (
+            icon: Icons.auto_awesome_rounded,
+            title: 'Prestige',
+            subtitle: 'Reset and advance your progression',
+            onTap: onPrestige,
+          ),
+          'save_slots': (
+            icon: Icons.save_rounded,
+            title: 'Save Slots',
+            subtitle: 'Manage your saved games',
+            onTap: onSaveSlots,
+          ),
+          'music': (
+            icon: Icons.library_music_rounded,
+            title: 'Music',
+            subtitle: 'Offline library, playlists and queue',
+            onTap: onMusic,
+          ),
+          'nebula': (
+            icon: Icons.diamond_rounded,
+            title: 'Nebula Shop',
+            subtitle: 'Permanent Nebula upgrades and items',
+            onTap: onNebulaShop,
+          ),
+        };
+    final orderedIds = <String>[
+      for (final id in settings.moreScreenOrder)
+        if (destinations.containsKey(id))
+          id,
+    ];
+    for (final id in destinations.keys) {
+      if (!orderedIds.contains(id)) orderedIds.add(id);
+    }
+
     return Scaffold(
       appBar: GtnExpressiveAppBar(title: const Text('More Hub')),
       body: ListView(
@@ -777,42 +943,21 @@ class _MoreMenuPage extends StatelessWidget {
           const SizedBox(height: 5),
           Text('Your shortcuts, your order.', style: TextStyle(color: muted)),
           const SizedBox(height: 18),
-          entry(
-            Icons.auto_awesome_rounded,
-            'Prestige & Ultra',
-            'Prestige and Ultra progression',
-            onPrestige,
-          ),
-          entry(
-            Icons.diamond_rounded,
-            'Nebula Shop',
-            'Nebula upgrades and items',
-            onNebulaShop,
-          ),
-          entry(
-            Icons.auto_stories_rounded,
-            'Journey, Rewards & Codex',
-            'Achievements, rewards and discoveries',
-            onLegacyPages,
-          ),
-          entry(
-            Icons.save_rounded,
-            'Save Slots',
-            'Manage your saved games',
-            onSaveSlots,
-          ),
-          entry(
-            Icons.settings_rounded,
-            'Settings',
-            'Game preferences',
-            onSettings,
-          ),
+          for (final id in orderedIds)
+            entry(
+              destinations[id]!.icon,
+              destinations[id]!.title,
+              destinations[id]!.subtitle,
+              destinations[id]!.onTap,
+              _destinationColor(settings.moreScreenButtonColors[id]),
+            ),
           if (showDeveloperSettings)
             entry(
               Icons.bug_report_rounded,
               'Dev Settings',
               'Developer tools',
               onDeveloperSettings,
+              _destinationColor(null),
             ),
         ],
       ),
