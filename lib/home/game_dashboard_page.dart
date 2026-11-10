@@ -308,7 +308,7 @@ class GameDashboardPage extends StatelessWidget {
                                 colors: [Colors.white, _cyan],
                               ).createShader(bounds),
                               child: Text('${game.minimum} — ${game.maximum}',
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     color: Colors.white,
                                     fontSize: compact ? 35 : 42,
                                     height: 1,
