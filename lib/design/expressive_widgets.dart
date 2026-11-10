@@ -47,7 +47,28 @@ class GtnExpressiveAppBar extends StatelessWidget implements PreferredSizeWidget
       );
 }
 
-/// Card compatibility wrapper backed by the native M3 Expressive card surface.
+/// GTN1 visual tokens. These intentionally preserve the Web Play identity while
+/// M3 Expressive supplies selected interactive controls, not the whole visual system.
+class GtnUiTokens {
+  GtnUiTokens._();
+
+  static const background = Color(0xFF080B16);
+  static const panel = Color(0xFF11172A);
+  static const raisedPanel = Color(0xFF171F36);
+  static const line = Color(0x20FFFFFF);
+  static const foreground = Color(0xFFF7F8FF);
+  static const muted = Color(0xFF9BA5C4);
+  static const purple = Color(0xFF9B7CFF);
+  static const cyan = Color(0xFF62E8FF);
+  static const gold = Color(0xFFFFD66B);
+  static const green = Color(0xFF63F5A4);
+  static const danger = Color(0xFFFF7195);
+  static const radius = 26.0;
+  static const contentMaxWidth = 720.0;
+}
+
+/// GTN1-style surface with custom gradients, borders and glow; M3E is reserved
+/// for the interactive controls where its expressive motion is useful.
 class GtnExpressiveCard extends StatelessWidget {
   const GtnExpressiveCard({
     super.key,
@@ -71,14 +92,27 @@ class GtnExpressiveCard extends StatelessWidget {
     final roundedShape = shape is RoundedRectangleBorder
         ? shape! as RoundedRectangleBorder
         : null;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final radius = roundedShape?.borderRadius.resolve(TextDirection.ltr).topLeft.x ??
+        GtnUiTokens.radius;
+    final side = roundedShape?.side ??
+        BorderSide(color: isDark ? GtnUiTokens.line : const Color(0x180D1530));
     return Padding(
       padding: margin,
-      child: M3ECard(
+      child: Container(
         padding: padding,
-        color: color,
-        elevation: elevation,
-        borderRadius: roundedShape?.borderRadius.resolve(TextDirection.ltr),
-        border: roundedShape?.side,
+        decoration: BoxDecoration(
+          color: color ?? (isDark ? GtnUiTokens.panel : Colors.white),
+          borderRadius: BorderRadius.circular(radius),
+          border: Border.fromBorderSide(side),
+          boxShadow: (elevation ?? 0) > 0
+              ? [BoxShadow(
+                  color: Colors.black.withValues(alpha: isDark ? .22 : .08),
+                  blurRadius: (elevation ?? 0) * 5,
+                  offset: Offset(0, (elevation ?? 0) * 1.5),
+                )]
+              : const [],
+        ),
         child: child,
       ),
     );
