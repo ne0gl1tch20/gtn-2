@@ -24,7 +24,9 @@ void main() {
       await tester.pump(const Duration(milliseconds: 100));
     }
     expect(find.text('Memory Digit Sequence'), findsOneWidget);
-    await tester.tap(find.text('Play').at(3));
+    final memoryMatchPlay = find.text('Play').at(3);
+    await tester.ensureVisible(memoryMatchPlay);
+    await tester.tap(memoryMatchPlay);
     await tester.pump(const Duration(milliseconds: 300));
 
     final sequence = tester
