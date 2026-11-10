@@ -56,7 +56,7 @@ class LegacyHubPage extends StatelessWidget {
               ),
             ),
           ),
-          Card(
+          GtnExpressiveCard(
             child: ListTile(
               leading: const Icon(Icons.grid_view_rounded),
               title: const Text('All gameplay systems'),
@@ -73,7 +73,7 @@ class LegacyHubPage extends StatelessWidget {
             ),
           ),
           for (final section in LegacySection.values)
-            Card(
+            GtnExpressiveCard(
               child: ListTile(
                 leading: Icon(section.icon),
                 title: Text(section.label),
@@ -113,7 +113,7 @@ class _LegacyDetailPage extends StatelessWidget {
       LegacySection.about => _about(context),
     };
     return Scaffold(
-      appBar: AppBar(title: Text(section.label)),
+      appBar: GtnExpressiveAppBar(title: Text(section.label)),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: content,
@@ -137,7 +137,7 @@ class _LegacyDetailPage extends StatelessWidget {
       Text('${progression.correctGuesses} correct guesses · ${progression.defeatedBosses.length}/4 guardians defeated'),
       const SizedBox(height: 16),
       for (final milestone in milestones)
-        Card(
+        GtnExpressiveCard(
           child: Padding(
             padding: const EdgeInsets.all(14),
             child: Column(
@@ -190,7 +190,7 @@ class _LegacyDetailPage extends StatelessWidget {
         const Text('A field guide to the four known worlds and their guardians.'),
         const SizedBox(height: 12),
         for (final boss in WorldBossCatalog.worlds)
-          Card(
+          GtnExpressiveCard(
             child: ListTile(
               leading: Icon(
                 progression.defeatedBosses.contains(boss.id)
@@ -222,7 +222,7 @@ class _LegacyDetailPage extends StatelessWidget {
         const Text('Built with Flutter and Dart. Game progress is stored locally on this device.'),
       ];
 
-  Widget _valueCard(String label, String value, IconData icon) => Card(
+  Widget _valueCard(String label, String value, IconData icon) => GtnExpressiveCard(
         child: ListTile(
           leading: Icon(icon),
           title: Text(label),
