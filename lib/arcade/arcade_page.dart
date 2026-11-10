@@ -85,7 +85,10 @@ class _ArcadePageState extends State<ArcadePage> {
                   for (final game in snapshot.data!)
                     GtnExpressiveCard(
                       margin: const EdgeInsets.only(bottom: 12),
-                      child: ListTile(
+                      child: Material(
+                        color: Colors.transparent,
+                        borderRadius: BorderRadius.circular(GtnUiTokens.radius),
+                        child: ListTile(
                         contentPadding: const EdgeInsets.all(16),
                         leading: Icon(_iconFor(game.id), size: 32),
                         title: Text(game.name),
@@ -101,6 +104,7 @@ class _ArcadePageState extends State<ArcadePage> {
                             title: game.name,
                             onReward: widget.onReward,
                           ),
+                        ),
                         ),
                       ),
                     ),
