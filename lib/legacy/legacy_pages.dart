@@ -1,4 +1,6 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
+import '../design/expressive_widgets.dart';
 
 import '../core/progression/progression_state.dart';
 import '../creative/creative_mode_page.dart';
@@ -33,7 +35,7 @@ class LegacyHubPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('More')),
+      appBar: GtnExpressiveAppBar(title: const Text('More')),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -41,7 +43,7 @@ class LegacyHubPage extends StatelessWidget {
           const SizedBox(height: 6),
           const Text('Progress, lifetime rewards, records and the world codex.'),
           const SizedBox(height: 16),
-          Card(
+          GtnExpressiveCard(
             child: ListTile(
               leading: const Icon(Icons.palette_rounded),
               title: const Text('Creative Mode'),
@@ -146,7 +148,7 @@ class _LegacyDetailPage extends StatelessWidget {
                   Text('${milestone.$2.clamp(0, milestone.$3)} / ${milestone.$3}'),
                 ]),
                 const SizedBox(height: 8),
-                LinearProgressIndicator(
+                M3EProgressIndicator.linearWavy(
                   value: (milestone.$2 / milestone.$3).clamp(0.0, 1.0),
                 ),
               ],
