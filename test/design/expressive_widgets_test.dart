@@ -52,6 +52,16 @@ void main() {
                 onChanged: (_) {},
                 decoration: const InputDecoration(labelText: 'Difficulty'),
               ),
+              M3EButton.text(
+                onPressed: () => GtnExpressiveDialog.show<void>(
+                  context,
+                  builder: (_) => const GtnExpressiveDialog(
+                    title: Text('M3E dialog'),
+                    content: Text('Dialog content'),
+                  ),
+                ),
+                child: const Text('Show dialog'),
+              ),
               const M3EProgressIndicator.linearWavy(value: 0.5),
               M3ESlider(value: 0.5, onChanged: (_) {}),
             ],
@@ -69,6 +79,11 @@ void main() {
     expect(find.byType(M3EDropdownMenu<String>), findsOneWidget);
     expect(find.byType(M3EProgressIndicator), findsOneWidget);
     expect(find.byType(M3ESlider), findsOneWidget);
+
+    await tester.tap(find.text('Show dialog'));
+    await tester.pumpAndSettle();
+    expect(find.byType(M3EDialog), findsOneWidget);
+    expect(find.text('M3E dialog'), findsOneWidget);
     controller.dispose();
   });
 }
