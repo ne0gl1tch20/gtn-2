@@ -273,3 +273,50 @@ class GtnExpressiveDropdown<T> extends StatelessWidget {
     );
   }
 }
+
+/// Dialog surface and presentation adapter backed by M3 Expressive dialogs.
+class GtnExpressiveDialog extends StatelessWidget {
+  const GtnExpressiveDialog({
+    super.key,
+    required this.title,
+    this.content,
+    this.actions = const [],
+    this.icon,
+    this.subhead,
+    this.contentPadding,
+  });
+
+  final Widget title;
+  final Widget? content;
+  final List<Widget> actions;
+  final Widget? icon;
+  final String? subhead;
+  final EdgeInsets? contentPadding;
+
+  static Future<T?> show<T>(
+    BuildContext context, {
+    required WidgetBuilder builder,
+    bool barrierDismissible = true,
+    bool? resizeToAvoidBottomInset,
+  }) {
+    return M3EDialog.show<T>(
+      context,
+      dialog: Builder(builder: builder),
+      barrierDismissible: barrierDismissible,
+      resizeToAvoidBottomInset: resizeToAvoidBottomInset,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final headline = title is Text ? (title as Text).data ?? '' : title.toString();
+    return M3EDialog(
+      title: headline,
+      content: content,
+      actions: actions,
+      icon: icon,
+      subhead: subhead,
+      contentPadding: contentPadding,
+    );
+  }
+}
