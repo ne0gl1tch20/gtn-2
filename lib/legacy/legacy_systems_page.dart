@@ -222,7 +222,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
               ListTile(
                 title: Text('${_pretty(entry.key)} strategy'),
                 subtitle: const Text('Choose how this gameplay trait behaves.'),
-                trailing: DropdownButton<String>(
+                trailing: GtnExpressiveDropdown<String>(
                   value: _systems.selectedTraitArms[entry.key] ?? entry.value.first,
                   items: [
                     for (final arm in entry.value)
@@ -378,7 +378,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
         children: [
           if (mutators.isEmpty) _catalogUnavailable(),
           for (final mutator in mutators)
-            SwitchListTile(
+            GtnExpressiveSwitchTile(
               title: Text(mutator['name'] as String),
               subtitle: Text(mutator['description'] as String),
               value: _systems.activeMutators.contains(mutator['id']),
@@ -614,7 +614,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
               : 'Not purchased',
         ),
         children: [
-          SwitchListTile(
+          GtnExpressiveSwitchTile(
             title: const Text('Automation'),
             subtitle: Text(
               timeTravelLocked
@@ -1059,7 +1059,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
                 icon: const Icon(Icons.delete_outline_rounded),
               ),
             ),
-          SwitchListTile(
+          GtnExpressiveSwitchTile(
             title: const Text('Shuffle'),
             value: _systems.musicShuffle,
             onChanged: (value) => _saveSystems(_systems.copyWith(musicShuffle: value)),
@@ -1067,7 +1067,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
           ListTile(
             title: const Text('Repeat mode'),
             subtitle: Text(_systems.musicRepeatMode.toUpperCase()),
-            trailing: DropdownButton<String>(
+            trailing: GtnExpressiveDropdown<String>(
               value: _systems.musicRepeatMode,
               items: const [
                 DropdownMenuItem(value: 'off', child: Text('Off')),
