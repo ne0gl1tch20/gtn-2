@@ -713,9 +713,7 @@ class _WorldMapPageState extends State<WorldMapPage> {
                   child: Text(canUnlock ? 'Unlock world' : 'Requirements pending'),
                 ),
               M3EButton.filled(
-                onPressed: (active || canFight || _state.legacySystems.endlessRiftActive) &&
-                        !busy &&
-                        (!defeated || _state.legacySystems.endlessRiftActive)
+                onPressed: (active || canFight) && !busy && !defeated
                     ? () => _runAction(world.id, 'boss')
                     : null,
                 child: Text(
