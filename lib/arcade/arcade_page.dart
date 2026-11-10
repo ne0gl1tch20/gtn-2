@@ -39,76 +39,110 @@ class _ArcadePageState extends State<ArcadePage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final dark = theme.brightness == Brightness.dark;
     return Scaffold(
       appBar: GtnExpressiveAppBar(title: const Text('Arcade')),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Text(
-            'Play the original seven GTN1 minigames to earn Nebula and Money.',
-            style: Theme.of(context).textTheme.bodyLarge,
-          ),
-          const SizedBox(height: 16),
           FutureBuilder<List<ArcadeGameDefinition>>(
             future: _catalog,
             builder: (context, snapshot) {
-              if (snapshot.connectionState != ConnectionState.done) {
-                return const Padding(
-                  padding: EdgeInsets.all(32),
-                  child: Center(child: M3EProgressIndicator.circular()),
-                );
-              }
-              if (snapshot.hasError || !snapshot.hasData) {
-                return GtnExpressiveCard(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
+              final games = snapshot.data ?? const <ArcadeGameDefinition>[];
+              return GtnExpressiveCard(
+                margin: EdgeInsets.zero,
+                padding: const EdgeInsets.all(20),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(26),
+                  side: BorderSide(
+                    color: dark
+                        ? GtnUiTokens.line
+                        : const Color(0x180D1530),
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Row(
                       children: [
-                        const Icon(Icons.error_outline_rounded, size: 32),
-                        const SizedBox(height: 8),
-                        const Text('The original Arcade catalog could not be loaded.'),
-                        const SizedBox(height: 8),
-                        M3EButton.filled(
-                          onPressed: () => setState(() {
-                            _catalog = ArcadeCatalog.load();
-                          }),
-                          child: const Text('Retry'),
+                        Container(
+                          width: 42,
+                          height: 42,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(14),
+                            gradient: const LinearGradient(
+                              colors: [GtnUiTokens.purple, GtnUiTokens.cyan],
+                            ),
+                          ),
+                          child: const Icon(
+                            Icons.sports_esports_rounded,
+                            color: Color(0xFF080B16),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'QUICK CHALLENGES',
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  color: GtnUiTokens.cyan,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: 1.2,
+                                ),
+                              ),
+                              Text(
+                                'Arcade',
+                                style: theme.textTheme.headlineSmall?.copyWith(
+                                  fontWeight: FontWeight.w900,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        _ArcadeCountChip(
+                          label: '${games.isEmpty ? ArcadeCatalog.expectedIds.length : games.length} GAMES',
                         ),
                       ],
                     ),
-                  ),
-                );
-              }
-
-              return Column(
-                children: [
-                  for (final game in snapshot.data!)
-                    GtnExpressiveCard(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      child: Material(
-                        color: Colors.transparent,
-                        borderRadius: BorderRadius.circular(GtnUiTokens.radius),
-                        child: ListTile(
-                        contentPadding: const EdgeInsets.all(16),
-                        leading: Icon(_iconFor(game.id), size: 32),
-                        title: Text(game.name),
-                        subtitle: Padding(
-                          padding: const EdgeInsets.only(top: 6),
-                          child: Text(game.description),
-                        ),
-                        trailing: const Icon(Icons.play_arrow_rounded),
-                        onTap: () => GtnExpressiveDialog.show<void>(
-                          context,
-                          builder: (_) => _ArcadeDialog(
-                            gameId: game.id,
-                            title: game.name,
-                            onReward: widget.onReward,
-                          ),
-                        ),
-                        ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Play the original GTN1 minigames to earn Nebula and Money.',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: dark ? GtnUiTokens.muted : const Color(0xFF65708C),
+                        height: 1.5,
                       ),
                     ),
-                ],
+                    const SizedBox(height: 16),
+                    if (snapshot.connectionState != ConnectionState.done)
+                      const Padding(
+                        padding: EdgeInsets.all(32),
+                        child: Center(child: M3EProgressIndicator.circular()),
+                      )
+                    else if (snapshot.hasError || !snapshot.hasData)
+                      _ArcadeCatalogError(
+                        onRetry: () => setState(() {
+                          _catalog = ArcadeCatalog.load();
+                        }),
+                      )
+                    else
+                      for (final game in games)
+                        _ArcadeCatalogEntry(
+                          game: game,
+                          icon: _iconFor(game.id),
+                          onPlay: () => GtnExpressiveDialog.show<void>(
+                            context,
+                            builder: (_) => _ArcadeDialog(
+                              gameId: game.id,
+                              title: game.name,
+                              onReward: widget.onReward,
+                            ),
+                          ),
+                        ),
+                  ],
+                ),
               );
             },
           ),
@@ -116,6 +150,138 @@ class _ArcadePageState extends State<ArcadePage> {
       ),
     );
   }
+}
+
+
+class _ArcadeCountChip extends StatelessWidget {
+  const _ArcadeCountChip({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) => DecoratedBox(
+        decoration: BoxDecoration(
+          color: GtnUiTokens.purple.withValues(alpha: .12),
+          borderRadius: BorderRadius.circular(9),
+          border: Border.all(
+            color: GtnUiTokens.purple.withValues(alpha: .24),
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
+          child: Text(
+            label,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: GtnUiTokens.purple,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: .6,
+                ),
+          ),
+        ),
+      );
+}
+
+class _ArcadeCatalogEntry extends StatelessWidget {
+  const _ArcadeCatalogEntry({
+    required this.game,
+    required this.icon,
+    required this.onPlay,
+  });
+
+  final ArcadeGameDefinition game;
+  final IconData icon;
+  final VoidCallback onPlay;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final dark = theme.brightness == Brightness.dark;
+    return GtnExpressiveCard(
+      margin: const EdgeInsets.only(bottom: 10),
+      color: dark ? GtnUiTokens.raisedPanel : const Color(0xFFF0F1FA),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(18),
+        side: BorderSide(
+          color: dark ? GtnUiTokens.line : const Color(0x180D1530),
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Row(
+          children: [
+            Container(
+              width: 38,
+              height: 38,
+              decoration: BoxDecoration(
+                color: GtnUiTokens.purple.withValues(alpha: .14),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, color: GtnUiTokens.purple, size: 21),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    game.name,
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    game.description,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: dark
+                          ? GtnUiTokens.muted
+                          : const Color(0xFF65708C),
+                      height: 1.4,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            M3EButton.tonal(
+              onPressed: onPlay,
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.play_arrow_rounded, size: 17),
+                  SizedBox(width: 2),
+                  Text('Play'),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ArcadeCatalogError extends StatelessWidget {
+  const _ArcadeCatalogError({required this.onRetry});
+
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            const Icon(Icons.error_outline_rounded, size: 32),
+            const SizedBox(height: 8),
+            const Text('The original Arcade catalog could not be loaded.'),
+            const SizedBox(height: 8),
+            M3EButton.filled(
+              onPressed: onRetry,
+              child: const Text('Retry'),
+            ),
+          ],
+        ),
+      );
 }
 
 class _ArcadeDialog extends StatefulWidget {
