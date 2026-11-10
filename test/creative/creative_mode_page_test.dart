@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:material_ui/material_ui.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
+import 'package:gtn_2/design/expressive_widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gtn_2/core/creative/creative_mode.dart';
 import 'package:gtn_2/creative/creative_mode_page.dart';
@@ -69,7 +70,7 @@ void main() {
     final run = CreativeModeRuntime.resume(runningSave!.creativeMode!);
     expect(run, isNotNull);
 
-    await tester.enterText(find.byType(TextField).last, run!.target.toString());
+    await tester.enterText(find.byType(GtnExpressiveTextField).last, run!.target.toString());
     await tester.tap(find.text('Submit guess'));
     await tester.pump();
     await pumpUntilFound(tester, find.text('Run complete'));
