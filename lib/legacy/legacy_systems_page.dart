@@ -218,8 +218,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
                     if (trait.minimumCorrectGuesses > 0) '${trait.minimumCorrectGuesses} correct guesses',
                   ];
                   final detail = visible
-                      ? '${trait.category} · ${trait.description}${!active && requirements.isNotEmpty ? '\
-Requires ${requirements.join(' · ')}' : ''}'
+                      ? '${trait.category} · ${trait.description}${!active && requirements.isNotEmpty ? '\nRequires ${requirements.join(' · ')}' : ''}'
                       : 'Hidden trait · keep playing to discover it';
                   return ListTile(
                     dense: true,
@@ -367,8 +366,7 @@ Requires ${requirements.join(' · ')}' : ''}'
               final parentReady = parent == null || _systems.talents.contains(parent);
               return ListTile(
                 title: Text(name),
-                subtitle: Text('$description\
-Cost: $cost Prestige${parent == null ? '' : ' · Requires ${_pretty(parent)}'}'),
+                subtitle: Text('$description\nCost: $cost Prestige${parent == null ? '' : ' · Requires ${_pretty(parent)}'}'),
                 isThreeLine: true,
                 trailing: owned
                     ? const Icon(Icons.check_circle_rounded, color: Colors.green)
@@ -435,8 +433,7 @@ Cost: $cost Prestige${parent == null ? '' : ' · Requires ${_pretty(parent)}'}')
               return ListTile(
                 leading: Icon(owned ? Icons.diamond_rounded : Icons.lock_outline_rounded),
                 title: Text(relic['name'] as String),
-                subtitle: Text('${relic['description']}\
-Earned from ${relic['unlockBossName']}'),
+                subtitle: Text('${relic['description']}\nEarned from ${relic['unlockBossName']}'),
                 isThreeLine: true,
                 trailing: M3EButton.tonal(
                   onPressed: owned ? () => _apply(_engine.equipRelic(_progression, _systems, id)) : null,
@@ -1296,8 +1293,7 @@ Earned from ${relic['unlockBossName']}'),
           _availableUpdate = null;
           _updateDetails = update == null
               ? 'This Windows build is up to date.'
-              : 'Windows ${update.versionName} · debug-latest #${update.runNumber}\
-Commit: ${update.commitSha}';
+              : 'Windows ${update.versionName} · debug-latest #${update.runNumber}\nCommit: ${update.commitSha}';
           _updateMessage = update == null
               ? 'You are up to date.'
               : 'A verified Windows update is available.';
@@ -1310,8 +1306,7 @@ Commit: ${update.commitSha}';
           _availableWindowsUpdate = null;
           _updateDetails = update == null
               ? 'This Android build is up to date.'
-              : 'Android ${update.versionName} (${update.versionCode}) · debug-latest #${update.runNumber}\
-Commit: ${update.commitSha}';
+              : 'Android ${update.versionName} (${update.versionCode}) · debug-latest #${update.runNumber}\nCommit: ${update.commitSha}';
           _updateMessage = update == null
               ? 'You are up to date.'
               : 'A verified Android update is available.';
