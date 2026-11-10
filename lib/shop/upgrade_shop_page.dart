@@ -72,7 +72,7 @@ class _UpgradeShopPageState extends State<UpgradeShopPage> {
           ),
           const SizedBox(height: 16),
           for (final upgrade in UpgradeCatalog.availableForGameplay)
-            _UpgradeGtnExpressiveCard(
+            _UpgradeCard(
               upgrade: upgrade,
               level: _progression.upgrades[upgrade.definition.id] ?? 0,
               money: _progression.money,
