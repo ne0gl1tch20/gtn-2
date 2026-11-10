@@ -2,7 +2,8 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
 
 import 'arcade/arcade_page.dart';
 import 'core/automation/bot_team.dart';
@@ -22,6 +23,7 @@ import 'data/saves/save_data.dart';
 import 'data/saves/save_storage.dart';
 import 'dev/developer_settings_page.dart';
 import 'home/game_dashboard_page.dart';
+import 'design/expressive_widgets.dart';
 import 'i18n/app_localizations.dart';
 import 'legacy/legacy_pages.dart';
 import 'progression/progression_hub_page.dart';
@@ -54,21 +56,15 @@ class GtnApp extends StatelessWidget {
       builder: (context, translations, _) => ValueListenableBuilder<GameSettings>(
       valueListenable: settingsNotifier,
       builder: (context, settings, _) {
-        ThemeData makeTheme(Brightness brightness) => ThemeData(
-              colorScheme: ColorScheme.fromSeed(
-                seedColor: const Color(0xFF7C5CFC),
-                brightness: brightness,
-              ),
-              useMaterial3: true,
-              fontFamily: 'Manrope',
-            );
-        return MaterialApp(
+        return M3EMaterialApp(
           title: 'GuessTheNumber 2',
+          data: M3EThemeData.light(seedColor: const Color(0xFF7C5CFC)),
+          fontFamily: 'Manrope',
+          autoTheming: false,
+          dynamicColoring: false,
+          initialTheme: settings.darkMode ? Brightness.dark : Brightness.light,
           debugShowCheckedModeBanner: false,
-          theme: makeTheme(Brightness.light),
-          darkTheme: makeTheme(Brightness.dark),
-          themeMode: settings.darkMode ? ThemeMode.dark : ThemeMode.light,
-          builder: (context, child) => MediaQuery(
+          appBuilder: (context, child) => MediaQuery(
             data: MediaQuery.of(context).copyWith(
               disableAnimations: settings.reduceMotion,
             ),
