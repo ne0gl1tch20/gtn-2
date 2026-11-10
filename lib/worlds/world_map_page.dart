@@ -1,11 +1,11 @@
 import 'dart:math' as math;
 
-import 'package:material_ui/material_ui.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
-import '../design/expressive_widgets.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../core/numbers/big_number.dart';
 import '../core/progression/progression_state.dart';
+import '../design/expressive_widgets.dart';
 import '../i18n/app_localizations.dart';
 import 'world_boss_catalog.dart';
 
