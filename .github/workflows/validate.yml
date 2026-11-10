@@ -13,6 +13,7 @@ permissions:
 # CI formatting is committed before Android and Windows validation jobs.
 # Keep the release artifact short-lived and traceable to this exact build.
 # Apply lint quick fixes before the strict analyzer gate.
+# Revalidate music queue, playlist editing and persisted settings synchronization.
 # Revalidate settings round-trip and scroll behavior.
 
 concurrency:
