@@ -127,23 +127,46 @@ Sources: GTN1 `app/src/main/assets/web-play/` and `app/src/main/assets/libraries
 - [ ] Ensure all gameplay state is save-backed and survives app restart
 - [ ] Ensure Android and Windows behavior is intentionally supported or explicitly unavailable
 
-## 6. Material 3 Expressive migration
+## 6. GTN1 Web Play visual recreation + selective Material 3 Expressive
 
-Required package: `material_3_expressive: 1.2.0` (unverified uploader accepted by project owner for this migration).
+**Architecture rule:** Rebuild the GTN1 HTML/CSS interface as native Flutter widgets written entirely in Dart. The HTML, CSS, JavaScript and Jarrlyy UI SDK are reference material for appearance, layout, labels, motion and behavior only. GTN2 must not embed the HTML, use a WebView, or ship a second JavaScript gameplay/UI runtime.
 
-- [~] Upgrade the Flutter/Dart SDK constraint to the package's documented minimum: Flutter 3.47 / Dart 3.13 (implemented; CI validation pending)
-- [~] Add and pin `material_3_expressive: 1.2.0` and declare `material_ui` directly (dependency resolution succeeded in CI; lockfile generation/commit remains open)
-- [~] Migrate app and widget-test Material imports from `package:flutter/material.dart` to `package:material_ui/material_ui.dart`
-- [~] Establish one shared M3E theme with light/dark mode and GTN2 color tokens
-- [ ] Apply expressive typography, shape, spacing, elevation and motion tokens consistently
-- [~] Use M3E buttons, cards, chips, selection controls, text inputs and progress indicators
-- [~] Use M3E app bars and adaptive navigation bar; rails/tabs/menus still need screen-specific review
-- [~] Primary buttons, app bars, cards and input selectors are M3E-backed; dialog/sheet/snackbar surfaces still need screen-specific review
-- [~] Shared M3E app bars, cards, buttons and controls applied across Home, Gameplay, shops, Progression, Worlds, Arcade, Creative Mode, More, save slots, Settings, Developer Settings and About/Updater
-- [ ] Preserve keyboard, mouse, touch, focus, semantics and reduced-motion behavior
-- [ ] Verify compact Android layouts and resizable Windows layouts
-- [~] Add widget coverage for shared expressive components; full navigation-flow coverage pending
-- [ ] Verify the app does not mix old default Material controls into primary user journeys
+### Visual identity to preserve
+- [~] Dark cosmic foundation: `#080B16` background, `#11172A` panels, `#171F36` raised surfaces
+- [~] GTN1 accent palette: purple `#9B7CFF`, cyan `#62E8FF`, gold `#FFD66B`, green `#63F5A4`, danger `#FF7195`
+- [~] Manrope / Inter / Space Grotesk / JetBrains Mono typography roles
+- [~] Rounded 26px panels, subtle borders, gradients, glows and compact information density
+- [~] Responsive centered content (720px reference width), compact mobile layouts and scroll behavior
+- [ ] Match each GTN1 screen's hierarchy, spacing, typography, gradients, card treatments and responsive breakpoints
+- [ ] Match all labels, iconography, button hierarchy, selected/disabled/hover/focus states and empty/loading/error states
+- [ ] Match screen transitions, micro-interactions, feedback, animation timing and reduced-motion behavior
+- [ ] Verify accessibility semantics, contrast, touch targets, keyboard and mouse behavior
+
+### Native Flutter implementation
+- [~] Recreate all UI in Dart widgets; Dart remains the only UI and gameplay runtime
+- [~] Centralize GTN1 palette and reusable surface primitives in `lib/design/`
+- [~] Keep the existing Dart game engine, save system and validated transactions as the single source of truth
+- [~] Use `material_3_expressive: 1.2.0` selectively for expressive buttons, switches, chips, sliders, progress, navigation and motion
+- [ ] Avoid generic M3E surfaces replacing GTN1's distinctive gradient/glow/card styling
+- [ ] Map every HTML/CSS component and SDK component to a native Flutter equivalent with source references
+- [ ] Map all five Web Play JavaScript modules to Dart UI behavior and existing Dart domain services
+- [ ] Complete screen-by-screen visual and interaction comparison against GTN1 screenshots/source
+- [ ] Verify Android and Windows layouts, navigation, focus, pointer input and reduced motion
+
+### M3 Expressive integration constraints
+- [~] Pin `material_3_expressive: 1.2.0` and declare `material_ui` directly
+- [~] Meet the package's documented Flutter 3.47 / Dart 3.13 minimum
+- [~] Preserve Manrope and the app's dark-mode / reduced-motion settings
+- [~] Add shared expressive adapters and widget coverage
+- [ ] Apply expressive motion and shape selectively without changing GTN1's brand identity
+- [ ] Verify no M3E dependency forces an HTML/WebView bridge or duplicate state layer
+
+### Validation
+- [ ] Compare Android screenshots against GTN1 reference screens at matching viewport sizes
+- [ ] Test all primary navigation and gameplay journeys on Android and Windows
+- [ ] Verify all controls call real Dart actions and persist through the existing save engine
+- [ ] Run format, analyzer, full tests and Android/Windows debug builds
+- [ ] Do not publish APKs or enable `debug-latest` until parity and runtime gates pass
 
 ## 7. Automated verification and release gate
 
