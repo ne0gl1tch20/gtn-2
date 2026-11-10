@@ -1,6 +1,8 @@
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
+import '../design/expressive_widgets.dart';
 
 import '../data/saves/save_data.dart';
 
@@ -86,7 +88,7 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Developer Settings')),
+      appBar: GtnExpressiveAppBar(title: const Text('Developer Settings')),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -103,13 +105,13 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
             onSubmitted: (_) => _runCommand(),
           ),
           const SizedBox(height: 8),
-          FilledButton(
+          M3EButton.filled(
             onPressed: _busy ? null : _runCommand,
             child: const Text('Run command'),
           ),
           if (_logs.isNotEmpty) ...[
             const SizedBox(height: 12),
-            Card(
+            GtnExpressiveCard(
               child: Padding(
                 padding: const EdgeInsets.all(12),
                 child: Column(
