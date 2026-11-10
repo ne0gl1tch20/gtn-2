@@ -1,9 +1,9 @@
-import 'package:material_ui/material_ui.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
-import '../design/expressive_widgets.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../core/game/game_engine.dart';
 import '../core/progression/progression_state.dart';
+import '../design/expressive_widgets.dart';
 
 const _purple = Color(0xFF9B7CFF);
 const _cyan = Color(0xFF62E8FF);
@@ -605,46 +605,6 @@ class _MoreMenuPage extends StatelessWidget {
       ),
     );
   }
-}
-
-class _BottomNavItem extends StatelessWidget {
-  const _BottomNavItem(this.icon, this.label, this.selected, this.onTap);
-
-  final IconData icon;
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) => Material(
-        color: selected ? _purple.withValues(alpha: .15) : Colors.transparent,
-        borderRadius: BorderRadius.circular(13),
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(13),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 7),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(icon, size: 19, color: selected ? _purple : _muted),
-                const SizedBox(height: 3),
-                Text(
-                  label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: selected ? _white : _muted,
-                    fontSize: 8,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
 }
 
 class _Stat extends StatelessWidget {
