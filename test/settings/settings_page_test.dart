@@ -21,6 +21,7 @@ void main() {
       ),
     );
 
+    await tester.pumpAndSettle();
     expect(find.text('GAME PREFERENCES'), findsOneWidget);
     expect(find.text('Language & Numbers'), findsOneWidget);
     expect(find.text('Number notation'), findsOneWidget);
@@ -58,6 +59,7 @@ void main() {
       ),
     );
 
+    await tester.pumpAndSettle();
     await tester.ensureVisible(find.text('Save logs to storage'));
     await tester.pumpAndSettle();
     expect(find.text('Save logs to storage'), findsOneWidget);
