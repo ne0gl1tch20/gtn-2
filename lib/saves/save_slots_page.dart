@@ -1,6 +1,8 @@
 import 'dart:math';
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
+import '../design/expressive_widgets.dart';
 
 import '../core/game/difficulty_rules.dart';
 import '../creative/creative_mode_page.dart';
@@ -102,8 +104,8 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
             ],
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(dialogContext), child: const Text('Cancel')),
-            FilledButton(
+            M3EButton.text(onPressed: () => Navigator.pop(dialogContext), child: const Text('Cancel')),
+            M3EButton.filled(
               onPressed: () => Navigator.pop(
                 dialogContext,
                 (name: nameController.text.trim(), difficulty: difficulty, icon: icon),
@@ -338,7 +340,7 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Save Slots')),
+      appBar: GtnExpressiveAppBar(title: const Text('Save Slots')),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -356,7 +358,7 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
                     : save == null
                         ? 'Empty slot'
                         : 'Games won: ${save.gamesWon}';
-                return Card(
+                return GtnExpressiveCard(
                   child: ListTile(
                     leading: CircleAvatar(child: Text(save == null ? '$slot' : _iconSymbol(save.profileIconId))),
                     title: Text(save?.profileName.isNotEmpty == true ? save!.profileName : 'Slot $slot'),
@@ -365,7 +367,7 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         if (busy)
-                          const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                          const SizedBox(width: 20, height: 20, child: M3EProgressIndicator.circular(strokeWidth: 2))
                         else if (selected)
                           const Text('Active'),
                         PopupMenuButton<String>(
