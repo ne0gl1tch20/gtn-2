@@ -25,6 +25,9 @@ void main() {
     required ProgressionState state,
     required WorldBossAction onAction,
   }) async {
+    // Use bounded frames: the expressive controls and map viewport can keep
+    // scheduling animations, so waiting for global idle with pumpAndSettle is
+    // not deterministic for this screen.
     await tester.pumpWidget(
       M3EMaterialApp(
         data: M3EThemeData.light(seedColor: const Color(0xFF7C5CFC)),
