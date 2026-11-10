@@ -164,31 +164,72 @@ class GtnExpressiveTextField extends StatelessWidget {
   final VoidCallback? onEditingComplete;
 
   @override
-  Widget build(BuildContext context) => M3ETextField(
-        controller: controller,
-        focusNode: focusNode,
-        label: decoration?.labelText,
-        supportingText: decoration?.helperText,
+  Widget build(BuildContext context) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    final borderColor = dark
+        ? Colors.white.withValues(alpha: .10)
+        : const Color(0x220D1530);
+    final hintColor = dark ? GtnUiTokens.muted : const Color(0xFF65708C);
+    final radius = BorderRadius.circular(18);
+    return TextField(
+      controller: controller,
+      focusNode: focusNode,
+      enabled: enabled,
+      keyboardType: keyboardType,
+      textInputAction: textInputAction,
+      inputFormatters: inputFormatters,
+      onChanged: onChanged,
+      onSubmitted: onSubmitted,
+      maxLines: maxLines,
+      minLines: minLines,
+      readOnly: readOnly,
+      autofocus: autofocus,
+      maxLength: maxLength,
+      textCapitalization: textCapitalization,
+      textAlign: textAlign,
+      obscureText: obscureText,
+      onEditingComplete: onEditingComplete,
+      style: TextStyle(
+        color: dark ? GtnUiTokens.foreground : const Color(0xFF172039),
+        fontSize: 18,
+        fontWeight: FontWeight.w800,
+      ),
+      decoration: InputDecoration(
+        labelText: decoration?.labelText,
+        hintText: decoration?.hintText,
+        helperText: decoration?.helperText,
         errorText: decoration?.errorText,
         prefixText: decoration?.prefixText,
         suffixText: decoration?.suffixText,
-        placeholder: decoration?.hintText,
-        enabled: enabled,
-        keyboardType: keyboardType,
-        textInputAction: textInputAction,
-        inputFormatters: inputFormatters,
-        onChanged: onChanged,
-        onSubmitted: onSubmitted,
-        maxLines: maxLines,
-        minLines: minLines,
-        readOnly: readOnly,
-        autofocus: autofocus,
-        maxLength: maxLength,
-        textCapitalization: textCapitalization,
-        textAlign: textAlign,
-        obscureText: obscureText,
-        onEditingComplete: onEditingComplete,
-      );
+        filled: true,
+        fillColor: dark ? const Color(0xFF080D1B) : const Color(0xFFF0F1FA),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 16,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: radius,
+          borderSide: BorderSide(color: borderColor),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: radius,
+          borderSide: BorderSide(color: borderColor),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: radius,
+          borderSide: const BorderSide(
+            color: GtnUiTokens.purple,
+            width: 1.4,
+          ),
+        ),
+        disabledBorder: OutlineInputBorder(
+          borderRadius: radius,
+          borderSide: BorderSide(color: borderColor.withValues(alpha: .5)),
+        ),
+        hintStyle: TextStyle(color: hintColor.withValues(alpha: .8)),
+      ),
+    );
+  }
 }
 
 /// Switch row backed by the spring-driven M3 Expressive switch.
