@@ -12,7 +12,7 @@ permissions:
 
 # CI formatting is committed before Android and Windows validation jobs.
 # Keep the release artifact short-lived and traceable to this exact build.
-# Recheck analyzer warnings after wiring the Settings routes.
+# Apply lint quick fixes before the strict analyzer gate.
 
 concurrency:
   group: validate-${{ github.ref }}
