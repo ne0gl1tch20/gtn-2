@@ -57,11 +57,11 @@ class GtnApp extends StatelessWidget {
       builder: (context, settings, _) {
         return M3EMaterialApp(
           title: 'GuessTheNumber 2',
-          data: M3EThemeData.light(seedColor: const Color(0xFF7C5CFC)),
+          data: M3EThemeData.light(seedColor: Color(0xFF000000 | int.parse(settings.customPrimaryColor.substring(1), radix: 16))),
           fontFamily: 'Manrope',
           autoTheming: false,
           dynamicColoring: false,
-          initialTheme: settings.darkMode ? Brightness.dark : Brightness.light,
+          initialTheme: settings.themeMode == 'System'\n              ? MediaQuery.platformBrightnessOf(context)\n              : settings.darkMode ? Brightness.dark : Brightness.light,
           debugShowCheckedModeBanner: false,
           appBuilder: (context, child) => MediaQuery(
             data: MediaQuery.of(context).copyWith(

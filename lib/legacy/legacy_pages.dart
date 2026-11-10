@@ -74,6 +74,27 @@ class LegacyHubPage extends StatelessWidget {
               ),
             ),
           ),
+          for (final destination in const [
+            (LegacySystemsView.music, 'Music', Icons.library_music_rounded, 'Offline player, library, playlists and playback controls.'),
+            (LegacySystemsView.luckyStake, 'Lucky Stake', Icons.casino_rounded, 'Place a stake and settle a validated 50/50 round.'),
+          ])
+            GtnExpressiveCard(
+              child: ListTile(
+                leading: Icon(destination.$3),
+                title: Text(destination.$2),
+                subtitle: Text(destination.$4),
+                trailing: const Icon(Icons.chevron_right_rounded),
+                onTap: () => Navigator.of(context).push<void>(
+                  MaterialPageRoute<void>(
+                    builder: (_) => LegacySystemsPage(
+                      progression: progression,
+                      onChanged: onSystemsChanged,
+                      view: destination.$1,
+                    ),
+                  ),
+                ),
+              ),
+            ),
           for (final section in LegacySection.values)
             GtnExpressiveCard(
               child: ListTile(

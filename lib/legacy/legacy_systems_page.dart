@@ -21,7 +21,7 @@ import '../data/updates/update_checker.dart';
 import '../design/expressive_widgets.dart';
 import '../worlds/world_boss_catalog.dart';
 
-typedef LegacyProgressionChanged = Future<void> Function(ProgressionState progression);
+typedef LegacyProgressionChanged = Future<void> Function(ProgressionState progression);\n\nenum LegacySystemsView { all, music, luckyStake }
 
 class LegacySystemsPage extends StatefulWidget {
   const LegacySystemsPage({
@@ -31,7 +31,7 @@ class LegacySystemsPage extends StatefulWidget {
   });
 
   final ProgressionState progression;
-  final LegacyProgressionChanged onChanged;
+  final LegacyProgressionChanged onChanged;\n  final LegacySystemsView view;
 
   @override
   State<LegacySystemsPage> createState() => _LegacySystemsPageState();
@@ -114,7 +114,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
       activeSeasonId: _seasonId(DateTime.now()),
     );
     return Scaffold(
-      appBar: GtnExpressiveAppBar(title: const Text('GTN 1 Systems')),
+      appBar: GtnExpressiveAppBar(title: Text(switch (widget.view) { LegacySystemsView.all => 'GTN 1 Systems', LegacySystemsView.music => 'Music', LegacySystemsView.luckyStake => 'Lucky Stake' })),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -142,19 +142,25 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
               ),
             ),
           ),
-          _traitsSection(traitState),
-          _talentsSection(),
-          _mutatorsSection(),
-          _relicsSection(),
-          _homeBaseSection(),
-          _stakeSection(),
-          _dailySection(),
-          _lootSection(),
-          _automationSection(),
-          _challengeSection(),
-          _worldCodexSection(),
-          _musicSection(),
-          _aboutSection(),
+          if (widget.view == LegacySystemsView.all) ...[
+            _traitsSection(traitState),
+            _talentsSection(),
+            _mutatorsSection(),
+            _relicsSection(),
+            _homeBaseSection(),
+          ],
+          if (widget.view == LegacySystemsView.all || widget.view == LegacySystemsView.luckyStake)
+            _stakeSection(expanded: widget.view == LegacySystemsView.luckyStake),
+          if (widget.view == LegacySystemsView.all) ...[
+            _dailySection(),
+            _lootSection(),
+            _automationSection(),
+            _challengeSection(),
+            _worldCodexSection(),
+          ],
+          if (widget.view == LegacySystemsView.all || widget.view == LegacySystemsView.music)
+            _musicSection(expanded: widget.view == LegacySystemsView.music),
+          if (widget.view == LegacySystemsView.all) _aboutSection(),
         ],
       ),
     );
@@ -455,7 +461,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
     );
   }
 
-  Widget _stakeSection() {
+  Widget _stakeSection({bool expanded = false}) {
     return GtnExpressiveCard(
       child: ExpansionTile(
         leading: const Icon(Icons.casino_rounded),
@@ -987,7 +993,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
     final playlists = Map<String, List<String>>.of(_systems.musicPlaylists)..remove(name);
     await _saveSystems(_systems.copyWith(musicPlaylists: Map.unmodifiable(playlists)));
   }
-  Widget _musicSection() {
+  Widget _musicSection({bool expanded = false}) {
     return GtnExpressiveCard(
       child: ExpansionTile(
         leading: const Icon(Icons.library_music_rounded),
