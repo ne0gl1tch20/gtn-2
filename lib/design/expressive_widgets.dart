@@ -83,3 +83,75 @@ class GtnExpressiveCard extends StatelessWidget {
     );
   }
 }
+
+/// Text-field adapter that preserves the existing TextField call sites while
+/// rendering the native M3 Expressive floating-label input.
+class GtnExpressiveTextField extends StatelessWidget {
+  const GtnExpressiveTextField({
+    super.key,
+    this.controller,
+    this.focusNode,
+    this.decoration,
+    this.enabled = true,
+    this.keyboardType,
+    this.textInputAction,
+    this.inputFormatters,
+    this.onChanged,
+    this.onSubmitted,
+    this.maxLines = 1,
+    this.minLines,
+    this.readOnly = false,
+    this.autofocus = false,
+    this.maxLength,
+    this.textCapitalization = TextCapitalization.none,
+    this.textAlign = TextAlign.start,
+    this.obscureText = false,
+    this.onEditingComplete,
+  });
+
+  final TextEditingController? controller;
+  final FocusNode? focusNode;
+  final InputDecoration? decoration;
+  final bool enabled;
+  final TextInputType? keyboardType;
+  final TextInputAction? textInputAction;
+  final List<TextInputFormatter>? inputFormatters;
+  final ValueChanged<String>? onChanged;
+  final ValueChanged<String>? onSubmitted;
+  final int? maxLines;
+  final int? minLines;
+  final bool readOnly;
+  final bool autofocus;
+  final int? maxLength;
+  final TextCapitalization textCapitalization;
+  final TextAlign textAlign;
+  final bool obscureText;
+  final VoidCallback? onEditingComplete;
+
+  @override
+  Widget build(BuildContext context) => M3ETextField(
+        controller: controller,
+        focusNode: focusNode,
+        label: decoration?.labelText,
+        supportingText: decoration?.helperText,
+        errorText: decoration?.errorText,
+        prefixText: decoration?.prefixText,
+        suffixText: decoration?.suffixText,
+        placeholder: decoration?.hintText,
+        enabled: enabled,
+        keyboardType: keyboardType,
+        textInputAction: textInputAction,
+        inputFormatters: inputFormatters,
+        onChanged: onChanged,
+        onSubmitted: onSubmitted,
+        maxLines: maxLines,
+        minLines: minLines,
+        readOnly: readOnly,
+        autofocus: autofocus,
+        maxLength: maxLength,
+        textCapitalization: textCapitalization,
+        textAlign: textAlign,
+        obscureText: obscureText,
+        onEditingComplete: onEditingComplete,
+      );
+}
