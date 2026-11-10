@@ -1,6 +1,8 @@
 import 'dart:math' show Random;
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
+import '../design/expressive_widgets.dart';
 
 import '../core/creative/creative_mode.dart';
 import '../data/saves/save_data.dart';
@@ -271,9 +273,9 @@ class _CreativeModePageState extends State<CreativeModePage> {
     final rules = CreativeModeEffectPolicy.resolve(_config);
     final run = _run;
     return Scaffold(
-      appBar: AppBar(title: Text('Creative Mode · Slot ${widget.slot}')),
+      appBar: GtnExpressiveAppBar(title: Text('Creative Mode · Slot ${widget.slot}')),
       body: _loading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: M3EProgressIndicator.circular())
           : _save == null
               ? Center(child: Padding(
                   padding: const EdgeInsets.all(24),
@@ -369,7 +371,7 @@ class _CreativeModePageState extends State<CreativeModePage> {
                               }),
                     ),
                     const SizedBox(height: 8),
-                    FilledButton.tonal(
+                    M3EButton.tonal(
                       onPressed: _saving ? null : _saveConfiguration,
                       child: const Text('Save configuration'),
                     ),
@@ -381,13 +383,13 @@ class _CreativeModePageState extends State<CreativeModePage> {
                     ],
                     const Divider(height: 32),
                     Text('Play', style: Theme.of(context).textTheme.titleLarge),
-                    FilledButton(
+                    M3EButton.filled(
                       onPressed: _saving || !_enabled ? null : _startRun,
                       child: const Text('Start new run'),
                     ),
                     if (run != null) ...[
                       const SizedBox(height: 12),
-                      Card(
+                      GtnExpressiveCard(
                         child: Padding(
                           padding: const EdgeInsets.all(16),
                           child: Column(
@@ -421,7 +423,7 @@ class _CreativeModePageState extends State<CreativeModePage> {
                     ],
                     const SizedBox(height: 12),
                     Text(_message),
-                    if (_saving) const LinearProgressIndicator(),
+                    if (_saving) const M3EProgressIndicator.linearWavy(),
                   ],
                 ),
     );
