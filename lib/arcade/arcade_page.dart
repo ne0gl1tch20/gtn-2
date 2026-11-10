@@ -352,7 +352,7 @@ class _ArcadeDialogState extends State<_ArcadeDialog> {
             ),
             if (!_finished) ...[
               Text('Guess the target: $_target'),
-              TextField(
+              GtnExpressiveTextField(
                 controller: _input,
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(labelText: 'Your guess (1–9)'),
@@ -419,7 +419,7 @@ class _ArcadeDialogState extends State<_ArcadeDialog> {
               )
             else if (!_memorySubmitted) ...[
               const Text('Enter the three digits in the same order.'),
-              TextField(
+              GtnExpressiveTextField(
                 controller: _input,
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(labelText: 'Sequence'),
@@ -540,10 +540,7 @@ class _ArcadeDialogState extends State<_ArcadeDialog> {
                     onPressed: revealed || _gridSelected.length >= 2
                         ? null
                         : () => _flipGridCard(index),
-                    style: FilledButton.styleFrom(
-                      padding: EdgeInsets.zero,
-                      minimumSize: Size.zero,
-                    ),
+                    
                     child: Text(
                       revealed ? '${_gridCards[index]}' : '?',
                       style: Theme.of(context).textTheme.titleLarge,
