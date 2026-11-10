@@ -573,7 +573,7 @@ class _WorldMapPageState extends State<WorldMapPage> {
                   color: theme.colorScheme.tertiary,
                 ),
               ),
-              FilledButton.tonal(
+              M3EButton.tonal(
                 onPressed: canUpgradeMastery && !busy
                     ? () => _runAction(world.id, 'mastery')
                     : null,
