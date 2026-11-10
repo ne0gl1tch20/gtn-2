@@ -77,6 +77,8 @@ class GameDashboardPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dark = Theme.of(context).brightness == Brightness.dark;
+    final compact = MediaQuery.sizeOf(context).width <= 430;
+    final horizontalPadding = compact ? 12.0 : 16.0;
     final foreground = dark ? _white : const Color(0xFF172039);
     final muted = dark ? _muted : const Color(0xFF65708C);
     final panel = dark ? _panel : Colors.white;
@@ -143,7 +145,7 @@ class GameDashboardPage extends StatelessWidget {
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 720),
               child: ListView(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
+                padding: EdgeInsets.fromLTRB(horizontalPadding, 12, horizontalPadding, 28),
                 children: [
                   Row(
                     children: [
@@ -210,8 +212,10 @@ class GameDashboardPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 18),
                   Container(
-                    padding: const EdgeInsets.all(25),
-                    constraints: const BoxConstraints(minHeight: 205),
+                    padding: EdgeInsets.all(compact ? 21 : 25),
+                    constraints: BoxConstraints(
+                      minHeight: compact ? 190 : 205,
+                    ),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(32),
                       gradient: const LinearGradient(
@@ -306,7 +310,7 @@ class GameDashboardPage extends StatelessWidget {
                               child: Text('${game.minimum} — ${game.maximum}',
                                   style: const TextStyle(
                                     color: Colors.white,
-                                    fontSize: 42,
+                                    fontSize: compact ? 35 : 42,
                                     height: 1,
                                     fontWeight: FontWeight.w900,
                                     letterSpacing: -2.5,
@@ -673,10 +677,10 @@ class _Stat extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 5),
+        padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 10),
         decoration: BoxDecoration(
           color: panel,
-          borderRadius: BorderRadius.circular(19),
+          borderRadius: BorderRadius.circular(20),
           border: Border.all(color: line),
         ),
         child: Column(
@@ -688,7 +692,7 @@ class _Stat extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   color: foreground,
-                  fontSize: 20,
+                  fontSize: MediaQuery.sizeOf(context).width <= 430 ? 20 : 22,
                   fontWeight: FontWeight.w900,
                 )),
             const SizedBox(height: 3),
@@ -719,7 +723,7 @@ class _Wallet extends StatelessWidget {
         padding: const EdgeInsets.all(17),
         decoration: BoxDecoration(
           color: panel,
-          borderRadius: BorderRadius.circular(22),
+          borderRadius: BorderRadius.circular(24),
           border: Border.all(color: line),
         ),
         child: Column(
@@ -878,10 +882,10 @@ class _GuessInput extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.all(17),
+        padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
           color: panel,
-          borderRadius: BorderRadius.circular(23),
+          borderRadius: BorderRadius.circular(28),
           border: Border.all(color: line),
         ),
         child: Column(
@@ -921,6 +925,7 @@ class _GuessInput extends StatelessWidget {
                 ),
                 const SizedBox(width: 9),
                 SizedBox(
+                  width: MediaQuery.sizeOf(context).width <= 430 ? 100 : 116,
                   height: 56,
                   child: M3EButton.filled(
                     onPressed: enabled ? onGuess : null,
