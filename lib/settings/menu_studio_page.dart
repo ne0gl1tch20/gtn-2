@@ -30,7 +30,6 @@ class _MenuStudioPageState extends State<MenuStudioPage> {
     'world_map': 'World map',
     'achievements': 'Achievements',
     'live_ops': 'Live events',
-    'lua_hub': 'Lua hub',
     'mutators': 'Mutators',
     'talent': 'Talents',
     'relics': 'Relics',
@@ -38,6 +37,7 @@ class _MenuStudioPageState extends State<MenuStudioPage> {
     'codex': 'Codex',
     'endgame': 'Endgame',
     'arcade': 'Arcade',
+    'nebula': 'Nebula Shop',
     'stats': 'Statistics',
     'changelog': 'Changelog',
     'settings': 'Settings',
@@ -62,7 +62,13 @@ class _MenuStudioPageState extends State<MenuStudioPage> {
   }
 
   void _load() {
-    _order = [...widget.settings.moreScreenOrder];
+    _order = widget.settings.moreScreenOrder
+        .where(_labels.containsKey)
+        .toSet()
+        .toList();
+    for (final id in _labels.keys) {
+      if (!_order.contains(id)) _order.add(id);
+    }
     _colors = Map.of(widget.settings.moreScreenButtonColors);
   }
 
