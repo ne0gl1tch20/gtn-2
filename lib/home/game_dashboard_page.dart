@@ -5,16 +5,16 @@ import '../core/game/game_engine.dart';
 import '../core/progression/progression_state.dart';
 import '../design/expressive_widgets.dart';
 
-const _purple = Color(0xFF9B7CFF);
-const _cyan = Color(0xFF62E8FF);
-const _gold = Color(0xFFFFD66B);
-const _green = Color(0xFF63F5A4);
-const _bg = Color(0xFF080B16);
-const _panel = Color(0xFF11172A);
-const _raised = Color(0xFF171F36);
-const _line = Color(0x20FFFFFF);
-const _white = Color(0xFFF7F8FF);
-const _muted = Color(0xFF9BA5C4);
+const _purple = GtnUiTokens.purple;
+const _cyan = GtnUiTokens.cyan;
+const _gold = GtnUiTokens.gold;
+const _green = GtnUiTokens.green;
+const _bg = GtnUiTokens.background;
+const _panel = GtnUiTokens.panel;
+const _raised = GtnUiTokens.raisedPanel;
+const _line = GtnUiTokens.line;
+const _white = GtnUiTokens.foreground;
+const _muted = GtnUiTokens.muted;
 
 class GameDashboardPage extends StatelessWidget {
   const GameDashboardPage({
@@ -251,6 +251,26 @@ class GameDashboardPage extends StatelessWidget {
                             ),
                           ),
                         ),
+                        const Positioned(
+                          right: 24,
+                          top: 28,
+                          child: _HeroSparkle(size: 5, opacity: .8),
+                        ),
+                        const Positioned(
+                          right: 12,
+                          top: 88,
+                          child: _HeroSparkle(size: 4, opacity: .55),
+                        ),
+                        const Positioned(
+                          right: 78,
+                          bottom: 26,
+                          child: _HeroSparkle(size: 5, opacity: .7),
+                        ),
+                        const Positioned(
+                          right: 132,
+                          top: 44,
+                          child: _HeroSparkle(size: 3, opacity: .45),
+                        ),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -394,6 +414,31 @@ class GameDashboardPage extends StatelessWidget {
       ),
     );
   }
+}
+
+class _HeroSparkle extends StatelessWidget {
+  const _HeroSparkle({required this.size, required this.opacity});
+
+  final double size;
+  final double opacity;
+
+  @override
+  Widget build(BuildContext context) => IgnorePointer(
+        child: Container(
+          width: size,
+          height: size,
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: opacity),
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: _cyan.withValues(alpha: opacity * .45),
+                blurRadius: size * 2.4,
+              ),
+            ],
+          ),
+        ),
+      );
 }
 
 class _BotArena extends StatelessWidget {
