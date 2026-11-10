@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
+import '../design/expressive_widgets.dart';
 
 import '../core/numbers/big_number.dart';
 import 'arcade_catalog.dart';
@@ -38,7 +40,7 @@ class _ArcadePageState extends State<ArcadePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Arcade')),
+      appBar: GtnExpressiveAppBar(title: const Text('Arcade')),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -53,11 +55,11 @@ class _ArcadePageState extends State<ArcadePage> {
               if (snapshot.connectionState != ConnectionState.done) {
                 return const Padding(
                   padding: EdgeInsets.all(32),
-                  child: Center(child: CircularProgressIndicator()),
+                  child: Center(child: M3EProgressIndicator.circular()),
                 );
               }
               if (snapshot.hasError || !snapshot.hasData) {
-                return Card(
+                return GtnExpressiveCard(
                   child: Padding(
                     padding: const EdgeInsets.all(16),
                     child: Column(
@@ -66,7 +68,7 @@ class _ArcadePageState extends State<ArcadePage> {
                         const SizedBox(height: 8),
                         const Text('The original Arcade catalog could not be loaded.'),
                         const SizedBox(height: 8),
-                        FilledButton(
+                        M3EButton.filled(
                           onPressed: () => setState(() {
                             _catalog = ArcadeCatalog.load();
                           }),
@@ -479,7 +481,7 @@ class _ArcadeDialogState extends State<_ArcadeDialog> {
                 Text('Time: ${_timeLeft}s'),
               ],
             ),
-            LinearProgressIndicator(value: _timeLeft / 60),
+            M3EProgressIndicator.linearWavy(value: _timeLeft / 60),
             const SizedBox(height: 12),
             if (!_finished) ...[
               Text(
@@ -589,7 +591,7 @@ class _ArcadeDialogState extends State<_ArcadeDialog> {
       title: Text(widget.title),
       content: SingleChildScrollView(child: _gameContent()),
       actions: [
-        TextButton(
+        M3EButton.text(
           onPressed: () => Navigator.of(context).pop(),
           child: const Text('Close'),
         ),
