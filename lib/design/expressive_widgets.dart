@@ -320,3 +320,15 @@ class GtnExpressiveDialog extends StatelessWidget {
     );
   }
 }
+
+/// Message presenter backed by the M3 Expressive snackbar overlay.
+class GtnExpressiveSnackbar {
+  static void show(
+    BuildContext context, {
+    required Widget content,
+    Duration? duration,
+  }) {
+    final message = content is Text ? content.data ?? '' : content.toString();
+    M3ESnackbar.show(context, message: message, duration: duration);
+  }
+}
