@@ -146,7 +146,7 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
             ),
           ),
           const SizedBox(height: 8),
-          FilledButton(
+          M3EButton.filled(
             onPressed: _busy ? null : _applyJson,
             child: const Text('Apply JSON to current slot'),
           ),
