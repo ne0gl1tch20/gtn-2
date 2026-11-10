@@ -1,4 +1,6 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
+import '../design/expressive_widgets.dart';
 
 import '../core/numbers/big_number.dart';
 import '../core/progression/progression_calculator.dart';
@@ -73,11 +75,11 @@ class _ProgressionHubPageState extends State<ProgressionHubPage> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Prestige & Ultra')),
+      appBar: GtnExpressiveAppBar(title: const Text('Prestige & Ultra')),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Card(
+          GtnExpressiveCard(
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -94,7 +96,7 @@ class _ProgressionHubPageState extends State<ProgressionHubPage> {
                     'Prestige resets Money and normal upgrades while keeping permanent Prestige upgrades.',
                   ),
                   const SizedBox(height: 12),
-                  FilledButton(
+                  M3EButton.filled(
                     onPressed: _busy ||
                             _state.money.compareTo(prestigeRequirement) < 0 ||
                             prestigeReward.compareTo(BigNumber.fromInt(0)) <= 0
@@ -102,7 +104,8 @@ class _ProgressionHubPageState extends State<ProgressionHubPage> {
                         : () => _run(widget.onPrestige),
                     child: const Text('Prestige reset'),
                   ),
-                  OutlinedButton.icon(
+                  M3EButton.icon(
+                style: M3EButtonStyle.outlined,
                     onPressed: _busy ? null : () => _openPermanentShop(false),
                     icon: const Icon(Icons.upgrade),
                     label: const Text('Prestige upgrades'),
