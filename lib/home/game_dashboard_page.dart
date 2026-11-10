@@ -672,10 +672,13 @@ class _MoreMenuPage extends StatelessWidget {
           borderRadius: BorderRadius.circular(18),
           side: BorderSide(color: foreground.withValues(alpha: .08)),
         ),
-        child: InkWell(
+        child: Material(
+          color: Colors.transparent,
           borderRadius: BorderRadius.circular(18),
-          onTap: onTap,
-          child: Padding(
+          child: InkWell(
+            borderRadius: BorderRadius.circular(18),
+            onTap: onTap,
+            child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 13),
             child: Row(
               children: [
@@ -693,6 +696,7 @@ class _MoreMenuPage extends StatelessWidget {
                 ),
                 Icon(Icons.chevron_right_rounded, color: muted),
               ],
+            ),
             ),
           ),
         ),
