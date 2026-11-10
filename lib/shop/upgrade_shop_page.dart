@@ -108,7 +108,7 @@ class _UpgradeCard extends StatelessWidget {
     final canAfford = money.compareTo(cost) >= 0;
     final theme = Theme.of(context);
 
-    return Card(
+    return GtnExpressiveCard(
       margin: const EdgeInsets.only(bottom: 12),
       child: Padding(
         padding: const EdgeInsets.all(16),
