@@ -1,6 +1,8 @@
 import 'dart:math' as math;
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
+import '../design/expressive_widgets.dart';
 
 import '../core/numbers/big_number.dart';
 import '../core/progression/progression_state.dart';
@@ -163,7 +165,7 @@ class _WorldMapPageState extends State<WorldMapPage> {
         _state.nebula.compareTo(masteryCost) >= 0;
 
     return Scaffold(
-      appBar: AppBar(
+      appBar: GtnExpressiveAppBar(
         title: Text(AppLocalizations.text('world_map_title', 'World Map')),
         actions: [
           IconButton(
@@ -438,7 +440,7 @@ class _WorldMapPageState extends State<WorldMapPage> {
     final discovered =
         _state.legacySystems.discoveredSecrets.contains(world.secretId);
     final busy = _busyAction != null;
-    return Card(
+    return GtnExpressiveCard(
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -481,7 +483,7 @@ class _WorldMapPageState extends State<WorldMapPage> {
             const SizedBox(height: 8),
             if (unlocked && !defeated) ...[
               Text('Boss HP: ${(hp - damage).clamp(0, hp)} / $hp'),
-              LinearProgressIndicator(
+              M3EProgressIndicator.linearWavy(
                 value: (damage / hp).clamp(0.0, 1.0),
               ),
               const SizedBox(height: 4),
@@ -536,14 +538,14 @@ class _WorldMapPageState extends State<WorldMapPage> {
               ),
             const SizedBox(height: 12),
             if (!unlocked)
-              FilledButton.tonal(
+              M3EButton.tonal(
                 onPressed: canUnlock && !busy
                     ? () => _runAction(world.id, 'unlock')
                     : null,
                 child: const Text('Unlock world'),
               )
             else if (!defeated)
-              FilledButton(
+              M3EButton.filled(
                 onPressed: (active || canFight) && !busy
                     ? () => _runAction(world.id, 'boss')
                     : null,
@@ -586,7 +588,8 @@ class _WorldMapPageState extends State<WorldMapPage> {
               ),
             ],
             if (unlocked)
-              TextButton.icon(
+              M3EButton.icon(
+                style: M3EButtonStyle.text,
                 onPressed: busy
                     ? null
                     : () => _runAction(world.id, 'select_world'),
