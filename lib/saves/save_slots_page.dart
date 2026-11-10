@@ -73,7 +73,7 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextField(
+              GtnExpressiveTextField(
                 controller: nameController,
                 maxLength: 24,
                 decoration: const InputDecoration(labelText: 'Save name (optional)'),
@@ -163,7 +163,7 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextField(
+              GtnExpressiveTextField(
                 controller: nameController,
                 maxLength: 24,
                 decoration: const InputDecoration(labelText: 'Save name'),
