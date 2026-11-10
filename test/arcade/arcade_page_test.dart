@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gtn_2/arcade/arcade_page.dart';
 
@@ -6,7 +7,11 @@ void main() {
   testWidgets('Memory Match locks the round after one incorrect answer',
       (WidgetTester tester) async {
     final rewards = <String>[];
-    await tester.pumpWidget(MaterialApp(
+    await tester.pumpWidget(M3EMaterialApp(
+        data: M3EThemeData.light(seedColor: const Color(0xFF7C5CFC)),
+        fontFamily: 'Manrope',
+        autoTheming: false,
+        initialTheme: Brightness.light,
       home: ArcadePage(onReward: (nebula, money) async {
         rewards.add('${nebula.toString()}:${money.toString()}');
       }),
