@@ -1,4 +1,6 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
+import '../design/expressive_widgets.dart';
 
 import '../core/game/difficulty_rules.dart';
 import '../i18n/app_localizations.dart';
@@ -19,7 +21,7 @@ class SettingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(AppLocalizations.text('settings', 'Settings'))),
+      appBar: GtnExpressiveAppBar(title: Text(AppLocalizations.text('settings', 'Settings'))),
       body: ListView(
         children: [
           Padding(
