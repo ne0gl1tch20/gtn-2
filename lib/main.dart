@@ -61,7 +61,8 @@ class GtnApp extends StatelessWidget {
           fontFamily: 'Manrope',
           autoTheming: false,
           dynamicColoring: false,
-          initialTheme: settings.themeMode == 'System'\n              ? MediaQuery.platformBrightnessOf(context)\n              : settings.darkMode ? Brightness.dark : Brightness.light,
+          initialTheme: settings.themeMode == 'System'
+              ? MediaQuery.platformBrightnessOf(context)\n              : settings.darkMode ? Brightness.dark : Brightness.light,
           debugShowCheckedModeBanner: false,
           appBuilder: (context, child) => MediaQuery(
             data: MediaQuery.of(context).copyWith(
