@@ -159,7 +159,7 @@ Source: pinned GTN1 `web-play/index.html`, `styles.css`, and all seven files in 
 | `homebase` | Home Base / Sanctuary level, bonus, restoration action | `lib/progression/progression_hub_page.dart` and legacy systems | [~] Functionality exists; dedicated screen parity open |
 | `relics` | Relic collection, rarity, equipment slots and equip state | `lib/legacy/legacy_systems_page.dart` | [~] Native section exists; visual comparison open |
 | `codex` | Discovery collection, completion progress and claim-once reward | `lib/legacy/legacy_pages.dart` / legacy systems | [~] Native section exists; visual comparison open |
-| `changelog` | Release notes and rendered changelog content | No confirmed dedicated Flutter destination | [ ] Needs native screen and content source audit |
+| `changelog` | Release notes and rendered changelog content | `lib/legacy/legacy_pages.dart` + `assets/changelogs.md` | [~] Native Dart screen reads canonical GTN1 Markdown; parser fidelity and visual audit remain open |
 | `about` | App information, open-source licenses and attribution | `lib/legacy/legacy_pages.dart` | [~] Basic destination exists; licenses/content parity open |
 | `music` | Offline music player, track list, playback controls and state | No confirmed dedicated Flutter screen | [ ] Needs screen and native audio-service audit |
 | `settings` | Gameplay, appearance, audio, locale, accessibility and menu customization | `lib/settings/settings_page.dart` | [~] Settings exist; Menu Studio and all preference parity open |
