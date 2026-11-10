@@ -29,7 +29,6 @@ class _MenuStudioPageState extends State<MenuStudioPage> {
   static const _labels = <String, String>{
     'world_map': 'World map',
     'achievements': 'Achievements',
-    'live_ops': 'Live events',
     'mutators': 'Mutators',
     'talent': 'Talents',
     'relics': 'Relics',
