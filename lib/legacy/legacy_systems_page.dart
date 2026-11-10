@@ -5,7 +5,9 @@ import 'dart:math';
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
+import '../design/expressive_widgets.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:path_provider/path_provider.dart';
@@ -112,11 +114,11 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
       activeSeasonId: _seasonId(DateTime.now()),
     );
     return Scaffold(
-      appBar: AppBar(title: const Text('GTN 1 Systems')),
+      appBar: GtnExpressiveAppBar(title: const Text('GTN 1 Systems')),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Card(
+          GtnExpressiveCard(
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -345,7 +347,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
                 isThreeLine: true,
                 trailing: owned
                     ? const Icon(Icons.check_circle_rounded, color: Colors.green)
-                    : FilledButton(
+                    : M3EButton.filled(
                         onPressed: parentReady
                             ? () => _apply(_engine.buyTalent(
                                   _progression,
@@ -410,7 +412,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
                 title: Text(relic['name'] as String),
                 subtitle: Text('${relic['description']}\\nEarned from ${relic['unlockBossName']}'),
                 isThreeLine: true,
-                trailing: FilledButton.tonal(
+                trailing: M3EButton.tonal(
                   onPressed: owned ? () => _apply(_engine.equipRelic(_progression, _systems, id)) : null,
                   child: Text(equipped ? 'Unequip' : 'Equip'),
                 ),
@@ -959,7 +961,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
           decoration: const InputDecoration(labelText: 'Playlist name'),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          M3EButton.text(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
           FilledButton(onPressed: () => Navigator.pop(context, controller.text.trim()), child: const Text('Create')),
         ],
       ),
@@ -1029,7 +1031,8 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-            child: FilledButton.tonalIcon(
+            child: M3EButton.icon(
+                style: M3EButtonStyle.tonal,
               onPressed: _importMusicTracks,
               icon: const Icon(Icons.add_rounded),
               label: const Text('Import audio files'),
@@ -1107,7 +1110,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
             title: const Text('Check for updates'),
             subtitle: Text(_updateMessage ?? 'Check the GitHub release feed for a newer build.'),
             trailing: _checkingUpdate
-                ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                ? const SizedBox(width: 20, height: 20, child: M3EProgressIndicator.circular(strokeWidth: 2))
                 : const Icon(Icons.refresh_rounded),
             onTap: _checkingUpdate ? null : _checkForUpdate,
           ),
@@ -1123,7 +1126,8 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-              child: FilledButton.icon(
+              child: M3EButton.icon(
+                style: M3EButtonStyle.filled,
                 onPressed: _checkingUpdate ? null : _downloadAndInstallUpdate,
                 icon: const Icon(Icons.download_rounded),
                 label: const Text('Download and install update'),
