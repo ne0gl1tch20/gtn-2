@@ -31,8 +31,6 @@ void main() {
     await tester.scrollUntilVisible(find.text('Reduce flashes'), 350);
     expect(find.text('Reduce flashes'), findsOneWidget);
   });
-}
-
 
   testWidgets('Settings exposes diagnostics and Menu Studio', (tester) async {
     var openedMenuStudio = false;
@@ -57,3 +55,4 @@ void main() {
     await tester.tap(find.text('Menu Studio'));
     expect(openedMenuStudio, isTrue);
   });
+}
