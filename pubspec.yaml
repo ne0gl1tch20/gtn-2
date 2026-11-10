@@ -32,6 +32,7 @@ flutter:
     - assets/game/
     - assets/fonts/
     - assets/gtn1/
+    - assets/changelogs.md
 
   fonts:
     - family: Manrope
