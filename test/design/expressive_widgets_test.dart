@@ -4,7 +4,7 @@ import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
 
 void main() {
-  testWidgets('shared application surfaces use Material 3 Expressive widgets',
+  testWidgets('GTN1 surfaces retain custom styling while interactive controls use M3 Expressive',
       (tester) async {
     final controller = TextEditingController();
     await tester.pumpWidget(
@@ -71,7 +71,7 @@ void main() {
     );
 
     expect(find.byType(M3EAppBar), findsOneWidget);
-    expect(find.byType(M3ECard), findsOneWidget);
+    expect(find.byType(GtnExpressiveCard), findsOneWidget);
     expect(find.byType(M3EButton), findsOneWidget);
     expect(find.byType(M3ETextField), findsOneWidget);
     expect(find.byType(M3ESwitch), findsOneWidget);
