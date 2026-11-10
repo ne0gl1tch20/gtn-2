@@ -91,8 +91,10 @@ class UpdateChecker {
         for (final item in assets) {
           if (item is! Map<String, dynamic> || item['name'] != name) continue;
           final value = item['browser_download_url'];
-          if (value is String && _isReleaseAssetUrl(Uri.tryParse(value), name))
+          if (value is String &&
+              _isReleaseAssetUrl(Uri.tryParse(value), name)) {
             return value;
+          }
         }
         return null;
       }
@@ -178,8 +180,10 @@ class UpdateChecker {
         for (final item in assets) {
           if (item is! Map<String, dynamic> || item['name'] != name) continue;
           final value = item['browser_download_url'];
-          if (value is String && _isReleaseAssetUrl(Uri.tryParse(value), name))
+          if (value is String &&
+              _isReleaseAssetUrl(Uri.tryParse(value), name)) {
             return value;
+          }
         }
         return null;
       }
@@ -283,10 +287,11 @@ class UpdateChecker {
           const Duration(seconds: 60),
         )) {
           total += chunk.length;
-          if (total > maxWindowsArchiveBytes)
+          if (total > maxWindowsArchiveBytes) {
             throw const FormatException(
               'Windows update archive exceeds the size limit.',
             );
+          }
           sink.add(chunk);
         }
         await sink.flush();
@@ -387,8 +392,9 @@ Remove-Item -LiteralPath $temporaryDirectory -Recurse -Force -ErrorAction Silent
           const Duration(seconds: 60),
         )) {
           total += chunk.length;
-          if (total > maxApkBytes)
+          if (total > maxApkBytes) {
             throw const FormatException('Update APK exceeds the size limit.');
+          }
           sink.add(chunk);
         }
         await sink.flush();
@@ -449,8 +455,9 @@ Remove-Item -LiteralPath $temporaryDirectory -Recurse -Force -ErrorAction Silent
   }
 
   Future<Map<String, dynamic>> _getJson(HttpClient client, Uri uri) async {
-    if (!_isTrustedMetadataUrl(uri))
+    if (!_isTrustedMetadataUrl(uri)) {
       throw const FormatException('Update metadata URL is not trusted.');
+    }
     final request = await client.getUrl(uri);
     request.headers.set(
       HttpHeaders.acceptHeader,
@@ -464,12 +471,14 @@ Remove-Item -LiteralPath $temporaryDirectory -Recurse -Force -ErrorAction Silent
     final bytes = <int>[];
     await for (final chunk in response.timeout(const Duration(seconds: 30))) {
       bytes.addAll(chunk);
-      if (bytes.length > maxMetadataBytes)
+      if (bytes.length > maxMetadataBytes) {
         throw const FormatException('Update metadata is too large.');
+      }
     }
     final decoded = jsonDecode(utf8.decode(bytes));
-    if (decoded is! Map<String, dynamic>)
+    if (decoded is! Map<String, dynamic>) {
       throw const FormatException('Update metadata JSON is invalid.');
+    }
     return decoded;
   }
 

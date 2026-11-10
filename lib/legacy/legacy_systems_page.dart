@@ -339,8 +339,9 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
         }
         entries.add(entry);
       }
-      if (entries.isEmpty)
+      if (entries.isEmpty) {
         throw FormatException('Empty pinned GTN1 catalog: $path');
+      }
       if (key == 'talents') {
         final talentIds = entries.map((entry) => entry['id'] as String).toSet();
         for (final entry in entries) {
@@ -1302,8 +1303,9 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
     controller.dispose();
     if (name == null ||
         name.isEmpty ||
-        _systems.musicPlaylists.containsKey(name))
+        _systems.musicPlaylists.containsKey(name)) {
       return;
+    }
     final playlists = Map<String, List<String>>.of(_systems.musicPlaylists)
       ..[name] = List<String>.unmodifiable(_systems.musicLibrary);
     await _saveSystems(
@@ -1505,8 +1507,9 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
                 DropdownMenuItem(value: 'all', child: Text('All')),
               ],
               onChanged: (value) {
-                if (value != null)
+                if (value != null) {
                   _saveSystems(_systems.copyWith(musicRepeatMode: value));
+                }
               },
             ),
           ),

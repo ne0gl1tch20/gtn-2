@@ -228,8 +228,9 @@ class _CreativeModePageState extends State<CreativeModePage> {
         _message = 'New run started. Find the secret number!';
       });
     } catch (error) {
-      if (mounted)
+      if (mounted) {
         setState(() => _message = 'Could not save the new run: $error');
+      }
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -280,8 +281,9 @@ class _CreativeModePageState extends State<CreativeModePage> {
         _message = message;
       });
     } catch (error) {
-      if (mounted)
+      if (mounted) {
         setState(() => _message = 'Could not save this guess: $error');
+      }
     } finally {
       if (mounted) setState(() => _saving = false);
     }

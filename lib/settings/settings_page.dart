@@ -129,13 +129,14 @@ class SettingsPage extends StatelessWidget {
                   DropdownMenuItem(value: 'AMOLED', child: Text('AMOLED')),
                 ],
                 (v) {
-                  if (v != null)
+                  if (v != null) {
                     _update(
                       settings.copyWith(
                         themeMode: v,
                         darkMode: v == 'Dark' || v == 'AMOLED',
                       ),
                     );
+                  }
                 },
               ),
               _dropdown<String>(
@@ -251,8 +252,9 @@ class SettingsPage extends StatelessWidget {
                   DropdownMenuItem(value: 48, child: Text('48 hours')),
                 ],
                 (v) {
-                  if (v != null)
+                  if (v != null) {
                     _update(settings.copyWith(notificationIntervalHours: v));
+                  }
                 },
               ),
               _toggle(
@@ -293,8 +295,9 @@ class SettingsPage extends StatelessWidget {
                   DropdownMenuItem(value: 168, child: Text('Every 7 days')),
                 ],
                 (v) {
-                  if (v != null)
+                  if (v != null) {
                     _update(settings.copyWith(updateCheckIntervalHours: v));
+                  }
                 },
               ),
               const Text(
@@ -453,7 +456,7 @@ class _SettingsSlider extends StatelessWidget {
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      Text('${label} · ${(value * 100).round()}%'),
+      Text('$label · ${(value * 100).round()}%'),
       Slider(value: value, min: 0, max: 1, onChanged: onChanged),
     ],
   );
@@ -470,7 +473,7 @@ class _ColorSetting extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => TextFormField(
-    key: ValueKey('${label}-${value}'),
+    key: ValueKey('$label-$value'),
     initialValue: value,
     decoration: InputDecoration(
       labelText: label,
@@ -479,8 +482,9 @@ class _ColorSetting extends StatelessWidget {
     ),
     onFieldSubmitted: (raw) {
       final normalized = raw.trim().toUpperCase();
-      if (RegExp(r'^#[0-9A-F]{6}$').hasMatch(normalized))
+      if (RegExp(r'^#[0-9A-F]{6}$').hasMatch(normalized)) {
         onSubmitted(normalized);
+      }
     },
   );
 }

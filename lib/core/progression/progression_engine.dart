@@ -104,8 +104,9 @@ class ProgressionEngine {
     UpgradeDefinition definition,
   ) {
     final level = state.upgrades[definition.id] ?? 0;
-    if (definition.maxLevel != null && level >= definition.maxLevel!)
+    if (definition.maxLevel != null && level >= definition.maxLevel!) {
       return state;
+    }
     final cost = definition.costAtLevel(level);
     if (state.money.compareTo(cost) < 0) return state;
     final levels = Map<String, int>.of(state.upgrades)
@@ -121,8 +122,9 @@ class ProgressionEngine {
     UpgradeDefinition definition,
   ) {
     final level = state.prestigeUpgrades[definition.id] ?? 0;
-    if (definition.maxLevel != null && level >= definition.maxLevel!)
+    if (definition.maxLevel != null && level >= definition.maxLevel!) {
       return state;
+    }
     final cost = definition.costAtLevel(level);
     if (state.prestige.compareTo(cost) < 0) return state;
     final levels = Map<String, int>.of(state.prestigeUpgrades)
@@ -138,8 +140,9 @@ class ProgressionEngine {
     UpgradeDefinition definition,
   ) {
     final level = state.ultraUpgrades[definition.id] ?? 0;
-    if (definition.maxLevel != null && level >= definition.maxLevel!)
+    if (definition.maxLevel != null && level >= definition.maxLevel!) {
       return state;
+    }
     final cost = definition.costAtLevel(level);
     if (state.ultra.compareTo(cost) < 0) return state;
     final levels = Map<String, int>.of(state.ultraUpgrades)

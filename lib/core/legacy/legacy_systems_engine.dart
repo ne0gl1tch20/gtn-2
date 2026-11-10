@@ -61,8 +61,9 @@ class LegacySystemsEngine {
     String id,
     bool active,
   ) {
-    if (!_mutators.contains(id))
+    if (!_mutators.contains(id)) {
       return _reject(progression, systems, 'Unknown mutator.');
+    }
     final next = Set<String>.of(systems.activeMutators);
     if (active) {
       next.add(id);
@@ -127,11 +128,13 @@ class LegacySystemsEngine {
     ProgressionState progression,
     LegacySystemsState systems,
   ) {
-    if (systems.homeBaseLevel >= 20)
+    if (systems.homeBaseLevel >= 20) {
       return _reject(progression, systems, 'Home Base is fully restored.');
+    }
     final cost = BigNumber.fromInt(50000 * (systems.homeBaseLevel + 1));
-    if (progression.money.compareTo(cost) < 0)
+    if (progression.money.compareTo(cost) < 0) {
       return _reject(progression, systems, 'Not enough Money.');
+    }
     return _accept(
       progression.copyWith(
         money: progression.money - cost,
@@ -154,12 +157,13 @@ class LegacySystemsEngine {
     if (equipped.contains(relicId)) {
       equipped.remove(relicId);
     } else {
-      if (equipped.length >= 4)
+      if (equipped.length >= 4) {
         return _reject(
           progression,
           systems,
           'Only four relics can be equipped.',
         );
+      }
       equipped.add(relicId);
     }
     return _accept(
@@ -199,15 +203,18 @@ class LegacySystemsEngine {
       _ => '0',
     };
     multiplier += BigNumber.parse(setBonus);
-    if (equipped.contains('verdant_guardian'))
+    if (equipped.contains('verdant_guardian')) {
       multiplier += BigNumber.parse('0.10');
+    }
     if (equipped.contains('crystal_golem') && criticalHit) {
       multiplier += BigNumber.parse('0.50');
     }
-    if (equipped.contains('ember_dragon'))
+    if (equipped.contains('ember_dragon')) {
       multiplier += BigNumber.parse('0.25');
-    if (equipped.contains('nebula_titan'))
+    }
+    if (equipped.contains('nebula_titan')) {
       multiplier += BigNumber.parse('0.25');
+    }
     return baseReward * multiplier;
   }
 
@@ -304,10 +311,12 @@ class LegacySystemsEngine {
     required bool won,
     required int currentStreak,
   }) {
-    if (stake.compareTo(_zero) <= 0)
+    if (stake.compareTo(_zero) <= 0) {
       return _reject(progression, systems, 'Stake must be positive.');
-    if (progression.money.compareTo(stake) < 0)
+    }
+    if (progression.money.compareTo(stake) < 0) {
       return _reject(progression, systems, 'Not enough Money.');
+    }
     final payout = won
         ? stake * BigNumber.fromParts(BigInt.from(20 + currentStreak), 1)
         : _zero;
@@ -333,8 +342,9 @@ class LegacySystemsEngine {
     int traitNebulaBonus = 0,
     bool nebulaBoostOwned = false,
   }) {
-    if (!_validDate(today))
+    if (!_validDate(today)) {
       return _reject(progression, systems, 'Invalid claim date.');
+    }
     if (systems.lastDailyRewardDate == today) {
       return _reject(progression, systems, 'Daily reward already claimed.');
     }
@@ -365,8 +375,9 @@ class LegacySystemsEngine {
     required String today,
     bool nebulaBoostOwned = false,
   }) {
-    if (!_validDate(today))
+    if (!_validDate(today)) {
       return _reject(progression, systems, 'Invalid claim date.');
+    }
     var current = systems;
     if (current.dailyQuestDate != today) {
       current = current.copyWith(
@@ -428,8 +439,9 @@ class LegacySystemsEngine {
     const money = {'common': 5000, 'rare': 25000, 'epic': 100000};
     const nebula = {'common': 5, 'rare': 25, 'epic': 100};
     final available = systems.lootChests[tier];
-    if (available == null || available <= 0)
+    if (available == null || available <= 0) {
       return _reject(progression, systems, 'No chest available.');
+    }
     final chests = Map<String, int>.of(systems.lootChests)
       ..[tier] = available - 1;
     var updated = progression;
@@ -478,8 +490,9 @@ class LegacySystemsEngine {
       );
     }
     final current = systems.worldMasteryLevels[worldId] ?? 1;
-    if (current >= 10)
+    if (current >= 10) {
       return _reject(progression, systems, 'Mastery is already at level 10.');
+    }
     final secretId = const <String, String>{
       'verdant_grove': 'whispering_hollow',
       'crystal_caverns': 'shard_archive',
@@ -562,8 +575,9 @@ class LegacySystemsEngine {
       'lost_observatory': 150,
     };
     final worldId = worlds[secretId];
-    if (worldId == null)
+    if (worldId == null) {
       return _reject(progression, systems, 'Unknown secret area.');
+    }
     if (systems.discoveredSecrets.contains(secretId)) {
       return _reject(progression, systems, 'Secret area already discovered.');
     }
@@ -703,8 +717,9 @@ class LegacySystemsEngine {
     required bool active,
   }) {
     if (active) {
-      if (systems.endlessRiftActive)
+      if (systems.endlessRiftActive) {
         return _reject(progression, systems, 'Endless Rift is already active.');
+      }
       if (!WorldBossCatalog.worlds.every(
         (world) => WorldBossCatalog.isDefeated(progression, world),
       )) {
@@ -738,8 +753,9 @@ class LegacySystemsEngine {
         ),
       );
     }
-    if (!systems.endlessRiftActive)
+    if (!systems.endlessRiftActive) {
       return _reject(progression, systems, 'Endless Rift is not active.');
+    }
     return _accept(
       progression,
       systems.copyWith(endlessRiftActive: false, clearActiveBossBattle: true),
@@ -1010,16 +1026,18 @@ class LegacySystemsEngine {
     required String? activeSeasonId,
   }) {
     final allowed = gameplayArms[traitId];
-    if (allowed == null || !allowed.contains(armId))
+    if (allowed == null || !allowed.contains(armId)) {
       return _reject(progression, systems, 'Unknown trait arm.');
+    }
     final active = evaluateTraits(
       progression: progression,
       systems: systems,
       playerLevel: playerLevel,
       activeSeasonId: activeSeasonId,
     );
-    if (!active.activeTraitIds.contains(traitId))
+    if (!active.activeTraitIds.contains(traitId)) {
       return _reject(progression, systems, 'Trait is not active.');
+    }
     return _accept(
       progression,
       systems.copyWith(

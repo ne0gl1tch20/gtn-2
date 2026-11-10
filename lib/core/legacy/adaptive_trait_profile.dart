@@ -133,8 +133,9 @@ class AdaptiveTraitProfile {
 
     Map<String, int> counters(String key) {
       final value = json[key] ?? const <String, dynamic>{};
-      if (value is! Map)
+      if (value is! Map) {
         throw FormatException('Invalid adaptive trait profile map: $key');
+      }
       final result = <String, int>{};
       for (final entry in value.entries) {
         if (entry.key is! String ||
@@ -144,8 +145,9 @@ class AdaptiveTraitProfile {
         }
         result[entry.key as String] = entry.value as int;
       }
-      if (result.length > 64)
+      if (result.length > 64) {
         throw FormatException('Adaptive trait profile map is too large: $key');
+      }
       return Map.unmodifiable(result);
     }
 
@@ -154,16 +156,18 @@ class AdaptiveTraitProfile {
       if (value is! List || value.any((item) => item is! String)) {
         throw FormatException('Invalid adaptive trait profile set: $key');
       }
-      if (value.length > 64)
+      if (value.length > 64) {
         throw FormatException('Adaptive trait profile set is too large: $key');
+      }
       return Set.unmodifiable(value.cast<String>());
     }
 
     final version = count('schemaVersion');
-    if (version != 1)
+    if (version != 1) {
       throw const FormatException(
         'Unsupported adaptive trait profile version.',
       );
+    }
     final earned = json['moneyEarnedObserved'] ?? '0';
     final spent = json['moneySpentObserved'] ?? '0';
     if (earned is! String || spent is! String) {
