@@ -44,6 +44,7 @@ void main() {
     );
     final restored = GameSettings.fromJson(settings.toJson());
     expect(restored.themeMode, 'AMOLED');
+    expect(restored.darkMode, isTrue);
     expect(restored.numberNotation, 'Scientific');
     expect(restored.localeCode, 'fil');
     expect(restored.difficultyId, 'hard');
@@ -106,3 +107,10 @@ void main() {
     );
   });
 }
+
+  test('system theme preserves the legacy dark mode fallback', () {
+    final settings = GameSettings.initial;
+    final restored = GameSettings.fromJson(settings.toJson());
+    expect(restored.themeMode, 'System');
+    expect(restored.darkMode, isTrue);
+  });
