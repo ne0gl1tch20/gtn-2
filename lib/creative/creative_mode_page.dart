@@ -327,7 +327,7 @@ class _CreativeModePageState extends State<CreativeModePage> {
                     ),
                     const SizedBox(height: 12),
                     Text('Range scale: $_rangeScale×'),
-                    Slider(
+                    M3ESlider(
                       value: _rangeScale.toDouble(),
                       min: 1,
                       max: 5,
@@ -341,7 +341,7 @@ class _CreativeModePageState extends State<CreativeModePage> {
                               }),
                     ),
                     Text('Extra hints: $_extraHints'),
-                    Slider(
+                    M3ESlider(
                       value: _extraHints.toDouble(),
                       min: 0,
                       max: 5,
@@ -357,7 +357,7 @@ class _CreativeModePageState extends State<CreativeModePage> {
                     Text(_attemptLimit == 0
                         ? 'Attempt limit: unlimited'
                         : 'Attempt limit: $_attemptLimit'),
-                    Slider(
+                    M3ESlider(
                       value: _attemptLimit.toDouble(),
                       min: 0,
                       max: 100,
@@ -412,7 +412,7 @@ class _CreativeModePageState extends State<CreativeModePage> {
                                 onSubmitted: (_) => _submitGuess(),
                               ),
                               const SizedBox(height: 8),
-                              FilledButton(
+                              M3EButton.filled(
                                 onPressed: run.completed || _saving ? null : _submitGuess,
                                 child: const Text('Submit guess'),
                               ),
