@@ -1,5 +1,6 @@
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:flutter/services.dart';
 
 import '../core/progression/progression_state.dart';
 import '../creative/creative_mode_page.dart';
@@ -13,6 +14,7 @@ enum LegacySection {
   rewards('Rewards', Icons.card_giftcard_rounded),
   statistics('Statistics', Icons.query_stats_rounded),
   codex('Codex', Icons.menu_book_rounded),
+  changelog('Changelog', Icons.article_outlined),
   about('About', Icons.info_outline_rounded);
 
   const LegacySection(this.label, this.icon);
@@ -110,6 +112,7 @@ class _LegacyDetailPage extends StatelessWidget {
       LegacySection.rewards => _rewards(context),
       LegacySection.statistics => _statistics(context),
       LegacySection.codex => _codex(context),
+      LegacySection.changelog => _changelog(context),
       LegacySection.about => _about(context),
     };
     return Scaffold(
@@ -212,6 +215,10 @@ class _LegacyDetailPage extends StatelessWidget {
           ),
       ];
 
+  List<Widget> _changelog(BuildContext context) => [
+        const _ChangelogContent(),
+      ];
+
   List<Widget> _about(BuildContext context) => [
         Text('Guess The Number 2', style: Theme.of(context).textTheme.headlineSmall),
         const SizedBox(height: 8),
@@ -229,4 +236,129 @@ class _LegacyDetailPage extends StatelessWidget {
           trailing: Text(value, style: const TextStyle(fontWeight: FontWeight.w800)),
         ),
       );
+}
+
+
+class _ChangelogContent extends StatelessWidget {
+  const _ChangelogContent();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return FutureBuilder<String>(
+      future: rootBundle.loadString('assets/changelogs.md'),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState != ConnectionState.done) {
+          return const Center(
+            child: Padding(
+              padding: EdgeInsets.all(32),
+              child: M3EProgressIndicator.circular(),
+            ),
+          );
+        }
+        if (snapshot.hasError || !snapshot.hasData) {
+          return GtnExpressiveCard(
+            child: const Text('The bundled GTN1 changelog could not be loaded.'),
+          );
+        }
+        final rows = <Widget>[];
+        for (final raw in snapshot.data!.split('\n')) {
+          final line = raw.trim();
+          if (line.isEmpty || line == '---') continue;
+          if (line.startsWith('# ')) continue;
+          if (line.startsWith('### ')) {
+            rows.add(Padding(
+              padding: const EdgeInsets.only(top: 14, bottom: 4),
+              child: Text(
+                line.substring(4).replaceAll('**', ''),
+                style: theme.textTheme.titleMedium?.copyWith(
+                  color: GtnUiTokens.cyan,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ));
+          } else if (line.startsWith('## ')) {
+            rows.add(Padding(
+              padding: const EdgeInsets.only(top: 16, bottom: 5),
+              child: Text(
+                line.substring(3).replaceAll('**', ''),
+                style: theme.textTheme.titleLarge?.copyWith(
+                  color: GtnUiTokens.purple,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ));
+          } else if (line.startsWith('- ')) {
+            rows.add(Padding(
+              padding: const EdgeInsets.only(left: 4, top: 4),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.only(top: 7, right: 9),
+                    child: Icon(Icons.circle, size: 6, color: GtnUiTokens.cyan),
+                  ),
+                  Expanded(
+                    child: Text(
+                      line.substring(2).replaceAll('**', '').replaceAll('`', ''),
+                      style: theme.textTheme.bodySmall?.copyWith(height: 1.55),
+                    ),
+                  ),
+                ],
+              ),
+            ));
+          } else {
+            rows.add(Padding(
+              padding: const EdgeInsets.only(top: 5),
+              child: Text(
+                line.replaceAll('**', '').replaceAll('`', ''),
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                  height: 1.55,
+                ),
+              ),
+            ));
+          }
+        }
+        return GtnExpressiveCard(
+          padding: const EdgeInsets.all(18),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(26),
+            side: const BorderSide(color: GtnUiTokens.line),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'PROJECT HISTORY',
+                style: TextStyle(
+                  color: GtnUiTokens.cyan,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 1.4,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'Changelog',
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Release notes and development history from the original GTN1 source.',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 12),
+              const Divider(height: 1),
+              ...rows,
+            ],
+          ),
+        );
+      },
+    );
+  }
 }
