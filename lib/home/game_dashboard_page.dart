@@ -1,4 +1,6 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
+import '../design/expressive_widgets.dart';
 
 import '../core/game/game_engine.dart';
 import '../core/progression/progression_state.dart';
@@ -83,26 +85,44 @@ class GameDashboardPage extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: dark ? _bg : const Color(0xFFF5F6FC),
-      bottomNavigationBar: SafeArea(
-        top: false,
-        child: Container(
-          padding: const EdgeInsets.fromLTRB(7, 8, 7, 7),
-          decoration: BoxDecoration(
-            color: dark ? const Color(0xF20A0E1C) : Colors.white,
-            border: Border(
-              top: BorderSide(color: foreground.withValues(alpha: .10)),
-            ),
+      bottomNavigationBar: M3ENavigationBar(
+        destinations: const [
+          M3ENavigationBarDestination(
+            icon: Icon(Icons.public_rounded),
+            label: 'Beyond the Numbers',
           ),
-          child: Row(
-            children: [
-              Expanded(child: _BottomNavItem(Icons.public_rounded, 'Beyond the Numbers', false, onWorldMap)),
-              Expanded(child: _BottomNavItem(Icons.sports_esports_rounded, 'Arcade', false, onArcade)),
-              Expanded(child: _BottomNavItem(Icons.play_arrow_rounded, 'Play', true, () {})),
-              Expanded(child: _BottomNavItem(Icons.upgrade_rounded, 'Upgrades', false, onUpgradeShop)),
-              Expanded(child: _BottomNavItem(Icons.menu_rounded, 'More', false, () => _openMoreMenu(context, panel))),
-            ],
+          M3ENavigationBarDestination(
+            icon: Icon(Icons.sports_esports_rounded),
+            label: 'Arcade',
           ),
-        ),
+          M3ENavigationBarDestination(
+            icon: Icon(Icons.play_arrow_rounded),
+            label: 'Play',
+          ),
+          M3ENavigationBarDestination(
+            icon: Icon(Icons.upgrade_rounded),
+            label: 'Upgrades',
+          ),
+          M3ENavigationBarDestination(
+            icon: Icon(Icons.menu_rounded),
+            label: 'More',
+          ),
+        ],
+        selectedIndex: 2,
+        onDestinationSelected: (index) {
+          switch (index) {
+            case 0:
+              onWorldMap();
+            case 1:
+              onArcade();
+            case 2:
+              break;
+            case 3:
+              onUpgradeShop();
+            case 4:
+              _openMoreMenu(context, panel);
+          }
+        },
       ),
       body: Container(
         decoration: BoxDecoration(
@@ -350,7 +370,8 @@ class GameDashboardPage extends StatelessWidget {
                   ),
                   if (game.isComplete) ...[
                     const SizedBox(height: 12),
-                    FilledButton.icon(
+                    M3EButton.icon(
+                style: M3EButtonStyle.filled,
                       onPressed: loading ? null : onNewGame,
                       icon: const Icon(Icons.refresh_rounded),
                       label: const Text('Start another round'),
@@ -508,7 +529,7 @@ class _BotArena extends StatelessWidget {
                   style: TextStyle(color: muted, fontSize: 9),
                 ),
               ),
-              TextButton(
+              M3EButton.text(
                 onPressed: onOpenShop,
                 child: const Text('Nebula Shop ↗'),
               ),
@@ -547,7 +568,7 @@ class _MoreMenuPage extends StatelessWidget {
     final panel = dark ? _panel : Colors.white;
 
     Widget entry(IconData icon, String title, String subtitle, VoidCallback onTap) {
-      return Card(
+      return GtnExpressiveCard(
         color: panel,
         margin: const EdgeInsets.only(bottom: 10),
         shape: RoundedRectangleBorder(
@@ -566,7 +587,7 @@ class _MoreMenuPage extends StatelessWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('More Hub')),
+      appBar: GtnExpressiveAppBar(title: const Text('More Hub')),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -914,7 +935,7 @@ class _GuessInput extends StatelessWidget {
                 const SizedBox(width: 9),
                 SizedBox(
                   height: 56,
-                  child: FilledButton(
+                  child: M3EButton.filled(
                     onPressed: enabled ? onGuess : null,
                     style: FilledButton.styleFrom(
                       backgroundColor: _purple,
@@ -1005,7 +1026,7 @@ class _QuickGuessButton extends StatelessWidget {
   final VoidCallback onPressed;
 
   @override
-  Widget build(BuildContext context) => OutlinedButton(
+  Widget build(BuildContext context) => M3EButton.outlined(
         onPressed: enabled ? onPressed : null,
         style: OutlinedButton.styleFrom(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
