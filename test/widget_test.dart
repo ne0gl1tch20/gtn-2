@@ -126,6 +126,14 @@ void main() {
     expect(find.text('Lua hub'), findsNothing);
     expect(find.text('Live events'), findsNothing);
     expect(
+      tester.getTopLeft(find.text('Music')).dy,
+      lessThan(tester.getTopLeft(find.text('Settings')).dy),
+    );
+    expect(
+      tester.getTopLeft(find.text('Settings')).dy,
+      lessThan(tester.getTopLeft(find.text('Save Slots')).dy),
+    );
+    expect(
       find.byWidgetPredicate(
         (widget) =>
             widget is Icon &&
@@ -133,14 +141,6 @@ void main() {
             widget.color == const Color(0xFFFF5722),
       ),
       findsOneWidget,
-    );
-    expect(
-      tester.getTopLeft(find.text('Music')).dy,
-      lessThan(tester.getTopLeft(find.text('Settings')).dy),
-    );
-    expect(
-      tester.getTopLeft(find.text('Settings')).dy,
-      lessThan(tester.getTopLeft(find.text('Save Slots')).dy),
     );
     await tester.scrollUntilVisible(
       find.text('Dev Settings'),
