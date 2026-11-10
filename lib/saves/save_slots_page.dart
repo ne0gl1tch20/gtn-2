@@ -65,10 +65,10 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
     final nameController = TextEditingController();
     var difficulty = DifficultyRules.classic;
     var icon = 'default';
-    final result = await showDialog<({String name, String difficulty, String icon})>(
+    final result = await GtnExpressiveDialog.show<({String name, String difficulty, String icon})>(
       context: context,
       builder: (dialogContext) => StatefulBuilder(
-        builder: (context, setDialogState) => AlertDialog(
+        builder: (context, setDialogState) => GtnExpressiveDialog(
           title: Text('Create Slot $slot'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -155,10 +155,10 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
     if (current == null || !mounted) return;
     final nameController = TextEditingController(text: current.profileName);
     var icon = current.profileIconId;
-    final result = await showDialog<({String name, String icon})>(
+    final result = await GtnExpressiveDialog.show<({String name, String icon})>(
       context: context,
       builder: (dialogContext) => StatefulBuilder(
-        builder: (context, setDialogState) => AlertDialog(
+        builder: (context, setDialogState) => GtnExpressiveDialog(
           title: Text('Edit Slot $slot Profile'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -246,10 +246,10 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
       return;
     }
     var target = emptySlots.first;
-    final selected = await showDialog<int>(
+    final selected = await GtnExpressiveDialog.show<int>(
       context: context,
       builder: (dialogContext) => StatefulBuilder(
-        builder: (context, setDialogState) => AlertDialog(
+        builder: (context, setDialogState) => GtnExpressiveDialog(
           title: Text('Duplicate Slot $sourceSlot'),
           content: GtnExpressiveDropdown<int>(
             initialValue: target,
@@ -285,9 +285,9 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
   }
 
   Future<void> _reset(int slot) async {
-    final confirmed = await showDialog<bool>(
+    final confirmed = await GtnExpressiveDialog.show<bool>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
+      builder: (dialogContext) => GtnExpressiveDialog(
         title: Text('Reset Slot $slot?'),
         content: const Text('This permanently deletes the save and its restore backup.'),
         actions: [
@@ -311,9 +311,9 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
   }
 
   Future<void> _restore(int slot) async {
-    final confirmed = await showDialog<bool>(
+    final confirmed = await GtnExpressiveDialog.show<bool>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
+      builder: (dialogContext) => GtnExpressiveDialog(
         title: Text('Restore Slot $slot backup?'),
         content: const Text('The current save will become the backup, so you can switch back if needed.'),
         actions: [
