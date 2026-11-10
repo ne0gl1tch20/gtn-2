@@ -3,10 +3,11 @@ import 'package:gtn_2/core/game/game_engine.dart';
 import 'package:gtn_2/core/progression/progression_state.dart';
 import 'package:gtn_2/design/expressive_widgets.dart';
 import 'package:gtn_2/home/game_dashboard_page.dart';
+import 'package:gtn_2/settings/game_settings.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
 
-Widget buildDashboard() => M3EMaterialApp(
+Widget buildDashboard({GameSettings? settings}) => M3EMaterialApp(
   data: M3EThemeData.light(seedColor: const Color(0xFF7C5CFC)),
   fontFamily: 'Manrope',
   autoTheming: false,
@@ -14,6 +15,7 @@ Widget buildDashboard() => M3EMaterialApp(
   home: GameDashboardPage(
     game: const GameState(secret: 42, attempts: 0, isComplete: false),
     progression: ProgressionState.initial,
+    settings: settings ?? GameSettings.initial,
     activeSlot: 1,
     loading: false,
     message: 'Make your move.',
@@ -29,6 +31,9 @@ Widget buildDashboard() => M3EMaterialApp(
     onSettings: () {},
     onDeveloperSettings: () {},
     onLegacyPages: () {},
+    onMusic: () {},
+    onLuckyStake: () {},
+    onSystems: () {},
     showDeveloperSettings: true,
   ),
 );
@@ -96,16 +101,32 @@ void main() {
     expect(guessController().text, isEmpty);
   });
 
-  testWidgets('More opens its own destination with save and dev tools', (
+  testWidgets('More follows the saved Menu Studio order and includes tools', (
     WidgetTester tester,
   ) async {
-    await tester.pumpWidget(buildDashboard());
+    final settings = GameSettings.initial.copyWith(
+      moreScreenOrder: const ['music', 'settings', 'save_slots'],
+      moreScreenButtonColors: const {'music': '#FF5722'},
+    );
+    await tester.pumpWidget(buildDashboard(settings: settings));
     await tester.tap(find.text('More'));
     await tester.pumpAndSettle();
 
     expect(find.text('More Menu'), findsOneWidget);
+    expect(find.text('Music'), findsOneWidget);
+    expect(find.text('Settings'), findsOneWidget);
     expect(find.text('Save Slots'), findsOneWidget);
-    await tester.drag(find.byType(ListView).last, const Offset(0, -500));
+    expect(find.text('Lucky Stake'), findsOneWidget);
+    expect(find.text('Lua hub'), findsNothing);
+    expect(
+      tester.getTopLeft(find.text('Music')).dy,
+      lessThan(tester.getTopLeft(find.text('Settings')).dy),
+    );
+    expect(
+      tester.getTopLeft(find.text('Settings')).dy,
+      lessThan(tester.getTopLeft(find.text('Save Slots')).dy),
+    );
+    await tester.drag(find.byType(ListView).last, const Offset(0, -1600));
     await tester.pumpAndSettle();
     expect(find.text('Dev Settings'), findsOneWidget);
   });
