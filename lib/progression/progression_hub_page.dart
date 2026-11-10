@@ -114,7 +114,7 @@ class _ProgressionHubPageState extends State<ProgressionHubPage> {
               ),
             ),
           ),
-          Card(
+          GtnExpressiveCard(
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -132,7 +132,7 @@ class _ProgressionHubPageState extends State<ProgressionHubPage> {
                     'Ultra is a stronger reset. It clears Money, Prestige and the related progression upgrades.',
                   ),
                   const SizedBox(height: 12),
-                  FilledButton(
+                  M3EButton.filled(
                     onPressed: _busy ||
                             !hasPrestigeForUltra ||
                             _state.money.compareTo(ultraRequirement) < 0 ||
@@ -141,7 +141,8 @@ class _ProgressionHubPageState extends State<ProgressionHubPage> {
                         : () => _run(widget.onUltra),
                     child: const Text('Ultra reset'),
                   ),
-                  OutlinedButton.icon(
+                  M3EButton.icon(
+                        style: M3EButtonStyle.outlined,
                     onPressed: _busy ? null : () => _openPermanentShop(true),
                     icon: const Icon(Icons.auto_awesome),
                     label: const Text('Ultra upgrades'),
