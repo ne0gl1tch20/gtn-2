@@ -76,6 +76,14 @@ void main() {
     expect(find.byType(GtnExpressiveCard), findsOneWidget);
     expect(find.byType(M3EButton), findsOneWidget);
     expect(find.byType(TextField), findsOneWidget);
+    final input = tester.widget<TextField>(find.byType(TextField));
+    expect(input.style?.fontSize, 18);
+    expect(input.decoration?.filled, isTrue);
+    expect(input.decoration?.fillColor, const Color(0xFFF0F1FA));
+    expect(
+      (input.decoration?.enabledBorder as OutlineInputBorder).borderRadius,
+      BorderRadius.circular(18),
+    );
     expect(find.byType(M3ESwitch), findsOneWidget);
     expect(find.byType(M3EChip), findsOneWidget);
     expect(find.byType(M3EDropdownMenu<String>), findsOneWidget);
