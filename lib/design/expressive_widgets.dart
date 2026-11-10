@@ -156,3 +156,120 @@ class GtnExpressiveTextField extends StatelessWidget {
         onEditingComplete: onEditingComplete,
       );
 }
+
+/// Switch row backed by the spring-driven M3 Expressive switch.
+class GtnExpressiveSwitchTile extends StatelessWidget {
+  const GtnExpressiveSwitchTile({
+    super.key,
+    required this.title,
+    this.subtitle,
+    this.secondary,
+    required this.value,
+    required this.onChanged,
+    this.contentPadding,
+  });
+
+  final Widget title;
+  final Widget? subtitle;
+  final Widget? secondary;
+  final bool value;
+  final ValueChanged<bool>? onChanged;
+  final EdgeInsetsGeometry? contentPadding;
+
+  @override
+  Widget build(BuildContext context) => ListTile(
+        contentPadding: contentPadding,
+        leading: secondary,
+        title: title,
+        subtitle: subtitle,
+        trailing: M3ESwitch(value: value, onChanged: onChanged),
+      );
+}
+
+/// Choice chip adapter backed by the M3 Expressive filter-chip interaction.
+class GtnExpressiveChoiceChip extends StatelessWidget {
+  const GtnExpressiveChoiceChip({
+    super.key,
+    required this.label,
+    required this.selected,
+    required this.onSelected,
+  });
+
+  final String label;
+  final bool selected;
+  final ValueChanged<bool>? onSelected;
+
+  @override
+  Widget build(BuildContext context) => M3EChip(
+        label: label,
+        type: M3EChipType.filter,
+        selected: selected,
+        onPressed: onSelected == null ? null : () => onSelected!(!selected),
+      );
+}
+
+/// Single-select dropdown adapter backed by M3EDropdownMenu.
+class GtnExpressiveDropdown<T> extends StatelessWidget {
+  const GtnExpressiveDropdown({
+    super.key,
+    this.value,
+    this.initialValue,
+    required this.items,
+    this.onChanged,
+    this.decoration,
+  });
+
+  final T? value;
+  final T? initialValue;
+  final List<DropdownMenuItem<T>> items;
+  final ValueChanged<T?>? onChanged;
+  final InputDecoration? decoration;
+
+  @override
+  Widget build(BuildContext context) {
+    final selectedValue = value ?? initialValue;
+    final expressiveItems = items
+        .where((item) => item.value != null)
+        .map(
+          (item) => M3EDropdownItem<T>(
+            label: item.child is Text
+                ? (item.child as Text).data ?? item.value.toString()
+                : item.value.toString(),
+            value: item.value as T,
+            selected: item.value == selectedValue,
+            disabled: !item.enabled,
+          ),
+        )
+        .toList(growable: false);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (decoration?.labelText case final label?)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 6),
+            child: Text(label, style: Theme.of(context).textTheme.labelLarge),
+          ),
+        M3EDropdownMenu<T>(
+          items: expressiveItems,
+          singleSelect: true,
+          enabled: onChanged != null,
+          fieldStyle: M3EDropdownFieldStyle(
+            hintText: decoration?.hintText ??
+                decoration?.labelText ??
+                'Select an option',
+          ),
+          onSelectionChanged: (selected) {
+            if (selected.isNotEmpty) onChanged?.call(selected.first.value);
+          },
+        ),
+        if (decoration?.helperText case final helper?)
+          Padding(
+            padding: const EdgeInsets.only(top: 6),
+            child: Text(helper, style: Theme.of(context).textTheme.bodySmall),
+          ),
+      ],
+    );
+  }
+}
