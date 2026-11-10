@@ -45,7 +45,13 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
   final LegacySystemsEngine _engine = const LegacySystemsEngine();
   final TextEditingController _stakeController = TextEditingController();
   late ProgressionState _progression = widget.progression;
-  final AudioPlayer _audioPlayer = AudioPlayer();
+  static final AudioPlayer _sharedAudioPlayer = AudioPlayer();
+  final AudioPlayer _audioPlayer = _sharedAudioPlayer;
+  StreamSubscription<Duration>? _musicPositionSubscription;
+  StreamSubscription<Duration>? _musicDurationSubscription;
+  Duration _musicPosition = Duration.zero;
+  Duration _musicDuration = Duration.zero;
+  String? _stakeResultMessage;
   StreamSubscription<void>? _trackCompleteSubscription;
   bool _isPlaying = false;
   bool _checkingUpdate = false;
@@ -68,6 +74,12 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
     _loadSystemCatalogs();
     _trackCompleteSubscription = _audioPlayer.onPlayerComplete.listen((_) {
       _playNextTrack();
+    });
+    _musicPositionSubscription = _audioPlayer.onPositionChanged.listen((position) {
+      if (mounted) setState(() => _musicPosition = position);
+    });
+    _musicDurationSubscription = _audioPlayer.onDurationChanged.listen((duration) {
+      if (mounted) setState(() => _musicDuration = duration);
     });
   }
 
@@ -105,7 +117,8 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
   void dispose() {
     _stakeController.dispose();
     _trackCompleteSubscription?.cancel();
-    unawaited(_audioPlayer.dispose());
+    _musicPositionSubscription?.cancel();
+    _musicDurationSubscription?.cancel();
     super.dispose();
   }
 
@@ -469,6 +482,8 @@ Earned from ${relic['unlockBossName']}'),
   }
 
   Widget _stakeSection({bool expanded = false}) {
+    final streak = _progression.currentStreak;
+    final multiplier = (20 + streak) / 10;
     return GtnExpressiveCard(
       child: ExpansionTile(
         initiallyExpanded: expanded,
@@ -478,36 +493,74 @@ Earned from ${relic['unlockBossName']}'),
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Current streak: $streak · Win multiplier: ${multiplier.toStringAsFixed(1)}×'),
+                const SizedBox(height: 4),
+                Text('Money available: ${_progression.money}'),
+                const SizedBox(height: 6),
+                const Text('Stake money on a 50/50 coin flip. A win pays your stake multiplied by 2.0× plus 0.1× for each current streak point. A loss forfeits the stake.'),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
             child: GtnExpressiveTextField(
               controller: _stakeController,
               keyboardType: TextInputType.number,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               decoration: const InputDecoration(labelText: 'Stake amount', prefixText: 'Money '),
             ),
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
             child: M3EButton.filled(
-              onPressed: () {
+              onPressed: () async {
                 BigNumber stake;
                 try {
                   stake = BigNumber.parse(_stakeController.text.trim());
                 } on FormatException {
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Enter a valid stake.')));
+                  setState(() => _stakeResultMessage = 'Enter a valid whole-number stake.');
                   return;
                 }
+                final won = Random.secure().nextBool();
                 final result = _engine.settleLuckyStake(
                   progression: _progression,
                   systems: _systems,
                   stake: stake,
-                  won: Random.secure().nextBool(),
-                  currentStreak: _progression.currentStreak,
+                  won: won,
+                  currentStreak: streak,
                 );
-                _apply(result);
+                if (!result.accepted) {
+                  await _apply(result);
+                  return;
+                }
+                final payout = won
+                    ? stake * BigNumber.fromParts(BigInt.from(20 + streak), 1)
+                    : BigNumber.fromInt(0);
+                setState(() {
+                  _stakeResultMessage = won
+                      ? 'Lucky flip won. Payout: $payout Money.'
+                      : 'Lucky flip lost. $stake Money forfeited.';
+                });
                 _stakeController.clear();
+                await _apply(result);
               },
-              child: const Text('Flip 50/50'),
+              child: const Text('Stake & Flip (50/50)'),
             ),
           ),
+          if (_stakeResultMessage != null)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
+              child: Text(
+                _stakeResultMessage!,
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  color: GtnUiTokens.gold,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
         ],
       ),
     );
@@ -987,6 +1040,18 @@ Earned from ${relic['unlockBossName']}'),
     await _saveSystems(_systems.copyWith(musicPlaylists: Map.unmodifiable(playlists)));
   }
 
+  Future<void> _enqueueMusicTrack(String path) async {
+    if (_systems.musicQueue.contains(path)) return;
+    await _saveSystems(_systems.copyWith(
+      musicQueue: List<String>.unmodifiable([..._systems.musicQueue, path]),
+    ));
+  }
+
+  Future<void> _removeQueuedTrack(int index) async {
+    final queue = [..._systems.musicQueue]..removeAt(index);
+    await _saveSystems(_systems.copyWith(musicQueue: List<String>.unmodifiable(queue)));
+  }
+
   Future<void> _playPlaylist(List<String> tracks) async {
     final valid = tracks.where((track) => _systems.musicLibrary.contains(track) && File(track).existsSync()).toList();
     if (valid.isEmpty) return;
@@ -1045,6 +1110,18 @@ Earned from ${relic['unlockBossName']}'),
             ),
           ),
           Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Slider(
+              value: _musicDuration.inMilliseconds <= 0
+                  ? 0
+                  : _musicPosition.inMilliseconds.clamp(0, _musicDuration.inMilliseconds).toDouble(),
+              max: _musicDuration.inMilliseconds <= 0 ? 1 : _musicDuration.inMilliseconds.toDouble(),
+              onChanged: _musicDuration.inMilliseconds <= 0
+                  ? null
+                  : (value) => _audioPlayer.seek(Duration(milliseconds: value.round())),
+            ),
+          ),
+          Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             child: M3EButton.icon(
                 style: M3EButtonStyle.tonal,
@@ -1062,6 +1139,28 @@ Earned from ${relic['unlockBossName']}'),
               label: const Text('Create playlist from library'),
             ),
           ),
+          ListTile(
+            title: Text('Queue · ${_systems.musicQueue.length} tracks'),
+            trailing: TextButton(
+              onPressed: _systems.musicQueue.isEmpty
+                  ? null
+                  : () => _saveSystems(_systems.copyWith(musicQueue: const [])),
+              child: const Text('Clear'),
+            ),
+          ),
+          for (var queueIndex = 0; queueIndex < _systems.musicQueue.length; queueIndex++)
+            ListTile(
+              dense: true,
+              leading: Text('${queueIndex + 1}'),
+              title: Text(_systems.musicQueue[queueIndex].split(Platform.pathSeparator).last,
+                  maxLines: 1, overflow: TextOverflow.ellipsis),
+              trailing: IconButton(
+                tooltip: 'Remove from queue',
+                onPressed: () => _removeQueuedTrack(queueIndex),
+                icon: const Icon(Icons.close_rounded),
+              ),
+              onTap: () => _playTrack(_systems.musicQueue[queueIndex]),
+            ),
           for (final playlist in _systems.musicPlaylists.entries)
             ListTile(
               leading: const Icon(Icons.queue_music_rounded),
@@ -1099,11 +1198,10 @@ Earned from ${relic['unlockBossName']}'),
               dense: true,
               leading: const Icon(Icons.music_note_rounded),
               title: Text(track.split(Platform.pathSeparator).last, maxLines: 1, overflow: TextOverflow.ellipsis),
-              trailing: IconButton(
-                tooltip: 'Play track',
-                onPressed: () => _playTrack(track),
-                icon: const Icon(Icons.play_circle_outline_rounded),
-              ),
+              trailing: Wrap(spacing: 0, children: [
+                IconButton(tooltip: 'Play track', onPressed: () => _playTrack(track), icon: const Icon(Icons.play_circle_outline_rounded)),
+                IconButton(tooltip: 'Add to queue', onPressed: () => _enqueueMusicTrack(track), icon: const Icon(Icons.queue_music_rounded)),
+              ]),
             ),
         ],
       ),
