@@ -75,7 +75,7 @@ void main() {
     expect(find.byType(M3EAppBar), findsOneWidget);
     expect(find.byType(GtnExpressiveCard), findsOneWidget);
     expect(find.byType(M3EButton), findsOneWidget);
-    expect(find.byType(M3ETextField), findsOneWidget);
+    expect(find.byType(TextField), findsOneWidget);
     expect(find.byType(M3ESwitch), findsOneWidget);
     expect(find.byType(M3EChip), findsOneWidget);
     expect(find.byType(M3EDropdownMenu<String>), findsOneWidget);
