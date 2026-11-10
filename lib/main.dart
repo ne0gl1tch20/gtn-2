@@ -25,6 +25,7 @@ import 'dev/developer_settings_page.dart';
 import 'home/game_dashboard_page.dart';
 import 'i18n/app_localizations.dart';
 import 'legacy/legacy_pages.dart';
+import 'legacy/legacy_systems_page.dart';
 import 'progression/progression_hub_page.dart';
 import 'saves/save_slots_page.dart';
 import 'settings/game_settings.dart';
@@ -1042,6 +1043,28 @@ class _GameHomePageState extends State<GameHomePage>
     _scheduleAutoClicker();
   }
 
+  Future<void> _openLegacySystems(LegacySystemsView view) async {
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (_) => LegacySystemsPage(
+          progression: _progression,
+          onChanged: _applyLegacyProgression,
+          view: view,
+        ),
+      ),
+    );
+    _scheduleAutoClicker();
+  }
+
+  Future<void> _openSystems() =>
+      _openLegacySystems(LegacySystemsView.all);
+
+  Future<void> _openMusic() =>
+      _openLegacySystems(LegacySystemsView.music);
+
+  Future<void> _openLuckyStake() =>
+      _openLegacySystems(LegacySystemsView.luckyStake);
+
   Future<void> _openUpgradeShop() async {
     await Navigator.of(context).push<void>(
       MaterialPageRoute<void>(
@@ -1392,6 +1415,7 @@ class _GameHomePageState extends State<GameHomePage>
     return GameDashboardPage(
       game: _game,
       progression: _progression,
+      settings: _settings,
       activeSlot: _activeSlot,
       loading: _isLoading,
       message: _message,
@@ -1407,6 +1431,9 @@ class _GameHomePageState extends State<GameHomePage>
       onSettings: _openSettings,
       onDeveloperSettings: _openDeveloperSettings,
       onLegacyPages: _openLegacyPages,
+      onMusic: _openMusic,
+      onLuckyStake: _openLuckyStake,
+      onSystems: _openSystems,
       showDeveloperSettings: kDebugMode,
     );
   }
