@@ -289,7 +289,7 @@ class _CreativeModePageState extends State<CreativeModePage> {
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
                     const SizedBox(height: 16),
-                    SwitchListTile(
+                    GtnExpressiveSwitchTile(
                       contentPadding: EdgeInsets.zero,
                       title: const Text('Enable Creative Mode'),
                       subtitle: const Text('Use a custom range and optional rule modifiers.'),
