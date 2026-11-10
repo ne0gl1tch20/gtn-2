@@ -1,4 +1,6 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
+import '../design/expressive_widgets.dart';
 
 import '../core/numbers/big_number.dart';
 import '../core/progression/progression_state.dart';
@@ -130,7 +132,7 @@ class _NebulaShopPageState extends State<NebulaShopPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(
+      appBar: GtnExpressiveAppBar(
         title: const Text('Nebula Shop'),
         actions: [
           Padding(
@@ -165,7 +167,7 @@ class _NebulaShopPageState extends State<NebulaShopPage> {
                   : _toggleAutomation,
             ),
           for (final item in NebulaShopCatalog.items)
-            Card(
+            GtnExpressiveCard(
               margin: const EdgeInsets.only(bottom: 12),
               child: Padding(
                 padding: const EdgeInsets.all(16),
@@ -190,7 +192,7 @@ class _NebulaShopPageState extends State<NebulaShopPage> {
                       ),
                     ),
                     const SizedBox(height: 12),
-                    FilledButton(
+                    M3EButton.filled(
                       onPressed: _buyingId != null ||
                               _state.nebula.compareTo(item.price) < 0 ||
                               (NebulaShopCatalog.automationIds.contains(item.id) &&
