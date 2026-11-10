@@ -8,9 +8,10 @@ import 'game_settings.dart';
 typedef SettingsChanged = Future<void> Function(GameSettings settings);
 
 class SettingsPage extends StatelessWidget {
-  const SettingsPage({super.key, required this.settings, required this.onChanged});
+  const SettingsPage({super.key, required this.settings, required this.onChanged, this.onOpenMenuStudio});
   final GameSettings settings;
   final SettingsChanged onChanged;
+  final VoidCallback? onOpenMenuStudio;
 
   void _update(GameSettings next) => onChanged(next);
 
@@ -71,7 +72,21 @@ class SettingsPage extends StatelessWidget {
             _toggle('Reduced motion', settings.reduceMotion, (v) => _update(settings.copyWith(reduceMotion: v))),
             _toggle('Reduce flashes', settings.reduceFlashes, (v) => _update(settings.copyWith(reduceFlashes: v))),
           ]),
-          const Padding(padding: EdgeInsets.fromLTRB(8, 10, 8, 0), child: Text('Preferences are saved with your active game profile. Menu Studio and tutorial replay remain separate migration tasks.', style: TextStyle(color: GtnUiTokens.muted, fontSize: 11))),
+          _SettingsSection(eyebrow: '07 / DEVELOPER & SAVE', title: 'Developer & Save Preferences', description: 'Control diagnostic logging, matching the original GTN1 settings.', children: [
+            _toggle('Save logs to storage', settings.saveLogsToStorage, (v) => _update(settings.copyWith(saveLogsToStorage: v))),
+            _toggle('Verbose logging', settings.verboseLogging, (v) => _update(settings.copyWith(verboseLogging: v))),
+          ]),
+          if (onOpenMenuStudio != null)
+            GtnExpressiveCard(
+              child: ListTile(
+                leading: const Icon(Icons.palette_rounded),
+                title: const Text('Menu Studio'),
+                subtitle: const Text('Reorder More destinations and customize their colors.'),
+                trailing: const Icon(Icons.chevron_right_rounded),
+                onTap: onOpenMenuStudio,
+              ),
+            ),
+          const Padding(padding: EdgeInsets.fromLTRB(8, 10, 8, 0), child: Text('Preferences are saved with your active game profile. Tutorial replay remains a separate migration task.', style: TextStyle(color: GtnUiTokens.muted, fontSize: 11))),
         ],
       ),
     );
