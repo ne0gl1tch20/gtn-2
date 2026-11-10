@@ -8,18 +8,51 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: validate-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  validate:
-    name: Format, analyze, test and Android debug build
+  format:
+    name: Format Dart sources
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
+          ref: ${{ github.event.pull_request.head.ref || github.ref_name }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Format Dart sources
+        run: dart format .
+      - name: Commit formatting changes
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          TARGET_BRANCH: ${{ github.event.pull_request.head.ref || github.ref_name }}
+        run: |
+          if git diff --quiet -- '*.dart'; then
+            echo "Dart sources are already formatted."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -u -- '*.dart'
+          git commit -m "chore: format Dart sources"
+          git push origin "HEAD:${TARGET_BRANCH}"
+
+  validate:
+    name: Format, analyze, test and Android debug build
+    runs-on: ubuntu-latest
+    needs: format
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref || github.ref_name }}
       - name: Fetch GTN1 source assets
         uses: actions/checkout@v4
         with:
@@ -66,8 +99,11 @@ jobs:
   windows-build:
     name: Windows desktop debug build
     runs-on: windows-latest
+    needs: format
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref || github.ref_name }}
       - name: Fetch GTN1 source assets
         uses: actions/checkout@v4
         with:
