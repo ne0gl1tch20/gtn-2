@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gtn_2/core/game/game_engine.dart';
 import 'package:gtn_2/core/progression/progression_state.dart';
-import 'package:gtn_2/home/game_dashboard_page.dart';
 import 'package:gtn_2/design/expressive_widgets.dart';
+import 'package:gtn_2/home/game_dashboard_page.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
 
