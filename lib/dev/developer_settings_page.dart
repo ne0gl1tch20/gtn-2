@@ -96,7 +96,7 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
           const SizedBox(height: 8),
           const Text('Try /help, /money 1000000, /prestige 10, /ultra 1, /nebula 100 or /reset.'),
           const SizedBox(height: 12),
-          TextField(
+          GtnExpressiveTextField(
             controller: _command,
             decoration: const InputDecoration(
               labelText: 'Developer command',
@@ -134,7 +134,7 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
           const SizedBox(height: 8),
           const Text('Edit the current slot save directly. Invalid or incompatible JSON is rejected.'),
           const SizedBox(height: 8),
-          TextField(
+          GtnExpressiveTextField(
             controller: _json,
             minLines: 12,
             maxLines: 24,
