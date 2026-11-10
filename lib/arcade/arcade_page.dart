@@ -83,7 +83,7 @@ class _ArcadePageState extends State<ArcadePage> {
               return Column(
                 children: [
                   for (final game in snapshot.data!)
-                    Card(
+                    GtnExpressiveCard(
                       margin: const EdgeInsets.only(bottom: 12),
                       child: ListTile(
                         contentPadding: const EdgeInsets.all(16),
@@ -359,7 +359,7 @@ class _ArcadeDialogState extends State<_ArcadeDialog> {
                 onSubmitted: (_) => _guess(),
               ),
               const SizedBox(height: 8),
-              FilledButton(onPressed: _guess, child: const Text('Guess')),
+              M3EButton.filled(onPressed: _guess, child: const Text('Guess')),
             ] else
               const Text('Time is up!'),
           ],
@@ -377,7 +377,7 @@ class _ArcadeDialogState extends State<_ArcadeDialog> {
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 12),
-            FilledButton(
+            M3EButton.filled(
               onPressed: _reactionFinished ? null : _tapReaction,
               child: const Text('TAP'),
             ),
@@ -394,7 +394,7 @@ class _ArcadeDialogState extends State<_ArcadeDialog> {
                 spacing: 8,
                 children: [
                   for (var i = 1; i <= 3; i++)
-                    FilledButton(
+                    M3EButton.filled(
                       onPressed: () => setState(() => _chosenBox = i),
                       child: Text('Box $i'),
                     ),
@@ -424,7 +424,7 @@ class _ArcadeDialogState extends State<_ArcadeDialog> {
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(labelText: 'Sequence'),
               ),
-              FilledButton(
+              M3EButton.filled(
                 onPressed: () => setState(() {
                   _memoryCorrect = _input.text.trim() == _sequence.join();
                   _memorySubmitted = true;
@@ -449,7 +449,7 @@ class _ArcadeDialogState extends State<_ArcadeDialog> {
               spacing: 8,
               children: [
                 for (final number in _numbers)
-                  FilledButton(
+                  M3EButton.filled(
                     onPressed: _finished
                         ? null
                         : () => setState(() {
@@ -495,7 +495,7 @@ class _ArcadeDialogState extends State<_ArcadeDialog> {
                 runSpacing: 8,
                 children: [
                   for (final option in _mathChoices)
-                    FilledButton(
+                    M3EButton.filled(
                       onPressed: () => _answerMath(option),
                       child: Text('$option'),
                     ),
@@ -518,7 +518,7 @@ class _ArcadeDialogState extends State<_ArcadeDialog> {
                 Text('Time: ${_timeLeft}s'),
               ],
             ),
-            LinearProgressIndicator(value: _timeLeft / 60),
+            M3EProgressIndicator.linearWavy(value: _timeLeft / 60),
             const SizedBox(height: 8),
             Text('Find all 8 matching pairs. Moves: $_gridMoves'),
             const SizedBox(height: 8),
@@ -536,7 +536,7 @@ class _ArcadeDialogState extends State<_ArcadeDialog> {
                 itemBuilder: (context, index) {
                   final revealed = _gridSelected.contains(index) ||
                       _gridMatched.contains(index);
-                  return FilledButton(
+                  return M3EButton.filled(
                     onPressed: revealed || _gridSelected.length >= 2
                         ? null
                         : () => _flipGridCard(index),
@@ -593,7 +593,7 @@ class _ArcadeDialogState extends State<_ArcadeDialog> {
           child: const Text('Close'),
         ),
         if (_canClaim)
-          FilledButton(
+          M3EButton.filled(
             onPressed: _claim,
             child: Text(
               widget.gameId == 'memory_match' && !_memoryCorrect
