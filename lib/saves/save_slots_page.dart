@@ -182,8 +182,8 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
             ],
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(dialogContext), child: const Text('Cancel')),
-            FilledButton(
+            M3EButton.text(onPressed: () => Navigator.pop(dialogContext), child: const Text('Cancel')),
+            M3EButton.filled(
               onPressed: () => Navigator.pop(
                 dialogContext,
                 (name: nameController.text.trim(), icon: icon),
@@ -263,8 +263,8 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
             },
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(dialogContext), child: const Text('Cancel')),
-            FilledButton(onPressed: () => Navigator.pop(dialogContext, target), child: const Text('Duplicate')),
+            M3EButton.text(onPressed: () => Navigator.pop(dialogContext), child: const Text('Cancel')),
+            M3EButton.filled(onPressed: () => Navigator.pop(dialogContext, target), child: const Text('Duplicate')),
           ],
         ),
       ),
@@ -291,8 +291,8 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
         title: Text('Reset Slot $slot?'),
         content: const Text('This permanently deletes the save and its restore backup.'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(dialogContext, false), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Navigator.pop(dialogContext, true), child: const Text('Reset')),
+          M3EButton.text(onPressed: () => Navigator.pop(dialogContext, false), child: const Text('Cancel')),
+          M3EButton.filled(onPressed: () => Navigator.pop(dialogContext, true), child: const Text('Reset')),
         ],
       ),
     );
@@ -317,8 +317,8 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
         title: Text('Restore Slot $slot backup?'),
         content: const Text('The current save will become the backup, so you can switch back if needed.'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(dialogContext, false), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Navigator.pop(dialogContext, true), child: const Text('Restore')),
+          M3EButton.text(onPressed: () => Navigator.pop(dialogContext, false), child: const Text('Cancel')),
+          M3EButton.filled(onPressed: () => Navigator.pop(dialogContext, true), child: const Text('Restore')),
         ],
       ),
     );
