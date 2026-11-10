@@ -194,10 +194,15 @@ class _WorldMapPageState extends State<WorldMapPage> {
           ),
         ],
       ),
-      body: LayoutBuilder(
-        builder: (context, _) => ListView(
-          padding: const EdgeInsets.fromLTRB(12, 8, 12, 20),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(12, 8, 12, 20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            _buildProgressionSummary(context),
+            const SizedBox(height: 12),
+            _buildWorldList(context),
+            const SizedBox(height: 16),
             Text(
               AppLocalizations.text(
                 'world_map_hint',
@@ -296,6 +301,450 @@ class _WorldMapPageState extends State<WorldMapPage> {
 
   bool _fitRequested = false;
   bool _hasInitializedTransform = false;
+
+
+  Widget _buildProgressionSummary(BuildContext context) {
+    final theme = Theme.of(context);
+    final activeWorld = WorldBossCatalog.worlds.firstWhere(
+      (world) => world.id == _state.legacySystems.activeWorldId,
+      orElse: () => WorldBossCatalog.worlds.first,
+    );
+    final defeatedCount = WorldBossCatalog.worlds
+        .where((world) => WorldBossCatalog.isDefeated(_state, world))
+        .length;
+    final riftBest = _state.legacySystems.endlessRiftBestTier;
+    return GtnExpressiveCard(
+      margin: EdgeInsets.zero,
+      padding: const EdgeInsets.all(18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.explore_rounded, color: GtnUiTokens.purple),
+              const SizedBox(width: 9),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'BEYOND THE NUMBERS',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: GtnUiTokens.cyan,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 1.1,
+                      ),
+                    ),
+                    Text(
+                      AppLocalizations.text('web_ui_your_universe', 'Your universe'),
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              _StatusChip(
+                label: '${WorldBossCatalog.worlds.length} WORLDS',
+                color: GtnUiTokens.purple,
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              Expanded(
+                child: _ProgressionCurrencyTile(
+                  label: 'PRESTIGE',
+                  value: _state.prestige.toString(),
+                  detail: '${_state.prestigeResets} ascensions',
+                  color: GtnUiTokens.purple,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _ProgressionCurrencyTile(
+                  label: 'ULTRA',
+                  value: _state.ultra.toString(),
+                  detail: '${_state.ultraResets} resets',
+                  color: GtnUiTokens.cyan,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _ProgressionCurrencyTile(
+                  label: 'NEBULA',
+                  value: _state.nebula.toString(),
+                  detail: 'Cosmic currency',
+                  color: GtnUiTokens.gold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  GtnUiTokens.green.withValues(alpha: .10),
+                  GtnUiTokens.cyan.withValues(alpha: .04),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(19),
+              border: Border.all(
+                color: GtnUiTokens.green.withValues(alpha: .14),
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 42,
+                  height: 42,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF1C584E), Color(0xFF143047)],
+                    ),
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: const Icon(
+                    Icons.auto_awesome_rounded,
+                    color: Color(0xFFA7FFDA),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'CURRENT REALM',
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: GtnUiTokens.muted,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: .9,
+                        ),
+                      ),
+                      Text(
+                        AppLocalizations.text(
+                          activeWorld.worldNameKey,
+                          activeWorld.worldName,
+                        ),
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      Text(
+                        'Your adventure is taking shape.',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: GtnUiTokens.muted,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Column(
+                  children: [
+                    Text(
+                      '$defeatedCount',
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        color: GtnUiTokens.green,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    Text(
+                      'BOSSES',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: GtnUiTokens.muted,
+                        letterSpacing: .8,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: _ProgressionMiniTile(
+                  icon: Icons.home_rounded,
+                  value: 'Lv. ${_state.legacySystems.homeBaseLevel}',
+                  label: 'Home base',
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _ProgressionMiniTile(
+                  icon: Icons.all_inclusive_rounded,
+                  value: 'Tier ${riftBest < 1 ? 0 : riftBest}',
+                  label: 'Endless Rift best',
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _ProgressionMiniTile(
+                  icon: Icons.shield_rounded,
+                  value: '$defeatedCount',
+                  label: 'Bosses defeated',
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildWorldList(BuildContext context) {
+    final theme = Theme.of(context);
+    return GtnExpressiveCard(
+      margin: EdgeInsets.zero,
+      padding: const EdgeInsets.all(18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.layers_rounded, color: GtnUiTokens.purple),
+              const SizedBox(width: 9),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'WORLD EXPEDITION',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: GtnUiTokens.cyan,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 1.1,
+                      ),
+                    ),
+                    Text(
+                      'Worlds & bosses',
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              _StatusChip(
+                label: 'READY',
+                color: GtnUiTokens.green,
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Unlock new realms and challenge their guardians. Boss rules and rewards are handled by the game engine.',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: GtnUiTokens.muted,
+              height: 1.5,
+            ),
+          ),
+          const SizedBox(height: 14),
+          for (final world in WorldBossCatalog.worlds)
+            _buildWorldEntry(context, world),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildWorldEntry(
+    BuildContext context,
+    WorldBossDefinition world,
+  ) {
+    final theme = Theme.of(context);
+    final unlocked = WorldBossCatalog.isUnlocked(_state, world);
+    final defeated = WorldBossCatalog.isDefeated(_state, world) &&
+        !_state.legacySystems.endlessRiftActive;
+    final active = _state.legacySystems.activeBossBattleWorldId == world.id;
+    final canUnlock = WorldBossCatalog.canUnlock(_state, world);
+    final canFight = WorldBossCatalog.canFight(_state, world);
+    final selected = _selectedWorldId == world.id;
+    final riftTier = _state.legacySystems.endlessRiftTier < 1
+        ? 1
+        : _state.legacySystems.endlessRiftTier;
+    final hp = world.hits +
+        (_state.legacySystems.endlessRiftActive ? (riftTier - 1) * 2 : 0);
+    final damage = WorldBossCatalog.damage(_state, world).clamp(0, hp);
+    final remaining = (hp - damage).clamp(0, hp);
+    final busy = _busyAction != null;
+    final status = defeated
+        ? 'CLEARED'
+        : active
+            ? 'BATTLE LIVE'
+            : unlocked
+                ? 'UNLOCKED'
+                : 'LOCKED';
+    final statusColor = defeated
+        ? GtnUiTokens.green
+        : unlocked
+            ? GtnUiTokens.purple
+            : GtnUiTokens.muted;
+    final name = AppLocalizations.text(world.worldNameKey, world.worldName);
+    final bossName = AppLocalizations.text(world.bossNameKey, world.name);
+    final requirement = !unlocked
+        ? AppLocalizations.text(
+            world.worldRequirementKey,
+            'World unlock requirements are not met.',
+          )
+        : !canFight && !active && !defeated
+            ? AppLocalizations.text(
+                world.bossRequirementKey,
+                'Boss battle requirements are not met.',
+              )
+            : null;
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(13),
+      decoration: BoxDecoration(
+        color: theme.brightness == Brightness.dark
+            ? const Color(0xFF0B1020)
+            : const Color(0xFFF1F3FA),
+        borderRadius: BorderRadius.circular(17),
+        border: Border.all(
+          color: selected
+              ? GtnUiTokens.purple.withValues(alpha: .5)
+              : theme.colorScheme.outlineVariant.withValues(alpha: .45),
+        ),
+        gradient: selected
+            ? LinearGradient(
+                colors: [
+                  GtnUiTokens.purple.withValues(alpha: .10),
+                  Colors.transparent,
+                ],
+              )
+            : null,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      name,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      bossName,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: GtnUiTokens.muted,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              _StatusChip(label: status, color: statusColor),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'BOSS HEALTH',
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: GtnUiTokens.muted,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: .8,
+                  ),
+                ),
+              ),
+              Text(
+                '$remaining / $hp HP',
+                style: theme.textTheme.labelSmall?.copyWith(
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(9),
+            child: Stack(
+              children: [
+                Container(
+                  height: 5,
+                  color: theme.colorScheme.onSurface.withValues(alpha: .08),
+                ),
+                FractionallySizedBox(
+                  widthFactor: hp == 0 ? 0 : remaining / hp,
+                  child: Container(
+                    height: 5,
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [GtnUiTokens.danger, Color(0xFFFFB16D)],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (requirement != null) ...[
+            const SizedBox(height: 10),
+            Text(
+              requirement,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: GtnUiTokens.muted,
+              ),
+            ),
+          ],
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              if (!unlocked)
+                M3EButton.tonal(
+                  onPressed: canUnlock && !busy
+                      ? () => _runAction(world.id, 'unlock')
+                      : null,
+                  child: Text(canUnlock ? 'Unlock world' : 'Requirements pending'),
+                ),
+              M3EButton.filled(
+                onPressed: (active || canFight || _state.legacySystems.endlessRiftActive) &&
+                        !busy &&
+                        (!defeated || _state.legacySystems.endlessRiftActive)
+                    ? () => _runAction(world.id, 'boss')
+                    : null,
+                child: Text(
+                  active
+                      ? 'Leave battle'
+                      : defeated && !_state.legacySystems.endlessRiftActive
+                          ? 'Boss defeated'
+                          : 'Start battle',
+                ),
+              ),
+              if (unlocked)
+                M3EButton.icon(
+                  style: M3EButtonStyle.text,
+                  onPressed: busy
+                      ? null
+                      : () => _runAction(world.id, 'select_world'),
+                  icon: const Icon(Icons.check_circle_outline),
+                  label: Text(
+                    _state.legacySystems.activeWorldId == world.id
+                        ? 'Selected world'
+                        : 'Select world',
+                  ),
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
 
   Widget _buildWorldNode(BuildContext context, WorldBossDefinition world) {
     final theme = Theme.of(context);
@@ -609,6 +1058,125 @@ class _WorldMapPageState extends State<WorldMapPage> {
     return tier < 1 ? '1' : '$tier';
   }
 }
+
+
+class _ProgressionCurrencyTile extends StatelessWidget {
+  const _ProgressionCurrencyTile({
+    required this.label,
+    required this.value,
+    required this.detail,
+    required this.color,
+  });
+
+  final String label;
+  final String value;
+  final String detail;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      constraints: const BoxConstraints(minWidth: 0),
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 12),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface.withValues(alpha: .45),
+        borderRadius: BorderRadius.circular(17),
+        border: Border.all(
+          color: theme.colorScheme.outlineVariant.withValues(alpha: .4),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: GtnUiTokens.muted,
+              fontWeight: FontWeight.w900,
+              letterSpacing: .6,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.titleMedium?.copyWith(
+              color: color,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          const SizedBox(height: 3),
+          Text(
+            detail,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: GtnUiTokens.muted,
+              fontSize: 9,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ProgressionMiniTile extends StatelessWidget {
+  const _ProgressionMiniTile({
+    required this.icon,
+    required this.value,
+    required this.label,
+  });
+
+  final IconData icon;
+  final String value;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 11),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface.withValues(alpha: .25),
+        borderRadius: BorderRadius.circular(15),
+        border: Border.all(
+          color: theme.colorScheme.outlineVariant.withValues(alpha: .3),
+        ),
+      ),
+      child: Column(
+        children: [
+          Icon(icon, size: 17, color: GtnUiTokens.purple),
+          const SizedBox(height: 5),
+          Text(
+            value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.labelLarge?.copyWith(
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            label,
+            maxLines: 2,
+            textAlign: TextAlign.center,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: GtnUiTokens.muted,
+              fontSize: 8,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 
 class _StatusChip extends StatelessWidget {
   const _StatusChip({required this.label, required this.color});
