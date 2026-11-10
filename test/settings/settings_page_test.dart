@@ -5,30 +5,29 @@ import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
 
 void main() {
-  testWidgets('Settings recreates GTN1 preference groups with native controls',
-      (WidgetTester tester) async {
+  testWidgets('Settings recreates the full GTN1 preference groups', (tester) async {
     await tester.pumpWidget(
       M3EMaterialApp(
         data: M3EThemeData.light(seedColor: const Color(0xFF7C5CFC)),
         fontFamily: 'Manrope',
         autoTheming: false,
         initialTheme: Brightness.dark,
-        home: SettingsPage(
-          settings: GameSettings.initial,
-          onChanged: (_) async {},
-        ),
+        home: SettingsPage(settings: GameSettings.initial, onChanged: (_) async {}),
       ),
     );
 
     expect(find.text('GAME PREFERENCES'), findsOneWidget);
-    expect(find.text('Language & gameplay'), findsOneWidget);
+    expect(find.text('Language & Numbers'), findsOneWidget);
+    expect(find.text('Number notation'), findsOneWidget);
     expect(find.text('Appearance'), findsOneWidget);
-    await tester.scrollUntilVisible(find.text('Visual comfort'), 300);
-    expect(find.text('Visual comfort'), findsOneWidget);
-    expect(find.text('Language'), findsOneWidget);
-    expect(find.text('Difficulty'), findsOneWidget);
-    expect(find.text('Dark theme'), findsOneWidget);
-    await tester.scrollUntilVisible(find.text('Reduce motion'), 300);
-    expect(find.text('Reduce motion'), findsOneWidget);
+    expect(find.text('Audio & Haptics'), findsOneWidget);
+    await tester.scrollUntilVisible(find.text('Notifications'), 350);
+    expect(find.text('Notifications'), findsOneWidget);
+    await tester.scrollUntilVisible(find.text('Updates'), 350);
+    expect(find.text('Updates'), findsOneWidget);
+    await tester.scrollUntilVisible(find.text('Accessibility'), 350);
+    expect(find.text('Accessibility'), findsOneWidget);
+    await tester.scrollUntilVisible(find.text('Reduce flashes'), 350);
+    expect(find.text('Reduce flashes'), findsOneWidget);
   });
 }

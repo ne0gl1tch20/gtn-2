@@ -21,17 +21,21 @@ import '../data/updates/update_checker.dart';
 import '../design/expressive_widgets.dart';
 import '../worlds/world_boss_catalog.dart';
 
-typedef LegacyProgressionChanged = Future<void> Function(ProgressionState progression);\n\nenum LegacySystemsView { all, music, luckyStake }
+typedef LegacyProgressionChanged = Future<void> Function(ProgressionState progression);
+
+enum LegacySystemsView { all, music, luckyStake }
 
 class LegacySystemsPage extends StatefulWidget {
   const LegacySystemsPage({
     super.key,
     required this.progression,
     required this.onChanged,
+    this.view = LegacySystemsView.all,
   });
 
   final ProgressionState progression;
-  final LegacyProgressionChanged onChanged;\n  final LegacySystemsView view;
+  final LegacyProgressionChanged onChanged;
+  final LegacySystemsView view;
 
   @override
   State<LegacySystemsPage> createState() => _LegacySystemsPageState();
@@ -118,7 +122,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          GtnExpressiveCard(
+          if (widget.view == LegacySystemsView.all) GtnExpressiveCard(
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -201,7 +205,8 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
                     if (trait.minimumCorrectGuesses > 0) '${trait.minimumCorrectGuesses} correct guesses',
                   ];
                   final detail = visible
-                      ? '${trait.category} · ${trait.description}${!active && requirements.isNotEmpty ? '\\nRequires ${requirements.join(' · ')}' : ''}'
+                      ? '${trait.category} · ${trait.description}${!active && requirements.isNotEmpty ? '\
+Requires ${requirements.join(' · ')}' : ''}'
                       : 'Hidden trait · keep playing to discover it';
                   return ListTile(
                     dense: true,
@@ -349,7 +354,8 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
               final parentReady = parent == null || _systems.talents.contains(parent);
               return ListTile(
                 title: Text(name),
-                subtitle: Text('$description\\nCost: $cost Prestige${parent == null ? '' : ' · Requires ${_pretty(parent)}'}'),
+                subtitle: Text('$description\
+Cost: $cost Prestige${parent == null ? '' : ' · Requires ${_pretty(parent)}'}'),
                 isThreeLine: true,
                 trailing: owned
                     ? const Icon(Icons.check_circle_rounded, color: Colors.green)
@@ -416,7 +422,8 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
               return ListTile(
                 leading: Icon(owned ? Icons.diamond_rounded : Icons.lock_outline_rounded),
                 title: Text(relic['name'] as String),
-                subtitle: Text('${relic['description']}\\nEarned from ${relic['unlockBossName']}'),
+                subtitle: Text('${relic['description']}\
+Earned from ${relic['unlockBossName']}'),
                 isThreeLine: true,
                 trailing: M3EButton.tonal(
                   onPressed: owned ? () => _apply(_engine.equipRelic(_progression, _systems, id)) : null,
@@ -464,6 +471,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
   Widget _stakeSection({bool expanded = false}) {
     return GtnExpressiveCard(
       child: ExpansionTile(
+        initiallyExpanded: expanded,
         leading: const Icon(Icons.casino_rounded),
         title: const Text('Lucky Stake'),
         subtitle: Text('Wins: ${_systems.stakesWon} · Losses: ${_systems.stakesLost}'),
@@ -996,6 +1004,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
   Widget _musicSection({bool expanded = false}) {
     return GtnExpressiveCard(
       child: ExpansionTile(
+        initiallyExpanded: expanded,
         leading: const Icon(Icons.library_music_rounded),
         title: const Text('Offline music player'),
         subtitle: Text('${_systems.musicLibrary.length} tracks · ${_systems.musicPlaylists.length} playlists'),
@@ -1189,7 +1198,8 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
           _availableUpdate = null;
           _updateDetails = update == null
               ? 'This Windows build is up to date.'
-              : 'Windows ${update.versionName} · debug-latest #${update.runNumber}\\nCommit: ${update.commitSha}';
+              : 'Windows ${update.versionName} · debug-latest #${update.runNumber}\
+Commit: ${update.commitSha}';
           _updateMessage = update == null
               ? 'You are up to date.'
               : 'A verified Windows update is available.';
@@ -1202,7 +1212,8 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
           _availableWindowsUpdate = null;
           _updateDetails = update == null
               ? 'This Android build is up to date.'
-              : 'Android ${update.versionName} (${update.versionCode}) · debug-latest #${update.runNumber}\\nCommit: ${update.commitSha}';
+              : 'Android ${update.versionName} (${update.versionCode}) · debug-latest #${update.runNumber}\
+Commit: ${update.commitSha}';
           _updateMessage = update == null
               ? 'You are up to date.'
               : 'A verified Android update is available.';
