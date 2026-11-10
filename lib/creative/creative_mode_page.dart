@@ -301,7 +301,7 @@ class _CreativeModePageState extends State<CreativeModePage> {
                                 _run = null;
                               }),
                     ),
-                    TextField(
+                    GtnExpressiveTextField(
                       controller: _nameController,
                       maxLength: 40,
                       decoration: const InputDecoration(labelText: 'Mode name'),
@@ -309,7 +309,7 @@ class _CreativeModePageState extends State<CreativeModePage> {
                     Row(
                       children: [
                         Expanded(
-                          child: TextField(
+                          child: GtnExpressiveTextField(
                             controller: _minimumController,
                             keyboardType: TextInputType.number,
                             decoration: const InputDecoration(labelText: 'Minimum'),
@@ -317,7 +317,7 @@ class _CreativeModePageState extends State<CreativeModePage> {
                         ),
                         const SizedBox(width: 12),
                         Expanded(
-                          child: TextField(
+                          child: GtnExpressiveTextField(
                             controller: _maximumController,
                             keyboardType: TextInputType.number,
                             decoration: const InputDecoration(labelText: 'Maximum'),
@@ -401,7 +401,7 @@ class _CreativeModePageState extends State<CreativeModePage> {
                               Text('Correct guesses: ${run.correctGuesses}'),
                               Text('Hints used: ${run.hintsUsed} / ${rules?.extraHints ?? 0}'),
                               const SizedBox(height: 12),
-                              TextField(
+                              GtnExpressiveTextField(
                                 controller: _guessController,
                                 keyboardType: TextInputType.number,
                                 enabled: !run.completed && !_saving,
