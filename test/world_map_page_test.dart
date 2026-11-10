@@ -54,7 +54,7 @@ void main() {
     expect(find.text('Worlds & bosses'), findsOneWidget);
     expect(find.text('Verdant Grove'), findsWidgets);
     expect(find.text('BOSS HEALTH'), findsWidgets);
-    expect(find.text('Unlock world'), findsWidgets);
+    expect(find.text('Requirements pending'), findsWidgets);
   });
 
   testWidgets('renders all four world nodes on an interactive map',
