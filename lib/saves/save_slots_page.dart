@@ -173,7 +173,7 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
                 children: [
                   for (final id in SaveData.profileIconIds)
                     GtnExpressiveChoiceChip(
-                      label: Text(_iconSymbol(id)),
+                      label: _iconSymbol(id),
                       selected: icon == id,
                       onSelected: (_) => setDialogState(() => icon = id),
                     ),
