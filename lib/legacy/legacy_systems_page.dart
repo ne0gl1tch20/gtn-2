@@ -166,7 +166,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
   );
 
   Widget _traitsSection(TraitEffectSummary traits) {
-    return Card(
+    return GtnExpressiveCard(
       child: ExpansionTile(
         leading: const Icon(Icons.auto_awesome_rounded),
         title: const Text('Traits'),
@@ -325,7 +325,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
 
   Widget _talentsSection() {
     final talents = _talentCatalog;
-    return Card(
+    return GtnExpressiveCard(
       child: ExpansionTile(
         leading: const Icon(Icons.account_tree_rounded),
         title: const Text('Talent tree'),
@@ -370,7 +370,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
 
   Widget _mutatorsSection() {
     final mutators = _mutatorCatalog;
-    return Card(
+    return GtnExpressiveCard(
       child: ExpansionTile(
         leading: const Icon(Icons.tune_rounded),
         title: const Text('Mutators & challenge builder'),
@@ -395,7 +395,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
 
   Widget _relicsSection() {
     final relics = _relicCatalog;
-    return Card(
+    return GtnExpressiveCard(
       child: ExpansionTile(
         leading: const Icon(Icons.diamond_rounded),
         title: const Text('Relic collection'),
@@ -429,7 +429,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
   Widget _homeBaseSection() {
     final level = _systems.homeBaseLevel;
     final cost = BigNumber.fromInt(50000 * (level + 1));
-    return Card(
+    return GtnExpressiveCard(
       child: ExpansionTile(
         leading: const Icon(Icons.home_work_rounded),
         title: const Text('Home Base'),
@@ -443,7 +443,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
             ),
           Padding(
             padding: const EdgeInsets.all(12),
-            child: FilledButton(
+            child: M3EButton.filled(
               onPressed: level < 20 && _progression.money.compareTo(cost) >= 0
                   ? () => _apply(_engine.upgradeHomeBase(_progression, _systems))
                   : null,
@@ -456,7 +456,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
   }
 
   Widget _stakeSection() {
-    return Card(
+    return GtnExpressiveCard(
       child: ExpansionTile(
         leading: const Icon(Icons.casino_rounded),
         title: const Text('Lucky Stake'),
@@ -472,7 +472,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-            child: FilledButton(
+            child: M3EButton.filled(
               onPressed: () {
                 BigNumber stake;
                 try {
@@ -520,7 +520,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
       'daily_streak_5': daily.dailyQuestBestStreak,
       'daily_upgrades_3': daily.dailyQuestUpgradePurchases,
     };
-    return Card(
+    return GtnExpressiveCard(
       child: ExpansionTile(
         leading: const Icon(Icons.calendar_month_rounded),
         title: const Text('Daily rewards & quests'),
@@ -529,7 +529,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
           ListTile(
             title: const Text('Daily login reward'),
             subtitle: Text(_systems.lastDailyRewardDate == _today ? 'Claimed today' : 'Claim your daily Nebula'),
-            trailing: FilledButton(
+            trailing: M3EButton.filled(
               onPressed: _systems.lastDailyRewardDate == _today
                   ? null
                   : () => _apply(_engine.claimDailyReward(
@@ -551,7 +551,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
             ListTile(
               title: Text(quest.$2),
               subtitle: Text('${progress[quest.$1]} / ${quest.$3}'),
-              trailing: FilledButton.tonal(
+              trailing: M3EButton.tonal(
                 onPressed: progress[quest.$1]! >= quest.$3 && !daily.claimedDailyQuests.contains(quest.$1)
                     ? () => _apply(_engine.claimDailyQuest(
                           progression: _progression,
@@ -570,7 +570,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
   }
 
   Widget _lootSection() {
-    return Card(
+    return GtnExpressiveCard(
       child: ExpansionTile(
         leading: const Icon(Icons.inventory_2_rounded),
         title: const Text('Loot chests'),
@@ -580,7 +580,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
             ListTile(
               title: Text('${_pretty(tier)} chest'),
               subtitle: Text('Owned: ${_systems.lootChests[tier] ?? 0}'),
-              trailing: FilledButton.tonal(
+              trailing: M3EButton.tonal(
                 onPressed: (_systems.lootChests[tier] ?? 0) > 0
                     ? () => _apply(_engine.openLootChest(
                           progression: _progression,
@@ -604,7 +604,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
     final hasBot = ownedBots.isNotEmpty;
     final sharedMemory = (_progression.nebulaItems['bot_logic_upgrade'] ?? 0) > 0;
     final timeTravelLocked = _systems.timeTravelPenaltyUntil > DateTime.now().millisecondsSinceEpoch;
-    return Card(
+    return GtnExpressiveCard(
       child: ExpansionTile(
         leading: const Icon(Icons.smart_toy_rounded),
         title: const Text('Auto Clicker & bot team'),
@@ -759,7 +759,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
   Widget _challengeSection() {
     final progress = _systems.dailyQuestDate == _today ? _systems.dailyQuestCorrectGuesses : 0;
     final challenges = _challengeCatalog;
-    return Card(
+    return GtnExpressiveCard(
       child: ExpansionTile(
         leading: const Icon(Icons.flag_rounded),
         title: const Text('Challenges'),
@@ -776,7 +776,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
               return ListTile(
                 title: Text(challenge['name'] as String),
                 subtitle: Text('${challenge['description']} Reward: $reward Nebula.'),
-                trailing: FilledButton.tonal(
+                trailing: M3EButton.tonal(
                   onPressed: eligible && !claimed
                       ? () => _apply(_engine.claimChallenge(
                             progression: _progression,
@@ -832,7 +832,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
       'rift_tier_10': _systems.endlessRiftBestTier >= 10,
       'mastery_all_5': allWorldIds.every((id) => (_systems.worldMasteryLevels[id] ?? 0) >= 5),
     };
-    return Card(
+    return GtnExpressiveCard(
       child: ExpansionTile(
         leading: const Icon(Icons.public_rounded),
         title: const Text('World mastery, secrets & Codex'),
@@ -847,7 +847,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
                 leading: Icon(defeated ? Icons.verified_rounded : Icons.public_rounded),
                 title: Text(world.worldName),
                 subtitle: Text('${world.name} · Mastery $level / 10'),
-                trailing: FilledButton.tonal(
+                trailing: M3EButton.tonal(
                   onPressed: canUpgrade
                       ? () => _apply(_engine.upgradeWorldMastery(
                             progression: _progression,
@@ -869,7 +869,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
                 leading: Icon(discovered ? Icons.key_rounded : Icons.lock_outline_rounded),
                 title: Text(discovered ? secret.$2 : 'Hidden area'),
                 subtitle: Text(discovered ? 'Discovered' : 'Requires ${secret.$3} correct guesses and prior world progress'),
-                trailing: FilledButton.tonal(
+                trailing: M3EButton.tonal(
                   onPressed: eligible && !discovered
                       ? () => _apply(_engine.discoverSecret(
                             progression: _progression,
@@ -885,7 +885,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
             leading: const Icon(Icons.menu_book_rounded),
             title: const Text('Complete the Codex'),
             subtitle: Text('$codexCount / 12 entries · Reward: 100 Nebula'),
-            trailing: FilledButton.tonal(
+            trailing: M3EButton.tonal(
               onPressed: codexComplete && !_systems.codexRewardClaimed
                   ? () => _apply(_engine.claimCodexCompletionReward(_progression, _systems))
                   : null,
@@ -897,7 +897,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
             ListTile(
               title: Text(reward.$2),
               subtitle: Text('Claim once when the goal is complete.'),
-              trailing: FilledButton.tonal(
+              trailing: M3EButton.tonal(
                 onPressed: endgameEligibility[reward.$1] == true && !_systems.endgameRewardsClaimed.contains(reward.$1)
                     ? () => _apply(_engine.claimEndgameReward(_progression, _systems, reward.$1))
                     : null,
@@ -916,7 +916,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
                 title: Text('Endless Rift · Tier ${_systems.endlessRiftTier}'),
                 subtitle: Text('${world.name} · Boss HP: ${hp - damage} / $hp remaining. Correct guesses attack; misses can regress damage.'),
                 isThreeLine: true,
-                trailing: FilledButton.tonal(
+                trailing: M3EButton.tonal(
                   onPressed: () => _apply(_engine.setEndlessRift(
                     progression: _progression,
                     systems: _systems,
@@ -931,7 +931,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
               leading: const Icon(Icons.all_inclusive_rounded),
               title: const Text('Endless Rift unlocked'),
               subtitle: Text('Best tier: ${_systems.endlessRiftBestTier} · Rematch all four guardians in sequence.'),
-              trailing: FilledButton.tonal(
+              trailing: M3EButton.tonal(
                 onPressed: () => _apply(_engine.setEndlessRift(
                   progression: _progression,
                   systems: _systems,
@@ -962,7 +962,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
         ),
         actions: [
           M3EButton.text(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Navigator.pop(context, controller.text.trim()), child: const Text('Create')),
+          M3EButton.filled(onPressed: () => Navigator.pop(context, controller.text.trim()), child: const Text('Create')),
         ],
       ),
     );
@@ -988,7 +988,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
     await _saveSystems(_systems.copyWith(musicPlaylists: Map.unmodifiable(playlists)));
   }
   Widget _musicSection() {
-    return Card(
+    return GtnExpressiveCard(
       child: ExpansionTile(
         leading: const Icon(Icons.library_music_rounded),
         title: const Text('Offline music player'),
@@ -1040,7 +1040,8 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
-            child: FilledButton.tonalIcon(
+            child: M3EButton.icon(
+                        style: M3EButtonStyle.tonal,
               onPressed: _createPlaylist,
               icon: const Icon(Icons.playlist_add_rounded),
               label: const Text('Create playlist from library'),
@@ -1095,7 +1096,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
   }
 
   Widget _aboutSection() {
-    return Card(
+    return GtnExpressiveCard(
       child: ExpansionTile(
         leading: const Icon(Icons.info_outline_rounded),
         title: const Text('About & updater'),
@@ -1135,7 +1136,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-              child: TextButton(
+              child: M3EButton.text(
                 onPressed: () => _openGithubUrl(_availableUpdate?.releaseUrl ?? _availableWindowsUpdate!.releaseUrl),
                 child: const Text('View release notes'),
               ),
