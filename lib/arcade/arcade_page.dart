@@ -94,7 +94,7 @@ class _ArcadePageState extends State<ArcadePage> {
                           child: Text(game.description),
                         ),
                         trailing: const Icon(Icons.play_arrow_rounded),
-                        onTap: () => showDialog<void>(
+                        onTap: () => GtnExpressiveDialog.show<void>(
                           context: context,
                           builder: (_) => _ArcadeDialog(
                             gameId: game.id,
@@ -584,7 +584,7 @@ class _ArcadeDialogState extends State<_ArcadeDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
+    return GtnExpressiveDialog(
       title: Text(widget.title),
       content: SingleChildScrollView(child: _gameContent()),
       actions: [
