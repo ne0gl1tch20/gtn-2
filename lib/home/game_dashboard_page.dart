@@ -164,7 +164,7 @@ class GameDashboardPage extends StatelessWidget {
                           ],
                         ),
                         child: ClipRRect(
-                          borderRadius: BorderRadius.circular(15),
+                          borderRadius: BorderRadius.circular(12),
                           child: Image.asset(
                             'assets/gtn1/gtn-app-logo.png',
                             width: 42,
@@ -232,7 +232,9 @@ class GameDashboardPage extends StatelessWidget {
                         ),
                       ],
                     ),
-                    child: Stack(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(32),
+                      child: Stack(
                       children: [
                         Positioned(
                           right: -80,
@@ -310,8 +312,7 @@ class GameDashboardPage extends StatelessWidget {
                                     letterSpacing: -2.5,
                                   )),
                             ),
-                            const SizedBox(height: 7),
-                            const SizedBox(height: 12),
+                            const SizedBox(height: 15),
                             Text(message,
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
@@ -323,6 +324,7 @@ class GameDashboardPage extends StatelessWidget {
                           ],
                         ),
                       ],
+                    ),
                     ),
                   ),
                   const SizedBox(height: 12),
