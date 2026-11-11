@@ -129,6 +129,30 @@ screen "home" version 1 {
       );
     });
 
+    test('rejects reserved manifest and Windows device paths', () {
+      final digest = sha256.convert(utf8.encode('asset')).toString();
+      expect(
+        () => JuiBundleManifest.fromJson({
+          'schemaVersion': 1,
+          'bundleVersion': '1.0.0',
+          'minimumHostApiVersion': 1,
+          'entryScreen': 'screens/home.jui',
+          'files': [
+            {'path': 'screens/home.jui', 'sha256': digest},
+            {'path': 'manifest.json', 'sha256': digest},
+          ],
+        }),
+        throwsA(isA<JuiBundleException>()),
+      );
+      expect(
+        () => JuiBundleFile.fromJson({
+          'path': 'images/CON.png',
+          'sha256': digest,
+        }),
+        throwsA(isA<JuiBundleException>()),
+      );
+    });
+
     test('rejects unsupported host API version', () {
       expect(
         () => JuiBundleValidator().validate(
