@@ -297,6 +297,7 @@ class JuiParser {
     'list',
     'dialog',
   };
+  static const _actions = <String>{'button'};
   static const _leaves = <String>{
     'text',
     'icon',
@@ -304,7 +305,6 @@ class JuiParser {
     'spacer',
     'divider',
     'input',
-    'button',
     'toggle',
   };
   static const _attributeNames = <String>{
@@ -314,6 +314,7 @@ class JuiParser {
     'action',
     'style',
     'gap',
+    'extent',
     'type',
     'enabled',
     'label',
@@ -430,7 +431,9 @@ class JuiParser {
       return null;
     }
     final kind = token.lexeme;
-    if (!_containers.contains(kind) && !_leaves.contains(kind)) {
+    if (!_containers.contains(kind) &&
+        !_leaves.contains(kind) &&
+        !_actions.contains(kind)) {
       _error('JUI010_UNKNOWN_NODE', 'Unknown node "$kind".', token.span);
       _advance();
       return null;
@@ -472,19 +475,21 @@ class JuiParser {
     }
 
     final children = <JuiNode>[];
-    if (_containers.contains(kind)) {
-      if (!_match(_TokenKind.leftBrace)) {
+    if (_containers.contains(kind) ||
+        (_actions.contains(kind) && _check(_TokenKind.leftBrace))) {
+      if (_containers.contains(kind) && !_match(_TokenKind.leftBrace)) {
         _error(
           'JUI001_UNEXPECTED_TOKEN',
           'Container "$kind" must open a child block.',
           _currentToken.span,
         );
       } else {
+        if (_actions.contains(kind)) _advance();
         children.addAll(_parseChildren(depth: depth));
         if (!_match(_TokenKind.rightBrace)) {
           _error(
             'JUI002_UNCLOSED_BLOCK',
-            'Container "$kind" block was not closed.',
+            'Node "$kind" block was not closed.',
             token.span,
           );
         }
@@ -501,6 +506,7 @@ class JuiParser {
     if (_currentToken.kind == _TokenKind.identifier &&
         !_containers.contains(_currentToken.lexeme) &&
         !_leaves.contains(_currentToken.lexeme) &&
+        !_actions.contains(_currentToken.lexeme) &&
         !_attributeNames.contains(_currentToken.lexeme)) {
       _error(
         'JUI012_UNKNOWN_ATTRIBUTE',
@@ -531,7 +537,7 @@ class JuiParser {
       _consumeIdentifier('bind', 'Expected "bind" after "enabled".');
       return _consumeString('Expected a binding ID after "enabled bind".');
     }
-    if (attribute == 'gap') {
+    if (attribute == 'gap' || attribute == 'extent') {
       final token = _consumeNumber('Expected a number after "gap".');
       final value = token?.value;
       if (value is num && value.isFinite && value >= 0 && value <= 4096) {
@@ -545,15 +551,18 @@ class JuiParser {
       return null;
     }
     if (attribute == 'type') {
-      if (_currentToken.kind != _TokenKind.identifier) {
-        _error(
-          'JUI001_UNEXPECTED_TOKEN',
-          'Expected an input type identifier.',
-          _currentToken.span,
-        );
-        return null;
+      if (_currentToken.kind == _TokenKind.string) {
+        return _advance().value as String;
       }
-      return _advance().lexeme;
+      if (_currentToken.kind == _TokenKind.identifier) {
+        return _advance().lexeme;
+      }
+      _error(
+        'JUI001_UNEXPECTED_TOKEN',
+        'Expected an input type identifier.',
+        _currentToken.span,
+      );
+      return null;
     }
     return _consumeString('Expected a quoted string after "$attribute".');
   }
@@ -680,7 +689,7 @@ class JuiParser {
     }
     if (kind == 'icon') return {'id', 'asset', 'style', 'semantic'};
     if (kind == 'image') return {'id', 'asset', 'semantic'};
-    if (kind == 'spacer') return {'id', 'gap'};
+    if (kind == 'spacer') return {'id', 'extent'};
     if (kind == 'divider') return {'id', 'style'};
     if (kind == 'input') return {'id', 'bind', 'type', 'label', 'semantic'};
     if (kind == 'button') {
