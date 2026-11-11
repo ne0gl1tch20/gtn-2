@@ -335,6 +335,7 @@ class LegacySystemsEngine {
     final updated = progression.copyWith(
       money: money,
       moneyEarned: progression.moneyEarned + payout,
+      moneySpent: progression.moneySpent + stake,
     );
     return _accept(
       updated,
