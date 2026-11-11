@@ -1,5 +1,6 @@
 import '../../worlds/world_boss_catalog.dart';
 import '../numbers/big_number.dart';
+import 'achievement_catalog.dart';
 import 'progression_state.dart';
 
 class UpgradeDefinition {
@@ -53,6 +54,9 @@ class UltraRules {
 
 class ProgressionEngine {
   const ProgressionEngine();
+
+  ProgressionState evaluateAchievements(ProgressionState state) =>
+      AchievementCatalog.evaluate(state);
 
   ProgressionState recordGuess(
     ProgressionState state, {

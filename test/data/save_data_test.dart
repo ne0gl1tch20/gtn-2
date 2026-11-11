@@ -11,6 +11,32 @@ import 'package:gtn_2/settings/game_settings.dart';
 
 void main() {
   group('SaveData', () {
+    test(
+      'persists achievement IDs and playtime and migrates older progression',
+      () {
+        final progression = ProgressionState.initial.copyWith(
+          achievements: const {'correct_10', 'playtime_1h'},
+          playtimeSeconds: 3600,
+        );
+        final save = SaveData(
+          secret: 42,
+          attempts: 0,
+          gamesWon: 0,
+          progression: progression,
+        );
+        final restored = SaveData.fromJson(save.toJson());
+        expect(restored.progression.achievements, progression.achievements);
+        expect(restored.progression.playtimeSeconds, 3600);
+
+        final oldProgression = Map<String, dynamic>.from(progression.toJson())
+          ..remove('achievements')
+          ..remove('playtimeSeconds');
+        final migrated = ProgressionState.fromJson(oldProgression);
+        expect(migrated.achievements, isEmpty);
+        expect(migrated.playtimeSeconds, 0);
+      },
+    );
+
     test('round-trips progression and settings through JSON', () {
       final save = SaveData(
         secret: 42,

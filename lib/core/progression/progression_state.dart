@@ -20,6 +20,8 @@ class ProgressionState {
     BigNumber? moneyEarned,
     this.currentStreak = 0,
     this.bestStreak = 0,
+    this.playtimeSeconds = 0,
+    this.achievements = const {},
     BigNumber? nebulaEarned,
     LegacySystemsState? legacySystems,
   }) : money = money ?? BigNumber.fromInt(0),
@@ -39,7 +41,8 @@ class ProgressionState {
   final Set<String> defeatedBosses;
   final int prestigeResets, ultraResets, totalGuesses, correctGuesses;
   final BigNumber moneyEarned;
-  final int currentStreak, bestStreak;
+  final int currentStreak, bestStreak, playtimeSeconds;
+  final Set<String> achievements;
   final BigNumber nebulaEarned;
   final LegacySystemsState legacySystems;
 
@@ -63,6 +66,8 @@ class ProgressionState {
     'moneyEarned': moneyEarned.toString(),
     'currentStreak': currentStreak,
     'bestStreak': bestStreak,
+    'playtimeSeconds': playtimeSeconds,
+    'achievements': achievements.toList()..sort(),
     'nebulaEarned': nebulaEarned.toString(),
     'legacySystems': legacySystems.toJson(),
   };
@@ -134,6 +139,15 @@ class ProgressionState {
       defeatedBosses.addAll(rawDefeated.cast<String>());
     }
 
+    final rawAchievements = json['achievements'];
+    final achievements = <String>{};
+    if (rawAchievements != null) {
+      if (rawAchievements is! List ||
+          rawAchievements.any((value) => value is! String || value.isEmpty)) {
+        throw const FormatException('Invalid achievement list.');
+      }
+      achievements.addAll(rawAchievements.cast<String>());
+    }
     final total = count('totalGuesses');
     final correct = count('correctGuesses');
     final streak = count('currentStreak');
@@ -159,6 +173,10 @@ class ProgressionState {
       moneyEarned: number('moneyEarned'),
       currentStreak: streak,
       bestStreak: best,
+      playtimeSeconds: json['playtimeSeconds'] == null
+          ? 0
+          : count('playtimeSeconds'),
+      achievements: Set.unmodifiable(achievements),
       nebulaEarned: number('nebulaEarned'),
       legacySystems: legacySystems,
     );
@@ -182,6 +200,8 @@ class ProgressionState {
     BigNumber? moneyEarned,
     int? currentStreak,
     int? bestStreak,
+    int? playtimeSeconds,
+    Set<String>? achievements,
     BigNumber? nebulaEarned,
     LegacySystemsState? legacySystems,
   }) => ProgressionState(
@@ -202,6 +222,8 @@ class ProgressionState {
     moneyEarned: moneyEarned ?? this.moneyEarned,
     currentStreak: currentStreak ?? this.currentStreak,
     bestStreak: bestStreak ?? this.bestStreak,
+    playtimeSeconds: playtimeSeconds ?? this.playtimeSeconds,
+    achievements: achievements ?? this.achievements,
     nebulaEarned: nebulaEarned ?? this.nebulaEarned,
     legacySystems: legacySystems ?? this.legacySystems,
   );
