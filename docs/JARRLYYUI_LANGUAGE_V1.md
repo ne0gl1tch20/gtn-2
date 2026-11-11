@@ -23,7 +23,7 @@ screen "game.home" version 1 {
       }
     }
 
-    input id "guess.input" bind "guess.text" type "integer"
+    input id "guess.input" bind "guess.text" type integer
     button id "guess.submit" key "guess.submit"
       action "game.submitGuess"
       enabled bind "guess.canSubmit"
@@ -102,9 +102,9 @@ The grammar is followed by a semantic validation pass. Node-specific attributes 
 | text | none | key or bind | Localized or bound text |
 | icon | none | asset or registered icon token | Theme-aware icon |
 | image | none | asset | Sandboxed bundle asset |
-| spacer / divider | none | none | Layout primitives |
+| spacer / divider | none | optional extent for spacer | Layout primitives |
 | input | none | id, writable bind, type | Typed user input |
-| button | none | id, action | Allowlisted intent; optional key supplies its label |
+| button | optional nodes | id, action | Allowlisted intent; optional key supplies its label |
 | toggle | none | id, writable bind | Boolean input |
 
 Version 1 deliberately omits loops, conditionals, expressions, custom functions, arbitrary colors, arbitrary font loading, raw platform calls and network access.
