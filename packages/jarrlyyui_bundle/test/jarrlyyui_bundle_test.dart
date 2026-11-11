@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
@@ -214,6 +215,54 @@ screen "home" version 1 {
 
       expect(await sourceAdapter.fetchLatest(), isNull);
       client.close();
+    });
+  });
+
+  group('JuiFileBundleStore', () {
+    test('persists and restores the active bundle across store instances', () async {
+      final directory = await Directory.systemTemp.createTemp('jui_bundle_store_');
+      addTearDown(() => directory.delete(recursive: true));
+      final validator = JuiBundleValidator();
+      final store = JuiFileBundleStore(root: directory, validator: validator);
+      final bundle = validator.validate(package(version: '1.2.0'));
+
+      expect(await store.readActive(), isNull);
+      await store.stage(bundle);
+      await store.activateStaged(expectedCurrentVersion: '');
+
+      final reopened = JuiFileBundleStore(
+        root: directory,
+        validator: validator,
+      );
+      final active = await reopened.readActive();
+
+      expect(active?.manifest.bundleVersion, '1.2.0');
+      expect(active?.entryDocument.id, 'home');
+      expect(
+        utf8.decode(active!.files['screens/home.jui']!),
+        source,
+      );
+    });
+
+    test('rejects stale activation and keeps the previous active bundle', () async {
+      final directory = await Directory.systemTemp.createTemp('jui_bundle_store_');
+      addTearDown(() => directory.delete(recursive: true));
+      final store = JuiFileBundleStore(root: directory);
+      final validator = JuiBundleValidator();
+      await store.stage(validator.validate(package(version: '1.0.0')));
+      await store.activateStaged(expectedCurrentVersion: '');
+      await store.stage(validator.validate(package(version: '1.1.0')));
+
+      await expectLater(
+        store.activateStaged(expectedCurrentVersion: '0.9.0'),
+        throwsA(isA<StateError>()),
+      );
+      await store.discardStaged();
+
+      expect(
+        (await store.readActive())?.manifest.bundleVersion,
+        '1.0.0',
+      );
     });
   });
 
