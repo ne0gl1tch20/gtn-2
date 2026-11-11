@@ -229,19 +229,33 @@ class SaveStorage {
     await candidate.rename(_file.path);
   }
 
-  bool _isValidSave(SaveData data) =>
-      data.schemaVersion == SaveData.currentSchemaVersion &&
-      data.minimum >= 1 &&
-      data.maximum <= 500 &&
-      data.minimum <= data.maximum &&
-      data.secret >= data.minimum &&
-      data.secret <= data.maximum &&
-      data.attempts >= 0 &&
-      data.gamesWon >= 0 &&
-      data.profileName.length <= 24 &&
-      SaveData.profileIconIds.contains(data.profileIconId) &&
-      (data.creativeMode == null ||
-          CreativeModeSave.validate(data.creativeMode!));
+  bool _isValidSave(SaveData data) {
+    if (data.schemaVersion != SaveData.currentSchemaVersion ||
+        data.minimum < 1 ||
+        data.maximum > 500 ||
+        data.minimum > data.maximum ||
+        data.secret < data.minimum ||
+        data.secret > data.maximum ||
+        data.attempts < 0 ||
+        data.gamesWon < 0 ||
+        data.profileName.length > 24 ||
+        !SaveData.profileIconIds.contains(data.profileIconId) ||
+        (data.creativeMode != null &&
+            !CreativeModeSave.validate(data.creativeMode!))) {
+      return false;
+    }
+
+    // Validate the complete nested progression/settings payload too. Constructors
+    // are intentionally lightweight, so in-memory states can be invalid even
+    // when the top-level save fields look safe. Reusing the decoder keeps write
+    // validation aligned with the exact schema and migration checks used on load.
+    try {
+      SaveData.fromJson(data.toJson());
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
 
   Future<void> save(SaveData data) {
     if (!_isValidSave(data)) {
