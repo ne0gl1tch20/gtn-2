@@ -71,10 +71,12 @@ void main() {
     );
     state = engine.purchaseUpgrade(state, upgrade);
     expect(state.money.toString(), '90');
+    expect(state.moneySpent.toString(), '10');
     expect(state.upgrades['income'], 1);
     state = engine.purchaseUpgrade(state, upgrade);
     state = engine.purchaseUpgrade(state, upgrade);
     expect(state.upgrades['income'], 3);
+    expect(state.moneySpent.toString(), '70');
     expect(engine.purchaseUpgrade(state, upgrade), same(state));
   });
 

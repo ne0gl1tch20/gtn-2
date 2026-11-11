@@ -121,10 +121,12 @@ void main() {
       expect(first.accepted, isTrue);
       expect(first.systems.homeBaseLevel, 1);
       expect(first.progression.money.compareTo(n(100000)), 0);
+      expect(first.progression.moneySpent.compareTo(n(50000)), 0);
       final second = engine.upgradeHomeBase(first.progression, first.systems);
       expect(second.accepted, isTrue);
       expect(second.systems.homeBaseLevel, 2);
       expect(second.progression.money.compareTo(n(0)), 0);
+      expect(second.progression.moneySpent.compareTo(n(150000)), 0);
       final capped = engine.upgradeHomeBase(
         second.progression,
         second.systems.copyWith(homeBaseLevel: 20),
@@ -349,6 +351,7 @@ void main() {
       expect(result.systems.stakesPlaced, 1);
       expect(result.systems.stakesWon, 1);
       expect(result.systems.stakesLost, 0);
+      expect(result.progression.moneySpent.compareTo(n(10)), 0);
     });
 
     test('rejects non-positive and unaffordable stakes atomically', () {
