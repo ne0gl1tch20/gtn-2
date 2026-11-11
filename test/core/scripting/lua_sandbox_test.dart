@@ -187,31 +187,32 @@ void main() {
     },
   );
 
-
-  test('script manifest lists every bundled core Lua script exactly once', () async {
-    final source = await rootBundle.loadString('assets/scripts/manifest.json');
-    final manifest = jsonDecode(source) as Map<String, Object?>;
-    expect(manifest['schemaVersion'], 1);
-    expect(manifest['hostApiVersion'], 1);
-    final scripts = (manifest['scripts'] as List<Object?>)
-        .cast<Map<String, Object?>>();
-    final ids = scripts.map((script) => script['id'] as String).toSet();
-    expect(ids, {
-      'number_rush',
-      'random_event',
-      'seasonal_events',
-      'invisible_traits',
-    });
-    expect(scripts, hasLength(4));
-    for (final script in scripts) {
-      final path = 'assets/scripts/${script['file']}';
-      final lua = await rootBundle.loadString(path);
-      await sandbox.validate(
-        scriptId: script['id'] as String,
-        source: lua,
+  test(
+    'script manifest lists every bundled core Lua script exactly once',
+    () async {
+      final source = await rootBundle.loadString(
+        'assets/scripts/manifest.json',
       );
-    }
-  });
+      final manifest = jsonDecode(source) as Map<String, Object?>;
+      expect(manifest['schemaVersion'], 1);
+      expect(manifest['hostApiVersion'], 1);
+      final scripts = (manifest['scripts'] as List<Object?>)
+          .cast<Map<String, Object?>>();
+      final ids = scripts.map((script) => script['id'] as String).toSet();
+      expect(ids, {
+        'number_rush',
+        'random_event',
+        'seasonal_events',
+        'invisible_traits',
+      });
+      expect(scripts, hasLength(4));
+      for (final script in scripts) {
+        final path = 'assets/scripts/${script['file']}';
+        final lua = await rootBundle.loadString(path);
+        await sandbox.validate(scriptId: script['id'] as String, source: lua);
+      }
+    },
+  );
 
   test('caps individual returned string values', () async {
     await expectLater(
