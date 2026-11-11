@@ -1281,28 +1281,37 @@ class _GuessInput extends StatelessWidget {
         Row(
           children: [
             Expanded(
-              child: GtnExpressiveTextField(
-                key: const Key('guess-input'),
-                controller: controller,
-                enabled: enabled,
-                keyboardType: TextInputType.number,
-                textInputAction: TextInputAction.done,
-                onSubmitted: (_) => onGuess(),
-                decoration: const InputDecoration(hintText: 'Enter a number'),
+              child: Semantics(
+                label: 'Your guess',
+                textField: true,
+                child: GtnExpressiveTextField(
+                  key: const Key('guess-input'),
+                  controller: controller,
+                  enabled: enabled,
+                  keyboardType: TextInputType.number,
+                  textInputAction: TextInputAction.done,
+                  onSubmitted: (_) => onGuess(),
+                  decoration: const InputDecoration(hintText: 'Enter a number'),
+                ),
               ),
             ),
             const SizedBox(width: 9),
             SizedBox(
               width: MediaQuery.sizeOf(context).width <= 430 ? 100 : 116,
               height: 56,
-              child: M3EButton.filled(
-                onPressed: enabled ? onGuess : null,
-                child: const Text(
-                  '->',
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 0,
+              child: Semantics(
+                label: 'Guess',
+                button: true,
+                enabled: enabled,
+                child: M3EButton.filled(
+                  onPressed: enabled ? onGuess : null,
+                  child: const Text(
+                    '->',
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 0,
+                    ),
                   ),
                 ),
               ),
@@ -1328,22 +1337,26 @@ class _GuessInput extends StatelessWidget {
           runSpacing: 7,
           children: [
             _QuickGuessButton(
+              semanticLabel: 'Use lower end of range',
               label: 'LOW END',
               enabled: enabled,
               onPressed: () => _setGuess(game.minimum),
             ),
             _QuickGuessButton(
+              semanticLabel: 'Use midpoint of range',
               label: 'MIDPOINT',
               enabled: enabled,
               onPressed: () =>
                   _setGuess(game.minimum + (game.maximum - game.minimum) ~/ 2),
             ),
             _QuickGuessButton(
+              semanticLabel: 'Use upper end of range',
               label: 'HIGH END',
               enabled: enabled,
               onPressed: () => _setGuess(game.maximum),
             ),
             _QuickGuessButton(
+              semanticLabel: 'Clear guess input',
               label: 'CLEAR',
               enabled: enabled,
               onPressed: () {
@@ -1354,9 +1367,14 @@ class _GuessInput extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 8),
-        Text(
-          completed ? 'You found it! Start another round when you are ready.' : 'Every correct guess earns Money. Build your streak for bigger rewards.',
-          style: TextStyle(color: muted, fontSize: 10, height: 1.4),
+        Semantics(
+          liveRegion: true,
+          child: Text(
+            completed
+                ? 'You found it! Start another round when you are ready.'
+                : 'Every correct guess earns Money. Build your streak for bigger rewards.',
+            style: TextStyle(color: muted, fontSize: 10, height: 1.4),
+          ),
         ),
       ],
     ),
@@ -1366,11 +1384,13 @@ class _GuessInput extends StatelessWidget {
 class _QuickGuessButton extends StatelessWidget {
   const _QuickGuessButton({
     required this.label,
+    required this.semanticLabel,
     required this.enabled,
     required this.onPressed,
   });
 
   final String label;
+  final String semanticLabel;
   final bool enabled;
   final VoidCallback onPressed;
 
