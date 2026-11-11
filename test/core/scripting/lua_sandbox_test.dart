@@ -1,7 +1,9 @@
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gtn_2/core/scripting/lua_sandbox.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
   const sandbox = LuaSandbox();
 
   test('executes Lua and returns bounded typed data', () async {
@@ -101,4 +103,84 @@ void main() {
       throwsA(isA<LuaScriptException>()),
     );
   });
+
+  test('bundled random event selector returns an approved event ID', () async {
+    final source = await rootBundle.loadString(
+      'assets/scripts/events/random_event.lua',
+    );
+    final result = await sandbox.execute(
+      scriptId: 'random_event',
+      source: source,
+    );
+    final value = result.value as Map<String, Object?>;
+    expect(value['trigger'], isA<bool>());
+    expect(
+      {
+        'CASH_BURST',
+        'NEBULA_RAIN',
+        'JACKPOT',
+        'STREAK_SURGE',
+        'RANGE_SHUFFLE',
+        'TAX_REFUND',
+        'COSMIC_GIFT',
+      },
+      contains(value['type']),
+    );
+  });
+
+  test('bundled seasonal event catalog returns versioned data', () async {
+    final source = await rootBundle.loadString(
+      'assets/scripts/events/seasonal_events.lua',
+    );
+    final result = await sandbox.execute(
+      scriptId: 'seasonal_events',
+      source: source,
+    );
+    final value = result.value as Map<String, Object?>;
+    expect(value['schemaVersion'], 1);
+    expect(value['manifestVersion'], 2);
+    expect(value['events'], isA<List<Object?>>());
+    expect((value['events'] as List<Object?>).length, 2);
+  });
+
+  test('bundled Number Rush script returns its presentation model', () async {
+    final source = await rootBundle.loadString(
+      'assets/scripts/minigames/number_rush.lua',
+    );
+    final result = await sandbox.execute(
+      scriptId: 'number_rush',
+      source: source,
+    );
+    final value = result.value as Map<String, Object?>;
+    expect(value['title'], 'Number Rush');
+    expect(value['prompt'], isA<String>());
+    expect(value['options'], isA<List<Object?>>());
+    expect((value['options'] as List<Object?>).length, 4);
+    expect(value['correct_option'], 2);
+  });
+
+  test('bundled invisible trait selector returns helper and bonus IDs', () async {
+    final source = await rootBundle.loadString(
+      'assets/scripts/traits/invisible_traits.lua',
+    );
+    final result = await sandbox.execute(
+      scriptId: 'invisible_traits',
+      source: source,
+      input: const {
+        'failed_guesses': '6',
+        'correct_guesses': '10',
+        'long_streaks_observed': '1',
+        'current_streak': '5',
+        'total_guesses': '20',
+        'accuracy_score': '0.4',
+        'prestige_count': '1',
+        'ultra_count': '0',
+      },
+    );
+    final value = result.value as Map<String, Object?>;
+    expect(value['helpers'], contains('mistake_insurance'));
+    expect(value['helpers'], contains('streak_guard'));
+    expect(value['bonuses'], contains('first_prestige_bonus'));
+  });
+
 }
