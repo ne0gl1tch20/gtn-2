@@ -44,7 +44,7 @@ screen "game.home" version 1 {
         text bind "wallet.moneyLabel" style "value"
       }
     }
-    input id "guess.input" bind "guess.text" type "number"
+    input id "guess.input" bind "guess.text" type number
     button id "guess.submit" key "guess.submit" action "game.submitGuess"
   }
 }
