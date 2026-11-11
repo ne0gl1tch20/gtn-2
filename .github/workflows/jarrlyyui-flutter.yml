@@ -5,6 +5,7 @@ on:
     branches: [main, 'feature/**']
     paths:
       - 'packages/jarrlyyui_flutter/**'
+      - 'packages/jarrlyyui_bundle/**'
       - 'packages/jarrlyyui_language/**'
       - '.github/workflows/jarrlyyui-flutter.yml'
   pull_request:
@@ -38,3 +39,23 @@ jobs:
       - name: Test renderer
         working-directory: packages/jarrlyyui_flutter
         run: flutter test
+
+  bundle:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+      - name: Install bundle dependencies
+        working-directory: packages/jarrlyyui_bundle
+        run: dart pub get
+      - name: Check bundle formatting
+        working-directory: packages/jarrlyyui_bundle
+        run: dart format --output=none --set-exit-if-changed .
+      - name: Analyze bundle
+        working-directory: packages/jarrlyyui_bundle
+        run: dart analyze
+      - name: Test bundle validation and updates
+        working-directory: packages/jarrlyyui_bundle
+        run: dart test
