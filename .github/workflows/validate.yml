@@ -16,7 +16,7 @@ permissions:
 # Revalidate settings round-trip and scroll behavior.
 
 concurrency:
-  group: validate-${{ github.ref }}
+  group: validate-${{ github.event.pull_request.head.ref || github.ref_name }}
   cancel-in-progress: true
 
 jobs:
