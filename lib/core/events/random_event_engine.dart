@@ -83,8 +83,7 @@ class RandomEventEngine {
 
     switch (type) {
       case RandomEventType.cashBurst:
-        final percentageBonus =
-            progression.money * BigNumber.parse('0.10');
+        final percentageBonus = progression.money * BigNumber.parse('0.10');
         final bonus = percentageBonus.compareTo(_minimumCashBurst) < 0
             ? _minimumCashBurst
             : percentageBonus;

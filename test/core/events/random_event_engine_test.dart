@@ -69,38 +69,43 @@ void main() {
       expect(result.progression.bestStreak, 8);
     });
 
-    test('Range Shuffle changes only the target within the active interval', () {
-      final result = RandomEventEngine(random: Random(12)).apply(
-        progression: ProgressionState(),
-        game: game,
-        type: RandomEventType.rangeShuffle,
-      );
-      expect(result.game.secret, inInclusiveRange(1, 100));
-      expect(result.game.attempts, game.attempts);
-      expect(result.game.minimum, game.minimum);
-      expect(result.game.maximum, game.maximum);
-      expect(result.game.lastResult, game.lastResult);
-      expect(result.progression.money, n('0'));
-    });
+    test(
+      'Range Shuffle changes only the target within the active interval',
+      () {
+        final result = RandomEventEngine(random: Random(12)).apply(
+          progression: ProgressionState(),
+          game: game,
+          type: RandomEventType.rangeShuffle,
+        );
+        expect(result.game.secret, inInclusiveRange(1, 100));
+        expect(result.game.attempts, game.attempts);
+        expect(result.game.minimum, game.minimum);
+        expect(result.game.maximum, game.maximum);
+        expect(result.game.lastResult, game.lastResult);
+        expect(result.progression.money, n('0'));
+      },
+    );
 
-    test('Tax Refund uses five percent of lifetime money spent with a 100 floor',
-        () {
-      final small = RandomEventEngine().apply(
-        progression: ProgressionState(moneySpent: n('1000')),
-        game: game,
-        type: RandomEventType.taxRefund,
-      );
-      expect(small.progression.money.toString(), '100');
-      expect(small.progression.moneyEarned.toString(), '100');
+    test(
+      'Tax Refund uses five percent of lifetime money spent with a 100 floor',
+      () {
+        final small = RandomEventEngine().apply(
+          progression: ProgressionState(moneySpent: n('1000')),
+          game: game,
+          type: RandomEventType.taxRefund,
+        );
+        expect(small.progression.money.toString(), '100');
+        expect(small.progression.moneyEarned.toString(), '100');
 
-      final large = RandomEventEngine().apply(
-        progression: ProgressionState(moneySpent: n('10000')),
-        game: game,
-        type: RandomEventType.taxRefund,
-      );
-      expect(large.progression.money.toString(), '500');
-      expect(large.progression.moneyEarned.toString(), '500');
-    });
+        final large = RandomEventEngine().apply(
+          progression: ProgressionState(moneySpent: n('10000')),
+          game: game,
+          type: RandomEventType.taxRefund,
+        );
+        expect(large.progression.money.toString(), '500');
+        expect(large.progression.moneyEarned.toString(), '500');
+      },
+    );
 
     test('Cosmic Gift awards 100 Nebula', () {
       final result = RandomEventEngine().apply(
@@ -121,17 +126,15 @@ void main() {
       expect(result.progression.randomEventsTriggered, 5);
       expect(result.progression.lastRandomEventId, 'cosmic_gift');
       expect(
-        result.progression.copyWith(clearLastRandomEventId: true)
+        result.progression
+            .copyWith(clearLastRandomEventId: true)
             .lastRandomEventId,
         isNull,
       );
     });
 
     test('Lua event IDs are closed and unknown IDs are rejected', () {
-      expect(
-        randomEventTypeFromLuaId('CASH_BURST'),
-        RandomEventType.cashBurst,
-      );
+      expect(randomEventTypeFromLuaId('CASH_BURST'), RandomEventType.cashBurst);
       expect(
         randomEventTypeFromLuaId('COSMIC_GIFT'),
         RandomEventType.cosmicGift,

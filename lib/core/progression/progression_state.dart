@@ -92,9 +92,8 @@ class ProgressionState {
       return parsed;
     }
 
-    BigNumber optionalNumber(String key) => json[key] == null
-        ? BigNumber.fromInt(0)
-        : number(key);
+    BigNumber optionalNumber(String key) =>
+        json[key] == null ? BigNumber.fromInt(0) : number(key);
 
     int count(String key) {
       final value = json[key];
