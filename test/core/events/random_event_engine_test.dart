@@ -156,6 +156,17 @@ void main() {
       expect(restored.lastRandomEventId, isNull);
     });
 
+    test('save rejects random event IDs outside the approved catalog', () {
+      final invalidSave = ProgressionState().toJson()
+        ..['lastRandomEventId'] = 'admin_override';
+      expect(
+        () => ProgressionState.fromJson(
+          Map<String, dynamic>.from(invalidSave),
+        ),
+        throwsFormatException,
+      );
+    });
+
     test('new event statistics round trip through the save model', () {
       final state = ProgressionState(
         moneySpent: n('12345'),
