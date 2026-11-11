@@ -100,6 +100,34 @@ void main() {
       );
     });
 
+    test('rejects a screen that references an asset absent from the bundle', () {
+      const screen = '''
+screen "home" version 1 {
+  image asset "images/missing.png"
+}
+''';
+      final bytes = Uint8List.fromList(utf8.encode(screen));
+      final invalid = JuiBundlePackage(
+        manifestJson: {
+          'schemaVersion': 1,
+          'bundleVersion': '1.0.0',
+          'minimumHostApiVersion': 1,
+          'entryScreen': 'screens/home.jui',
+          'files': [
+            {
+              'path': 'screens/home.jui',
+              'sha256': sha256.convert(bytes).toString(),
+            },
+          ],
+        },
+        files: {'screens/home.jui': bytes},
+      );
+      expect(
+        () => JuiBundleValidator().validate(invalid),
+        throwsA(isA<JuiBundleException>()),
+      );
+    });
+
     test('rejects unsupported host API version', () {
       expect(
         () => JuiBundleValidator().validate(
