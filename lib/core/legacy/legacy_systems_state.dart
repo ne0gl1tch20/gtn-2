@@ -585,6 +585,7 @@ class TraitEffectSummary {
     this.rangeHint = false,
     this.activeTraitIds = const {},
     this.discoveredHiddenTraitIds = const {},
+    this.cosmeticBadgeTraitIds = const {},
   });
   final double xpMultiplier;
   final int nebulaBonusPerClaim;
@@ -595,4 +596,5 @@ class TraitEffectSummary {
   final bool rangeHint;
   final Set<String> activeTraitIds;
   final Set<String> discoveredHiddenTraitIds;
+  final Set<String> cosmeticBadgeTraitIds;
 }
