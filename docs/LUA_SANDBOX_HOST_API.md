@@ -1,6 +1,6 @@
 # GTN2 Lua Sandbox Host API v1
 
-**Status:** Runtime foundation in review; gameplay entry-point integration remains pending.
+**Status:** Isolated runtime and all four bundled script entries are implemented and tested; gameplay entry-point integration remains pending.
 **Source:** GTN1 pinned source at `fe9cf567169e19059e0330d08769fe454336ef94`.
 
 ## Runtime boundary
@@ -47,6 +47,8 @@ The supported standard library surface is for local computation only. It does no
 Callers may choose a shorter execution budget for a particular script. The default must not be raised to accommodate an inefficient script; optimize the script or split the task instead.
 
 ## GTN1 script contracts to wire
+
+All four pinned-source Lua scripts are listed in `assets/scripts/manifest.json`; the manifest test verifies unique IDs, asset existence and successful Lua compilation. Registration does not mean the gameplay adapters below are complete.
 
 | Script | Expected return | Dart-side responsibility |
 |---|---|---|

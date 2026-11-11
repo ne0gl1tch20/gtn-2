@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gtn_2/core/scripting/lua_sandbox.dart';
@@ -182,6 +184,33 @@ void main() {
       expect(value['helpers'], contains('mistake_insurance'));
       expect(value['helpers'], contains('range_scout'));
       expect(value['bonuses'], contains('first_prestige_bonus'));
+    },
+  );
+
+  test(
+    'script manifest lists every bundled core Lua script exactly once',
+    () async {
+      final source = await rootBundle.loadString(
+        'assets/scripts/manifest.json',
+      );
+      final manifest = jsonDecode(source) as Map<String, Object?>;
+      expect(manifest['schemaVersion'], 1);
+      expect(manifest['hostApiVersion'], 1);
+      final scripts = (manifest['scripts'] as List<Object?>)
+          .cast<Map<String, Object?>>();
+      final ids = scripts.map((script) => script['id'] as String).toSet();
+      expect(ids, {
+        'number_rush',
+        'random_event',
+        'seasonal_events',
+        'invisible_traits',
+      });
+      expect(scripts, hasLength(4));
+      for (final script in scripts) {
+        final path = 'assets/scripts/${script['file']}';
+        final lua = await rootBundle.loadString(path);
+        await sandbox.validate(scriptId: script['id'] as String, source: lua);
+      }
     },
   );
 
