@@ -244,6 +244,30 @@ screen "home" version 1 {
       );
     });
 
+    test('replaces the active pointer only after a newer bundle is staged', () async {
+      final directory = await Directory.systemTemp.createTemp('jui_bundle_store_');
+      addTearDown(() => directory.delete(recursive: true));
+      final validator = JuiBundleValidator();
+      final store = JuiFileBundleStore(root: directory, validator: validator);
+
+      await store.stage(validator.validate(package(version: '1.0.0')));
+      await store.activateStaged(expectedCurrentVersion: '');
+      await store.stage(validator.validate(package(version: '1.1.0')));
+      await store.activateStaged(expectedCurrentVersion: '1.0.0');
+
+      expect(
+        (await store.readActive())?.manifest.bundleVersion,
+        '1.1.0',
+      );
+      expect(
+        await Directory(
+          '${directory.path}${Platform.pathSeparator}bundles'
+          '${Platform.pathSeparator}1.0.0',
+        ).exists(),
+        isTrue,
+      );
+    });
+
     test('rejects stale activation and keeps the previous active bundle', () async {
       final directory = await Directory.systemTemp.createTemp('jui_bundle_store_');
       addTearDown(() => directory.delete(recursive: true));
