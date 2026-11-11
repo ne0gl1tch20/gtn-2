@@ -1328,6 +1328,7 @@ class _GuessInput extends StatelessWidget {
               child: Semantics(
                 label: 'Your guess',
                 textField: true,
+                excludeSemantics: true,
                 child: GtnExpressiveTextField(
                   key: const Key('guess-input'),
                   controller: controller,
@@ -1346,6 +1347,7 @@ class _GuessInput extends StatelessWidget {
               child: Semantics(
                 label: 'Guess',
                 button: true,
+                excludeSemantics: true,
                 enabled: enabled,
                 child: M3EButton.filled(
                   onPressed: enabled ? onGuess : null,
@@ -1439,11 +1441,17 @@ class _QuickGuessButton extends StatelessWidget {
   final VoidCallback onPressed;
 
   @override
-  Widget build(BuildContext context) => M3EButton.outlined(
-    onPressed: enabled ? onPressed : null,
-    child: Text(
-      label,
-      style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w900),
+  Widget build(BuildContext context) => Semantics(
+    label: semanticLabel,
+    button: true,
+    enabled: enabled,
+    excludeSemantics: true,
+    child: M3EButton.outlined(
+      onPressed: enabled ? onPressed : null,
+      child: Text(
+        label,
+        style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w900),
+      ),
     ),
   );
 }
