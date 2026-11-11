@@ -183,4 +183,15 @@ void main() {
     expect(value['bonuses'], contains('first_prestige_bonus'));
   });
 
+
+  test('caps individual returned string values', () async {
+    await expectLater(
+      sandbox.execute(
+        scriptId: 'oversized_result',
+        source: 'return string.rep("x", 4097)',
+      ),
+      throwsA(isA<LuaScriptException>()),
+    );
+  });
+
 }
