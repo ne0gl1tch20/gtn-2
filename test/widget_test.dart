@@ -7,7 +7,7 @@ import 'package:gtn_2/settings/game_settings.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
 
-Widget buildDashboard({GameSettings? settings}) => M3EMaterialApp(
+Widget buildDashboard({GameSettings? settings, VoidCallback? onGuess}) => M3EMaterialApp(
   data: M3EThemeData.light(seedColor: const Color(0xFF7C5CFC)),
   fontFamily: 'Manrope',
   autoTheming: false,
@@ -20,7 +20,7 @@ Widget buildDashboard({GameSettings? settings}) => M3EMaterialApp(
     loading: false,
     message: 'Make your move.',
     controller: TextEditingController(),
-    onGuess: () {},
+    onGuess: onGuess ?? () {},
     onNewGame: () {},
     onUpgradeShop: () {},
     onPrestige: () {},
@@ -39,6 +39,32 @@ Widget buildDashboard({GameSettings? settings}) => M3EMaterialApp(
 );
 
 void main() {
+  testWidgets('guess controls expose GTN1 accessibility labels and submit action', (
+    WidgetTester tester,
+  ) async {
+    var submitted = 0;
+    await tester.pumpWidget(buildDashboard(onGuess: () => submitted++));
+
+    expect(find.bySemanticsLabel('Your guess'), findsOneWidget);
+    expect(find.bySemanticsLabel('Guess'), findsOneWidget);
+    expect(find.bySemanticsLabel('Use lower end of range'), findsOneWidget);
+    expect(find.bySemanticsLabel('Use midpoint of range'), findsOneWidget);
+    expect(find.bySemanticsLabel('Use upper end of range'), findsOneWidget);
+    expect(find.bySemanticsLabel('Clear guess input'), findsOneWidget);
+
+    await tester.tap(find.bySemanticsLabel('Guess'));
+    await tester.pump();
+    expect(submitted, 1);
+
+    await tester.tap(find.bySemanticsLabel('Use midpoint of range'));
+    await tester.pump();
+    final field = tester.widget<GtnExpressiveTextField>(
+      find.byKey(const Key('guess-input')),
+    );
+    expect(field.controller!.text, '50');
+  });
+
+
   testWidgets('shows the HTML-facing dashboard and quick-pick controls', (
     WidgetTester tester,
   ) async {
