@@ -1221,11 +1221,10 @@ class _GameHomePageState extends State<GameHomePage>
             nebulaBoostOwned:
                 (beforeGuess.nebulaItems['nebula_boost'] ?? 0) > 0,
           );
-          final adaptiveBonusRate = _invisibleTraitEngine
-              .progressionBonusRate(
-                helperIds: adaptiveDecision.helperIds,
-                bonusCount: adaptiveDecision.bonusIds.length,
-              );
+          final adaptiveBonusRate = _invisibleTraitEngine.progressionBonusRate(
+            helperIds: adaptiveDecision.helperIds,
+            bonusCount: adaptiveDecision.bonusIds.length,
+          );
           if (adaptiveBonusRate > 0) {
             final earned = afterReward.money - beforeGuess.money;
             final adaptiveBonus =

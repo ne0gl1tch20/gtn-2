@@ -116,10 +116,7 @@ void main() {
   });
 
   test('adaptive reward bonuses match GTN1 without an extra 30% cap', () {
-    expect(
-      engine.progressionBonusRate(helperIds: const {}, bonusCount: 0),
-      0,
-    );
+    expect(engine.progressionBonusRate(helperIds: const {}, bonusCount: 0), 0);
     expect(
       engine.progressionBonusRate(
         helperIds: const {InvisibleTraitEngine.helperComeback},

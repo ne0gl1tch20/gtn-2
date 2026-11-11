@@ -171,7 +171,9 @@ class InvisibleTraitEngine {
   }) {
     final comebackBonus = helperIds.contains(helperComeback) ? 0.05 : 0.0;
     final momentumBonus = helperIds.contains(helperMomentum) ? 0.03 : 0.0;
-    return comebackBonus + momentumBonus + (bonusCount < 0 ? 0 : bonusCount) * 0.10;
+    return comebackBonus +
+        momentumBonus +
+        (bonusCount < 0 ? 0 : bonusCount) * 0.10;
   }
 
   AdaptiveTraitProfile markHelperUses(
