@@ -250,7 +250,7 @@ class _GameHomePageState extends State<GameHomePage>
       }
       final source = await rootBundle.loadString(scriptPath);
       final execution = await _luaSandbox.execute(
-        scriptId: 'random_event_selector',
+        scriptId: 'random_event',
         source: source,
       );
       final output = execution.value;
