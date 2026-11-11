@@ -141,10 +141,7 @@ void main() {
       ),
       closeTo(0.38, 0.000001),
     );
-    expect(
-      engine.progressionBonusRate(helperIds: const {}, bonusCount: -1),
-      0,
-    );
+    expect(engine.progressionBonusRate(helperIds: const {}, bonusCount: -1), 0);
   });
 
   test('upgrade purchases increment the persistent profile counter', () {
