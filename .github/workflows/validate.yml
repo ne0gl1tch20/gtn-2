@@ -80,7 +80,6 @@ jobs:
   windows-build:
     name: Windows desktop debug build
     runs-on: windows-latest
-    needs: format
     steps:
       - uses: actions/checkout@v4
         with:
