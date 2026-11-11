@@ -223,6 +223,13 @@ void _luaWorker(Map<String, Object?> message) {
       state.setGlobal(global);
     }
 
+    state.getGlobal('table');
+    if (state.isTable(-1)) {
+      state.pushNil();
+      state.setField(-2, 'concat');
+    }
+    state.pop(1);
+
     state.newTable(); // gtn
     state.newTable(); // gtn.input
     for (final entry in input.entries) {
