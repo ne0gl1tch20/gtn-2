@@ -68,6 +68,8 @@ void main() {
       expect(result.activeTraitIds, contains('steady_start'));
       expect(result.xpMultiplier, inInclusiveRange(1.0, 2.0));
       expect(result.nebulaBonusPerClaim, inInclusiveRange(0, 100));
+      expect(result.cosmeticBadgeTraitIds, contains('core_spark'));
+      expect(result.cosmeticBadgeTraitIds, isNot(contains('combo_momentum')));
     });
   });
 
