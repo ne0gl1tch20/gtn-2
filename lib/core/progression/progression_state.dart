@@ -1,6 +1,16 @@
 import '../legacy/legacy_systems_state.dart';
 import '../numbers/big_number.dart';
 
+const Set<String> _randomEventSaveIds = {
+  'cash_burst',
+  'nebula_rain',
+  'jackpot',
+  'streak_surge',
+  'range_shuffle',
+  'tax_refund',
+  'cosmic_gift',
+};
+
 class ProgressionState {
   ProgressionState({
     BigNumber? money,
@@ -165,7 +175,7 @@ class ProgressionState {
     final rawLastRandomEventId = json['lastRandomEventId'];
     if (rawLastRandomEventId != null &&
         (rawLastRandomEventId is! String ||
-            !RegExp(r'^[a-z_]{1,64}$').hasMatch(rawLastRandomEventId))) {
+            !_randomEventSaveIds.contains(rawLastRandomEventId))) {
       throw const FormatException('Invalid random event ID.');
     }
     final total = count('totalGuesses');
