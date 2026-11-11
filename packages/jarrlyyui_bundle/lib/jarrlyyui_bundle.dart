@@ -281,9 +281,10 @@ class JuiBundleUpdateManager {
   final JuiBundleValidator validator;
 
   Future<JuiBundleUpdateResult> checkForUpdates() async {
-    final active = await store.readActive();
-    final currentVersion = active?.manifest.bundleVersion;
+    String? currentVersion;
     try {
+      final active = await store.readActive();
+      currentVersion = active?.manifest.bundleVersion;
       final package = await source.fetchLatest(currentVersion: currentVersion);
       if (package == null) {
         return JuiBundleUpdateResult(
