@@ -37,6 +37,7 @@ class LuaSandbox {
   static const int maxLogCharacters = 500;
   static const int maxResultNodes = 512;
   static const int maxResultDepth = 8;
+  static const int maxResultStringCharacters = 4096;
 
   final Duration executionBudget;
 
@@ -309,7 +310,13 @@ Object? _readLuaValue(
   if (state.isNil(index)) return null;
   if (state.isBoolean(index)) return state.toBoolean(index);
   if (state.isNumber(index)) return state.toNumber(index);
-  if (state.isString(index)) return state.toStr(index);
+  if (state.isString(index)) {
+    final value = state.toStr(index) ?? '';
+    if (value.length > LuaSandbox.maxResultStringCharacters) {
+      throw const LuaScriptException('Lua result string is too long.');
+    }
+    return value;
+  }
   if (!state.isTable(index)) {
     throw const LuaScriptException('Lua returned an unsupported value type.');
   }
