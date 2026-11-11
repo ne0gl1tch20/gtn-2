@@ -172,7 +172,9 @@ class JuiRenderer extends StatelessWidget {
 
   Widget _buildToggle(JuiNode node) {
     final binding = node.binding;
-    if (binding == null || !writableBindings.contains(binding)) {
+    if (binding == null ||
+        onInputChanged == null ||
+        !writableBindings.contains(binding)) {
       return const SizedBox.shrink();
     }
     return SwitchListTile(
