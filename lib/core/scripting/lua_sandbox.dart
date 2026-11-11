@@ -27,9 +27,7 @@ class LuaBudgetExceededException extends LuaScriptException {
 /// Runs GTN1 Lua scripts in a disposable isolate with a deliberately small host
 /// surface. Scripts return data only; the Dart caller validates and applies it.
 class LuaSandbox {
-  const LuaSandbox({
-    this.executionBudget = const Duration(milliseconds: 500),
-  });
+  const LuaSandbox({this.executionBudget = const Duration(milliseconds: 500)});
 
   static const int maxSourceCharacters = 32768;
   static const int maxInputEntries = 64;
@@ -194,7 +192,8 @@ void _luaWorker(Map<String, Object?> message) {
   final scriptId = message['scriptId'] as String;
   final source = message['source'] as String;
   final input = message['input'] as Map<String, String>;
-  final capabilities = (message['capabilities'] as List<Object?>).cast<String>();
+  final capabilities = (message['capabilities'] as List<Object?>)
+      .cast<String>();
   final validateOnly = message['validateOnly'] as bool;
   final logs = <String>[];
 
@@ -235,7 +234,9 @@ void _luaWorker(Map<String, Object?> message) {
     if (capabilities.contains('log')) {
       state.pushDartFunction((lua) {
         if (logs.length < LuaSandbox.maxLogLines) {
-          final line = (lua.toString2(1) ?? '').take(LuaSandbox.maxLogCharacters);
+          final line = (lua.toString2(1) ?? '').take(
+            LuaSandbox.maxLogCharacters,
+          );
           logs.add(line);
         }
         return 0;
@@ -252,7 +253,9 @@ void _luaWorker(Map<String, Object?> message) {
         if (logs.length < LuaSandbox.maxLogLines) {
           final parts = <String>[];
           for (var i = 1; i <= lua.getTop(); i++) {
-            parts.add((lua.toString2(i) ?? '').take(LuaSandbox.maxLogCharacters));
+            parts.add(
+              (lua.toString2(i) ?? '').take(LuaSandbox.maxLogCharacters),
+            );
           }
           logs.add(parts.join(' ').take(LuaSandbox.maxLogCharacters));
         }
@@ -281,12 +284,7 @@ void _luaWorker(Map<String, Object?> message) {
         'Lua execution failed in $scriptId: ${state.toStr(-1) ?? callStatus.name}',
       );
     }
-    final value = _readLuaValue(
-      state,
-      -1,
-      depth: 0,
-      nodeCount: [0],
-    );
+    final value = _readLuaValue(state, -1, depth: 0, nodeCount: [0]);
     replyTo.send({'ok': true, 'value': value, 'logs': logs});
   } catch (error) {
     replyTo.send({
@@ -338,13 +336,11 @@ Object? _readLuaValue(
     state.pop(1);
   }
 
-  final numericKeys = values.keys
-      .map(int.tryParse)
-      .toList(growable: false);
-  if (values.isNotEmpty &&
-      numericKeys.every((key) => key != null && key > 0)) {
+  final numericKeys = values.keys.map(int.tryParse).toList(growable: false);
+  if (values.isNotEmpty && numericKeys.every((key) => key != null && key > 0)) {
     final indices = numericKeys.cast<int>()..sort();
-    final isDense = indices.length == indices.last && 
+    final isDense =
+        indices.length == indices.last &&
         indices.asMap().entries.every((entry) => entry.value == entry.key + 1);
     if (isDense) {
       return List<Object?>.unmodifiable([

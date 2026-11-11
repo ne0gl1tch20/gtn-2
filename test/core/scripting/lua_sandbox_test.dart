@@ -23,10 +23,12 @@ void main() {
     expect(result.logs, ['amount 41']);
   });
 
-  test('does not expose filesystem, process, loader or debug libraries', () async {
-    final result = await sandbox.execute(
-      scriptId: 'sandbox_surface',
-      source: '''
+  test(
+    'does not expose filesystem, process, loader or debug libraries',
+    () async {
+      final result = await sandbox.execute(
+        scriptId: 'sandbox_surface',
+        source: '''
         return {
           os = os ~= nil,
           io = io ~= nil,
@@ -40,21 +42,22 @@ void main() {
           setmetatable = setmetatable ~= nil
         }
       ''',
-    );
+      );
 
-    expect(result.value, {
-      'os': false,
-      'io': false,
-      'package': false,
-      'debug': false,
-      'dofile': false,
-      'loadfile': false,
-      'load': false,
-      'require': false,
-      'rawset': false,
-      'setmetatable': false,
-    });
-  });
+      expect(result.value, {
+        'os': false,
+        'io': false,
+        'package': false,
+        'debug': false,
+        'dofile': false,
+        'loadfile': false,
+        'load': false,
+        'require': false,
+        'rawset': false,
+        'setmetatable': false,
+      });
+    },
+  );
 
   test('validation compiles without executing the chunk', () async {
     await sandbox.validate(
@@ -71,14 +74,9 @@ void main() {
   });
 
   test('interrupts an infinite loop by terminating its isolate', () async {
-    const bounded = LuaSandbox(
-      executionBudget: Duration(milliseconds: 150),
-    );
+    const bounded = LuaSandbox(executionBudget: Duration(milliseconds: 150));
     await expectLater(
-      bounded.execute(
-        scriptId: 'infinite_loop',
-        source: 'while true do end',
-      ),
+      bounded.execute(scriptId: 'infinite_loop', source: 'while true do end'),
       throwsA(isA<LuaBudgetExceededException>()),
     );
   });
@@ -96,7 +94,8 @@ void main() {
         scriptId: 'too_many_inputs',
         source: 'return true',
         input: {
-          for (var i = 0; i < LuaSandbox.maxInputEntries + 1; i++) 'key_$i': 'v',
+          for (var i = 0; i < LuaSandbox.maxInputEntries + 1; i++)
+            'key_$i': 'v',
         },
       ),
       throwsA(isA<LuaScriptException>()),
