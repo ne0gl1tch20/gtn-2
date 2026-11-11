@@ -2,7 +2,7 @@ import 'dart:math';
 
 import '../game/game_engine.dart';
 import '../numbers/big_number.dart';
-import 'progression_state.dart';
+import '../progression/progression_state.dart';
 
 enum RandomEventType {
   cashBurst,
