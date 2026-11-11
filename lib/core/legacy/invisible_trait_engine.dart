@@ -165,6 +165,7 @@ class InvisibleTraitEngine {
 
   /// Mirrors GTN1 TraitGameplayRules: adaptive helper bonuses and each
   /// newly earned progression milestone are additive, without a 30% cap.
+  /// The three one-time progression bonuses can therefore reach 38% with both helpers.
   double progressionBonusRate({
     required Set<String> helperIds,
     required int bonusCount,
