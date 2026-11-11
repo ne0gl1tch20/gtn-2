@@ -3,6 +3,7 @@ import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../core/progression/achievement_catalog.dart';
 import '../core/progression/progression_state.dart';
 import '../creative/creative_mode_page.dart';
 import '../design/expressive_widgets.dart';
@@ -11,7 +12,7 @@ import '../worlds/world_boss_catalog.dart';
 import 'legacy_systems_page.dart';
 
 enum LegacySection {
-  journey('Journey', Icons.route_rounded),
+  journey('Achievements & Perks', Icons.emoji_events_rounded),
   rewards('Rewards', Icons.card_giftcard_rounded),
   statistics('Statistics', Icons.query_stats_rounded),
   codex('Codex', Icons.menu_book_rounded),
@@ -161,48 +162,76 @@ class _LegacyDetailPage extends StatelessWidget {
 
   List<Widget> _journey(BuildContext context) {
     final theme = Theme.of(context);
-    final milestones = <(String, int, int)>[
-      ('First steps', progression.correctGuesses, 1),
-      ('Getting consistent', progression.correctGuesses, 10),
-      ('World explorer', progression.defeatedBosses.length, 1),
-      ('Prestige beginner', progression.prestigeResets, 1),
-      ('Beyond prestige', progression.ultraResets, 1),
-      ('Master of the rift', progression.defeatedBosses.length, 4),
-    ];
+    final unlockedCount = AchievementCatalog.all
+        .where((item) => progression.achievements.contains(item.id))
+        .length;
     return [
-      Text('Keep moving forward', style: theme.textTheme.titleLarge),
+      Text('Achievement Progress', style: theme.textTheme.titleLarge),
       const SizedBox(height: 6),
-      Text(
-        '${progression.correctGuesses} correct guesses · ${progression.defeatedBosses.length}/4 guardians defeated',
+      Text('Unlocked: $unlockedCount / ${AchievementCatalog.all.length}'),
+      const SizedBox(height: 8),
+      M3EProgressIndicator.linearWavy(
+        value: unlockedCount / AchievementCatalog.all.length,
       ),
       const SizedBox(height: 16),
-      for (final milestone in milestones)
-        GtnExpressiveCard(
-          child: Padding(
-            padding: const EdgeInsets.all(14),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
+      for (final achievement in AchievementCatalog.all)
+        Builder(
+          builder: (context) {
+            final unlocked = progression.achievements.contains(achievement.id);
+            final target = AchievementCatalog.target(achievement.id);
+            final current = AchievementCatalog.progress(progression, achievement.id);
+            final isCounterMilestone = target > 0;
+            return GtnExpressiveCard(
+              child: Padding(
+                padding: const EdgeInsets.all(14),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      child: Text(
-                        milestone.$1,
-                        style: theme.textTheme.titleMedium,
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(
+                          unlocked ? Icons.check_circle_rounded : Icons.lock_rounded,
+                          color: unlocked ? const Color(0xFFFFD166) : theme.colorScheme.onSurfaceVariant,
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(achievement.name, style: theme.textTheme.titleMedium),
+                              const SizedBox(height: 3),
+                              Text(achievement.description, style: theme.textTheme.bodySmall),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(achievement.tier.toUpperCase(), style: theme.textTheme.labelSmall),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            unlocked ? 'Unlocked' : AchievementCatalog.progressLabel(progression, achievement),
+                            style: theme.textTheme.bodySmall,
+                          ),
+                        ),
+                        Text('+${achievement.rewardNebula} Nebula', style: theme.textTheme.labelMedium),
+                      ],
+                    ),
+                    if (!unlocked && isCounterMilestone) ...[
+                      const SizedBox(height: 8),
+                      M3EProgressIndicator.linearWavy(
+                        value: (current / target).clamp(0.0, 1.0),
                       ),
-                    ),
-                    Text(
-                      '${milestone.$2.clamp(0, milestone.$3)} / ${milestone.$3}',
-                    ),
+                    ],
                   ],
                 ),
-                const SizedBox(height: 8),
-                M3EProgressIndicator.linearWavy(
-                  value: (milestone.$2 / milestone.$3).clamp(0.0, 1.0),
-                ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         ),
     ];
   }
