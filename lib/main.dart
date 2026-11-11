@@ -1171,7 +1171,8 @@ class _GameHomePageState extends State<GameHomePage>
               ? adaptiveProfileForDecision.prestigesObserved
               : beforeGuess.prestigeResets,
           ultraCount:
-              adaptiveProfileForDecision.ultrasObserved > beforeGuess.ultraResets
+              adaptiveProfileForDecision.ultrasObserved >
+                  beforeGuess.ultraResets
               ? adaptiveProfileForDecision.ultrasObserved
               : beforeGuess.ultraResets,
           currentStreak: beforeGuess.currentStreak,
@@ -1183,27 +1184,26 @@ class _GameHomePageState extends State<GameHomePage>
               bonusCount: adaptiveDecision.bonusIds.length,
             );
 
-        BigNumber calculateCorrectGuessReward(double traitMultiplier) =>
-            GuessEconomyRules.correctGuessReward(
-              rangeMaximum: _game.maximum,
-              currentStreak: beforeGuess.currentStreak,
-              rewardMultiplierLevel:
-                  beforeGuess.upgrades['reward_multiplier'] ?? 0,
-              // talent_reward_1 is a Prestige talent, not the legacy shop/upgrade flag
-              // consumed by GameEngine's base reward calculation. GTN1 applies its
-              // +50% once in applyTalentBonuses after the raw reward is recorded.
-              hasTalentReward: false,
-              isCritical: isCritical,
-              difficultyId: _settings.difficultyId,
-              mutatorMultiplier: _legacySystemsEngine.mutatorRewardMultiplier(
-                legacySystems,
-              ),
-              traitMultiplier: BigNumber.parse(
-                traitMultiplier.toStringAsFixed(2),
-              ),
-              permanentMoneyMultiplier:
-                  GuessEconomyRules.moneyEarningMultiplier(beforeGuess),
-            );
+        BigNumber calculateCorrectGuessReward(
+          double traitMultiplier,
+        ) => GuessEconomyRules.correctGuessReward(
+          rangeMaximum: _game.maximum,
+          currentStreak: beforeGuess.currentStreak,
+          rewardMultiplierLevel: beforeGuess.upgrades['reward_multiplier'] ?? 0,
+          // talent_reward_1 is a Prestige talent, not the legacy shop/upgrade flag
+          // consumed by GameEngine's base reward calculation. GTN1 applies its
+          // +50% once in applyTalentBonuses after the raw reward is recorded.
+          hasTalentReward: false,
+          isCritical: isCritical,
+          difficultyId: _settings.difficultyId,
+          mutatorMultiplier: _legacySystemsEngine.mutatorRewardMultiplier(
+            legacySystems,
+          ),
+          traitMultiplier: BigNumber.parse(traitMultiplier.toStringAsFixed(2)),
+          permanentMoneyMultiplier: GuessEconomyRules.moneyEarningMultiplier(
+            beforeGuess,
+          ),
+        );
 
         // Keep the unmodified base reward for the adaptive profile, matching
         // GTN1's observation before TraitGameplayRules applies its combined
