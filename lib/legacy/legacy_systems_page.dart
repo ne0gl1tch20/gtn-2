@@ -12,6 +12,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../core/music/music_playback_policy.dart';
 import '../core/legacy/legacy_systems_engine.dart';
 import '../core/legacy/legacy_systems_state.dart';
 import '../core/legacy/trait_catalog_repository.dart';
@@ -1003,19 +1004,27 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
   }
 
   Future<void> _toggleMusicPlayback() async {
-    if (_isPlaying) {
-      await _audioPlayer.pause();
-      if (mounted) setState(() => _isPlaying = false);
-      return;
-    }
-    final current = _systems.currentTrackId;
-    if (current != null && File(current).existsSync()) {
-      await _audioPlayer.resume();
-      if (mounted) setState(() => _isPlaying = true);
-    } else if (_systems.musicQueue.isNotEmpty) {
-      await _playTrack(_systems.musicQueue.first);
-    } else {
-      await _importMusicTracks();
+    final action = MusicPlaybackPolicy.resolve(
+      isPlaying: _isPlaying,
+      playerIsPaused: _audioPlayer.state == PlayerState.paused,
+      currentTrackExists:
+          _systems.currentTrackId != null &&
+          File(_systems.currentTrackId!).existsSync(),
+      hasQueuedTracks: _systems.musicQueue.isNotEmpty,
+    );
+    switch (action) {
+      case MusicPlaybackAction.pause:
+        await _audioPlayer.pause();
+        if (mounted) setState(() => _isPlaying = false);
+      case MusicPlaybackAction.resume:
+        await _audioPlayer.resume();
+        if (mounted) setState(() => _isPlaying = true);
+      case MusicPlaybackAction.replayCurrent:
+        await _playTrack(_systems.currentTrackId!);
+      case MusicPlaybackAction.playQueue:
+        await _playTrack(_systems.musicQueue.first);
+      case MusicPlaybackAction.importTracks:
+        await _importMusicTracks();
     }
   }
 
