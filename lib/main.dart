@@ -797,10 +797,25 @@ class _GameHomePageState extends State<GameHomePage>
           moneyEarned: nextProgression.moneyEarned + offlineEarnings,
         );
       }
-      await AppLocalizations.load(save?.settings.localeCode ?? 'en_us');
+
+      // Slot changes must run the same legacy music migration as startup.
+      // Otherwise a slot with settings-backed music can appear empty until
+      // the next full app restart, and the two persisted representations drift.
+      final savedSettings = save?.settings ?? GameSettings.initial;
+      final restoredMusicSystems = restoreMusicStateFromSettings(
+        settings: savedSettings,
+        systems: nextProgression.legacySystems,
+      );
+      nextProgression = nextProgression.copyWith(
+        legacySystems: restoredMusicSystems,
+      );
+      final nextSettings = syncMusicSettingsFromLegacy(
+        settings: savedSettings,
+        systems: restoredMusicSystems,
+      );
+      await AppLocalizations.load(nextSettings.localeCode);
       await storage.saveActiveSlot(slot);
       if (!mounted) return;
-      final nextSettings = save?.settings ?? GameSettings.initial;
       final nextEngine = _engineFor(nextProgression, nextSettings);
       setState(() {
         _storage = Future.value(storage);
