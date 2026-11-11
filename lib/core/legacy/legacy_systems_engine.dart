@@ -894,6 +894,20 @@ class LegacySystemsEngine {
     );
   }
 
+  /// Combines the regular trait and adaptive helper without stacking the same
+  /// mistake-insurance effect twice. GTN1 resolves both sources to one refund rate.
+  /// When both are active, the stronger single rate wins rather than adding refunds.
+  double resolveMissPenaltyRefundRate({
+    required double traitRefundRate,
+    required bool adaptiveInsuranceActive,
+  }) {
+    final boundedTraitRate = traitRefundRate.clamp(0.0, 1.0).toDouble();
+    if (!adaptiveInsuranceActive || boundedTraitRate >= 0.50) {
+      return boundedTraitRate;
+    }
+    return 0.50;
+  }
+
   TraitEffectSummary evaluateTraits({
     required ProgressionState progression,
     required LegacySystemsState systems,

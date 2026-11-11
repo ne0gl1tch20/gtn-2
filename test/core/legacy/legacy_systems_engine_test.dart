@@ -502,6 +502,56 @@ void main() {
     });
   });
 
+  group('trait insurance refund policy', () {
+    test('adaptive insurance does not stack with the active trait refund', () {
+      expect(
+        engine.resolveMissPenaltyRefundRate(
+          traitRefundRate: 0,
+          adaptiveInsuranceActive: false,
+        ),
+        0,
+      );
+      expect(
+        engine.resolveMissPenaltyRefundRate(
+          traitRefundRate: 0,
+          adaptiveInsuranceActive: true,
+        ),
+        0.50,
+      );
+      expect(
+        engine.resolveMissPenaltyRefundRate(
+          traitRefundRate: 0.50,
+          adaptiveInsuranceActive: true,
+        ),
+        0.50,
+      );
+      expect(
+        engine.resolveMissPenaltyRefundRate(
+          traitRefundRate: 0.75,
+          adaptiveInsuranceActive: true,
+        ),
+        0.75,
+      );
+    });
+
+    test('bounds invalid trait refund rates', () {
+      expect(
+        engine.resolveMissPenaltyRefundRate(
+          traitRefundRate: -0.25,
+          adaptiveInsuranceActive: false,
+        ),
+        0,
+      );
+      expect(
+        engine.resolveMissPenaltyRefundRate(
+          traitRefundRate: 1.5,
+          adaptiveInsuranceActive: false,
+        ),
+        1,
+      );
+    });
+  });
+
   group('catalog and save integrity', () {
     test(
       'hidden trait discovery follows GTN1 progression gates, not player level',
