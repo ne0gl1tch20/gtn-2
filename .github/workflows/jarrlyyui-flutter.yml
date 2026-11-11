@@ -11,10 +11,6 @@ on:
   pull_request:
     branches: [main]
   workflow_dispatch:
-    paths:
-      - 'packages/jarrlyyui_flutter/**'
-      - 'packages/jarrlyyui_language/**'
-      - '.github/workflows/jarrlyyui-flutter.yml'
 
 permissions:
   contents: read
