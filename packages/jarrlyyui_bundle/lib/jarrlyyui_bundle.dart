@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
@@ -53,6 +54,17 @@ class JuiBundleManifest {
   final int minimumHostApiVersion;
   final String entryScreen;
   final List<JuiBundleFile> files;
+
+  Map<String, Object> toJson() => {
+    'schemaVersion': juiBundleSchemaVersion,
+    'bundleVersion': bundleVersion,
+    'minimumHostApiVersion': minimumHostApiVersion,
+    'entryScreen': entryScreen,
+    'files': [
+      for (final file in files)
+        {'path': file.path, 'sha256': file.sha256},
+    ],
+  };
 
   factory JuiBundleManifest.fromJson(Object? value) {
     if (value is! Map) {
@@ -255,6 +267,725 @@ class JuiGitHubBundleSource implements JuiBundleSource {
   }) : _client = client ?? http.Client(),
        _ownsClient = client == null {
     if (!RegExp(r'^[A-Za-z0-9_.-]+
+/// File-backed store shared by Android and Windows hosts. The app should
+/// place [root] inside its application-support directory.
+class JuiFileBundleStore implements JuiBundleStore {
+  JuiFileBundleStore({required this.root, JuiBundleValidator? validator})
+    : validator = validator ?? JuiBundleValidator();
+
+  final Directory root;
+  final JuiBundleValidator validator;
+
+  Directory get _stagingDirectory => Directory(_join([root.path, 'staged']));
+  Directory get _bundlesDirectory => Directory(_join([root.path, 'bundles']));
+  File get _activeFile => File(_join([root.path, 'active.json']));
+
+  @override
+  Future<JuiValidatedBundle?> readActive() async {
+    if (!await _activeFile.exists()) return null;
+    final pointer = jsonDecode(await _activeFile.readAsString());
+    if (pointer is! Map || pointer['bundleVersion'] is! String) {
+      throw const JuiBundleException('Active bundle pointer is invalid.');
+    }
+    final version = pointer['bundleVersion'] as String;
+    if (!RegExp(r'^[0-9]+\.[0-9]+\.[0-9]+(?:[-+][A-Za-z0-9.-]+)?
+
+class JuiBundleUpdateResult {
+  const JuiBundleUpdateResult({
+    required this.status,
+    this.activeVersion,
+    this.message,
+  });
+
+  final JuiBundleUpdateStatus status;
+  final String? activeVersion;
+  final String? message;
+}
+
+class JuiBundleUpdateManager {
+  const JuiBundleUpdateManager({
+    required this.source,
+    required this.store,
+    required this.validator,
+  });
+
+  final JuiBundleSource source;
+  final JuiBundleStore store;
+  final JuiBundleValidator validator;
+
+  Future<JuiBundleUpdateResult> checkForUpdates() async {
+    String? currentVersion;
+    try {
+      final active = await store.readActive();
+      currentVersion = active?.manifest.bundleVersion;
+      final package = await source.fetchLatest(currentVersion: currentVersion);
+      if (package == null) {
+        return JuiBundleUpdateResult(
+          status: JuiBundleUpdateStatus.unavailable,
+          activeVersion: currentVersion,
+          message: 'No bundle is currently available.',
+        );
+      }
+      final candidate = validator.validate(package);
+      if (currentVersion != null &&
+          _compareVersions(candidate.manifest.bundleVersion, currentVersion) <=
+              0) {
+        return JuiBundleUpdateResult(
+          status: JuiBundleUpdateStatus.upToDate,
+          activeVersion: currentVersion,
+        );
+      }
+      try {
+        await store.stage(candidate);
+        await store.activateStaged(
+          expectedCurrentVersion: currentVersion ?? '',
+        );
+      } catch (_) {
+        await store.discardStaged();
+        rethrow;
+      }
+      return JuiBundleUpdateResult(
+        status: JuiBundleUpdateStatus.updated,
+        activeVersion: candidate.manifest.bundleVersion,
+      );
+    } on Object catch (error) {
+      return JuiBundleUpdateResult(
+        status: JuiBundleUpdateStatus.rejected,
+        activeVersion: currentVersion,
+        message: error.toString(),
+      );
+    }
+  }
+}
+
+bool _isSafeBundlePath(String path) {
+  if (path.isEmpty ||
+      path.startsWith('/') ||
+      path.startsWith(String.fromCharCode(92)) ||
+      path.contains(String.fromCharCode(92)) ||
+      path.contains(':') ||
+      path.split('/').any((part) => part.isEmpty || part == '.' || part == '..')) {
+    return false;
+  }
+  return true;
+}
+
+int _compareVersions(String left, String right) {
+  String withoutBuild(String value) => value.split('+').first;
+  List<int> parts(String value) => withoutBuild(value)
+      .split('-')
+      .first
+      .split('.')
+      .map(int.parse)
+      .toList(growable: false);
+  String? prerelease(String value) {
+    final parts = withoutBuild(value).split('-');
+    return parts.length > 1 ? parts.sublist(1).join('-') : null;
+  }
+
+  final a = parts(left);
+  final b = parts(right);
+  for (var i = 0; i < 3; i++) {
+    final comparison = a[i].compareTo(b[i]);
+    if (comparison != 0) return comparison;
+  }
+  final aPre = prerelease(left);
+  final bPre = prerelease(right);
+  if (aPre == null && bPre == null) return 0;
+  if (aPre == null) return 1;
+  if (bPre == null) return -1;
+  return aPre.compareTo(bPre);
+}
+).hasMatch(owner) ||
+        !RegExp(r'^[A-Za-z0-9_.-]+
+enum JuiBundleUpdateStatus { upToDate, updated, unavailable, rejected }
+
+class JuiBundleUpdateResult {
+  const JuiBundleUpdateResult({
+    required this.status,
+    this.activeVersion,
+    this.message,
+  });
+
+  final JuiBundleUpdateStatus status;
+  final String? activeVersion;
+  final String? message;
+}
+
+class JuiBundleUpdateManager {
+  const JuiBundleUpdateManager({
+    required this.source,
+    required this.store,
+    required this.validator,
+  });
+
+  final JuiBundleSource source;
+  final JuiBundleStore store;
+  final JuiBundleValidator validator;
+
+  Future<JuiBundleUpdateResult> checkForUpdates() async {
+    final active = await store.readActive();
+    final currentVersion = active?.manifest.bundleVersion;
+    try {
+      final package = await source.fetchLatest(currentVersion: currentVersion);
+      if (package == null) {
+        return JuiBundleUpdateResult(
+          status: JuiBundleUpdateStatus.unavailable,
+          activeVersion: currentVersion,
+          message: 'No bundle is currently available.',
+        );
+      }
+      final candidate = validator.validate(package);
+      if (currentVersion != null &&
+          _compareVersions(candidate.manifest.bundleVersion, currentVersion) <=
+              0) {
+        return JuiBundleUpdateResult(
+          status: JuiBundleUpdateStatus.upToDate,
+          activeVersion: currentVersion,
+        );
+      }
+      try {
+        await store.stage(candidate);
+        await store.activateStaged(
+          expectedCurrentVersion: currentVersion ?? '',
+        );
+      } catch (_) {
+        await store.discardStaged();
+        rethrow;
+      }
+      return JuiBundleUpdateResult(
+        status: JuiBundleUpdateStatus.updated,
+        activeVersion: candidate.manifest.bundleVersion,
+      );
+    } on Object catch (error) {
+      return JuiBundleUpdateResult(
+        status: JuiBundleUpdateStatus.rejected,
+        activeVersion: currentVersion,
+        message: error.toString(),
+      );
+    }
+  }
+}
+
+bool _isSafeBundlePath(String path) {
+  if (path.isEmpty ||
+      path.startsWith('/') ||
+      path.startsWith(String.fromCharCode(92)) ||
+      path.contains(String.fromCharCode(92)) ||
+      path.contains(':') ||
+      path.split('/').any((part) => part.isEmpty || part == '.' || part == '..')) {
+    return false;
+  }
+  return true;
+}
+
+int _compareVersions(String left, String right) {
+  String withoutBuild(String value) => value.split('+').first;
+  List<int> parts(String value) => withoutBuild(value)
+      .split('-')
+      .first
+      .split('.')
+      .map(int.parse)
+      .toList(growable: false);
+  String? prerelease(String value) {
+    final parts = withoutBuild(value).split('-');
+    return parts.length > 1 ? parts.sublist(1).join('-') : null;
+  }
+
+  final a = parts(left);
+  final b = parts(right);
+  for (var i = 0; i < 3; i++) {
+    final comparison = a[i].compareTo(b[i]);
+    if (comparison != 0) return comparison;
+  }
+  final aPre = prerelease(left);
+  final bPre = prerelease(right);
+  if (aPre == null && bPre == null) return 0;
+  if (aPre == null) return 1;
+  if (bPre == null) return -1;
+  return aPre.compareTo(bPre);
+}
+).hasMatch(repository) ||
+        ref.isEmpty ||
+        ref.split('/').any((part) => part.isEmpty || part == '.' || part == '..') ||
+        !RegExp(r'^[A-Za-z0-9_./-]+
+enum JuiBundleUpdateStatus { upToDate, updated, unavailable, rejected }
+
+class JuiBundleUpdateResult {
+  const JuiBundleUpdateResult({
+    required this.status,
+    this.activeVersion,
+    this.message,
+  });
+
+  final JuiBundleUpdateStatus status;
+  final String? activeVersion;
+  final String? message;
+}
+
+class JuiBundleUpdateManager {
+  const JuiBundleUpdateManager({
+    required this.source,
+    required this.store,
+    required this.validator,
+  });
+
+  final JuiBundleSource source;
+  final JuiBundleStore store;
+  final JuiBundleValidator validator;
+
+  Future<JuiBundleUpdateResult> checkForUpdates() async {
+    final active = await store.readActive();
+    final currentVersion = active?.manifest.bundleVersion;
+    try {
+      final package = await source.fetchLatest(currentVersion: currentVersion);
+      if (package == null) {
+        return JuiBundleUpdateResult(
+          status: JuiBundleUpdateStatus.unavailable,
+          activeVersion: currentVersion,
+          message: 'No bundle is currently available.',
+        );
+      }
+      final candidate = validator.validate(package);
+      if (currentVersion != null &&
+          _compareVersions(candidate.manifest.bundleVersion, currentVersion) <=
+              0) {
+        return JuiBundleUpdateResult(
+          status: JuiBundleUpdateStatus.upToDate,
+          activeVersion: currentVersion,
+        );
+      }
+      try {
+        await store.stage(candidate);
+        await store.activateStaged(
+          expectedCurrentVersion: currentVersion ?? '',
+        );
+      } catch (_) {
+        await store.discardStaged();
+        rethrow;
+      }
+      return JuiBundleUpdateResult(
+        status: JuiBundleUpdateStatus.updated,
+        activeVersion: candidate.manifest.bundleVersion,
+      );
+    } on Object catch (error) {
+      return JuiBundleUpdateResult(
+        status: JuiBundleUpdateStatus.rejected,
+        activeVersion: currentVersion,
+        message: error.toString(),
+      );
+    }
+  }
+}
+
+bool _isSafeBundlePath(String path) {
+  if (path.isEmpty ||
+      path.startsWith('/') ||
+      path.startsWith(String.fromCharCode(92)) ||
+      path.contains(String.fromCharCode(92)) ||
+      path.contains(':') ||
+      path.split('/').any((part) => part.isEmpty || part == '.' || part == '..')) {
+    return false;
+  }
+  return true;
+}
+
+int _compareVersions(String left, String right) {
+  String withoutBuild(String value) => value.split('+').first;
+  List<int> parts(String value) => withoutBuild(value)
+      .split('-')
+      .first
+      .split('.')
+      .map(int.parse)
+      .toList(growable: false);
+  String? prerelease(String value) {
+    final parts = withoutBuild(value).split('-');
+    return parts.length > 1 ? parts.sublist(1).join('-') : null;
+  }
+
+  final a = parts(left);
+  final b = parts(right);
+  for (var i = 0; i < 3; i++) {
+    final comparison = a[i].compareTo(b[i]);
+    if (comparison != 0) return comparison;
+  }
+  final aPre = prerelease(left);
+  final bPre = prerelease(right);
+  if (aPre == null && bPre == null) return 0;
+  if (aPre == null) return 1;
+  if (bPre == null) return -1;
+  return aPre.compareTo(bPre);
+}
+).hasMatch(ref) ||
+        directory.startsWith('/') ||
+        directory.split('/').any((part) => part.isEmpty || part == '.' || part == '..') ||
+        !RegExp(r'^[A-Za-z0-9_./-]+
+enum JuiBundleUpdateStatus { upToDate, updated, unavailable, rejected }
+
+class JuiBundleUpdateResult {
+  const JuiBundleUpdateResult({
+    required this.status,
+    this.activeVersion,
+    this.message,
+  });
+
+  final JuiBundleUpdateStatus status;
+  final String? activeVersion;
+  final String? message;
+}
+
+class JuiBundleUpdateManager {
+  const JuiBundleUpdateManager({
+    required this.source,
+    required this.store,
+    required this.validator,
+  });
+
+  final JuiBundleSource source;
+  final JuiBundleStore store;
+  final JuiBundleValidator validator;
+
+  Future<JuiBundleUpdateResult> checkForUpdates() async {
+    final active = await store.readActive();
+    final currentVersion = active?.manifest.bundleVersion;
+    try {
+      final package = await source.fetchLatest(currentVersion: currentVersion);
+      if (package == null) {
+        return JuiBundleUpdateResult(
+          status: JuiBundleUpdateStatus.unavailable,
+          activeVersion: currentVersion,
+          message: 'No bundle is currently available.',
+        );
+      }
+      final candidate = validator.validate(package);
+      if (currentVersion != null &&
+          _compareVersions(candidate.manifest.bundleVersion, currentVersion) <=
+              0) {
+        return JuiBundleUpdateResult(
+          status: JuiBundleUpdateStatus.upToDate,
+          activeVersion: currentVersion,
+        );
+      }
+      try {
+        await store.stage(candidate);
+        await store.activateStaged(
+          expectedCurrentVersion: currentVersion ?? '',
+        );
+      } catch (_) {
+        await store.discardStaged();
+        rethrow;
+      }
+      return JuiBundleUpdateResult(
+        status: JuiBundleUpdateStatus.updated,
+        activeVersion: candidate.manifest.bundleVersion,
+      );
+    } on Object catch (error) {
+      return JuiBundleUpdateResult(
+        status: JuiBundleUpdateStatus.rejected,
+        activeVersion: currentVersion,
+        message: error.toString(),
+      );
+    }
+  }
+}
+
+bool _isSafeBundlePath(String path) {
+  if (path.isEmpty ||
+      path.startsWith('/') ||
+      path.startsWith(String.fromCharCode(92)) ||
+      path.contains(String.fromCharCode(92)) ||
+      path.contains(':') ||
+      path.split('/').any((part) => part.isEmpty || part == '.' || part == '..')) {
+    return false;
+  }
+  return true;
+}
+
+int _compareVersions(String left, String right) {
+  String withoutBuild(String value) => value.split('+').first;
+  List<int> parts(String value) => withoutBuild(value)
+      .split('-')
+      .first
+      .split('.')
+      .map(int.parse)
+      .toList(growable: false);
+  String? prerelease(String value) {
+    final parts = withoutBuild(value).split('-');
+    return parts.length > 1 ? parts.sublist(1).join('-') : null;
+  }
+
+  final a = parts(left);
+  final b = parts(right);
+  for (var i = 0; i < 3; i++) {
+    final comparison = a[i].compareTo(b[i]);
+    if (comparison != 0) return comparison;
+  }
+  final aPre = prerelease(left);
+  final bPre = prerelease(right);
+  if (aPre == null && bPre == null) return 0;
+  if (aPre == null) return 1;
+  if (bPre == null) return -1;
+  return aPre.compareTo(bPre);
+}
+).hasMatch(directory)) {
+      throw ArgumentError('GitHub bundle source coordinates are invalid.');
+    }
+  }
+
+  final String owner;
+  final String repository;
+  final String ref;
+  final String directory;
+  final http.Client _client;
+  final bool _ownsClient;
+
+  @override
+  Future<JuiBundlePackage?> fetchLatest({String? currentVersion}) async {
+    final manifestUri = _uri('manifest.json');
+    final manifestResponse = await _client.get(
+      manifestUri,
+      headers: const {'Accept': 'application/json'},
+    );
+    if (manifestResponse.statusCode == 404) return null;
+    if (manifestResponse.statusCode != 200) {
+      throw JuiBundleException(
+        'GitHub manifest request failed with HTTP ${manifestResponse.statusCode}.',
+      );
+    }
+
+    if (manifestResponse.bodyBytes.length > 64 * 1024) {
+      throw const JuiBundleException('GitHub bundle manifest exceeds 64 KiB.');
+    }
+    final Object? manifestJson;
+    try {
+      manifestJson = jsonDecode(utf8.decode(manifestResponse.bodyBytes));
+    } on FormatException {
+      throw const JuiBundleException('GitHub bundle manifest is not valid JSON.');
+    }
+    final manifest = JuiBundleManifest.fromJson(manifestJson);
+    final files = <String, Uint8List>{};
+    for (final file in manifest.files) {
+      final response = await _client.get(_uri(file.path));
+      if (response.statusCode != 200) {
+        throw JuiBundleException(
+          'GitHub bundle file request failed for ${file.path} '
+          'with HTTP ${response.statusCode}.',
+        );
+      }
+      if (response.bodyBytes.isEmpty ||
+          response.bodyBytes.length > juiMaximumFileBytes) {
+        throw JuiBundleException('Invalid downloaded file size: ${file.path}.');
+      }
+      files[file.path] = Uint8List.fromList(response.bodyBytes);
+    }
+    return JuiBundlePackage(manifestJson: manifestJson, files: files);
+  }
+
+  Uri _uri(String path) => Uri.https(
+    'raw.githubusercontent.com',
+    '/$owner/$repository/$ref/$directory/$path',
+  );
+
+  void close() {
+    if (_ownsClient) _client.close();
+  }
+}
+
+enum JuiBundleUpdateStatus { upToDate, updated, unavailable, rejected }
+
+class JuiBundleUpdateResult {
+  const JuiBundleUpdateResult({
+    required this.status,
+    this.activeVersion,
+    this.message,
+  });
+
+  final JuiBundleUpdateStatus status;
+  final String? activeVersion;
+  final String? message;
+}
+
+class JuiBundleUpdateManager {
+  const JuiBundleUpdateManager({
+    required this.source,
+    required this.store,
+    required this.validator,
+  });
+
+  final JuiBundleSource source;
+  final JuiBundleStore store;
+  final JuiBundleValidator validator;
+
+  Future<JuiBundleUpdateResult> checkForUpdates() async {
+    final active = await store.readActive();
+    final currentVersion = active?.manifest.bundleVersion;
+    try {
+      final package = await source.fetchLatest(currentVersion: currentVersion);
+      if (package == null) {
+        return JuiBundleUpdateResult(
+          status: JuiBundleUpdateStatus.unavailable,
+          activeVersion: currentVersion,
+          message: 'No bundle is currently available.',
+        );
+      }
+      final candidate = validator.validate(package);
+      if (currentVersion != null &&
+          _compareVersions(candidate.manifest.bundleVersion, currentVersion) <=
+              0) {
+        return JuiBundleUpdateResult(
+          status: JuiBundleUpdateStatus.upToDate,
+          activeVersion: currentVersion,
+        );
+      }
+      try {
+        await store.stage(candidate);
+        await store.activateStaged(
+          expectedCurrentVersion: currentVersion ?? '',
+        );
+      } catch (_) {
+        await store.discardStaged();
+        rethrow;
+      }
+      return JuiBundleUpdateResult(
+        status: JuiBundleUpdateStatus.updated,
+        activeVersion: candidate.manifest.bundleVersion,
+      );
+    } on Object catch (error) {
+      return JuiBundleUpdateResult(
+        status: JuiBundleUpdateStatus.rejected,
+        activeVersion: currentVersion,
+        message: error.toString(),
+      );
+    }
+  }
+}
+
+bool _isSafeBundlePath(String path) {
+  if (path.isEmpty ||
+      path.startsWith('/') ||
+      path.startsWith(String.fromCharCode(92)) ||
+      path.contains(String.fromCharCode(92)) ||
+      path.contains(':') ||
+      path.split('/').any((part) => part.isEmpty || part == '.' || part == '..')) {
+    return false;
+  }
+  return true;
+}
+
+int _compareVersions(String left, String right) {
+  String withoutBuild(String value) => value.split('+').first;
+  List<int> parts(String value) => withoutBuild(value)
+      .split('-')
+      .first
+      .split('.')
+      .map(int.parse)
+      .toList(growable: false);
+  String? prerelease(String value) {
+    final parts = withoutBuild(value).split('-');
+    return parts.length > 1 ? parts.sublist(1).join('-') : null;
+  }
+
+  final a = parts(left);
+  final b = parts(right);
+  for (var i = 0; i < 3; i++) {
+    final comparison = a[i].compareTo(b[i]);
+    if (comparison != 0) return comparison;
+  }
+  final aPre = prerelease(left);
+  final bPre = prerelease(right);
+  if (aPre == null && bPre == null) return 0;
+  if (aPre == null) return 1;
+  if (bPre == null) return -1;
+  return aPre.compareTo(bPre);
+}
+)
+        .hasMatch(version)) {
+      throw const JuiBundleException('Active bundle version is invalid.');
+    }
+    final directory = Directory(_join([_bundlesDirectory.path, version]));
+    final manifestFile = File(_join([directory.path, 'manifest.json']));
+    if (!await manifestFile.exists()) {
+      throw const JuiBundleException('Active bundle manifest is missing.');
+    }
+    final manifestJson = jsonDecode(await manifestFile.readAsString());
+    final manifest = JuiBundleManifest.fromJson(manifestJson);
+    if (manifest.bundleVersion != version) {
+      throw const JuiBundleException('Active bundle pointer does not match its manifest.');
+    }
+    final files = <String, Uint8List>{};
+    for (final entry in manifest.files) {
+      final file = File(_join([directory.path, entry.path]));
+      if (!await file.exists()) {
+        throw JuiBundleException('Active bundle file is missing: ${entry.path}.');
+      }
+      files[entry.path] = await file.readAsBytes();
+    }
+    return validator.validate(
+      JuiBundlePackage(manifestJson: manifestJson, files: files),
+    );
+  }
+
+  @override
+  Future<void> stage(JuiValidatedBundle bundle) async {
+    await root.create(recursive: true);
+    if (await _stagingDirectory.exists()) {
+      await _stagingDirectory.delete(recursive: true);
+    }
+    await _stagingDirectory.create(recursive: true);
+    final manifest = File(_join([_stagingDirectory.path, 'manifest.json']));
+    await manifest.writeAsString(
+      jsonEncode(bundle.manifest.toJson()),
+      flush: true,
+    );
+    final files = bundle.files;
+    for (final entry in bundle.manifest.files) {
+      final target = File(_join([_stagingDirectory.path, entry.path]));
+      await target.parent.create(recursive: true);
+      await target.writeAsBytes(files[entry.path]!, flush: true);
+    }
+  }
+
+  @override
+  Future<void> activateStaged({required String expectedCurrentVersion}) async {
+    final current = await readActive();
+    final actualVersion = current?.manifest.bundleVersion ?? '';
+    if (actualVersion != expectedCurrentVersion) {
+      throw StateError(
+        'Active bundle changed during update. Expected '
+        '$expectedCurrentVersion but found $actualVersion.',
+      );
+    }
+    if (!await _stagingDirectory.exists()) {
+      throw const JuiBundleException('No staged bundle is available.');
+    }
+    final manifestFile = File(_join([_stagingDirectory.path, 'manifest.json']));
+    final manifestJson = jsonDecode(await manifestFile.readAsString());
+    final manifest = JuiBundleManifest.fromJson(manifestJson);
+    final target = Directory(_join([_bundlesDirectory.path, manifest.bundleVersion]));
+    await _bundlesDirectory.create(recursive: true);
+    if (await target.exists()) {
+      await target.delete(recursive: true);
+    }
+    await _stagingDirectory.rename(target.path);
+
+    final temporaryPointer = File(_join([root.path, 'active.json.tmp']));
+    await temporaryPointer.writeAsString(
+      jsonEncode({'bundleVersion': manifest.bundleVersion}),
+      flush: true,
+    );
+    await temporaryPointer.rename(_activeFile.path);
+  }
+
+  @override
+  Future<void> discardStaged() async {
+    if (await _stagingDirectory.exists()) {
+      await _stagingDirectory.delete(recursive: true);
+    }
+  }
+
+  String _join(List<String> parts) => parts.join(Platform.pathSeparator);
+}
+
 enum JuiBundleUpdateStatus { upToDate, updated, unavailable, rejected }
 
 class JuiBundleUpdateResult {
