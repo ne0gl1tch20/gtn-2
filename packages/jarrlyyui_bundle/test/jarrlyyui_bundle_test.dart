@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
 import 'package:jarrlyyui_bundle/jarrlyyui_bundle.dart';
 import 'package:test/test.dart';
 
@@ -125,6 +127,65 @@ void main() {
         () => JuiBundleValidator().validate(traversal),
         throwsA(isA<JuiBundleException>()),
       );
+    });
+  });
+
+  group('JuiGitHubBundleSource', () {
+    test('downloads manifest and exact listed files over HTTPS', () async {
+      final bytes = Uint8List.fromList(utf8.encode(source));
+      final manifest = {
+        'schemaVersion': 1,
+        'bundleVersion': '1.0.0',
+        'minimumHostApiVersion': 1,
+        'entryScreen': 'screens/home.jui',
+        'files': [
+          {
+            'path': 'screens/home.jui',
+            'sha256': sha256.convert(bytes).toString(),
+          },
+        ],
+      };
+      final client = MockClient((request) async {
+        if (request.url.path.endsWith('/manifest.json')) {
+          return http.Response(jsonEncode(manifest), 200);
+        }
+        if (request.url.path.endsWith('/screens/home.jui')) {
+          return http.Response.bytes(bytes, 200);
+        }
+        return http.Response('', 404);
+      });
+      final sourceAdapter = JuiGitHubBundleSource(
+        owner: 'example',
+        repository: 'gtn-ui',
+        ref: 'main',
+        directory: 'bundles/stable',
+        client: client,
+      );
+
+      final downloaded = await sourceAdapter.fetchLatest();
+      final validated = JuiBundleValidator().validate(downloaded!);
+
+      expect(validated.entryDocument.id, 'home');
+      expect(validated.manifest.bundleVersion, '1.0.0');
+      expect(
+        validated.files['screens/home.jui'],
+        orderedEquals(bytes),
+      );
+      client.close();
+    });
+
+    test('returns no bundle when the GitHub manifest is missing', () async {
+      final client = MockClient((_) async => http.Response('', 404));
+      final sourceAdapter = JuiGitHubBundleSource(
+        owner: 'example',
+        repository: 'gtn-ui',
+        ref: 'main',
+        directory: 'bundles/stable',
+        client: client,
+      );
+
+      expect(await sourceAdapter.fetchLatest(), isNull);
+      client.close();
     });
   });
 
