@@ -1,6 +1,9 @@
 include: package:flutter_lints/flutter.yaml
 
 analyzer:
+  # The standalone parser package has its own pubspec and CI analysis.
+  exclude:
+    - packages/jarrlyyui_language/**
   language:
     strict-casts: true
     strict-inference: true
