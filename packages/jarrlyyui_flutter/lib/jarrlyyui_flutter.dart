@@ -148,7 +148,9 @@ class JuiRenderer extends StatelessWidget {
 
   Widget _buildInput(JuiNode node) {
     final binding = node.binding;
-    if (binding == null || !writableBindings.contains(binding)) {
+    if (binding == null ||
+        onInputChanged == null ||
+        !writableBindings.contains(binding)) {
       return const SizedBox.shrink();
     }
     final isInteger = node.type == 'integer';
@@ -186,7 +188,8 @@ class JuiRenderer extends StatelessWidget {
     final action = node.action;
     if (action == null) return const SizedBox.shrink();
     final enabledBinding = node.attributes['enabled'] as String?;
-    final enabled = allowedActions.contains(action) &&
+    final enabled = onAction != null &&
+        allowedActions.contains(action) &&
         (enabledBinding == null || values[enabledBinding] == true);
     final child = node.children.isEmpty
         ? Text(_labelFor(node))
