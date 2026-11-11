@@ -220,8 +220,8 @@ void main() {
       'ultra_1', 'ultra_3', 'playtime_1h', 'playtime_10h',
       'frenzy_5', 'frenzy_10',
     ]));
-    expect(unlocked.nebula.toString(), '840');
-    expect(unlocked.nebulaEarned.toString(), '840');
+    expect(unlocked.nebula.toString(), '935');
+    expect(unlocked.nebulaEarned.toString(), '935');
     expect(engine.evaluateAchievements(unlocked), same(unlocked));
   });
 
