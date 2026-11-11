@@ -787,6 +787,7 @@ int _compareVersions(String left, String right) {
     }
     final manifest = JuiBundleManifest.fromJson(manifestJson);
     final files = <String, Uint8List>{};
+    var totalBytes = manifestResponse.bodyBytes.length;
     for (final file in manifest.files) {
       final response = await _client.get(_uri(file.path));
       if (response.statusCode != 200) {
@@ -798,6 +799,10 @@ int _compareVersions(String left, String right) {
       if (response.bodyBytes.isEmpty ||
           response.bodyBytes.length > juiMaximumFileBytes) {
         throw JuiBundleException('Invalid downloaded file size: ${file.path}.');
+      }
+      totalBytes += response.bodyBytes.length;
+      if (totalBytes > juiMaximumBundleBytes) {
+        throw const JuiBundleException('Downloaded bundle exceeds the 16 MiB size limit.');
       }
       files[file.path] = Uint8List.fromList(response.bodyBytes);
     }
