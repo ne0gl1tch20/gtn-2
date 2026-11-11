@@ -1149,27 +1149,70 @@ class _GameHomePageState extends State<GameHomePage>
             (guaranteedGoldenGuess ||
                 Random.secure().nextDouble() <
                     GuessEconomyRules.criticalChance(criticalPrecisionLevel));
+        // GTN1 observes the guess before trait resolution. Adaptive helper
+        // eligibility therefore uses the pre-guess streak, while the profile
+        // observation still records the streak produced by this guess.
+        final expectedNewStreak = isBot
+            ? beforeGuess.currentStreak
+            : correct
+            ? beforeGuess.currentStreak + 1
+            : 0;
+        final adaptiveProfileForDecision = _invisibleTraitEngine.observeGuess(
+          profile: legacySystems.adaptiveTraitProfile,
+          correct: correct,
+          newStreak: expectedNewStreak,
+          reward: BigNumber.fromInt(0),
+        );
+        final adaptiveDecision = _invisibleTraitEngine.evaluate(
+          profile: adaptiveProfileForDecision,
+          prestigeCount:
+              adaptiveProfileForDecision.prestigesObserved >
+                  beforeGuess.prestigeResets
+              ? adaptiveProfileForDecision.prestigesObserved
+              : beforeGuess.prestigeResets,
+          ultraCount:
+              adaptiveProfileForDecision.ultrasObserved >
+                  beforeGuess.ultraResets
+              ? adaptiveProfileForDecision.ultrasObserved
+              : beforeGuess.ultraResets,
+          currentStreak: beforeGuess.currentStreak,
+        );
+        final combinedTraitMultiplier = _invisibleTraitEngine
+            .combinedRewardMultiplier(
+              gameplayTraitMultiplier: traitEffects.correctGuessMultiplier,
+              helperIds: adaptiveDecision.helperIds,
+              bonusCount: adaptiveDecision.bonusIds.length,
+            );
+
+        BigNumber calculateCorrectGuessReward(
+          double traitMultiplier,
+        ) => GuessEconomyRules.correctGuessReward(
+          rangeMaximum: _game.maximum,
+          currentStreak: beforeGuess.currentStreak,
+          rewardMultiplierLevel: beforeGuess.upgrades['reward_multiplier'] ?? 0,
+          // talent_reward_1 is a Prestige talent, not the legacy shop/upgrade flag
+          // consumed by GameEngine's base reward calculation. GTN1 applies its
+          // +50% once in applyTalentBonuses after the raw reward is recorded.
+          hasTalentReward: false,
+          isCritical: isCritical,
+          difficultyId: _settings.difficultyId,
+          mutatorMultiplier: _legacySystemsEngine.mutatorRewardMultiplier(
+            legacySystems,
+          ),
+          traitMultiplier: BigNumber.parse(traitMultiplier.toStringAsFixed(2)),
+          permanentMoneyMultiplier: GuessEconomyRules.moneyEarningMultiplier(
+            beforeGuess,
+          ),
+        );
+
+        // Keep the unmodified base reward for the adaptive profile, matching
+        // GTN1's observation before TraitGameplayRules applies its combined
+        // gameplay-trait and adaptive multiplier.
+        final baseRewardForAdaptiveProfile = correct
+            ? calculateCorrectGuessReward(1.0)
+            : BigNumber.fromInt(0);
         final rawReward = correct
-            ? GuessEconomyRules.correctGuessReward(
-                rangeMaximum: _game.maximum,
-                currentStreak: beforeGuess.currentStreak,
-                rewardMultiplierLevel:
-                    beforeGuess.upgrades['reward_multiplier'] ?? 0,
-                // talent_reward_1 is a Prestige talent, not the legacy shop/upgrade flag
-                // consumed by GameEngine's base reward calculation. GTN1 applies its
-                // +50% once in applyTalentBonuses after the raw reward is recorded.
-                hasTalentReward: false,
-                isCritical: isCritical,
-                difficultyId: _settings.difficultyId,
-                mutatorMultiplier: _legacySystemsEngine.mutatorRewardMultiplier(
-                  legacySystems,
-                ),
-                traitMultiplier: BigNumber.parse(
-                  traitEffects.correctGuessMultiplier.toStringAsFixed(2),
-                ),
-                permanentMoneyMultiplier:
-                    GuessEconomyRules.moneyEarningMultiplier(beforeGuess),
-              )
+            ? calculateCorrectGuessReward(combinedTraitMultiplier)
             : null;
         var afterReward = _progressionEngine.recordGuess(
           beforeGuess,
@@ -1181,20 +1224,7 @@ class _GameHomePageState extends State<GameHomePage>
           profile: legacySystems.adaptiveTraitProfile,
           correct: correct,
           newStreak: afterReward.currentStreak,
-          reward: correct
-              ? afterReward.money - beforeGuess.money
-              : BigNumber.fromInt(0),
-        );
-        final adaptiveDecision = _invisibleTraitEngine.evaluate(
-          profile: adaptiveProfile,
-          prestigeCount:
-              adaptiveProfile.prestigesObserved > beforeGuess.prestigeResets
-              ? adaptiveProfile.prestigesObserved
-              : beforeGuess.prestigeResets,
-          ultraCount: adaptiveProfile.ultrasObserved > beforeGuess.ultraResets
-              ? adaptiveProfile.ultrasObserved
-              : beforeGuess.ultraResets,
-          currentStreak: afterReward.currentStreak,
+          reward: baseRewardForAdaptiveProfile,
         );
         rangeScoutActive =
             rangeScoutActive ||
@@ -1221,19 +1251,6 @@ class _GameHomePageState extends State<GameHomePage>
             nebulaBoostOwned:
                 (beforeGuess.nebulaItems['nebula_boost'] ?? 0) > 0,
           );
-          final adaptiveBonusRate = _invisibleTraitEngine.progressionBonusRate(
-            helperIds: adaptiveDecision.helperIds,
-            bonusCount: adaptiveDecision.bonusIds.length,
-          );
-          if (adaptiveBonusRate > 0) {
-            final earned = afterReward.money - beforeGuess.money;
-            final adaptiveBonus =
-                earned * BigNumber.parse(adaptiveBonusRate.toStringAsFixed(2));
-            afterReward = afterReward.copyWith(
-              money: afterReward.money + adaptiveBonus,
-              moneyEarned: afterReward.moneyEarned + adaptiveBonus,
-            );
-          }
         } else {
           final difficultyPenalty =
               beforeGuess.money *

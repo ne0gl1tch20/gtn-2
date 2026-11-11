@@ -144,6 +144,45 @@ void main() {
     expect(engine.progressionBonusRate(helperIds: const {}, bonusCount: -1), 0);
   });
 
+  test('momentum eligibility uses the streak before the current guess', () {
+    const profile = AdaptiveTraitProfile(totalGuessesObserved: 8);
+    final belowThreshold = engine.evaluate(
+      profile: profile,
+      prestigeCount: 0,
+      ultraCount: 0,
+      currentStreak: 4,
+    );
+    final atThreshold = engine.evaluate(
+      profile: profile,
+      prestigeCount: 0,
+      ultraCount: 0,
+      currentStreak: 5,
+    );
+
+    expect(
+      belowThreshold.helperIds,
+      isNot(contains(InvisibleTraitEngine.helperMomentum)),
+    );
+    expect(
+      atThreshold.helperIds,
+      contains(InvisibleTraitEngine.helperMomentum),
+    );
+  });
+
+  test('gameplay and adaptive reward bonuses add instead of compound', () {
+    final multiplier = engine.combinedRewardMultiplier(
+      gameplayTraitMultiplier: 1.20,
+      helperIds: const {
+        InvisibleTraitEngine.helperComeback,
+        InvisibleTraitEngine.helperMomentum,
+      },
+      bonusCount: 3,
+    );
+
+    // 20% gameplay trait + 5% comeback + 3% momentum + 30% milestones.
+    expect(multiplier, closeTo(1.58, 0.000001));
+  });
+
   test('upgrade purchases increment the persistent profile counter', () {
     final next = engine.observeUpgradePurchase(const AdaptiveTraitProfile());
     expect(next.upgradesPurchasedObserved, 1);

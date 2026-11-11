@@ -176,6 +176,25 @@ class InvisibleTraitEngine {
         (bonusCount < 0 ? 0 : bonusCount) * 0.10;
   }
 
+  /// Combines gameplay-trait and adaptive bonuses additively, as in GTN1's
+  /// single TraitGameplayRules multiplier. Applying the adaptive rate to an
+  /// already trait-adjusted reward would incorrectly compound the percentages.
+  double combinedRewardMultiplier({
+    required double gameplayTraitMultiplier,
+    required Set<String> helperIds,
+    required int bonusCount,
+  }) {
+    if (!gameplayTraitMultiplier.isFinite || gameplayTraitMultiplier < 1) {
+      throw ArgumentError.value(
+        gameplayTraitMultiplier,
+        'gameplayTraitMultiplier',
+        'Must be finite and at least one.',
+      );
+    }
+    return gameplayTraitMultiplier +
+        progressionBonusRate(helperIds: helperIds, bonusCount: bonusCount);
+  }
+
   AdaptiveTraitProfile markHelperUses(
     AdaptiveTraitProfile profile,
     Set<String> helperIds,
