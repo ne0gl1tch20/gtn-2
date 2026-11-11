@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gtn_2/core/numbers/big_number.dart';
+import 'package:gtn_2/core/progression/achievement_catalog.dart';
 import 'package:gtn_2/core/progression/progression_calculator.dart';
 import 'package:gtn_2/core/progression/progression_engine.dart';
 import 'package:gtn_2/core/progression/progression_state.dart';
@@ -199,4 +200,55 @@ void main() {
     expect(result.nebula.toString(), '30');
     expect(result.nebulaEarned.toString(), '30');
   });
+
+  test('GTN1 achievement catalog unlocks exact milestones and pays once', () {
+    final before = ProgressionState.initial.copyWith(
+      correctGuesses: 50,
+      totalGuesses: 50,
+      bestStreak: 10,
+      currentStreak: 10,
+      money: BigNumber.fromInt(10000000),
+      prestigeResets: 5,
+      ultraResets: 3,
+      playtimeSeconds: 36000,
+    );
+    final unlocked = engine.evaluateAchievements(before);
+    expect(AchievementCatalog.all, hasLength(27));
+    expect(unlocked.achievements, containsAll([
+      'correct_10', 'correct_50', 'streak_5', 'streak_10',
+      'millionaire', 'ten_millionaire', 'prestige_1', 'prestige_5',
+      'ultra_1', 'ultra_3', 'playtime_1h', 'playtime_10h',
+      'frenzy_5', 'frenzy_10',
+    ]));
+    expect(unlocked.nebula.toString(), '935');
+    expect(unlocked.nebulaEarned.toString(), '935');
+    expect(engine.evaluateAchievements(unlocked), same(unlocked));
+  });
+
+  test('achievement rewards apply GTN1 Nebula multipliers exactly once', () {
+    final state = ProgressionState.initial.copyWith(
+      correctGuesses: 10,
+      totalGuesses: 10,
+      ultraUpgrades: const {'ultra_nebula_boost': 2},
+      nebulaItems: const {'nebula_boost': 1},
+    );
+    final unlocked = engine.evaluateAchievements(state);
+    expect(unlocked.achievements, contains('correct_10'));
+    expect(unlocked.nebula.toString(), '60');
+    expect(unlocked.nebulaEarned.toString(), '60');
+    expect(engine.evaluateAchievements(unlocked).nebula.toString(), '60');
+  });
+
+  test('achievement evaluation respects exact thresholds', () {
+    final below = ProgressionState.initial.copyWith(
+      correctGuesses: 9,
+      totalGuesses: 9,
+      bestStreak: 4,
+      money: BigNumber.fromInt(999999),
+      playtimeSeconds: 3599,
+    );
+    expect(engine.evaluateAchievements(below).achievements, isEmpty);
+    expect(engine.evaluateAchievements(below).nebula.toString(), '0');
+  });
+
 }
