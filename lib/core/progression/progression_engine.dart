@@ -117,6 +117,7 @@ class ProgressionEngine {
       ..[definition.id] = level + 1;
     return state.copyWith(
       money: state.money - cost,
+      moneySpent: state.moneySpent + cost,
       upgrades: Map.unmodifiable(levels),
     );
   }
