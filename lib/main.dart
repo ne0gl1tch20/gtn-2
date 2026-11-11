@@ -142,6 +142,7 @@ class _GameHomePageState extends State<GameHomePage>
       const InvisibleTraitEngine();
   final BotTeam _botTeam = BotTeam();
   Timer? _autoClickerTimer;
+  Timer? _playtimeTimer;
   bool _autoClickerTickRunning = false;
   bool _resumeCatchUpPending = false;
   ProgressionState _progression = ProgressionState.initial;
@@ -165,10 +166,29 @@ class _GameHomePageState extends State<GameHomePage>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       unawaited(_resumeAutoClicker());
+      _startPlaytimeTimer();
     } else {
       _autoClickerTimer?.cancel();
       _autoClickerTimer = null;
+      _playtimeTimer?.cancel();
+      _playtimeTimer = null;
     }
+  }
+
+  void _startPlaytimeTimer() {
+    if (!mounted || _isLoading || _playtimeTimer?.isActive == true) return;
+    _playtimeTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (!mounted || _isLoading) return;
+      final next = _progression.copyWith(
+        playtimeSeconds: _progression.playtimeSeconds + 1,
+      );
+      final evaluated = _progressionEngine.evaluateAchievements(next);
+      final unlocked = evaluated.achievements.length > _progression.achievements.length;
+      setState(() => _progression = evaluated);
+      if (unlocked || evaluated.playtimeSeconds % 30 == 0) {
+        unawaited(_persist());
+      }
+    });
   }
 
   Future<void> _resumeAutoClicker() async {
@@ -316,7 +336,10 @@ class _GameHomePageState extends State<GameHomePage>
         });
       }
     } finally {
-      if (mounted) setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+        _startPlaytimeTimer();
+      }
     }
     _botTeam.reset(_game.minimum, _game.maximum);
     if (shouldPersistOfflineEarnings) await _persist();
@@ -324,6 +347,11 @@ class _GameHomePageState extends State<GameHomePage>
   }
 
   Future<void> _persist() async {
+    final evaluated = _progressionEngine.evaluateAchievements(_progression);
+    if (evaluated != _progression) {
+      _progression = evaluated;
+      if (mounted) setState(() {});
+    }
     try {
       final storage = await _storage;
       _progression = _progression.copyWith(
@@ -1404,6 +1432,7 @@ class _GameHomePageState extends State<GameHomePage>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _autoClickerTimer?.cancel();
+    _playtimeTimer?.cancel();
     _controller.dispose();
     super.dispose();
   }
