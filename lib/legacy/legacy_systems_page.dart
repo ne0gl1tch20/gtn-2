@@ -15,6 +15,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../core/legacy/legacy_systems_engine.dart';
 import '../core/legacy/legacy_systems_state.dart';
 import '../core/legacy/trait_catalog_repository.dart';
+import '../core/music/music_playback_policy.dart';
 import '../core/numbers/big_number.dart';
 import '../core/progression/progression_state.dart';
 import '../data/updates/update_checker.dart';
@@ -1003,19 +1004,32 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
   }
 
   Future<void> _toggleMusicPlayback() async {
-    if (_isPlaying) {
-      await _audioPlayer.pause();
-      if (mounted) setState(() => _isPlaying = false);
-      return;
-    }
-    final current = _systems.currentTrackId;
-    if (current != null && File(current).existsSync()) {
-      await _audioPlayer.resume();
-      if (mounted) setState(() => _isPlaying = true);
-    } else if (_systems.musicQueue.isNotEmpty) {
-      await _playTrack(_systems.musicQueue.first);
-    } else {
-      await _importMusicTracks();
+    final action = MusicPlaybackPolicy.resolve(
+      isPlaying: _isPlaying,
+      playerIsPaused: _audioPlayer.state == PlayerState.paused,
+      currentTrackExists:
+          _systems.currentTrackId != null &&
+          File(_systems.currentTrackId!).existsSync(),
+      hasQueuedTracks: _systems.musicQueue.isNotEmpty,
+    );
+    switch (action) {
+      case MusicPlaybackAction.pause:
+        await _audioPlayer.pause();
+        if (mounted) setState(() => _isPlaying = false);
+        break;
+      case MusicPlaybackAction.resume:
+        await _audioPlayer.resume();
+        if (mounted) setState(() => _isPlaying = true);
+        break;
+      case MusicPlaybackAction.replayCurrent:
+        await _playTrack(_systems.currentTrackId!);
+        break;
+      case MusicPlaybackAction.playQueue:
+        await _playTrack(_systems.musicQueue.first);
+        break;
+      case MusicPlaybackAction.importTracks:
+        await _importMusicTracks();
+        break;
     }
   }
 
