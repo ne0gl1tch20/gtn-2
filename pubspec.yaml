@@ -19,6 +19,7 @@ dependencies:
   flutter_svg: ^2.2.0
   material_3_expressive: 1.2.0
   material_ui: ^1.8.0
+  lua_dardo: ^0.0.5
 
 dev_dependencies:
   flutter_test:
@@ -32,6 +33,7 @@ flutter:
     - assets/game/
     - assets/fonts/
     - assets/gtn1/
+    - assets/scripts/
     - assets/changelogs.md
 
   fonts:
