@@ -337,12 +337,7 @@ class JuiParser {
           JuiDiagnostic(
             code: 'JUI050_DOCUMENT_TOO_LARGE',
             message: 'Document exceeds the configured size limit.',
-            span: const JuiSourceSpan(
-              offset: 0,
-              length: 0,
-              line: 1,
-              column: 1,
-            ),
+            span: const JuiSourceSpan(offset: 0, length: 0, line: 1, column: 1),
           ),
         ],
       );
@@ -364,7 +359,9 @@ class JuiParser {
     }
     final screenId = _consumeString('Expected a quoted screen ID.');
     _consumeIdentifier('version', 'Expected "version" after screen ID.');
-    final versionToken = _consumeNumber('Expected an integer language version.');
+    final versionToken = _consumeNumber(
+      'Expected an integer language version.',
+    );
     final versionValue = versionToken?.value;
     final version = versionValue is int ? versionValue : -1;
     if (version != 1) {
@@ -386,11 +383,7 @@ class JuiParser {
     final children = _parseChildren(depth: 0);
     final end = _currentToken.span;
     if (!_match(_TokenKind.rightBrace)) {
-      _error(
-        'JUI002_UNCLOSED_BLOCK',
-        'Screen block was not closed.',
-        start,
-      );
+      _error('JUI002_UNCLOSED_BLOCK', 'Screen block was not closed.', start);
     }
     if (!_match(_TokenKind.eof)) {
       _error(
@@ -432,11 +425,7 @@ class JuiParser {
   JuiNode? _parseNode({required int depth}) {
     final token = _currentToken;
     if (token.kind != _TokenKind.identifier) {
-      _error(
-        'JUI001_UNEXPECTED_TOKEN',
-        'Expected a UI node name.',
-        token.span,
-      );
+      _error('JUI001_UNEXPECTED_TOKEN', 'Expected a UI node name.', token.span);
       _advance();
       return null;
     }
@@ -515,7 +504,7 @@ class JuiParser {
         !_attributeNames.contains(_currentToken.lexeme)) {
       _error(
         'JUI012_UNKNOWN_ATTRIBUTE',
-        'Unknown attribute or node token "' + _currentToken.lexeme + '".',
+        'Unknown attribute or node token "${_currentToken.lexeme}".',
         _currentToken.span,
       );
       _advance();
@@ -527,7 +516,8 @@ class JuiParser {
       children: children,
       span: JuiSourceSpan(
         offset: token.span.offset,
-        length: _previousToken.span.offset +
+        length:
+            _previousToken.span.offset +
             _previousToken.span.length -
             token.span.offset,
         line: token.span.line,
@@ -590,7 +580,7 @@ class JuiParser {
       if (!allowed.contains(attribute)) {
         _error(
           'JUI012_UNKNOWN_ATTRIBUTE',
-          'Attribute "$attribute" is not valid on "' + node.kind + '".',
+          'Attribute "$attribute" is not valid on "${node.kind}".',
           node.span,
         );
       }
@@ -618,7 +608,7 @@ class JuiParser {
           !const {'integer', 'number', 'text', 'boolean'}.contains(node.type)) {
         _error(
           'JUI023_INVALID_INPUT_TYPE',
-          'Unsupported input type "' + node.type! + '".',
+          'Unsupported input type "${node.type!}".',
           node.span,
         );
       }
@@ -747,9 +737,7 @@ class JuiParser {
   }
 
   void _error(String code, String message, JuiSourceSpan span) {
-    _diagnostics.add(
-      JuiDiagnostic(code: code, message: message, span: span),
-    );
+    _diagnostics.add(JuiDiagnostic(code: code, message: message, span: span));
   }
 
   JuiParseResult _failure() =>

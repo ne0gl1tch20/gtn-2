@@ -171,9 +171,8 @@ screen "sample.partial" version 1 {
     });
 
     test('enforces source size and nesting limits', () {
-      final tooLarge = JuiParser(maxDocumentCharacters: 10).parse(
-        'screen "sample" version 1 {}',
-      );
+      final tooLarge = JuiParser(maxDocumentCharacters: 10)
+          .parse('screen "sample" version 1 {}');
       expect(
         tooLarge.diagnostics.map((diagnostic) => diagnostic.code),
         contains('JUI050_DOCUMENT_TOO_LARGE'),
