@@ -114,18 +114,15 @@ void main() {
     );
     final value = result.value as Map<String, Object?>;
     expect(value['trigger'], isA<bool>());
-    expect(
-      {
-        'CASH_BURST',
-        'NEBULA_RAIN',
-        'JACKPOT',
-        'STREAK_SURGE',
-        'RANGE_SHUFFLE',
-        'TAX_REFUND',
-        'COSMIC_GIFT',
-      },
-      contains(value['type']),
-    );
+    expect({
+      'CASH_BURST',
+      'NEBULA_RAIN',
+      'JACKPOT',
+      'STREAK_SURGE',
+      'RANGE_SHUFFLE',
+      'TAX_REFUND',
+      'COSMIC_GIFT',
+    }, contains(value['type']));
   });
 
   test('bundled seasonal event catalog returns versioned data', () async {
@@ -159,30 +156,32 @@ void main() {
     expect(value['correct_option'], 2);
   });
 
-  test('bundled invisible trait selector returns helper and bonus IDs', () async {
-    final source = await rootBundle.loadString(
-      'assets/scripts/traits/invisible_traits.lua',
-    );
-    final result = await sandbox.execute(
-      scriptId: 'invisible_traits',
-      source: source,
-      input: const {
-        'failed_guesses': '6',
-        'correct_guesses': '10',
-        'long_streaks_observed': '1',
-        'current_streak': '5',
-        'total_guesses': '20',
-        'accuracy_score': '0.4',
-        'prestige_count': '1',
-        'ultra_count': '0',
-      },
-    );
-    final value = result.value as Map<String, Object?>;
-    expect(value['helpers'], contains('mistake_insurance'));
-    expect(value['helpers'], contains('range_scout'));
-    expect(value['bonuses'], contains('first_prestige_bonus'));
-  });
-
+  test(
+    'bundled invisible trait selector returns helper and bonus IDs',
+    () async {
+      final source = await rootBundle.loadString(
+        'assets/scripts/traits/invisible_traits.lua',
+      );
+      final result = await sandbox.execute(
+        scriptId: 'invisible_traits',
+        source: source,
+        input: const {
+          'failed_guesses': '6',
+          'correct_guesses': '10',
+          'long_streaks_observed': '1',
+          'current_streak': '5',
+          'total_guesses': '20',
+          'accuracy_score': '0.4',
+          'prestige_count': '1',
+          'ultra_count': '0',
+        },
+      );
+      final value = result.value as Map<String, Object?>;
+      expect(value['helpers'], contains('mistake_insurance'));
+      expect(value['helpers'], contains('range_scout'));
+      expect(value['bonuses'], contains('first_prestige_bonus'));
+    },
+  );
 
   test('caps individual returned string values', () async {
     await expectLater(
@@ -193,5 +192,4 @@ void main() {
       throwsA(isA<LuaScriptException>()),
     );
   });
-
 }
