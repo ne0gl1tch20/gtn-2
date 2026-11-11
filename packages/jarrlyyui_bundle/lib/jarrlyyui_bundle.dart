@@ -73,7 +73,8 @@ class JuiBundleManifest {
         !_isSafeBundlePath(entryScreen) ||
         !entryScreen.endsWith('.jui') ||
         rawFiles is! List ||
-        rawFiles.isEmpty) {
+        rawFiles.isEmpty ||
+        rawFiles.length > 256) {
       throw const JuiBundleException('Unsupported or malformed bundle manifest.');
     }
     final files = rawFiles.map(JuiBundleFile.fromJson).toList();
@@ -146,8 +147,9 @@ class JuiBundleValidator {
         'this app supports $hostApiVersion.',
       );
     }
+    final bundleFiles = bundle.files;
     final expectedPaths = manifest.files.map((file) => file.path).toSet();
-    final actualPaths = bundle.files.keys.toSet();
+    final actualPaths = bundleFiles.keys.toSet();
     if (actualPaths.difference(expectedPaths).isNotEmpty ||
         expectedPaths.difference(actualPaths).isNotEmpty) {
       throw const JuiBundleException(
@@ -159,7 +161,7 @@ class JuiBundleValidator {
     final validatedFiles = <String, Uint8List>{};
     final screens = <String, JuiDocument>{};
     for (final entry in manifest.files) {
-      final bytes = bundle.files[entry.path]!;
+      final bytes = bundleFiles[entry.path]!;
       if (bytes.isEmpty || bytes.length > juiMaximumFileBytes) {
         throw JuiBundleException('Invalid file size: ${entry.path}.');
       }
@@ -189,6 +191,21 @@ class JuiBundleValidator {
     }
     if (!screens.containsKey(manifest.entryScreen)) {
       throw const JuiBundleException('Entry screen was not parsed.');
+    }
+    void validateAssets(JuiNode node) {
+      final asset = node.asset;
+      if (asset != null && !validatedFiles.containsKey(asset)) {
+        throw JuiBundleException('Screen references missing asset: $asset.');
+      }
+      for (final child in node.children) {
+        validateAssets(child);
+      }
+    }
+
+    for (final screen in screens.values) {
+      for (final node in screen.children) {
+        validateAssets(node);
+      }
     }
     final ids = screens.values.map((screen) => screen.id).toSet();
     if (ids.length != screens.length) {
@@ -702,6 +719,9 @@ int _compareVersions(String left, String right) {
       );
     }
 
+    if (manifestResponse.bodyBytes.length > 64 * 1024) {
+      throw const JuiBundleException('GitHub bundle manifest exceeds 64 KiB.');
+    }
     final Object? manifestJson;
     try {
       manifestJson = jsonDecode(utf8.decode(manifestResponse.bodyBytes));
