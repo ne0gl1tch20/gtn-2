@@ -963,6 +963,10 @@ class LegacySystemsEngine {
     }
     final hasInsurance = activeIds.contains('mistake_insurance');
     final highRisk = systems.selectedTraitArms['risk_reward'] == 'high_risk';
+    final cosmeticBadgeTraitIds = active
+        .where((trait) => trait.effect == 'COSMETIC_BADGE')
+        .map((trait) => trait.id)
+        .toSet();
     return TraitEffectSummary(
       xpMultiplier: (1 + xpCount * 0.05).clamp(1.0, 2.0).toDouble(),
       nebulaBonusPerClaim: nebulaCount.clamp(0, 100).toInt(),
@@ -989,6 +993,7 @@ class LegacySystemsEngine {
             )
             .map((trait) => trait.id),
       ),
+      cosmeticBadgeTraitIds: Set.unmodifiable(cosmeticBadgeTraitIds),
     );
   }
 
