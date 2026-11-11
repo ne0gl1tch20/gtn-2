@@ -91,7 +91,11 @@ class JuiBundleManifest {
     }
     final files = rawFiles.map(JuiBundleFile.fromJson).toList();
     final paths = files.map((file) => file.path).toSet();
+    final caseFoldedPaths = files
+        .map((file) => file.path.toLowerCase())
+        .toSet();
     if (paths.length != files.length ||
+        caseFoldedPaths.length != files.length ||
         !paths.contains(entryScreen) ||
         paths.any((path) => path.toLowerCase() == 'manifest.json')) {
       throw const JuiBundleException(
