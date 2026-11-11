@@ -50,7 +50,7 @@ Expected: syntax tree contains an input node with writable binding `guess.text` 
 ~~~jui
 // Root screen
 screen "sample.labels" version 1 {
-  text id "quote" label "A \\"quoted\\" label"
+  text id "quote" label "A \"quoted\" label"
 }
 ~~~
 
@@ -67,7 +67,7 @@ screen "sample.future" version 2 {
 }
 ~~~
 
-Expected diagnostic: `JUI005_UNSUPPORTED_VERSION` at line 1, column 31 (the version literal).
+Expected diagnostic: `JUI005_UNSUPPORTED_VERSION` at line 1, column 32 (the version literal).
 
 ### E002 — unknown node
 
@@ -137,7 +137,7 @@ Expected diagnostic: reject the `+` token. Version 1 has no expression or interp
 
 ~~~jui
 screen "sample.escape" version 1 {
-  text label "bad\\qescape"
+  text label "bad\qescape"
 }
 ~~~
 
