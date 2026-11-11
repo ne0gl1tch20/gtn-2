@@ -9,6 +9,30 @@
       "description": "A quick Lua-powered number challenge.",
       "featured": true,
       "hostApiVersion": 1
+    },
+    {
+      "id": "random_event",
+      "file": "events/random_event.lua",
+      "title": "Random Event Selector",
+      "description": "Selects an approved random event intent for Dart-side validation.",
+      "featured": false,
+      "hostApiVersion": 1
+    },
+    {
+      "id": "seasonal_events",
+      "file": "events/seasonal_events.lua",
+      "title": "Seasonal Event Catalog",
+      "description": "Provides versioned seasonal event definitions for Dart-side validation.",
+      "featured": false,
+      "hostApiVersion": 1
+    },
+    {
+      "id": "invisible_traits",
+      "file": "traits/invisible_traits.lua",
+      "title": "Invisible Trait Selector",
+      "description": "Selects bounded adaptive helper and progression bonus intents.",
+      "featured": false,
+      "hostApiVersion": 1
     }
   ]
 }
