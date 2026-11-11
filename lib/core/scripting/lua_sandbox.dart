@@ -68,7 +68,9 @@ class LuaSandbox {
     }
     for (final entry in input.entries) {
       if (entry.key.length > maxInputKeyCharacters ||
-          !RegExp(r'^[A-Za-z][A-Za-z0-9_]*
+          !RegExp(r'^[A-Za-z][A-Za-z0-9_]*$').hasMatch(entry.key)) {
+        throw const LuaScriptException('Lua input contains an invalid key.');
+      }
       if (entry.value.length > maxInputValueCharacters) {
         throw const LuaScriptException('Lua input value is too long.');
       }
