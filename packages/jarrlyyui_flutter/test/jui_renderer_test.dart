@@ -35,6 +35,8 @@ screen "settings.test" version 1 {
               'settings.music': true,
               'settings.canSave': true,
             },
+            writableBindings: const {'guess.value', 'settings.music'},
+            allowedActions: const {'settings.save'},
             resolveText: (key) => switch (key) {
               'settings.title' => 'Settings',
               'settings.save' => 'Save',
