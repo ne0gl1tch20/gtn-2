@@ -323,11 +323,14 @@ class _JuiBoundInputState extends State<_JuiBoundInput> {
   }
 
   @override
-  Widget build(BuildContext context) => TextField(
-    controller: _controller,
-    keyboardType: widget.keyboardType,
-    onChanged: widget.onChanged,
-    decoration: InputDecoration(labelText: widget.label),
-    semanticsLabel: widget.semanticLabel,
+  Widget build(BuildContext context) => Semantics(
+    label: widget.semanticLabel,
+    textField: true,
+    child: TextField(
+      controller: _controller,
+      keyboardType: widget.keyboardType,
+      onChanged: widget.onChanged,
+      decoration: InputDecoration(labelText: widget.label),
+    ),
   );
 }
