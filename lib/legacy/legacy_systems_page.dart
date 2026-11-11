@@ -284,7 +284,29 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
                     title: Text(visible ? trait.title : 'Undiscovered trait'),
                     subtitle: Text(detail),
                     isThreeLine: visible,
-                    trailing: active ? const Text('ACTIVE') : null,
+                    trailing: active
+                        ? Wrap(
+                            spacing: 4,
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            children: [
+                              const Chip(
+                                label: Text('ACTIVE'),
+                                visualDensity: VisualDensity.compact,
+                              ),
+                              if (traits.cosmeticBadgeTraitIds.contains(
+                                trait.id,
+                              ))
+                                const Chip(
+                                  avatar: Icon(
+                                    Icons.workspace_premium_rounded,
+                                    size: 16,
+                                  ),
+                                  label: Text('BADGE'),
+                                  visualDensity: VisualDensity.compact,
+                                ),
+                            ],
+                          )
+                        : null,
                   );
                 },
               ),
