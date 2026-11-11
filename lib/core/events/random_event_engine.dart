@@ -65,7 +65,6 @@ class RandomEventEngine {
   RandomEventEngine({Random? random}) : _random = random ?? Random.secure();
 
   final Random _random;
-  static final _zero = BigNumber.fromInt(0);
   static final _minimumCashBurst = BigNumber.fromInt(100);
   static final _minimumTaxRefund = BigNumber.fromInt(100);
 
