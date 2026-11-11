@@ -41,7 +41,8 @@ void main() {
           load = load ~= nil,
           require = require ~= nil,
           rawset = rawset ~= nil,
-          setmetatable = setmetatable ~= nil
+          setmetatable = setmetatable ~= nil,
+          tableConcat = table.concat ~= nil
         }
       ''',
       );
@@ -57,6 +58,7 @@ void main() {
         'require': false,
         'rawset': false,
         'setmetatable': false,
+        'tableConcat': false,
       });
     },
   );
