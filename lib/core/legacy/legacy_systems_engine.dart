@@ -95,17 +95,6 @@ class LegacySystemsEngine {
   int rangeMultiplier(LegacySystemsState systems) =>
       systems.activeMutators.contains('mut_hardcore') ? 2 : 1;
 
-  /// Combines visible trait insurance and adaptive insurance without stacking
-  /// two refunds for the same miss, matching GTN1's single refund policy.
-  double missPenaltyRefundRate({
-    required double traitRefundRate,
-    required bool adaptiveInsurance,
-  }) {
-    final boundedTraitRate = traitRefundRate.clamp(0.0, 1.0).toDouble();
-    if (adaptiveInsurance && boundedTraitRate < 0.50) return 0.50;
-    return boundedTraitRate;
-  }
-
   LegacyActionResult buyTalent(
     ProgressionState progression,
     LegacySystemsState systems,
