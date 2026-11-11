@@ -250,7 +250,7 @@ class _GameHomePageState extends State<GameHomePage>
       }
       final source = await rootBundle.loadString(scriptPath);
       final execution = await _luaSandbox.execute(
-        scriptId: 'random_event',
+        scriptId: 'random_event_selector',
         source: source,
       );
       final output = execution.value;
@@ -282,7 +282,7 @@ class _GameHomePageState extends State<GameHomePage>
         _randomEventMessage = message;
       });
       _randomEventBannerTimer?.cancel();
-      _randomEventBannerTimer = Timer(const Duration(seconds: 9), () {
+      _randomEventBannerTimer = Timer(const Duration(seconds: 8), () {
         if (mounted) setState(() => _randomEventMessage = null);
       });
       await _persist();
