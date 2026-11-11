@@ -25,6 +25,8 @@ class JuiRenderer extends StatelessWidget {
     super.key,
     required this.document,
     this.values = const {},
+    this.writableBindings = const {},
+    this.allowedActions = const {},
     this.onInputChanged,
     this.onAction,
     this.resolveText,
@@ -34,6 +36,8 @@ class JuiRenderer extends StatelessWidget {
 
   final JuiDocument document;
   final Map<String, Object?> values;
+  final Set<String> writableBindings;
+  final Set<String> allowedActions;
   final ValueChanged<JuiInputChange>? onInputChanged;
   final ValueChanged<String>? onAction;
   final JuiTextResolver? resolveText;
@@ -144,7 +148,9 @@ class JuiRenderer extends StatelessWidget {
 
   Widget _buildInput(JuiNode node) {
     final binding = node.binding;
-    if (binding == null) return const SizedBox.shrink();
+    if (binding == null || !writableBindings.contains(binding)) {
+      return const SizedBox.shrink();
+    }
     final isInteger = node.type == 'integer';
     final current = values[binding]?.toString() ?? '';
     return _JuiBoundInput(
@@ -164,7 +170,9 @@ class JuiRenderer extends StatelessWidget {
 
   Widget _buildToggle(JuiNode node) {
     final binding = node.binding;
-    if (binding == null) return const SizedBox.shrink();
+    if (binding == null || !writableBindings.contains(binding)) {
+      return const SizedBox.shrink();
+    }
     return SwitchListTile(
       contentPadding: EdgeInsets.zero,
       title: Text(_labelFor(node)),
@@ -178,7 +186,8 @@ class JuiRenderer extends StatelessWidget {
     final action = node.action;
     if (action == null) return const SizedBox.shrink();
     final enabledBinding = node.attributes['enabled'] as String?;
-    final enabled = enabledBinding == null || values[enabledBinding] == true;
+    final enabled = allowedActions.contains(action) &&
+        (enabledBinding == null || values[enabledBinding] == true);
     final child = node.children.isEmpty
         ? Text(_labelFor(node))
         : _buildChildren(context, node.children, Axis.vertical);
