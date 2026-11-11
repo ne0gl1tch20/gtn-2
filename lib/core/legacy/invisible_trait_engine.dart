@@ -163,6 +163,17 @@ class InvisibleTraitEngine {
         .toInt();
   }
 
+  /// Mirrors GTN1 TraitGameplayRules: adaptive helper bonuses and each
+  /// newly earned progression milestone are additive, without a 30% cap.
+  double progressionBonusRate({
+    required Set<String> helperIds,
+    required int bonusCount,
+  }) {
+    final comebackBonus = helperIds.contains(helperComeback) ? 0.05 : 0.0;
+    final momentumBonus = helperIds.contains(helperMomentum) ? 0.03 : 0.0;
+    return comebackBonus + momentumBonus + (bonusCount < 0 ? 0 : bonusCount) * 0.10;
+  }
+
   AdaptiveTraitProfile markHelperUses(
     AdaptiveTraitProfile profile,
     Set<String> helperIds,
