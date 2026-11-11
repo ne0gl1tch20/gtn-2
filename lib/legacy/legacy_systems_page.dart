@@ -1016,15 +1016,20 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
       case MusicPlaybackAction.pause:
         await _audioPlayer.pause();
         if (mounted) setState(() => _isPlaying = false);
+        break;
       case MusicPlaybackAction.resume:
         await _audioPlayer.resume();
         if (mounted) setState(() => _isPlaying = true);
+        break;
       case MusicPlaybackAction.replayCurrent:
         await _playTrack(_systems.currentTrackId!);
+        break;
       case MusicPlaybackAction.playQueue:
         await _playTrack(_systems.musicQueue.first);
+        break;
       case MusicPlaybackAction.importTracks:
         await _importMusicTracks();
+        break;
     }
   }
 
