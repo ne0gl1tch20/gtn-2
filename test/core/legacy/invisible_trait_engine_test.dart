@@ -115,6 +115,40 @@ void main() {
     expect(second.bonusIds, isEmpty);
   });
 
+  test('adaptive reward bonuses match GTN1 without an extra 30% cap', () {
+    expect(
+      engine.progressionBonusRate(helperIds: const {}, bonusCount: 0),
+      0,
+    );
+    expect(
+      engine.progressionBonusRate(
+        helperIds: const {InvisibleTraitEngine.helperComeback},
+        bonusCount: 0,
+      ),
+      0.05,
+    );
+    expect(
+      engine.progressionBonusRate(
+        helperIds: const {
+          InvisibleTraitEngine.helperComeback,
+          InvisibleTraitEngine.helperMomentum,
+        },
+        bonusCount: 0,
+      ),
+      0.08,
+    );
+    expect(
+      engine.progressionBonusRate(
+        helperIds: const {
+          InvisibleTraitEngine.helperComeback,
+          InvisibleTraitEngine.helperMomentum,
+        },
+        bonusCount: 3,
+      ),
+      closeTo(0.38, 0.000001),
+    );
+  });
+
   test('upgrade purchases increment the persistent profile counter', () {
     final next = engine.observeUpgradePurchase(const AdaptiveTraitProfile());
     expect(next.upgradesPurchasedObserved, 1);
