@@ -104,7 +104,7 @@ The grammar is followed by a semantic validation pass. Node-specific attributes 
 | image | none | asset | Sandboxed bundle asset |
 | spacer / divider | none | none | Layout primitives |
 | input | none | id, writable bind, type | Typed user input |
-| button | nodes optional | id, action | Allowlisted intent |
+| button | none | id, action | Allowlisted intent; optional key supplies its label |
 | toggle | none | id, writable bind | Boolean input |
 
 Version 1 deliberately omits loops, conditionals, expressions, custom functions, arbitrary colors, arbitrary font loading, raw platform calls and network access.

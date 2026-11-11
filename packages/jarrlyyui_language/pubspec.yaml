@@ -1,0 +1,9 @@
+name: jarrlyyui_language
+description: Standalone pure-Dart parser and validator for the jarrlyyui declarative UI language.
+version: 0.1.0
+publish_to: none
+environment:
+  sdk: ">=3.6.0 <4.0.0"
+dev_dependencies:
+  lints: ^5.1.0
+  test: ^1.25.8
