@@ -1,0 +1,40 @@
+name: jarrlyyui Flutter Renderer
+
+on:
+  push:
+    branches: [main, 'feature/**']
+    paths:
+      - 'packages/jarrlyyui_flutter/**'
+      - 'packages/jarrlyyui_language/**'
+      - '.github/workflows/jarrlyyui-flutter.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'packages/jarrlyyui_flutter/**'
+      - 'packages/jarrlyyui_language/**'
+      - '.github/workflows/jarrlyyui-flutter.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Install renderer dependencies
+        working-directory: packages/jarrlyyui_flutter
+        run: flutter pub get
+      - name: Check renderer formatting
+        working-directory: packages/jarrlyyui_flutter
+        run: dart format --output=none --set-exit-if-changed .
+      - name: Analyze renderer
+        working-directory: packages/jarrlyyui_flutter
+        run: flutter analyze --fatal-infos
+      - name: Test renderer
+        working-directory: packages/jarrlyyui_flutter
+        run: flutter test
