@@ -145,14 +145,18 @@ No partially downloaded script can become active. Remote scripts cannot add host
 - Developers can diagnose parse, validation and binding errors with file, line and column.
 - GTN2 remains fully usable with the engine disabled.
 
-## 12. Open design decisions
+## 12. Version 1 decisions and remaining questions
 
-Resolve these with a small prototype rather than expanding the language prematurely:
-- Exact grammar: braces/blocks versus XML-like tags.
-- Whether .jui is line-oriented; prefer no expressions in version 1.
-- Resource packaging: single archives or file trees.
-- Signature/trust model for remotely delivered bundles.
-- Declarative animation versus registered Dart components.
-- Standalone Dart package/repository versus workspace package during the prototype.
+The language draft resolves these initial choices:
+- Use the block-based grammar documented in [JARRLYYUI_LANGUAGE_V1.md](JARRLYYUI_LANGUAGE_V1.md), not XML or HTML tags.
+- Keep version 1 expression-free and deterministic.
+- Keep parsing/validation in a pure-Dart package, separate from the Flutter renderer and bundle manager.
+- Use registered Dart components for complex or animated widgets rather than adding an animation language prematurely.
 
-**Recommended starting point:** a standalone Dart package with zero Flutter dependency for parsing and validation, plus a separate Flutter renderer package. This keeps the language testable and prevents the parser from coupling to widget implementation.
+Still to decide during the prototype:
+- Bundle packaging: a single archive or a validated file tree.
+- Trust/signature model for remotely delivered bundles.
+- Exact animation hand-off contract for registered Dart components.
+- Whether the three packages live in one workspace or separate repositories after the prototype proves useful.
+
+These decisions should be made from parser, renderer and update tests rather than speculative language features.
