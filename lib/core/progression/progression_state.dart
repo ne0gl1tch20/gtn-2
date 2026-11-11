@@ -192,6 +192,9 @@ class ProgressionState {
       totalGuesses: total,
       correctGuesses: correct,
       moneyEarned: number('moneyEarned'),
+      moneySpent: optionalNumber('moneySpent'),
+      randomEventsTriggered: optionalCount('randomEventsTriggered'),
+      lastRandomEventId: rawLastRandomEventId as String?,
       currentStreak: streak,
       bestStreak: best,
       playtimeSeconds: json['playtimeSeconds'] == null
