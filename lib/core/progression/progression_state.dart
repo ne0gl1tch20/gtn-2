@@ -18,6 +18,9 @@ class ProgressionState {
     this.totalGuesses = 0,
     this.correctGuesses = 0,
     BigNumber? moneyEarned,
+    BigNumber? moneySpent,
+    this.randomEventsTriggered = 0,
+    this.lastRandomEventId,
     this.currentStreak = 0,
     this.bestStreak = 0,
     this.playtimeSeconds = 0,
@@ -29,6 +32,7 @@ class ProgressionState {
        ultra = ultra ?? BigNumber.fromInt(0),
        nebula = nebula ?? BigNumber.fromInt(0),
        moneyEarned = moneyEarned ?? BigNumber.fromInt(0),
+       moneySpent = moneySpent ?? BigNumber.fromInt(0),
        nebulaEarned = nebulaEarned ?? BigNumber.fromInt(0),
        legacySystems = legacySystems ?? LegacySystemsState.initial;
 
@@ -40,7 +44,9 @@ class ProgressionState {
       bossDamage;
   final Set<String> defeatedBosses;
   final int prestigeResets, ultraResets, totalGuesses, correctGuesses;
-  final BigNumber moneyEarned;
+  final BigNumber moneyEarned, moneySpent;
+  final int randomEventsTriggered;
+  final String? lastRandomEventId;
   final int currentStreak, bestStreak, playtimeSeconds;
   final Set<String> achievements;
   final BigNumber nebulaEarned;
@@ -64,6 +70,9 @@ class ProgressionState {
     'totalGuesses': totalGuesses,
     'correctGuesses': correctGuesses,
     'moneyEarned': moneyEarned.toString(),
+    'moneySpent': moneySpent.toString(),
+    'randomEventsTriggered': randomEventsTriggered,
+    if (lastRandomEventId != null) 'lastRandomEventId': lastRandomEventId!,
     'currentStreak': currentStreak,
     'bestStreak': bestStreak,
     'playtimeSeconds': playtimeSeconds,
@@ -83,6 +92,10 @@ class ProgressionState {
       return parsed;
     }
 
+    BigNumber optionalNumber(String key) => json[key] == null
+        ? BigNumber.fromInt(0)
+        : number(key);
+
     int count(String key) {
       final value = json[key];
       if (value is! int || value < 0) {
@@ -90,6 +103,8 @@ class ProgressionState {
       }
       return value;
     }
+
+    int optionalCount(String key) => json[key] == null ? 0 : count(key);
 
     Map<String, int> levels(String key, {bool optional = false}) {
       final value = json[key];
@@ -147,6 +162,104 @@ class ProgressionState {
         throw const FormatException('Invalid achievement list.');
       }
       achievements.addAll(rawAchievements.cast<String>());
+    }
+    final rawLastRandomEventId = json['lastRandomEventId'];
+    if (rawLastRandomEventId != null &&
+        (rawLastRandomEventId is! String ||
+            !RegExp(r'^[a-z_]{1,64}
+    final correct = count('correctGuesses');
+    final streak = count('currentStreak');
+    final best = count('bestStreak');
+    if (correct > total || streak > correct || best < streak) {
+      throw const FormatException('Inconsistent progression statistics.');
+    }
+    return ProgressionState(
+      money: number('money'),
+      prestige: number('prestige'),
+      ultra: number('ultra'),
+      nebula: number('nebula'),
+      upgrades: levels('upgrades'),
+      prestigeUpgrades: levels('prestigeUpgrades'),
+      ultraUpgrades: levels('ultraUpgrades'),
+      nebulaItems: levels('nebulaItems', optional: true),
+      bossDamage: Map.unmodifiable(bossDamage),
+      defeatedBosses: Set.unmodifiable(defeatedBosses),
+      prestigeResets: count('prestigeResets'),
+      ultraResets: count('ultraResets'),
+      totalGuesses: total,
+      correctGuesses: correct,
+      moneyEarned: number('moneyEarned'),
+      moneySpent: optionalNumber('moneySpent'),
+      randomEventsTriggered: optionalCount('randomEventsTriggered'),
+      lastRandomEventId: rawLastRandomEventId as String?,
+      currentStreak: streak,
+      bestStreak: best,
+      playtimeSeconds: json['playtimeSeconds'] == null
+          ? 0
+          : count('playtimeSeconds'),
+      achievements: Set.unmodifiable(achievements),
+      nebulaEarned: number('nebulaEarned'),
+      legacySystems: legacySystems,
+    );
+  }
+
+  ProgressionState copyWith({
+    BigNumber? money,
+    BigNumber? prestige,
+    BigNumber? ultra,
+    BigNumber? nebula,
+    Map<String, int>? upgrades,
+    Map<String, int>? prestigeUpgrades,
+    Map<String, int>? ultraUpgrades,
+    Map<String, int>? nebulaItems,
+    Map<String, int>? bossDamage,
+    Set<String>? defeatedBosses,
+    int? prestigeResets,
+    int? ultraResets,
+    int? totalGuesses,
+    int? correctGuesses,
+    BigNumber? moneyEarned,
+    BigNumber? moneySpent,
+    int? randomEventsTriggered,
+    String? lastRandomEventId,
+    bool clearLastRandomEventId = false,
+    int? currentStreak,
+    int? bestStreak,
+    int? playtimeSeconds,
+    Set<String>? achievements,
+    BigNumber? nebulaEarned,
+    LegacySystemsState? legacySystems,
+  }) => ProgressionState(
+    money: money ?? this.money,
+    prestige: prestige ?? this.prestige,
+    ultra: ultra ?? this.ultra,
+    nebula: nebula ?? this.nebula,
+    upgrades: upgrades ?? this.upgrades,
+    prestigeUpgrades: prestigeUpgrades ?? this.prestigeUpgrades,
+    ultraUpgrades: ultraUpgrades ?? this.ultraUpgrades,
+    nebulaItems: nebulaItems ?? this.nebulaItems,
+    bossDamage: bossDamage ?? this.bossDamage,
+    defeatedBosses: defeatedBosses ?? this.defeatedBosses,
+    prestigeResets: prestigeResets ?? this.prestigeResets,
+    ultraResets: ultraResets ?? this.ultraResets,
+    totalGuesses: totalGuesses ?? this.totalGuesses,
+    correctGuesses: correctGuesses ?? this.correctGuesses,
+    moneyEarned: moneyEarned ?? this.moneyEarned,
+    moneySpent: moneySpent ?? this.moneySpent,
+    randomEventsTriggered: randomEventsTriggered ?? this.randomEventsTriggered,
+    lastRandomEventId: clearLastRandomEventId
+        ? null
+        : lastRandomEventId ?? this.lastRandomEventId,
+    currentStreak: currentStreak ?? this.currentStreak,
+    bestStreak: bestStreak ?? this.bestStreak,
+    playtimeSeconds: playtimeSeconds ?? this.playtimeSeconds,
+    achievements: achievements ?? this.achievements,
+    nebulaEarned: nebulaEarned ?? this.nebulaEarned,
+    legacySystems: legacySystems ?? this.legacySystems,
+  );
+}
+).hasMatch(rawLastRandomEventId))) {
+      throw const FormatException('Invalid random event ID.');
     }
     final total = count('totalGuesses');
     final correct = count('correctGuesses');
