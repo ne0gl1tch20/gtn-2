@@ -1,0 +1,32 @@
+name: jarrlyyui language
+
+on:
+  pull_request:
+    paths:
+      - "packages/jarrlyyui_language/**"
+      - ".github/workflows/jarrlyyui-language.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  parser-tests:
+    name: Parser tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Flutter and Dart
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - name: Get package dependencies
+        working-directory: packages/jarrlyyui_language
+        run: dart pub get
+      - name: Analyze parser package
+        working-directory: packages/jarrlyyui_language
+        run: dart analyze
+      - name: Run parser tests
+        working-directory: packages/jarrlyyui_language
+        run: dart test
