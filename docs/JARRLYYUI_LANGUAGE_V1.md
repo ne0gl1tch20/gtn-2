@@ -59,7 +59,7 @@ containerName  = "column" | "row" | "stack" | "scroll" | "panel"
 leafName       = "text" | "icon" | "image" | "spacer" | "divider"
                | "input" | "toggle" ;
 attribute      = idAttr | keyAttr | bindAttr | actionAttr
-               | styleAttr | gapAttr | typeAttr | enabledAttr
+               | styleAttr | gapAttr | extentAttr | typeAttr | enabledAttr
                | labelAttr | assetAttr | semanticAttr ;
 idAttr         = "id", string ;
 keyAttr        = "key", string ;
@@ -67,6 +67,7 @@ bindAttr       = "bind", string ;
 actionAttr     = "action", string ;
 styleAttr      = "style", string ;
 gapAttr        = "gap", number ;
+extentAttr     = "extent", number ;
 typeAttr       = "type", identifier ;
 enabledAttr    = "enabled", "bind", string ;
 labelAttr      = "label", string ;
