@@ -64,3 +64,20 @@ jobs:
       - name: Test bundle validation and updates
         working-directory: packages/jarrlyyui_bundle
         run: dart test
+
+  bundle-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+      - name: Install bundle dependencies
+        working-directory: packages/jarrlyyui_bundle
+        run: dart pub get
+      - name: Analyze bundle
+        working-directory: packages/jarrlyyui_bundle
+        run: dart analyze
+      - name: Test Windows bundle storage
+        working-directory: packages/jarrlyyui_bundle
+        run: dart test
