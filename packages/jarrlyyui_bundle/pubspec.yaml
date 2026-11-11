@@ -6,6 +6,7 @@ environment:
   sdk: ">=3.6.0 <4.0.0"
 dependencies:
   crypto: ^3.0.6
+  http: ^1.2.2
   jarrlyyui_language:
     path: ../jarrlyyui_language
 dev_dependencies:
