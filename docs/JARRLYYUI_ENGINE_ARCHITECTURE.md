@@ -17,6 +17,9 @@ A small, versioned, declarative UI scripting format that Flutter parses and rend
 - Bundles work offline. Remote updates are optional and never required to boot.
 - Invalid or incompatible scripts fall back to the last-known-good bundle or native Dart screen.
 
+
+**Language draft:** [`JARRLYYUI_LANGUAGE_V1.md`](JARRLYYUI_LANGUAGE_V1.md) defines the first block grammar, EBNF, AST contract, typed bindings, diagnostics and parser acceptance tests. The grammar is a draft to validate in a standalone parser prototype, not a promise that a runtime already exists.
+
 ## 2. Proposed layers
 
 1. **Authoring format:** readable .jui documents with explicit elements, properties, stable IDs and typed bindings.
