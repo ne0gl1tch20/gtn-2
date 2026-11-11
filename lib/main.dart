@@ -1255,13 +1255,12 @@ class _GameHomePageState extends State<GameHomePage>
               ? beforeGuess.money * BigNumber.parse('0.05')
               : BigNumber.fromInt(0);
           final penalty = difficultyPenalty + taxPenalty;
-          final refundRate = _legacySystemsEngine
-              .resolveMissPenaltyRefundRate(
-                traitRefundRate: traitEffects.missPenaltyRefundRate,
-                adaptiveInsuranceActive: adaptiveDecision.helperIds.contains(
-                  InvisibleTraitEngine.helperMistakeInsurance,
-                ),
-              );
+          final refundRate = _legacySystemsEngine.resolveMissPenaltyRefundRate(
+            traitRefundRate: traitEffects.missPenaltyRefundRate,
+            adaptiveInsuranceActive: adaptiveDecision.helperIds.contains(
+              InvisibleTraitEngine.helperMistakeInsurance,
+            ),
+          );
           final refund =
               penalty * BigNumber.parse(refundRate.toStringAsFixed(2));
           final extraPenalty =
