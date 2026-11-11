@@ -50,7 +50,7 @@ Expected: syntax tree contains an input node with writable binding `guess.text` 
 ~~~jui
 // Root screen
 screen "sample.labels" version 1 {
-  text id "quote" label "A \"quoted\" label"
+  text id "quote" key "sample.quote" label "A \"quoted\" label"
 }
 ~~~
 
