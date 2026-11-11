@@ -179,7 +179,7 @@ void main() {
     );
     final value = result.value as Map<String, Object?>;
     expect(value['helpers'], contains('mistake_insurance'));
-    expect(value['helpers'], contains('streak_guard'));
+    expect(value['helpers'], contains('range_scout'));
     expect(value['bonuses'], contains('first_prestige_bonus'));
   });
 
