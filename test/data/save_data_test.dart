@@ -359,6 +359,42 @@ void main() {
   });
 
   test(
+    'rejects invalid nested progression and legacy state before writing',
+    () async {
+      final directory = await Directory.systemTemp.createTemp(
+        'gtn2-invalid-nested-save-test-',
+      );
+      addTearDown(() => directory.delete(recursive: true));
+      final storage = SaveStorage(directory: directory);
+
+      final invalidStatistics = SaveData(
+        secret: 42,
+        attempts: 0,
+        gamesWon: 0,
+        progression: ProgressionState.initial.copyWith(totalGuesses: -1),
+      );
+      await expectLater(storage.save(invalidStatistics), throwsArgumentError);
+      expect(await storage.load(), isNull);
+
+      final invalidLegacyState = SaveData(
+        secret: 42,
+        attempts: 0,
+        gamesWon: 0,
+        progression: ProgressionState.initial.copyWith(
+          legacySystems: LegacySystemsState.initial.copyWith(
+            homeBaseLevel: 21,
+          ),
+        ),
+      );
+      await expectLater(
+        storage.save(invalidLegacyState),
+        throwsArgumentError,
+      );
+      expect(await storage.load(), isNull);
+    },
+  );
+
+  test(
     'rejects save data whose secret is outside its configured range',
     () async {
       final directory = await Directory.systemTemp.createTemp(
