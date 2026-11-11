@@ -91,7 +91,9 @@ class JuiBundleManifest {
     }
     final files = rawFiles.map(JuiBundleFile.fromJson).toList();
     final paths = files.map((file) => file.path).toSet();
-    if (paths.length != files.length || !paths.contains(entryScreen)) {
+    if (paths.length != files.length ||
+        !paths.contains(entryScreen) ||
+        paths.any((path) => path.toLowerCase() == 'manifest.json')) {
       throw const JuiBundleException(
         'Bundle file paths must be unique and include the entry screen.',
       );
@@ -363,9 +365,26 @@ bool _isSafeBundlePath(String path) {
       path.startsWith('/') ||
       path.startsWith(String.fromCharCode(92)) ||
       path.contains(String.fromCharCode(92)) ||
-      path.contains(':') ||
-      path.split('/').any((part) => part.isEmpty || part == '.' || part == '..')) {
+      path.contains(':')) {
     return false;
+  }
+  const reservedWindowsNames = {
+    'CON', 'PRN', 'AUX', 'NUL',
+    'COM1', 'COM2', 'COM3', 'COM4', 'COM5',
+    'COM6', 'COM7', 'COM8', 'COM9',
+    'LPT1', 'LPT2', 'LPT3', 'LPT4', 'LPT5',
+    'LPT6', 'LPT7', 'LPT8', 'LPT9',
+  };
+  for (final part in path.split('/')) {
+    if (part.isEmpty ||
+        part == '.' ||
+        part == '..' ||
+        part.endsWith('.') ||
+        part.endsWith(' ')) {
+      return false;
+    }
+    final deviceName = part.split('.').first.toUpperCase();
+    if (reservedWindowsNames.contains(deviceName)) return false;
   }
   return true;
 }
