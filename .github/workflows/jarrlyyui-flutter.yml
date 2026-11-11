@@ -2,7 +2,7 @@ name: jarrlyyui Flutter Renderer
 
 on:
   push:
-    branches: [main, 'feature/**']
+    branches: [main]
     paths:
       - 'packages/jarrlyyui_flutter/**'
       - 'packages/jarrlyyui_bundle/**'
@@ -10,6 +10,7 @@ on:
       - '.github/workflows/jarrlyyui-flutter.yml'
   pull_request:
     branches: [main]
+  workflow_dispatch:
     paths:
       - 'packages/jarrlyyui_flutter/**'
       - 'packages/jarrlyyui_language/**'
