@@ -61,6 +61,10 @@ screen "settings.test" version 1 {
     expect(changes.single.binding, 'guess.value');
     expect(changes.single.value, 42);
 
+    await tester.tap(find.byType(SwitchListTile));
+    expect(changes.last.binding, 'settings.music');
+    expect(changes.last.value, false);
+
     await tester.tap(find.text('Save'));
     expect(actions, ['settings.save']);
   });
