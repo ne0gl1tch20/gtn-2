@@ -33,7 +33,11 @@ flutter:
     - assets/game/
     - assets/fonts/
     - assets/gtn1/
-    - assets/scripts/
+    - assets/scripts/manifest.json
+    - assets/scripts/events/random_event.lua
+    - assets/scripts/events/seasonal_events.lua
+    - assets/scripts/minigames/number_rush.lua
+    - assets/scripts/traits/invisible_traits.lua
     - assets/changelogs.md
 
   fonts:
