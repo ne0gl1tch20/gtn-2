@@ -53,7 +53,6 @@ class AchievementCatalog {
   ];
 
   static ProgressionState evaluate(ProgressionState state) {
-    final zero = BigNumber.fromInt(0);
     final milestones = <String, bool>{
       'correct_10': state.correctGuesses >= 10,
       'correct_50': state.correctGuesses >= 50,
