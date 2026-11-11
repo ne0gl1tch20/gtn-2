@@ -139,6 +139,7 @@ class LegacySystemsEngine {
       progression.copyWith(
         money: progression.money - cost,
         moneyEarned: progression.moneyEarned,
+        moneySpent: progression.moneySpent + cost,
       ),
       systems.copyWith(homeBaseLevel: systems.homeBaseLevel + 1),
     );
