@@ -179,7 +179,10 @@ class _LegacyDetailPage extends StatelessWidget {
           builder: (context) {
             final unlocked = progression.achievements.contains(achievement.id);
             final target = AchievementCatalog.target(achievement.id);
-            final current = AchievementCatalog.progress(progression, achievement.id);
+            final current = AchievementCatalog.progress(
+              progression,
+              achievement.id,
+            );
             final isCounterMilestone = target > 0;
             return GtnExpressiveCard(
               child: Padding(
@@ -191,22 +194,35 @@ class _LegacyDetailPage extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Icon(
-                          unlocked ? Icons.check_circle_rounded : Icons.lock_rounded,
-                          color: unlocked ? const Color(0xFFFFD166) : theme.colorScheme.onSurfaceVariant,
+                          unlocked
+                              ? Icons.check_circle_rounded
+                              : Icons.lock_rounded,
+                          color: unlocked
+                              ? const Color(0xFFFFD166)
+                              : theme.colorScheme.onSurfaceVariant,
                         ),
                         const SizedBox(width: 10),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(achievement.name, style: theme.textTheme.titleMedium),
+                              Text(
+                                achievement.name,
+                                style: theme.textTheme.titleMedium,
+                              ),
                               const SizedBox(height: 3),
-                              Text(achievement.description, style: theme.textTheme.bodySmall),
+                              Text(
+                                achievement.description,
+                                style: theme.textTheme.bodySmall,
+                              ),
                             ],
                           ),
                         ),
                         const SizedBox(width: 8),
-                        Text(achievement.tier.toUpperCase(), style: theme.textTheme.labelSmall),
+                        Text(
+                          achievement.tier.toUpperCase(),
+                          style: theme.textTheme.labelSmall,
+                        ),
                       ],
                     ),
                     const SizedBox(height: 10),
@@ -214,11 +230,19 @@ class _LegacyDetailPage extends StatelessWidget {
                       children: [
                         Expanded(
                           child: Text(
-                            unlocked ? 'Unlocked' : AchievementCatalog.progressLabel(progression, achievement),
+                            unlocked
+                                ? 'Unlocked'
+                                : AchievementCatalog.progressLabel(
+                                    progression,
+                                    achievement,
+                                  ),
                             style: theme.textTheme.bodySmall,
                           ),
                         ),
-                        Text('+${achievement.rewardNebula} Nebula', style: theme.textTheme.labelMedium),
+                        Text(
+                          '+${achievement.rewardNebula} Nebula',
+                          style: theme.textTheme.labelMedium,
+                        ),
                       ],
                     ),
                     if (!unlocked && isCounterMilestone) ...[

@@ -214,12 +214,25 @@ void main() {
     );
     final unlocked = engine.evaluateAchievements(before);
     expect(AchievementCatalog.all, hasLength(27));
-    expect(unlocked.achievements, containsAll([
-      'correct_10', 'correct_50', 'streak_5', 'streak_10',
-      'millionaire', 'ten_millionaire', 'prestige_1', 'prestige_5',
-      'ultra_1', 'ultra_3', 'playtime_1h', 'playtime_10h',
-      'frenzy_5', 'frenzy_10',
-    ]));
+    expect(
+      unlocked.achievements,
+      containsAll([
+        'correct_10',
+        'correct_50',
+        'streak_5',
+        'streak_10',
+        'millionaire',
+        'ten_millionaire',
+        'prestige_1',
+        'prestige_5',
+        'ultra_1',
+        'ultra_3',
+        'playtime_1h',
+        'playtime_10h',
+        'frenzy_5',
+        'frenzy_10',
+      ]),
+    );
     expect(unlocked.nebula.toString(), '935');
     expect(unlocked.nebulaEarned.toString(), '935');
     expect(engine.evaluateAchievements(unlocked), same(unlocked));
@@ -250,5 +263,4 @@ void main() {
     expect(engine.evaluateAchievements(below).achievements, isEmpty);
     expect(engine.evaluateAchievements(below).nebula.toString(), '0');
   });
-
 }

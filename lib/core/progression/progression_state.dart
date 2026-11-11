@@ -142,7 +142,8 @@ class ProgressionState {
     final rawAchievements = json['achievements'];
     final achievements = <String>{};
     if (rawAchievements != null) {
-      if (rawAchievements is! List || rawAchievements.any((value) => value is! String || value.isEmpty)) {
+      if (rawAchievements is! List ||
+          rawAchievements.any((value) => value is! String || value.isEmpty)) {
         throw const FormatException('Invalid achievement list.');
       }
       achievements.addAll(rawAchievements.cast<String>());
@@ -172,7 +173,9 @@ class ProgressionState {
       moneyEarned: number('moneyEarned'),
       currentStreak: streak,
       bestStreak: best,
-      playtimeSeconds: json['playtimeSeconds'] == null ? 0 : count('playtimeSeconds'),
+      playtimeSeconds: json['playtimeSeconds'] == null
+          ? 0
+          : count('playtimeSeconds'),
       achievements: Set.unmodifiable(achievements),
       nebulaEarned: number('nebulaEarned'),
       legacySystems: legacySystems,

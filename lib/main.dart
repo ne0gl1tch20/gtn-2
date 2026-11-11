@@ -183,7 +183,8 @@ class _GameHomePageState extends State<GameHomePage>
         playtimeSeconds: _progression.playtimeSeconds + 1,
       );
       final evaluated = _progressionEngine.evaluateAchievements(next);
-      final unlocked = evaluated.achievements.length > _progression.achievements.length;
+      final unlocked =
+          evaluated.achievements.length > _progression.achievements.length;
       setState(() => _progression = evaluated);
       if (unlocked || evaluated.playtimeSeconds % 30 == 0) {
         unawaited(_persist());
