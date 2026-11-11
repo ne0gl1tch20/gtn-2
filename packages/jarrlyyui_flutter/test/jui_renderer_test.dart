@@ -50,7 +50,10 @@ screen "settings.test" version 1 {
     expect(find.text('Settings'), findsOneWidget);
     expect(find.text('12'), findsOneWidget);
     expect(find.text('Music'), findsOneWidget);
-    expect(tester.widget<SwitchListTile>(find.byType(SwitchListTile)).value, isTrue);
+    expect(
+      tester.widget<SwitchListTile>(find.byType(SwitchListTile)).value,
+      isTrue,
+    );
 
     await tester.enterText(find.byType(TextField), '42');
     expect(changes.single.binding, 'guess.value');

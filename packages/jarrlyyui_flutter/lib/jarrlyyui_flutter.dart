@@ -93,7 +93,9 @@ class JuiRenderer extends StatelessWidget {
         return _buildChildren(context, children, Axis.horizontal, gap: gap);
       case 'stack':
         return Stack(
-          children: children.map((child) => _buildNode(context, child)).toList(),
+          children: children
+              .map((child) => _buildNode(context, child))
+              .toList(),
         );
       case 'scroll':
         return SingleChildScrollView(
@@ -103,24 +105,14 @@ class JuiRenderer extends StatelessWidget {
         return Card(
           child: Padding(
             padding: const EdgeInsets.all(16),
-            child: _buildChildren(
-              context,
-              children,
-              Axis.vertical,
-              gap: gap,
-            ),
+            child: _buildChildren(context, children, Axis.vertical, gap: gap),
           ),
         );
       case 'list':
         return _buildChildren(context, children, Axis.vertical, gap: gap);
       case 'dialog':
         return AlertDialog(
-          content: _buildChildren(
-            context,
-            children,
-            Axis.vertical,
-            gap: gap,
-          ),
+          content: _buildChildren(context, children, Axis.vertical, gap: gap),
         );
       case 'text':
         return Text(
@@ -177,9 +169,8 @@ class JuiRenderer extends StatelessWidget {
       contentPadding: EdgeInsets.zero,
       title: Text(_labelFor(node)),
       value: values[binding] == true,
-      onChanged: (value) => onInputChanged?.call(
-        JuiInputChange(binding: binding, value: value),
-      ),
+      onChanged: (value) =>
+          onInputChanged?.call(JuiInputChange(binding: binding, value: value)),
     );
   }
 
@@ -309,9 +300,7 @@ class _JuiBoundInputState extends State<_JuiBoundInput> {
         _controller.text != widget.initialValue) {
       _controller.value = TextEditingValue(
         text: widget.initialValue,
-        selection: TextSelection.collapsed(
-          offset: widget.initialValue.length,
-        ),
+        selection: TextSelection.collapsed(offset: widget.initialValue.length),
       );
     }
   }
