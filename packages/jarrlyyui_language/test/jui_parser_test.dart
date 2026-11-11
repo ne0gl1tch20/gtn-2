@@ -192,5 +192,32 @@ screen "sample.deep" version 1 {
         contains('JUI051_MAX_DEPTH'),
       );
     });
+
+    test('parses action nodes with optional child blocks', () {
+      final result = parser.parse('''
+screen "sample.action" version 1 {
+  button id "submit" key "submit.label" action "game.submit" {
+    icon asset "icons/check"
+    text key "submit.hint"
+  }
+}
+''');
+      expect(result.isSuccess, isTrue, reason: result.diagnostics.toString());
+      final button = result.document!.children.single;
+      expect(button.kind, 'button');
+      expect(button.children.map((node) => node.kind), ['icon', 'text']);
+    });
+
+    test('parses spacer extent and quoted input type', () {
+      final result = parser.parse('''
+screen "sample.layout" version 1 {
+  spacer extent 24
+  input id "name" bind "profile.name" type "text"
+}
+''');
+      expect(result.isSuccess, isTrue, reason: result.diagnostics.toString());
+      expect(result.document!.children.first.attributes['extent'], 24);
+      expect(result.document!.children.last.type, 'text');
+    });
   });
 }
