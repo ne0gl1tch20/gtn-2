@@ -95,13 +95,17 @@ class JuiBundlePackage {
   JuiBundlePackage({
     required this.manifestJson,
     required Map<String, Uint8List> files,
-  }) : files = Map.unmodifiable({
+  }) : _files = {
          for (final entry in files.entries)
            entry.key: Uint8List.fromList(entry.value),
-       });
+       };
 
   final Object? manifestJson;
-  final Map<String, Uint8List> files;
+  final Map<String, Uint8List> _files;
+  Map<String, Uint8List> get files => Map.unmodifiable({
+    for (final entry in _files.entries)
+      entry.key: Uint8List.fromList(entry.value),
+  });
 }
 
 class JuiValidatedBundle {
@@ -109,11 +113,18 @@ class JuiValidatedBundle {
     required this.manifest,
     required Map<String, Uint8List> files,
     required Map<String, JuiDocument> screens,
-  }) : files = Map.unmodifiable(files),
+  }) : _files = {
+         for (final entry in files.entries)
+           entry.key: Uint8List.fromList(entry.value),
+       },
        screens = Map.unmodifiable(screens);
 
   final JuiBundleManifest manifest;
-  final Map<String, Uint8List> files;
+  final Map<String, Uint8List> _files;
+  Map<String, Uint8List> get files => Map.unmodifiable({
+    for (final entry in _files.entries)
+      entry.key: Uint8List.fromList(entry.value),
+  });
   final Map<String, JuiDocument> screens;
 
   JuiDocument get entryDocument => screens[manifest.entryScreen]!;
@@ -260,8 +271,8 @@ class JuiBundleUpdateManager {
           activeVersion: currentVersion,
         );
       }
-      await store.stage(candidate);
       try {
+        await store.stage(candidate);
         await store.activateStaged(
           expectedCurrentVersion: currentVersion ?? '',
         );
@@ -296,17 +307,28 @@ bool _isSafeBundlePath(String path) {
 }
 
 int _compareVersions(String left, String right) {
-  List<int> parts(String value) => value
-      .split(RegExp(r'[-+]'))
+  String withoutBuild(String value) => value.split('+').first;
+  List<int> parts(String value) => withoutBuild(value)
+      .split('-')
       .first
       .split('.')
       .map(int.parse)
       .toList(growable: false);
+  String? prerelease(String value) {
+    final parts = withoutBuild(value).split('-');
+    return parts.length > 1 ? parts.sublist(1).join('-') : null;
+  }
+
   final a = parts(left);
   final b = parts(right);
   for (var i = 0; i < 3; i++) {
     final comparison = a[i].compareTo(b[i]);
     if (comparison != 0) return comparison;
   }
-  return 0;
+  final aPre = prerelease(left);
+  final bPre = prerelease(right);
+  if (aPre == null && bPre == null) return 0;
+  if (aPre == null) return 1;
+  if (bPre == null) return -1;
+  return aPre.compareTo(bPre);
 }
