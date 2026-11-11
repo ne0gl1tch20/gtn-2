@@ -160,9 +160,7 @@ void main() {
       final invalidSave = ProgressionState().toJson()
         ..['lastRandomEventId'] = 'admin_override';
       expect(
-        () => ProgressionState.fromJson(
-          Map<String, dynamic>.from(invalidSave),
-        ),
+        () => ProgressionState.fromJson(Map<String, dynamic>.from(invalidSave)),
         throwsFormatException,
       );
     });
