@@ -163,6 +163,19 @@ class InvisibleTraitEngine {
         .toInt();
   }
 
+  /// GTN1 adds adaptive helper and one-time progression bonuses together.
+  /// There is no aggregate 30% cap in the source gameplay rules.
+  double progressionBonusRate({
+    required Set<String> helperIds,
+    required int bonusCount,
+  }) {
+    final comebackBonus = helperIds.contains(helperComeback) ? 0.05 : 0.0;
+    final momentumBonus = helperIds.contains(helperMomentum) ? 0.03 : 0.0;
+    return comebackBonus +
+        momentumBonus +
+        (bonusCount < 0 ? 0 : bonusCount) * 0.10;
+  }
+
   AdaptiveTraitProfile markHelperUses(
     AdaptiveTraitProfile profile,
     Set<String> helperIds,
