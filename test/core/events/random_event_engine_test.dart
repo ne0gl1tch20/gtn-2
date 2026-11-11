@@ -44,7 +44,7 @@ void main() {
         game: game,
         type: RandomEventType.nebulaRain,
       );
-      final reward = result.progression.nebula.toDouble();
+      final reward = int.parse(result.progression.nebula.toString());
       expect(reward, inInclusiveRange(10, 50));
       expect(result.progression.nebulaEarned, result.progression.nebula);
     });
@@ -141,7 +141,7 @@ void main() {
     });
 
     test('old saves default the new event statistics safely', () {
-      final oldSave = ProgressionState.initial.toJson()
+      final oldSave = ProgressionState().toJson()
         ..remove('moneySpent')
         ..remove('randomEventsTriggered')
         ..remove('lastRandomEventId');
