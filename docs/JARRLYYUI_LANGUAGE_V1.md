@@ -50,13 +50,14 @@ All identifiers in `key`, `bind` and `action` are symbolic names registered by t
 document       = screen ;
 screen         = "screen", string, "version", integer, block ;
 block          = "{", { node }, "}" ;
-node           = container | leaf ;
+node           = container | actionNode | leaf ;
 container      = containerName, { attribute }, block ;
+actionNode     = "button", { attribute }, [ block ] ;
 leaf           = leafName, { attribute } ;
 containerName  = "column" | "row" | "stack" | "scroll" | "panel"
                | "list" | "dialog" ;
 leafName       = "text" | "icon" | "image" | "spacer" | "divider"
-               | "input" | "button" | "toggle" ;
+               | "input" | "toggle" ;
 attribute      = idAttr | keyAttr | bindAttr | actionAttr
                | styleAttr | gapAttr | typeAttr | enabledAttr
                | labelAttr | assetAttr | semanticAttr ;
@@ -75,7 +76,14 @@ string         = quotedString ;
 integer        = digit, { digit } ;
 number         = [ "-" ], integer, [ ".", digit, { digit } ] ;
 identifier     = identifierStart, { identifierPart } ;
+quotedString   = '"', { stringCharacter | escape }, '"' ;
+escape         = "\\\\", ( '"' | "\\\\" | "n" | "t" ) ;
+digit          = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" ;
+identifierStart = "A"…"Z" | "a"…"z" | "_" ;
+identifierPart  = identifierStart | digit | "-" ;
 ~~~
+
+`stringCharacter` excludes an unescaped quote, backslash and control characters. Escape sequences are decoded before semantic validation.
 
 The grammar is followed by a semantic validation pass. Node-specific attributes are not interchangeable: for example, `asset` is valid for image/icon, `action` is valid for button, and `bind` on input must resolve to a writable input binding.
 
