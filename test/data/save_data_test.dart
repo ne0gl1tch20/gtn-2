@@ -381,15 +381,10 @@ void main() {
         attempts: 0,
         gamesWon: 0,
         progression: ProgressionState.initial.copyWith(
-          legacySystems: LegacySystemsState.initial.copyWith(
-            homeBaseLevel: 21,
-          ),
+          legacySystems: LegacySystemsState.initial.copyWith(homeBaseLevel: 21),
         ),
       );
-      await expectLater(
-        storage.save(invalidLegacyState),
-        throwsArgumentError,
-      );
+      await expectLater(storage.save(invalidLegacyState), throwsArgumentError);
       expect(await storage.load(), isNull);
     },
   );
