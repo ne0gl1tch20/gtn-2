@@ -282,8 +282,14 @@ class _GameHomePageState extends State<GameHomePage>
         _randomEventMessage = message;
       });
       _randomEventBannerTimer?.cancel();
+      debugPrint('RANDOM_EVENT_TRIGGERED: ${eventType.name}');
       _randomEventBannerTimer = Timer(const Duration(seconds: 8), () {
-        if (mounted) setState(() => _randomEventMessage = null);
+        if (!mounted) return;
+        setState(() {
+          _randomEventMessage = null;
+          _progression = _progression.copyWith(clearLastRandomEventId: true);
+        });
+        unawaited(_persist());
       });
       await _persist();
     } catch (error) {
