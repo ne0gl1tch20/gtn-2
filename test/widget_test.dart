@@ -40,30 +40,29 @@ Widget buildDashboard({GameSettings? settings, VoidCallback? onGuess}) =>
     );
 
 void main() {
-  testWidgets(
-    'guess controls show labels and submit action',
-    (WidgetTester tester) async {
-      var submitted = 0;
-      await tester.pumpWidget(buildDashboard(onGuess: () => submitted++));
+  testWidgets('guess controls show labels and submit action', (
+    WidgetTester tester,
+  ) async {
+    var submitted = 0;
+    await tester.pumpWidget(buildDashboard(onGuess: () => submitted++));
 
-      expect(find.text('->'), findsOneWidget);
-      expect(find.text('LOW END'), findsOneWidget);
-      expect(find.text('MIDPOINT'), findsOneWidget);
-      expect(find.text('HIGH END'), findsOneWidget);
-      expect(find.text('CLEAR'), findsOneWidget);
+    expect(find.text('->'), findsOneWidget);
+    expect(find.text('LOW END'), findsOneWidget);
+    expect(find.text('MIDPOINT'), findsOneWidget);
+    expect(find.text('HIGH END'), findsOneWidget);
+    expect(find.text('CLEAR'), findsOneWidget);
 
-      await tester.tap(find.text('->'));
-      await tester.pump();
-      expect(submitted, 1);
+    await tester.tap(find.text('->'));
+    await tester.pump();
+    expect(submitted, 1);
 
-      await tester.tap(find.text('MIDPOINT'));
-      await tester.pump();
-      final field = tester.widget<GtnExpressiveTextField>(
-        find.byKey(const Key('guess-input')),
-      );
-      expect(field.controller!.text, '50');
-    },
-  );
+    await tester.tap(find.text('MIDPOINT'));
+    await tester.pump();
+    final field = tester.widget<GtnExpressiveTextField>(
+      find.byKey(const Key('guess-input')),
+    );
+    expect(field.controller!.text, '50');
+  });
 
   testWidgets('shows the HTML-facing dashboard and quick-pick controls', (
     WidgetTester tester,
