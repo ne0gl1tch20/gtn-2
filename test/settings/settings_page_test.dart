@@ -63,7 +63,9 @@ void main() {
     expect(find.text('Reduce flashes'), findsOneWidget);
   });
 
-  testWidgets('Settings exposes diagnostics and Menu Studio', (tester) async {
+  testWidgets('Settings exposes Help & Tutorial, diagnostics and Menu Studio', (
+    tester,
+  ) async {
     var openedMenuStudio = false;
     await tester.pumpWidget(
       M3EMaterialApp(
@@ -75,11 +77,18 @@ void main() {
           settings: GameSettings.initial,
           onChanged: (_) async {},
           onOpenMenuStudio: () => openedMenuStudio = true,
+          onReplayTutorial: () {},
         ),
       ),
     );
 
     await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.text('Rerun Nimmy tutorial'),
+      250,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.text('Rerun Nimmy tutorial'), findsOneWidget);
     await tester.scrollUntilVisible(
       find.text('Save logs to storage'),
       250,

@@ -4,6 +4,8 @@ import 'package:material_ui/material_ui.dart';
 import '../core/game/game_engine.dart';
 import '../core/progression/progression_state.dart';
 import '../design/expressive_widgets.dart';
+import '../legacy/legacy_pages.dart';
+import '../legacy/legacy_systems_page.dart';
 import '../settings/game_settings.dart';
 
 const _purple = GtnUiTokens.purple;
@@ -42,6 +44,11 @@ class GameDashboardPage extends StatelessWidget {
     required this.onLuckyStake,
     required this.onSystems,
     this.showDeveloperSettings = false,
+    required this.shellNavigatorKey,
+    required this.selectedIndex,
+    required this.onPrimarySelected,
+    required this.onSystemsView,
+    required this.onLegacySection,
   });
 
   final GameState game;
@@ -66,9 +73,14 @@ class GameDashboardPage extends StatelessWidget {
   final VoidCallback onLuckyStake;
   final VoidCallback onSystems;
   final bool showDeveloperSettings;
+  final GlobalKey<NavigatorState> shellNavigatorKey;
+  final int selectedIndex;
+  final ValueChanged<int> onPrimarySelected;
+  final ValueChanged<LegacySystemsView> onSystemsView;
+  final ValueChanged<LegacySection> onLegacySection;
 
   void _openMoreMenu(BuildContext context, Color panel) {
-    Navigator.of(context).push<void>(
+    shellNavigatorKey.currentState!.push<void>(
       MaterialPageRoute<void>(
         builder: (_) => _MoreMenuPage(
           settings: settings,
@@ -84,6 +96,9 @@ class GameDashboardPage extends StatelessWidget {
           onMusic: onMusic,
           onLuckyStake: onLuckyStake,
           onSystems: onSystems,
+          onSystemsView: onSystemsView,
+          onLegacySection: onLegacySection,
+          onUpgradeShop: onUpgradeShop,
         ),
       ),
     );
@@ -105,6 +120,11 @@ class GameDashboardPage extends StatelessWidget {
       bottomNavigationBar: LayoutBuilder(
         builder: (context, constraints) {
           void selectDestination(int index) {
+            // Primary tabs replace the active primary destination. Feature
+            // pages opened from More use push(), so Back returns to More while
+            // the shared navigation shell remains mounted.
+            shellNavigatorKey.currentState?.popUntil((route) => route.isFirst);
+            onPrimarySelected(index);
             switch (index) {
               case 0:
                 onWorldMap();
@@ -128,7 +148,7 @@ class GameDashboardPage extends StatelessWidget {
           // with the standard adaptive M3 bar on tablets and desktop windows.
           if (constraints.maxWidth > 600) {
             return NavigationBar(
-              selectedIndex: 2,
+              selectedIndex: selectedIndex,
               onDestinationSelected: selectDestination,
               labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
               height: 76,
@@ -182,345 +202,369 @@ class GameDashboardPage extends StatelessWidget {
                 label: 'More',
               ),
             ],
-            selectedIndex: 2,
+            selectedIndex: selectedIndex,
             onDestinationSelected: selectDestination,
           );
         },
       ),
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: dark
-                ? const [Color(0xFF182142), _bg, _bg]
-                : const [Color(0xFFEAE8FF), Color(0xFFF5F6FC)],
-          ),
-        ),
-        child: SafeArea(
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 720),
-              child: ListView(
-                padding: EdgeInsets.fromLTRB(
-                  horizontalPadding,
-                  12,
-                  horizontalPadding,
-                  28,
-                ),
-                children: [
-                  Row(
+      body: Navigator(
+        key: shellNavigatorKey,
+        onGenerateRoute: (routeSettings) => MaterialPageRoute<void>(
+          settings: routeSettings,
+          builder: (_) => Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: dark
+                    ? const [Color(0xFF182142), _bg, _bg]
+                    : const [Color(0xFFEAE8FF), Color(0xFFF5F6FC)],
+              ),
+            ),
+            child: SafeArea(
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 720),
+                  child: ListView(
+                    padding: EdgeInsets.fromLTRB(
+                      horizontalPadding,
+                      12,
+                      horizontalPadding,
+                      28,
+                    ),
                     children: [
-                      Container(
-                        width: 42,
-                        height: 42,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(12),
-                          gradient: const LinearGradient(
-                            colors: [_purple, Color(0xFF6651D9)],
+                      Row(
+                        children: [
+                          Container(
+                            width: 42,
+                            height: 42,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12),
+                              gradient: const LinearGradient(
+                                colors: [_purple, Color(0xFF6651D9)],
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: _purple.withValues(alpha: .25),
+                                  blurRadius: 18,
+                                  offset: const Offset(0, 7),
+                                ),
+                              ],
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: Image.asset(
+                                'assets/gtn1/gtn-app-logo.png',
+                                width: 42,
+                                height: 42,
+                                fit: BoxFit.contain,
+                              ),
+                            ),
                           ),
-                          boxShadow: [
+                          const SizedBox(width: 11),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Guess The Number',
+                                  style: TextStyle(
+                                    color: foreground,
+                                    fontFamily: 'SpaceGrotesk',
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 7,
+                            ),
+                            decoration: BoxDecoration(
+                              color: foreground.withValues(alpha: .06),
+                              borderRadius: BorderRadius.circular(99),
+                              border: Border.all(
+                                color: foreground.withValues(alpha: .08),
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(
+                                  Icons.cloud_off_rounded,
+                                  color: _green,
+                                  size: 12,
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  'OFFLINE',
+                                  style: TextStyle(
+                                    color: muted,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: 1,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 18),
+                      Container(
+                        padding: EdgeInsets.all(compact ? 21 : 25),
+                        constraints: BoxConstraints(
+                          minHeight: compact ? 190 : 205,
+                        ),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(32),
+                          gradient: const LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              Color(0xFF292750),
+                              Color(0xFF171B35),
+                              Color(0xFF10172B),
+                            ],
+                          ),
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: .1),
+                          ),
+                          boxShadow: const [
                             BoxShadow(
-                              color: _purple.withValues(alpha: .25),
-                              blurRadius: 18,
-                              offset: const Offset(0, 7),
+                              color: Color(0x33000000),
+                              blurRadius: 28,
+                              offset: Offset(0, 14),
                             ),
                           ],
                         ),
                         child: ClipRRect(
-                          borderRadius: BorderRadius.circular(12),
-                          child: Image.asset(
-                            'assets/gtn1/gtn-app-logo.png',
-                            width: 42,
-                            height: 42,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 11),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Guess The Number',
-                              style: TextStyle(
-                                color: foreground,
-                                fontFamily: 'SpaceGrotesk',
-                                fontSize: 18,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 7,
-                        ),
-                        decoration: BoxDecoration(
-                          color: foreground.withValues(alpha: .06),
-                          borderRadius: BorderRadius.circular(99),
-                          border: Border.all(
-                            color: foreground.withValues(alpha: .08),
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.circle, color: _green, size: 7),
-                            const SizedBox(width: 6),
-                            Text(
-                              'ONLINE',
-                              style: TextStyle(
-                                color: muted,
-                                fontSize: 8,
-                                fontWeight: FontWeight.w900,
-                                letterSpacing: 1,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 18),
-                  Container(
-                    padding: EdgeInsets.all(compact ? 21 : 25),
-                    constraints: BoxConstraints(minHeight: compact ? 190 : 205),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(32),
-                      gradient: const LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          Color(0xFF292750),
-                          Color(0xFF171B35),
-                          Color(0xFF10172B),
-                        ],
-                      ),
-                      border: Border.all(
-                        color: Colors.white.withValues(alpha: .1),
-                      ),
-                      boxShadow: const [
-                        BoxShadow(
-                          color: Color(0x33000000),
-                          blurRadius: 28,
-                          offset: Offset(0, 14),
-                        ),
-                      ],
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(32),
-                      child: Stack(
-                        children: [
-                          Positioned(
-                            right: -80,
-                            top: -95,
-                            child: Container(
-                              width: 220,
-                              height: 220,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                gradient: RadialGradient(
-                                  colors: [
-                                    _cyan.withValues(alpha: .24),
-                                    _cyan.withValues(alpha: 0),
-                                  ],
+                          borderRadius: BorderRadius.circular(32),
+                          child: Stack(
+                            children: [
+                              Positioned(
+                                right: -80,
+                                top: -95,
+                                child: Container(
+                                  width: 220,
+                                  height: 220,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    gradient: RadialGradient(
+                                      colors: [
+                                        _cyan.withValues(alpha: .24),
+                                        _cyan.withValues(alpha: 0),
+                                      ],
+                                    ),
+                                  ),
                                 ),
                               ),
-                            ),
-                          ),
-                          const Positioned(
-                            right: 24,
-                            top: 28,
-                            child: _HeroSparkle(size: 5, opacity: .8),
-                          ),
-                          const Positioned(
-                            right: 12,
-                            top: 88,
-                            child: _HeroSparkle(size: 4, opacity: .55),
-                          ),
-                          const Positioned(
-                            right: 78,
-                            bottom: 26,
-                            child: _HeroSparkle(size: 5, opacity: .7),
-                          ),
-                          const Positioned(
-                            right: 132,
-                            top: 44,
-                            child: _HeroSparkle(size: 3, opacity: .45),
-                          ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Row(
+                              const Positioned(
+                                right: 24,
+                                top: 28,
+                                child: _HeroSparkle(size: 5, opacity: .8),
+                              ),
+                              const Positioned(
+                                right: 12,
+                                top: 88,
+                                child: _HeroSparkle(size: 4, opacity: .55),
+                              ),
+                              const Positioned(
+                                right: 78,
+                                bottom: 26,
+                                child: _HeroSparkle(size: 5, opacity: .7),
+                              ),
+                              const Positioned(
+                                right: 132,
+                                top: 44,
+                                child: _HeroSparkle(size: 3, opacity: .45),
+                              ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Icon(Icons.circle, color: _green, size: 8),
-                                  SizedBox(width: 7),
-                                  Text(
-                                    'CURRENT RUN',
+                                  const Row(
+                                    children: [
+                                      Icon(
+                                        Icons.circle,
+                                        color: _green,
+                                        size: 8,
+                                      ),
+                                      SizedBox(width: 7),
+                                      Text(
+                                        'CURRENT RUN',
+                                        style: TextStyle(
+                                          color: Color(0xFF9BA5C4),
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w900,
+                                          letterSpacing: 1.7,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 16),
+                                  const Text(
+                                    'Find your secret number',
                                     style: TextStyle(
                                       color: Color(0xFF9BA5C4),
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w900,
-                                      letterSpacing: 1.7,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  ShaderMask(
+                                    shaderCallback: (bounds) =>
+                                        const LinearGradient(
+                                          colors: [Colors.white, _cyan],
+                                        ).createShader(bounds),
+                                    child: Text(
+                                      '${game.minimum} — ${game.maximum}',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: compact ? 35 : 42,
+                                        height: 1,
+                                        fontWeight: FontWeight.w900,
+                                        letterSpacing: -2.5,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 15),
+                                  Text(
+                                    message,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      color: Color(0xFFD2D9F0),
+                                      fontSize: 13,
+                                      height: 1.4,
                                     ),
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 16),
-                              const Text(
-                                'Find your secret number',
-                                style: TextStyle(
-                                  color: Color(0xFF9BA5C4),
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              ShaderMask(
-                                shaderCallback: (bounds) =>
-                                    const LinearGradient(
-                                      colors: [Colors.white, _cyan],
-                                    ).createShader(bounds),
-                                child: Text(
-                                  '${game.minimum} — ${game.maximum}',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: compact ? 35 : 42,
-                                    height: 1,
-                                    fontWeight: FontWeight.w900,
-                                    letterSpacing: -2.5,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 15),
-                              Text(
-                                message,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  color: Color(0xFFD2D9F0),
-                                  fontSize: 13,
-                                  height: 1.4,
-                                ),
-                              ),
                             ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      _GuessInput(
+                        game: game,
+                        controller: controller,
+                        enabled: !loading && !game.isComplete,
+                        completed: game.isComplete,
+                        onGuess: onGuess,
+                        panel: panel,
+                        raised: raised,
+                        line: line,
+                        foreground: foreground,
+                        muted: muted,
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _Stat(
+                              Icons.bolt_rounded,
+                              game.attempts.toString(),
+                              'ATTEMPTS',
+                              _cyan,
+                              panel,
+                              line,
+                              foreground,
+                              muted,
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: _Stat(
+                              Icons.check_circle_rounded,
+                              progression.correctGuesses.toString(),
+                              'CORRECT',
+                              _gold,
+                              panel,
+                              line,
+                              foreground,
+                              muted,
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: _Stat(
+                              Icons.local_fire_department_rounded,
+                              progression.currentStreak.toString(),
+                              'STREAK',
+                              _green,
+                              panel,
+                              line,
+                              foreground,
+                              muted,
+                            ),
                           ),
                         ],
                       ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  _BotArena(
-                    progression: progression,
-                    onOpenShop: onNebulaShop,
-                    panel: panel,
-                    line: line,
-                    foreground: foreground,
-                    muted: muted,
-                  ),
-                  const SizedBox(height: 12),
-                  _GuessInput(
-                    game: game,
-                    controller: controller,
-                    enabled: !loading && !game.isComplete,
-                    completed: game.isComplete,
-                    onGuess: onGuess,
-                    panel: panel,
-                    raised: raised,
-                    line: line,
-                    foreground: foreground,
-                    muted: muted,
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _Stat(
-                          Icons.bolt_rounded,
-                          game.attempts.toString(),
-                          'ATTEMPTS',
-                          _cyan,
-                          panel,
-                          line,
-                          foreground,
-                          muted,
-                        ),
+                      const SizedBox(height: 12),
+                      _Wallet(
+                        progression,
+                        panel,
+                        raised,
+                        line,
+                        foreground,
+                        muted,
                       ),
-                      const SizedBox(width: 6),
-                      Expanded(
-                        child: _Stat(
-                          Icons.check_circle_rounded,
-                          progression.correctGuesses.toString(),
-                          'CORRECT',
-                          _gold,
-                          panel,
-                          line,
-                          foreground,
-                          muted,
-                        ),
+                      const SizedBox(height: 12),
+                      _BotArena(
+                        progression: progression,
+                        onOpenShop: onNebulaShop,
+                        panel: panel,
+                        line: line,
+                        foreground: foreground,
+                        muted: muted,
                       ),
-                      const SizedBox(width: 6),
-                      Expanded(
-                        child: _Stat(
-                          Icons.local_fire_department_rounded,
-                          progression.currentStreak.toString(),
-                          'STREAK',
-                          _green,
-                          panel,
-                          line,
-                          foreground,
-                          muted,
-                        ),
+                      const SizedBox(height: 12),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _Action(
+                              'Beyond the Numbers',
+                              'Explore your progression',
+                              Icons.public_rounded,
+                              _cyan,
+                              onWorldMap,
+                              panel,
+                              line,
+                              foreground,
+                              muted,
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: _Action(
+                              'Daily Momentum',
+                              'Keep the streak alive',
+                              Icons.auto_awesome_rounded,
+                              _gold,
+                              onLegacyPages,
+                              panel,
+                              line,
+                              foreground,
+                              muted,
+                            ),
+                          ),
+                        ],
                       ),
+                      if (game.isComplete) ...[
+                        const SizedBox(height: 12),
+                        M3EButton.icon(
+                          style: M3EButtonStyle.filled,
+                          onPressed: loading ? null : onNewGame,
+                          icon: const Icon(Icons.refresh_rounded),
+                          label: const Text('Start another round'),
+                        ),
+                      ],
                     ],
                   ),
-                  const SizedBox(height: 12),
-                  _Wallet(progression, panel, raised, line, foreground, muted),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _Action(
-                          'Beyond the Numbers',
-                          'Explore your progression',
-                          Icons.public_rounded,
-                          _cyan,
-                          onWorldMap,
-                          panel,
-                          line,
-                          foreground,
-                          muted,
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: _Action(
-                          'Daily Momentum',
-                          'Keep the streak alive',
-                          Icons.auto_awesome_rounded,
-                          _gold,
-                          onLegacyPages,
-                          panel,
-                          line,
-                          foreground,
-                          muted,
-                        ),
-                      ),
-                    ],
-                  ),
-                  if (game.isComplete) ...[
-                    const SizedBox(height: 12),
-                    M3EButton.icon(
-                      style: M3EButtonStyle.filled,
-                      onPressed: loading ? null : onNewGame,
-                      icon: const Icon(Icons.refresh_rounded),
-                      label: const Text('Start another round'),
-                    ),
-                  ],
-                ],
+                ),
               ),
             ),
           ),
@@ -618,7 +662,7 @@ class _BotArena extends StatelessWidget {
                       'AUTOMATION LAB',
                       style: TextStyle(
                         color: muted,
-                        fontSize: 9,
+                        fontSize: 10,
                         fontWeight: FontWeight.w900,
                         letterSpacing: 1.3,
                       ),
@@ -645,7 +689,7 @@ class _BotArena extends StatelessWidget {
                   countLabel,
                   style: const TextStyle(
                     color: _purple,
-                    fontSize: 8,
+                    fontSize: 10,
                     fontWeight: FontWeight.w900,
                   ),
                 ),
@@ -719,6 +763,9 @@ class _MoreMenuPage extends StatelessWidget {
     required this.onMusic,
     required this.onLuckyStake,
     required this.onSystems,
+    required this.onSystemsView,
+    required this.onLegacySection,
+    required this.onUpgradeShop,
   });
 
   final GameSettings settings;
@@ -734,6 +781,9 @@ class _MoreMenuPage extends StatelessWidget {
   final VoidCallback onMusic;
   final VoidCallback onLuckyStake;
   final VoidCallback onSystems;
+  final ValueChanged<LegacySystemsView> onSystemsView;
+  final ValueChanged<LegacySection> onLegacySection;
+  final VoidCallback onUpgradeShop;
 
   Color _destinationColor(String? hex) {
     if (hex == null || hex.isEmpty) return _purple;
@@ -817,37 +867,61 @@ class _MoreMenuPage extends StatelessWidget {
             icon: Icons.emoji_events_rounded,
             title: 'Achievements',
             subtitle: 'Journey progress and rewards',
-            onTap: onLegacyPages,
+            onTap: () => onLegacySection(LegacySection.journey),
+          ),
+          'rewards': (
+            icon: Icons.card_giftcard_rounded,
+            title: 'Rewards',
+            subtitle: 'Achievements and daily rewards',
+            onTap: () => onLegacySection(LegacySection.rewards),
+          ),
+          'journey': (
+            icon: Icons.timeline_rounded,
+            title: 'Journey',
+            subtitle: 'Your run history and progress',
+            onTap: () => onLegacySection(LegacySection.journey),
+          ),
+          'shop': (
+            icon: Icons.storefront_rounded,
+            title: 'Shop',
+            subtitle: 'Browse upgrades',
+            onTap: onUpgradeShop,
           ),
           'mutators': (
             icon: Icons.tune_rounded,
             title: 'Mutators',
-            subtitle: 'Open the gameplay systems hub',
-            onTap: onSystems,
+            subtitle: 'Customize challenge rules',
+            onTap: () => onSystemsView(LegacySystemsView.mutators),
           ),
           'talent': (
             icon: Icons.psychology_alt_rounded,
             title: 'Talents',
-            subtitle: 'Open the gameplay systems hub',
-            onTap: onSystems,
+            subtitle: 'Build your talent path',
+            onTap: () => onSystemsView(LegacySystemsView.talents),
+          ),
+          'traits': (
+            icon: Icons.auto_awesome_rounded,
+            title: 'Traits',
+            subtitle: 'Choose gameplay traits and variants',
+            onTap: () => onSystemsView(LegacySystemsView.traits),
           ),
           'relics': (
             icon: Icons.auto_awesome_rounded,
             title: 'Relics',
-            subtitle: 'Open the gameplay systems hub',
-            onTap: onSystems,
+            subtitle: 'Manage your relic collection',
+            onTap: () => onSystemsView(LegacySystemsView.relics),
           ),
           'home_base': (
             icon: Icons.home_work_rounded,
             title: 'Home Base',
-            subtitle: 'Open the gameplay systems hub',
-            onTap: onSystems,
+            subtitle: 'Build up your base',
+            onTap: () => onSystemsView(LegacySystemsView.homeBase),
           ),
           'codex': (
             icon: Icons.menu_book_rounded,
             title: 'Codex',
             subtitle: 'Discoveries and lore entries',
-            onTap: onLegacyPages,
+            onTap: () => onLegacySection(LegacySection.codex),
           ),
           'endgame': (
             icon: Icons.flag_rounded,
@@ -865,13 +939,13 @@ class _MoreMenuPage extends StatelessWidget {
             icon: Icons.query_stats_rounded,
             title: 'Statistics',
             subtitle: 'Review your gameplay records',
-            onTap: onLegacyPages,
+            onTap: () => onLegacySection(LegacySection.statistics),
           ),
           'changelog': (
             icon: Icons.history_rounded,
             title: 'Changelog',
             subtitle: 'Review version history',
-            onTap: onLegacyPages,
+            onTap: () => onLegacySection(LegacySection.changelog),
           ),
           'settings': (
             icon: Icons.settings_rounded,
@@ -883,7 +957,7 @@ class _MoreMenuPage extends StatelessWidget {
             icon: Icons.info_outline_rounded,
             title: 'About',
             subtitle: 'Credits, links and app information',
-            onTap: onLegacyPages,
+            onTap: () => onLegacySection(LegacySection.about),
           ),
           'staking': (
             icon: Icons.casino_rounded,
@@ -1008,7 +1082,7 @@ class _Stat extends StatelessWidget {
           label,
           style: TextStyle(
             color: muted,
-            fontSize: 8,
+            fontSize: 10,
             fontWeight: FontWeight.w900,
             letterSpacing: 1,
           ),
@@ -1085,7 +1159,7 @@ class _Wallet extends StatelessWidget {
           'MONEY',
           style: TextStyle(
             color: muted,
-            fontSize: 8,
+            fontSize: 10,
             fontWeight: FontWeight.w900,
             letterSpacing: 1.7,
           ),
@@ -1097,7 +1171,7 @@ class _Wallet extends StatelessWidget {
               'RUN MOMENTUM',
               style: TextStyle(
                 color: muted,
-                fontSize: 8,
+                fontSize: 10,
                 fontWeight: FontWeight.w900,
                 letterSpacing: 1,
               ),
@@ -1107,7 +1181,7 @@ class _Wallet extends StatelessWidget {
               'BEST ${state.bestStreak}',
               style: TextStyle(
                 color: muted,
-                fontSize: 8,
+                fontSize: 10,
                 fontWeight: FontWeight.w900,
               ),
             ),
@@ -1203,7 +1277,7 @@ class _Currency extends StatelessWidget {
           label,
           style: TextStyle(
             color: muted,
-            fontSize: 7,
+            fontSize: 10,
             fontWeight: FontWeight.w900,
             letterSpacing: .8,
           ),
@@ -1271,7 +1345,7 @@ class _GuessInput extends StatelessWidget {
               'WHOLE NUMBER',
               style: TextStyle(
                 color: muted,
-                fontSize: 9,
+                fontSize: 10,
                 fontWeight: FontWeight.w800,
               ),
             ),
@@ -1282,6 +1356,8 @@ class _GuessInput extends StatelessWidget {
           children: [
             Expanded(
               child: Semantics(
+                container: true,
+                excludeSemantics: true,
                 label: 'Your guess',
                 textField: true,
                 child: GtnExpressiveTextField(
@@ -1300,6 +1376,8 @@ class _GuessInput extends StatelessWidget {
               width: MediaQuery.sizeOf(context).width <= 430 ? 100 : 116,
               height: 56,
               child: Semantics(
+                container: true,
+                excludeSemantics: true,
                 label: 'Guess',
                 button: true,
                 enabled: enabled,
@@ -1325,7 +1403,7 @@ class _GuessInput extends StatelessWidget {
             'QUICK PICK',
             style: TextStyle(
               color: muted,
-              fontSize: 9,
+              fontSize: 10,
               fontWeight: FontWeight.w900,
               letterSpacing: 1,
             ),
@@ -1395,11 +1473,18 @@ class _QuickGuessButton extends StatelessWidget {
   final VoidCallback onPressed;
 
   @override
-  Widget build(BuildContext context) => M3EButton.outlined(
-    onPressed: enabled ? onPressed : null,
-    child: Text(
-      label,
-      style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w900),
+  Widget build(BuildContext context) => Semantics(
+    container: true,
+    excludeSemantics: true,
+    label: semanticLabel,
+    button: true,
+    enabled: enabled,
+    child: M3EButton.outlined(
+      onPressed: enabled ? onPressed : null,
+      child: Text(
+        label,
+        style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w900),
+      ),
     ),
   );
 }
@@ -1471,7 +1556,7 @@ class _Action extends StatelessWidget {
                     subtitle,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(color: muted, fontSize: 8, height: 1.2),
+                    style: TextStyle(color: muted, fontSize: 10, height: 1.2),
                   ),
                 ],
               ),

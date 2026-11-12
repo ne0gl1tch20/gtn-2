@@ -3,104 +3,108 @@ import 'package:gtn_2/core/game/game_engine.dart';
 import 'package:gtn_2/core/progression/progression_state.dart';
 import 'package:gtn_2/design/expressive_widgets.dart';
 import 'package:gtn_2/home/game_dashboard_page.dart';
+import 'package:gtn_2/legacy/legacy_systems_page.dart';
 import 'package:gtn_2/settings/game_settings.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
 
-Widget buildDashboard({GameSettings? settings, VoidCallback? onGuess}) => M3EMaterialApp(
-  data: M3EThemeData.light(seedColor: const Color(0xFF7C5CFC)),
-  fontFamily: 'Manrope',
-  autoTheming: false,
-  initialTheme: Brightness.light,
-  home: GameDashboardPage(
-    game: const GameState(secret: 42, attempts: 0, isComplete: false),
-    progression: ProgressionState.initial,
-    settings: settings ?? GameSettings.initial,
-    activeSlot: 1,
-    loading: false,
-    message: 'Make your move.',
-    controller: TextEditingController(),
-    onGuess: onGuess ?? () {},
-    onNewGame: () {},
-    onUpgradeShop: () {},
-    onPrestige: () {},
-    onArcade: () {},
-    onNebulaShop: () {},
-    onWorldMap: () {},
-    onSaveSlots: () {},
-    onSettings: () {},
-    onDeveloperSettings: () {},
-    onLegacyPages: () {},
-    onMusic: () {},
-    onLuckyStake: () {},
-    onSystems: () {},
-    showDeveloperSettings: true,
-  ),
-);
+Widget buildDashboard({
+  GameSettings? settings,
+  VoidCallback? onGuess,
+  GlobalKey<NavigatorState>? shellNavigatorKey,
+  ValueChanged<LegacySystemsView>? onSystemsView,
+}) {
+  final navigatorKey = shellNavigatorKey ?? GlobalKey<NavigatorState>();
+  return M3EMaterialApp(
+    data: M3EThemeData.light(seedColor: const Color(0xFF7C5CFC)),
+    fontFamily: 'Manrope',
+    autoTheming: false,
+    initialTheme: Brightness.light,
+    home: GameDashboardPage(
+      game: const GameState(secret: 42, attempts: 0, isComplete: false),
+      progression: ProgressionState.initial,
+      settings: settings ?? GameSettings.initial,
+      activeSlot: 1,
+      loading: false,
+      message: 'Make your move.',
+      controller: TextEditingController(),
+      onGuess: onGuess ?? () {},
+      onNewGame: () {},
+      onUpgradeShop: () {},
+      onPrestige: () {},
+      onArcade: () {},
+      onNebulaShop: () {},
+      onWorldMap: () {},
+      onSaveSlots: () {},
+      onSettings: () {},
+      onDeveloperSettings: () {},
+      onLegacyPages: () {},
+      onMusic: () {},
+      onLuckyStake: () {},
+      onSystems: () {},
+      showDeveloperSettings: true,
+      shellNavigatorKey: navigatorKey,
+      selectedIndex: 2,
+      onPrimarySelected: (_) {},
+      onSystemsView: onSystemsView ?? (_) {},
+      onLegacySection: (_) {},
+    ),
+  );
+}
 
 void main() {
-  testWidgets('guess controls expose GTN1 accessibility labels and submit action', (
-    WidgetTester tester,
-  ) async {
-    var submitted = 0;
-    await tester.pumpWidget(buildDashboard(onGuess: () => submitted++));
+  testWidgets(
+    'guess controls expose GTN1 accessibility labels and submit action',
+    (WidgetTester tester) async {
+      final semantics = tester.ensureSemantics();
+      var submitted = 0;
+      try {
+        await tester.pumpWidget(buildDashboard(onGuess: () => submitted++));
+        await tester.ensureVisible(find.byKey(const Key('guess-input')));
+        await tester.pumpAndSettle();
 
-    expect(find.bySemanticsLabel('Your guess'), findsOneWidget);
-    expect(find.bySemanticsLabel('Guess'), findsOneWidget);
-    expect(find.bySemanticsLabel('Use lower end of range'), findsOneWidget);
-    expect(find.bySemanticsLabel('Use midpoint of range'), findsOneWidget);
-    expect(find.bySemanticsLabel('Use upper end of range'), findsOneWidget);
-    expect(find.bySemanticsLabel('Clear guess input'), findsOneWidget);
+        expect(find.bySemanticsLabel('Your guess'), findsOneWidget);
+        expect(find.bySemanticsLabel('Guess'), findsOneWidget);
+        expect(find.bySemanticsLabel('Use lower end of range'), findsOneWidget);
+        expect(find.bySemanticsLabel('Use midpoint of range'), findsOneWidget);
+        expect(find.bySemanticsLabel('Use upper end of range'), findsOneWidget);
+        expect(find.bySemanticsLabel('Clear guess input'), findsOneWidget);
 
-    await tester.tap(find.bySemanticsLabel('Guess'));
-    await tester.pump();
-    expect(submitted, 1);
+        await tester.tap(find.bySemanticsLabel('Guess'));
+        await tester.pump();
+        expect(submitted, 1);
 
-    await tester.tap(find.bySemanticsLabel('Use midpoint of range'));
-    await tester.pump();
-    final field = tester.widget<GtnExpressiveTextField>(
-      find.byKey(const Key('guess-input')),
-    );
-    expect(field.controller!.text, '50');
-  });
-
+        await tester.tap(find.bySemanticsLabel('Use midpoint of range'));
+        await tester.pump();
+        final field = tester.widget<GtnExpressiveTextField>(
+          find.byKey(const Key('guess-input')),
+        );
+        expect(field.controller!.text, '50');
+      } finally {
+        semantics.dispose();
+      }
+    },
+  );
 
   testWidgets('shows the HTML-facing dashboard and quick-pick controls', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(buildDashboard());
     expect(find.text('Guess The Number'), findsOneWidget);
-    // The dashboard uses a lazy ListView, so scroll to the wallet before asserting it.
-    await tester.drag(find.byType(ListView).first, const Offset(0, -500));
-    await tester.pumpAndSettle();
-    expect(find.text('YOUR WALLET'), findsOneWidget);
     expect(find.text('Play'), findsOneWidget);
     expect(find.text('Beyond the Numbers'), findsOneWidget);
     expect(find.text('More'), findsOneWidget);
 
+    final scrollable = find.byType(Scrollable).first;
     await tester.scrollUntilVisible(
-      find.text('Daily Momentum'),
-      200,
-      scrollable: find.byType(Scrollable).first,
+      find.text('YOUR GUESS'),
+      180,
+      scrollable: scrollable,
     );
     await tester.pumpAndSettle();
-    expect(find.text('Daily Momentum'), findsOneWidget);
-
-    // Return to the top before checking the Automation Lab above the wallet.
-    await tester.drag(find.byType(ListView).first, const Offset(0, 1000));
-    await tester.pumpAndSettle();
-    await tester.drag(find.byType(ListView).first, const Offset(0, -500));
-    await tester.pumpAndSettle();
-    expect(find.text('AUTOMATION LAB'), findsOneWidget);
-    expect(find.text('Guessing Bots'), findsOneWidget);
-    expect(find.text('NO BOTS YET'), findsOneWidget);
     expect(find.text('YOUR GUESS'), findsOneWidget);
-    expect(find.text('->'), findsOneWidget);
     expect(find.text('QUICK PICK'), findsOneWidget);
-    expect(find.text('LOW END'), findsOneWidget);
-    expect(find.text('MIDPOINT'), findsOneWidget);
-    expect(find.text('HIGH END'), findsOneWidget);
-    expect(find.text('CLEAR'), findsOneWidget);
+    expect(find.text('->'), findsOneWidget);
 
     TextEditingController guessController() => tester
         .widget<GtnExpressiveTextField>(find.byKey(const Key('guess-input')))
@@ -125,6 +129,50 @@ void main() {
     await tester.tap(find.text('CLEAR'));
     await tester.pump();
     expect(guessController().text, isEmpty);
+
+    for (final label in [
+      'YOUR WALLET',
+      'AUTOMATION LAB',
+      'Guessing Bots',
+      'Daily Momentum',
+    ]) {
+      await tester.scrollUntilVisible(
+        find.text(label),
+        180,
+        scrollable: scrollable,
+      );
+      await tester.pumpAndSettle();
+      expect(find.text(label), findsOneWidget);
+    }
+    expect(find.text('NO BOTS YET'), findsOneWidget);
+  });
+
+  testWidgets('More detail pages keep the shell and Back returns to More', (
+    WidgetTester tester,
+  ) async {
+    final shellKey = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(buildDashboard(shellNavigatorKey: shellKey));
+
+    await tester.tap(find.text('More'));
+    await tester.pumpAndSettle();
+    expect(find.text('More Menu'), findsOneWidget);
+
+    shellKey.currentState!.push<void>(
+      MaterialPageRoute<void>(
+        builder: (_) => Scaffold(
+          appBar: AppBar(title: const Text('Traits')),
+          body: const Center(child: Text('Feature detail')),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Feature detail'), findsOneWidget);
+    expect(find.text('More'), findsOneWidget);
+
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    expect(find.text('More Menu'), findsOneWidget);
   });
 
   testWidgets('More follows the saved Menu Studio order and includes tools', (

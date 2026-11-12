@@ -13,10 +13,12 @@ class SettingsPage extends StatelessWidget {
     required this.settings,
     required this.onChanged,
     this.onOpenMenuStudio,
+    this.onReplayTutorial,
   });
   final GameSettings settings;
   final SettingsChanged onChanged;
   final VoidCallback? onOpenMenuStudio;
+  final VoidCallback? onReplayTutorial;
 
   void _update(GameSettings next) => onChanged(next);
 
@@ -324,7 +326,30 @@ class SettingsPage extends StatelessWidget {
             ],
           ),
           _SettingsSection(
-            eyebrow: '07 / DEVELOPER & SAVE',
+            eyebrow: '07 / HELP & TUTORIAL',
+            title: 'Help & Tutorial',
+            description: 'Need a refresher? Nimmy can show you around again.',
+            children: [
+              Material(
+                color: Colors.transparent,
+                child: ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(
+                    Icons.school_rounded,
+                    color: GtnUiTokens.cyan,
+                  ),
+                  title: const Text('Rerun Nimmy tutorial'),
+                  subtitle: const Text(
+                    'Review the main game controls and progression.',
+                  ),
+                  trailing: const Icon(Icons.chevron_right_rounded),
+                  onTap: onReplayTutorial,
+                ),
+              ),
+            ],
+          ),
+          _SettingsSection(
+            eyebrow: '08 / DEVELOPER & SAVE',
             title: 'Developer & Save Preferences',
             description: 'Control diagnostic logging, matching the original GTN1 settings.',
             children: [
@@ -359,7 +384,7 @@ class SettingsPage extends StatelessWidget {
           const Padding(
             padding: EdgeInsets.fromLTRB(8, 10, 8, 0),
             child: Text(
-              'Preferences are saved with your active game profile. Tutorial replay remains a separate migration task.',
+              'Preferences are saved with your active game profile.',
               style: TextStyle(color: GtnUiTokens.muted, fontSize: 11),
             ),
           ),

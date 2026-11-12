@@ -124,7 +124,7 @@ class LegacyHubPage extends StatelessWidget {
                 trailing: const Icon(Icons.chevron_right_rounded),
                 onTap: () => Navigator.of(context).push<void>(
                   MaterialPageRoute<void>(
-                    builder: (_) => _LegacyDetailPage(
+                    builder: (_) => LegacyDetailPage(
                       section: section,
                       progression: progression,
                     ),
@@ -138,8 +138,12 @@ class LegacyHubPage extends StatelessWidget {
   }
 }
 
-class _LegacyDetailPage extends StatelessWidget {
-  const _LegacyDetailPage({required this.section, required this.progression});
+class LegacyDetailPage extends StatelessWidget {
+  const LegacyDetailPage({
+    super.key,
+    required this.section,
+    required this.progression,
+  });
 
   final LegacySection section;
   final ProgressionState progression;
