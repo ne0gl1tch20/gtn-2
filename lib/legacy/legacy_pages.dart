@@ -36,7 +36,10 @@ class LegacyHubPage extends StatelessWidget {
   final int activeSlot;
   final LegacyProgressionChanged onSystemsChanged;
 
-  void _openSystems(BuildContext context, {LegacySystemsView? view}) {
+  void _openSystems(
+    BuildContext context, {
+    LegacySystemsView view = LegacySystemsView.all,
+  }) {
     Navigator.of(context).push<void>(
       MaterialPageRoute<void>(
         builder: (_) => LegacySystemsPage(
