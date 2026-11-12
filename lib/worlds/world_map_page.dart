@@ -1303,4 +1303,3 @@ class _WorldRoutesPainter extends CustomPainter {
       oldDelegate.selectedWorldId != selectedWorldId ||
       oldDelegate.colorScheme != colorScheme;
 }
-Formatted 1 file (1 changed) in 0.04 seconds.
