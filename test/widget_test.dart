@@ -101,34 +101,16 @@ void main() {
     expect(find.text('More'), findsOneWidget);
 
     final scrollable = find.byType(Scrollable).first;
-    for (final label in [
-      'YOUR GUESS',
-      'QUICK PICK',
-      'AUTOMATION LAB',
-      'YOUR WALLET',
-      'Daily Momentum',
-    ]) {
-      await tester.scrollUntilVisible(
-        find.text(label),
-        180,
-        scrollable: scrollable,
-      );
-      await tester.pumpAndSettle();
-      expect(find.text(label), findsOneWidget);
-    }
-
     await tester.scrollUntilVisible(
-      find.text('Guessing Bots'),
+      find.text('YOUR GUESS'),
       180,
       scrollable: scrollable,
     );
-    expect(find.text('NO BOTS YET'), findsOneWidget);
+    await tester.pumpAndSettle();
+    expect(find.text('YOUR GUESS'), findsOneWidget);
+    expect(find.text('QUICK PICK'), findsOneWidget);
+    expect(find.text('->'), findsOneWidget);
 
-    await tester.scrollUntilVisible(
-      find.text('LOW END'),
-      180,
-      scrollable: scrollable,
-    );
     TextEditingController guessController() => tester
         .widget<GtnExpressiveTextField>(find.byKey(const Key('guess-input')))
         .controller!;
@@ -148,6 +130,23 @@ void main() {
     await tester.tap(find.text('CLEAR'));
     await tester.pump();
     expect(guessController().text, isEmpty);
+
+    for (final label in [
+      'YOUR WALLET',
+      'AUTOMATION LAB',
+      'Guessing Bots',
+      'Daily Momentum',
+    ]) {
+      await tester.scrollUntilVisible(
+        find.text(label),
+        180,
+        scrollable: scrollable,
+      );
+      await tester.pumpAndSettle();
+      expect(find.text(label), findsOneWidget);
+    }
+    expect(find.text('NO BOTS YET'), findsOneWidget);
+
   });
 
   testWidgets('More detail pages keep the shell and Back returns to More', (
