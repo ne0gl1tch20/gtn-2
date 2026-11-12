@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "screen": "home_base",
+  "root": {
+    "type": "column",
+    "children": [
+      {"type": "text", "text": "HOME BASE", "fontSize": 28},
+      {"type": "text", "text": "Base upgrades, resources, unlocks and purchases must be read from and committed through the host."},
+      {"type": "button", "text": "OPEN BASE", "action": {"id": "home_base.open"}},
+      {"type": "button", "text": "BACK", "action": {"id": "navigation.back"}}
+    ]
+  }
+}
