@@ -1286,6 +1286,18 @@ class _Wallet extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 10),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(99),
+          child: LinearProgressIndicator(
+            value: state.bestStreak == 0
+                ? 0
+                : (state.currentStreak / state.bestStreak).clamp(0.0, 1.0),
+            minHeight: 8,
+            backgroundColor: raised,
+            color: _purple,
+          ),
+        ),
+        const SizedBox(height: 8),
         Row(
           children: [
             Text(
@@ -1307,18 +1319,6 @@ class _Wallet extends StatelessWidget {
               ),
             ),
           ],
-        ),
-        const SizedBox(height: 8),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(99),
-          child: LinearProgressIndicator(
-            value: state.bestStreak == 0
-                ? 0
-                : (state.currentStreak / state.bestStreak).clamp(0.0, 1.0),
-            minHeight: 8,
-            backgroundColor: raised,
-            color: _purple,
-          ),
         ),
         const SizedBox(height: 13),
         Row(
