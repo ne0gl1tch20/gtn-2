@@ -218,7 +218,8 @@ class _PlayerProfilePageState extends State<PlayerProfilePage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final profileImage = _avatarId == 'custom' && _customAvatarData != null
+    final profileImage =
+        _avatarId == 'custom' && _customAvatarData != null
         ? Image.memory(
             base64Decode(_customAvatarData!.split(',').last),
             fit: BoxFit.cover,
