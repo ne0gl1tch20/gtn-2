@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: validate-${{ github.ref }}
@@ -21,9 +21,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
-          ref: ${{ github.event.pull_request.head.ref || github.ref_name }}
-          token: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
@@ -34,24 +32,9 @@ jobs:
       # Keep CI formatting scoped to Dart sources instead of committing tool-generated config.
       - name: Restore analysis configuration
         run: git restore -- analysis_options.yaml
-      - name: Apply Dart quick fixes
-        run: dart fix --apply
-      - name: Format Dart sources
-        run: dart format .
-      - name: Commit formatting changes
-        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
-        env:
-          TARGET_BRANCH: ${{ github.event.pull_request.head.ref || github.ref_name }}
-        run: |
-          if git diff --quiet -- '*.dart'; then
-            echo "Dart sources are already formatted."
-            exit 0
-          fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -u -- '*.dart'
-          git commit -m "chore: format Dart sources"
-          git push origin "HEAD:${TARGET_BRANCH}"
+      - name: Verify Dart formatting
+        run: dart format --output=none --set-exit-if-changed .
+
 
   validate:
     name: Format, analyze, test and Android debug build
