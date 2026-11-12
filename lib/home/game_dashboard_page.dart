@@ -235,7 +235,7 @@ class GameDashboardPage extends StatelessWidget {
                     children: [
                       LayoutBuilder(
                         builder: (context, constraints) {
-                          final wide = constraints.maxWidth >= 720;
+                          final wide = constraints.maxWidth >= 640;
                           final fullWidth = constraints.maxWidth;
                           final columnWidth = wide
                               ? (fullWidth - 14) / 2
@@ -560,15 +560,12 @@ class GameDashboardPage extends StatelessWidget {
                               if (game.isComplete)
                                 SizedBox(
                                   width: fullWidth,
-                                  child: if (game.isComplete) ...[
-                        const SizedBox(height: 12),
-                        M3EButton.icon(
-                          style: M3EButtonStyle.filled,
-                          onPressed: loading ? null : onNewGame,
-                          icon: const Icon(Icons.refresh_rounded),
-                          label: const Text('Start another round'),
-                        ),
-                      ],,
+                                  child: M3EButton.icon(
+                                    style: M3EButtonStyle.filled,
+                                    onPressed: loading ? null : onNewGame,
+                                    icon: const Icon(Icons.refresh_rounded),
+                                    label: const Text('Start another round'),
+                                  ),
                                 ),
                             ],
                           );
