@@ -463,7 +463,7 @@ class GameDashboardPage extends StatelessWidget {
                               ),
                               SizedBox(
                                 width: columnWidth,
-                                child: 
+                                child: _GuessInput(
                                     game: game,
                                     controller: controller,
                                     enabled: !loading && !game.isComplete,
@@ -478,7 +478,7 @@ class GameDashboardPage extends StatelessWidget {
                               ),
                               SizedBox(
                                 width: columnWidth,
-                                child: 
+                                child: Row(
                                     children: [
                                       Expanded(
                                         child: _Stat(
@@ -523,7 +523,7 @@ class GameDashboardPage extends StatelessWidget {
                               ),
                               SizedBox(
                                 width: columnWidth,
-                                child: 
+                                child: _Wallet(
                                     progression,
                                     panel,
                                     raised,
@@ -534,7 +534,7 @@ class GameDashboardPage extends StatelessWidget {
                               ),
                               SizedBox(
                                 width: fullWidth,
-                                child: 
+                                child: _BotArena(
                                     progression: progression,
                                     onOpenShop: onNebulaShop,
                                     panel: panel,
