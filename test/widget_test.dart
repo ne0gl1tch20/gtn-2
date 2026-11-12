@@ -89,6 +89,10 @@ void main() {
   testWidgets('shows the HTML-facing dashboard and quick-pick controls', (
     WidgetTester tester,
   ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
     await tester.pumpWidget(buildDashboard());
     expect(find.text('Guess The Number'), findsOneWidget);
     expect(find.text('Play'), findsOneWidget);
@@ -103,6 +107,12 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.text('YOUR GUESS'), findsOneWidget);
+    expect(find.text('Guessing Bots'), findsOneWidget);
+    expect(
+      tester.getTopLeft(find.text('Guessing Bots')).dy,
+      lessThan(tester.getTopLeft(find.text('YOUR GUESS')).dy),
+      reason: 'GTN1 places the automation arena before the guess panel.',
+    );
     expect(find.text('QUICK PICK'), findsOneWidget);
     expect(find.byIcon(Icons.arrow_forward_rounded), findsOneWidget);
 
@@ -131,7 +141,7 @@ void main() {
     expect(guessController().text, isEmpty);
 
     for (final label in [
-      'YOUR WALLET',
+      'MONEY',
       'AUTOMATION LAB',
       'Guessing Bots',
       'Daily Momentum',
@@ -175,6 +185,40 @@ void main() {
     expect(find.text('More Menu'), findsOneWidget);
   });
 
+  testWidgets('default More menu keeps GTN1 destination names', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(buildDashboard());
+    await tester.tap(find.text('More').first);
+    await tester.pumpAndSettle();
+
+    expect(find.text('More Menu'), findsOneWidget);
+    for (final label in [
+      'Rewards',
+      'Journey',
+      'Shop',
+      'Home Base',
+      'Relics',
+      'Codex',
+      'Changelog',
+      'Background Music',
+      'Settings',
+      'Prestige',
+      'Ultra',
+      'Talents',
+      'Traits',
+      'Mutators',
+      'Stats',
+      'Lucky Stake',
+    ]) {
+      expect(find.text(label), findsOneWidget);
+    }
+  });
+
   testWidgets('More follows the saved Menu Studio order and includes tools', (
     WidgetTester tester,
   ) async {
@@ -191,11 +235,11 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('More Menu'), findsOneWidget);
-    expect(find.text('Music'), findsOneWidget);
+    expect(find.text('Background Music'), findsOneWidget);
     expect(find.text('Settings'), findsOneWidget);
     expect(find.text('Save Slots'), findsOneWidget);
     expect(
-      tester.getTopLeft(find.text('Music')).dy,
+      tester.getTopLeft(find.text('Background Music')).dy,
       lessThan(tester.getTopLeft(find.text('Settings')).dy),
     );
     expect(

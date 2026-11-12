@@ -486,6 +486,17 @@ class GameDashboardPage extends StatelessWidget {
                                 ),
                               ),
                               SizedBox(
+                                width: fullWidth,
+                                child: _BotArena(
+                                  progression: progression,
+                                  onOpenShop: onNebulaShop,
+                                  panel: panel,
+                                  line: line,
+                                  foreground: foreground,
+                                  muted: muted,
+                                ),
+                              ),
+                              SizedBox(
                                 width: columnWidth,
                                 child: _GuessInput(
                                   game: game,
@@ -554,17 +565,6 @@ class GameDashboardPage extends StatelessWidget {
                                   line,
                                   foreground,
                                   muted,
-                                ),
-                              ),
-                              SizedBox(
-                                width: fullWidth,
-                                child: _BotArena(
-                                  progression: progression,
-                                  onOpenShop: onNebulaShop,
-                                  panel: panel,
-                                  line: line,
-                                  foreground: foreground,
-                                  muted: muted,
                                 ),
                               ),
                               SizedBox(
@@ -940,7 +940,7 @@ class _MoreMenuPage extends StatelessWidget {
         >{
           'world_map': (
             icon: Icons.public_rounded,
-            title: 'World map',
+            title: 'Beyond the Numbers',
             subtitle: 'Explore unlocked worlds and bosses',
             onTap: onWorldMap,
           ),
@@ -1018,7 +1018,7 @@ class _MoreMenuPage extends StatelessWidget {
           ),
           'stats': (
             icon: Icons.query_stats_rounded,
-            title: 'Statistics',
+            title: 'Stats',
             subtitle: 'Review your gameplay records',
             onTap: () => onLegacySection(LegacySection.statistics),
           ),
@@ -1066,7 +1066,7 @@ class _MoreMenuPage extends StatelessWidget {
           ),
           'music': (
             icon: Icons.library_music_rounded,
-            title: 'Music',
+            title: 'Background Music',
             subtitle: 'Offline library, playlists and queue',
             onTap: onMusic,
           ),
@@ -1086,7 +1086,7 @@ class _MoreMenuPage extends StatelessWidget {
     }
 
     return Scaffold(
-      appBar: GtnExpressiveAppBar(title: const Text('More Hub')),
+      appBar: GtnExpressiveAppBar(title: const Text('More')),
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 1000),
@@ -1249,7 +1249,7 @@ class _Wallet extends StatelessWidget {
             ),
             const SizedBox(width: 8),
             Text(
-              'YOUR WALLET',
+              'MONEY',
               style: TextStyle(
                 color: muted,
                 fontSize: 10,
@@ -1274,15 +1274,6 @@ class _Wallet extends StatelessWidget {
             fontSize: 28,
             fontWeight: FontWeight.w900,
             letterSpacing: -.8,
-          ),
-        ),
-        Text(
-          'MONEY',
-          style: TextStyle(
-            color: muted,
-            fontSize: 10,
-            fontWeight: FontWeight.w900,
-            letterSpacing: 1.7,
           ),
         ),
         const SizedBox(height: 10),
