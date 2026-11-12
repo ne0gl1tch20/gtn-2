@@ -1,3 +1,4 @@
+
 import 'package:flutter/services.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
@@ -156,10 +157,7 @@ class GtnPageHeader extends StatelessWidget {
               ],
             ),
           ),
-          if (trailing != null) ...[
-            const SizedBox(width: 10),
-            trailing!,
-          ],
+          if (trailing != null) ...[const SizedBox(width: 10), trailing!],
         ],
       ),
     );
@@ -509,3 +507,4 @@ class GtnExpressiveSnackbar {
     M3ESnackbar.show(context, message: message, duration: duration);
   }
 }
+Formatted 1 file (1 changed) in 0.01 seconds.
