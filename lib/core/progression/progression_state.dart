@@ -2,8 +2,13 @@ import '../legacy/legacy_systems_state.dart';
 import '../numbers/big_number.dart';
 
 const Set<String> _randomEventSaveIds = {
-  'cash_burst', 'nebula_rain', 'jackpot', 'streak_surge',
-  'range_shuffle', 'tax_refund', 'cosmic_gift',
+  'cash_burst',
+  'nebula_rain',
+  'jackpot',
+  'streak_surge',
+  'range_shuffle',
+  'tax_refund',
+  'cosmic_gift',
 };
 
 class ProgressionState {

@@ -134,11 +134,13 @@ void main() {
     });
 
     test('Streak Surge state survives save and reload', () {
-      final surged = RandomEventEngine().apply(
-        progression: ProgressionState(currentStreak: 3, bestStreak: 3),
-        game: game,
-        type: RandomEventType.streakSurge,
-      ).progression;
+      final surged = RandomEventEngine()
+          .apply(
+            progression: ProgressionState(currentStreak: 3, bestStreak: 3),
+            game: game,
+            type: RandomEventType.streakSurge,
+          )
+          .progression;
       final restored = ProgressionState.fromJson(
         Map<String, dynamic>.from(surged.toJson()),
       );

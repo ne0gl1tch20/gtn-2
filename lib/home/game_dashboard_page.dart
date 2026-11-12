@@ -509,7 +509,8 @@ class GameDashboardPage extends StatelessWidget {
                                       const SizedBox(width: 11),
                                       Expanded(
                                         child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           children: [
                                             Text(
                                               'RANDOM EVENT',
