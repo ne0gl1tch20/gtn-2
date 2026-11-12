@@ -63,14 +63,20 @@ void main() {
         await tester.ensureVisible(find.byKey(const Key('guess-input')));
         await tester.pumpAndSettle();
 
-        expect(find.bySemanticsLabel('Your guess'), findsOneWidget);
-        expect(find.bySemanticsLabel('Guess'), findsOneWidget);
-        expect(find.bySemanticsLabel('Use lower end of range'), findsOneWidget);
-        expect(find.bySemanticsLabel('Use midpoint of range'), findsOneWidget);
-        expect(find.bySemanticsLabel('Use upper end of range'), findsOneWidget);
-        expect(find.bySemanticsLabel('Clear guess input'), findsOneWidget);
+        Finder semanticsWithLabel(String label) => find.byWidgetPredicate(
+          (widget) =>
+              widget is Semantics && widget.properties.label == label,
+          description: 'Semantics(label: $label)',
+        );
 
-        await tester.tap(find.bySemanticsLabel('Guess'));
+        expect(semanticsWithLabel('Your guess'), findsOneWidget);
+        expect(semanticsWithLabel('Guess'), findsOneWidget);
+        expect(semanticsWithLabel('Use lower end of range'), findsOneWidget);
+        expect(semanticsWithLabel('Use midpoint of range'), findsOneWidget);
+        expect(semanticsWithLabel('Use upper end of range'), findsOneWidget);
+        expect(semanticsWithLabel('Clear guess input'), findsOneWidget);
+
+        await tester.tap(find.text('->'));
         await tester.pump();
         expect(submitted, 1);
 
@@ -91,68 +97,55 @@ void main() {
   ) async {
     await tester.pumpWidget(buildDashboard());
     expect(find.text('Guess The Number'), findsOneWidget);
-    // The dashboard uses a lazy ListView, so scroll to the wallet before asserting it.
-    await tester.drag(find.byType(ListView).first, const Offset(0, -500));
-    await tester.pumpAndSettle();
-    expect(find.text('YOUR WALLET'), findsOneWidget);
     expect(find.text('Play'), findsOneWidget);
     expect(find.text('Beyond the Numbers'), findsOneWidget);
     expect(find.text('More'), findsOneWidget);
 
-    await tester.scrollUntilVisible(
-      find.text('Daily Momentum'),
-      200,
-      scrollable: find.byType(Scrollable).first,
-    );
-    await tester.pumpAndSettle();
-    expect(find.text('Daily Momentum'), findsOneWidget);
+    final scrollable = find.byType(Scrollable).first;
+    for (final label in [
+      'YOUR GUESS',
+      'QUICK PICK',
+      'AUTOMATION LAB',
+      'YOUR WALLET',
+      'Daily Momentum',
+    ]) {
+      await tester.scrollUntilVisible(
+        find.text(label),
+        180,
+        scrollable: scrollable,
+      );
+      await tester.pumpAndSettle();
+      expect(find.text(label), findsOneWidget);
+    }
 
-    // Return to the top before checking the Automation Lab above the wallet.
-    await tester.drag(find.byType(ListView).first, const Offset(0, 1000));
-    await tester.pumpAndSettle();
-    await tester.drag(find.byType(ListView).first, const Offset(0, -500));
-    await tester.pumpAndSettle();
-    expect(find.text('AUTOMATION LAB'), findsOneWidget);
-    expect(find.text('Guessing Bots'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('Guessing Bots'),
+      180,
+      scrollable: scrollable,
+    );
     expect(find.text('NO BOTS YET'), findsOneWidget);
 
-    // The primary guess panel is now above the wallet and Automation Lab.
-    await tester.drag(find.byType(ListView).first, const Offset(0, 1000));
-    await tester.pumpAndSettle();
     await tester.scrollUntilVisible(
-      find.text('YOUR GUESS'),
-      150,
-      scrollable: find.byType(Scrollable).first,
+      find.text('LOW END'),
+      180,
+      scrollable: scrollable,
     );
-    await tester.pumpAndSettle();
-    expect(find.text('YOUR GUESS'), findsOneWidget);
-    expect(find.text('->'), findsOneWidget);
-    expect(find.text('QUICK PICK'), findsOneWidget);
-    expect(find.text('LOW END'), findsOneWidget);
-    expect(find.text('MIDPOINT'), findsOneWidget);
-    expect(find.text('HIGH END'), findsOneWidget);
-    expect(find.text('CLEAR'), findsOneWidget);
-
     TextEditingController guessController() => tester
         .widget<GtnExpressiveTextField>(find.byKey(const Key('guess-input')))
         .controller!;
 
-    await tester.ensureVisible(find.text('LOW END'));
     await tester.tap(find.text('LOW END'));
     await tester.pump();
     expect(guessController().text, '1');
 
-    await tester.ensureVisible(find.text('MIDPOINT'));
     await tester.tap(find.text('MIDPOINT'));
     await tester.pump();
     expect(guessController().text, '50');
 
-    await tester.ensureVisible(find.text('HIGH END'));
     await tester.tap(find.text('HIGH END'));
     await tester.pump();
     expect(guessController().text, '100');
 
-    await tester.ensureVisible(find.text('CLEAR'));
     await tester.tap(find.text('CLEAR'));
     await tester.pump();
     expect(guessController().text, isEmpty);
@@ -161,12 +154,16 @@ void main() {
   testWidgets('More detail pages keep the shell and Back returns to More', (
     WidgetTester tester,
   ) async {
-    final shellKey = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
       buildDashboard(
-        shellNavigatorKey: shellKey,
         onSystemsView: (view) {
-          shellKey.currentState!.push<void>(
+          final shellNavigator = tester.state<NavigatorState>(
+            find.descendant(
+              of: find.byType(GameDashboardPage),
+              matching: find.byType(Navigator),
+            ),
+          );
+          shellNavigator.push<void>(
             MaterialPageRoute<void>(
               builder: (_) => Scaffold(
                 appBar: AppBar(title: Text(view.name)),
@@ -178,7 +175,7 @@ void main() {
       ),
     );
 
-    await tester.tap(find.text('More'));
+    await tester.tap(find.text('More').last);
     await tester.pumpAndSettle();
     expect(find.text('More Menu'), findsOneWidget);
 
