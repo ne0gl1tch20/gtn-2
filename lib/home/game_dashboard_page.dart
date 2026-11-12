@@ -807,23 +807,32 @@ class _MoreMenuPage extends StatelessWidget {
     ) {
       return GtnExpressiveCard(
         color: panel,
-        margin: const EdgeInsets.only(bottom: 10),
+        margin: const EdgeInsets.only(bottom: 12),
+        elevation: 1,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(18),
-          side: BorderSide(color: accent.withValues(alpha: .22)),
+          borderRadius: BorderRadius.circular(24),
+          side: BorderSide(color: accent.withValues(alpha: .24)),
         ),
         child: Material(
           color: Colors.transparent,
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(24),
           child: InkWell(
-            borderRadius: BorderRadius.circular(18),
+            borderRadius: BorderRadius.circular(24),
             onTap: onTap,
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 13),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
               child: Row(
                 children: [
-                  Icon(icon, color: accent),
-                  const SizedBox(width: 14),
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: accent.withValues(alpha: dark ? .16 : .11),
+                      borderRadius: BorderRadius.circular(18),
+                    ),
+                    child: Icon(icon, color: accent, size: 23),
+                  ),
+                  const SizedBox(width: 15),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -832,18 +841,37 @@ class _MoreMenuPage extends StatelessWidget {
                           title,
                           style: TextStyle(
                             color: foreground,
+                            fontSize: 14,
                             fontWeight: FontWeight.w800,
+                            letterSpacing: -.2,
                           ),
                         ),
-                        const SizedBox(height: 3),
+                        const SizedBox(height: 4),
                         Text(
                           subtitle,
-                          style: TextStyle(color: muted, fontSize: 11),
+                          style: TextStyle(
+                            color: muted,
+                            fontSize: 12,
+                            height: 1.3,
+                          ),
                         ),
                       ],
                     ),
                   ),
-                  Icon(Icons.chevron_right_rounded, color: muted),
+                  const SizedBox(width: 8),
+                  Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: accent.withValues(alpha: .10),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.arrow_forward_rounded,
+                      color: accent,
+                      size: 17,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -1009,9 +1037,71 @@ class _MoreMenuPage extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Text('More Menu', style: Theme.of(context).textTheme.headlineSmall),
-          const SizedBox(height: 5),
-          Text('Your shortcuts, your order.', style: TextStyle(color: muted)),
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(28),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: dark
+                    ? const [Color(0xFF30295D), Color(0xFF171F36)]
+                    : const [Color(0xFFE9E4FF), Color(0xFFF3F0FF)],
+              ),
+              border: Border.all(
+                color: _purple.withValues(alpha: dark ? .28 : .18),
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 52,
+                  height: 52,
+                  decoration: BoxDecoration(
+                    color: _purple.withValues(alpha: .16),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: const Icon(
+                    Icons.grid_view_rounded,
+                    color: _purple,
+                    size: 27,
+                  ),
+                ),
+                const SizedBox(width: 15),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'EXPLORE GTN2',
+                        style: TextStyle(
+                          color: muted,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 1.4,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'More Menu',
+                        style: TextStyle(
+                          color: foreground,
+                          fontSize: 22,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: -.7,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Your shortcuts, your order.',
+                        style: TextStyle(color: muted, fontSize: 12),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
           const SizedBox(height: 18),
           for (final id in orderedIds)
             entry(
