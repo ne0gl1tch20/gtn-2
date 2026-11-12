@@ -87,15 +87,32 @@ class _PermanentUpgradeShopPageState extends State<PermanentUpgradeShopPage> {
             ),
           ),
           const SizedBox(height: 8),
-          for (final upgrade in _catalog)
-            _PermanentUpgradeCard(
-              upgrade: upgrade,
-              level: _level(upgrade.definition.id),
-              balance: _balance,
-              currency: currency,
-              busy: _buyingId != null,
-              onBuy: () => _buy(upgrade),
-            ),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final columns = constraints.maxWidth >= 760 ? 2 : 1;
+              const spacing = 12.0;
+              final width =
+                  (constraints.maxWidth - spacing * (columns - 1)) / columns;
+              return Wrap(
+                spacing: spacing,
+                runSpacing: 0,
+                children: [
+                  for (final upgrade in _catalog)
+                    SizedBox(
+                      width: width,
+                      child: _PermanentUpgradeCard(
+                        upgrade: upgrade,
+                        level: _level(upgrade.definition.id),
+                        balance: _balance,
+                        currency: currency,
+                        busy: _buyingId != null,
+                        onBuy: () => _buy(upgrade),
+                      ),
+                    ),
+                ],
+              );
+            },
+          ),
         ],
       ),
     );
