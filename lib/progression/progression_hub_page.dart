@@ -175,4 +175,3 @@ class _ProgressionHubPageState extends State<ProgressionHubPage> {
     );
   }
 }
-Formatted 1 file (1 changed) in 0.01 seconds.
