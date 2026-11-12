@@ -117,6 +117,14 @@ void main() {
         expect(find.bySemanticsLabel('Use upper end of range'), findsOneWidget);
         expect(find.bySemanticsLabel('Clear guess input'), findsOneWidget);
 
+        await tester.tap(find.byKey(const Key('guess-input')));
+        await tester.enterText(find.byKey(const Key('guess-input')), '73');
+        await tester.pump();
+        final typedField = tester.widget<GtnExpressiveTextField>(
+          find.byKey(const Key('guess-input')),
+        );
+        expect(typedField.controller!.text, '73');
+
         await tester.tap(find.bySemanticsLabel('Guess'));
         await tester.pump();
         expect(submitted, 1);
