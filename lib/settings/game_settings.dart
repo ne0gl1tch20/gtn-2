@@ -46,10 +46,11 @@ class GameSettings {
       'traits',
       'mutators',
       'stats',
+      'staking',
+      // GTN2-only destinations remain available after the GTN1 menu flow.
       'world_map',
       'arcade',
       'nebula',
-      'staking',
       'save_slots',
     ],
     this.moreScreenButtonColors = const {},
