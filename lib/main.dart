@@ -151,6 +151,9 @@ class _GameHomePageState extends State<GameHomePage>
   late GameState _game = _createGame();
   late Future<SaveStorage> _storage = SaveStorage.inApplicationDocuments();
   int _activeSlot = 1;
+  int _selectedPrimaryIndex = 2;
+  final GlobalKey<NavigatorState> _shellNavigatorKey =
+      GlobalKey<NavigatorState>();
   int _gamesWon = 0;
   bool _isLoading = true;
   String _message = 'Make your move.';
@@ -513,7 +516,7 @@ class _GameHomePageState extends State<GameHomePage>
   }
 
   Future<void> _openProgressionHub() async {
-    await Navigator.of(context).push<void>(
+    await _shellNavigatorKey.currentState!.push<void>(
       MaterialPageRoute<void>(
         builder: (_) => ProgressionHubPage(
           progression: _progression,
@@ -543,7 +546,7 @@ class _GameHomePageState extends State<GameHomePage>
   }
 
   Future<void> _openArcade() async {
-    await Navigator.of(context).push<void>(
+    await _shellNavigatorKey.currentState!.push<void>(
       MaterialPageRoute<void>(
         builder: (_) => ArcadePage(onReward: _awardArcadeReward),
       ),
@@ -695,7 +698,7 @@ class _GameHomePageState extends State<GameHomePage>
   }
 
   Future<void> _openNebulaShop() async {
-    await Navigator.of(context).push<void>(
+    await _shellNavigatorKey.currentState!.push<void>(
       MaterialPageRoute<void>(
         builder: (_) => NebulaShopPage(
           progression: _progression,
@@ -747,7 +750,7 @@ class _GameHomePageState extends State<GameHomePage>
   }
 
   Future<void> _openWorldMap() async {
-    await Navigator.of(context).push<void>(
+    await _shellNavigatorKey.currentState!.push<void>(
       MaterialPageRoute<void>(
         builder: (_) =>
             WorldMapPage(progression: _progression, onAction: _worldBossAction),
@@ -857,7 +860,7 @@ class _GameHomePageState extends State<GameHomePage>
   }
 
   Future<void> _openSaveSlots() async {
-    await Navigator.of(context).push<void>(
+    await _shellNavigatorKey.currentState!.push<void>(
       MaterialPageRoute<void>(
         builder: (_) =>
             SaveSlotsPage(activeSlot: _activeSlot, onSelect: _switchSaveSlot),
@@ -895,20 +898,57 @@ class _GameHomePageState extends State<GameHomePage>
     await _persist();
   }
 
+  void _onPrimarySelected(int index) {
+    setState(() => _selectedPrimaryIndex = index);
+  }
+
+  Future<void> _showNimmyTutorial() async {
+    var step = 0;
+    const steps = <({String title, String body})>[
+      (title: 'Welcome to Guess The Number', body: 'Find the hidden number. Use the current range and feedback to narrow it down.'),
+      (title: 'Make a guess', body: 'Enter a number and press GUESS. A low or high result helps you narrow the range.'),
+      (title: 'Use quick picks', body: 'LOW END, MIDPOINT and HIGH END fill the guess field. CLEAR empties it.'),
+      (title: 'Grow your run', body: 'Earn Money, unlock upgrades and explore Arcade, Beyond the Numbers and More.'),
+    ];
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, update) => AlertDialog(
+          title: Text('Nimmy · ${steps[step].title}'),
+          content: Text(steps[step].body),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(dialogContext), child: const Text('Close')),
+            FilledButton(
+              onPressed: () {
+                if (step == steps.length - 1) {
+                  Navigator.pop(dialogContext);
+                } else {
+                  update(() => step++);
+                }
+              },
+              child: Text(step == steps.length - 1 ? 'Finish' : 'Next'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Future<void> _openSettings() async {
-    await Navigator.of(context).push<void>(
+    await _shellNavigatorKey.currentState!.push<void>(
       MaterialPageRoute<void>(
         builder: (_) => SettingsPage(
           settings: _settings,
           onChanged: _updateSettings,
           onOpenMenuStudio: _openMenuStudio,
+          onReplayTutorial: _showNimmyTutorial,
         ),
       ),
     );
   }
 
   Future<void> _openMenuStudio() async {
-    await Navigator.of(context).push<void>(
+    await _shellNavigatorKey.currentState!.push<void>(
       MaterialPageRoute<void>(
         builder: (_) =>
             MenuStudioPage(settings: _settings, onChanged: _updateSettings),
@@ -1028,7 +1068,7 @@ class _GameHomePageState extends State<GameHomePage>
   }
 
   Future<void> _openDeveloperSettings() async {
-    await Navigator.of(context).push<void>(
+    await _shellNavigatorKey.currentState!.push<void>(
       MaterialPageRoute<void>(
         builder: (_) => DeveloperSettingsPage(
           save: _currentSaveData(),
@@ -1075,7 +1115,7 @@ class _GameHomePageState extends State<GameHomePage>
   }
 
   Future<void> _openLegacyPages() async {
-    await Navigator.of(context).push<void>(
+    await _shellNavigatorKey.currentState!.push<void>(
       MaterialPageRoute<void>(
         builder: (_) => LegacyHubPage(
           progression: _progression,
@@ -1087,8 +1127,19 @@ class _GameHomePageState extends State<GameHomePage>
     _scheduleAutoClicker();
   }
 
+  Future<void> _openLegacySection(LegacySection section) async {
+    await _shellNavigatorKey.currentState!.push<void>(
+      MaterialPageRoute<void>(
+        builder: (_) => LegacyDetailPage(
+          section: section,
+          progression: _progression,
+        ),
+      ),
+    );
+  }
+
   Future<void> _openLegacySystems(LegacySystemsView view) async {
-    await Navigator.of(context).push<void>(
+    await _shellNavigatorKey.currentState!.push<void>(
       MaterialPageRoute<void>(
         builder: (_) => LegacySystemsPage(
           progression: _progression,
@@ -1108,7 +1159,7 @@ class _GameHomePageState extends State<GameHomePage>
       _openLegacySystems(LegacySystemsView.luckyStake);
 
   Future<void> _openUpgradeShop() async {
-    await Navigator.of(context).push<void>(
+    await _shellNavigatorKey.currentState!.push<void>(
       MaterialPageRoute<void>(
         builder: (_) => UpgradeShopPage(
           progression: _progression,
@@ -1478,6 +1529,11 @@ class _GameHomePageState extends State<GameHomePage>
       onLuckyStake: _openLuckyStake,
       onSystems: _openSystems,
       showDeveloperSettings: kDebugMode,
+      shellNavigatorKey: _shellNavigatorKey,
+      selectedIndex: _selectedPrimaryIndex,
+      onPrimarySelected: _onPrimarySelected,
+      onSystemsView: _openLegacySystems,
+      onLegacySection: _openLegacySection,
     );
   }
 }
