@@ -1,0 +1,34 @@
+name: PR 73 Dart formatting
+
+on:
+  push:
+    branches:
+      - port/gtn1-random-events-main
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: port/gtn1-random-events-main
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Format changed Dart files
+        run: dart format lib/core/progression/progression_state.dart lib/home/game_dashboard_page.dart test/core/events/random_event_engine_test.dart test/core/scripting/lua_sandbox_test.dart
+      - name: Commit formatter output
+        run: |
+          if git diff --quiet; then
+            echo "No formatting changes required."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add lib/core/progression/progression_state.dart lib/home/game_dashboard_page.dart test/core/events/random_event_engine_test.dart test/core/scripting/lua_sandbox_test.dart
+          git commit -m "style: apply Dart formatter to random events"
+          git push
