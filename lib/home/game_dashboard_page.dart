@@ -816,7 +816,7 @@ class _MoreMenuPage extends StatelessWidget {
     ) {
       return GtnExpressiveCard(
         color: panel,
-        margin: const EdgeInsets.only(bottom: 12),
+        margin: EdgeInsets.zero,
         elevation: 1,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(24),
