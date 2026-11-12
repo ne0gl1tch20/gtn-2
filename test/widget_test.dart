@@ -64,8 +64,7 @@ void main() {
         await tester.pumpAndSettle();
 
         Finder semanticsWithLabel(String label) => find.byWidgetPredicate(
-          (widget) =>
-              widget is Semantics && widget.properties.label == label,
+          (widget) => widget is Semantics && widget.properties.label == label,
           description: 'Semantics(label: $label)',
         );
 
