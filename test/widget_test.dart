@@ -63,19 +63,14 @@ void main() {
         await tester.ensureVisible(find.byKey(const Key('guess-input')));
         await tester.pumpAndSettle();
 
-        Finder semanticsWithLabel(String label) => find.byWidgetPredicate(
-          (widget) => widget is Semantics && widget.properties.label == label,
-          description: 'Semantics(label: $label)',
-        );
+        expect(find.bySemanticsLabel('Your guess'), findsOneWidget);
+        expect(find.bySemanticsLabel('Guess'), findsOneWidget);
+        expect(find.bySemanticsLabel('Use lower end of range'), findsOneWidget);
+        expect(find.bySemanticsLabel('Use midpoint of range'), findsOneWidget);
+        expect(find.bySemanticsLabel('Use upper end of range'), findsOneWidget);
+        expect(find.bySemanticsLabel('Clear guess input'), findsOneWidget);
 
-        expect(semanticsWithLabel('Your guess'), findsOneWidget);
-        expect(semanticsWithLabel('Guess'), findsOneWidget);
-        expect(semanticsWithLabel('Use lower end of range'), findsOneWidget);
-        expect(semanticsWithLabel('Use midpoint of range'), findsOneWidget);
-        expect(semanticsWithLabel('Use upper end of range'), findsOneWidget);
-        expect(semanticsWithLabel('Clear guess input'), findsOneWidget);
-
-        await tester.tap(find.text('->'));
+        await tester.tap(find.bySemanticsLabel('Guess'));
         await tester.pump();
         expect(submitted, 1);
 
@@ -115,18 +110,22 @@ void main() {
         .widget<GtnExpressiveTextField>(find.byKey(const Key('guess-input')))
         .controller!;
 
+    await tester.ensureVisible(find.text('LOW END'));
     await tester.tap(find.text('LOW END'));
     await tester.pump();
     expect(guessController().text, '1');
 
+    await tester.ensureVisible(find.text('MIDPOINT'));
     await tester.tap(find.text('MIDPOINT'));
     await tester.pump();
     expect(guessController().text, '50');
 
+    await tester.ensureVisible(find.text('HIGH END'));
     await tester.tap(find.text('HIGH END'));
     await tester.pump();
     expect(guessController().text, '100');
 
+    await tester.ensureVisible(find.text('CLEAR'));
     await tester.tap(find.text('CLEAR'));
     await tester.pump();
     expect(guessController().text, isEmpty);
