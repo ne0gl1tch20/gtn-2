@@ -88,7 +88,7 @@ class _PermanentUpgradeShopPageState extends State<PermanentUpgradeShopPage> {
           const SizedBox(height: 8),
           LayoutBuilder(
             builder: (context, constraints) {
-              final columns = constraints.maxWidth >= 760 ? 2 : 1;
+              final columns = constraints.maxWidth >= 640 ? 2 : 1;
               const spacing = 12.0;
               final width =
                   (constraints.maxWidth - spacing * (columns - 1)) / columns;
