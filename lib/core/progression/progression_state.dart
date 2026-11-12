@@ -97,7 +97,8 @@ class ProgressionState {
       return parsed;
     }
 
-    BigNumber optionalNumber(String key) => json[key] == null ? BigNumber.fromInt(0) : number(key);
+    BigNumber optionalNumber(String key) =>
+        json[key] == null ? BigNumber.fromInt(0) : number(key);
 
     int count(String key) {
       final value = json[key];
@@ -167,7 +168,9 @@ class ProgressionState {
       achievements.addAll(rawAchievements.cast<String>());
     }
     final rawLastRandomEventId = json['lastRandomEventId'];
-    if (rawLastRandomEventId != null && (rawLastRandomEventId is! String || !_randomEventSaveIds.contains(rawLastRandomEventId))) {
+    if (rawLastRandomEventId != null &&
+        (rawLastRandomEventId is! String ||
+            !_randomEventSaveIds.contains(rawLastRandomEventId))) {
       throw const FormatException('Invalid random event ID.');
     }
     final total = count('totalGuesses');
@@ -251,7 +254,9 @@ class ProgressionState {
     moneyEarned: moneyEarned ?? this.moneyEarned,
     moneySpent: moneySpent ?? this.moneySpent,
     randomEventsTriggered: randomEventsTriggered ?? this.randomEventsTriggered,
-    lastRandomEventId: clearLastRandomEventId ? null : lastRandomEventId ?? this.lastRandomEventId,
+    lastRandomEventId: clearLastRandomEventId
+        ? null
+        : lastRandomEventId ?? this.lastRandomEventId,
     currentStreak: currentStreak ?? this.currentStreak,
     bestStreak: bestStreak ?? this.bestStreak,
     playtimeSeconds: playtimeSeconds ?? this.playtimeSeconds,
