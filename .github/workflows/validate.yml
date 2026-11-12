@@ -41,7 +41,7 @@ jobs:
       - name: Restore analysis configuration
         run: git restore -- analysis_options.yaml
       - name: Verify Dart formatting
-        run: dart format lib/home/game_dashboard_page.dart && git diff -- lib/home/game_dashboard_page.dart && dart format --output=none --set-exit-if-changed .
+        run: dart format --output=none --set-exit-if-changed .
       - name: Analyze
         run: flutter analyze --fatal-infos
 

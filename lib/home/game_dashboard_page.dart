@@ -849,6 +849,7 @@ class _MoreMenuPage extends StatelessWidget {
     final dark = Theme.of(context).brightness == Brightness.dark;
     final foreground = dark ? _white : const Color(0xFF172039);
     final muted = dark ? _muted : const Color(0xFF65708C);
+    final panel = dark ? _panel : Colors.white;
     final line = dark ? _line : const Color(0x180D1530);
     final compact = MediaQuery.sizeOf(context).width <= 520;
 
@@ -920,11 +921,7 @@ class _MoreMenuPage extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    Icon(
-                      Icons.chevron_right_rounded,
-                      color: muted,
-                      size: 23,
-                    ),
+                    Icon(Icons.chevron_right_rounded, color: muted, size: 23),
                   ],
                 ),
               ),
