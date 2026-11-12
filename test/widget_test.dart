@@ -146,7 +146,6 @@ void main() {
       expect(find.text(label), findsOneWidget);
     }
     expect(find.text('NO BOTS YET'), findsOneWidget);
-
   });
 
   testWidgets('More detail pages keep the shell and Back returns to More', (
