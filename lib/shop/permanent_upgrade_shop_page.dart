@@ -74,7 +74,9 @@ class _PermanentUpgradeShopPageState extends State<PermanentUpgradeShopPage> {
         padding: const EdgeInsets.fromLTRB(12, 14, 12, 28),
         children: [
           GtnPageHeader(
-            eyebrow: widget.ultra ? 'Ultra progression' : 'Prestige progression',
+            eyebrow: widget.ultra
+                ? 'Ultra progression'
+                : 'Prestige progression',
             title: '$currency Upgrades',
             description:
                 'Permanent bonuses that stay with your progression after resets.',
