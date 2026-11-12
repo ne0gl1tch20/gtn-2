@@ -55,8 +55,12 @@ Widget buildDashboard({
 }
 
 void main() {
-  testWidgets('shows the temporary random-event dashboard banner', (WidgetTester tester) async {
-    await tester.pumpWidget(buildDashboard(randomEventMessage: 'Cash Burst · bonus Money added'));
+  testWidgets('shows the temporary random-event dashboard banner', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      buildDashboard(randomEventMessage: 'Cash Burst · bonus Money added'),
+    );
     expect(find.text('RANDOM EVENT'), findsOneWidget);
     expect(find.text('Cash Burst · bonus Money added'), findsOneWidget);
   });
