@@ -4,6 +4,8 @@ import 'package:material_ui/material_ui.dart';
 import '../core/game/game_engine.dart';
 import '../core/progression/progression_state.dart';
 import '../design/expressive_widgets.dart';
+import '../legacy/legacy_pages.dart';
+import '../legacy/legacy_systems_page.dart';
 import '../settings/game_settings.dart';
 
 const _purple = GtnUiTokens.purple;
@@ -42,6 +44,11 @@ class GameDashboardPage extends StatelessWidget {
     required this.onLuckyStake,
     required this.onSystems,
     this.showDeveloperSettings = false,
+    required this.shellNavigatorKey,
+    required this.selectedIndex,
+    required this.onPrimarySelected,
+    required this.onSystemsView,
+    required this.onLegacySection,
   });
 
   final GameState game;
@@ -66,9 +73,14 @@ class GameDashboardPage extends StatelessWidget {
   final VoidCallback onLuckyStake;
   final VoidCallback onSystems;
   final bool showDeveloperSettings;
+  final GlobalKey<NavigatorState> shellNavigatorKey;
+  final int selectedIndex;
+  final ValueChanged<int> onPrimarySelected;
+  final ValueChanged<LegacySystemsView> onSystemsView;
+  final ValueChanged<LegacySection> onLegacySection;
 
   void _openMoreMenu(BuildContext context, Color panel) {
-    Navigator.of(context).push<void>(
+    shellNavigatorKey.currentState!.push<void>(
       MaterialPageRoute<void>(
         builder: (_) => _MoreMenuPage(
           settings: settings,
@@ -84,6 +96,9 @@ class GameDashboardPage extends StatelessWidget {
           onMusic: onMusic,
           onLuckyStake: onLuckyStake,
           onSystems: onSystems,
+          onSystemsView: onSystemsView,
+          onLegacySection: onLegacySection,
+          onUpgradeShop: onUpgradeShop,
         ),
       ),
     );
@@ -105,6 +120,11 @@ class GameDashboardPage extends StatelessWidget {
       bottomNavigationBar: LayoutBuilder(
         builder: (context, constraints) {
           void selectDestination(int index) {
+            // Primary tabs replace the active primary destination. Feature
+            // pages opened from More use push(), so Back returns to More while
+            // the shared navigation shell remains mounted.
+            shellNavigatorKey.currentState?.popUntil((route) => route.isFirst);
+            onPrimarySelected(index);
             switch (index) {
               case 0:
                 onWorldMap();
@@ -128,7 +148,7 @@ class GameDashboardPage extends StatelessWidget {
           // with the standard adaptive M3 bar on tablets and desktop windows.
           if (constraints.maxWidth > 600) {
             return NavigationBar(
-              selectedIndex: 2,
+              selectedIndex: selectedIndex,
               onDestinationSelected: selectDestination,
               labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
               height: 76,
@@ -182,12 +202,16 @@ class GameDashboardPage extends StatelessWidget {
                 label: 'More',
               ),
             ],
-            selectedIndex: 2,
+            selectedIndex: selectedIndex,
             onDestinationSelected: selectDestination,
           );
         },
       ),
-      body: Container(
+      body: Navigator(
+        key: shellNavigatorKey,
+        onGenerateRoute: (routeSettings) => MaterialPageRoute<void>(
+          settings: routeSettings,
+          builder: (_) => Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
@@ -233,7 +257,7 @@ class GameDashboardPage extends StatelessWidget {
                             'assets/gtn1/gtn-app-logo.png',
                             width: 42,
                             height: 42,
-                            fit: BoxFit.cover,
+                            fit: BoxFit.contain,
                           ),
                         ),
                       ),
@@ -531,6 +555,8 @@ class GameDashboardPage extends StatelessWidget {
           ),
         ),
       ),
+        ),
+      ),
     );
   }
 }
@@ -724,6 +750,9 @@ class _MoreMenuPage extends StatelessWidget {
     required this.onMusic,
     required this.onLuckyStake,
     required this.onSystems,
+    required this.onSystemsView,
+    required this.onLegacySection,
+    required this.onUpgradeShop,
   });
 
   final GameSettings settings;
@@ -739,6 +768,9 @@ class _MoreMenuPage extends StatelessWidget {
   final VoidCallback onMusic;
   final VoidCallback onLuckyStake;
   final VoidCallback onSystems;
+  final ValueChanged<LegacySystemsView> onSystemsView;
+  final ValueChanged<LegacySection> onLegacySection;
+  final VoidCallback onUpgradeShop;
 
   Color _destinationColor(String? hex) {
     if (hex == null || hex.isEmpty) return _purple;
@@ -822,37 +854,61 @@ class _MoreMenuPage extends StatelessWidget {
             icon: Icons.emoji_events_rounded,
             title: 'Achievements',
             subtitle: 'Journey progress and rewards',
-            onTap: onLegacyPages,
+            onTap: () => onLegacySection(LegacySection.journey),
+          ),
+          'rewards': (
+            icon: Icons.card_giftcard_rounded,
+            title: 'Rewards',
+            subtitle: 'Achievements and daily rewards',
+            onTap: () => onLegacySection(LegacySection.rewards),
+          ),
+          'journey': (
+            icon: Icons.timeline_rounded,
+            title: 'Journey',
+            subtitle: 'Your run history and progress',
+            onTap: () => onLegacySection(LegacySection.journey),
+          ),
+          'shop': (
+            icon: Icons.storefront_rounded,
+            title: 'Shop',
+            subtitle: 'Browse upgrades',
+            onTap: onUpgradeShop,
           ),
           'mutators': (
             icon: Icons.tune_rounded,
             title: 'Mutators',
-            subtitle: 'Open the gameplay systems hub',
-            onTap: onSystems,
+            subtitle: 'Customize challenge rules',
+            onTap: () => onSystemsView(LegacySystemsView.mutators),
           ),
           'talent': (
             icon: Icons.psychology_alt_rounded,
             title: 'Talents',
-            subtitle: 'Open the gameplay systems hub',
-            onTap: onSystems,
+            subtitle: 'Build your talent path',
+            onTap: () => onSystemsView(LegacySystemsView.talents),
+          ),
+          'traits': (
+            icon: Icons.auto_awesome_rounded,
+            title: 'Traits',
+            subtitle: 'Choose gameplay traits and variants',
+            onTap: () => onSystemsView(LegacySystemsView.traits),
           ),
           'relics': (
             icon: Icons.auto_awesome_rounded,
             title: 'Relics',
-            subtitle: 'Open the gameplay systems hub',
-            onTap: onSystems,
+            subtitle: 'Manage your relic collection',
+            onTap: () => onSystemsView(LegacySystemsView.relics),
           ),
           'home_base': (
             icon: Icons.home_work_rounded,
             title: 'Home Base',
-            subtitle: 'Open the gameplay systems hub',
-            onTap: onSystems,
+            subtitle: 'Build up your base',
+            onTap: () => onSystemsView(LegacySystemsView.homeBase),
           ),
           'codex': (
             icon: Icons.menu_book_rounded,
             title: 'Codex',
             subtitle: 'Discoveries and lore entries',
-            onTap: onLegacyPages,
+            onTap: () => onLegacySection(LegacySection.codex),
           ),
           'endgame': (
             icon: Icons.flag_rounded,
@@ -870,13 +926,13 @@ class _MoreMenuPage extends StatelessWidget {
             icon: Icons.query_stats_rounded,
             title: 'Statistics',
             subtitle: 'Review your gameplay records',
-            onTap: onLegacyPages,
+            onTap: () => onLegacySection(LegacySection.statistics),
           ),
           'changelog': (
             icon: Icons.history_rounded,
             title: 'Changelog',
             subtitle: 'Review version history',
-            onTap: onLegacyPages,
+            onTap: () => onLegacySection(LegacySection.changelog),
           ),
           'settings': (
             icon: Icons.settings_rounded,
@@ -888,7 +944,7 @@ class _MoreMenuPage extends StatelessWidget {
             icon: Icons.info_outline_rounded,
             title: 'About',
             subtitle: 'Credits, links and app information',
-            onTap: onLegacyPages,
+            onTap: () => onLegacySection(LegacySection.about),
           ),
           'staking': (
             icon: Icons.casino_rounded,
