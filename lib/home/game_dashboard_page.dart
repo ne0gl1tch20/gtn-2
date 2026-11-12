@@ -545,85 +545,37 @@ class GameDashboardPage extends StatelessWidget {
                               ),
                               SizedBox(
                                 width: fullWidth,
-                                child: 
-                                    children: [
-                                      Container(
-                                        width: 42,
-                                        height: 42,
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(12),
-                                          gradient: const LinearGradient(
-                                            colors: [_purple, Color(0xFF6651D9)],
-                                          ),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: _purple.withValues(alpha: .25),
-                                              blurRadius: 18,
-                                              offset: const Offset(0, 7),
-                                            ),
-                                          ],
-                                        ),
-                                        child: ClipRRect(
-                                          borderRadius: BorderRadius.circular(12),
-                                          child: Image.asset(
-                                            'assets/gtn1/gtn-app-logo.png',
-                                            width: 42,
-                                            height: 42,
-                                            fit: BoxFit.contain,
-                                          ),
-                                        ),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: _Action(
+                                        'Beyond the Numbers',
+                                        'Explore your progression',
+                                        Icons.public_rounded,
+                                        _cyan,
+                                        onWorldMap,
+                                        panel,
+                                        line,
+                                        foreground,
+                                        muted,
                                       ),
-                                      const SizedBox(width: 11),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              'Guess The Number',
-                                              style: TextStyle(
-                                                color: foreground,
-                                                fontFamily: 'SpaceGrotesk',
-                                                fontSize: 18,
-                                                fontWeight: FontWeight.w700,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      child: _Action(
+                                        'Daily Momentum',
+                                        'Keep the streak alive',
+                                        Icons.auto_awesome_rounded,
+                                        _gold,
+                                        onLegacyPages,
+                                        panel,
+                                        line,
+                                        foreground,
+                                        muted,
                                       ),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 10,
-                                          vertical: 7,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: foreground.withValues(alpha: .06),
-                                          borderRadius: BorderRadius.circular(99),
-                                          border: Border.all(
-                                            color: foreground.withValues(alpha: .08),
-                                          ),
-                                        ),
-                                        child: Row(
-                                          children: [
-                                            const Icon(
-                                              Icons.cloud_off_rounded,
-                                              color: _green,
-                                              size: 12,
-                                            ),
-                                            const SizedBox(width: 6),
-                                            Text(
-                                              'OFFLINE',
-                                              style: TextStyle(
-                                                color: muted,
-                                                fontSize: 10,
-                                                fontWeight: FontWeight.w900,
-                                                letterSpacing: 1,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+                                    ),
+                                  ],
+                                ),
                               ),
                               if (game.isComplete)
                                 SizedBox(
