@@ -1,3 +1,4 @@
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gtn_2/design/expressive_widgets.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
@@ -99,9 +100,7 @@ void main() {
     },
   );
 
-  testWidgets(
-    'GTN page header adapts to compact phone widths',
-    (tester) async {
+  testWidgets('GTN page header adapts to compact phone widths', (tester) async {
     await tester.pumpWidget(
       M3EMaterialApp(
         title: 'GTN2 page header test',
@@ -116,8 +115,7 @@ void main() {
               child: GtnPageHeader(
                 eyebrow: 'Beyond the Numbers',
                 title: 'Your universe',
-                description:
-                    'Explore worlds, discover secrets and challenge their guardians.',
+                description: 'Explore worlds, discover secrets and challenge their guardians.',
                 icon: Icons.explore_rounded,
                 accent: const Color(0xFF62E8FF),
                 trailing: const Chip(label: Text('4 WORLDS')),
@@ -131,7 +129,7 @@ void main() {
     expect(find.text('Beyond the Numbers'), findsOneWidget);
     expect(find.text('Your universe'), findsOneWidget);
     expect(find.text('4 WORLDS'), findsOneWidget);
-      expect(tester.takeException(), isNull);
-    },
-  );
+    expect(tester.takeException(), isNull);
+  });
 }
+Formatted 1 file (1 changed) in 0.01 seconds.
