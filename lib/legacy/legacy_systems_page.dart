@@ -244,9 +244,15 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
                 spacing: 8,
                 runSpacing: 8,
                 children: [
-                  _statChip('Traits', '${traitState.activeTraitIds.length}/320'),
+                  _statChip(
+                    'Traits',
+                    '${traitState.activeTraitIds.length}/320',
+                  ),
                   _statChip('Talents', '${_systems.talents.length}/6'),
-                  _statChip('Relics', '${_systems.equippedRelics.length}/4'),
+                  _statChip(
+                    'Relics',
+                    '${_systems.equippedRelics.length}/4',
+                  ),
                   _statChip('Sanctuary', 'Lv ${_systems.homeBaseLevel}'),
                 ],
               ),
