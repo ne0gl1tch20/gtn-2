@@ -236,6 +236,11 @@ void main() {
       ),
     );
 
+    await tester.scrollUntilVisible(
+      find.text('Save profile'),
+      240,
+      scrollable: find.byType(Scrollable).first,
+    );
     await tester.tap(find.text('Save profile'));
     await tester.pumpAndSettle();
 
@@ -288,10 +293,10 @@ void main() {
     await tester.tap(find.text('More').first);
     await tester.pumpAndSettle();
 
-    final rewards = tester.getTopLeft(find.text('Rewards'));
-    final journey = tester.getTopLeft(find.text('Journey'));
-    expect(rewards.dx, lessThan(journey.dx));
-    expect(rewards.dy, journey.dy);
+    final profile = tester.getTopLeft(find.text('Player profile'));
+    final worldMap = tester.getTopLeft(find.text('Beyond the Numbers'));
+    expect(profile.dx, lessThan(worldMap.dx));
+    expect(profile.dy, worldMap.dy);
   });
 
   testWidgets('More follows the saved Menu Studio order and includes tools', (
