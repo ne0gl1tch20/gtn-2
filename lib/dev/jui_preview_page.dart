@@ -58,7 +58,7 @@ class _JuiPreviewPageState extends State<JuiPreviewPage> {
     }
     if (actionId == 'navigation.back') {
       if (_screenId == 'home') {
-        Navigator.of(context).maybePop();
+        await Navigator.of(context).maybePop();
       } else {
         _openScreen('home');
       }
