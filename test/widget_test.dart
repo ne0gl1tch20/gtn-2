@@ -97,6 +97,16 @@ void main() {
     expect(find.text('AUTOMATION LAB'), findsOneWidget);
     expect(find.text('Guessing Bots'), findsOneWidget);
     expect(find.text('NO BOTS YET'), findsOneWidget);
+
+    // The primary guess panel is now above the wallet and Automation Lab.
+    await tester.drag(find.byType(ListView).first, const Offset(0, 1000));
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.text('YOUR GUESS'),
+      150,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
     expect(find.text('YOUR GUESS'), findsOneWidget);
     expect(find.text('->'), findsOneWidget);
     expect(find.text('QUICK PICK'), findsOneWidget);
