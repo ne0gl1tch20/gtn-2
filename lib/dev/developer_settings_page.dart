@@ -101,11 +101,13 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
           M3EButton.filled(
             onPressed: _busy
                 ? null
-                : () => Navigator.of(context).push<void>(
-                    MaterialPageRoute<void>(
-                      builder: (_) => const JuiPreviewPage(),
-                    ),
-                  ),
+                : () async {
+                    await Navigator.of(context).push<void>(
+                      MaterialPageRoute<void>(
+                        builder: (_) => const JuiPreviewPage(),
+                      ),
+                    );
+                  },
             child: const Text('Open JUI screen preview'),
           ),
           const SizedBox(height: 8),
