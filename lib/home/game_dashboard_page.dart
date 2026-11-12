@@ -268,13 +268,13 @@ class GameDashboardPage extends StatelessWidget {
                         ),
                         child: Row(
                           children: [
-                            const Icon(Icons.circle, color: _green, size: 7),
+                            const Icon(Icons.cloud_off_rounded, color: _green, size: 12),
                             const SizedBox(width: 6),
                             Text(
-                              'ONLINE',
+                              'OFFLINE',
                               style: TextStyle(
                                 color: muted,
-                                fontSize: 8,
+                                fontSize: 9,
                                 fontWeight: FontWeight.w900,
                                 letterSpacing: 1,
                               ),
@@ -413,15 +413,6 @@ class GameDashboardPage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  _BotArena(
-                    progression: progression,
-                    onOpenShop: onNebulaShop,
-                    panel: panel,
-                    line: line,
-                    foreground: foreground,
-                    muted: muted,
-                  ),
-                  const SizedBox(height: 12),
                   _GuessInput(
                     game: game,
                     controller: controller,
@@ -479,6 +470,16 @@ class GameDashboardPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   _Wallet(progression, panel, raised, line, foreground, muted),
+                  const SizedBox(height: 12),
+                  _BotArena(
+                    progression: progression,
+                    onOpenShop: onNebulaShop,
+                    panel: panel,
+                    line: line,
+                    foreground: foreground,
+                    muted: muted,
+                  ),
+                  const SizedBox(height: 12),
                   const SizedBox(height: 16),
                   Row(
                     children: [
