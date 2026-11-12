@@ -62,8 +62,7 @@ class _ArcadePageState extends State<ArcadePage> {
                             GtnPageHeader(
                               eyebrow: 'Quick challenges',
                               title: 'Arcade',
-                              description:
-                                  'Play GTN1 minigames to earn Nebula and Money.',
+                              description: 'Play GTN1 minigames to earn Nebula and Money.',
                               icon: Icons.sports_esports_rounded,
                               accent: GtnUiTokens.cyan,
                               trailing: _ArcadeCountChip(
@@ -89,8 +88,9 @@ class _ArcadePageState extends State<ArcadePage> {
                             else
                               LayoutBuilder(
                                 builder: (context, constraints) {
-                                  final columns =
-                                      constraints.maxWidth >= 720 ? 2 : 1;
+                                  final columns = constraints.maxWidth >= 720
+                                      ? 2
+                                      : 1;
                                   const gap = 12.0;
                                   final cardWidth =
                                       (constraints.maxWidth -
@@ -750,3 +750,4 @@ class _ArcadeDialogState extends State<_ArcadeDialog> {
     );
   }
 }
+
