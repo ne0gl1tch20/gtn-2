@@ -3,12 +3,18 @@ import 'package:gtn_2/core/game/game_engine.dart';
 import 'package:gtn_2/core/progression/progression_state.dart';
 import 'package:gtn_2/design/expressive_widgets.dart';
 import 'package:gtn_2/home/game_dashboard_page.dart';
+import 'package:gtn_2/legacy/legacy_systems_page.dart';
 import 'package:gtn_2/settings/game_settings.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
 
-Widget buildDashboard({GameSettings? settings, VoidCallback? onGuess}) {
-  final shellNavigatorKey = GlobalKey<NavigatorState>();
+Widget buildDashboard({
+  GameSettings? settings,
+  VoidCallback? onGuess,
+  GlobalKey<NavigatorState>? shellNavigatorKey,
+  ValueChanged<LegacySystemsView>? onSystemsView,
+}) {
+  final navigatorKey = shellNavigatorKey ?? GlobalKey<NavigatorState>();
   return M3EMaterialApp(
     data: M3EThemeData.light(seedColor: const Color(0xFF7C5CFC)),
     fontFamily: 'Manrope',
@@ -37,10 +43,10 @@ Widget buildDashboard({GameSettings? settings, VoidCallback? onGuess}) {
       onLuckyStake: () {},
       onSystems: () {},
       showDeveloperSettings: true,
-      shellNavigatorKey: shellNavigatorKey,
+      shellNavigatorKey: navigatorKey,
       selectedIndex: 2,
       onPrimarySelected: (_) {},
-      onSystemsView: (_) {},
+      onSystemsView: onSystemsView ?? (_) {},
       onLegacySection: (_) {},
     ),
   );
@@ -150,6 +156,46 @@ void main() {
     await tester.tap(find.text('CLEAR'));
     await tester.pump();
     expect(guessController().text, isEmpty);
+  });
+
+  testWidgets('More detail pages keep the shell and Back returns to More', (
+    WidgetTester tester,
+  ) async {
+    final shellKey = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(
+      buildDashboard(
+        shellNavigatorKey: shellKey,
+        onSystemsView: (view) {
+          shellKey.currentState!.push<void>(
+            MaterialPageRoute<void>(
+              builder: (_) => Scaffold(
+                appBar: AppBar(title: Text(view.name)),
+                body: const Center(child: Text('Feature detail')),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+
+    await tester.tap(find.text('More'));
+    await tester.pumpAndSettle();
+    expect(find.text('More Menu'), findsOneWidget);
+
+    await tester.scrollUntilVisible(
+      find.text('Traits'),
+      250,
+      scrollable: find.byType(Scrollable).last,
+    );
+    await tester.tap(find.text('Traits'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Feature detail'), findsOneWidget);
+    expect(find.text('More'), findsOneWidget);
+
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    expect(find.text('More Menu'), findsOneWidget);
   });
 
   testWidgets('More follows the saved Menu Studio order and includes tools', (
