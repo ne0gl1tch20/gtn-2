@@ -7,8 +7,9 @@ import 'package:gtn_2/settings/game_settings.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
 
-Widget buildDashboard({GameSettings? settings, VoidCallback? onGuess}) =>
-    M3EMaterialApp(
+Widget buildDashboard({GameSettings? settings, VoidCallback? onGuess}) {
+  final shellNavigatorKey = GlobalKey<NavigatorState>();
+  return M3EMaterialApp(
       data: M3EThemeData.light(seedColor: const Color(0xFF7C5CFC)),
       fontFamily: 'Manrope',
       autoTheming: false,
@@ -36,17 +37,23 @@ Widget buildDashboard({GameSettings? settings, VoidCallback? onGuess}) =>
         onLuckyStake: () {},
         onSystems: () {},
         showDeveloperSettings: true,
+        shellNavigatorKey: shellNavigatorKey,
+        selectedIndex: 2,
+        onPrimarySelected: (_) {},
+        onSystemsView: (_) {},
+        onLegacySection: (_) {},
       ),
     );
+}
 
 void main() {
   testWidgets(
     'guess controls expose GTN1 accessibility labels and submit action',
     (WidgetTester tester) async {
       final semantics = tester.ensureSemantics();
-      addTearDown(semantics.dispose);
       var submitted = 0;
-      await tester.pumpWidget(buildDashboard(onGuess: () => submitted++));
+      try {
+        await tester.pumpWidget(buildDashboard(onGuess: () => submitted++));
       await tester.ensureVisible(find.byKey(const Key('guess-input')));
       await tester.pumpAndSettle();
 
@@ -66,7 +73,10 @@ void main() {
       final field = tester.widget<GtnExpressiveTextField>(
         find.byKey(const Key('guess-input')),
       );
-      expect(field.controller!.text, '50');
+        expect(field.controller!.text, '50');
+      } finally {
+        semantics.dispose();
+      }
     },
   );
 
