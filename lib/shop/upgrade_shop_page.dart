@@ -58,17 +58,16 @@ class _UpgradeShopPageState extends State<UpgradeShopPage> {
         ],
       ),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(12, 14, 12, 28),
         children: [
-          Text(
-            'Make every correct guess count.',
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 6),
-          Text(
-            'Upgrade levels are saved automatically. Prices use the '
-            'base cost × growth rate^level formula.',
-            style: Theme.of(context).textTheme.bodySmall,
+          GtnPageHeader(
+            eyebrow: 'Build your run',
+            title: 'Upgrades',
+            description:
+                'Make every correct guess count. Upgrade levels are saved automatically.',
+            icon: Icons.upgrade_rounded,
+            accent: GtnUiTokens.purple,
+            trailing: _BalanceChip(value: _progression.money.toString()),
           ),
           const SizedBox(height: 16),
           for (final upgrade in UpgradeCatalog.availableForGameplay)
@@ -83,6 +82,32 @@ class _UpgradeShopPageState extends State<UpgradeShopPage> {
       ),
     );
   }
+}
+
+class _BalanceChip extends StatelessWidget {
+  const _BalanceChip({required this.value});
+
+  final String value;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    constraints: const BoxConstraints(maxWidth: 112),
+    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+    decoration: BoxDecoration(
+      color: GtnUiTokens.gold.withValues(alpha: .12),
+      borderRadius: BorderRadius.circular(14),
+      border: Border.all(color: GtnUiTokens.gold.withValues(alpha: .24)),
+    ),
+    child: Text(
+      value,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+        color: GtnUiTokens.gold,
+        fontWeight: FontWeight.w900,
+      ),
+    ),
+  );
 }
 
 class _UpgradeCard extends StatelessWidget {
