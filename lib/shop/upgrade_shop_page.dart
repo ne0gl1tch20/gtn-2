@@ -43,20 +43,7 @@ class _UpgradeShopPageState extends State<UpgradeShopPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: GtnExpressiveAppBar(
-        title: const Text('Upgrade Shop'),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 16),
-            child: Center(
-              child: Text(
-                'Money: ${_progression.money}',
-                style: Theme.of(context).textTheme.titleSmall,
-              ),
-            ),
-          ),
-        ],
-      ),
+      appBar: GtnExpressiveAppBar(title: const Text('Upgrade Shop')),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(12, 14, 12, 28),
         children: [
