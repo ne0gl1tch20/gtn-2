@@ -683,7 +683,6 @@ class _ArcadeDialogState extends State<_ArcadeDialog> {
                     onPressed: revealed || _gridSelected.length >= 2
                         ? null
                         : () => _flipGridCard(index),
-
                     child: Text(
                       revealed ? '${_gridCards[index]}' : '?',
                       style: Theme.of(context).textTheme.titleLarge,
