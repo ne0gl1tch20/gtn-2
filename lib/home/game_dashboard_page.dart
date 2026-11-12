@@ -940,7 +940,7 @@ class _MoreMenuPage extends StatelessWidget {
         >{
           'world_map': (
             icon: Icons.public_rounded,
-            title: 'World map',
+            title: 'Beyond the Numbers',
             subtitle: 'Explore unlocked worlds and bosses',
             onTap: onWorldMap,
           ),
@@ -1018,7 +1018,7 @@ class _MoreMenuPage extends StatelessWidget {
           ),
           'stats': (
             icon: Icons.query_stats_rounded,
-            title: 'Statistics',
+            title: 'Stats',
             subtitle: 'Review your gameplay records',
             onTap: () => onLegacySection(LegacySection.statistics),
           ),
@@ -1066,7 +1066,7 @@ class _MoreMenuPage extends StatelessWidget {
           ),
           'music': (
             icon: Icons.library_music_rounded,
-            title: 'Music',
+            title: 'Background Music',
             subtitle: 'Offline library, playlists and queue',
             onTap: onMusic,
           ),
@@ -1086,7 +1086,7 @@ class _MoreMenuPage extends StatelessWidget {
     }
 
     return Scaffold(
-      appBar: GtnExpressiveAppBar(title: const Text('More Hub')),
+      appBar: GtnExpressiveAppBar(title: const Text('More')),
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 1000),
