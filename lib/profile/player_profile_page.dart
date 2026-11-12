@@ -96,8 +96,7 @@ class PlayerProfileStore {
     if (!await file.exists()) return const PlayerProfile();
     try {
       final decoded = jsonDecode(await file.readAsString());
-      if (decoded is! Map<String, dynamic> ||
-          decoded['schemaVersion'] != 1) {
+      if (decoded is! Map<String, dynamic> || decoded['schemaVersion'] != 1) {
         return const PlayerProfile();
       }
       return PlayerProfile.fromJson(decoded);
