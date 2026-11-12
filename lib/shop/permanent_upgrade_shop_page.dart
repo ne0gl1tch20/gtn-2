@@ -1,3 +1,4 @@
+
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -78,8 +79,7 @@ class _PermanentUpgradeShopPageState extends State<PermanentUpgradeShopPage> {
                 ? 'Ultra progression'
                 : 'Prestige progression',
             title: '$currency Upgrades',
-            description:
-                'Permanent bonuses that stay with your progression after resets.',
+            description: 'Permanent bonuses that stay with your progression after resets.',
             icon: widget.ultra ? Icons.bolt_rounded : Icons.stars_rounded,
             accent: widget.ultra ? GtnUiTokens.cyan : GtnUiTokens.purple,
             trailing: _PermanentBalanceChip(
@@ -140,19 +140,15 @@ class _PermanentBalanceChip extends StatelessWidget {
       children: [
         Text(
           label.toUpperCase(),
-          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-            color: GtnUiTokens.gold,
-            fontWeight: FontWeight.w900,
-          ),
+          style: Theme.of(context).textTheme.labelSmall
+              ?.copyWith(color: GtnUiTokens.gold, fontWeight: FontWeight.w900),
         ),
         Text(
           value,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: Theme.of(context).textTheme.labelLarge?.copyWith(
-            color: GtnUiTokens.gold,
-            fontWeight: FontWeight.w900,
-          ),
+          style: Theme.of(context).textTheme.labelLarge
+              ?.copyWith(color: GtnUiTokens.gold, fontWeight: FontWeight.w900),
         ),
       ],
     ),
@@ -227,3 +223,4 @@ class _PermanentUpgradeCard extends StatelessWidget {
     );
   }
 }
+Formatted 1 file (1 changed) in 0.01 seconds.
