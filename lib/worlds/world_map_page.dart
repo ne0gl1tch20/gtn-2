@@ -1,3 +1,4 @@
+
 import 'dart:math' as math;
 
 import 'package:material_3_expressive/material_3_expressive.dart';
@@ -336,8 +337,7 @@ class _WorldMapPageState extends State<WorldMapPage> {
               'web_ui_your_universe',
               'Your universe',
             ),
-            description:
-                'Explore worlds, discover secrets and challenge their guardians.',
+            description: 'Explore worlds, discover secrets and challenge their guardians.',
             icon: Icons.explore_rounded,
             accent: GtnUiTokens.cyan,
             trailing: _StatusChip(
@@ -1303,3 +1303,4 @@ class _WorldRoutesPainter extends CustomPainter {
       oldDelegate.selectedWorldId != selectedWorldId ||
       oldDelegate.colorScheme != colorScheme;
 }
+Formatted 1 file (1 changed) in 0.04 seconds.
