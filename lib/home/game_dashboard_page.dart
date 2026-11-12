@@ -1040,70 +1040,12 @@ class _MoreMenuPage extends StatelessWidget {
           child: ListView(
             padding: const EdgeInsets.fromLTRB(12, 14, 12, 28),
         children: [
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(28),
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: dark
-                    ? const [Color(0xFF30295D), Color(0xFF171F36)]
-                    : const [Color(0xFFE9E4FF), Color(0xFFF3F0FF)],
-              ),
-              border: Border.all(
-                color: _purple.withValues(alpha: dark ? .28 : .18),
-              ),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 52,
-                  height: 52,
-                  decoration: BoxDecoration(
-                    color: _purple.withValues(alpha: .16),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: const Icon(
-                    Icons.grid_view_rounded,
-                    color: _purple,
-                    size: 27,
-                  ),
-                ),
-                const SizedBox(width: 15),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'EXPLORE GTN2',
-                        style: TextStyle(
-                          color: muted,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 1.4,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'More Menu',
-                        style: TextStyle(
-                          color: foreground,
-                          fontSize: 22,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: -.7,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        'Your shortcuts, your order.',
-                        style: TextStyle(color: muted, fontSize: 12),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+          const GtnPageHeader(
+            eyebrow: 'Explore GTN2',
+            title: 'More Menu',
+            description: 'Your shortcuts, your order.',
+            icon: Icons.grid_view_rounded,
+            accent: _purple,
           ),
           const SizedBox(height: 18),
           LayoutBuilder(
