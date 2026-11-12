@@ -47,6 +47,8 @@ void main() {
       addTearDown(semantics.dispose);
       var submitted = 0;
       await tester.pumpWidget(buildDashboard(onGuess: () => submitted++));
+      await tester.ensureVisible(find.byKey(const Key('guess-input')));
+      await tester.pumpAndSettle();
 
       expect(find.bySemanticsLabel('Your guess'), findsOneWidget);
       expect(find.bySemanticsLabel('Guess'), findsOneWidget);
