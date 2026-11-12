@@ -84,8 +84,9 @@ void main() {
       expect(reloaded, isNotNull);
       expect(reloaded!.progression.legacySystems.musicShuffle, isTrue);
       expect(
-        ProgressionState.fromJson(reloaded.progression.toJson())
-            .legacySystems.musicShuffle,
+        ProgressionState.fromJson(
+          reloaded.progression.toJson(),
+        ).legacySystems.musicShuffle,
         isTrue,
       );
     },
