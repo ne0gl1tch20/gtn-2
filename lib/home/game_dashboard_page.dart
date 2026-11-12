@@ -1034,8 +1034,11 @@ class _MoreMenuPage extends StatelessWidget {
 
     return Scaffold(
       appBar: GtnExpressiveAppBar(title: const Text('More Hub')),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1000),
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(12, 14, 12, 28),
         children: [
           Container(
             padding: const EdgeInsets.all(20),
@@ -1103,23 +1106,45 @@ class _MoreMenuPage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 18),
-          for (final id in orderedIds)
-            entry(
-              destinations[id]!.icon,
-              destinations[id]!.title,
-              destinations[id]!.subtitle,
-              destinations[id]!.onTap,
-              _destinationColor(settings.moreScreenButtonColors[id]),
-            ),
-          if (showDeveloperSettings)
-            entry(
-              Icons.bug_report_rounded,
-              'Dev Settings',
-              'Developer tools',
-              onDeveloperSettings,
-              _destinationColor(null),
-            ),
-        ],
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final columns = constraints.maxWidth >= 640 ? 2 : 1;
+              final spacing = 12.0;
+              final itemWidth =
+                  (constraints.maxWidth - spacing * (columns - 1)) / columns;
+              return Wrap(
+                spacing: spacing,
+                runSpacing: spacing,
+                children: [
+                  for (final id in orderedIds)
+                    SizedBox(
+                      width: itemWidth,
+                      child: entry(
+                        destinations[id]!.icon,
+                        destinations[id]!.title,
+                        destinations[id]!.subtitle,
+                        destinations[id]!.onTap,
+                        _destinationColor(settings.moreScreenButtonColors[id]),
+                      ),
+                    ),
+                  if (showDeveloperSettings)
+                    SizedBox(
+                      width: itemWidth,
+                      child: entry(
+                        Icons.bug_report_rounded,
+                        'Dev Settings',
+                        'Developer tools',
+                        onDeveloperSettings,
+                        _destinationColor(null),
+                      ),
+                    ),
+                ],
+              );
+            },
+          ),
+            ],
+          ),
+        ),
       ),
     );
   }
