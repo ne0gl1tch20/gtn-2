@@ -330,8 +330,10 @@ class SettingsPage extends StatelessWidget {
             title: 'Help & Tutorial',
             description: 'Need a refresher? Nimmy can show you around again.',
             children: [
-              ListTile(
-                contentPadding: EdgeInsets.zero,
+              Material(
+                color: Colors.transparent,
+                child: ListTile(
+                  contentPadding: EdgeInsets.zero,
                 leading: const Icon(
                   Icons.school_rounded,
                   color: GtnUiTokens.cyan,
@@ -341,7 +343,8 @@ class SettingsPage extends StatelessWidget {
                   'Review the main game controls and progression.',
                 ),
                 trailing: const Icon(Icons.chevron_right_rounded),
-                onTap: onReplayTutorial,
+                  onTap: onReplayTutorial,
+                ),
               ),
             ],
           ),
