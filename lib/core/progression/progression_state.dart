@@ -174,7 +174,7 @@ class ProgressionState {
     final correct = count('correctGuesses');
     final streak = count('currentStreak');
     final best = count('bestStreak');
-    if (correct > total || streak > correct || best < streak) {
+    if (correct > total || best < streak) {
       throw const FormatException('Inconsistent progression statistics.');
     }
     return ProgressionState(
