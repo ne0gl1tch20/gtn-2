@@ -598,7 +598,7 @@ class GameDashboardPage extends StatelessWidget {
                                         'Keep the streak alive',
                                         Icons.auto_awesome_rounded,
                                         _gold,
-                                        onLegacyPages,
+                                        () => onLegacySection(LegacySection.rewards),
                                         panel,
                                         line,
                                         foreground,
