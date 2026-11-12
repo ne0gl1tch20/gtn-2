@@ -32,6 +32,8 @@ jobs:
         run: bash scripts/sync_gtn1_assets.sh gtn1-source
       - name: Verify complete GTN1 content bundle
         run: python scripts/verify_gtn1_assets.py
+      - name: Audit locale coverage and hardcoded Flutter UI strings
+        run: python scripts/validate_localization_contract.py
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
