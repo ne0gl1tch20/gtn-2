@@ -39,11 +39,10 @@ class _ArcadePageState extends State<ArcadePage> {
 
   @override
   Widget build(BuildContext context) {
-    final dark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       appBar: GtnExpressiveAppBar(title: const Text('Arcade')),
       body: LayoutBuilder(
-        builder: (context, viewport) => ListView(
+        builder: (context, _) => ListView(
           padding: const EdgeInsets.fromLTRB(16, 14, 16, 28),
           children: [
             Center(
