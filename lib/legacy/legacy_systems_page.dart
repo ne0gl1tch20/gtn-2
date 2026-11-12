@@ -306,6 +306,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
   Widget _traitsSection(TraitEffectSummary traits) {
     return GtnExpressiveCard(
       child: ExpansionTile(
+        initiallyExpanded: widget.view == LegacySystemsView.traits,
         leading: const Icon(Icons.auto_awesome_rounded),
         title: const Text('Traits'),
         subtitle: Text(
