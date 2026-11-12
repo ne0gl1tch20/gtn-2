@@ -103,6 +103,12 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.text('YOUR GUESS'), findsOneWidget);
+    expect(find.text('Guessing Bots'), findsOneWidget);
+    expect(
+      tester.getTopLeft(find.text('Guessing Bots')).dy,
+      lessThan(tester.getTopLeft(find.text('YOUR GUESS')).dy),
+      reason: 'GTN1 places the automation arena before the guess panel.',
+    );
     expect(find.text('QUICK PICK'), findsOneWidget);
     expect(find.byIcon(Icons.arrow_forward_rounded), findsOneWidget);
 
