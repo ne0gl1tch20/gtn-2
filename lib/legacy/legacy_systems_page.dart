@@ -1,3 +1,4 @@
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -195,8 +196,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
       LegacySystemsView.codex => Icons.menu_book_rounded,
     };
     final pageDescription = switch (widget.view) {
-      LegacySystemsView.all =>
-        'Persistent gameplay systems from GTN1, with purchases and rewards validated by the Dart game engine.',
+      LegacySystemsView.all => 'Persistent gameplay systems from GTN1, with purchases and rewards validated by the Dart game engine.',
       LegacySystemsView.music =>
         'Your offline soundtrack, playlists and playback controls.',
       LegacySystemsView.luckyStake =>
@@ -249,10 +249,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
                     '${traitState.activeTraitIds.length}/320',
                   ),
                   _statChip('Talents', '${_systems.talents.length}/6'),
-                  _statChip(
-                    'Relics',
-                    '${_systems.equippedRelics.length}/4',
-                  ),
+                  _statChip('Relics', '${_systems.equippedRelics.length}/4'),
                   _statChip('Sanctuary', 'Lv ${_systems.homeBaseLevel}'),
                 ],
               ),
@@ -2052,3 +2049,4 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
       .map((part) => part[0].toUpperCase() + part.substring(1))
       .join(' ');
 }
+Formatted 1 file (1 changed) in 0.05 seconds.
