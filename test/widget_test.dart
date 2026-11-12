@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gtn_2/core/game/game_engine.dart';
+import 'package:gtn_2/core/numbers/big_number.dart';
 import 'package:gtn_2/core/progression/progression_state.dart';
 import 'package:gtn_2/design/expressive_widgets.dart';
 import 'package:gtn_2/home/game_dashboard_page.dart';
@@ -14,6 +15,7 @@ Widget buildDashboard({
   GameSettings? settings,
   VoidCallback? onGuess,
   String? randomEventMessage,
+  BigNumber? incomePerSecond,
   GlobalKey<NavigatorState>? shellNavigatorKey,
   ValueChanged<LegacySystemsView>? onSystemsView,
   ValueChanged<LegacySection>? onLegacySection,
@@ -33,6 +35,7 @@ Widget buildDashboard({
       loading: false,
       message: 'Make your move.',
       randomEventMessage: randomEventMessage,
+      incomePerSecond: incomePerSecond,
       controller: TextEditingController(),
       onGuess: onGuess ?? () {},
       onNewGame: () {},
@@ -60,6 +63,16 @@ Widget buildDashboard({
 }
 
 void main() {
+  testWidgets('Money displays the live income-per-second rate', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      buildDashboard(incomePerSecond: BigNumber.fromInt(24)),
+    );
+    expect(find.text('+ 24 /s'), findsOneWidget);
+    expect(find.text('0 earned'), findsOneWidget);
+  });
+
   testWidgets('Daily Momentum opens the GTN1 Rewards destination', (
     WidgetTester tester,
   ) async {
