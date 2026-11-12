@@ -117,14 +117,6 @@ void main() {
         expect(find.bySemanticsLabel('Use upper end of range'), findsOneWidget);
         expect(find.bySemanticsLabel('Clear guess input'), findsOneWidget);
 
-        await tester.tap(find.byKey(const Key('guess-input')));
-        await tester.enterText(find.byKey(const Key('guess-input')), '73');
-        await tester.pump();
-        final typedField = tester.widget<GtnExpressiveTextField>(
-          find.byKey(const Key('guess-input')),
-        );
-        expect(typedField.controller!.text, '73');
-
         await tester.tap(find.bySemanticsLabel('Guess'));
         await tester.pump();
         expect(submitted, 1);
@@ -140,6 +132,22 @@ void main() {
       }
     },
   );
+
+  testWidgets('guess input receives focus and accepts typed numbers', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(buildDashboard());
+    final input = find.byKey(const Key('guess-input'));
+    await tester.ensureVisible(input);
+    await tester.pumpAndSettle();
+    await tester.tap(input);
+    await tester.enterText(input, '73');
+    await tester.pump();
+
+    final field = tester.widget<GtnExpressiveTextField>(input);
+    expect(field.controller!.text, '73');
+    expect(tester.testTextInput.isVisible, isTrue);
+  });
 
   testWidgets('shows the HTML-facing dashboard and quick-pick controls', (
     WidgetTester tester,
