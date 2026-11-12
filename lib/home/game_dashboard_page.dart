@@ -1249,7 +1249,7 @@ class _Wallet extends StatelessWidget {
             ),
             const SizedBox(width: 8),
             Text(
-              'YOUR WALLET',
+              'MONEY',
               style: TextStyle(
                 color: muted,
                 fontSize: 10,
@@ -1274,15 +1274,6 @@ class _Wallet extends StatelessWidget {
             fontSize: 28,
             fontWeight: FontWeight.w900,
             letterSpacing: -.8,
-          ),
-        ),
-        Text(
-          'MONEY',
-          style: TextStyle(
-            color: muted,
-            fontSize: 10,
-            fontWeight: FontWeight.w900,
-            letterSpacing: 1.7,
           ),
         ),
         const SizedBox(height: 10),
