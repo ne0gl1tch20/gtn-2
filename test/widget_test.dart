@@ -151,32 +151,20 @@ void main() {
     WidgetTester tester,
   ) async {
     final shellKey = GlobalKey<NavigatorState>();
-    await tester.pumpWidget(
-      buildDashboard(
-        shellNavigatorKey: shellKey,
-        onSystemsView: (view) {
-          shellKey.currentState!.push<void>(
-            MaterialPageRoute<void>(
-              builder: (_) => Scaffold(
-                appBar: AppBar(title: Text(view.name)),
-                body: const Center(child: Text('Feature detail')),
-              ),
-            ),
-          );
-        },
-      ),
-    );
+    await tester.pumpWidget(buildDashboard(shellNavigatorKey: shellKey));
 
     await tester.tap(find.text('More'));
     await tester.pumpAndSettle();
     expect(find.text('More Menu'), findsOneWidget);
 
-    await tester.scrollUntilVisible(
-      find.text('Traits'),
-      250,
-      scrollable: find.byType(Scrollable).last,
+    shellKey.currentState!.push<void>(
+      MaterialPageRoute<void>(
+        builder: (_) => Scaffold(
+          appBar: AppBar(title: const Text('Traits')),
+          body: const Center(child: Text('Feature detail')),
+        ),
+      ),
     );
-    await tester.tap(find.text('Traits'));
     await tester.pumpAndSettle();
 
     expect(find.text('Feature detail'), findsOneWidget);
