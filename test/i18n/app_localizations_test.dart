@@ -2,9 +2,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:gtn_2/i18n/app_localizations.dart';
 
 void main() {
-  test(
+  testWidgets(
     'locale overlays preserve English fallback and reject unknown locales',
-    () async {
+    (tester) async {
       await AppLocalizations.load('fil_ph');
 
       expect(AppLocalizations.currentCode, 'fil_ph');
