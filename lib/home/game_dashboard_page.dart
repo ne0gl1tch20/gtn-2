@@ -486,6 +486,17 @@ class GameDashboardPage extends StatelessWidget {
                                 ),
                               ),
                               SizedBox(
+                                width: fullWidth,
+                                child: _BotArena(
+                                  progression: progression,
+                                  onOpenShop: onNebulaShop,
+                                  panel: panel,
+                                  line: line,
+                                  foreground: foreground,
+                                  muted: muted,
+                                ),
+                              ),
+                              SizedBox(
                                 width: columnWidth,
                                 child: _GuessInput(
                                   game: game,
@@ -554,17 +565,6 @@ class GameDashboardPage extends StatelessWidget {
                                   line,
                                   foreground,
                                   muted,
-                                ),
-                              ),
-                              SizedBox(
-                                width: fullWidth,
-                                child: _BotArena(
-                                  progression: progression,
-                                  onOpenShop: onNebulaShop,
-                                  panel: panel,
-                                  line: line,
-                                  foreground: foreground,
-                                  muted: muted,
                                 ),
                               ),
                               SizedBox(
