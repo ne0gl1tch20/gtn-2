@@ -3,6 +3,7 @@ import 'package:gtn_2/core/game/game_engine.dart';
 import 'package:gtn_2/core/progression/progression_state.dart';
 import 'package:gtn_2/design/expressive_widgets.dart';
 import 'package:gtn_2/home/game_dashboard_page.dart';
+import 'package:gtn_2/profile/player_profile_page.dart';
 import 'package:gtn_2/legacy/legacy_systems_page.dart';
 import 'package:gtn_2/settings/game_settings.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
@@ -220,6 +221,25 @@ void main() {
     ]) {
       expect(find.text(label), findsOneWidget);
     }
+  });
+
+  testWidgets('Player Profile validates username before saving', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: PlayerProfilePage(
+          initialProfile: const PlayerProfile(),
+          store: PlayerProfileStore(),
+          onSaved: (_) {},
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Save profile'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Username must be 2–20 characters.'), findsOneWidget);
   });
 
   testWidgets('More opens the Player Profile destination callback', (
