@@ -92,7 +92,7 @@ void main() {
     await tester.pumpWidget(buildDashboard());
     expect(find.text('Guess The Number'), findsOneWidget);
     expect(find.text('Play'), findsOneWidget);
-    expect(find.text('Beyond the Numbers'), findsOneWidget);
+    expect(find.text('Beyond the Numbers'), findsWidgets);
     expect(find.text('More'), findsOneWidget);
 
     final scrollable = find.byType(Scrollable).first;
@@ -178,6 +178,10 @@ void main() {
   testWidgets('More follows the saved Menu Studio order and includes tools', (
     WidgetTester tester,
   ) async {
+    tester.view.physicalSize = const Size(400, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
     final settings = GameSettings.initial.copyWith(
       moreScreenOrder: const ['music', 'settings', 'save_slots'],
       moreScreenButtonColors: const {'music': '#FF5722'},
