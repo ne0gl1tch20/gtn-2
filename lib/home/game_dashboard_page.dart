@@ -1068,51 +1068,54 @@ class _MoreMenuPage extends StatelessWidget {
           constraints: const BoxConstraints(maxWidth: 1000),
           child: ListView(
             padding: const EdgeInsets.fromLTRB(12, 14, 12, 28),
-        children: [
-          const GtnPageHeader(
-            eyebrow: 'Explore GTN2',
-            title: 'More Menu',
-            description: 'Your shortcuts, your order.',
-            icon: Icons.grid_view_rounded,
-            accent: _purple,
-          ),
-          const SizedBox(height: 18),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              final columns = constraints.maxWidth >= 640 ? 2 : 1;
-              final spacing = 12.0;
-              final itemWidth =
-                  (constraints.maxWidth - spacing * (columns - 1)) / columns;
-              return Wrap(
-                spacing: spacing,
-                runSpacing: spacing,
-                children: [
-                  for (final id in orderedIds)
-                    SizedBox(
-                      width: itemWidth,
-                      child: entry(
-                        destinations[id]!.icon,
-                        destinations[id]!.title,
-                        destinations[id]!.subtitle,
-                        destinations[id]!.onTap,
-                        _destinationColor(settings.moreScreenButtonColors[id]),
-                      ),
-                    ),
-                  if (showDeveloperSettings)
-                    SizedBox(
-                      width: itemWidth,
-                      child: entry(
-                        Icons.bug_report_rounded,
-                        'Dev Settings',
-                        'Developer tools',
-                        onDeveloperSettings,
-                        _destinationColor(null),
-                      ),
-                    ),
-                ],
-              );
-            },
-          ),
+            children: [
+              const GtnPageHeader(
+                eyebrow: 'Explore GTN2',
+                title: 'More Menu',
+                description: 'Your shortcuts, your order.',
+                icon: Icons.grid_view_rounded,
+                accent: _purple,
+              ),
+              const SizedBox(height: 18),
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final columns = constraints.maxWidth >= 640 ? 2 : 1;
+                  const spacing = 12.0;
+                  final itemWidth =
+                      (constraints.maxWidth - spacing * (columns - 1)) /
+                      columns;
+                  return Wrap(
+                    spacing: spacing,
+                    runSpacing: spacing,
+                    children: [
+                      for (final id in orderedIds)
+                        SizedBox(
+                          width: itemWidth,
+                          child: entry(
+                            destinations[id]!.icon,
+                            destinations[id]!.title,
+                            destinations[id]!.subtitle,
+                            destinations[id]!.onTap,
+                            _destinationColor(
+                              settings.moreScreenButtonColors[id],
+                            ),
+                          ),
+                        ),
+                      if (showDeveloperSettings)
+                        SizedBox(
+                          width: itemWidth,
+                          child: entry(
+                            Icons.bug_report_rounded,
+                            'Dev Settings',
+                            'Developer tools',
+                            onDeveloperSettings,
+                            _destinationColor(null),
+                          ),
+                        ),
+                    ],
+                  );
+                },
+              ),
             ],
           ),
         ),
