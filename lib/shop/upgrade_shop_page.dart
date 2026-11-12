@@ -72,7 +72,8 @@ class _UpgradeShopPageState extends State<UpgradeShopPage> {
                       width: width,
                       child: _UpgradeCard(
                         upgrade: upgrade,
-                        level: _progression.upgrades[upgrade.definition.id] ?? 0,
+                        level:
+                            _progression.upgrades[upgrade.definition.id] ?? 0,
                         money: _progression.money,
                         busy: _buyingId != null,
                         onBuy: () => _buy(upgrade),
