@@ -51,10 +51,8 @@ class LegacyHubPage extends StatelessWidget {
   void _openSection(BuildContext context, LegacySection section) {
     Navigator.of(context).push<void>(
       MaterialPageRoute<void>(
-        builder: (_) => LegacyDetailPage(
-          section: section,
-          progression: progression,
-        ),
+        builder: (_) =>
+            LegacyDetailPage(section: section, progression: progression),
       ),
     );
   }
@@ -75,8 +73,7 @@ class LegacyHubPage extends StatelessWidget {
       ),
       _MoreDestination(
         title: 'All gameplay systems',
-        description:
-            'Traits, talents, mutators, relics, sanctuary, stakes, rewards, loot and music.',
+        description: 'Traits, talents, mutators, relics, sanctuary, stakes, rewards, loot and music.',
         icon: Icons.grid_view_rounded,
         accent: GtnUiTokens.cyan,
         onTap: () => _openSystems(context),
@@ -115,7 +112,8 @@ class LegacyHubPage extends StatelessWidget {
     final gameDestinations = [
       _MoreDestination(
         title: 'Music',
-        description: 'Offline player, library, playlists and playback controls.',
+        description:
+            'Offline player, library, playlists and playback controls.',
         icon: Icons.library_music_rounded,
         accent: GtnUiTokens.purple,
         onTap: () => _openSystems(context, view: LegacySystemsView.music),
