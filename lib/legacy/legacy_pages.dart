@@ -160,7 +160,8 @@ class LegacyHubPage extends StatelessWidget {
           const SizedBox(height: 18),
           _MoreSectionHeading(
             title: 'Quick access',
-            description: 'Jump into a creative run or browse the full systems hub.',
+            description:
+                'Jump into a creative run or browse the full systems hub.',
           ),
           const SizedBox(height: 10),
           _MoreDestinationGrid(destinations: quickAccess),
