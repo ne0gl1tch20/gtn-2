@@ -79,8 +79,16 @@ class _ProgressionHubPageState extends State<ProgressionHubPage> {
     return Scaffold(
       appBar: GtnExpressiveAppBar(title: const Text('Prestige & Ultra')),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(12, 14, 12, 28),
         children: [
+          GtnPageHeader(
+            eyebrow: 'Long-term progression',
+            title: 'Prestige & Ultra',
+            description: 'Reset strategically, earn permanent power and push your run further.',
+            icon: Icons.auto_awesome_rounded,
+            accent: GtnUiTokens.purple,
+          ),
+          const SizedBox(height: 8),
           GtnExpressiveCard(
             child: Padding(
               padding: const EdgeInsets.all(16),

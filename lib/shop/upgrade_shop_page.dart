@@ -43,46 +43,73 @@ class _UpgradeShopPageState extends State<UpgradeShopPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: GtnExpressiveAppBar(
-        title: const Text('Upgrade Shop'),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 16),
-            child: Center(
-              child: Text(
-                'Money: ${_progression.money}',
-                style: Theme.of(context).textTheme.titleSmall,
-              ),
-            ),
-          ),
-        ],
-      ),
+      appBar: GtnExpressiveAppBar(title: const Text('Upgrade Shop')),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(12, 14, 12, 28),
         children: [
-          Text(
-            'Make every correct guess count.',
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 6),
-          Text(
-            'Upgrade levels are saved automatically. Prices use the '
-            'base cost × growth rate^level formula.',
-            style: Theme.of(context).textTheme.bodySmall,
+          GtnPageHeader(
+            eyebrow: 'Build your run',
+            title: 'Upgrades',
+            description: 'Make every correct guess count. Upgrade levels are saved automatically.',
+            icon: Icons.upgrade_rounded,
+            accent: GtnUiTokens.purple,
+            trailing: _BalanceChip(value: _progression.money.toString()),
           ),
           const SizedBox(height: 16),
-          for (final upgrade in UpgradeCatalog.availableForGameplay)
-            _UpgradeCard(
-              upgrade: upgrade,
-              level: _progression.upgrades[upgrade.definition.id] ?? 0,
-              money: _progression.money,
-              busy: _buyingId != null,
-              onBuy: () => _buy(upgrade),
-            ),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final columns = constraints.maxWidth >= 640 ? 2 : 1;
+              const spacing = 12.0;
+              final width =
+                  (constraints.maxWidth - spacing * (columns - 1)) / columns;
+              return Wrap(
+                spacing: spacing,
+                runSpacing: 0,
+                children: [
+                  for (final upgrade in UpgradeCatalog.availableForGameplay)
+                    SizedBox(
+                      width: width,
+                      child: _UpgradeCard(
+                        upgrade: upgrade,
+                        level:
+                            _progression.upgrades[upgrade.definition.id] ?? 0,
+                        money: _progression.money,
+                        busy: _buyingId != null,
+                        onBuy: () => _buy(upgrade),
+                      ),
+                    ),
+                ],
+              );
+            },
+          ),
         ],
       ),
     );
   }
+}
+
+class _BalanceChip extends StatelessWidget {
+  const _BalanceChip({required this.value});
+
+  final String value;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    constraints: const BoxConstraints(maxWidth: 112),
+    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+    decoration: BoxDecoration(
+      color: GtnUiTokens.gold.withValues(alpha: .12),
+      borderRadius: BorderRadius.circular(14),
+      border: Border.all(color: GtnUiTokens.gold.withValues(alpha: .24)),
+    ),
+    child: Text(
+      value,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: Theme.of(context).textTheme.labelLarge
+          ?.copyWith(color: GtnUiTokens.gold, fontWeight: FontWeight.w900),
+    ),
+  );
 }
 
 class _UpgradeCard extends StatelessWidget {

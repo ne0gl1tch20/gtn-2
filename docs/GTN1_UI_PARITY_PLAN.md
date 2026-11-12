@@ -47,16 +47,41 @@ Match GTN1's settings groups and preserve all existing setting behavior:
 
 A setting change must update the existing settings model, persist through the existing save path, and update the UI immediately. Detailed editors (for example custom color selection) may be nested detail screens with a clear Back action.
 
-## Visual parity
+## GTN2 visual direction: GTN1 evolved with Material 3 Expressive
 
-Compare GTN2 against the GTN1 HTML and CSS at matching viewport sizes. Match:
-- content hierarchy and section ordering;
-- typography, font weights, letter spacing, colors, gradients, borders, radii, and shadows;
-- responsive breakpoints and compact/desktop layouts;
-- button dimensions, iconography, selected states, and focus states;
-- transitions, feedback, toasts, reduced-motion behavior, and empty/loading states.
+The product goal is an improved, recognizable GTN1, not a generic Material app and not a visual reinvention. GTN1 remains the source of truth for game identity, terminology, screen hierarchy, feature placement, and interaction meaning. Material 3 Expressive is the visual and interaction system used to modernize that identity.
 
-Do not treat a screenshot resemblance as sufficient: every GTN1 control and navigation interaction needs a corresponding Dart behavior and test.
+### Non-negotiable design rules
+
+- Preserve GTN1's recognizable color language, game vocabulary, progression identity, and screen hierarchy.
+- Apply Material 3 Expressive consistently: expressive rounded shapes, tonal surfaces, stronger type hierarchy, adaptive navigation, expressive controls, meaningful motion, and clear selected/focus states.
+- Keep game information dense enough to be useful, but give important actions and progression feedback clear visual priority.
+- Use accent colors to communicate feature identity and state, not as decoration on every element.
+- Support dark and light themes, compact phones, larger phones, tablets, and Windows desktop layouts.
+- Respect reduced-motion settings and accessibility semantics.
+- Avoid generic dashboard templates, random gradients, excessive glow, tiny uppercase-only labels, and one-off styling that does not belong to the shared design language.
+
+### GTN1 reference audit cadence
+
+The source of truth for visual and interaction comparisons is the live GTN1 Web Play implementation:
+
+- `app/src/main/assets/web-play/index.html` for screen structure, navigation labels, content order, semantics, and control names.
+- `app/src/main/assets/web-play/styles.css` for the visual tokens, typography, surfaces, spacing, breakpoints, hover/active states, and reduced-motion behavior.
+- `app/src/main/assets/web-play/app.js` for screen routing, action semantics, state-driven rendering, feedback, and keyboard/accessibility behavior.
+
+Re-check all three files at the start of each primary-destination pass and again before calling that destination visually complete. For secondary screens, inspect the relevant HTML section, CSS selectors, and JS renderer before styling or changing interactions. Revisit the source whenever a mismatch is found; do not rely on an old screenshot or a previous inspection.
+
+The current responsive targets follow GTN1's compact single-column phone layout and its wider two-column dashboard/catalog layouts. Validate at compact phone width, standard phone width, tablet width, and resizable Windows desktop width. Reduced-motion and semantic labels remain part of the acceptance pass.
+
+## Implementation sequence
+
+1. **Design foundation and Play dashboard:** establish shared GTN1-derived tokens and expressive component patterns; polish the current-run hero, guess interaction, stats, wallet, and automation panel.
+2. **Persistent navigation and primary destinations:** verify the five GTN1 destinations and apply the same design language to Beyond the Numbers, Arcade, Play, and Upgrades.
+3. **More hub and secondary screens:** modernize More, then Rewards, Journey, Shop, Home Base, Relics, Codex, Changelog, Music, Settings, Prestige, Ultra, Talents, Traits, Mutators, Stats, and Lucky Stake.
+4. **Consistency and responsive pass:** compare matching GTN1/GTN2 viewports, remove visual drift, and verify phone and Windows layouts.
+5. **Interaction and accessibility pass:** test navigation, nested Back behavior, state retention, focus, semantics, reduced motion, and every visible action.
+
+Do not treat a screenshot resemblance as sufficient: every GTN1 control and navigation interaction needs a corresponding Dart behavior and test. A screen is not complete merely because it has been restyled; its real feature behavior must remain connected.
 
 ## Validation gates
 

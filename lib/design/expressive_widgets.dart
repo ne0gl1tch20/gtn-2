@@ -48,8 +48,9 @@ class GtnExpressiveAppBar extends StatelessWidget
   );
 }
 
-/// GTN1 visual tokens. These intentionally preserve the Web Play identity while
-/// M3 Expressive supplies selected interactive controls, not the whole visual system.
+/// GTN1-derived visual tokens for GTN2.
+/// Preserve the original game's recognizable color language and hierarchy while
+/// using Material 3 Expressive shapes, motion and interaction patterns throughout.
 class GtnUiTokens {
   GtnUiTokens._();
 
@@ -68,8 +69,101 @@ class GtnUiTokens {
   static const contentMaxWidth = 720.0;
 }
 
-/// GTN1-style surface with custom gradients, borders and glow; M3E is reserved
-/// for the interactive controls where its expressive motion is useful.
+/// Shared page introduction that carries GTN1's cosmic color language into
+/// Material 3 Expressive layouts. Use it on feature destinations for a clear,
+/// consistent hierarchy across phone and desktop widths.
+class GtnPageHeader extends StatelessWidget {
+  const GtnPageHeader({
+    super.key,
+    required this.eyebrow,
+    required this.title,
+    required this.description,
+    required this.icon,
+    this.accent = GtnUiTokens.purple,
+    this.trailing,
+  });
+
+  final String eyebrow;
+  final String title;
+  final String description;
+  final IconData icon;
+  final Color accent;
+  final Widget? trailing;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final dark = theme.brightness == Brightness.dark;
+    final foreground = theme.colorScheme.onSurface;
+    final muted = theme.colorScheme.onSurfaceVariant;
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(28),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: dark
+              ? [accent.withValues(alpha: .19), GtnUiTokens.panel]
+              : [accent.withValues(alpha: .10), theme.colorScheme.surface],
+        ),
+        border: Border.all(color: accent.withValues(alpha: dark ? .28 : .20)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Container(
+            width: 52,
+            height: 52,
+            decoration: BoxDecoration(
+              color: accent.withValues(alpha: dark ? .20 : .13),
+              borderRadius: BorderRadius.circular(19),
+            ),
+            child: Icon(icon, color: accent, size: 27),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  eyebrow.toUpperCase(),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: accent,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 1.2,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  title,
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    color: foreground,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: -.55,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  description,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: muted,
+                    height: 1.4,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (trailing != null) ...[const SizedBox(width: 10), trailing!],
+        ],
+      ),
+    );
+  }
+}
+
+/// GTN1-inspired surface with an expressive shape and a restrained elevation.
 class GtnExpressiveCard extends StatelessWidget {
   const GtnExpressiveCard({
     super.key,

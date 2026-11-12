@@ -164,63 +164,96 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
       playerLevel: 1,
       activeSeasonId: _seasonId(DateTime.now()),
     );
+    final pageTitle = switch (widget.view) {
+      LegacySystemsView.all => 'Gameplay Systems',
+      LegacySystemsView.music => 'Music',
+      LegacySystemsView.luckyStake => 'Lucky Stake',
+      LegacySystemsView.traits => 'Traits',
+      LegacySystemsView.talents => 'Talents',
+      LegacySystemsView.mutators => 'Mutators',
+      LegacySystemsView.relics => 'Relics',
+      LegacySystemsView.homeBase => 'Home Base',
+      LegacySystemsView.dailyRewards => 'Daily Rewards',
+      LegacySystemsView.loot => 'Loot',
+      LegacySystemsView.automation => 'Automation',
+      LegacySystemsView.challenges => 'Challenges',
+      LegacySystemsView.codex => 'World Codex',
+    };
+    final pageIcon = switch (widget.view) {
+      LegacySystemsView.all => Icons.grid_view_rounded,
+      LegacySystemsView.music => Icons.library_music_rounded,
+      LegacySystemsView.luckyStake => Icons.casino_rounded,
+      LegacySystemsView.traits => Icons.auto_awesome_rounded,
+      LegacySystemsView.talents => Icons.school_rounded,
+      LegacySystemsView.mutators => Icons.tune_rounded,
+      LegacySystemsView.relics => Icons.diamond_rounded,
+      LegacySystemsView.homeBase => Icons.home_work_rounded,
+      LegacySystemsView.dailyRewards => Icons.card_giftcard_rounded,
+      LegacySystemsView.loot => Icons.inventory_2_rounded,
+      LegacySystemsView.automation => Icons.smart_toy_rounded,
+      LegacySystemsView.challenges => Icons.flag_rounded,
+      LegacySystemsView.codex => Icons.menu_book_rounded,
+    };
+    final pageDescription = switch (widget.view) {
+      LegacySystemsView.all => 'Persistent gameplay systems from GTN1, with purchases and rewards validated by the Dart game engine.',
+      LegacySystemsView.music =>
+        'Your offline soundtrack, playlists and playback controls.',
+      LegacySystemsView.luckyStake =>
+        'Place a stake and settle a validated 50/50 round.',
+      LegacySystemsView.traits =>
+        'Discover passive traits and configure their available strategies.',
+      LegacySystemsView.talents =>
+        'Review talent paths and manage earned progression choices.',
+      LegacySystemsView.mutators =>
+        'Shape a run with optional gameplay modifiers.',
+      LegacySystemsView.relics =>
+        'Collect and equip relics that influence your progression.',
+      LegacySystemsView.homeBase =>
+        'Upgrade your sanctuary and manage its persistent benefits.',
+      LegacySystemsView.dailyRewards =>
+        'Claim available rewards and keep your daily momentum.',
+      LegacySystemsView.loot =>
+        'Review drops, open earned chests and inspect rewards.',
+      LegacySystemsView.automation =>
+        'Configure your automation systems and their behavior.',
+      LegacySystemsView.challenges =>
+        'Track challenges and their current completion progress.',
+      LegacySystemsView.codex =>
+        'Review the worlds, guardians and discoveries in your game.',
+    };
     return Scaffold(
-      appBar: GtnExpressiveAppBar(
-        title: Text(switch (widget.view) {
-          LegacySystemsView.all => 'GTN 1 Systems',
-          LegacySystemsView.music => 'Music',
-          LegacySystemsView.luckyStake => 'Lucky Stake',
-          LegacySystemsView.traits => 'Traits',
-          LegacySystemsView.talents => 'Talents',
-          LegacySystemsView.mutators => 'Mutators',
-          LegacySystemsView.relics => 'Relics',
-          LegacySystemsView.homeBase => 'Home Base',
-          LegacySystemsView.dailyRewards => 'Daily Rewards',
-          LegacySystemsView.loot => 'Loot',
-          LegacySystemsView.automation => 'Automation',
-          LegacySystemsView.challenges => 'Challenges',
-          LegacySystemsView.codex => 'World Codex',
-        }),
-      ),
+      appBar: GtnExpressiveAppBar(title: Text(pageTitle)),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(12, 14, 12, 28),
         children: [
-          if (widget.view == LegacySystemsView.all)
+          GtnPageHeader(
+            eyebrow: widget.view == LegacySystemsView.all
+                ? 'Beyond the numbers'
+                : 'GTN gameplay system',
+            title: pageTitle,
+            description: pageDescription,
+            icon: pageIcon,
+            accent: GtnUiTokens.cyan,
+          ),
+          if (widget.view == LegacySystemsView.all) ...[
+            const SizedBox(height: 10),
             GtnExpressiveCard(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Legacy systems',
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      'Persistent gameplay systems ported from the original Kotlin game. Purchases and rewards are validated by the Dart engine.',
-                    ),
-                    const SizedBox(height: 10),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: [
-                        _statChip(
-                          'Traits',
-                          '${traitState.activeTraitIds.length}/320',
-                        ),
-                        _statChip('Talents', '${_systems.talents.length}/6'),
-                        _statChip(
-                          'Relics',
-                          '${_systems.equippedRelics.length}/4',
-                        ),
-                        _statChip('Sanctuary', 'Lv ${_systems.homeBaseLevel}'),
-                      ],
-                    ),
-                  ],
-                ),
+              padding: const EdgeInsets.all(12),
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  _statChip(
+                    'Traits',
+                    '${traitState.activeTraitIds.length}/320',
+                  ),
+                  _statChip('Talents', '${_systems.talents.length}/6'),
+                  _statChip('Relics', '${_systems.equippedRelics.length}/4'),
+                  _statChip('Sanctuary', 'Lv ${_systems.homeBaseLevel}'),
+                ],
               ),
             ),
+          ],
           if (widget.view == LegacySystemsView.all ||
               widget.view == LegacySystemsView.traits)
             _traitsSection(traitState),

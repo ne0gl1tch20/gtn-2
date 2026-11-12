@@ -36,103 +36,309 @@ class LegacyHubPage extends StatelessWidget {
   final int activeSlot;
   final LegacyProgressionChanged onSystemsChanged;
 
+  void _openSystems(
+    BuildContext context, {
+    LegacySystemsView view = LegacySystemsView.all,
+  }) {
+    Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (_) => LegacySystemsPage(
+          progression: progression,
+          onChanged: onSystemsChanged,
+          view: view,
+        ),
+      ),
+    );
+  }
+
+  void _openSection(BuildContext context, LegacySection section) {
+    Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (_) =>
+            LegacyDetailPage(section: section, progression: progression),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final quickAccess = [
+      _MoreDestination(
+        title: 'Creative Mode',
+        description: 'Build a separate sandbox with custom ranges and rules.',
+        icon: Icons.palette_rounded,
+        accent: GtnUiTokens.purple,
+        onTap: () => Navigator.of(context).push<void>(
+          MaterialPageRoute<void>(
+            builder: (_) => CreativeModePage(slot: activeSlot),
+          ),
+        ),
+      ),
+      _MoreDestination(
+        title: 'All gameplay systems',
+        description: 'Traits, talents, mutators, relics, sanctuary, stakes, rewards, loot and music.',
+        icon: Icons.grid_view_rounded,
+        accent: GtnUiTokens.cyan,
+        onTap: () => _openSystems(context),
+      ),
+    ];
+    final progressDestinations = [
+      _MoreDestination(
+        title: LegacySection.journey.label,
+        description: 'Achievements, milestones and earned perks.',
+        icon: LegacySection.journey.icon,
+        accent: GtnUiTokens.gold,
+        onTap: () => _openSection(context, LegacySection.journey),
+      ),
+      _MoreDestination(
+        title: LegacySection.rewards.label,
+        description: 'Review rewards and lifetime earnings.',
+        icon: LegacySection.rewards.icon,
+        accent: GtnUiTokens.green,
+        onTap: () => _openSection(context, LegacySection.rewards),
+      ),
+      _MoreDestination(
+        title: LegacySection.statistics.label,
+        description: 'Inspect records, streaks and long-term progress.',
+        icon: LegacySection.statistics.icon,
+        accent: GtnUiTokens.cyan,
+        onTap: () => _openSection(context, LegacySection.statistics),
+      ),
+      _MoreDestination(
+        title: LegacySection.codex.label,
+        description: 'Explore the worlds, guardians and discoveries.',
+        icon: LegacySection.codex.icon,
+        accent: GtnUiTokens.purple,
+        onTap: () => _openSection(context, LegacySection.codex),
+      ),
+    ];
+    final gameDestinations = [
+      _MoreDestination(
+        title: 'Music',
+        description:
+            'Offline player, library, playlists and playback controls.',
+        icon: Icons.library_music_rounded,
+        accent: GtnUiTokens.purple,
+        onTap: () => _openSystems(context, view: LegacySystemsView.music),
+      ),
+      _MoreDestination(
+        title: 'Lucky Stake',
+        description: 'Place a stake and settle a validated 50/50 round.',
+        icon: Icons.casino_rounded,
+        accent: GtnUiTokens.gold,
+        onTap: () => _openSystems(context, view: LegacySystemsView.luckyStake),
+      ),
+      _MoreDestination(
+        title: LegacySection.changelog.label,
+        description: 'See what changed across Guess The Number updates.',
+        icon: LegacySection.changelog.icon,
+        accent: GtnUiTokens.cyan,
+        onTap: () => _openSection(context, LegacySection.changelog),
+      ),
+      _MoreDestination(
+        title: LegacySection.about.label,
+        description: 'Game information, source links and acknowledgements.',
+        icon: LegacySection.about.icon,
+        accent: GtnUiTokens.muted,
+        onTap: () => _openSection(context, LegacySection.about),
+      ),
+    ];
+
     return Scaffold(
       appBar: GtnExpressiveAppBar(title: const Text('More')),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(12, 14, 12, 28),
+        children: [
+          GtnPageHeader(
+            eyebrow: 'Explore GTN1',
+            title: 'More',
+            description:
+                'Your achievements, game systems and extra ways to play.',
+            icon: Icons.explore_rounded,
+            accent: GtnUiTokens.cyan,
+          ),
+          const SizedBox(height: 18),
+          _MoreSectionHeading(
+            title: 'Quick access',
+            description:
+                'Jump into a creative run or browse the full systems hub.',
+          ),
+          const SizedBox(height: 10),
+          _MoreDestinationGrid(destinations: quickAccess),
+          const SizedBox(height: 22),
+          _MoreSectionHeading(
+            title: 'Progress & discoveries',
+            description: 'Keep track of what you have earned and explored.',
+          ),
+          const SizedBox(height: 10),
+          _MoreDestinationGrid(destinations: progressDestinations),
+          const SizedBox(height: 22),
+          _MoreSectionHeading(
+            title: 'Game & information',
+            description: 'Manage your game experience and see what is new.',
+          ),
+          const SizedBox(height: 10),
+          _MoreDestinationGrid(destinations: gameDestinations),
+        ],
+      ),
+    );
+  }
+}
+
+class _MoreDestination {
+  const _MoreDestination({
+    required this.title,
+    required this.description,
+    required this.icon,
+    required this.accent,
+    required this.onTap,
+  });
+
+  final String title;
+  final String description;
+  final IconData icon;
+  final Color accent;
+  final VoidCallback onTap;
+}
+
+class _MoreSectionHeading extends StatelessWidget {
+  const _MoreSectionHeading({required this.title, required this.description});
+
+  final String title;
+  final String description;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Your GTN journey',
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
-          const SizedBox(height: 6),
-          const Text(
-            'Progress, lifetime rewards, records and the world codex.',
-          ),
-          const SizedBox(height: 16),
-          GtnExpressiveCard(
-            child: ListTile(
-              leading: const Icon(Icons.palette_rounded),
-              title: const Text('Creative Mode'),
-              subtitle: const Text(
-                'Build a separate sandbox with custom ranges and rules.',
-              ),
-              trailing: const Icon(Icons.chevron_right_rounded),
-              onTap: () => Navigator.of(context).push<void>(
-                MaterialPageRoute<void>(
-                  builder: (_) => CreativeModePage(slot: activeSlot),
-                ),
-              ),
+            title,
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w900,
             ),
           ),
-          GtnExpressiveCard(
-            child: ListTile(
-              leading: const Icon(Icons.grid_view_rounded),
-              title: const Text('All gameplay systems'),
-              subtitle: const Text(
-                'Traits, talents, mutators, relics, sanctuary, stakes, rewards, loot, music and updates.',
-              ),
-              trailing: const Icon(Icons.chevron_right_rounded),
-              onTap: () => Navigator.of(context).push<void>(
-                MaterialPageRoute<void>(
-                  builder: (_) => LegacySystemsPage(
-                    progression: progression,
-                    onChanged: onSystemsChanged,
-                  ),
-                ),
-              ),
+          const SizedBox(height: 3),
+          Text(
+            description,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
-          for (final destination in const [
-            (
-              LegacySystemsView.music,
-              'Music',
-              Icons.library_music_rounded,
-              'Offline player, library, playlists and playback controls.',
-            ),
-            (
-              LegacySystemsView.luckyStake,
-              'Lucky Stake',
-              Icons.casino_rounded,
-              'Place a stake and settle a validated 50/50 round.',
-            ),
-          ])
-            GtnExpressiveCard(
-              child: ListTile(
-                leading: Icon(destination.$3),
-                title: Text(destination.$2),
-                subtitle: Text(destination.$4),
-                trailing: const Icon(Icons.chevron_right_rounded),
-                onTap: () => Navigator.of(context).push<void>(
-                  MaterialPageRoute<void>(
-                    builder: (_) => LegacySystemsPage(
-                      progression: progression,
-                      onChanged: onSystemsChanged,
-                      view: destination.$1,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          for (final section in LegacySection.values)
-            GtnExpressiveCard(
-              child: ListTile(
-                leading: Icon(section.icon),
-                title: Text(section.label),
-                trailing: const Icon(Icons.chevron_right_rounded),
-                onTap: () => Navigator.of(context).push<void>(
-                  MaterialPageRoute<void>(
-                    builder: (_) => LegacyDetailPage(
-                      section: section,
-                      progression: progression,
-                    ),
-                  ),
-                ),
-              ),
-            ),
         ],
+      ),
+    );
+  }
+}
+
+class _MoreDestinationGrid extends StatelessWidget {
+  const _MoreDestinationGrid({required this.destinations});
+
+  final List<_MoreDestination> destinations;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final columns = constraints.maxWidth >= 640 ? 2 : 1;
+        const spacing = 10.0;
+        final width =
+            (constraints.maxWidth - spacing * (columns - 1)) / columns;
+        return Wrap(
+          spacing: spacing,
+          runSpacing: spacing,
+          children: [
+            for (final destination in destinations)
+              SizedBox(
+                width: width,
+                child: _MoreDestinationCard(destination: destination),
+              ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _MoreDestinationCard extends StatelessWidget {
+  const _MoreDestinationCard({required this.destination});
+
+  final _MoreDestination destination;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final dark = theme.brightness == Brightness.dark;
+    final shape = RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(22),
+      side: BorderSide(
+        color: destination.accent.withValues(alpha: dark ? .28 : .20),
+      ),
+    );
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: destination.onTap,
+        borderRadius: BorderRadius.circular(22),
+        child: GtnExpressiveCard(
+          margin: EdgeInsets.zero,
+          padding: const EdgeInsets.all(14),
+          shape: shape,
+          color: dark ? GtnUiTokens.raisedPanel : const Color(0xFFF0F1FA),
+          child: Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: destination.accent.withValues(alpha: .14),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Icon(
+                  destination.icon,
+                  color: destination.accent,
+                  size: 23,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      destination.title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      destination.description,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: dark
+                            ? GtnUiTokens.muted
+                            : const Color(0xFF65708C),
+                        height: 1.35,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 6),
+              Icon(
+                Icons.chevron_right_rounded,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -158,9 +364,36 @@ class LegacyDetailPage extends StatelessWidget {
       LegacySection.changelog => _changelog(context),
       LegacySection.about => _about(context),
     };
+    final description = switch (section) {
+      LegacySection.journey =>
+        'Track achievements, milestones and the rewards earned along the way.',
+      LegacySection.rewards =>
+        'Review lifetime earnings and the currencies in your current run.',
+      LegacySection.statistics =>
+        'Inspect your records, streaks and long-term progression.',
+      LegacySection.codex =>
+        'A field guide to the known worlds, guardians and discoveries.',
+      LegacySection.changelog =>
+        'See what changed across Guess The Number updates.',
+      LegacySection.about =>
+        'Game information, source links and open-source acknowledgements.',
+    };
     return Scaffold(
       appBar: GtnExpressiveAppBar(title: Text(section.label)),
-      body: ListView(padding: const EdgeInsets.all(16), children: content),
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(12, 14, 12, 28),
+        children: [
+          GtnPageHeader(
+            eyebrow: 'More · GTN reference',
+            title: section.label,
+            description: description,
+            icon: section.icon,
+            accent: GtnUiTokens.purple,
+          ),
+          const SizedBox(height: 8),
+          ...content,
+        ],
+      ),
     );
   }
 

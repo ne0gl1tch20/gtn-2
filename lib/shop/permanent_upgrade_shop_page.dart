@@ -55,7 +55,6 @@ class _PermanentUpgradeShopPageState extends State<PermanentUpgradeShopPage> {
   @override
   Widget build(BuildContext context) {
     final currency = widget.ultra ? 'Ultra' : 'Prestige';
-    final theme = Theme.of(context);
     return Scaffold(
       appBar: GtnExpressiveAppBar(
         leading: IconButton(
@@ -72,40 +71,87 @@ class _PermanentUpgradeShopPageState extends State<PermanentUpgradeShopPage> {
         ],
       ),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(12, 14, 12, 28),
         children: [
-          GtnExpressiveCard(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  Icon(widget.ultra ? Icons.auto_awesome : Icons.stars),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      '$currency balance',
-                      style: theme.textTheme.titleMedium,
-                    ),
-                  ),
-                  Text(_balance.toString(), style: theme.textTheme.titleLarge),
-                ],
-              ),
+          GtnPageHeader(
+            eyebrow: widget.ultra
+                ? 'Ultra progression'
+                : 'Prestige progression',
+            title: '$currency Upgrades',
+            description: 'Permanent bonuses that stay with your progression after resets.',
+            icon: widget.ultra ? Icons.bolt_rounded : Icons.stars_rounded,
+            accent: widget.ultra ? GtnUiTokens.cyan : GtnUiTokens.purple,
+            trailing: _PermanentBalanceChip(
+              label: currency,
+              value: _balance.toString(),
             ),
           ),
           const SizedBox(height: 8),
-          for (final upgrade in _catalog)
-            _PermanentUpgradeCard(
-              upgrade: upgrade,
-              level: _level(upgrade.definition.id),
-              balance: _balance,
-              currency: currency,
-              busy: _buyingId != null,
-              onBuy: () => _buy(upgrade),
-            ),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final columns = constraints.maxWidth >= 640 ? 2 : 1;
+              const spacing = 12.0;
+              final width =
+                  (constraints.maxWidth - spacing * (columns - 1)) / columns;
+              return Wrap(
+                spacing: spacing,
+                runSpacing: 0,
+                children: [
+                  for (final upgrade in _catalog)
+                    SizedBox(
+                      width: width,
+                      child: _PermanentUpgradeCard(
+                        upgrade: upgrade,
+                        level: _level(upgrade.definition.id),
+                        balance: _balance,
+                        currency: currency,
+                        busy: _buyingId != null,
+                        onBuy: () => _buy(upgrade),
+                      ),
+                    ),
+                ],
+              );
+            },
+          ),
         ],
       ),
     );
   }
+}
+
+class _PermanentBalanceChip extends StatelessWidget {
+  const _PermanentBalanceChip({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    constraints: const BoxConstraints(maxWidth: 112),
+    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+    decoration: BoxDecoration(
+      color: GtnUiTokens.gold.withValues(alpha: .12),
+      borderRadius: BorderRadius.circular(14),
+      border: Border.all(color: GtnUiTokens.gold.withValues(alpha: .24)),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        Text(
+          label.toUpperCase(),
+          style: Theme.of(context).textTheme.labelSmall
+              ?.copyWith(color: GtnUiTokens.gold, fontWeight: FontWeight.w900),
+        ),
+        Text(
+          value,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: Theme.of(context).textTheme.labelLarge
+              ?.copyWith(color: GtnUiTokens.gold, fontWeight: FontWeight.w900),
+        ),
+      ],
+    ),
+  );
 }
 
 class _PermanentUpgradeCard extends StatelessWidget {

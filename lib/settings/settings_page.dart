@@ -24,7 +24,6 @@ class SettingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Scaffold(
       appBar: GtnExpressiveAppBar(
         title: Text(AppLocalizations.text('settings', 'Settings')),
@@ -32,39 +31,15 @@ class SettingsPage extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(12, 16, 12, 28),
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(8, 4, 8, 14),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'GAME PREFERENCES',
-                  style: TextStyle(
-                    color: GtnUiTokens.cyan,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 1.4,
-                  ),
-                ),
-                const SizedBox(height: 5),
-                Text(
-                  'Settings',
-                  style: theme.textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: -.8,
-                  ),
-                ),
-                const SizedBox(height: 5),
-                Text(
-                  'Customize how Guess The Number looks and plays.',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                    height: 1.5,
-                  ),
-                ),
-              ],
-            ),
+          GtnPageHeader(
+            eyebrow: 'Game preferences',
+            title: AppLocalizations.text('settings', 'Settings'),
+            description:
+                'Customize how Guess The Number looks, sounds and plays.',
+            icon: Icons.tune_rounded,
+            accent: GtnUiTokens.cyan,
           ),
+          const SizedBox(height: 4),
           _SettingsSection(
             eyebrow: '01 / LANGUAGE & NUMBERS',
             title: 'Language & Numbers',

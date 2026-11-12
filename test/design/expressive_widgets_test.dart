@@ -98,4 +98,36 @@ void main() {
       controller.dispose();
     },
   );
+
+  testWidgets('GTN page header adapts to compact phone widths', (tester) async {
+    await tester.pumpWidget(
+      M3EMaterialApp(
+        title: 'GTN2 page header test',
+        data: M3EThemeData.dark(seedColor: const Color(0xFF9B7CFF)),
+        fontFamily: 'Manrope',
+        autoTheming: false,
+        initialTheme: Brightness.dark,
+        home: Scaffold(
+          body: Center(
+            child: SizedBox(
+              width: 320,
+              child: GtnPageHeader(
+                eyebrow: 'Beyond the Numbers',
+                title: 'Your universe',
+                description: 'Explore worlds, discover secrets and challenge their guardians.',
+                icon: Icons.explore_rounded,
+                accent: const Color(0xFF62E8FF),
+                trailing: const Chip(label: Text('4 WORLDS')),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('BEYOND THE NUMBERS'), findsOneWidget);
+    expect(find.text('Your universe'), findsOneWidget);
+    expect(find.text('4 WORLDS'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
 }
