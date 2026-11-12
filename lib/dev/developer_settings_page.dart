@@ -5,6 +5,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../data/saves/save_data.dart';
 import '../design/expressive_widgets.dart';
+import 'jui_preview_page.dart';
 
 typedef DeveloperCommand = Future<String> Function(String command);
 typedef DeveloperSaveApply = Future<void> Function(SaveData save);
@@ -95,6 +96,17 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
           Text(
             'Developer Console',
             style: Theme.of(context).textTheme.titleLarge,
+          ),
+          const SizedBox(height: 12),
+          M3EButton.filled(
+            onPressed: _busy
+                ? null
+                : () => Navigator.of(context).push<void>(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const JuiPreviewPage(),
+                    ),
+                  ),
+            child: const Text('Open JUI screen preview'),
           ),
           const SizedBox(height: 8),
           const Text(
