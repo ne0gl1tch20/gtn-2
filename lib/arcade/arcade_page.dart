@@ -52,7 +52,7 @@ class _ArcadePageState extends State<ArcadePage> {
               final games = snapshot.data ?? const <ArcadeGameDefinition>[];
               return GtnExpressiveCard(
                 margin: EdgeInsets.zero,
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.all(14),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(26),
                   side: BorderSide(
@@ -62,58 +62,16 @@ class _ArcadePageState extends State<ArcadePage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Row(
-                      children: [
-                        Container(
-                          width: 42,
-                          height: 42,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(14),
-                            gradient: const LinearGradient(
-                              colors: [GtnUiTokens.purple, GtnUiTokens.cyan],
-                            ),
-                          ),
-                          child: const Icon(
-                            Icons.sports_esports_rounded,
-                            color: Color(0xFF080B16),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'QUICK CHALLENGES',
-                                style: theme.textTheme.labelSmall?.copyWith(
-                                  color: GtnUiTokens.cyan,
-                                  fontWeight: FontWeight.w900,
-                                  letterSpacing: 1.2,
-                                ),
-                              ),
-                              Text(
-                                'Arcade',
-                                style: theme.textTheme.headlineSmall?.copyWith(
-                                  fontWeight: FontWeight.w900,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        _ArcadeCountChip(
-                          label:
-                              '${games.isEmpty ? ArcadeCatalog.expectedIds.length : games.length} GAMES',
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      'Play the original GTN1 minigames to earn Nebula and Money.',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: dark
-                            ? GtnUiTokens.muted
-                            : const Color(0xFF65708C),
-                        height: 1.5,
+                    GtnPageHeader(
+                      eyebrow: 'Quick challenges',
+                      title: 'Arcade',
+                      description:
+                          'Play GTN1 minigames to earn Nebula and Money.',
+                      icon: Icons.sports_esports_rounded,
+                      accent: GtnUiTokens.cyan,
+                      trailing: _ArcadeCountChip(
+                        label:
+                            '${games.isEmpty ? ArcadeCatalog.expectedIds.length : games.length} GAMES',
                       ),
                     ),
                     const SizedBox(height: 16),
