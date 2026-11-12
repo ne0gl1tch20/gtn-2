@@ -64,25 +64,27 @@ class GtnApp extends StatelessWidget {
           ValueListenableBuilder<GameSettings>(
             valueListenable: settingsNotifier,
             builder: (context, settings, _) {
+              final brightness = settings.themeMode == 'System'
+                  ? MediaQuery.platformBrightnessOf(context)
+                  : settings.darkMode
+                  ? Brightness.dark
+                  : Brightness.light;
+              final seedColor = Color(
+                0xFF000000 |
+                    int.parse(
+                      settings.customPrimaryColor.substring(1),
+                      radix: 16,
+                    ),
+              );
               return M3EMaterialApp(
                 title: 'GuessTheNumber 2',
-                data: M3EThemeData.light(
-                  seedColor: Color(
-                    0xFF000000 |
-                        int.parse(
-                          settings.customPrimaryColor.substring(1),
-                          radix: 16,
-                        ),
-                  ),
-                ),
+                data: brightness == Brightness.dark
+                    ? M3EThemeData.dark(seedColor: seedColor)
+                    : M3EThemeData.light(seedColor: seedColor),
                 fontFamily: 'Manrope',
                 autoTheming: false,
                 dynamicColoring: false,
-                initialTheme: settings.themeMode == 'System'
-                    ? MediaQuery.platformBrightnessOf(context)
-                    : settings.darkMode
-                    ? Brightness.dark
-                    : Brightness.light,
+                initialTheme: brightness,
                 debugShowCheckedModeBanner: false,
                 appBuilder: (context, child) => MediaQuery(
                   data: MediaQuery.of(context)
