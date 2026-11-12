@@ -154,6 +154,8 @@ class _GameHomePageState extends State<GameHomePage>
   bool _randomEventRunning = false;
   String? _randomEventMessage;
   Timer? _playtimeTimer;
+  BigNumber _lastIncomeMeasurement = BigNumber.fromInt(0);
+  BigNumber _incomePerSecond = BigNumber.fromInt(0);
   bool _autoClickerTickRunning = false;
   bool _resumeCatchUpPending = false;
   ProgressionState _progression = ProgressionState.initial;
@@ -196,15 +198,25 @@ class _GameHomePageState extends State<GameHomePage>
 
   void _startPlaytimeTimer() {
     if (!mounted || _isLoading || _playtimeTimer?.isActive == true) return;
+    _lastIncomeMeasurement = _progression.money;
+    _incomePerSecond = BigNumber.fromInt(0);
     _playtimeTimer = Timer.periodic(const Duration(seconds: 1), (_) {
       if (!mounted || _isLoading) return;
+      final currentMoney = _progression.money;
+      final income = _progression.legacySystems.autoClickerActive
+          ? currentMoney - _lastIncomeMeasurement
+          : BigNumber.fromInt(0);
+      _lastIncomeMeasurement = currentMoney;
       final next = _progression.copyWith(
         playtimeSeconds: _progression.playtimeSeconds + 1,
       );
       final evaluated = _progressionEngine.evaluateAchievements(next);
       final unlocked =
           evaluated.achievements.length > _progression.achievements.length;
-      setState(() => _progression = evaluated);
+      setState(() {
+        _progression = evaluated;
+        _incomePerSecond = income;
+      });
       if (unlocked || evaluated.playtimeSeconds % 30 == 0) {
         unawaited(_persist());
       }
@@ -1701,6 +1713,7 @@ class _GameHomePageState extends State<GameHomePage>
     return GameDashboardPage(
       game: _game,
       progression: _progression,
+      incomePerSecond: _incomePerSecond,
       settings: _settings,
       activeSlot: _activeSlot,
       loading: _isLoading,
