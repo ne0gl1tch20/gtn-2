@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "screen": "talents",
+  "root": {
+    "type": "column",
+    "children": [
+      {"type": "text", "text": "TALENTS", "fontSize": 28},
+      {"type": "text", "text": "Talent points, prerequisites, purchases and effects are handled by Dart gameplay services."},
+      {"type": "button", "text": "OPEN TALENT TREE", "action": {"id": "talents.open_tree"}},
+      {"type": "button", "text": "BACK", "action": {"id": "navigation.back"}}
+    ]
+  }
+}
