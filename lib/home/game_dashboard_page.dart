@@ -49,6 +49,8 @@ class GameDashboardPage extends StatelessWidget {
     required this.onPrimarySelected,
     required this.onSystemsView,
     required this.onLegacySection,
+    this.playerProfile = const PlayerProfile(),
+    this.onPlayerProfile,
   });
 
   final GameState game;
@@ -78,6 +80,8 @@ class GameDashboardPage extends StatelessWidget {
   final ValueChanged<int> onPrimarySelected;
   final ValueChanged<LegacySystemsView> onSystemsView;
   final ValueChanged<LegacySection> onLegacySection;
+  final PlayerProfile playerProfile;
+  final VoidCallback? onPlayerProfile;
 
   void _openMoreMenu(BuildContext context, Color panel) {
     shellNavigatorKey.currentState!.push<void>(
@@ -99,6 +103,8 @@ class GameDashboardPage extends StatelessWidget {
           onSystemsView: onSystemsView,
           onLegacySection: onLegacySection,
           onUpgradeShop: onUpgradeShop,
+          playerProfile: playerProfile,
+          onPlayerProfile: onPlayerProfile ?? () {},
         ),
       ),
     );
@@ -819,6 +825,8 @@ class _MoreMenuPage extends StatelessWidget {
     required this.onSystemsView,
     required this.onLegacySection,
     required this.onUpgradeShop,
+    required this.playerProfile,
+    required this.onPlayerProfile,
   });
 
   final GameSettings settings;
@@ -837,6 +845,8 @@ class _MoreMenuPage extends StatelessWidget {
   final ValueChanged<LegacySystemsView> onSystemsView;
   final ValueChanged<LegacySection> onLegacySection;
   final VoidCallback onUpgradeShop;
+  final PlayerProfile playerProfile;
+  final VoidCallback onPlayerProfile;
 
   Color _destinationColor(String? hex) {
     if (hex == null || hex.isEmpty) return _purple;
@@ -936,6 +946,14 @@ class _MoreMenuPage extends StatelessWidget {
           String,
           ({IconData icon, String title, String subtitle, VoidCallback onTap})
         >{
+          'player_profile': (
+            icon: Icons.account_circle_rounded,
+            title: playerProfile.username.isEmpty ? 'Player profile' : playerProfile.username,
+            subtitle: playerProfile.bio.isEmpty
+                ? 'View your username and bio, then edit your profile'
+                : playerProfile.bio,
+            onTap: onPlayerProfile,
+          ),
           'world_map': (
             icon: Icons.public_rounded,
             title: 'Beyond the Numbers',
@@ -1075,10 +1093,13 @@ class _MoreMenuPage extends StatelessWidget {
             onTap: onNebulaShop,
           ),
         };
-    final orderedIds = settings.moreScreenOrder
-        .where(destinations.containsKey)
-        .toSet()
-        .toList();
+    final orderedIds = <String>['player_profile'];
+    orderedIds.addAll(
+      settings.moreScreenOrder
+          .where(destinations.containsKey)
+          .where((id) => id != 'player_profile')
+          .toSet(),
+    );
     for (final id in destinations.keys) {
       if (!orderedIds.contains(id)) orderedIds.add(id);
     }
