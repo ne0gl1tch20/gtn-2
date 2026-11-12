@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "screen": "traits",
+  "root": {
+    "type": "column",
+    "children": [
+      {"type": "text", "text": "TRAITS", "fontSize": 28},
+      {"type": "text", "text": "Trait ownership, effects, unlock requirements and selection remain authoritative in the GTN2 host."},
+      {"type": "button", "text": "OPEN TRAIT CATALOG", "action": {"id": "traits.open_catalog"}},
+      {"type": "button", "text": "BACK", "action": {"id": "navigation.back"}}
+    ]
+  }
+}
