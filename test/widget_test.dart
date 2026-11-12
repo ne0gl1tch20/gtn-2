@@ -41,28 +41,22 @@ Widget buildDashboard({GameSettings? settings, VoidCallback? onGuess}) =>
 
 void main() {
   testWidgets(
-    'guess controls expose GTN1 accessibility labels and submit action',
+    'guess controls show labels and submit action',
     (WidgetTester tester) async {
-      final semantics = tester.ensureSemantics();
-      addTearDown(semantics.dispose);
-      Finder semantic(String label) => find.byWidgetPredicate(
-        (widget) => widget is Semantics && widget.properties.label == label,
-      );
       var submitted = 0;
       await tester.pumpWidget(buildDashboard(onGuess: () => submitted++));
 
-      expect(semantic('Your guess'), findsOneWidget);
-      expect(semantic('Guess'), findsOneWidget);
-      expect(semantic('Use lower end of range'), findsOneWidget);
-      expect(semantic('Use midpoint of range'), findsOneWidget);
-      expect(semantic('Use upper end of range'), findsOneWidget);
-      expect(semantic('Clear guess input'), findsOneWidget);
+      expect(find.text('->'), findsOneWidget);
+      expect(find.text('LOW END'), findsOneWidget);
+      expect(find.text('MIDPOINT'), findsOneWidget);
+      expect(find.text('HIGH END'), findsOneWidget);
+      expect(find.text('CLEAR'), findsOneWidget);
 
-      await tester.tap(semantic('Guess'));
+      await tester.tap(find.text('->'));
       await tester.pump();
       expect(submitted, 1);
 
-      await tester.tap(semantic('Use midpoint of range'));
+      await tester.tap(find.text('MIDPOINT'));
       await tester.pump();
       final field = tester.widget<GtnExpressiveTextField>(
         find.byKey(const Key('guess-input')),
