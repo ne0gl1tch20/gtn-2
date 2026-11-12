@@ -67,9 +67,12 @@ void main() {
     await tester.pumpWidget(
       buildDashboard(onLegacySection: (section) => openedSection = section),
     );
-    await tester.tap(find.text('More').first);
+    await tester.scrollUntilVisible(
+      find.text('Daily Momentum'),
+      180,
+      scrollable: find.byType(Scrollable).first,
+    );
     await tester.pumpAndSettle();
-    await tester.ensureVisible(find.text('Daily Momentum'));
     await tester.tap(find.text('Daily Momentum'));
     expect(openedSection, LegacySection.rewards);
   });
