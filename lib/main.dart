@@ -908,8 +908,7 @@ class _GameHomePageState extends State<GameHomePage>
     } on Exception {
       if (mounted) {
         setState(
-          () => _message =
-              'Profile saved, but save-slot metadata could not be synchronized.',
+          () => _message = 'Profile saved, but save-slot metadata could not be synchronized.',
         );
       }
     }
