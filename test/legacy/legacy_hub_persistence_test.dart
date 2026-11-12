@@ -50,10 +50,10 @@ void main() {
         final destinationFinder = find.text(destination).first;
         await tester.ensureVisible(destinationFinder);
         await tester.tap(destinationFinder);
-        await tester.pumpAndSettle();
+        await tester.pump(const Duration(milliseconds: 500));
         expect(find.text(pageTitle), findsWidgets, reason: destination);
         await tester.pageBack();
-        await tester.pumpAndSettle();
+        await tester.pump(const Duration(milliseconds: 500));
         expect(find.text('More'), findsWidgets);
       }
 
@@ -71,12 +71,12 @@ void main() {
       final musicFinder = find.text('Music').first;
       await tester.ensureVisible(musicFinder);
       await tester.tap(musicFinder);
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 500));
 
       final shuffleSwitch = find.byType(M3ESwitch).first;
       expect(shuffleSwitch, findsOneWidget);
       await tester.tap(shuffleSwitch);
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 500));
 
       final reloaded = await storage.load();
       expect(reloaded, isNotNull);
