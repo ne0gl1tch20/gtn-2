@@ -55,7 +55,6 @@ class _PermanentUpgradeShopPageState extends State<PermanentUpgradeShopPage> {
   @override
   Widget build(BuildContext context) {
     final currency = widget.ultra ? 'Ultra' : 'Prestige';
-    final theme = Theme.of(context);
     return Scaffold(
       appBar: GtnExpressiveAppBar(
         leading: IconButton(
