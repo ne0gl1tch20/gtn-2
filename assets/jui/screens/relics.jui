@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "screen": "relics",
+  "root": {
+    "type": "column",
+    "children": [
+      {"type": "text", "text": "RELICS", "fontSize": 28},
+      {"type": "text", "text": "Relic inventory, descriptions, rarity, equip limits and effects are owned by Dart."},
+      {"type": "button", "text": "OPEN RELIC INVENTORY", "action": {"id": "relics.open_inventory"}},
+      {"type": "button", "text": "BACK", "action": {"id": "navigation.back"}}
+    ]
+  }
+}
