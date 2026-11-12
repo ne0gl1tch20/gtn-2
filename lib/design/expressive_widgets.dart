@@ -104,14 +104,8 @@ class GtnPageHeader extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: dark
-              ? [
-                  accent.withValues(alpha: .19),
-                  GtnUiTokens.panel,
-                ]
-              : [
-                  accent.withValues(alpha: .10),
-                  theme.colorScheme.surface,
-                ],
+              ? [accent.withValues(alpha: .19), GtnUiTokens.panel]
+              : [accent.withValues(alpha: .10), theme.colorScheme.surface],
         ),
         border: Border.all(color: accent.withValues(alpha: dark ? .28 : .20)),
       ),
