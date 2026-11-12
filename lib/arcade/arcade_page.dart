@@ -39,8 +39,7 @@ class _ArcadePageState extends State<ArcadePage> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final dark = theme.brightness == Brightness.dark;
+    final dark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       appBar: GtnExpressiveAppBar(title: const Text('Arcade')),
       body: ListView(
