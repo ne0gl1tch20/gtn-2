@@ -94,8 +94,7 @@ class SettingsPage extends StatelessWidget {
           _SettingsSection(
             eyebrow: '02 / APPEARANCE',
             title: 'Appearance',
-            description:
-                'Tune the theme while keeping the original GTN cosmic identity.',
+            description: 'Tune the theme while keeping the original GTN cosmic identity.',
             children: [
               _dropdown<String>(
                 'Theme mode',
