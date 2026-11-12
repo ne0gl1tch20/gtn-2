@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "screen": "more",
+  "root": {
+    "type": "column",
+    "children": [
+      {"type": "text", "text": "MORE", "fontSize": 28},
+      {"type": "button", "text": "SAVE SLOTS", "action": {"id": "navigation.open", "arguments": {"route": "save_slots"}}},
+      {"type": "button", "text": "TRAITS", "action": {"id": "navigation.open", "arguments": {"route": "traits"}}},
+      {"type": "button", "text": "TALENTS", "action": {"id": "navigation.open", "arguments": {"route": "talents"}}},
+      {"type": "button", "text": "MUTATORS", "action": {"id": "navigation.open", "arguments": {"route": "mutators"}}},
+      {"type": "button", "text": "RELICS", "action": {"id": "navigation.open", "arguments": {"route": "relics"}}},
+      {"type": "button", "text": "HOME BASE", "action": {"id": "navigation.open", "arguments": {"route": "home_base"}}},
+      {"type": "button", "text": "BACK", "action": {"id": "navigation.back"}}
+    ]
+  }
+}
