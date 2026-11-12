@@ -132,4 +132,3 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 }
-Formatted 1 file (1 changed) in 0.01 seconds.
