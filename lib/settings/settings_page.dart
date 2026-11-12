@@ -215,7 +215,8 @@ class SettingsPage extends StatelessWidget {
             eyebrow: '04 / NOTIFICATIONS',
             title: 'Notifications',
             description:
-                'Preferences are saved. Scheduled delivery still needs platform integration.',
+                'Preferences are saved. Scheduled delivery still needs '
+                'platform integration.',
             children: [
               _toggle(
                 'Game reminders',
@@ -280,7 +281,8 @@ class SettingsPage extends StatelessWidget {
                 },
               ),
               const Text(
-                'The preference is stored; background scheduling is not yet connected.',
+                'The preference is stored; background scheduling is not yet '
+                'connected.',
                 style: TextStyle(color: GtnUiTokens.muted, fontSize: 11),
               ),
             ],
@@ -329,7 +331,8 @@ class SettingsPage extends StatelessWidget {
             eyebrow: '08 / DEVELOPER & SAVE',
             title: 'Developer & Save Preferences',
             description:
-                'Control diagnostic logging, matching the original GTN1 settings.',
+                'Control diagnostic logging, matching the original GTN1 '
+                'settings.',
             children: [
               _toggle(
                 'Save logs to storage',
