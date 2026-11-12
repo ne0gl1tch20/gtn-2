@@ -207,11 +207,9 @@ class GameDashboardPage extends StatelessWidget {
           );
         },
       ),
-      body: Navigator(
-        key: shellNavigatorKey,
-        onGenerateRoute: (routeSettings) => MaterialPageRoute<void>(
-          settings: routeSettings,
-          builder: (_) => Container(
+      body: Stack(
+        children: [
+          Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
@@ -568,7 +566,15 @@ class GameDashboardPage extends StatelessWidget {
               ),
             ),
           ),
-        ),
+          Navigator(
+            key: shellNavigatorKey,
+            onGenerateRoute: (_) => PageRouteBuilder<void>(
+              opaque: false,
+              pageBuilder: (context, animation, secondaryAnimation) =>
+                  const SizedBox.shrink(),
+            ),
+          ),
+        ],
       ),
     );
   }
