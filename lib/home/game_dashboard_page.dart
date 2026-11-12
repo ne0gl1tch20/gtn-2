@@ -949,7 +949,9 @@ class _MoreMenuPage extends StatelessWidget {
         >{
           'player_profile': (
             icon: Icons.account_circle_rounded,
-            title: playerProfile.username.isEmpty ? 'Player profile' : playerProfile.username,
+            title: playerProfile.username.isEmpty
+                ? 'Player profile'
+                : playerProfile.username,
             subtitle: playerProfile.bio.isEmpty
                 ? 'View your username and bio, then edit your profile'
                 : playerProfile.bio,
