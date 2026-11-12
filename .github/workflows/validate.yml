@@ -2,19 +2,13 @@ name: Validate
 
 on:
   push:
-    branches: ['port/**']
+    branches: ['main', 'master', 'port/**']
   pull_request:
     branches: [main, master]
   workflow_dispatch:
 
 permissions:
   contents: write
-
-# CI formatting is committed before Android and Windows validation jobs.
-# Keep the release artifact short-lived and traceable to this exact build.
-# Apply lint quick fixes before the strict analyzer gate.
-# Revalidate music queue, playlist editing and persisted settings synchronization.
-# Revalidate settings round-trip and scroll behavior.
 
 concurrency:
   group: validate-${{ github.ref }}
@@ -45,7 +39,7 @@ jobs:
         env:
           TARGET_BRANCH: ${{ github.event.pull_request.head.ref || github.ref_name }}
         run: |
-          if git diff --quiet -- '*.dart'; then
+          if git diff --quiet; then
             echo "Dart sources are already formatted."
             exit 0
           fi
@@ -69,10 +63,12 @@ jobs:
           repository: ne0gl1tch20/GuessTheNumber
           ref: fe9cf567169e19059e0330d08769fe454336ef94
           path: gtn1-source
-      - name: Bundle GTN1 artwork and offline fonts
+      - name: Bundle GTN1 source artwork and offline fonts
         run: bash scripts/sync_gtn1_assets.sh gtn1-source
       - name: Verify complete GTN1 content bundle
         run: python scripts/verify_gtn1_assets.py
+      - name: Install image tooling
+        run: python -m pip install --upgrade pillow
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -83,6 +79,8 @@ jobs:
           cache: true
       - name: Generate Android project
         run: flutter create --platforms=android --project-name=gtn_2 --org=com.jarrlyyy .
+      - name: Generate GTN launcher icons
+        run: python scripts/generate_platform_icons.py --android-only
       - name: Cache Gradle distributions and dependencies
         uses: gradle/actions/setup-gradle@v4
       - name: Configure Android package installation and plugin SDK
@@ -96,15 +94,7 @@ jobs:
       - name: Test
         run: flutter test
       - name: Build Android debug APK
-        shell: bash
-        run: |
-          for attempt in 1 2 3; do
-            if flutter build apk --debug; then
-              exit 0
-            fi
-            if [ "$attempt" -lt 3 ]; then sleep $((attempt * 15)); fi
-          done
-          exit 1
+        run: flutter build apk --debug
       - name: Upload Android debug APK
         uses: actions/upload-artifact@v4
         with:
@@ -127,7 +117,7 @@ jobs:
           repository: ne0gl1tch20/GuessTheNumber
           ref: fe9cf567169e19059e0330d08769fe454336ef94
           path: gtn1-source
-      - name: Bundle GTN1 artwork and offline fonts
+      - name: Bundle GTN1 source artwork and offline fonts
         shell: bash
         run: bash scripts/sync_gtn1_assets.sh gtn1-source
       - name: Verify complete GTN1 content bundle
@@ -140,7 +130,75 @@ jobs:
         run: flutter config --enable-windows-desktop
       - name: Generate Windows project
         run: flutter create --platforms=windows --project-name=gtn_2 --org=com.jarrlyyy .
+      - name: Install image tooling
+        run: python -m pip install --upgrade pillow
+      - name: Generate GTN Windows icon
+        run: python scripts/generate_platform_icons.py --windows-only
       - name: Install dependencies
         run: flutter pub get
       - name: Build Windows debug app
         run: flutter build windows --debug
+      - name: Package portable Windows debug build
+        run: |
+          New-Item -ItemType Directory -Force dist | Out-Null
+          Compress-Archive -Path build/windows/x64/runner/Debug/* -DestinationPath dist/GuessTheNumber-Windows-Debug.zip -Force
+      - name: Upload portable Windows debug build
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-debug-portable
+          path: dist/GuessTheNumber-Windows-Debug.zip
+          if-no-files-found: error
+          retention-days: 7
+
+  windows-installer:
+    name: Windows release installer (Inno Setup)
+    runs-on: windows-latest
+    needs: format
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'))
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch GTN1 source assets
+        uses: actions/checkout@v4
+        with:
+          repository: ne0gl1tch20/GuessTheNumber
+          ref: fe9cf567169e19059e0330d08769fe454336ef94
+          path: gtn1-source
+      - name: Bundle GTN1 source artwork and offline fonts
+        shell: bash
+        run: bash scripts/sync_gtn1_assets.sh gtn1-source
+      - name: Verify complete GTN1 content bundle
+        run: python scripts/verify_gtn1_assets.py
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Enable Windows desktop
+        run: flutter config --enable-windows-desktop
+      - name: Generate Windows project
+        run: flutter create --platforms=windows --project-name=gtn_2 --org=com.jarrlyyy .
+      - name: Install image tooling
+        run: python -m pip install --upgrade pillow
+      - name: Generate GTN Windows icon
+        run: python scripts/generate_platform_icons.py --windows-only
+      - name: Install dependencies
+        run: flutter pub get
+      - name: Build Windows release app
+        run: flutter build windows --release
+      - name: Install Inno Setup
+        run: choco install innosetup --yes --no-progress
+      - name: Build installer and portable release
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force dist/windows | Out-Null
+          $version = (Select-String -Path pubspec.yaml -Pattern '^version:\s*([^+]+)' ).Matches[0].Groups[1].Value
+          & "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" "/DAppVersion=$version" windows/installer/gtn2.iss
+          Compress-Archive -Path build/windows/x64/runner/Release/* -DestinationPath dist/windows/GuessTheNumber-Windows-Portable.zip -Force
+      - name: Upload Windows installer and portable release
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-release-installer
+          path: |
+            dist/windows/GuessTheNumber-Setup.exe
+            dist/windows/GuessTheNumber-Windows-Portable.zip
+          if-no-files-found: error
+          retention-days: 7
