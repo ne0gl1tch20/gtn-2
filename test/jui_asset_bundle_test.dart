@@ -2,6 +2,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:jarrlyyui_engine/jarrlyyui_engine.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   test('all bundled JUI baseline screens load from Flutter assets', () async {
     final loader = JuiAssetLoader(basePath: 'assets/jui');
     const screens = [
