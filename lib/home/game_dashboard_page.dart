@@ -2,6 +2,7 @@ import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../core/game/game_engine.dart';
+import '../core/numbers/big_number.dart';
 import '../core/progression/progression_state.dart';
 import '../design/expressive_widgets.dart';
 import '../legacy/legacy_pages.dart';
@@ -46,6 +47,7 @@ class GameDashboardPage extends StatelessWidget {
     required this.onSystems,
     this.showDeveloperSettings = false,
     this.randomEventMessage,
+    this.incomePerSecond,
     required this.shellNavigatorKey,
     required this.selectedIndex,
     required this.onPrimarySelected,
@@ -78,6 +80,7 @@ class GameDashboardPage extends StatelessWidget {
   final VoidCallback onSystems;
   final bool showDeveloperSettings;
   final String? randomEventMessage;
+  final BigNumber? incomePerSecond;
   final GlobalKey<NavigatorState> shellNavigatorKey;
   final int selectedIndex;
   final ValueChanged<int> onPrimarySelected;
@@ -624,6 +627,7 @@ class GameDashboardPage extends StatelessWidget {
                                   line,
                                   foreground,
                                   muted,
+                                  incomePerSecond,
                                 ),
                               ),
                               SizedBox(
@@ -1297,6 +1301,7 @@ class _Wallet extends StatelessWidget {
     this.line,
     this.foreground,
     this.muted,
+    this.incomePerSecond,
   );
   final ProgressionState state;
   final Color panel;
@@ -1304,6 +1309,7 @@ class _Wallet extends StatelessWidget {
   final Color line;
   final Color foreground;
   final Color muted;
+  final BigNumber? incomePerSecond;
 
   @override
   Widget build(BuildContext context) => Container(
@@ -1334,9 +1340,22 @@ class _Wallet extends StatelessWidget {
               ),
             ),
             const Spacer(),
-            Text(
-              '${state.moneyEarned} earned',
-              style: const TextStyle(color: _green, fontSize: 10),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  '+ ${incomePerSecond ?? BigNumber.fromInt(0)} /s',
+                  style: const TextStyle(
+                    color: _green,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                Text(
+                  '${state.moneyEarned} earned',
+                  style: TextStyle(color: muted, fontSize: 9),
+                ),
+              ],
             ),
           ],
         ),
