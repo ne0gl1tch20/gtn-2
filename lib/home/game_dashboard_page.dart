@@ -492,21 +492,43 @@ class GameDashboardPage extends StatelessWidget {
                                 Container(
                                   padding: const EdgeInsets.all(15),
                                   decoration: BoxDecoration(
-                                    color: _gold.withValues(alpha: dark ? .12 : .16),
+                                    color: _gold.withValues(
+                                      alpha: dark ? .12 : .16,
+                                    ),
                                     borderRadius: BorderRadius.circular(20),
-                                    border: Border.all(color: _gold.withValues(alpha: .38)),
+                                    border: Border.all(
+                                      color: _gold.withValues(alpha: .38),
+                                    ),
                                   ),
                                   child: Row(
                                     children: [
-                                      const Icon(Icons.auto_awesome_rounded, color: _gold),
+                                      const Icon(
+                                        Icons.auto_awesome_rounded,
+                                        color: _gold,
+                                      ),
                                       const SizedBox(width: 11),
                                       Expanded(
                                         child: Column(
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
-                                            Text('RANDOM EVENT', style: TextStyle(color: muted, fontSize: 9, fontWeight: FontWeight.w900, letterSpacing: 1.4)),
+                                            Text(
+                                              'RANDOM EVENT',
+                                              style: TextStyle(
+                                                color: muted,
+                                                fontSize: 9,
+                                                fontWeight: FontWeight.w900,
+                                                letterSpacing: 1.4,
+                                              ),
+                                            ),
                                             const SizedBox(height: 3),
-                                            Text(randomEventMessage!, style: TextStyle(color: foreground, fontSize: 13, fontWeight: FontWeight.w800)),
+                                            Text(
+                                              randomEventMessage!,
+                                              style: TextStyle(
+                                                color: foreground,
+                                                fontSize: 13,
+                                                fontWeight: FontWeight.w800,
+                                              ),
+                                            ),
                                           ],
                                         ),
                                       ),
