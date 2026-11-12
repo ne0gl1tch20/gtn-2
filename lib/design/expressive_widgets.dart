@@ -48,8 +48,9 @@ class GtnExpressiveAppBar extends StatelessWidget
   );
 }
 
-/// GTN1 visual tokens. These intentionally preserve the Web Play identity while
-/// M3 Expressive supplies selected interactive controls, not the whole visual system.
+/// GTN1-derived visual tokens for GTN2.
+/// Preserve the original game's recognizable color language and hierarchy while
+/// using Material 3 Expressive shapes, motion and interaction patterns throughout.
 class GtnUiTokens {
   GtnUiTokens._();
 
@@ -68,8 +69,7 @@ class GtnUiTokens {
   static const contentMaxWidth = 720.0;
 }
 
-/// GTN1-style surface with custom gradients, borders and glow; M3E is reserved
-/// for the interactive controls where its expressive motion is useful.
+/// GTN1-inspired surface with an expressive shape and a restrained elevation.
 class GtnExpressiveCard extends StatelessWidget {
   const GtnExpressiveCard({
     super.key,
