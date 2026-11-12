@@ -571,7 +571,7 @@ class GameDashboardPage extends StatelessWidget {
             onGenerateRoute: (_) => PageRouteBuilder<void>(
               opaque: false,
               pageBuilder: (context, animation, secondaryAnimation) =>
-                  const SizedBox.shrink(),
+                  const IgnorePointer(child: SizedBox.expand()),
             ),
           ),
         ],
@@ -1363,6 +1363,7 @@ class _GuessInput extends StatelessWidget {
             Expanded(
               child: Semantics(
                 container: true,
+                excludeSemantics: true,
                 label: 'Your guess',
                 textField: true,
                 child: GtnExpressiveTextField(
@@ -1382,6 +1383,7 @@ class _GuessInput extends StatelessWidget {
               height: 56,
               child: Semantics(
                 container: true,
+                excludeSemantics: true,
                 label: 'Guess',
                 button: true,
                 enabled: enabled,
@@ -1479,6 +1481,7 @@ class _QuickGuessButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Semantics(
     container: true,
+    excludeSemantics: true,
     label: semanticLabel,
     button: true,
     enabled: enabled,
