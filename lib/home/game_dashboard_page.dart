@@ -268,7 +268,11 @@ class GameDashboardPage extends StatelessWidget {
                         ),
                         child: Row(
                           children: [
-                            const Icon(Icons.cloud_off_rounded, color: _green, size: 12),
+                            const Icon(
+                              Icons.cloud_off_rounded,
+                              color: _green,
+                              size: 12,
+                            ),
                             const SizedBox(width: 6),
                             Text(
                               'OFFLINE',
