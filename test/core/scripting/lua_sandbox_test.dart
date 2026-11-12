@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gtn_2/core/events/random_event_engine.dart';
 import 'package:gtn_2/core/scripting/lua_sandbox.dart';
 
 void main() {
@@ -64,6 +65,19 @@ void main() {
       });
     },
   );
+
+  test('bundled random-event Lua selector returns an approved event ID', () async {
+    final source = await rootBundle.loadString(
+      'assets/scripts/events/random_event.lua',
+    );
+    final result = await sandbox.execute(
+      scriptId: 'random_event',
+      source: source,
+    );
+    final value = result.value as Map<String, Object?>;
+    expect(value['trigger'], isA<bool>());
+    expect(randomEventTypeFromLuaId(value['type'] as String?), isNotNull);
+  });
 
   test('validation compiles without executing the chunk', () async {
     await sandbox.validate(
