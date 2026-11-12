@@ -2049,4 +2049,3 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
       .map((part) => part[0].toUpperCase() + part.substring(1))
       .join(' ');
 }
-Formatted 1 file (1 changed) in 0.05 seconds.
