@@ -123,7 +123,7 @@ jobs:
         run: python scripts/generate_platform_icons.py --windows-only
       - name: Install dependencies
         run: flutter pub get
-      - name: Build Windows desktop debug app
+      - name: Build Windows debug app
         run: flutter build windows --debug
       - name: Package portable Windows debug build
         run: |
