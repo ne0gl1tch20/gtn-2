@@ -98,6 +98,7 @@ void main() {
       controller.dispose();
     },
   );
+
   testWidgets('GTN page header adapts to compact phone widths', (tester) async {
     await tester.pumpWidget(
       M3EMaterialApp(
@@ -130,5 +131,4 @@ void main() {
     expect(find.text('4 WORLDS'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
-
 }
