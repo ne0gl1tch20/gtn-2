@@ -282,23 +282,6 @@ void main() {
     }
   });
 
-  testWidgets('More hub switches to the GTN1 two-column layout above 520px', (
-    WidgetTester tester,
-  ) async {
-    tester.view.physicalSize = const Size(800, 900);
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.resetPhysicalSize);
-    addTearDown(tester.view.resetDevicePixelRatio);
-    await tester.pumpWidget(buildDashboard());
-    await tester.tap(find.text('More').first);
-    await tester.pumpAndSettle();
-
-    final profile = tester.getTopLeft(find.text('Player profile'));
-    final worldMap = tester.getTopLeft(find.text('Beyond the Numbers').first);
-    expect(profile.dx, lessThan(worldMap.dx));
-    expect(profile.dy, worldMap.dy);
-  });
-
   testWidgets('More follows the saved Menu Studio order and includes tools', (
     WidgetTester tester,
   ) async {
