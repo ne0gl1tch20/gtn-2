@@ -41,17 +41,17 @@ class LegacyHubPage extends StatelessWidget {
     return Scaffold(
       appBar: GtnExpressiveAppBar(title: const Text('More')),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(12, 14, 12, 28),
         children: [
-          Text(
-            'Your GTN journey',
-            style: Theme.of(context).textTheme.headlineSmall,
+          GtnPageHeader(
+            eyebrow: 'Explore GTN2',
+            title: 'Your GTN journey',
+            description:
+                'Progress, lifetime rewards, records and the world codex.',
+            icon: Icons.explore_rounded,
+            accent: GtnUiTokens.cyan,
           ),
-          const SizedBox(height: 6),
-          const Text(
-            'Progress, lifetime rewards, records and the world codex.',
-          ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
           GtnExpressiveCard(
             child: ListTile(
               leading: const Icon(Icons.palette_rounded),
@@ -158,9 +158,36 @@ class LegacyDetailPage extends StatelessWidget {
       LegacySection.changelog => _changelog(context),
       LegacySection.about => _about(context),
     };
+    final description = switch (section) {
+      LegacySection.journey =>
+        'Track achievements, milestones and the rewards earned along the way.',
+      LegacySection.rewards =>
+        'Review lifetime earnings and the currencies in your current run.',
+      LegacySection.statistics =>
+        'Inspect your records, streaks and long-term progression.',
+      LegacySection.codex =>
+        'A field guide to the known worlds, guardians and discoveries.',
+      LegacySection.changelog =>
+        'See what changed across Guess The Number updates.',
+      LegacySection.about =>
+        'Game information, source links and open-source acknowledgements.',
+    };
     return Scaffold(
       appBar: GtnExpressiveAppBar(title: Text(section.label)),
-      body: ListView(padding: const EdgeInsets.all(16), children: content),
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(12, 14, 12, 28),
+        children: [
+          GtnPageHeader(
+            eyebrow: 'More · GTN reference',
+            title: section.label,
+            description: description,
+            icon: section.icon,
+            accent: GtnUiTokens.purple,
+          ),
+          const SizedBox(height: 8),
+          ...content,
+        ],
+      ),
     );
   }
 
