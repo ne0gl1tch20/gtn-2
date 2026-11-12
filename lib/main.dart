@@ -27,6 +27,7 @@ import 'i18n/app_localizations.dart';
 import 'legacy/legacy_pages.dart';
 import 'legacy/legacy_systems_page.dart';
 import 'progression/progression_hub_page.dart';
+import 'profile/player_profile_page.dart';
 import 'saves/save_slots_page.dart';
 import 'settings/game_settings.dart';
 import 'settings/menu_studio_page.dart';
@@ -146,6 +147,8 @@ class _GameHomePageState extends State<GameHomePage>
   bool _autoClickerTickRunning = false;
   bool _resumeCatchUpPending = false;
   ProgressionState _progression = ProgressionState.initial;
+  final PlayerProfileStore _playerProfileStore = PlayerProfileStore();
+  PlayerProfile _playerProfile = const PlayerProfile();
   GameSettings _settings = GameSettings.initial;
   final TextEditingController _controller = TextEditingController();
   late GameState _game = _createGame();
@@ -163,6 +166,7 @@ class _GameHomePageState extends State<GameHomePage>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _restoreSave();
+    _loadPlayerProfile();
   }
 
   @override
@@ -859,6 +863,27 @@ class _GameHomePageState extends State<GameHomePage>
     }
   }
 
+  Future<void> _loadPlayerProfile() async {
+    try {
+      final profile = await _playerProfileStore.load();
+      if (mounted) setState(() => _playerProfile = profile);
+    } on Exception {
+      // A missing or unreadable profile never blocks loading the game.
+    }
+  }
+
+  Future<void> _openPlayerProfile() async {
+    await _shellNavigatorKey.currentState!.push<void>(
+      MaterialPageRoute<void>(
+        builder: (_) => PlayerProfilePage(
+          initialProfile: _playerProfile,
+          store: _playerProfileStore,
+          onSaved: (profile) => setState(() => _playerProfile = profile),
+        ),
+      ),
+    );
+  }
+
   Future<void> _openSaveSlots() async {
     await _shellNavigatorKey.currentState!.push<void>(
       MaterialPageRoute<void>(
@@ -1547,6 +1572,8 @@ class _GameHomePageState extends State<GameHomePage>
       onPrimarySelected: _onPrimarySelected,
       onSystemsView: _openLegacySystems,
       onLegacySection: _openLegacySection,
+      playerProfile: _playerProfile,
+      onPlayerProfile: _openPlayerProfile,
     );
   }
 }
