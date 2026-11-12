@@ -150,16 +150,12 @@ void main() {
   testWidgets('More detail pages keep the shell and Back returns to More', (
     WidgetTester tester,
   ) async {
+    final shellKey = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
       buildDashboard(
+        shellNavigatorKey: shellKey,
         onSystemsView: (view) {
-          final shellNavigator = tester.state<NavigatorState>(
-            find.descendant(
-              of: find.byType(GameDashboardPage),
-              matching: find.byType(Navigator),
-            ),
-          );
-          shellNavigator.push<void>(
+          shellKey.currentState!.push<void>(
             MaterialPageRoute<void>(
               builder: (_) => Scaffold(
                 appBar: AppBar(title: Text(view.name)),
