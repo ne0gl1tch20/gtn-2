@@ -61,7 +61,19 @@ The product goal is an improved, recognizable GTN1, not a generic Material app a
 - Respect reduced-motion settings and accessibility semantics.
 - Avoid generic dashboard templates, random gradients, excessive glow, tiny uppercase-only labels, and one-off styling that does not belong to the shared design language.
 
-### Implementation sequence
+### GTN1 reference audit cadence
+
+The source of truth for visual and interaction comparisons is the live GTN1 Web Play implementation:
+
+- `app/src/main/assets/web-play/index.html` for screen structure, navigation labels, content order, semantics, and control names.
+- `app/src/main/assets/web-play/styles.css` for the visual tokens, typography, surfaces, spacing, breakpoints, hover/active states, and reduced-motion behavior.
+- `app/src/main/assets/web-play/app.js` for screen routing, action semantics, state-driven rendering, feedback, and keyboard/accessibility behavior.
+
+Re-check all three files at the start of each primary-destination pass and again before calling that destination visually complete. For secondary screens, inspect the relevant HTML section, CSS selectors, and JS renderer before styling or changing interactions. Revisit the source whenever a mismatch is found; do not rely on an old screenshot or a previous inspection.
+
+The current responsive targets follow GTN1's compact single-column phone layout and its wider two-column dashboard/catalog layouts. Validate at compact phone width, standard phone width, tablet width, and resizable Windows desktop width. Reduced-motion and semantic labels remain part of the acceptance pass.
+
+## Implementation sequence
 
 1. **Design foundation and Play dashboard:** establish shared GTN1-derived tokens and expressive component patterns; polish the current-run hero, guess interaction, stats, wallet, and automation panel.
 2. **Persistent navigation and primary destinations:** verify the five GTN1 destinations and apply the same design language to Beyond the Numbers, Arcade, Play, and Upgrades.
