@@ -197,11 +197,11 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('More Menu'), findsOneWidget);
-    expect(find.text('Music'), findsOneWidget);
+    expect(find.text('Background Music'), findsOneWidget);
     expect(find.text('Settings'), findsOneWidget);
     expect(find.text('Save Slots'), findsOneWidget);
     expect(
-      tester.getTopLeft(find.text('Music')).dy,
+      tester.getTopLeft(find.text('Background Music')).dy,
       lessThan(tester.getTopLeft(find.text('Settings')).dy),
     );
     expect(
