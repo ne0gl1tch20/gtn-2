@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "screen": "home",
+  "root": {
+    "type": "column",
+    "children": [
+      {"type": "text", "text": "GUESS THE NUMBER", "fontSize": 28},
+      {"type": "text", "text": "Choose a mode and start a round."},
+      {"type": "button", "text": "PLAY", "action": {"id": "game.start"}},
+      {"type": "button", "text": "MORE", "action": {"id": "navigation.open", "arguments": {"route": "more"}}},
+      {"type": "button", "text": "SETTINGS", "action": {"id": "navigation.open", "arguments": {"route": "settings"}}}
+    ]
+  }
+}
