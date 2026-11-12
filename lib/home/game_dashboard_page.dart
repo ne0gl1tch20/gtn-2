@@ -235,11 +235,7 @@ class GameDashboardPage extends StatelessWidget {
                     children: [
                       LayoutBuilder(
                         builder: (context, constraints) {
-                          final wide = constraints.maxWidth >= 640;
                           final fullWidth = constraints.maxWidth;
-                          final columnWidth = wide
-                              ? (fullWidth - 14) / 2
-                              : fullWidth;
                           return Wrap(
                             spacing: 14,
                             runSpacing: 14,
@@ -334,7 +330,8 @@ class GameDashboardPage extends StatelessWidget {
                                 ),
                               ),
                               SizedBox(
-                                width: columnWidth,
+                                key: const Key('dashboard-hero-section'),
+                                width: fullWidth,
                                 child: Container(
                                   padding: EdgeInsets.all(compact ? 21 : 25),
                                   constraints: BoxConstraints(
@@ -497,7 +494,8 @@ class GameDashboardPage extends StatelessWidget {
                                 ),
                               ),
                               SizedBox(
-                                width: columnWidth,
+                                key: const Key('dashboard-guess-section'),
+                                width: fullWidth,
                                 child: _GuessInput(
                                   game: game,
                                   controller: controller,
@@ -512,7 +510,8 @@ class GameDashboardPage extends StatelessWidget {
                                 ),
                               ),
                               SizedBox(
-                                width: columnWidth,
+                                key: const Key('dashboard-stats-section'),
+                                width: fullWidth,
                                 child: Row(
                                   children: [
                                     Expanded(
@@ -557,7 +556,8 @@ class GameDashboardPage extends StatelessWidget {
                                 ),
                               ),
                               SizedBox(
-                                width: columnWidth,
+                                key: const Key('dashboard-wallet-section'),
+                                width: fullWidth,
                                 child: _Wallet(
                                   progression,
                                   panel,

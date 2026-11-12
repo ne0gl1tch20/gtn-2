@@ -219,6 +219,29 @@ void main() {
     }
   });
 
+  testWidgets('Play dashboard sections stay full width on desktop', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(800, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(buildDashboard());
+
+    for (final key in [
+      'dashboard-hero-section',
+      'dashboard-guess-section',
+      'dashboard-stats-section',
+      'dashboard-wallet-section',
+    ]) {
+      expect(
+        tester.getSize(find.byKey(Key(key))).width,
+        greaterThan(700),
+        reason: '$key should follow GTN1 full-width Play flow on desktop.',
+      );
+    }
+  });
+
   testWidgets('More hub switches to the GTN1 two-column layout above 520px', (
     WidgetTester tester,
   ) async {
