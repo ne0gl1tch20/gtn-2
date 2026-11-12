@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "screen": "mutators",
+  "root": {
+    "type": "column",
+    "children": [
+      {"type": "text", "text": "MUTATORS", "fontSize": 28},
+      {"type": "text", "text": "Available mutators, unlocks, costs and active selections come from the host."},
+      {"type": "button", "text": "OPEN MUTATOR LIST", "action": {"id": "mutators.open_list"}},
+      {"type": "button", "text": "BACK", "action": {"id": "navigation.back"}}
+    ]
+  }
+}
