@@ -11,6 +11,7 @@ import 'package:material_ui/material_ui.dart';
 Widget buildDashboard({
   GameSettings? settings,
   VoidCallback? onGuess,
+  String? randomEventMessage,
   GlobalKey<NavigatorState>? shellNavigatorKey,
   ValueChanged<LegacySystemsView>? onSystemsView,
 }) {
@@ -27,6 +28,7 @@ Widget buildDashboard({
       activeSlot: 1,
       loading: false,
       message: 'Make your move.',
+      randomEventMessage: randomEventMessage,
       controller: TextEditingController(),
       onGuess: onGuess ?? () {},
       onNewGame: () {},
@@ -53,6 +55,12 @@ Widget buildDashboard({
 }
 
 void main() {
+  testWidgets('shows the temporary random-event dashboard banner', (WidgetTester tester) async {
+    await tester.pumpWidget(buildDashboard(randomEventMessage: 'Cash Burst · bonus Money added'));
+    expect(find.text('RANDOM EVENT'), findsOneWidget);
+    expect(find.text('Cash Burst · bonus Money added'), findsOneWidget);
+  });
+
   testWidgets(
     'guess controls expose GTN1 accessibility labels and submit action',
     (WidgetTester tester) async {
