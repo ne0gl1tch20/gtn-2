@@ -208,12 +208,15 @@ class _GameHomePageState extends State<GameHomePage>
     });
   }
 
-
   void _startRandomEventTimer() {
-    if (!mounted || _isLoading || _randomEventTimer?.isActive == true ||
+    if (!mounted ||
+        _isLoading ||
+        _randomEventTimer?.isActive == true ||
         WidgetsBinding.instance.lifecycleState == AppLifecycleState.paused ||
         WidgetsBinding.instance.lifecycleState == AppLifecycleState.inactive ||
-        WidgetsBinding.instance.lifecycleState == AppLifecycleState.detached) return;
+        WidgetsBinding.instance.lifecycleState == AppLifecycleState.detached) {
+      return;
+    }
     _randomEventTimer = Timer.periodic(const Duration(minutes: 1), (_) {
       unawaited(_runRandomEventTick());
     });
@@ -223,29 +226,49 @@ class _GameHomePageState extends State<GameHomePage>
     if (!mounted || _isLoading || _randomEventRunning) return;
     _randomEventRunning = true;
     try {
-      final manifest = jsonDecode(await rootBundle.loadString('assets/scripts/manifest.json'));
-      if (manifest is! Map<String, dynamic> || manifest['schemaVersion'] != 1 ||
-          manifest['hostApiVersion'] != 1 || manifest['scripts'] is! List) {
+      final manifest = jsonDecode(
+        await rootBundle.loadString('assets/scripts/manifest.json'),
+      );
+      if (manifest is! Map<String, dynamic> ||
+          manifest['schemaVersion'] != 1 ||
+          manifest['hostApiVersion'] != 1 ||
+          manifest['scripts'] is! List) {
         throw const FormatException('Invalid Lua script manifest.');
       }
       String? scriptPath;
       for (final entry in manifest['scripts'] as List) {
         if (entry is Map && entry['id'] == 'random_event') {
           final file = entry['file'];
-          if (file is String && file.endsWith('.lua') && !file.startsWith('/') && !file.contains('..')) {
+          if (file is String &&
+              file.endsWith('.lua') &&
+              !file.startsWith('/') &&
+              !file.contains('..')) {
             scriptPath = 'assets/scripts/$file';
           }
           break;
         }
       }
-      if (scriptPath == null) throw const FormatException('Random-event script is not registered.');
+      if (scriptPath == null) {
+        throw const FormatException('Random-event script is not registered.');
+      }
       final source = await rootBundle.loadString(scriptPath);
-      final execution = await _luaSandbox.execute(scriptId: 'random_event', source: source);
+      final execution = await _luaSandbox.execute(
+        scriptId: 'random_event',
+        source: source,
+      );
       final output = execution.value;
-      if (output is! Map || output['trigger'] != true || output['type'] is! String) return;
+      if (output is! Map ||
+          output['trigger'] != true ||
+          output['type'] is! String) {
+        return;
+      }
       final eventType = randomEventTypeFromLuaId(output['type'] as String);
       if (eventType == null) return;
-      final result = _randomEventEngine.apply(progression: _progression, game: _game, type: eventType);
+      final result = _randomEventEngine.apply(
+        progression: _progression,
+        game: _game,
+        type: eventType,
+      );
       final message = switch (eventType) {
         RandomEventType.cashBurst => 'Cash Burst · bonus Money added',
         RandomEventType.nebulaRain => 'Nebula Rain · 10–50 Nebula added',
