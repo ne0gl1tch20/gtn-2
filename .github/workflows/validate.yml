@@ -42,6 +42,8 @@ jobs:
         run: flutter pub get
       - name: Restore analysis configuration
         run: git restore -- analysis_options.yaml
+      - name: Show exact Dart formatter diff
+        run: dart format --output=show lib/settings/settings_page.dart | diff -u lib/settings/settings_page.dart - || true
       - name: Verify Dart formatting
         run: dart format --output=none --set-exit-if-changed .
       - name: Analyze
