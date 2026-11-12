@@ -125,7 +125,7 @@ void main() {
       ),
     );
 
-    expect(find.text('Beyond the Numbers'), findsOneWidget);
+    expect(find.text('BEYOND THE NUMBERS'), findsOneWidget);
     expect(find.text('Your universe'), findsOneWidget);
     expect(find.text('4 WORLDS'), findsOneWidget);
     expect(tester.takeException(), isNull);
