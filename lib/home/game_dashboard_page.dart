@@ -6,6 +6,7 @@ import '../core/progression/progression_state.dart';
 import '../design/expressive_widgets.dart';
 import '../legacy/legacy_pages.dart';
 import '../legacy/legacy_systems_page.dart';
+import '../profile/player_profile_page.dart';
 import '../settings/game_settings.dart';
 
 const _purple = GtnUiTokens.purple;
