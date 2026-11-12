@@ -869,7 +869,9 @@ class _GameHomePageState extends State<GameHomePage>
         final savedGame = await (await _storage).load();
         if (savedGame != null && savedGame.profileName.isNotEmpty) {
           profile = PlayerProfile(
-            username: savedGame.profileName,
+            username: savedGame.profileName.length > 20
+                ? savedGame.profileName.substring(0, 20)
+                : savedGame.profileName,
             avatarId: switch (savedGame.profileIconId) {
               'bolt' => 'lightning',
               'crown' => 'crown',
@@ -905,7 +907,10 @@ class _GameHomePageState extends State<GameHomePage>
       });
     } on Exception {
       if (mounted) {
-        setState(() => _message = 'Profile saved, but save-slot metadata could not be synchronized.');
+        setState(
+          () => _message =
+              'Profile saved, but save-slot metadata could not be synchronized.',
+        );
       }
     }
   }
