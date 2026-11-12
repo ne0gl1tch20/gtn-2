@@ -1575,8 +1575,6 @@ class _GuessInput extends StatelessWidget {
           children: [
             Expanded(
               child: Semantics(
-                container: true,
-                excludeSemantics: true,
                 label: 'Your guess',
                 textField: true,
                 child: GtnExpressiveTextField(
