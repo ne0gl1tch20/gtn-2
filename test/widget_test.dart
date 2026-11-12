@@ -245,7 +245,7 @@ void main() {
   testWidgets('More hub switches to the GTN1 two-column layout above 520px', (
     WidgetTester tester,
   ) async {
-    tester.view.physicalSize = const Size(600, 900);
+    tester.view.physicalSize = const Size(800, 900);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
