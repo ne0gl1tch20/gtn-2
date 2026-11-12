@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "screen": "results",
+  "root": {
+    "type": "column",
+    "children": [
+      {"type": "text", "text": "ROUND RESULTS", "fontSize": 28},
+      {"type": "text", "text": "The host provides the actual outcome, score, rewards and progression summary."},
+      {"type": "button", "text": "PLAY AGAIN", "action": {"id": "game.play_again"}},
+      {"type": "button", "text": "HOME", "action": {"id": "navigation.open", "arguments": {"route": "home"}}}
+    ]
+  }
+}
