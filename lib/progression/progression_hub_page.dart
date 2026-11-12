@@ -1,3 +1,4 @@
+
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -84,8 +85,7 @@ class _ProgressionHubPageState extends State<ProgressionHubPage> {
           GtnPageHeader(
             eyebrow: 'Long-term progression',
             title: 'Prestige & Ultra',
-            description:
-                'Reset strategically, earn permanent power and push your run further.',
+            description: 'Reset strategically, earn permanent power and push your run further.',
             icon: Icons.auto_awesome_rounded,
             accent: GtnUiTokens.purple,
           ),
@@ -175,3 +175,4 @@ class _ProgressionHubPageState extends State<ProgressionHubPage> {
     );
   }
 }
+Formatted 1 file (1 changed) in 0.01 seconds.
