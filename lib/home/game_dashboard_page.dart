@@ -323,7 +323,7 @@ class GameDashboardPage extends StatelessWidget {
                                         ),
                                       ),
                                     ],
-                                  ),
+                                  )
                               ),
                               SizedBox(
                                 width: columnWidth,
@@ -459,7 +459,7 @@ class GameDashboardPage extends StatelessWidget {
                                         ],
                                       ),
                                     ),
-                                  ),
+                                  )
                               ),
                               SizedBox(
                                 width: columnWidth,
@@ -474,7 +474,7 @@ class GameDashboardPage extends StatelessWidget {
                                     line: line,
                                     foreground: foreground,
                                     muted: muted,
-                                  ),
+                                  )
                               ),
                               SizedBox(
                                 width: columnWidth,
@@ -519,7 +519,7 @@ class GameDashboardPage extends StatelessWidget {
                                         ),
                                       ),
                                     ],
-                                  ),
+                                  )
                               ),
                               SizedBox(
                                 width: columnWidth,
@@ -530,7 +530,7 @@ class GameDashboardPage extends StatelessWidget {
                                     line,
                                     foreground,
                                     muted,
-                                  ),
+                                  )
                               ),
                               SizedBox(
                                 width: fullWidth,
@@ -541,41 +541,41 @@ class GameDashboardPage extends StatelessWidget {
                                     line: line,
                                     foreground: foreground,
                                     muted: muted,
-                                  ),
+                                  )
                               ),
                               SizedBox(
                                 width: fullWidth,
                                 child: Row(
-                                  children: [
-                                    Expanded(
-                                      child: _Action(
-                                        'Beyond the Numbers',
-                                        'Explore your progression',
-                                        Icons.public_rounded,
-                                        _cyan,
-                                        onWorldMap,
-                                        panel,
-                                        line,
-                                        foreground,
-                                        muted,
+                                    children: [
+                                      Expanded(
+                                        child: _Action(
+                                          'Beyond the Numbers',
+                                          'Explore your progression',
+                                          Icons.public_rounded,
+                                          _cyan,
+                                          onWorldMap,
+                                          panel,
+                                          line,
+                                          foreground,
+                                          muted,
+                                        ),
                                       ),
-                                    ),
-                                    const SizedBox(width: 10),
-                                    Expanded(
-                                      child: _Action(
-                                        'Daily Momentum',
-                                        'Keep the streak alive',
-                                        Icons.auto_awesome_rounded,
-                                        _gold,
-                                        onLegacyPages,
-                                        panel,
-                                        line,
-                                        foreground,
-                                        muted,
+                                      const SizedBox(width: 10),
+                                      Expanded(
+                                        child: _Action(
+                                          'Daily Momentum',
+                                          'Keep the streak alive',
+                                          Icons.auto_awesome_rounded,
+                                          _gold,
+                                          onLegacyPages,
+                                          panel,
+                                          line,
+                                          foreground,
+                                          muted,
+                                        ),
                                       ),
-                                    ),
-                                  ],
-                                ),
+                                    ],
+                                  )
                               ),
                               if (game.isComplete)
                                 SizedBox(
