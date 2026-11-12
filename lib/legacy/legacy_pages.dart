@@ -125,8 +125,7 @@ class LegacyHubPage extends StatelessWidget {
         description: 'Place a stake and settle a validated 50/50 round.',
         icon: Icons.casino_rounded,
         accent: GtnUiTokens.gold,
-        onTap: () =>
-            _openSystems(context, view: LegacySystemsView.luckyStake),
+        onTap: () => _openSystems(context, view: LegacySystemsView.luckyStake),
       ),
       _MoreDestination(
         title: LegacySection.changelog.label,
@@ -202,10 +201,7 @@ class _MoreDestination {
 }
 
 class _MoreSectionHeading extends StatelessWidget {
-  const _MoreSectionHeading({
-    required this.title,
-    required this.description,
-  });
+  const _MoreSectionHeading({required this.title, required this.description});
 
   final String title;
   final String description;
