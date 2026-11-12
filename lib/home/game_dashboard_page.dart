@@ -108,7 +108,7 @@ class GameDashboardPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final dark = Theme.of(context).brightness == Brightness.dark;
     final compact = MediaQuery.sizeOf(context).width <= 430;
-    final horizontalPadding = compact ? 12.0 : 16.0;
+    final horizontalPadding = compact ? 12.0 : 24.0;
     final foreground = dark ? _white : const Color(0xFF172039);
     final muted = dark ? _muted : const Color(0xFF65708C);
     final panel = dark ? _panel : Colors.white;
@@ -224,7 +224,7 @@ class GameDashboardPage extends StatelessWidget {
             child: SafeArea(
               child: Center(
                 child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 720),
+                  constraints: const BoxConstraints(maxWidth: 1120),
                   child: ListView(
                     padding: EdgeInsets.fromLTRB(
                       horizontalPadding,
@@ -233,7 +233,18 @@ class GameDashboardPage extends StatelessWidget {
                       28,
                     ),
                     children: [
-                      Row(
+                      LayoutBuilder(
+                        builder: (context, constraints) {
+                          final wide = constraints.maxWidth >= 720;
+                          final fullWidth = constraints.maxWidth;
+                          final columnWidth = wide
+                              ? (fullWidth - 14) / 2
+                              : fullWidth;
+                          return Wrap(
+                            spacing: 14,
+                            runSpacing: 14,
+                            children: [
+                              SizedBox(width: fullWidth, child: Row(
                         children: [
                           Container(
                             width: 42,
@@ -311,9 +322,8 @@ class GameDashboardPage extends StatelessWidget {
                             ),
                           ),
                         ],
-                      ),
-                      const SizedBox(height: 18),
-                      Container(
+                      ),),
+                              SizedBox(width: columnWidth, child: Container(
                         padding: EdgeInsets.all(compact ? 21 : 25),
                         constraints: BoxConstraints(
                           minHeight: compact ? 190 : 205,
@@ -445,9 +455,8 @@ class GameDashboardPage extends StatelessWidget {
                             ],
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 12),
-                      _GuessInput(
+                      ),),
+                              SizedBox(width: columnWidth, child: _GuessInput(
                         game: game,
                         controller: controller,
                         enabled: !loading && !game.isComplete,
@@ -458,9 +467,8 @@ class GameDashboardPage extends StatelessWidget {
                         line: line,
                         foreground: foreground,
                         muted: muted,
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
+                      ),),
+                              SizedBox(width: columnWidth, child: Row(
                         children: [
                           Expanded(
                             child: _Stat(
@@ -501,28 +509,24 @@ class GameDashboardPage extends StatelessWidget {
                             ),
                           ),
                         ],
-                      ),
-                      const SizedBox(height: 12),
-                      _Wallet(
+                      ),),
+                              SizedBox(width: columnWidth, child: _Wallet(
                         progression,
                         panel,
                         raised,
                         line,
                         foreground,
                         muted,
-                      ),
-                      const SizedBox(height: 12),
-                      _BotArena(
+                      ),),
+                              SizedBox(width: fullWidth, child: _BotArena(
                         progression: progression,
                         onOpenShop: onNebulaShop,
                         panel: panel,
                         line: line,
                         foreground: foreground,
                         muted: muted,
-                      ),
-                      const SizedBox(height: 12),
-                      const SizedBox(height: 16),
-                      Row(
+                      ),),
+                              SizedBox(width: fullWidth, child: Row(
                         children: [
                           Expanded(
                             child: _Action(
@@ -552,8 +556,11 @@ class GameDashboardPage extends StatelessWidget {
                             ),
                           ),
                         ],
-                      ),
-                      if (game.isComplete) ...[
+                      ),),
+                              if (game.isComplete)
+                                SizedBox(
+                                  width: fullWidth,
+                                  child: if (game.isComplete) ...[
                         const SizedBox(height: 12),
                         M3EButton.icon(
                           style: M3EButtonStyle.filled,
@@ -561,7 +568,12 @@ class GameDashboardPage extends StatelessWidget {
                           icon: const Icon(Icons.refresh_rounded),
                           label: const Text('Start another round'),
                         ),
-                      ],
+                      ],,
+                                ),
+                            ],
+                          );
+                        },
+                      ),
                     ],
                   ),
                 ),
