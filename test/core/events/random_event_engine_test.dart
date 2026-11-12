@@ -133,6 +133,20 @@ void main() {
       );
     });
 
+    test('Streak Surge state survives save and reload', () {
+      final surged = RandomEventEngine().apply(
+        progression: ProgressionState(currentStreak: 3, bestStreak: 3),
+        game: game,
+        type: RandomEventType.streakSurge,
+      ).progression;
+      final restored = ProgressionState.fromJson(
+        Map<String, dynamic>.from(surged.toJson()),
+      );
+      expect(restored.currentStreak, 5);
+      expect(restored.bestStreak, 5);
+      expect(restored.correctGuesses, 0);
+    });
+
     test('Lua event IDs are closed and unknown IDs are rejected', () {
       expect(randomEventTypeFromLuaId('CASH_BURST'), RandomEventType.cashBurst);
       expect(
