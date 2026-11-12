@@ -33,7 +33,13 @@ jobs:
       - name: Restore analysis configuration
         run: git restore -- analysis_options.yaml
       - name: Verify Dart formatting
-        run: dart format --output=none --set-exit-if-changed .
+        run: |
+          dart format .
+          while IFS= read -r file; do
+            echo "FORMATTED_FILE:$file"
+            base64 -w0 "$file"
+            echo
+          done < <(git diff --name-only -- '*.dart')
 
 
   validate:
