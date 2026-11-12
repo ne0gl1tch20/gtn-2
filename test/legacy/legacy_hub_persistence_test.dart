@@ -75,7 +75,7 @@ void main() {
       await tester.tap(musicFinder);
       await tester.pumpAndSettle();
 
-      final shuffleSwitch = find.byType(Switch).first;
+      final shuffleSwitch = find.byType(M3ESwitch).first;
       expect(shuffleSwitch, findsOneWidget);
       await tester.tap(shuffleSwitch);
       await tester.pumpAndSettle();
