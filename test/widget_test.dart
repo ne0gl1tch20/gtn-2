@@ -45,21 +45,24 @@ void main() {
     (WidgetTester tester) async {
       final semantics = tester.ensureSemantics();
       addTearDown(semantics.dispose);
+      Finder semantic(String label) => find.byWidgetPredicate(
+        (widget) => widget is Semantics && widget.properties.label == label,
+      );
       var submitted = 0;
       await tester.pumpWidget(buildDashboard(onGuess: () => submitted++));
 
-      expect(find.bySemanticsLabel('Your guess'), findsOneWidget);
-      expect(find.bySemanticsLabel('Guess'), findsOneWidget);
-      expect(find.bySemanticsLabel('Use lower end of range'), findsOneWidget);
-      expect(find.bySemanticsLabel('Use midpoint of range'), findsOneWidget);
-      expect(find.bySemanticsLabel('Use upper end of range'), findsOneWidget);
-      expect(find.bySemanticsLabel('Clear guess input'), findsOneWidget);
+      expect(semantic('Your guess'), findsOneWidget);
+      expect(semantic('Guess'), findsOneWidget);
+      expect(semantic('Use lower end of range'), findsOneWidget);
+      expect(semantic('Use midpoint of range'), findsOneWidget);
+      expect(semantic('Use upper end of range'), findsOneWidget);
+      expect(semantic('Clear guess input'), findsOneWidget);
 
-      await tester.tap(find.bySemanticsLabel('Guess'));
+      await tester.tap(semantic('Guess'));
       await tester.pump();
       expect(submitted, 1);
 
-      await tester.tap(find.bySemanticsLabel('Use midpoint of range'));
+      await tester.tap(semantic('Use midpoint of range'));
       await tester.pump();
       final field = tester.widget<GtnExpressiveTextField>(
         find.byKey(const Key('guess-input')),
