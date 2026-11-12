@@ -141,7 +141,7 @@ jobs:
     name: Windows release installer (Inno Setup)
     runs-on: windows-latest
     needs: format
-    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'))
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request' || (github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'))
     steps:
       - uses: actions/checkout@v4
       - name: Fetch GTN1 source assets
@@ -181,6 +181,7 @@ jobs:
           & "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" "/DAppVersion=$version" windows/installer/gtn2.iss
           Compress-Archive -Path build/windows/x64/runner/Release/* -DestinationPath dist/windows/GuessTheNumber-Windows-Portable.zip -Force
       - name: Upload Windows installer and portable release
+        if: github.event_name != 'pull_request'
         uses: actions/upload-artifact@v4
         with:
           name: windows-release-installer
