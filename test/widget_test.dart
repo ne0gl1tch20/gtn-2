@@ -104,7 +104,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('YOUR GUESS'), findsOneWidget);
     expect(find.text('QUICK PICK'), findsOneWidget);
-    expect(find.text('->'), findsOneWidget);
+    expect(find.byIcon(Icons.arrow_forward_rounded), findsOneWidget);
 
     TextEditingController guessController() => tester
         .widget<GtnExpressiveTextField>(find.byKey(const Key('guess-input')))
