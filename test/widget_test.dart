@@ -10,40 +10,40 @@ import 'package:material_ui/material_ui.dart';
 Widget buildDashboard({GameSettings? settings, VoidCallback? onGuess}) {
   final shellNavigatorKey = GlobalKey<NavigatorState>();
   return M3EMaterialApp(
-      data: M3EThemeData.light(seedColor: const Color(0xFF7C5CFC)),
-      fontFamily: 'Manrope',
-      autoTheming: false,
-      initialTheme: Brightness.light,
-      home: GameDashboardPage(
-        game: const GameState(secret: 42, attempts: 0, isComplete: false),
-        progression: ProgressionState.initial,
-        settings: settings ?? GameSettings.initial,
-        activeSlot: 1,
-        loading: false,
-        message: 'Make your move.',
-        controller: TextEditingController(),
-        onGuess: onGuess ?? () {},
-        onNewGame: () {},
-        onUpgradeShop: () {},
-        onPrestige: () {},
-        onArcade: () {},
-        onNebulaShop: () {},
-        onWorldMap: () {},
-        onSaveSlots: () {},
-        onSettings: () {},
-        onDeveloperSettings: () {},
-        onLegacyPages: () {},
-        onMusic: () {},
-        onLuckyStake: () {},
-        onSystems: () {},
-        showDeveloperSettings: true,
-        shellNavigatorKey: shellNavigatorKey,
-        selectedIndex: 2,
-        onPrimarySelected: (_) {},
-        onSystemsView: (_) {},
-        onLegacySection: (_) {},
-      ),
-    );
+    data: M3EThemeData.light(seedColor: const Color(0xFF7C5CFC)),
+    fontFamily: 'Manrope',
+    autoTheming: false,
+    initialTheme: Brightness.light,
+    home: GameDashboardPage(
+      game: const GameState(secret: 42, attempts: 0, isComplete: false),
+      progression: ProgressionState.initial,
+      settings: settings ?? GameSettings.initial,
+      activeSlot: 1,
+      loading: false,
+      message: 'Make your move.',
+      controller: TextEditingController(),
+      onGuess: onGuess ?? () {},
+      onNewGame: () {},
+      onUpgradeShop: () {},
+      onPrestige: () {},
+      onArcade: () {},
+      onNebulaShop: () {},
+      onWorldMap: () {},
+      onSaveSlots: () {},
+      onSettings: () {},
+      onDeveloperSettings: () {},
+      onLegacyPages: () {},
+      onMusic: () {},
+      onLuckyStake: () {},
+      onSystems: () {},
+      showDeveloperSettings: true,
+      shellNavigatorKey: shellNavigatorKey,
+      selectedIndex: 2,
+      onPrimarySelected: (_) {},
+      onSystemsView: (_) {},
+      onLegacySection: (_) {},
+    ),
+  );
 }
 
 void main() {
@@ -54,25 +54,25 @@ void main() {
       var submitted = 0;
       try {
         await tester.pumpWidget(buildDashboard(onGuess: () => submitted++));
-      await tester.ensureVisible(find.byKey(const Key('guess-input')));
-      await tester.pumpAndSettle();
+        await tester.ensureVisible(find.byKey(const Key('guess-input')));
+        await tester.pumpAndSettle();
 
-      expect(find.bySemanticsLabel('Your guess'), findsOneWidget);
-      expect(find.bySemanticsLabel('Guess'), findsOneWidget);
-      expect(find.bySemanticsLabel('Use lower end of range'), findsOneWidget);
-      expect(find.bySemanticsLabel('Use midpoint of range'), findsOneWidget);
-      expect(find.bySemanticsLabel('Use upper end of range'), findsOneWidget);
-      expect(find.bySemanticsLabel('Clear guess input'), findsOneWidget);
+        expect(find.bySemanticsLabel('Your guess'), findsOneWidget);
+        expect(find.bySemanticsLabel('Guess'), findsOneWidget);
+        expect(find.bySemanticsLabel('Use lower end of range'), findsOneWidget);
+        expect(find.bySemanticsLabel('Use midpoint of range'), findsOneWidget);
+        expect(find.bySemanticsLabel('Use upper end of range'), findsOneWidget);
+        expect(find.bySemanticsLabel('Clear guess input'), findsOneWidget);
 
-      await tester.tap(find.bySemanticsLabel('Guess'));
-      await tester.pump();
-      expect(submitted, 1);
+        await tester.tap(find.bySemanticsLabel('Guess'));
+        await tester.pump();
+        expect(submitted, 1);
 
-      await tester.tap(find.bySemanticsLabel('Use midpoint of range'));
-      await tester.pump();
-      final field = tester.widget<GtnExpressiveTextField>(
-        find.byKey(const Key('guess-input')),
-      );
+        await tester.tap(find.bySemanticsLabel('Use midpoint of range'));
+        await tester.pump();
+        final field = tester.widget<GtnExpressiveTextField>(
+          find.byKey(const Key('guess-input')),
+        );
         expect(field.controller!.text, '50');
       } finally {
         semantics.dispose();

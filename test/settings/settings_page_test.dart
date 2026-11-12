@@ -63,7 +63,9 @@ void main() {
     expect(find.text('Reduce flashes'), findsOneWidget);
   });
 
-  testWidgets('Settings exposes Help & Tutorial, diagnostics and Menu Studio', (tester) async {
+  testWidgets('Settings exposes Help & Tutorial, diagnostics and Menu Studio', (
+    tester,
+  ) async {
     var openedMenuStudio = false;
     await tester.pumpWidget(
       M3EMaterialApp(

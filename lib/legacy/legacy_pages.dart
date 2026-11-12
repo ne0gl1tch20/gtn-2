@@ -139,7 +139,11 @@ class LegacyHubPage extends StatelessWidget {
 }
 
 class LegacyDetailPage extends StatelessWidget {
-  const LegacyDetailPage({required this.section, required this.progression});
+  const LegacyDetailPage({
+    super.key,
+    required this.section,
+    required this.progression,
+  });
 
   final LegacySection section;
   final ProgressionState progression;

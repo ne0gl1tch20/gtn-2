@@ -905,10 +905,22 @@ class _GameHomePageState extends State<GameHomePage>
   Future<void> _showNimmyTutorial() async {
     var step = 0;
     const steps = <({String title, String body})>[
-      (title: 'Welcome to Guess The Number', body: 'Find the hidden number. Use the current range and feedback to narrow it down.'),
-      (title: 'Make a guess', body: 'Enter a number and press GUESS. A low or high result helps you narrow the range.'),
-      (title: 'Use quick picks', body: 'LOW END, MIDPOINT and HIGH END fill the guess field. CLEAR empties it.'),
-      (title: 'Grow your run', body: 'Earn Money, unlock upgrades and explore Arcade, Beyond the Numbers and More.'),
+      (
+        title: 'Welcome to Guess The Number',
+        body: 'Find the hidden number. Use the current range and feedback to narrow it down.',
+      ),
+      (
+        title: 'Make a guess',
+        body: 'Enter a number and press GUESS. A low or high result helps you narrow the range.',
+      ),
+      (
+        title: 'Use quick picks',
+        body: 'LOW END, MIDPOINT and HIGH END fill the guess field. CLEAR empties it.',
+      ),
+      (
+        title: 'Grow your run',
+        body: 'Earn Money, unlock upgrades and explore Arcade, Beyond the Numbers and More.',
+      ),
     ];
     await showDialog<void>(
       context: context,
@@ -917,7 +929,10 @@ class _GameHomePageState extends State<GameHomePage>
           title: Text('Nimmy · ${steps[step].title}'),
           content: Text(steps[step].body),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(dialogContext), child: const Text('Close')),
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('Close'),
+            ),
             FilledButton(
               onPressed: () {
                 if (step == steps.length - 1) {
@@ -1130,10 +1145,8 @@ class _GameHomePageState extends State<GameHomePage>
   Future<void> _openLegacySection(LegacySection section) async {
     await _shellNavigatorKey.currentState!.push<void>(
       MaterialPageRoute<void>(
-        builder: (_) => LegacyDetailPage(
-          section: section,
-          progression: _progression,
-        ),
+        builder: (_) =>
+            LegacyDetailPage(section: section, progression: _progression),
       ),
     );
   }

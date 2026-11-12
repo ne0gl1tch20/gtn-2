@@ -27,8 +27,19 @@ typedef LegacyProgressionChanged = Future<void> Function(
 );
 
 enum LegacySystemsView {
-  all, music, luckyStake, traits, talents, mutators, relics, homeBase,
-  dailyRewards, loot, automation, challenges, codex,
+  all,
+  music,
+  luckyStake,
+  traits,
+  talents,
+  mutators,
+  relics,
+  homeBase,
+  dailyRewards,
+  loot,
+  automation,
+  challenges,
+  codex,
 }
 
 class LegacySystemsPage extends StatefulWidget {
@@ -210,30 +221,40 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
                 ),
               ),
             ),
-          if (widget.view == LegacySystemsView.all || widget.view == LegacySystemsView.traits)
+          if (widget.view == LegacySystemsView.all ||
+              widget.view == LegacySystemsView.traits)
             _traitsSection(traitState),
-          if (widget.view == LegacySystemsView.all || widget.view == LegacySystemsView.talents)
+          if (widget.view == LegacySystemsView.all ||
+              widget.view == LegacySystemsView.talents)
             _talentsSection(),
-          if (widget.view == LegacySystemsView.all || widget.view == LegacySystemsView.mutators)
+          if (widget.view == LegacySystemsView.all ||
+              widget.view == LegacySystemsView.mutators)
             _mutatorsSection(),
-          if (widget.view == LegacySystemsView.all || widget.view == LegacySystemsView.relics)
+          if (widget.view == LegacySystemsView.all ||
+              widget.view == LegacySystemsView.relics)
             _relicsSection(),
-          if (widget.view == LegacySystemsView.all || widget.view == LegacySystemsView.homeBase)
+          if (widget.view == LegacySystemsView.all ||
+              widget.view == LegacySystemsView.homeBase)
             _homeBaseSection(),
           if (widget.view == LegacySystemsView.all ||
               widget.view == LegacySystemsView.luckyStake)
             _stakeSection(
               expanded: widget.view == LegacySystemsView.luckyStake,
             ),
-          if (widget.view == LegacySystemsView.all || widget.view == LegacySystemsView.dailyRewards)
+          if (widget.view == LegacySystemsView.all ||
+              widget.view == LegacySystemsView.dailyRewards)
             _dailySection(),
-          if (widget.view == LegacySystemsView.all || widget.view == LegacySystemsView.loot)
+          if (widget.view == LegacySystemsView.all ||
+              widget.view == LegacySystemsView.loot)
             _lootSection(),
-          if (widget.view == LegacySystemsView.all || widget.view == LegacySystemsView.automation)
+          if (widget.view == LegacySystemsView.all ||
+              widget.view == LegacySystemsView.automation)
             _automationSection(),
-          if (widget.view == LegacySystemsView.all || widget.view == LegacySystemsView.challenges)
+          if (widget.view == LegacySystemsView.all ||
+              widget.view == LegacySystemsView.challenges)
             _challengeSection(),
-          if (widget.view == LegacySystemsView.all || widget.view == LegacySystemsView.codex)
+          if (widget.view == LegacySystemsView.all ||
+              widget.view == LegacySystemsView.codex)
             _worldCodexSection(),
           if (widget.view == LegacySystemsView.all ||
               widget.view == LegacySystemsView.music)
