@@ -99,7 +99,9 @@ void main() {
     },
   );
 
-  testWidgets('GTN page header adapts to compact phone widths', (tester) async {
+  testWidgets(
+    'GTN page header adapts to compact phone widths',
+    (tester) async {
     await tester.pumpWidget(
       M3EMaterialApp(
         title: 'GTN2 page header test',
@@ -129,6 +131,7 @@ void main() {
     expect(find.text('Beyond the Numbers'), findsOneWidget);
     expect(find.text('Your universe'), findsOneWidget);
     expect(find.text('4 WORLDS'), findsOneWidget);
-    expect(tester.takeException(), isNull);
-  });
+      expect(tester.takeException(), isNull);
+    },
+  );
 }
