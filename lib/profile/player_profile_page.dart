@@ -131,10 +131,12 @@ class PlayerProfilePage extends StatefulWidget {
 }
 
 class _PlayerProfilePageState extends State<PlayerProfilePage> {
-  late final TextEditingController _username =
-      TextEditingController(text: widget.initialProfile.username);
-  late final TextEditingController _bio =
-      TextEditingController(text: widget.initialProfile.bio);
+  late final TextEditingController _username = TextEditingController(
+    text: widget.initialProfile.username,
+  );
+  late final TextEditingController _bio = TextEditingController(
+    text: widget.initialProfile.bio,
+  );
   late String _avatarId = widget.initialProfile.avatarId;
   late String? _customAvatarData = widget.initialProfile.customAvatarData;
   bool _saving = false;
@@ -217,8 +219,7 @@ class _PlayerProfilePageState extends State<PlayerProfilePage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final profileImage =
-        _avatarId == 'custom' && _customAvatarData != null
+    final profileImage = _avatarId == 'custom' && _customAvatarData != null
         ? Image.memory(
             base64Decode(_customAvatarData!.split(',').last),
             fit: BoxFit.cover,
@@ -304,10 +305,7 @@ class _PlayerProfilePageState extends State<PlayerProfilePage> {
             ),
             if (_error != null) ...[
               const SizedBox(height: 8),
-              Text(
-                _error!,
-                style: TextStyle(color: theme.colorScheme.error),
-              ),
+              Text(_error!, style: TextStyle(color: theme.colorScheme.error)),
             ],
             const SizedBox(height: 12),
             FilledButton(
