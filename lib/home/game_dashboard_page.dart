@@ -849,7 +849,8 @@ class _MoreMenuPage extends StatelessWidget {
     final dark = Theme.of(context).brightness == Brightness.dark;
     final foreground = dark ? _white : const Color(0xFF172039);
     final muted = dark ? _muted : const Color(0xFF65708C);
-    final panel = dark ? _panel : Colors.white;
+    final line = dark ? _line : const Color(0x180D1530);
+    final compact = MediaQuery.sizeOf(context).width <= 520;
 
     Widget entry(
       IconData icon,
@@ -858,74 +859,74 @@ class _MoreMenuPage extends StatelessWidget {
       VoidCallback onTap,
       Color accent,
     ) {
+      final radius = BorderRadius.circular(18);
       return GtnExpressiveCard(
         color: panel,
         margin: EdgeInsets.zero,
-        elevation: 1,
+        elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
-          side: BorderSide(color: accent.withValues(alpha: .24)),
+          borderRadius: radius,
+          side: BorderSide(color: line),
         ),
         child: Material(
           color: Colors.transparent,
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: radius,
           child: InkWell(
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: radius,
             onTap: onTap,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
-              child: Row(
-                children: [
-                  Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: accent.withValues(alpha: dark ? .16 : .11),
-                      borderRadius: BorderRadius.circular(18),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: compact ? 70 : 78),
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: compact ? 12 : 15,
+                  vertical: compact ? 12 : 15,
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: compact ? 40 : 42,
+                      height: compact ? 40 : 42,
+                      decoration: BoxDecoration(
+                        color: accent.withValues(alpha: dark ? .16 : .11),
+                        borderRadius: BorderRadius.circular(13),
+                      ),
+                      child: Icon(icon, color: accent, size: 22),
                     ),
-                    child: Icon(icon, color: accent, size: 23),
-                  ),
-                  const SizedBox(width: 15),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          title,
-                          style: TextStyle(
-                            color: foreground,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: -.2,
+                    const SizedBox(width: 13),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            title,
+                            style: TextStyle(
+                              color: foreground,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: -.2,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          subtitle,
-                          style: TextStyle(
-                            color: muted,
-                            fontSize: 12,
-                            height: 1.3,
+                          const SizedBox(height: 5),
+                          Text(
+                            subtitle,
+                            style: TextStyle(
+                              color: muted,
+                              fontSize: 11,
+                              height: 1.35,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  Container(
-                    width: 32,
-                    height: 32,
-                    decoration: BoxDecoration(
-                      color: accent.withValues(alpha: .10),
-                      shape: BoxShape.circle,
+                    const SizedBox(width: 8),
+                    Icon(
+                      Icons.chevron_right_rounded,
+                      color: muted,
+                      size: 23,
                     ),
-                    child: Icon(
-                      Icons.arrow_forward_rounded,
-                      color: accent,
-                      size: 17,
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -1103,7 +1104,7 @@ class _MoreMenuPage extends StatelessWidget {
               const SizedBox(height: 18),
               LayoutBuilder(
                 builder: (context, constraints) {
-                  final columns = constraints.maxWidth >= 640 ? 2 : 1;
+                  final columns = constraints.maxWidth > 520 ? 2 : 1;
                   const spacing = 12.0;
                   final itemWidth =
                       (constraints.maxWidth - spacing * (columns - 1)) /

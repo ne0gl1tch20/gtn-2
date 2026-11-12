@@ -219,6 +219,23 @@ void main() {
     }
   });
 
+  testWidgets('More hub switches to the GTN1 two-column layout above 520px', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(600, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(buildDashboard());
+    await tester.tap(find.text('More').first);
+    await tester.pumpAndSettle();
+
+    final rewards = tester.getTopLeft(find.text('Rewards'));
+    final journey = tester.getTopLeft(find.text('Journey'));
+    expect(rewards.dx, lessThan(journey.dx));
+    expect(rewards.dy, journey.dy);
+  });
+
   testWidgets('More follows the saved Menu Studio order and includes tools', (
     WidgetTester tester,
   ) async {
