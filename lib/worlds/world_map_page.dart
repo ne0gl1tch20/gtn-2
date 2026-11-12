@@ -316,6 +316,7 @@ class _WorldMapPageState extends State<WorldMapPage> {
   bool _hasInitializedTransform = false;
 
   Widget _buildProgressionSummary(BuildContext context) {
+    final theme = Theme.of(context);
     final activeWorld = WorldBossCatalog.worlds.firstWhere(
       (world) => world.id == _state.legacySystems.activeWorldId,
       orElse: () => WorldBossCatalog.worlds.first,
