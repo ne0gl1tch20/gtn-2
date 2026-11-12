@@ -32,10 +32,6 @@ jobs:
       # Keep CI formatting scoped to Dart sources instead of committing tool-generated config.
       - name: Restore analysis configuration
         run: git restore -- analysis_options.yaml
-      - name: Print formatter diff for More hub
-        run: |
-          dart format lib/legacy/legacy_pages.dart
-          git diff -- lib/legacy/legacy_pages.dart
       - name: Verify Dart formatting
         run: dart format --output=none --set-exit-if-changed .
 
