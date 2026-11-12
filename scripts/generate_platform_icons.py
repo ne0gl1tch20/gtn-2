@@ -23,6 +23,11 @@ def main() -> None:
             icon = image.resize((size, size), Image.Resampling.LANCZOS)
             icon.save(target / "ic_launcher.png")
             icon.save(target / "ic_launcher_round.png")
+        # Flutter's template adaptive icon still references its placeholder art.
+        # Remove it so Android resolves the density-specific canonical logo.
+        adaptive = ROOT / "android/app/src/main/res/mipmap-anydpi-v26"
+        for name in ("ic_launcher.xml", "ic_launcher_round.xml"):
+            (adaptive / name).unlink(missing_ok=True)
     if not args.android_only:
         target = ROOT / "windows/runner/resources"
         target.mkdir(parents=True, exist_ok=True)
