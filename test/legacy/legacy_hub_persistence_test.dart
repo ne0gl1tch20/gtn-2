@@ -63,7 +63,8 @@ void main() {
       await visit('Rewards', 'Rewards');
       await visit('Statistics', 'Statistics');
       await visit('Codex', 'Codex');
-      await visit('Music', 'Music');
+      // Open Music only once below. Mounting and disposing the audio player
+      // twice in this widget test can leave its platform lifecycle pending.
       await visit('Lucky Stake', 'Lucky Stake');
       await visit('Changelog', 'Changelog');
       await visit('About', 'About');
