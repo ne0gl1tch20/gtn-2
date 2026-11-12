@@ -89,6 +89,10 @@ void main() {
   testWidgets('shows the HTML-facing dashboard and quick-pick controls', (
     WidgetTester tester,
   ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
     await tester.pumpWidget(buildDashboard());
     expect(find.text('Guess The Number'), findsOneWidget);
     expect(find.text('Play'), findsOneWidget);
@@ -137,7 +141,7 @@ void main() {
     expect(guessController().text, isEmpty);
 
     for (final label in [
-      'YOUR WALLET',
+      'MONEY',
       'AUTOMATION LAB',
       'Guessing Bots',
       'Daily Momentum',
@@ -179,6 +183,46 @@ void main() {
     await tester.pageBack();
     await tester.pumpAndSettle();
     expect(find.text('More Menu'), findsOneWidget);
+  });
+
+  testWidgets('default More menu keeps GTN1 destination names', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(buildDashboard());
+    await tester.tap(find.text('More').first);
+    await tester.pumpAndSettle();
+
+    expect(find.text('More Menu'), findsOneWidget);
+    for (final label in [
+      'Rewards',
+      'Journey',
+      'Shop',
+      'Home Base',
+      'Relics',
+      'Codex',
+      'Changelog',
+      'Background Music',
+      'Settings',
+      'Prestige',
+      'Ultra',
+      'Talents',
+      'Traits',
+      'Mutators',
+      'Stats',
+      'Lucky Stake',
+    ]) {
+      await tester.scrollUntilVisible(
+        find.text(label),
+        220,
+        scrollable: find.byType(Scrollable).last,
+      );
+      await tester.pumpAndSettle();
+      expect(find.text(label), findsOneWidget);
+    }
   });
 
   testWidgets('More follows the saved Menu Studio order and includes tools', (
