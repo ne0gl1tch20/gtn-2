@@ -3,6 +3,7 @@ import 'package:gtn_2/core/game/game_engine.dart';
 import 'package:gtn_2/core/progression/progression_state.dart';
 import 'package:gtn_2/design/expressive_widgets.dart';
 import 'package:gtn_2/home/game_dashboard_page.dart';
+import 'package:gtn_2/legacy/legacy_pages.dart';
 import 'package:gtn_2/legacy/legacy_systems_page.dart';
 import 'package:gtn_2/profile/player_profile_page.dart';
 import 'package:gtn_2/settings/game_settings.dart';
@@ -14,6 +15,7 @@ Widget buildDashboard({
   VoidCallback? onGuess,
   GlobalKey<NavigatorState>? shellNavigatorKey,
   ValueChanged<LegacySystemsView>? onSystemsView,
+  ValueChanged<LegacySection>? onLegacySection,
   VoidCallback? onPlayerProfile,
 }) {
   final navigatorKey = shellNavigatorKey ?? GlobalKey<NavigatorState>();
@@ -49,13 +51,27 @@ Widget buildDashboard({
       selectedIndex: 2,
       onPrimarySelected: (_) {},
       onSystemsView: onSystemsView ?? (_) {},
-      onLegacySection: (_) {},
+      onLegacySection: onLegacySection ?? (_) {},
       onPlayerProfile: onPlayerProfile,
     ),
   );
 }
 
 void main() {
+  testWidgets('Daily Momentum opens the GTN1 Rewards destination', (
+    WidgetTester tester,
+  ) async {
+    LegacySection? openedSection;
+    await tester.pumpWidget(
+      buildDashboard(onLegacySection: (section) => openedSection = section),
+    );
+    await tester.tap(find.text('More').first);
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('Daily Momentum'));
+    await tester.tap(find.text('Daily Momentum'));
+    expect(openedSection, LegacySection.rewards);
+  });
+
   testWidgets(
     'guess controls expose GTN1 accessibility labels and submit action',
     (WidgetTester tester) async {
