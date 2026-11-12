@@ -11,7 +11,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: validate-${{ github.ref }}
+  group: validate-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -160,7 +160,7 @@ jobs:
   windows-installer:
     name: Windows release installer (Inno Setup)
     runs-on: windows-latest
-    needs: format
+    needs: [fast-checks, tests]
     if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'))
     steps:
       - uses: actions/checkout@v4
