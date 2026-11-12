@@ -215,12 +215,6 @@ void main() {
       'Stats',
       'Lucky Stake',
     ]) {
-      await tester.scrollUntilVisible(
-        find.text(label),
-        220,
-        scrollable: find.byType(Scrollable).last,
-      );
-      await tester.pumpAndSettle();
       expect(find.text(label), findsOneWidget);
     }
   });
