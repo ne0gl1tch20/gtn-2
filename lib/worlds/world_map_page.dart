@@ -331,39 +331,20 @@ class _WorldMapPageState extends State<WorldMapPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            children: [
-              const Icon(Icons.explore_rounded, color: GtnUiTokens.purple),
-              const SizedBox(width: 9),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'BEYOND THE NUMBERS',
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: GtnUiTokens.cyan,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 1.1,
-                      ),
-                    ),
-                    Text(
-                      AppLocalizations.text(
-                        'web_ui_your_universe',
-                        'Your universe',
-                      ),
-                      style: theme.textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              _StatusChip(
-                label: '${WorldBossCatalog.worlds.length} WORLDS',
-                color: GtnUiTokens.purple,
-              ),
-            ],
+          GtnPageHeader(
+            eyebrow: 'Beyond the Numbers',
+            title: AppLocalizations.text(
+              'web_ui_your_universe',
+              'Your universe',
+            ),
+            description:
+                'Explore worlds, discover secrets and challenge their guardians.',
+            icon: Icons.explore_rounded,
+            accent: GtnUiTokens.cyan,
+            trailing: _StatusChip(
+              label: '${WorldBossCatalog.worlds.length} WORLDS',
+              color: GtnUiTokens.purple,
+            ),
           ),
           const SizedBox(height: 14),
           Row(
