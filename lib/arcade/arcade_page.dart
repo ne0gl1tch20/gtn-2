@@ -750,4 +750,3 @@ class _ArcadeDialogState extends State<_ArcadeDialog> {
     );
   }
 }
-
