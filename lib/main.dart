@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -10,6 +12,7 @@ import 'core/automation/bot_team.dart';
 import 'core/automation/clock_rollback_policy.dart';
 import 'core/automation/guessing_bot.dart';
 import 'core/automation/offline_earnings_policy.dart';
+import 'core/events/random_event_engine.dart';
 import 'core/game/difficulty_rules.dart';
 import 'core/game/game_engine.dart';
 import 'core/game/guess_economy_rules.dart';
@@ -19,6 +22,7 @@ import 'core/numbers/big_number.dart';
 import 'core/progression/progression_calculator.dart';
 import 'core/progression/progression_engine.dart';
 import 'core/progression/progression_state.dart';
+import 'core/scripting/lua_sandbox.dart';
 import 'data/saves/save_data.dart';
 import 'data/saves/save_storage.dart';
 import 'dev/developer_settings_page.dart';
@@ -141,7 +145,13 @@ class _GameHomePageState extends State<GameHomePage>
   final InvisibleTraitEngine _invisibleTraitEngine =
       const InvisibleTraitEngine();
   final BotTeam _botTeam = BotTeam();
+  final LuaSandbox _luaSandbox = const LuaSandbox();
+  final RandomEventEngine _randomEventEngine = RandomEventEngine();
   Timer? _autoClickerTimer;
+  Timer? _randomEventTimer;
+  Timer? _randomEventBannerTimer;
+  bool _randomEventRunning = false;
+  String? _randomEventMessage;
   Timer? _playtimeTimer;
   bool _autoClickerTickRunning = false;
   bool _resumeCatchUpPending = false;
@@ -170,11 +180,14 @@ class _GameHomePageState extends State<GameHomePage>
     if (state == AppLifecycleState.resumed) {
       unawaited(_resumeAutoClicker());
       _startPlaytimeTimer();
+      _startRandomEventTimer();
     } else {
       _autoClickerTimer?.cancel();
       _autoClickerTimer = null;
       _playtimeTimer?.cancel();
       _playtimeTimer = null;
+      _randomEventTimer?.cancel();
+      _randomEventTimer = null;
     }
   }
 
@@ -193,6 +206,76 @@ class _GameHomePageState extends State<GameHomePage>
         unawaited(_persist());
       }
     });
+  }
+
+
+  void _startRandomEventTimer() {
+    if (!mounted || _isLoading || _randomEventTimer?.isActive == true ||
+        WidgetsBinding.instance.lifecycleState == AppLifecycleState.paused ||
+        WidgetsBinding.instance.lifecycleState == AppLifecycleState.inactive ||
+        WidgetsBinding.instance.lifecycleState == AppLifecycleState.detached) return;
+    _randomEventTimer = Timer.periodic(const Duration(minutes: 1), (_) {
+      unawaited(_runRandomEventTick());
+    });
+  }
+
+  Future<void> _runRandomEventTick() async {
+    if (!mounted || _isLoading || _randomEventRunning) return;
+    _randomEventRunning = true;
+    try {
+      final manifest = jsonDecode(await rootBundle.loadString('assets/scripts/manifest.json'));
+      if (manifest is! Map<String, dynamic> || manifest['schemaVersion'] != 1 ||
+          manifest['hostApiVersion'] != 1 || manifest['scripts'] is! List) {
+        throw const FormatException('Invalid Lua script manifest.');
+      }
+      String? scriptPath;
+      for (final entry in manifest['scripts'] as List) {
+        if (entry is Map && entry['id'] == 'random_event') {
+          final file = entry['file'];
+          if (file is String && file.endsWith('.lua') && !file.startsWith('/') && !file.contains('..')) {
+            scriptPath = 'assets/scripts/$file';
+          }
+          break;
+        }
+      }
+      if (scriptPath == null) throw const FormatException('Random-event script is not registered.');
+      final source = await rootBundle.loadString(scriptPath);
+      final execution = await _luaSandbox.execute(scriptId: 'random_event', source: source);
+      final output = execution.value;
+      if (output is! Map || output['trigger'] != true || output['type'] is! String) return;
+      final eventType = randomEventTypeFromLuaId(output['type'] as String);
+      if (eventType == null) return;
+      final result = _randomEventEngine.apply(progression: _progression, game: _game, type: eventType);
+      final message = switch (eventType) {
+        RandomEventType.cashBurst => 'Cash Burst · bonus Money added',
+        RandomEventType.nebulaRain => 'Nebula Rain · 10–50 Nebula added',
+        RandomEventType.jackpot => 'Jackpot · 1,000× your range in Money',
+        RandomEventType.streakSurge => 'Streak Surge · +2 streak',
+        RandomEventType.rangeShuffle => 'Range Shuffle · secret number changed',
+        RandomEventType.taxRefund => 'Tax Refund · Money returned',
+        RandomEventType.cosmicGift => 'Cosmic Gift · +100 Nebula',
+      };
+      if (!mounted) return;
+      setState(() {
+        _progression = result.progression;
+        _game = result.game;
+        _randomEventMessage = message;
+      });
+      _randomEventBannerTimer?.cancel();
+      _randomEventBannerTimer = Timer(const Duration(seconds: 8), () {
+        if (!mounted) return;
+        setState(() {
+          _randomEventMessage = null;
+          _progression = _progression.copyWith(clearLastRandomEventId: true);
+        });
+        unawaited(_persist());
+      });
+      await _persist();
+    } catch (error) {
+      debugPrint('Random-event selector failed safely: $error');
+    } finally {
+      _randomEventRunning = false;
+    }
   }
 
   Future<void> _resumeAutoClicker() async {
@@ -343,6 +426,7 @@ class _GameHomePageState extends State<GameHomePage>
       if (mounted) {
         setState(() => _isLoading = false);
         _startPlaytimeTimer();
+        _startRandomEventTimer();
       }
     }
     _botTeam.reset(_game.minimum, _game.maximum);
@@ -1513,6 +1597,8 @@ class _GameHomePageState extends State<GameHomePage>
     WidgetsBinding.instance.removeObserver(this);
     _autoClickerTimer?.cancel();
     _playtimeTimer?.cancel();
+    _randomEventTimer?.cancel();
+    _randomEventBannerTimer?.cancel();
     _controller.dispose();
     super.dispose();
   }
@@ -1526,6 +1612,7 @@ class _GameHomePageState extends State<GameHomePage>
       activeSlot: _activeSlot,
       loading: _isLoading,
       message: _message,
+      randomEventMessage: _randomEventMessage,
       controller: _controller,
       onGuess: _submitGuess,
       onNewGame: _newGame,
