@@ -1287,6 +1287,7 @@ class _GuessInput extends StatelessWidget {
           children: [
             Expanded(
               child: Semantics(
+                container: true,
                 label: 'Your guess',
                 textField: true,
                 child: GtnExpressiveTextField(
@@ -1305,6 +1306,7 @@ class _GuessInput extends StatelessWidget {
               width: MediaQuery.sizeOf(context).width <= 430 ? 100 : 116,
               height: 56,
               child: Semantics(
+                container: true,
                 label: 'Guess',
                 button: true,
                 enabled: enabled,
@@ -1401,6 +1403,7 @@ class _QuickGuessButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Semantics(
+    container: true,
     label: semanticLabel,
     button: true,
     enabled: enabled,
