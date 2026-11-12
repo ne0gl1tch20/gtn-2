@@ -278,7 +278,7 @@ class GameDashboardPage extends StatelessWidget {
                               'OFFLINE',
                               style: TextStyle(
                                 color: muted,
-                                fontSize: 9,
+                                fontSize: 10,
                                 fontWeight: FontWeight.w900,
                                 letterSpacing: 1,
                               ),
@@ -623,7 +623,7 @@ class _BotArena extends StatelessWidget {
                       'AUTOMATION LAB',
                       style: TextStyle(
                         color: muted,
-                        fontSize: 9,
+                        fontSize: 10,
                         fontWeight: FontWeight.w900,
                         letterSpacing: 1.3,
                       ),
@@ -650,7 +650,7 @@ class _BotArena extends StatelessWidget {
                   countLabel,
                   style: const TextStyle(
                     color: _purple,
-                    fontSize: 8,
+                    fontSize: 10,
                     fontWeight: FontWeight.w900,
                   ),
                 ),
@@ -1013,7 +1013,7 @@ class _Stat extends StatelessWidget {
           label,
           style: TextStyle(
             color: muted,
-            fontSize: 8,
+            fontSize: 10,
             fontWeight: FontWeight.w900,
             letterSpacing: 1,
           ),
@@ -1090,7 +1090,7 @@ class _Wallet extends StatelessWidget {
           'MONEY',
           style: TextStyle(
             color: muted,
-            fontSize: 8,
+            fontSize: 10,
             fontWeight: FontWeight.w900,
             letterSpacing: 1.7,
           ),
@@ -1102,7 +1102,7 @@ class _Wallet extends StatelessWidget {
               'RUN MOMENTUM',
               style: TextStyle(
                 color: muted,
-                fontSize: 8,
+                fontSize: 10,
                 fontWeight: FontWeight.w900,
                 letterSpacing: 1,
               ),
@@ -1112,7 +1112,7 @@ class _Wallet extends StatelessWidget {
               'BEST ${state.bestStreak}',
               style: TextStyle(
                 color: muted,
-                fontSize: 8,
+                fontSize: 10,
                 fontWeight: FontWeight.w900,
               ),
             ),
@@ -1208,7 +1208,7 @@ class _Currency extends StatelessWidget {
           label,
           style: TextStyle(
             color: muted,
-            fontSize: 7,
+            fontSize: 10,
             fontWeight: FontWeight.w900,
             letterSpacing: .8,
           ),
@@ -1276,7 +1276,7 @@ class _GuessInput extends StatelessWidget {
               'WHOLE NUMBER',
               style: TextStyle(
                 color: muted,
-                fontSize: 9,
+                fontSize: 10,
                 fontWeight: FontWeight.w800,
               ),
             ),
@@ -1330,7 +1330,7 @@ class _GuessInput extends StatelessWidget {
             'QUICK PICK',
             style: TextStyle(
               color: muted,
-              fontSize: 9,
+              fontSize: 10,
               fontWeight: FontWeight.w900,
               letterSpacing: 1,
             ),
@@ -1408,7 +1408,7 @@ class _QuickGuessButton extends StatelessWidget {
       onPressed: enabled ? onPressed : null,
       child: Text(
         label,
-        style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w900),
+        style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w900),
       ),
     ),
   );
@@ -1481,7 +1481,7 @@ class _Action extends StatelessWidget {
                     subtitle,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(color: muted, fontSize: 8, height: 1.2),
+                    style: TextStyle(color: muted, fontSize: 10, height: 1.2),
                   ),
                 ],
               ),
