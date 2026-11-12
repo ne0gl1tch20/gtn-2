@@ -94,7 +94,8 @@ class SettingsPage extends StatelessWidget {
           _SettingsSection(
             eyebrow: '02 / APPEARANCE',
             title: 'Appearance',
-            description: 'Tune the theme while keeping the original GTN cosmic identity.',
+            description:
+                'Tune the theme while keeping the original GTN cosmic identity.',
             children: [
               _dropdown<String>(
                 'Theme mode',
@@ -213,7 +214,8 @@ class SettingsPage extends StatelessWidget {
           _SettingsSection(
             eyebrow: '04 / NOTIFICATIONS',
             title: 'Notifications',
-            description: 'Preferences are saved. Scheduled delivery still needs platform integration.',
+            description:
+                'Preferences are saved. Scheduled delivery still needs platform integration.',
             children: [
               _toggle(
                 'Game reminders',
@@ -326,7 +328,8 @@ class SettingsPage extends StatelessWidget {
           _SettingsSection(
             eyebrow: '08 / DEVELOPER & SAVE',
             title: 'Developer & Save Preferences',
-            description: 'Control diagnostic logging, matching the original GTN1 settings.',
+            description:
+                'Control diagnostic logging, matching the original GTN1 settings.',
             children: [
               _toggle(
                 'Save logs to storage',
@@ -566,7 +569,11 @@ class _ColorSetting extends StatelessWidget {
       ),
     );
     if (result != null) {
-      final hex = result.toARGB32().toRadixString(16).substring(2).toUpperCase();
+      final hex = result
+          .toARGB32()
+          .toRadixString(16)
+          .substring(2)
+          .toUpperCase();
       onSubmitted('#$hex');
     }
   }
@@ -591,7 +598,10 @@ class _ColorSetting extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(label, style: Theme.of(context).textTheme.titleSmall),
-              Text(value.toUpperCase(), style: Theme.of(context).textTheme.bodySmall),
+              Text(
+                value.toUpperCase(),
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
             ],
           ),
         ),
