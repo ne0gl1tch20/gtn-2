@@ -643,7 +643,7 @@ class LegacyDetailPage extends StatelessWidget {
               'NameMC · PearlSteve15',
               'https://namemc.com/profile/PearlSteve15',
             ),
-            ('GitHub · Source code', 'https://github.com/ne0gl1tch20'),
+            ('GitHub · Source code', 'https://github.com/ne0gl1tch20/gtn-2'),
             (
               'Official website',
               'https://ne0gl1tch20.github.io/GuessTheNumber',
