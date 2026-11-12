@@ -20,6 +20,11 @@ dependencies:
   material_3_expressive: 1.2.0
   material_ui: ^1.8.0
   lua_dardo: ^0.0.5
+  jarrlyyui_engine:
+    git:
+      url: https://github.com/ne0gl1tch20/jarrlyyui_engine.git
+      ref: 556d6f730e2243683aacce3273efa86c9807d8e3
+      path: packages/jarrlyyui_engine
 
 dev_dependencies:
   flutter_test:
@@ -32,6 +37,7 @@ flutter:
     - assets/locales/
     - assets/game/
     - assets/fonts/
+    - assets/jui/
     - assets/gtn1/
     - assets/scripts/manifest.json
     - assets/scripts/events/random_event.lua
