@@ -1,5 +1,5 @@
-import 'package:material_ui/material_ui.dart';
 import 'package:jarrlyyui_engine/jarrlyyui_engine.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Developer-only preview of the APK-bundled JUI baseline.
 ///
@@ -92,7 +92,9 @@ class _JuiPreviewPageState extends State<JuiPreviewPage> {
               return Center(
                 child: Padding(
                   padding: const EdgeInsets.all(24),
-                  child: Text('Could not load bundled JUI screen: ${snapshot.error}'),
+                  child: Text(
+                    'Could not load bundled JUI screen: ${snapshot.error}',
+                  ),
                 ),
               );
             }
