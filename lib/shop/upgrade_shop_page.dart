@@ -70,14 +70,31 @@ class _UpgradeShopPageState extends State<UpgradeShopPage> {
             trailing: _BalanceChip(value: _progression.money.toString()),
           ),
           const SizedBox(height: 16),
-          for (final upgrade in UpgradeCatalog.availableForGameplay)
-            _UpgradeCard(
-              upgrade: upgrade,
-              level: _progression.upgrades[upgrade.definition.id] ?? 0,
-              money: _progression.money,
-              busy: _buyingId != null,
-              onBuy: () => _buy(upgrade),
-            ),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final columns = constraints.maxWidth >= 760 ? 2 : 1;
+              const spacing = 12.0;
+              final width =
+                  (constraints.maxWidth - spacing * (columns - 1)) / columns;
+              return Wrap(
+                spacing: spacing,
+                runSpacing: 0,
+                children: [
+                  for (final upgrade in UpgradeCatalog.availableForGameplay)
+                    SizedBox(
+                      width: width,
+                      child: _UpgradeCard(
+                        upgrade: upgrade,
+                        level: _progression.upgrades[upgrade.definition.id] ?? 0,
+                        money: _progression.money,
+                        busy: _buyingId != null,
+                        onBuy: () => _buy(upgrade),
+                      ),
+                    ),
+                ],
+              );
+            },
+          ),
         ],
       ),
     );
