@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "screen": "save_slots",
+  "root": {
+    "type": "column",
+    "children": [
+      {"type": "text", "text": "SAVE SLOTS", "fontSize": 28},
+      {"type": "text", "text": "The host supplies real slot names, progress and timestamps. This example only demonstrates the screen shell."},
+      {"type": "button", "text": "SELECT SLOT 1", "action": {"id": "saves.select_slot", "arguments": {"slot": 0}}},
+      {"type": "button", "text": "SELECT SLOT 2", "action": {"id": "saves.select_slot", "arguments": {"slot": 1}}},
+      {"type": "button", "text": "SELECT SLOT 3", "action": {"id": "saves.select_slot", "arguments": {"slot": 2}}},
+      {"type": "button", "text": "BACK", "action": {"id": "navigation.back"}}
+    ]
+  }
+}
