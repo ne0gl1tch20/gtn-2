@@ -3,7 +3,9 @@ import 'package:gtn_2/core/game/game_engine.dart';
 import 'package:gtn_2/core/progression/progression_state.dart';
 import 'package:gtn_2/design/expressive_widgets.dart';
 import 'package:gtn_2/home/game_dashboard_page.dart';
+import 'package:gtn_2/legacy/legacy_pages.dart';
 import 'package:gtn_2/legacy/legacy_systems_page.dart';
+import 'package:gtn_2/profile/player_profile_page.dart';
 import 'package:gtn_2/settings/game_settings.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
@@ -14,6 +16,8 @@ Widget buildDashboard({
   String? randomEventMessage,
   GlobalKey<NavigatorState>? shellNavigatorKey,
   ValueChanged<LegacySystemsView>? onSystemsView,
+  ValueChanged<LegacySection>? onLegacySection,
+  VoidCallback? onPlayerProfile,
 }) {
   final navigatorKey = shellNavigatorKey ?? GlobalKey<NavigatorState>();
   return M3EMaterialApp(
@@ -49,12 +53,27 @@ Widget buildDashboard({
       selectedIndex: 2,
       onPrimarySelected: (_) {},
       onSystemsView: onSystemsView ?? (_) {},
-      onLegacySection: (_) {},
+      onLegacySection: onLegacySection ?? (_) {},
+      onPlayerProfile: onPlayerProfile,
     ),
   );
 }
 
 void main() {
+  testWidgets('Daily Momentum opens the GTN1 Rewards destination', (
+    WidgetTester tester,
+  ) async {
+    LegacySection? openedSection;
+    await tester.pumpWidget(
+      buildDashboard(onLegacySection: (section) => openedSection = section),
+    );
+    await tester.tap(find.text('More').first);
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('Daily Momentum'));
+    await tester.tap(find.text('Daily Momentum'));
+    expect(openedSection, LegacySection.rewards);
+  });
+
   testWidgets('shows the temporary random-event dashboard banner', (
     WidgetTester tester,
   ) async {
@@ -210,6 +229,7 @@ void main() {
 
     expect(find.text('More Menu'), findsOneWidget);
     for (final label in [
+      'Player profile',
       'Rewards',
       'Journey',
       'Shop',
@@ -228,6 +248,62 @@ void main() {
       'Lucky Stake',
     ]) {
       expect(find.text(label), findsOneWidget);
+    }
+  });
+
+  testWidgets('Player Profile validates username before saving', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: PlayerProfilePage(
+          initialProfile: const PlayerProfile(),
+          store: PlayerProfileStore(),
+          onSaved: (_) {},
+        ),
+      ),
+    );
+    await tester.scrollUntilVisible(
+      find.text('Save profile'),
+      240,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.text('Save profile'));
+    await tester.pumpAndSettle();
+    expect(find.text('Username must be 2–20 characters.'), findsOneWidget);
+  });
+
+  testWidgets('More opens the Player Profile destination callback', (
+    WidgetTester tester,
+  ) async {
+    var opened = 0;
+    await tester.pumpWidget(buildDashboard(onPlayerProfile: () => opened++));
+    await tester.tap(find.text('More').first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Player profile'));
+    await tester.pumpAndSettle();
+    expect(opened, 1);
+  });
+
+  testWidgets('Play dashboard sections stay full width on desktop', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(1200, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(buildDashboard());
+    for (final key in [
+      'dashboard-hero-section',
+      'dashboard-guess-section',
+      'dashboard-stats-section',
+      'dashboard-wallet-section',
+    ]) {
+      expect(
+        tester.getSize(find.byKey(Key(key))).width,
+        greaterThan(700),
+        reason: '$key should follow GTN1 full-width Play flow on desktop.',
+      );
     }
   });
 

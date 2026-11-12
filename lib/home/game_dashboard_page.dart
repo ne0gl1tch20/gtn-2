@@ -6,6 +6,7 @@ import '../core/progression/progression_state.dart';
 import '../design/expressive_widgets.dart';
 import '../legacy/legacy_pages.dart';
 import '../legacy/legacy_systems_page.dart';
+import '../profile/player_profile_page.dart';
 import '../settings/game_settings.dart';
 
 const _purple = GtnUiTokens.purple;
@@ -50,6 +51,8 @@ class GameDashboardPage extends StatelessWidget {
     required this.onPrimarySelected,
     required this.onSystemsView,
     required this.onLegacySection,
+    this.playerProfile = const PlayerProfile(),
+    this.onPlayerProfile,
   });
 
   final GameState game;
@@ -80,6 +83,8 @@ class GameDashboardPage extends StatelessWidget {
   final ValueChanged<int> onPrimarySelected;
   final ValueChanged<LegacySystemsView> onSystemsView;
   final ValueChanged<LegacySection> onLegacySection;
+  final PlayerProfile playerProfile;
+  final VoidCallback? onPlayerProfile;
 
   void _openMoreMenu(BuildContext context, Color panel) {
     shellNavigatorKey.currentState!.push<void>(
@@ -101,6 +106,8 @@ class GameDashboardPage extends StatelessWidget {
           onSystemsView: onSystemsView,
           onLegacySection: onLegacySection,
           onUpgradeShop: onUpgradeShop,
+          playerProfile: playerProfile,
+          onPlayerProfile: onPlayerProfile ?? () {},
         ),
       ),
     );
@@ -237,11 +244,7 @@ class GameDashboardPage extends StatelessWidget {
                     children: [
                       LayoutBuilder(
                         builder: (context, constraints) {
-                          final wide = constraints.maxWidth >= 640;
                           final fullWidth = constraints.maxWidth;
-                          final columnWidth = wide
-                              ? (fullWidth - 14) / 2
-                              : fullWidth;
                           return Wrap(
                             spacing: 14,
                             runSpacing: 14,
@@ -336,7 +339,8 @@ class GameDashboardPage extends StatelessWidget {
                                 ),
                               ),
                               SizedBox(
-                                width: columnWidth,
+                                key: const Key('dashboard-hero-section'),
+                                width: fullWidth,
                                 child: Container(
                                   padding: EdgeInsets.all(compact ? 21 : 25),
                                   constraints: BoxConstraints(
@@ -549,7 +553,8 @@ class GameDashboardPage extends StatelessWidget {
                                 ),
                               ),
                               SizedBox(
-                                width: columnWidth,
+                                key: const Key('dashboard-guess-section'),
+                                width: fullWidth,
                                 child: _GuessInput(
                                   game: game,
                                   controller: controller,
@@ -564,7 +569,8 @@ class GameDashboardPage extends StatelessWidget {
                                 ),
                               ),
                               SizedBox(
-                                width: columnWidth,
+                                key: const Key('dashboard-stats-section'),
+                                width: fullWidth,
                                 child: Row(
                                   children: [
                                     Expanded(
@@ -609,7 +615,8 @@ class GameDashboardPage extends StatelessWidget {
                                 ),
                               ),
                               SizedBox(
-                                width: columnWidth,
+                                key: const Key('dashboard-wallet-section'),
+                                width: fullWidth,
                                 child: _Wallet(
                                   progression,
                                   panel,
@@ -643,7 +650,9 @@ class GameDashboardPage extends StatelessWidget {
                                         'Keep the streak alive',
                                         Icons.auto_awesome_rounded,
                                         _gold,
-                                        onLegacyPages,
+                                        () => onLegacySection(
+                                          LegacySection.rewards,
+                                        ),
                                         panel,
                                         line,
                                         foreground,
@@ -871,6 +880,8 @@ class _MoreMenuPage extends StatelessWidget {
     required this.onSystemsView,
     required this.onLegacySection,
     required this.onUpgradeShop,
+    required this.playerProfile,
+    required this.onPlayerProfile,
   });
 
   final GameSettings settings;
@@ -889,6 +900,8 @@ class _MoreMenuPage extends StatelessWidget {
   final ValueChanged<LegacySystemsView> onSystemsView;
   final ValueChanged<LegacySection> onLegacySection;
   final VoidCallback onUpgradeShop;
+  final PlayerProfile playerProfile;
+  final VoidCallback onPlayerProfile;
 
   Color _destinationColor(String? hex) {
     if (hex == null || hex.isEmpty) return _purple;
@@ -902,6 +915,8 @@ class _MoreMenuPage extends StatelessWidget {
     final foreground = dark ? _white : const Color(0xFF172039);
     final muted = dark ? _muted : const Color(0xFF65708C);
     final panel = dark ? _panel : Colors.white;
+    final line = dark ? _line : const Color(0x180D1530);
+    final compact = MediaQuery.sizeOf(context).width <= 520;
 
     Widget entry(
       IconData icon,
@@ -910,74 +925,70 @@ class _MoreMenuPage extends StatelessWidget {
       VoidCallback onTap,
       Color accent,
     ) {
+      final radius = BorderRadius.circular(18);
       return GtnExpressiveCard(
         color: panel,
         margin: EdgeInsets.zero,
-        elevation: 1,
+        elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
-          side: BorderSide(color: accent.withValues(alpha: .24)),
+          borderRadius: radius,
+          side: BorderSide(color: line),
         ),
         child: Material(
           color: Colors.transparent,
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: radius,
           child: InkWell(
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: radius,
             onTap: onTap,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
-              child: Row(
-                children: [
-                  Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: accent.withValues(alpha: dark ? .16 : .11),
-                      borderRadius: BorderRadius.circular(18),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: compact ? 70 : 78),
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: compact ? 12 : 15,
+                  vertical: compact ? 12 : 15,
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: compact ? 40 : 42,
+                      height: compact ? 40 : 42,
+                      decoration: BoxDecoration(
+                        color: accent.withValues(alpha: dark ? .16 : .11),
+                        borderRadius: BorderRadius.circular(13),
+                      ),
+                      child: Icon(icon, color: accent, size: 22),
                     ),
-                    child: Icon(icon, color: accent, size: 23),
-                  ),
-                  const SizedBox(width: 15),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          title,
-                          style: TextStyle(
-                            color: foreground,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: -.2,
+                    const SizedBox(width: 13),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            title,
+                            style: TextStyle(
+                              color: foreground,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: -.2,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          subtitle,
-                          style: TextStyle(
-                            color: muted,
-                            fontSize: 12,
-                            height: 1.3,
+                          const SizedBox(height: 5),
+                          Text(
+                            subtitle,
+                            style: TextStyle(
+                              color: muted,
+                              fontSize: 11,
+                              height: 1.35,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  Container(
-                    width: 32,
-                    height: 32,
-                    decoration: BoxDecoration(
-                      color: accent.withValues(alpha: .10),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.arrow_forward_rounded,
-                      color: accent,
-                      size: 17,
-                    ),
-                  ),
-                ],
+                    const SizedBox(width: 8),
+                    Icon(Icons.chevron_right_rounded, color: muted, size: 23),
+                  ],
+                ),
               ),
             ),
           ),
@@ -990,6 +1001,16 @@ class _MoreMenuPage extends StatelessWidget {
           String,
           ({IconData icon, String title, String subtitle, VoidCallback onTap})
         >{
+          'player_profile': (
+            icon: Icons.account_circle_rounded,
+            title: playerProfile.username.isEmpty
+                ? 'Player profile'
+                : playerProfile.username,
+            subtitle: playerProfile.bio.isEmpty
+                ? 'View your username and bio, then edit your profile'
+                : playerProfile.bio,
+            onTap: onPlayerProfile,
+          ),
           'world_map': (
             icon: Icons.public_rounded,
             title: 'Beyond the Numbers',
@@ -1129,10 +1150,13 @@ class _MoreMenuPage extends StatelessWidget {
             onTap: onNebulaShop,
           ),
         };
-    final orderedIds = settings.moreScreenOrder
-        .where(destinations.containsKey)
-        .toSet()
-        .toList();
+    final orderedIds = <String>['player_profile'];
+    orderedIds.addAll(
+      settings.moreScreenOrder
+          .where(destinations.containsKey)
+          .where((id) => id != 'player_profile')
+          .toSet(),
+    );
     for (final id in destinations.keys) {
       if (!orderedIds.contains(id)) orderedIds.add(id);
     }
@@ -1155,7 +1179,7 @@ class _MoreMenuPage extends StatelessWidget {
               const SizedBox(height: 18),
               LayoutBuilder(
                 builder: (context, constraints) {
-                  final columns = constraints.maxWidth >= 640 ? 2 : 1;
+                  final columns = constraints.maxWidth > 520 ? 2 : 1;
                   const spacing = 12.0;
                   final itemWidth =
                       (constraints.maxWidth - spacing * (columns - 1)) /

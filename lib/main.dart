@@ -30,6 +30,7 @@ import 'home/game_dashboard_page.dart';
 import 'i18n/app_localizations.dart';
 import 'legacy/legacy_pages.dart';
 import 'legacy/legacy_systems_page.dart';
+import 'profile/player_profile_page.dart';
 import 'progression/progression_hub_page.dart';
 import 'saves/save_slots_page.dart';
 import 'settings/game_settings.dart';
@@ -156,6 +157,8 @@ class _GameHomePageState extends State<GameHomePage>
   bool _autoClickerTickRunning = false;
   bool _resumeCatchUpPending = false;
   ProgressionState _progression = ProgressionState.initial;
+  final PlayerProfileStore _playerProfileStore = PlayerProfileStore();
+  PlayerProfile _playerProfile = const PlayerProfile();
   GameSettings _settings = GameSettings.initial;
   final TextEditingController _controller = TextEditingController();
   late GameState _game = _createGame();
@@ -172,7 +175,7 @@ class _GameHomePageState extends State<GameHomePage>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _restoreSave();
+    unawaited(_restoreSave().then((_) => _loadPlayerProfile()));
   }
 
   @override
@@ -966,6 +969,73 @@ class _GameHomePageState extends State<GameHomePage>
     }
   }
 
+  Future<void> _loadPlayerProfile() async {
+    try {
+      var profile = await _playerProfileStore.load();
+      if (profile.username.isEmpty) {
+        final savedGame = await (await _storage).load();
+        if (savedGame != null && savedGame.profileName.isNotEmpty) {
+          profile = PlayerProfile(
+            username: savedGame.profileName.length > 20
+                ? savedGame.profileName.substring(0, 20)
+                : savedGame.profileName,
+            avatarId: switch (savedGame.profileIconId) {
+              'bolt' => 'lightning',
+              'crown' => 'crown',
+              'planet' => 'moon',
+              _ => 'star',
+            },
+          );
+          await _playerProfileStore.save(profile);
+        }
+      }
+      if (mounted) setState(() => _playerProfile = profile);
+    } on Exception {
+      // A missing or unreadable profile never blocks loading the game.
+    }
+  }
+
+  Future<void> _syncPlayerProfileToSave(PlayerProfile profile) async {
+    final legacyIconId = switch (profile.avatarId) {
+      'lightning' => 'bolt',
+      'crown' => 'crown',
+      'moon' => 'planet',
+      'star' => 'star',
+      _ => 'default',
+    };
+    try {
+      final storage = await _storage;
+      await storage.update((existing) {
+        final base = existing ?? _currentSaveData();
+        return base.copyWith(
+          profileName: profile.username,
+          profileIconId: legacyIconId,
+        );
+      });
+    } on Exception {
+      if (mounted) {
+        setState(
+          () => _message = 'Profile saved, but save-slot metadata could not be synchronized.',
+        );
+      }
+    }
+  }
+
+  Future<void> _openPlayerProfile() async {
+    await _shellNavigatorKey.currentState!.push<void>(
+      MaterialPageRoute<void>(
+        builder: (_) => PlayerProfilePage(
+          initialProfile: _playerProfile,
+          store: _playerProfileStore,
+          onSaved: (profile) {
+            setState(() => _playerProfile = profile);
+            unawaited(_syncPlayerProfileToSave(profile));
+          },
+        ),
+      ),
+    );
+  }
+
   Future<void> _openSaveSlots() async {
     await _shellNavigatorKey.currentState!.push<void>(
       MaterialPageRoute<void>(
@@ -1657,6 +1727,8 @@ class _GameHomePageState extends State<GameHomePage>
       onPrimarySelected: _onPrimarySelected,
       onSystemsView: _openLegacySystems,
       onLegacySection: _openLegacySection,
+      playerProfile: _playerProfile,
+      onPlayerProfile: _openPlayerProfile,
     );
   }
 }
