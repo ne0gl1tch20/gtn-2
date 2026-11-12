@@ -294,7 +294,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final profile = tester.getTopLeft(find.text('Player profile'));
-    final worldMap = tester.getTopLeft(find.text('Beyond the Numbers'));
+    final worldMap = tester.getTopLeft(find.text('Beyond the Numbers').first);
     expect(profile.dx, lessThan(worldMap.dx));
     expect(profile.dy, worldMap.dy);
   });
