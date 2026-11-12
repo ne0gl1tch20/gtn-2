@@ -171,7 +171,7 @@ void main() {
       ),
     );
 
-    await tester.tap(find.text('More').last);
+    await tester.tap(find.text('More'));
     await tester.pumpAndSettle();
     expect(find.text('More Menu'), findsOneWidget);
 
