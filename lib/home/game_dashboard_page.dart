@@ -1150,20 +1150,28 @@ class _Stat extends StatelessWidget {
     padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 10),
     decoration: BoxDecoration(
       color: panel,
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: BorderRadius.circular(22),
       border: Border.all(color: line),
     ),
     child: Column(
       children: [
-        Icon(icon, color: color, size: 19),
-        const SizedBox(height: 7),
+        Container(
+          width: 34,
+          height: 34,
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: .13),
+            borderRadius: BorderRadius.circular(13),
+          ),
+          child: Icon(icon, color: color, size: 19),
+        ),
+        const SizedBox(height: 8),
         Text(
           value,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: TextStyle(
             color: foreground,
-            fontSize: MediaQuery.sizeOf(context).width <= 430 ? 20 : 22,
+            fontSize: MediaQuery.sizeOf(context).width <= 360 ? 18 : 21,
             fontWeight: FontWeight.w900,
           ),
         ),
@@ -1463,7 +1471,7 @@ class _GuessInput extends StatelessWidget {
             ),
             const SizedBox(width: 9),
             SizedBox(
-              width: MediaQuery.sizeOf(context).width <= 430 ? 100 : 116,
+              width: MediaQuery.sizeOf(context).width <= 360 ? 104 : 120,
               height: 56,
               child: Semantics(
                 container: true,
@@ -1473,14 +1481,22 @@ class _GuessInput extends StatelessWidget {
                 enabled: enabled,
                 child: M3EButton.filled(
                   onPressed: enabled ? onGuess : null,
-                  child: const Text(
-                    '->',
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 0,
-                    ),
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'GUESS',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: .35,
+                        ),
+                      ),
+                      SizedBox(width: 5),
+                      Icon(Icons.arrow_forward_rounded, size: 18),
+                    ],
                   ),
+
                 ),
               ),
             ),
@@ -1604,26 +1620,26 @@ class _Action extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Material(
     color: panel,
-    borderRadius: BorderRadius.circular(19),
+    borderRadius: BorderRadius.circular(22),
     child: InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(19),
+      borderRadius: BorderRadius.circular(22),
       child: Container(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(19),
+          borderRadius: BorderRadius.circular(22),
           border: Border.all(color: line),
         ),
         child: Row(
           children: [
             Container(
-              width: 35,
-              height: 35,
+              width: 42,
+              height: 42,
               decoration: BoxDecoration(
                 color: color.withValues(alpha: .14),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(15),
               ),
-              child: Icon(icon, color: color, size: 19),
+              child: Icon(icon, color: color, size: 21),
             ),
             const SizedBox(width: 8),
             Expanded(
