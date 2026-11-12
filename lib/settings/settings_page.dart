@@ -334,15 +334,15 @@ class SettingsPage extends StatelessWidget {
                 color: Colors.transparent,
                 child: ListTile(
                   contentPadding: EdgeInsets.zero,
-                leading: const Icon(
-                  Icons.school_rounded,
-                  color: GtnUiTokens.cyan,
-                ),
-                title: const Text('Rerun Nimmy tutorial'),
-                subtitle: const Text(
-                  'Review the main game controls and progression.',
-                ),
-                trailing: const Icon(Icons.chevron_right_rounded),
+                  leading: const Icon(
+                    Icons.school_rounded,
+                    color: GtnUiTokens.cyan,
+                  ),
+                  title: const Text('Rerun Nimmy tutorial'),
+                  subtitle: const Text(
+                    'Review the main game controls and progression.',
+                  ),
+                  trailing: const Icon(Icons.chevron_right_rounded),
                   onTap: onReplayTutorial,
                 ),
               ),
