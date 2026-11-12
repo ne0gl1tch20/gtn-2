@@ -8,6 +8,10 @@ void main() {
   testWidgets('Memory Match locks the round after one incorrect answer', (
     WidgetTester tester,
   ) async {
+    tester.view.physicalSize = const Size(1000, 1200);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
     final rewards = <String>[];
     await tester.pumpWidget(
       M3EMaterialApp(
