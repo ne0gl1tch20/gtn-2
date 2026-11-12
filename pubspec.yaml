@@ -37,7 +37,7 @@ flutter:
     - assets/locales/
     - assets/game/
     - assets/fonts/
-    - assets/jui/
+    - assets/jui/screens/
     - assets/gtn1/
     - assets/scripts/manifest.json
     - assets/scripts/events/random_event.lua
