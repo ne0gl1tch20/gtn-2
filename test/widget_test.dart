@@ -1,11 +1,10 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gtn_2/core/game/game_engine.dart';
 import 'package:gtn_2/core/progression/progression_state.dart';
 import 'package:gtn_2/design/expressive_widgets.dart';
 import 'package:gtn_2/home/game_dashboard_page.dart';
-import 'package:gtn_2/profile/player_profile_page.dart';
 import 'package:gtn_2/legacy/legacy_systems_page.dart';
+import 'package:gtn_2/profile/player_profile_page.dart';
 import 'package:gtn_2/settings/game_settings.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
