@@ -1,6 +1,11 @@
 import '../legacy/legacy_systems_state.dart';
 import '../numbers/big_number.dart';
 
+const Set<String> _randomEventSaveIds = {
+  'cash_burst', 'nebula_rain', 'jackpot', 'streak_surge',
+  'range_shuffle', 'tax_refund', 'cosmic_gift',
+};
+
 class ProgressionState {
   ProgressionState({
     BigNumber? money,
@@ -18,6 +23,9 @@ class ProgressionState {
     this.totalGuesses = 0,
     this.correctGuesses = 0,
     BigNumber? moneyEarned,
+    BigNumber? moneySpent,
+    this.randomEventsTriggered = 0,
+    this.lastRandomEventId,
     this.currentStreak = 0,
     this.bestStreak = 0,
     this.playtimeSeconds = 0,
@@ -29,6 +37,7 @@ class ProgressionState {
        ultra = ultra ?? BigNumber.fromInt(0),
        nebula = nebula ?? BigNumber.fromInt(0),
        moneyEarned = moneyEarned ?? BigNumber.fromInt(0),
+       moneySpent = moneySpent ?? BigNumber.fromInt(0),
        nebulaEarned = nebulaEarned ?? BigNumber.fromInt(0),
        legacySystems = legacySystems ?? LegacySystemsState.initial;
 
@@ -40,7 +49,9 @@ class ProgressionState {
       bossDamage;
   final Set<String> defeatedBosses;
   final int prestigeResets, ultraResets, totalGuesses, correctGuesses;
-  final BigNumber moneyEarned;
+  final BigNumber moneyEarned, moneySpent;
+  final int randomEventsTriggered;
+  final String? lastRandomEventId;
   final int currentStreak, bestStreak, playtimeSeconds;
   final Set<String> achievements;
   final BigNumber nebulaEarned;
@@ -64,6 +75,9 @@ class ProgressionState {
     'totalGuesses': totalGuesses,
     'correctGuesses': correctGuesses,
     'moneyEarned': moneyEarned.toString(),
+    'moneySpent': moneySpent.toString(),
+    'randomEventsTriggered': randomEventsTriggered,
+    if (lastRandomEventId != null) 'lastRandomEventId': lastRandomEventId!,
     'currentStreak': currentStreak,
     'bestStreak': bestStreak,
     'playtimeSeconds': playtimeSeconds,
@@ -83,6 +97,8 @@ class ProgressionState {
       return parsed;
     }
 
+    BigNumber optionalNumber(String key) => json[key] == null ? BigNumber.fromInt(0) : number(key);
+
     int count(String key) {
       final value = json[key];
       if (value is! int || value < 0) {
@@ -90,6 +106,8 @@ class ProgressionState {
       }
       return value;
     }
+
+    int optionalCount(String key) => json[key] == null ? 0 : count(key);
 
     Map<String, int> levels(String key, {bool optional = false}) {
       final value = json[key];
@@ -148,6 +166,10 @@ class ProgressionState {
       }
       achievements.addAll(rawAchievements.cast<String>());
     }
+    final rawLastRandomEventId = json['lastRandomEventId'];
+    if (rawLastRandomEventId != null && (rawLastRandomEventId is! String || !_randomEventSaveIds.contains(rawLastRandomEventId))) {
+      throw const FormatException('Invalid random event ID.');
+    }
     final total = count('totalGuesses');
     final correct = count('correctGuesses');
     final streak = count('currentStreak');
@@ -171,6 +193,9 @@ class ProgressionState {
       totalGuesses: total,
       correctGuesses: correct,
       moneyEarned: number('moneyEarned'),
+      moneySpent: optionalNumber('moneySpent'),
+      randomEventsTriggered: optionalCount('randomEventsTriggered'),
+      lastRandomEventId: rawLastRandomEventId as String?,
       currentStreak: streak,
       bestStreak: best,
       playtimeSeconds: json['playtimeSeconds'] == null
@@ -198,6 +223,10 @@ class ProgressionState {
     int? totalGuesses,
     int? correctGuesses,
     BigNumber? moneyEarned,
+    BigNumber? moneySpent,
+    int? randomEventsTriggered,
+    String? lastRandomEventId,
+    bool clearLastRandomEventId = false,
     int? currentStreak,
     int? bestStreak,
     int? playtimeSeconds,
@@ -220,6 +249,9 @@ class ProgressionState {
     totalGuesses: totalGuesses ?? this.totalGuesses,
     correctGuesses: correctGuesses ?? this.correctGuesses,
     moneyEarned: moneyEarned ?? this.moneyEarned,
+    moneySpent: moneySpent ?? this.moneySpent,
+    randomEventsTriggered: randomEventsTriggered ?? this.randomEventsTriggered,
+    lastRandomEventId: clearLastRandomEventId ? null : lastRandomEventId ?? this.lastRandomEventId,
     currentStreak: currentStreak ?? this.currentStreak,
     bestStreak: bestStreak ?? this.bestStreak,
     playtimeSeconds: playtimeSeconds ?? this.playtimeSeconds,
