@@ -32,21 +32,6 @@ jobs:
       # Keep CI formatting scoped to Dart sources instead of committing tool-generated config.
       - name: Restore analysis configuration
         run: git restore -- analysis_options.yaml
-      - name: Print formatted source for the current UI pass
-        run: |
-          for file in \
-            lib/design/expressive_widgets.dart \
-            lib/home/game_dashboard_page.dart \
-            lib/legacy/legacy_systems_page.dart \
-            lib/progression/progression_hub_page.dart \
-            lib/shop/permanent_upgrade_shop_page.dart \
-            lib/shop/upgrade_shop_page.dart \
-            lib/worlds/world_map_page.dart \
-            test/design/expressive_widgets_test.dart; do
-            echo "FORMAT_BEGIN:$file"
-            dart format --output=show "$file"
-            echo "FORMAT_END:$file"
-          done
       - name: Verify Dart formatting
         run: dart format --output=none --set-exit-if-changed .
 
