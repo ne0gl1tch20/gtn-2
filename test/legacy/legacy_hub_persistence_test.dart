@@ -24,9 +24,7 @@ void main() {
       var progression = ProgressionState.initial;
       Future<void> persist(ProgressionState next) async {
         progression = next;
-        await storage.update(
-          (current) => current!.copyWith(progression: next),
-        );
+        await storage.update((current) => current!.copyWith(progression: next));
       }
 
       await tester.pumpWidget(
@@ -84,9 +82,9 @@ void main() {
       expect(reloaded, isNotNull);
       expect(reloaded!.progression.legacySystems.musicShuffle, isTrue);
       expect(
-        ProgressionState.fromJson(
-          reloaded.progression.toJson(),
-        ).legacySystems.musicShuffle,
+        ProgressionState.fromJson(reloaded.progression.toJson())
+            .legacySystems
+            .musicShuffle,
         isTrue,
       );
     },
