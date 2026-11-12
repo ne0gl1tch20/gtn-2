@@ -32,6 +32,8 @@ jobs:
       # Keep CI formatting scoped to Dart sources instead of committing tool-generated config.
       - name: Restore analysis configuration
         run: git restore -- analysis_options.yaml
+      - name: Print exact formatted Arcade file
+        run: dart format lib/arcade/arcade_page.dart && cat lib/arcade/arcade_page.dart
       - name: Verify Dart formatting
         run: dart format --output=none --set-exit-if-changed .
 
