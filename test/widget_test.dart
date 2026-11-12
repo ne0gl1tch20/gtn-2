@@ -13,6 +13,7 @@ Widget buildDashboard({
   VoidCallback? onGuess,
   GlobalKey<NavigatorState>? shellNavigatorKey,
   ValueChanged<LegacySystemsView>? onSystemsView,
+  VoidCallback? onPlayerProfile,
 }) {
   final navigatorKey = shellNavigatorKey ?? GlobalKey<NavigatorState>();
   return M3EMaterialApp(
@@ -48,6 +49,7 @@ Widget buildDashboard({
       onPrimarySelected: (_) {},
       onSystemsView: onSystemsView ?? (_) {},
       onLegacySection: (_) {},
+      onPlayerProfile: onPlayerProfile,
     ),
   );
 }
@@ -198,6 +200,7 @@ void main() {
 
     expect(find.text('More Menu'), findsOneWidget);
     for (final label in [
+      'Player profile',
       'Rewards',
       'Journey',
       'Shop',
@@ -217,6 +220,18 @@ void main() {
     ]) {
       expect(find.text(label), findsOneWidget);
     }
+  });
+
+  testWidgets('More opens the Player Profile destination callback', (
+    WidgetTester tester,
+  ) async {
+    var opened = 0;
+    await tester.pumpWidget(buildDashboard(onPlayerProfile: () => opened++));
+    await tester.tap(find.text('More').first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Player profile'));
+    await tester.pumpAndSettle();
+    expect(opened, 1);
   });
 
   testWidgets('Play dashboard sections stay full width on desktop', (
