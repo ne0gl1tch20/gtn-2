@@ -51,7 +51,7 @@ class PlayerProfile {
         bio is! String ||
         bio.length > 120 ||
         avatarId is! String ||
-        !avatarPresets.containsKey(avatarId) && avatarId != 'custom' ||
+        (!avatarPresets.containsKey(avatarId) && avatarId != 'custom') ||
         customAvatarData != null &&
             (customAvatarData is! String ||
                 !customAvatarData.startsWith('data:image/'))) {
@@ -96,7 +96,8 @@ class PlayerProfileStore {
     if (!await file.exists()) return const PlayerProfile();
     try {
       final decoded = jsonDecode(await file.readAsString());
-      if (decoded is! Map<String, dynamic> || decoded['schemaVersion'] != 1) {
+      if (decoded is! Map<String, dynamic> ||
+          decoded['schemaVersion'] != 1) {
         return const PlayerProfile();
       }
       return PlayerProfile.fromJson(decoded);
@@ -239,7 +240,11 @@ class _PlayerProfilePageState extends State<PlayerProfilePage> {
                 radius: 56,
                 backgroundColor: theme.colorScheme.secondaryContainer,
                 child: ClipOval(
-                  child: SizedBox(width: 112, height: 112, child: Center(child: profileImage)),
+                  child: SizedBox(
+                    width: 112,
+                    height: 112,
+                    child: Center(child: profileImage),
+                  ),
                 ),
               ),
             ),
@@ -260,7 +265,10 @@ class _PlayerProfilePageState extends State<PlayerProfilePage> {
               children: [
                 for (final entry in avatarPresets.entries)
                   ChoiceChip(
-                    label: Text(entry.value, style: const TextStyle(fontSize: 22)),
+                    label: Text(
+                      entry.value,
+                      style: const TextStyle(fontSize: 22),
+                    ),
                     selected: _avatarId == entry.key,
                     onSelected: _saving
                         ? null
@@ -296,7 +304,10 @@ class _PlayerProfilePageState extends State<PlayerProfilePage> {
             ),
             if (_error != null) ...[
               const SizedBox(height: 8),
-              Text(_error!, style: TextStyle(color: theme.colorScheme.error)),
+              Text(
+                _error!,
+                style: TextStyle(color: theme.colorScheme.error),
+              ),
             ],
             const SizedBox(height: 12),
             FilledButton(
