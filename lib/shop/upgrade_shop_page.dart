@@ -1,3 +1,4 @@
+
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -50,8 +51,7 @@ class _UpgradeShopPageState extends State<UpgradeShopPage> {
           GtnPageHeader(
             eyebrow: 'Build your run',
             title: 'Upgrades',
-            description:
-                'Make every correct guess count. Upgrade levels are saved automatically.',
+            description: 'Make every correct guess count. Upgrade levels are saved automatically.',
             icon: Icons.upgrade_rounded,
             accent: GtnUiTokens.purple,
             trailing: _BalanceChip(value: _progression.money.toString()),
@@ -107,10 +107,8 @@ class _BalanceChip extends StatelessWidget {
       value,
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
-      style: Theme.of(context).textTheme.labelLarge?.copyWith(
-        color: GtnUiTokens.gold,
-        fontWeight: FontWeight.w900,
-      ),
+      style: Theme.of(context).textTheme.labelLarge
+          ?.copyWith(color: GtnUiTokens.gold, fontWeight: FontWeight.w900),
     ),
   );
 }
@@ -184,3 +182,4 @@ class _UpgradeCard extends StatelessWidget {
     );
   }
 }
+Formatted 1 file (1 changed) in 0.01 seconds.
