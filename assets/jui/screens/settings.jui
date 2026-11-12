@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "screen": "settings",
+  "root": {
+    "type": "column",
+    "children": [
+      {"type": "text", "text": "SETTINGS", "fontSize": 28},
+      {"type": "text", "text": "Audio, appearance, language and gameplay preferences."},
+      {"type": "button", "text": "OPEN AUDIO SETTINGS", "action": {"id": "settings.open_section", "arguments": {"section": "audio"}}},
+      {"type": "button", "text": "OPEN APPEARANCE", "action": {"id": "settings.open_section", "arguments": {"section": "appearance"}}},
+      {"type": "button", "text": "OPEN LANGUAGE", "action": {"id": "settings.open_section", "arguments": {"section": "language"}}},
+      {"type": "button", "text": "BACK", "action": {"id": "navigation.back"}}
+    ]
+  }
+}
