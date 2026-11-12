@@ -165,8 +165,7 @@ class _GameHomePageState extends State<GameHomePage>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _restoreSave();
-    _loadPlayerProfile();
+    unawaited(_restoreSave().then((_) => _loadPlayerProfile()));
   }
 
   @override
@@ -865,10 +864,49 @@ class _GameHomePageState extends State<GameHomePage>
 
   Future<void> _loadPlayerProfile() async {
     try {
-      final profile = await _playerProfileStore.load();
+      var profile = await _playerProfileStore.load();
+      if (profile.username.isEmpty) {
+        final savedGame = await (await _storage).load();
+        if (savedGame != null && savedGame.profileName.isNotEmpty) {
+          profile = PlayerProfile(
+            username: savedGame.profileName,
+            avatarId: switch (savedGame.profileIconId) {
+              'bolt' => 'lightning',
+              'crown' => 'crown',
+              'planet' => 'moon',
+              _ => 'star',
+            },
+          );
+          await _playerProfileStore.save(profile);
+        }
+      }
       if (mounted) setState(() => _playerProfile = profile);
     } on Exception {
       // A missing or unreadable profile never blocks loading the game.
+    }
+  }
+
+  Future<void> _syncPlayerProfileToSave(PlayerProfile profile) async {
+    final legacyIconId = switch (profile.avatarId) {
+      'lightning' => 'bolt',
+      'crown' => 'crown',
+      'moon' => 'planet',
+      'star' => 'star',
+      _ => 'default',
+    };
+    try {
+      final storage = await _storage;
+      await storage.update((existing) {
+        final base = existing ?? _currentSaveData();
+        return base.copyWith(
+          profileName: profile.username,
+          profileIconId: legacyIconId,
+        );
+      });
+    } on Exception {
+      if (mounted) {
+        setState(() => _message = 'Profile saved, but save-slot metadata could not be synchronized.');
+      }
     }
   }
 
@@ -878,7 +916,10 @@ class _GameHomePageState extends State<GameHomePage>
         builder: (_) => PlayerProfilePage(
           initialProfile: _playerProfile,
           store: _playerProfileStore,
-          onSaved: (profile) => setState(() => _playerProfile = profile),
+          onSaved: (profile) {
+            setState(() => _playerProfile = profile);
+            unawaited(_syncPlayerProfileToSave(profile));
+          },
         ),
       ),
     );
