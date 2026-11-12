@@ -42,6 +42,8 @@ void main() {
   testWidgets('guess controls expose GTN1 accessibility labels and submit action', (
     WidgetTester tester,
   ) async {
+    final semantics = tester.ensureSemantics();
+    addTearDown(semantics.dispose);
     var submitted = 0;
     await tester.pumpWidget(buildDashboard(onGuess: () => submitted++));
 
