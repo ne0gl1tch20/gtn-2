@@ -1,3 +1,4 @@
+
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -237,8 +238,9 @@ class GameDashboardPage extends StatelessWidget {
                         builder: (context, constraints) {
                           final wide = constraints.maxWidth >= 640;
                           final fullWidth = constraints.maxWidth;
-                          final columnWidth =
-                              wide ? (fullWidth - 14) / 2 : fullWidth;
+                          final columnWidth = wide
+                              ? (fullWidth - 14) / 2
+                              : fullWidth;
                           return Wrap(
                             spacing: 14,
                             runSpacing: 14,
@@ -257,7 +259,9 @@ class GameDashboardPage extends StatelessWidget {
                                         ),
                                         boxShadow: [
                                           BoxShadow(
-                                            color: _purple.withValues(alpha: .25),
+                                            color: _purple.withValues(
+                                              alpha: .25,
+                                            ),
                                             blurRadius: 18,
                                             offset: const Offset(0, 7),
                                           ),
@@ -276,7 +280,8 @@ class GameDashboardPage extends StatelessWidget {
                                     const SizedBox(width: 11),
                                     Expanded(
                                       child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Text(
                                             'Guess The Number',
@@ -296,10 +301,14 @@ class GameDashboardPage extends StatelessWidget {
                                         vertical: 7,
                                       ),
                                       decoration: BoxDecoration(
-                                        color: foreground.withValues(alpha: .06),
+                                        color: foreground.withValues(
+                                          alpha: .06,
+                                        ),
                                         borderRadius: BorderRadius.circular(99),
                                         border: Border.all(
-                                          color: foreground.withValues(alpha: .08),
+                                          color: foreground.withValues(
+                                            alpha: .08,
+                                          ),
                                         ),
                                       ),
                                       child: Row(
@@ -378,25 +387,38 @@ class GameDashboardPage extends StatelessWidget {
                                         const Positioned(
                                           right: 24,
                                           top: 28,
-                                          child: _HeroSparkle(size: 5, opacity: .8),
+                                          child: _HeroSparkle(
+                                            size: 5,
+                                            opacity: .8,
+                                          ),
                                         ),
                                         const Positioned(
                                           right: 12,
                                           top: 88,
-                                          child: _HeroSparkle(size: 4, opacity: .55),
+                                          child: _HeroSparkle(
+                                            size: 4,
+                                            opacity: .55,
+                                          ),
                                         ),
                                         const Positioned(
                                           right: 78,
                                           bottom: 26,
-                                          child: _HeroSparkle(size: 5, opacity: .7),
+                                          child: _HeroSparkle(
+                                            size: 5,
+                                            opacity: .7,
+                                          ),
                                         ),
                                         const Positioned(
                                           right: 132,
                                           top: 44,
-                                          child: _HeroSparkle(size: 3, opacity: .45),
+                                          child: _HeroSparkle(
+                                            size: 3,
+                                            opacity: .45,
+                                          ),
                                         ),
                                         Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           children: [
                                             const Row(
                                               children: [
@@ -430,7 +452,10 @@ class GameDashboardPage extends StatelessWidget {
                                             ShaderMask(
                                               shaderCallback: (bounds) =>
                                                   const LinearGradient(
-                                                    colors: [Colors.white, _cyan],
+                                                    colors: [
+                                                      Colors.white,
+                                                      _cyan,
+                                                    ],
                                                   ).createShader(bounds),
                                               child: Text(
                                                 '${game.minimum} — ${game.maximum}',
@@ -1495,7 +1520,6 @@ class _GuessInput extends StatelessWidget {
                       Icon(Icons.arrow_forward_rounded, size: 18),
                     ],
                   ),
-
                 ),
               ),
             ),
@@ -1673,3 +1697,4 @@ class _Action extends StatelessWidget {
     ),
   );
 }
+Formatted 1 file (1 changed) in 0.09 seconds.
