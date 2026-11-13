@@ -8,8 +8,9 @@ import '../design/expressive_widgets.dart';
 import 'upgrade_catalog.dart';
 
 typedef UpgradePurchase = Future<ProgressionState> Function(
-  UpgradeDefinition definition,
-);
+  UpgradeDefinition definition, {
+  int levels,
+});
 
 class UpgradeShopPage extends StatefulWidget {
   const UpgradeShopPage({
@@ -28,12 +29,41 @@ class UpgradeShopPage extends StatefulWidget {
 class _UpgradeShopPageState extends State<UpgradeShopPage> {
   late ProgressionState _progression = widget.progression;
   String? _buyingId;
+  String _buyMultiplier = '1';
 
-  Future<void> _buy(GameUpgrade upgrade) async {
+  int _levelsToBuy(GameUpgrade upgrade) {
+    final current = _progression.upgrades[upgrade.definition.id] ?? 0;
+    final maxLevel = upgrade.definition.maxLevel ?? 999999;
+    final remaining = maxLevel - current;
+    if (remaining <= 0) return 0;
+    if (_buyMultiplier == 'MAX') {
+      var levels = 0;
+      var total = BigNumber.fromInt(0);
+      while (levels < remaining) {
+        final nextCost = upgrade.definition.costAtLevel(current + levels);
+        if (_progression.money.compareTo(total + nextCost) < 0) break;
+        total += nextCost;
+        levels++;
+      }
+      return levels;
+    }
+    return int.parse(_buyMultiplier).clamp(1, remaining);
+  }
+
+  BigNumber _costForLevels(GameUpgrade upgrade, int levels) {
+    final current = _progression.upgrades[upgrade.definition.id] ?? 0;
+    var total = BigNumber.fromInt(0);
+    for (var i = 0; i < levels; i++) {
+      total += upgrade.definition.costAtLevel(current + i);
+    }
+    return total;
+  }
+
+  Future<void> _buy(GameUpgrade upgrade, int levels) async {
     if (_buyingId != null) return;
     setState(() => _buyingId = upgrade.definition.id);
     try {
-      final updated = await widget.onPurchase(upgrade.definition);
+      final updated = await widget.onPurchase(upgrade.definition, levels: levels);
       if (mounted) setState(() => _progression = updated);
     } finally {
       if (mounted) setState(() => _buyingId = null);
@@ -56,6 +86,26 @@ class _UpgradeShopPageState extends State<UpgradeShopPage> {
             trailing: _BalanceChip(value: _progression.money.toString()),
           ),
           const SizedBox(height: 16),
+          Row(
+            children: [
+              Text('Buy multiplier', style: Theme.of(context).textTheme.titleSmall),
+              const Spacer(),
+              SegmentedButton<String>(
+                segments: const [
+                  ButtonSegment(value: '1', label: Text('1×')),
+                  ButtonSegment(value: '10', label: Text('10×')),
+                  ButtonSegment(value: '100', label: Text('100×')),
+                  ButtonSegment(value: 'MAX', label: Text('MAX')),
+                ],
+                selected: {_buyMultiplier},
+                onSelectionChanged: _buyingId == null
+                    ? (selection) => setState(() => _buyMultiplier = selection.first)
+                    : null,
+                showSelectedIcon: false,
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
           LayoutBuilder(
             builder: (context, constraints) {
               final columns = constraints.maxWidth >= 640 ? 2 : 1;
@@ -75,7 +125,13 @@ class _UpgradeShopPageState extends State<UpgradeShopPage> {
                             _progression.upgrades[upgrade.definition.id] ?? 0,
                         money: _progression.money,
                         busy: _buyingId != null,
-                        onBuy: () => _buy(upgrade),
+                        levelsToBuy: _levelsToBuy(upgrade),
+                        totalCost: _costForLevels(
+                          upgrade,
+                          _levelsToBuy(upgrade),
+                        ),
+                        multiplier: _buyMultiplier,
+                        onBuy: (levels) => _buy(upgrade, levels),
                       ),
                     ),
                 ],
@@ -118,6 +174,9 @@ class _UpgradeCard extends StatelessWidget {
     required this.level,
     required this.money,
     required this.busy,
+    required this.levelsToBuy,
+    required this.totalCost,
+    required this.multiplier,
     required this.onBuy,
   });
 
@@ -125,14 +184,17 @@ class _UpgradeCard extends StatelessWidget {
   final int level;
   final BigNumber money;
   final bool busy;
-  final VoidCallback onBuy;
+  final int levelsToBuy;
+  final BigNumber totalCost;
+  final String multiplier;
+  final ValueChanged<int> onBuy;
 
   @override
   Widget build(BuildContext context) {
     final maxLevel = upgrade.definition.maxLevel;
     final isMaxed = maxLevel != null && level >= maxLevel;
-    final cost = upgrade.definition.costAtLevel(level);
-    final canAfford = money.compareTo(cost) >= 0;
+    final cost = totalCost;
+    final canAfford = levelsToBuy > 0 && money.compareTo(cost) >= 0;
     final theme = Theme.of(context);
 
     return GtnExpressiveCard(
@@ -164,12 +226,16 @@ class _UpgradeCard extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             M3EButton.filled(
-              onPressed: busy || isMaxed || !canAfford ? null : onBuy,
+              onPressed: busy || isMaxed || !canAfford
+                  ? null
+                  : () => onBuy(levelsToBuy),
               child: Text(
-                isMaxed ? 'Max level reached' : 'Upgrade · $cost Money',
+                isMaxed
+                    ? 'Max level reached'
+                    : 'Upgrade · $cost Money${levelsToBuy > 1 ? ' ($levelsToBuy levels)' : ''}',
               ),
             ),
-            if (!isMaxed && !canAfford)
+            if (!isMaxed && multiplier != 'MAX' && !canAfford)
               Text(
                 'Need ${cost - money} more Money',
                 textAlign: TextAlign.center,
