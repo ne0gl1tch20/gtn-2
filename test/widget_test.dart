@@ -225,8 +225,12 @@ void main() {
     WidgetTester tester,
   ) async {
     var selectedIndex = 2;
+    final shellKey = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
-      buildDashboard(onPrimarySelected: (index) => selectedIndex = index),
+      buildDashboard(
+        shellNavigatorKey: shellKey,
+        onPrimarySelected: (index) => selectedIndex = index,
+      ),
     );
 
     await tester.tap(find.text('More').first);
@@ -234,7 +238,7 @@ void main() {
     expect(selectedIndex, 4);
     expect(find.text('More Menu'), findsOneWidget);
 
-    await tester.pageBack();
+    shellKey.currentState!.pop();
     await tester.pumpAndSettle();
     expect(selectedIndex, 2);
     expect(find.text('More Menu'), findsNothing);
