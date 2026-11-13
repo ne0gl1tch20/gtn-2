@@ -1,7 +1,7 @@
 # GTN1 → GTN2 Kotlin source map
 
 **Authority:** GTN1 commit `fe9cf567169e19059e0330d08769fe454336ef94`  
-**Target snapshot:** GTN2 `main` at `a0bc370961bcb7bf7b3a3c94b98a09c0f3a89c42`  
+**Target snapshot:** GTN2 `main` at `b101947617d391b8bf681adfe94317580f56126f`  
 **Inventory:** `docs/GTN1_SOURCE_INVENTORY.json` (107 production Kotlin files)
 
 This is a file-level migration map, not a parity-completion claim. A mapped row only identifies the current Dart replacement and relevant regression-test surface. Behavioral equivalence remains governed by `docs/FINITE_PARITY_PLAN.md` and `docs/GTN1_TO_GTN2_MIGRATION_CHECKLIST.md`.

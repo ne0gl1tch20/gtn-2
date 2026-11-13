@@ -419,7 +419,7 @@ void main() {
           {'id': 'rules', 'type': 'JSON', 'entrypoint': 'rules.json'},
         ],
         files: {
-          'rules.json': ' ' * (TraitExtensionRuntime.maxSourceCharacters + 1),
+          'rules.json': List<String>.filled(TraitExtensionRuntime.maxSourceCharacters + 1, ' ').join(),
         },
       ),
       throwsA(isA<FormatException>()),
