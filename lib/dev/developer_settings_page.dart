@@ -106,7 +106,7 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
     });
     try {
       final source = await rootBundle.loadString(
-        'assets/scripts/' + script.file,
+        'assets/scripts/\${script.file}',
       );
       final progression = widget.save.progression;
       final profile = progression.legacySystems.adaptiveTraitProfile;
@@ -153,7 +153,7 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
       });
     } on Object catch (error) {
       if (!mounted) return;
-      setState(() => _luaOutput = 'Lua execution failed: ' + error.toString());
+      setState(() => _luaOutput = 'Lua execution failed: \${error}');
     } finally {
       if (mounted) setState(() => _luaBusy = false);
     }
@@ -232,7 +232,7 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
               }
               if (snapshot.hasError) {
                 return Text(
-                  'Could not load Lua manifest: ' + snapshot.error.toString(),
+                  'Could not load Lua manifest: \${snapshot.error}',
                 );
               }
               final scripts = snapshot.data ?? const <_RegisteredLuaScript>[];
@@ -253,7 +253,7 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       DropdownButtonFormField<String>(
-                        value: selectedId,
+                        initialValue: selectedId,
                         decoration: const InputDecoration(
                           labelText: 'Registered script',
                           border: OutlineInputBorder(),
