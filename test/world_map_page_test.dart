@@ -96,9 +96,7 @@ void main() {
       },
     );
 
-    final lockedNode = find.byKey(
-      const ValueKey('world-node-crystal_caverns'),
-    );
+    final lockedNode = find.byKey(const ValueKey('world-node-crystal_caverns'));
     await tester.ensureVisible(lockedNode);
     await tester.tap(lockedNode);
     await tester.pump(const Duration(milliseconds: 400));
@@ -135,9 +133,7 @@ void main() {
     );
 
     final activeNode = find.byKey(const ValueKey('world-node-verdant_grove'));
-    final otherNode = find.byKey(
-      const ValueKey('world-node-crystal_caverns'),
-    );
+    final otherNode = find.byKey(const ValueKey('world-node-crystal_caverns'));
     await tester.ensureVisible(otherNode);
     await tester.tap(otherNode);
     await tester.pump(const Duration(milliseconds: 400));
