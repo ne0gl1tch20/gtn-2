@@ -1952,6 +1952,24 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
             title: const Text('Source repository'),
             onTap: () => _openGithubUrl('https://github.com/ne0gl1tch20/gtn-2'),
           ),
+          const ListTile(
+            leading: Icon(Icons.public_rounded),
+            title: Text('Find us online'),
+            subtitle: Text('These links open in your browser.'),
+          ),
+          for (final link in const [
+            ('YouTube · @theg0ldne0_01', 'https://www.youtube.com/@theg0ldne0_01'),
+            ('Instagram · theg0ldne0_01', 'https://www.instagram.com/theg0ldne0_01/'),
+            ('NameMC · PearlSteve15', 'https://namemc.com/profile/PearlSteve15'),
+            ('GitHub · ne0gl1tch20', 'https://github.com/ne0gl1tch20'),
+            ('Website', 'https://ne0gl1tch20.github.io/GuessTheNumber'),
+          ])
+            ListTile(
+              dense: true,
+              leading: const Icon(Icons.open_in_new_rounded),
+              title: Text(link.$1),
+              onTap: () => _openExternalUrl(link.$2),
+            ),
           const Padding(
             padding: EdgeInsets.fromLTRB(16, 0, 16, 16),
             child: Text(
@@ -2078,6 +2096,12 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
   Future<void> _openGithubUrl(String value) async {
     final uri = Uri.tryParse(value);
     if (uri == null || !_isGithubUrl(value)) return;
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
+  }
+
+  Future<void> _openExternalUrl(String value) async {
+    final uri = Uri.tryParse(value);
+    if (uri == null || uri.scheme != 'https' || uri.host.isEmpty) return;
     await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 
