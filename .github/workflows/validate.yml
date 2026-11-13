@@ -42,6 +42,8 @@ jobs:
         run: flutter pub get
       - name: Restore analysis configuration
         run: git restore -- analysis_options.yaml
+      - name: Show exact formatter output for dashboard localization
+        run: dart format --output=show lib/home/game_dashboard_page.dart
       - name: Verify Dart formatting
         run: dart format --output=none --set-exit-if-changed .
       - name: Analyze
