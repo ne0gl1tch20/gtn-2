@@ -158,6 +158,43 @@ void main() {
     expect(bought.nebulaItems['arcade_boost'], 1);
     expect(bought.money.toString(), '0');
   });
+  test('Nebula cosmetics can be purchased once and equipped only when owned', () {
+    final rich = ProgressionState.initial.copyWith(
+      nebula: BigNumber.fromInt(500),
+    );
+    final bought = engine.purchaseNebulaItem(
+      rich,
+      itemId: 'cosmetic_nebula_ring',
+      price: BigNumber.fromInt(75),
+    );
+    expect(bought.nebula.toString(), '425');
+    expect(bought.nebulaItems['cosmetic_nebula_ring'], 1);
+    expect(
+      engine.purchaseNebulaItem(
+        bought,
+        itemId: 'cosmetic_nebula_ring',
+        price: BigNumber.fromInt(75),
+      ),
+      same(bought),
+    );
+    expect(
+      engine.equipNebulaCosmetic(
+        ProgressionState.initial,
+        'cosmetic_nebula_ring',
+      ),
+      same(ProgressionState.initial),
+    );
+    final equipped = engine.equipNebulaCosmetic(
+      bought,
+      'cosmetic_nebula_ring',
+    );
+    expect(equipped.equippedCosmeticId, 'cosmetic_nebula_ring');
+    expect(
+      engine.equipNebulaCosmetic(equipped, 'cosmetic_starfield'),
+      same(equipped),
+    );
+  });
+
   test('Prestige gain and starting capital upgrades match GTN1', () {
     final state = ProgressionState.initial.copyWith(
       money: BigNumber.fromInt(50000000),
