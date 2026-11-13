@@ -72,8 +72,7 @@ class AdaptiveTargetGenerator {
 
     if (width > BigInt.from(4)) {
       final quarter = width ~/ BigInt.from(4);
-      final pressureBand =
-          (BigInt.from(pressure) * width) ~/ BigInt.from(128);
+      final pressureBand = (BigInt.from(pressure) * width) ~/ BigInt.from(128);
       final edgeBand = quarter < pressureBand ? quarter : pressureBand;
       if (edgeBand > BigInt.zero && sample.isOdd) {
         final maxOffset = width - BigInt.one;
