@@ -13,6 +13,7 @@ import 'package:material_ui/material_ui.dart';
 
 Widget buildDashboard({
   GameSettings? settings,
+  bool loading = false,
   VoidCallback? onGuess,
   String? randomEventMessage,
   BigNumber? incomePerSecond,
@@ -33,7 +34,7 @@ Widget buildDashboard({
       progression: ProgressionState.initial,
       settings: settings ?? GameSettings.initial,
       activeSlot: 1,
-      loading: false,
+      loading: loading,
       message: 'Make your move.',
       randomEventMessage: randomEventMessage,
       incomePerSecond: incomePerSecond,
@@ -64,6 +65,20 @@ Widget buildDashboard({
 }
 
 void main() {
+  testWidgets('save restoration shows a blocking loading state', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(buildDashboard(loading: true));
+
+    expect(find.text('Loading your game'), findsOneWidget);
+    expect(
+      find.text('Restoring save slot 1 and preparing your next round.'),
+      findsOneWidget,
+    );
+    expect(find.byType(ModalBarrier), findsOneWidget);
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+  });
+
   testWidgets('Money displays the live income-per-second rate', (
     WidgetTester tester,
   ) async {
