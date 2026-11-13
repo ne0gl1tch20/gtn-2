@@ -168,7 +168,7 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
                           await Clipboard.setData(
                             ClipboardData(text: _json.text),
                           );
-                          if (!mounted) return;
+                          if (!context.mounted) return;
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(content: Text('Save JSON copied.')),
                           );
