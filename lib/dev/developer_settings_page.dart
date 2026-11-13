@@ -36,8 +36,7 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
   final List<String> _logs = [];
   bool _busy = false;
   final LuaSandbox _luaSandbox = const LuaSandbox();
-  late final Future<List<_RegisteredLuaScript>> _luaScripts =
-      _loadLuaScripts();
+  late final Future<List<_RegisteredLuaScript>> _luaScripts = _loadLuaScripts();
   String? _selectedLuaScriptId;
   bool _luaBusy = false;
   String? _luaOutput;
@@ -63,14 +62,17 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
         throw const FormatException('Invalid registered Lua script entry.');
       }
       final id = entry['id'] as String;
-      final validId = id.isNotEmpty &&
+      final validId =
+          id.isNotEmpty &&
           id.length <= 64 &&
           id.codeUnits.first >= 97 &&
           id.codeUnits.first <= 122 &&
-          id.codeUnits.every((unit) =>
-              (unit >= 97 && unit <= 122) ||
-              (unit >= 48 && unit <= 57) ||
-              unit == 95);
+          id.codeUnits.every(
+            (unit) =>
+                (unit >= 97 && unit <= 122) ||
+                (unit >= 48 && unit <= 57) ||
+                unit == 95,
+          );
       if (!validId) {
         throw const FormatException('Invalid registered Lua script ID.');
       }
@@ -95,9 +97,7 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
     return List.unmodifiable(scripts);
   }
 
-  Future<void> _runRegisteredLuaScript(
-    _RegisteredLuaScript script,
-  ) async {
+  Future<void> _runRegisteredLuaScript(_RegisteredLuaScript script) async {
     if (_luaBusy) return;
     setState(() {
       _luaBusy = true;
@@ -120,9 +120,9 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
           'nebula': progression.nebula.toString(),
           'total_guesses': progression.totalGuesses.toString(),
           'correct_guesses': progression.correctGuesses.toString(),
-          'failed_guesses': (progression.totalGuesses -
-                  progression.correctGuesses)
-              .toString(),
+          'failed_guesses':
+              (progression.totalGuesses - progression.correctGuesses)
+                  .toString(),
           'current_streak': progression.currentStreak.toString(),
           'best_streak': progression.bestStreak.toString(),
           'long_streaks_observed': profile.longStreaksObserved.toString(),
@@ -131,14 +131,13 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
           'ultra_count': progression.ultraResets.toString(),
           'first_prestige_awarded':
               profile.awardedBonuses.contains('first_prestige_bonus')
-                  ? '1'
-                  : '0',
+              ? '1'
+              : '0',
           'first_ultra_awarded':
-              profile.awardedBonuses.contains('first_ultra_bonus')
-                  ? '1'
-                  : '0',
-          'veteran_awarded':
-              profile.awardedBonuses.contains('veteran_bonus') ? '1' : '0',
+              profile.awardedBonuses.contains('first_ultra_bonus') ? '1' : '0',
+          'veteran_awarded': profile.awardedBonuses.contains('veteran_bonus')
+              ? '1'
+              : '0',
           'playtime_seconds': progression.playtimeSeconds.toString(),
           'attempts': widget.save.attempts.toString(),
           'range_min': widget.save.minimum.toString(),
@@ -219,10 +218,7 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Text(
-            'Lua Console',
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
+          Text('Lua Console', style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 8),
           const Text(
             'Run registered Lua scripts against a read-only snapshot of this save. Scripts cannot write saves, change settings or grant rewards.',
@@ -243,9 +239,8 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
               if (scripts.isEmpty) {
                 return const Text('No registered Lua scripts are available.');
               }
-              final selectedId = scripts.any(
-                (script) => script.id == _selectedLuaScriptId,
-              )
+              final selectedId =
+                  scripts.any((script) => script.id == _selectedLuaScriptId)
                   ? _selectedLuaScriptId!
                   : scripts.first.id;
               final selected = scripts.firstWhere(
@@ -408,7 +403,6 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
     );
   }
 }
-
 
 class _RegisteredLuaScript {
   const _RegisteredLuaScript({
