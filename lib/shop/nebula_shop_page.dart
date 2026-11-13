@@ -228,10 +228,11 @@ class _NebulaShopPageState extends State<NebulaShopPage> {
             ),
           ],
           const SizedBox(height: 16),
-          if ((_selectedCategory == 'all' || _selectedCategory == 'automation') &&
+          if ((_selectedCategory == 'all' ||
+                  _selectedCategory == 'automation') &&
               NebulaShopCatalog.botIds.any(
-            (id) => (_state.nebulaItems[id] ?? 0) > 0,
-          ))
+                (id) => (_state.nebulaItems[id] ?? 0) > 0,
+              ))
             GtnExpressiveSwitchTile(
               contentPadding: EdgeInsets.zero,
               title: const Text('Auto Clicker'),
