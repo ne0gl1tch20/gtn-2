@@ -27,7 +27,7 @@
 - [x] Record the exact GTN1 source commit used by the port (`fe9cf567169e19059e0330d08769fe454336ef94`; verified against `scripts/sync_gtn1_assets.sh`, `docs/GTN1_SOURCE_INVENTORY.json`, and both CI workflows).
 - [x] Verify the complete pinned repository inventory: 214 production Kotlin files and 111 Kotlin tests across app, shared KMP, desktopApp and buildSrc.
 - [~] Map the Android app module's 107/107 production Kotlin files. `docs/GTN1_TO_GTN2_SOURCE_MAP.md` records 66 mapped/partial, five N/A and 36 gaps; this is app-only coverage, not full-repository parity.
-- [ ] Map the 50 shared KMP production files and 30 shared tests to their Dart replacements and regression tests.
+- [x] Map the 50 shared KMP production files and 30 shared tests to Dart destinations/regression surfaces. `docs/GTN1_SHARED_KMP_TO_GTN2_SOURCE_MAP.md` maps every source/test and explicitly records partial ports and gaps; mapping completion does not close behavioral parity items.
 - [ ] Map the 55 Windows desktop production files and 29 desktop tests to the Flutter Windows implementation; explicitly account for desktop-only behaviors.
 - [ ] Review the two buildSrc Kotlin files and record build-only applicability or required CI parity.
 - [ ] Map the single Web Play HTML shell, its actual route/screen renderers and the five JavaScript modules to native Flutter destinations and behaviors.
