@@ -18,18 +18,6 @@ class UpgradeDefinition {
     if (currentLevel < 0) throw ArgumentError.value(currentLevel);
     return baseCost * growthRate.powInt(currentLevel);
   }
-
-  ProgressionState equipNebulaCosmetic(
-    ProgressionState state,
-    String cosmeticId,
-  ) {
-    if (!nebulaCosmeticIds.contains(cosmeticId) ||
-        (state.nebulaItems[cosmeticId] ?? 0) < 1) {
-      return state;
-    }
-    if (state.equippedCosmeticId == cosmeticId) return state;
-    return state.copyWith(equippedCosmeticId: cosmeticId);
-  }
 }
 
 class GuessRewardModifiers {
@@ -332,4 +320,16 @@ class ProgressionEngine {
       nebulaItems: Map.unmodifiable(inventory),
     );
   }
+  ProgressionState equipNebulaCosmetic(
+    ProgressionState state,
+    String cosmeticId,
+  ) {
+    if (!nebulaCosmeticIds.contains(cosmeticId) ||
+        (state.nebulaItems[cosmeticId] ?? 0) < 1) {
+      return state;
+    }
+    if (state.equippedCosmeticId == cosmeticId) return state;
+    return state.copyWith(equippedCosmeticId: cosmeticId);
+  }
+
 }
