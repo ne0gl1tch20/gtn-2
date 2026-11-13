@@ -85,6 +85,7 @@ class GtnApp extends StatelessWidget {
                 autoTheming: false,
                 dynamicColoring: false,
                 initialTheme: brightness,
+                themeAnimationDuration: Duration.zero,
                 debugShowCheckedModeBanner: false,
                 appBuilder: (context, child) => MediaQuery(
                   data: MediaQuery.of(context)
