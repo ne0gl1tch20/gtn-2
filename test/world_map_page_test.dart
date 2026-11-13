@@ -1,3 +1,4 @@
+import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gtn_2/core/legacy/legacy_systems_state.dart';
 import 'package:gtn_2/core/numbers/big_number.dart';
@@ -11,11 +12,19 @@ void main() {
   ProgressionState stateWith({
     Set<String> unlocked = const {'verdant_grove'},
     int correctGuesses = 0,
+    String activeWorldId = 'verdant_grove',
+    bool endlessRiftActive = false,
+    String? activeBossBattleWorldId,
+    Set<String> discoveredSecrets = const {},
   }) => ProgressionState(
     correctGuesses: correctGuesses,
     legacySystems: LegacySystemsState.initial.copyWith(
       unlockedWorldIds: unlocked,
       worldUnlockMigrationPending: false,
+      activeWorldId: activeWorldId,
+      endlessRiftActive: endlessRiftActive,
+      activeBossBattleWorldId: activeBossBattleWorldId,
+      discoveredSecrets: discoveredSecrets,
     ),
   );
 
@@ -68,6 +77,91 @@ void main() {
       expect(find.byKey(ValueKey('world-node-${world.id}')), findsOneWidget);
     }
     expect(find.text('Verdant Grove'), findsWidgets);
+  });
+
+  testWidgets('locked worlds remain inspectable without selecting them', (
+    tester,
+  ) async {
+    final state = stateWith();
+    final calls = <(String, String)>[];
+    final semantics = tester.ensureSemantics();
+    addTearDown(semantics.dispose);
+
+    await pumpMap(
+      tester,
+      state: state,
+      onAction: (id, action) async {
+        calls.add((id, action));
+        return state;
+      },
+    );
+
+    final lockedNode = find.byKey(
+      const ValueKey('world-node-crystal_caverns'),
+    );
+    await tester.ensureVisible(lockedNode);
+    await tester.tap(lockedNode);
+    await tester.pump(const Duration(milliseconds: 400));
+
+    expect(calls, isEmpty);
+    expect(
+      tester.getSemantics(lockedNode).hasFlag(SemanticsFlag.isSelected),
+      isTrue,
+    );
+    expect(find.text('Crystal Caverns'), findsWidgets);
+    expect(find.text('Unlock world'), findsWidgets);
+  });
+
+  testWidgets('Endless Rift keeps world selection on its active realm', (
+    tester,
+  ) async {
+    final unlocked = WorldBossCatalog.worlds.map((world) => world.id).toSet();
+    final state = stateWith(
+      unlocked: unlocked,
+      activeWorldId: 'verdant_grove',
+      endlessRiftActive: true,
+    );
+    final calls = <(String, String)>[];
+    final semantics = tester.ensureSemantics();
+    addTearDown(semantics.dispose);
+
+    await pumpMap(
+      tester,
+      state: state,
+      onAction: (id, action) async {
+        calls.add((id, action));
+        return state;
+      },
+    );
+
+    final activeNode = find.byKey(const ValueKey('world-node-verdant_grove'));
+    final otherNode = find.byKey(
+      const ValueKey('world-node-crystal_caverns'),
+    );
+    await tester.ensureVisible(otherNode);
+    await tester.tap(otherNode);
+    await tester.pump(const Duration(milliseconds: 400));
+
+    expect(calls, isEmpty);
+    expect(
+      tester.getSemantics(activeNode).hasFlag(SemanticsFlag.isSelected),
+      isTrue,
+    );
+    expect(
+      tester.getSemantics(otherNode).hasFlag(SemanticsFlag.isSelected),
+      isFalse,
+    );
+  });
+
+  testWidgets('active boss battle state is visible on its world node', (
+    tester,
+  ) async {
+    final state = stateWith(activeBossBattleWorldId: 'verdant_grove');
+    await pumpMap(tester, state: state, onAction: (_, __) async => state);
+
+    expect(find.text('BATTLE LIVE'), findsOneWidget);
+    expect(find.text('Battle active'), findsWidgets);
+    expect(find.text('Leave boss battle'), findsOneWidget);
   });
 
   testWidgets('map fit, reset and zoom controls update the real viewport', (
