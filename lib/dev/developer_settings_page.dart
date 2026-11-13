@@ -170,9 +170,7 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
                           );
                           if (!mounted) return;
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Save JSON copied.'),
-                            ),
+                            const SnackBar(content: Text('Save JSON copied.')),
                           );
                         },
                   child: const Text('Copy JSON'),
