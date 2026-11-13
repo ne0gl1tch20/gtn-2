@@ -88,13 +88,51 @@ void main() {
       );
     });
 
-    test('does not count invalid guesses or guesses after winning', () {
+    test('clamps guesses below and above the active range like GTN1', () {
       final engine = GameEngine(random: FixedRandom(41));
       final initial = engine.newGame();
-      final invalid = engine.guess(initial, 101);
-      expect(invalid.lastResult, GuessResult.outOfRange);
-      expect(invalid.attempts, 0);
+
+      final below = engine.guess(initial, -10);
+      expect(below.lastResult, GuessResult.tooLow);
+      expect(below.attempts, 1);
+
+      final above = engine.guess(below, 150);
+      expect(above.lastResult, GuessResult.tooHigh);
+      expect(above.attempts, 2);
+    });
+
+    test('clamped edge guesses can match a target at the range boundary', () {
+      final engine = GameEngine();
+      final minimumTarget = engine.restore(
+        secret: 1,
+        attempts: 0,
+        isComplete: false,
+      );
+      final maximumTarget = engine.restore(
+        secret: 100,
+        attempts: 0,
+        isComplete: false,
+      );
+
+      expect(engine.guess(minimumTarget, -10).lastResult, GuessResult.correct);
+      expect(engine.guess(maximumTarget, 150).lastResult, GuessResult.correct);
+    });
+
+    test('allows a single-value range as a valid GTN1 range', () {
+      final engine = GameEngine(minimum: 7, maximum: 7);
+      final game = engine.newGame();
+
+      expect(game.secret, 7);
+      expect(game.minimum, 7);
+      expect(game.maximum, 7);
+      expect(engine.guess(game, 7).lastResult, GuessResult.correct);
+    });
+
+    test('does not accept another guess after a completed round', () {
+      final engine = GameEngine(random: FixedRandom(41));
+      final initial = engine.newGame();
       final won = engine.guess(initial, 42);
+
       expect(engine.guess(won, 20), same(won));
     });
 
