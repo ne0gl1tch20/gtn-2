@@ -231,9 +231,7 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
                 return const LinearProgressIndicator();
               }
               if (snapshot.hasError) {
-                return Text(
-                  'Could not load Lua manifest: \${snapshot.error}',
-                );
+                return Text('Could not load Lua manifest: \${snapshot.error}');
               }
               final scripts = snapshot.data ?? const <_RegisteredLuaScript>[];
               if (scripts.isEmpty) {
