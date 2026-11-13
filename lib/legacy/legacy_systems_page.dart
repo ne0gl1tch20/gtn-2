@@ -1855,11 +1855,16 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
         children: [
           ListTile(
             title: const Text('Guess The Number 2'),
-            subtitle: Text(
-              'Update channel: ${Platform.isWindows ? 'Windows Debug' : Platform.isAndroid ? 'Android Debug' : 'Unsupported platform'}',
-            ),
-            subtitle: Text(
-              'Flutter continuation of the original Kotlin game. Offline-first local saves.',
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Update channel: ${Platform.isWindows ? 'Windows Debug' : Platform.isAndroid ? 'Android Debug' : 'Unsupported platform'}',
+                ),
+                const Text(
+                  'Flutter continuation of the original Kotlin game. Offline-first local saves.',
+                ),
+              ],
             ),
           ),
           ListTile(
