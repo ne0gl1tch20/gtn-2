@@ -7,7 +7,7 @@ import 'package:gtn_2/core/scripting/lua_sandbox.dart';
 const _runtime = TraitExtensionRuntime();
 
 void main() {
-  test('Lua reads only the declared snapshot and returns a typed decision', () async {
+  test('Lua reads declared snapshot and returns a decision', () async {
     final extension = await _validate(
       traitId: 'remote_streak',
       modules: [
@@ -49,7 +49,7 @@ void main() {
     expect(yes.requestedEffects, {TraitEffect.cosmeticBadge});
   });
 
-  test('Lua decisions reject non-boolean eligibility and non-table results', () async {
+  test('Lua rejects invalid decision shapes', () async {
     final stringDecision = await _validate(
       traitId: 'remote_streak',
       modules: [
@@ -87,7 +87,7 @@ void main() {
     );
   });
 
-  test('Lua logging and snapshot reads require declared capabilities', () async {
+  test('Lua capabilities gate logging and snapshot reads', () async {
     final noLogging = await _validate(
       traitId: 'remote_streak',
       modules: [
@@ -118,7 +118,7 @@ void main() {
     );
   });
 
-  test('Lua cannot request undeclared effects or exceed the effect limit', () async {
+  test('Lua rejects undeclared or excessive effects', () async {
     final extension = await _validate(
       traitId: 'remote_streak',
       modules: [
@@ -195,7 +195,7 @@ void main() {
     );
   });
 
-  test('JavaScript is returned as presentation data and must expose its UI contract', () async {
+  test('JavaScript presentation rejects host APIs', () async {
     const goodSource =
         "function renderTrait(api) { api.setText('status', 'Ready'); }";
     final extension = await _validate(
@@ -247,7 +247,7 @@ void main() {
     }
   });
 
-  test('rejects traversal, missing files, invalid capabilities and module types', () async {
+  test('Rejects traversal and invalid module data', () async {
     await expectLater(
       _runtime.validate(
         manifestText: _manifest(
@@ -346,7 +346,7 @@ void main() {
     }
   });
 
-  test('rejects wrong trait identity, unknown schema and unknown fields', () async {
+  test('Rejects wrong identity, schema, and unknown fields', () async {
     await expectLater(
       _runtime.validate(
         manifestText: _manifest(
@@ -419,7 +419,10 @@ void main() {
           {'id': 'rules', 'type': 'JSON', 'entrypoint': 'rules.json'},
         ],
         files: {
-          'rules.json': List<String>.filled(TraitExtensionRuntime.maxSourceCharacters + 1, ' ').join(),
+          'rules.json': List<String>.filled(
+            TraitExtensionRuntime.maxSourceCharacters + 1,
+            ' ',
+          ).join(),
         },
       ),
       throwsA(isA<FormatException>()),

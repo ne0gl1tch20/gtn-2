@@ -26,7 +26,7 @@
 
 - [x] Record the exact GTN1 source commit used by the port (`fe9cf567169e19059e0330d08769fe454336ef94`; verified against `scripts/sync_gtn1_assets.sh`, `docs/GTN1_SOURCE_INVENTORY.json`, and both CI workflows).
 - [x] Confirm the finite inventory counts above against that commit (see `docs/GTN1_SOURCE_INVENTORY.md`).
-- [~] Map every Kotlin source file to a GTN2 implementation, a grouped replacement, or a documented not-applicable item. See `docs/GTN1_TO_GTN2_SOURCE_MAP.md`: 107/107 source files inspected: 66 mapped or partially mapped, five documented N/A decisions, and 36 unresolved gaps..
+- [~] Map every Kotlin source file to a GTN2 implementation, a grouped replacement, or a documented not-applicable item. See `docs/GTN1_TO_GTN2_SOURCE_MAP.md`: 107/107 source files inspected: 66 mapped or partially mapped, five documented N/A decisions, and 36 unresolved gaps.
 - [ ] Map the single Web Play HTML shell, its actual route/screen renderers and the five JavaScript modules to native Flutter destinations and behaviors.
 - [ ] Map the 24 SDK files to the Flutter components/events that are actually used by those screens.
 - [ ] Map all 17 catalogs, 320 trait IDs, four Lua scripts and 23 locales from the source manifest to their GTN2 runtime destinations.
