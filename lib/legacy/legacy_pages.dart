@@ -549,8 +549,8 @@ class LegacyDetailPage extends StatelessWidget {
     final playtime = hours > 0
         ? '${hours}h ${minutes}m ${seconds}s'
         : minutes > 0
-        ? '${minutes}m ${seconds}s'
-        : '${seconds}s';
+            ? '${minutes}m ${seconds}s'
+            : '${seconds}s';
     final totalUpgradeLevels = progression.upgrades.values.fold<int>(
       0,
       (sum, level) => sum + level,
