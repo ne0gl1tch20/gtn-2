@@ -68,7 +68,7 @@ void main() {
     });
 
     test('uses an independent timestamp per limiter', () {
-      var now = 100000;
+      final now = 100000;
       final first = GuessRateLimiter(nowMicroseconds: () => now);
       final second = GuessRateLimiter(nowMicroseconds: () => now);
 
