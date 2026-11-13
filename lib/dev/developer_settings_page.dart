@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:flutter/services.dart';
+
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -156,9 +158,34 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
             ),
           ),
           const SizedBox(height: 8),
-          M3EButton.filled(
-            onPressed: _busy ? null : _applyJson,
-            child: const Text('Apply JSON to current slot'),
+          Row(
+            children: [
+              Expanded(
+                child: M3EButton.text(
+                  onPressed: _busy
+                      ? null
+                      : () async {
+                          await Clipboard.setData(
+                            ClipboardData(text: _json.text),
+                          );
+                          if (!mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Save JSON copied.'),
+                            ),
+                          );
+                        },
+                  child: const Text('Copy JSON'),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: M3EButton.filled(
+                  onPressed: _busy ? null : _applyJson,
+                  child: const Text('Apply JSON to current slot'),
+                ),
+              ),
+            ],
           ),
         ],
       ),
