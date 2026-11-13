@@ -150,6 +150,28 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('Endless Rift enables boss fights below normal requirements', (
+    tester,
+  ) async {
+    final state = stateWith(endlessRiftActive: true);
+    final calls = <(String, String)>[];
+
+    await pumpMap(
+      tester,
+      state: state,
+      onAction: (id, action) async {
+        calls.add((id, action));
+        return state;
+      },
+    );
+
+    final startBattle = find.text('Start boss battle');
+    expect(startBattle, findsOneWidget);
+    await tester.tap(startBattle);
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(calls, contains(('verdant_grove', 'boss')));
+  });
+
   testWidgets('active boss battle state is visible on its world node', (
     tester,
   ) async {
