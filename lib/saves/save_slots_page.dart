@@ -43,7 +43,8 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
   void _refreshPreviews() {
     _previews = {
       for (var slot = 1; slot <= SaveStorage.maxSaveSlots; slot++)
-        slot: widget.previewLoader?.call(slot) ??
+        slot:
+            widget.previewLoader?.call(slot) ??
             SaveStorage.inApplicationDocuments(slot: slot)
                 .then((storage) => storage.load()),
     };
@@ -455,7 +456,8 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
                           enabled:
                               _switching == null &&
                               _working == null &&
-                              snapshot.connectionState == ConnectionState.done &&
+                              snapshot.connectionState ==
+                                  ConnectionState.done &&
                               !readFailed,
                           onSelected: (action) {
                             switch (action) {
