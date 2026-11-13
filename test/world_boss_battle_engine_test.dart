@@ -254,27 +254,30 @@ void main() {
     expect(state.legacySystems.worldBossVictories, 1);
   });
 
-  test('Endless Rift bypasses normal fight requirements for unlocked worlds', () {
-    final state = ProgressionState.initial.copyWith(
-      legacySystems: ProgressionState.initial.legacySystems.copyWith(
-        endlessRiftActive: true,
-        activeWorldId: 'verdant_grove',
-      ),
-    );
+  test(
+    'Endless Rift bypasses normal fight requirements for unlocked worlds',
+    () {
+      final state = ProgressionState.initial.copyWith(
+        legacySystems: ProgressionState.initial.legacySystems.copyWith(
+          endlessRiftActive: true,
+          activeWorldId: 'verdant_grove',
+        ),
+      );
 
-    expect(state.correctGuesses, 0);
-    expect(
-      WorldBossCatalog.canFight(state, WorldBossCatalog.worlds.first),
-      isTrue,
-    );
+      expect(state.correctGuesses, 0);
+      expect(
+        WorldBossCatalog.canFight(state, WorldBossCatalog.worlds.first),
+        isTrue,
+      );
 
-    final result = engine.toggleBossBattle(state, 'verdant_grove');
-    expect(result.accepted, isTrue);
-    expect(
-      result.progression.legacySystems.activeBossBattleWorldId,
-      'verdant_grove',
-    );
-  });
+      final result = engine.toggleBossBattle(state, 'verdant_grove');
+      expect(result.accepted, isTrue);
+      expect(
+        result.progression.legacySystems.activeBossBattleWorldId,
+        'verdant_grove',
+      );
+    },
+  );
 
   test(
     'selecting a different world cannot interrupt an active Endless Rift',
