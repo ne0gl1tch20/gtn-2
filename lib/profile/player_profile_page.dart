@@ -120,11 +120,13 @@ class PlayerProfilePage extends StatefulWidget {
     required this.initialProfile,
     required this.store,
     required this.onSaved,
+    this.equippedCosmeticId,
   });
 
   final PlayerProfile initialProfile;
   final PlayerProfileStore store;
   final ValueChanged<PlayerProfile> onSaved;
+  final String? equippedCosmeticId;
 
   @override
   State<PlayerProfilePage> createState() => _PlayerProfilePageState();
@@ -237,15 +239,53 @@ class _PlayerProfilePageState extends State<PlayerProfilePage> {
           padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
           children: [
             Center(
-              child: CircleAvatar(
-                radius: 56,
-                backgroundColor: theme.colorScheme.secondaryContainer,
-                child: ClipOval(
-                  child: SizedBox(
-                    width: 112,
-                    height: 112,
-                    child: Center(child: profileImage),
-                  ),
+              child: Container(
+                padding: const EdgeInsets.all(5),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: equippedCosmeticId == 'cosmetic_nebula_ring'
+                      ? Border.all(color: theme.colorScheme.primary, width: 4)
+                      : null,
+                  boxShadow: equippedCosmeticId == 'cosmetic_pixel_glow'
+                      ? [
+                          BoxShadow(
+                            color: theme.colorScheme.tertiary.withValues(alpha: 0.65),
+                            blurRadius: 24,
+                            spreadRadius: 4,
+                          ),
+                        ]
+                      : null,
+                ),
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    CircleAvatar(
+                      radius: 56,
+                      backgroundColor: theme.colorScheme.secondaryContainer,
+                      child: ClipOval(
+                        child: SizedBox(
+                          width: 112,
+                          height: 112,
+                          child: Center(child: profileImage),
+                        ),
+                      ),
+                    ),
+                    if (equippedCosmeticId == 'cosmetic_starfield')
+                      Positioned(
+                        right: -3,
+                        bottom: -3,
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.primaryContainer,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Padding(
+                            padding: EdgeInsets.all(7),
+                            child: Icon(Icons.auto_awesome_rounded, size: 20),
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
               ),
             ),
