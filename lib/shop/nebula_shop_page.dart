@@ -282,7 +282,8 @@ class _NebulaShopPageState extends State<NebulaShopPage> {
                       ),
                     ),
                     const SizedBox(height: 12),
-                    if (item.isCosmetic && (_state.nebulaItems[item.id] ?? 0) > 0)
+                    if (item.isCosmetic &&
+                        (_state.nebulaItems[item.id] ?? 0) > 0)
                       M3EButton.filled(
                         onPressed:
                             _equippingId != null ||
