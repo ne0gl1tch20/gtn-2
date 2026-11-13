@@ -5,6 +5,7 @@ import '../core/game/game_engine.dart';
 import '../core/numbers/big_number.dart';
 import '../core/progression/progression_state.dart';
 import '../design/expressive_widgets.dart';
+import '../i18n/app_localizations.dart';
 import '../legacy/legacy_pages.dart';
 import '../legacy/legacy_systems_page.dart';
 import '../profile/player_profile_page.dart';
@@ -168,33 +169,33 @@ class GameDashboardPage extends StatelessWidget {
               height: 76,
               backgroundColor: panel,
               indicatorColor: _purple.withValues(alpha: .18),
-              destinations: const [
+              destinations: [
                 NavigationDestination(
                   icon: Icon(Icons.public_rounded),
-                  label: 'Beyond the Numbers',
+                  label: AppLocalizations.text('nav_worlds', 'Beyond the Numbers'),
                 ),
                 NavigationDestination(
                   icon: Icon(Icons.sports_esports_rounded),
-                  label: 'Arcade',
+                  label: AppLocalizations.text('nav_arcade', 'Arcade'),
                 ),
                 NavigationDestination(
                   icon: Icon(Icons.play_arrow_rounded),
-                  label: 'Play',
+                  label: AppLocalizations.text('nav_play', 'Play'),
                 ),
                 NavigationDestination(
                   icon: Icon(Icons.upgrade_rounded),
-                  label: 'Upgrades',
+                  label: AppLocalizations.text('nav_upgrades', 'Upgrades'),
                 ),
                 NavigationDestination(
                   icon: Icon(Icons.menu_rounded),
-                  label: 'More',
+                  label: AppLocalizations.text('nav_more', 'More'),
                 ),
               ],
             );
           }
 
           return M3ENavigationBar(
-            destinations: const [
+            destinations: [
               M3ENavigationBarDestination(
                 icon: Icon(Icons.public_rounded),
                 label: 'Beyond the Numbers',
@@ -1586,7 +1587,12 @@ class _GuessInput extends StatelessWidget {
                   keyboardType: TextInputType.number,
                   textInputAction: TextInputAction.done,
                   onSubmitted: (_) => onGuess(),
-                  decoration: const InputDecoration(hintText: 'Enter a number'),
+                  decoration: InputDecoration(
+                    hintText: AppLocalizations.text(
+                      'play_enter_guess',
+                      'Enter your guess',
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -1606,7 +1612,7 @@ class _GuessInput extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        'GUESS',
+                        AppLocalizations.text('play_guess_button', 'GUESS'),
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w900,
@@ -1642,26 +1648,26 @@ class _GuessInput extends StatelessWidget {
           children: [
             _QuickGuessButton(
               semanticLabel: 'Use lower end of range',
-              label: 'LOW END',
+              label: AppLocalizations.text('web_guess_lower_end', 'LOW END'),
               enabled: enabled,
               onPressed: () => _setGuess(game.minimum),
             ),
             _QuickGuessButton(
               semanticLabel: 'Use midpoint of range',
-              label: 'MIDPOINT',
+              label: AppLocalizations.text('web_ui_midpoint', 'MIDPOINT'),
               enabled: enabled,
               onPressed: () =>
                   _setGuess(game.minimum + (game.maximum - game.minimum) ~/ 2),
             ),
             _QuickGuessButton(
               semanticLabel: 'Use upper end of range',
-              label: 'HIGH END',
+              label: AppLocalizations.text('web_guess_upper_end', 'HIGH END'),
               enabled: enabled,
               onPressed: () => _setGuess(game.maximum),
             ),
             _QuickGuessButton(
               semanticLabel: 'Clear guess input',
-              label: 'CLEAR',
+              label: AppLocalizations.text('clear', 'CLEAR'),
               enabled: enabled,
               onPressed: () {
                 controller.clear();
