@@ -731,6 +731,7 @@ class GameDashboardPage extends StatelessWidget {
                   child: Stack(
                     children: [
                       const ModalBarrier(
+                        key: Key('dashboard-loading-barrier'),
                         dismissible: false,
                         color: Color(0xB3000618),
                       ),
