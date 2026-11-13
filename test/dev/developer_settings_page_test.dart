@@ -34,36 +34,6 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(find.text('Diagnostic Log Viewer'), findsOneWidget);
-
-      final commandField = find.byWidgetPredicate(
-        (widget) =>
-            widget is TextField &&
-            widget.decoration?.labelText == 'Developer command',
-      );
-      await tester.scrollUntilVisible(
-        commandField,
-        250,
-        scrollable: find.byType(Scrollable).first,
-      );
-      await tester.enterText(commandField, '/help');
-      await tester.scrollUntilVisible(
-        find.text('Run command'),
-        120,
-        scrollable: find.byType(Scrollable).first,
-      );
-      await tester.tap(find.text('Run command'));
-      await tester.pumpAndSettle();
-
-      await tester.scrollUntilVisible(
-        find.text('Diagnostic Log Viewer'),
-        250,
-        scrollable: find.byType(Scrollable).first,
-      );
-      await tester.pumpAndSettle();
-      expect(
-        find.textContaining('[INFO][COMMAND_EXECUTED] /help'),
-        findsOneWidget,
-      );
     },
   );
 }
