@@ -15,6 +15,7 @@ import 'core/automation/offline_earnings_policy.dart';
 import 'core/events/random_event_engine.dart';
 import 'core/game/difficulty_rules.dart';
 import 'core/game/game_engine.dart';
+import 'core/game/guess_rate_limit_policy.dart';
 import 'core/game/guess_economy_rules.dart';
 import 'core/legacy/invisible_trait_engine.dart';
 import 'core/legacy/legacy_systems_engine.dart';
@@ -145,6 +146,7 @@ class _GameHomePageState extends State<GameHomePage>
   final InvisibleTraitEngine _invisibleTraitEngine =
       const InvisibleTraitEngine();
   final BotTeam _botTeam = BotTeam();
+  final GuessRateLimiter _guessRateLimiter = GuessRateLimiter();
   final LuaSandbox _luaSandbox = const LuaSandbox();
   final RandomEventEngine _randomEventEngine = RandomEventEngine();
   Timer? _autoClickerTimer;
@@ -1298,6 +1300,15 @@ class _GameHomePageState extends State<GameHomePage>
 
   Future<void> _submitGuess({int? automatedGuess, String? botId}) async {
     final isBot = botId != null;
+    if (!isBot && !_guessRateLimiter.tryAccept()) {
+      setState(
+        () => _message = AppLocalizations.text(
+          'guess_rate_limited',
+          'Please wait a moment before guessing again.',
+        ),
+      );
+      return;
+    }
     final guess = automatedGuess ?? int.tryParse(_controller.text.trim());
     if (guess == null) {
       setState(
