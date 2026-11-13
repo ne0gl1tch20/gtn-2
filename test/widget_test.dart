@@ -20,6 +20,7 @@ Widget buildDashboard({
   ValueChanged<LegacySystemsView>? onSystemsView,
   ValueChanged<LegacySection>? onLegacySection,
   VoidCallback? onPlayerProfile,
+  ValueChanged<int>? onPrimarySelected,
 }) {
   final navigatorKey = shellNavigatorKey ?? GlobalKey<NavigatorState>();
   return M3EMaterialApp(
@@ -54,7 +55,7 @@ Widget buildDashboard({
       showDeveloperSettings: true,
       shellNavigatorKey: navigatorKey,
       selectedIndex: 2,
-      onPrimarySelected: (_) {},
+      onPrimarySelected: onPrimarySelected ?? (_) {},
       onSystemsView: onSystemsView ?? (_) {},
       onLegacySection: onLegacySection ?? (_) {},
       onPlayerProfile: onPlayerProfile,
@@ -218,6 +219,26 @@ void main() {
       expect(find.text(label), findsOneWidget);
     }
     expect(find.text('NO BOTS YET'), findsOneWidget);
+  });
+
+  testWidgets('closing More restores Play as the selected destination', (
+    WidgetTester tester,
+  ) async {
+    var selectedIndex = 2;
+    await tester.pumpWidget(
+      buildDashboard(onPrimarySelected: (index) => selectedIndex = index),
+    );
+
+    await tester.tap(find.text('More').first);
+    await tester.pumpAndSettle();
+    expect(selectedIndex, 4);
+    expect(find.text('More Menu'), findsOneWidget);
+
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    expect(selectedIndex, 2);
+    expect(find.text('More Menu'), findsNothing);
+    expect(find.text('Guess The Number'), findsOneWidget);
   });
 
   testWidgets('More detail pages keep the shell and Back returns to More', (
