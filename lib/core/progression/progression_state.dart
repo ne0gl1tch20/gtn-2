@@ -7,6 +7,17 @@ const Set<String> nebulaCosmeticIds = {
   'cosmetic_pixel_glow',
 };
 
+const Set<String> nebulaSinglePurchaseItemIds = {
+  'nebula_boost',
+  'golden_guess',
+  'auto_clicker_basic',
+  'bot_byte',
+  'bot_pixel',
+  'bot_speed_upgrade',
+  'bot_logic_upgrade',
+  ...nebulaCosmeticIds,
+};
+
 const Set<String> _randomEventSaveIds = {
   'cash_burst',
   'nebula_rain',
