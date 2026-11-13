@@ -135,7 +135,7 @@ Only after Stage 7 passes:
 
 ## Final definition of done
 
-The port is complete only when all of the following are true:
+The port is complete only when all of the following are true (it is just bullet points, do not check):
 
 - [ ] Every in-scope GTN1 feature has a corresponding working Flutter/Dart implementation.
 - [ ] All 320 trait effects and all other source-listed gameplay content are accounted for and functional.
