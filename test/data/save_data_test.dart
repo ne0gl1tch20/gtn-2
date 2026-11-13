@@ -34,7 +34,8 @@ void main() {
 
         final oldProgression = Map<String, dynamic>.from(progression.toJson())
           ..remove('achievements')
-          ..remove('playtimeSeconds');
+          ..remove('playtimeSeconds')
+          ..remove('equippedCosmeticId');
         final migrated = ProgressionState.fromJson(oldProgression);
         expect(migrated.achievements, isEmpty);
         expect(migrated.playtimeSeconds, 0);
