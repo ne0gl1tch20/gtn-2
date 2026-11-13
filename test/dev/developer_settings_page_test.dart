@@ -27,6 +27,12 @@ void main() {
 
       expect(find.text('Trait Registry Inspector'), findsOneWidget);
       expect(find.text('Runtime Inspector'), findsOneWidget);
+      await tester.scrollUntilVisible(
+        find.text('Diagnostic Log Viewer'),
+        250,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
       expect(find.text('Diagnostic Log Viewer'), findsOneWidget);
 
       final commandField = find.byWidgetPredicate(
@@ -34,12 +40,20 @@ void main() {
             widget is TextField &&
             widget.decoration?.labelText == 'Developer command',
       );
-      await tester.ensureVisible(commandField);
+      await tester.scrollUntilVisible(
+        commandField,
+        250,
+        scrollable: find.byType(Scrollable).first,
+      );
       await tester.enterText(commandField, '/help');
       await tester.tap(find.text('Run command'));
       await tester.pumpAndSettle();
 
-      await tester.ensureVisible(find.text('Diagnostic Log Viewer'));
+      await tester.scrollUntilVisible(
+        find.textContaining('[INFO][COMMAND_EXECUTED] /help'),
+        250,
+        scrollable: find.byType(Scrollable).first,
+      );
       await tester.pumpAndSettle();
       expect(
         find.textContaining('[INFO][COMMAND_EXECUTED] /help'),
