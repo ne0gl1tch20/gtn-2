@@ -172,3 +172,30 @@ Keep routine progress narration to yourself; only interrupt the user when a spec
 > Continue around the goal without telling me or letting me know. Do not give me the apk without honest 100% port. Follow this goal: a complete, playable flutter port thats all flutter and dart with some cpp if needed instead of broken, placeholder, mock, fake, and missing features.
 
 This is a strict release gate, not a suggestion. Never hand over or publish an APK as the finished port until honest full parity is demonstrated by the source inventory, working implementations, tests, platform builds, and real Android play-test. If the port is not fully complete, keep working through the remaining steps and withhold the APK. Do not claim 100% based on compilation or CI alone.
+
+
+## Mandatory coding and validation reminders
+
+Apply these rules before every code change and before reporting work complete:
+
+1. **Work directly on `main`** when the user asks for direct-to-main work. Do not create a feature branch or PR for that task. Do not merge or close unrelated open PRs.
+2. Read the target file and its callers/tests before editing. Make the smallest coherent change; avoid broad rewrites and unrelated formatting churn.
+3. **Dart formatting is a required pre-commit step.** Run `dart format .` (or at minimum `dart format <every-changed-dart-file>`) with the same stable Dart SDK channel used by CI. This command must write the formatter's output; do not use `--output=none` as the only local formatting step.
+4. Immediately verify formatting with `dart format --output=none --set-exit-if-changed .`. If it reports changed files, do not commit. Run the write-mode formatter, inspect the resulting diff, then rerun the check.
+5. Avoid manually guessing Dart formatter indentation. Nested conditional expressions, multiline argument lists, collection literals, and trailing commas are common sources of formatter-only CI failures. Prefer simple `if/else` logic over deeply nested ternaries when readability improves.
+6. Before committing Dart changes, run `flutter analyze --fatal-infos` and the narrowest relevant tests. Run the full test suite when the change affects shared behavior or CI requires it. Do not claim tests passed unless the actual command or workflow passed.
+7. Inspect the exact GitHub Actions run for the pushed commit SHA. Confirm the formatting step, analysis, tests, and applicable platform builds individually; a queued or in-progress run is not a pass.
+8. When a validation step fails, read its logs and fix the underlying cause. Do not repeatedly make speculative whitespace edits. If formatter output is unclear, capture a unified diff between the source and `dart format --output=show <file>` before editing.
+9. Keep validation finite and fast: run focused checks first, avoid duplicate long-running tests, and do not repeat already-green checks without a code change or a demonstrated reason.
+10. Preserve the GTN1-to-GTN2 completion gate: no mock/placeholder functionality and no claim of full parity based on a successful build alone. Do not publish a completion APK before the documented acceptance criteria pass.
+
+### Dart formatting quick checklist
+
+```bash
+dart format <changed-dart-files>
+dart format --output=none --set-exit-if-changed .
+flutter analyze --fatal-infos
+flutter test <relevant-test-files>
+```
+
+If the formatter check fails in CI, obtain the formatter's exact output/diff first. Fix that output rather than hand-adjusting indentation by intuition.
