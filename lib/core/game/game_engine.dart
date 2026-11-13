@@ -25,8 +25,8 @@ class GameEngine {
     : _random = random ?? Random.secure(),
       minimum = minimum,
       maximum = maximum {
-    if (minimum >= maximum) {
-      throw ArgumentError('minimum must be less than maximum.');
+    if (minimum > maximum) {
+      throw ArgumentError('minimum must not exceed maximum.');
     }
   }
 
@@ -125,19 +125,12 @@ class GameEngine {
 
   GameState guess(GameState state, int value) {
     if (state.isComplete) return state;
-    if (value < state.minimum || value > state.maximum) {
-      return GameState(
-        secret: state.secret,
-        attempts: state.attempts,
-        isComplete: false,
-        lastResult: GuessResult.outOfRange,
-        minimum: state.minimum,
-        maximum: state.maximum,
-      );
-    }
-    final result = value == state.secret
+    // GTN1 clamps submitted values to the active range before resolving
+    // feedback. Keep this behavior for manual input and automated callers.
+    final clampedValue = value.clamp(state.minimum, state.maximum);
+    final result = clampedValue == state.secret
         ? GuessResult.correct
-        : value < state.secret
+        : clampedValue < state.secret
         ? GuessResult.tooLow
         : GuessResult.tooHigh;
     return GameState(
