@@ -47,6 +47,11 @@
 - [ ] Upgrades, prestige, Ultra progression and their reset/carry-over rules.
 - [ ] Traits, talents, mutators and relics, including actual gameplay effects.
 - [ ] Worlds, bosses, battles, mastery, secrets, codex and claim-once rewards.
+  - [ ] World unlock requirements and migration behavior.
+  - [ ] Boss battle eligibility, lifecycle, phases, hit/miss rules and defeat.
+  - [ ] Boss rewards, multipliers, relic/Codex unlocks and mastery.
+  - [ ] Endless Rift scaling, rewards, rotation and best-tier persistence.
+  - [ ] World selection, secret discovery and restoration after save/load.
 - [ ] Home Base/Sanctuary, daily and weekly rewards, quests, chests and minigames.
 - [ ] Lucky Stake and achievements, including unlock conditions and reward settlement.
 - [ ] Automation, bot behavior, offline earnings and clock handling.
@@ -70,6 +75,7 @@
 - [ ] Every screen/route rendered by the single Web Play HTML shell has a corresponding native Flutter destination (the pinned tree does not contain 22 separate HTML screen roots).
 - [ ] Each screen's primary controls, dialogs, navigation and state transitions work.
 - [ ] The fixed screen set is compared against GTN1 at agreed mobile and desktop viewport sizes.
+- [x] Step 1 interactive world map acceptance: four GTN1 nodes, exact source coordinates and route graph, locked/unlocked/defeated/selected/active-battle states, secret thresholds and discovered state, pan/zoom/fit/reset, Endless Rift selection lock and external active-world synchronization. Evidence: GTN1 `WorldMapScreen.kt` and `DesktopWorldMapContent.kt`; GTN2 `lib/worlds/world_map_page.dart`, `lib/worlds/world_boss_catalog.dart`, `test/world_boss_test.dart` and `test/world_map_page_test.dart`. Actions route through `_worldBossAction` to `WorldBossBattleEngine`/`LegacySystemsEngine` and persist accepted changes. Validation: test suite passed in run `43443383175`; Android and Windows debug builds passed in run `43441814113`. Real-device play-test remains in Stage 6.
 - [ ] All 17 catalogs load from canonical bundled data with valid references.
 - [ ] All 320 trait IDs and their definitions/rules are available to the runtime.
 - [ ] All 23 locale files load; key flows have no missing-string or layout failures.
