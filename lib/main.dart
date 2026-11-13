@@ -714,6 +714,18 @@ class _GameHomePageState extends State<GameHomePage>
     return _progression;
   }
 
+  Future<ProgressionState> _equipNebulaCosmetic(String cosmeticId) async {
+    final updated = _progressionEngine.equipNebulaCosmetic(
+      _progression,
+      cosmeticId,
+    );
+    if (updated != _progression) {
+      setState(() => _progression = updated);
+      await _persist();
+    }
+    return _progression;
+  }
+
   Future<ProgressionState> _setAutomationActive(bool active) async {
     final hasBot = NebulaShopCatalog.botIds.any(
       (id) => (_progression.nebulaItems[id] ?? 0) > 0,
@@ -830,6 +842,7 @@ class _GameHomePageState extends State<GameHomePage>
           progression: _progression,
           onPurchase: _purchaseNebulaItem,
           onAutomationChanged: _setAutomationActive,
+          onEquipCosmetic: _equipNebulaCosmetic,
         ),
       ),
     );
@@ -1043,6 +1056,7 @@ class _GameHomePageState extends State<GameHomePage>
         builder: (_) => PlayerProfilePage(
           initialProfile: _playerProfile,
           store: _playerProfileStore,
+          equippedCosmeticId: _progression.equippedCosmeticId,
           onSaved: (profile) {
             setState(() => _playerProfile = profile);
             unawaited(_syncPlayerProfileToSave(profile));
