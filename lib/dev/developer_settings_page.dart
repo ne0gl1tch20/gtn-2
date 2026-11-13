@@ -160,7 +160,11 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
         _luaOutput = const JsonEncoder.withIndent('  ').convert(result.value);
         _luaLogs = result.logs;
       });
-      _recordDiagnostic('INFO', 'LUA_SCRIPT_COMPLETED', 'Executed ${script.id}; ${result.logs.length} log lines returned.');
+      _recordDiagnostic(
+        'INFO',
+        'LUA_SCRIPT_COMPLETED',
+        'Executed ${script.id}; ${result.logs.length} log lines returned.',
+      );
     } on Object catch (error) {
       if (!mounted) return;
       setState(() => _luaOutput = 'Lua execution failed: $error');
@@ -209,7 +213,11 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
       }
       final save = SaveData.fromJson(decoded);
       await widget.onApplySave(save);
-      _recordDiagnostic('INFO', 'SAVE_JSON_APPLIED', 'Applied schema ${save.schemaVersion} save data to the current slot.');
+      _recordDiagnostic(
+        'INFO',
+        'SAVE_JSON_APPLIED',
+        'Applied schema ${save.schemaVersion} save data to the current slot.',
+      );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Developer save applied.')),
@@ -226,7 +234,6 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
       if (mounted) setState(() => _busy = false);
     }
   }
-
 
   void _recordDiagnostic(String level, String event, String message) {
     if (!mounted) return;
@@ -268,34 +275,44 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
         }
         final traits = snapshot.data ?? const <TraitCatalogEntry>[];
         final query = _traitSearch.text.trim().toLowerCase();
-        final filtered = traits.where((trait) {
-          if (query.isEmpty) return true;
-          return <String>[
-            trait.id,
-            trait.title,
-            trait.description,
-            trait.category,
-            trait.catalogId,
-            trait.packageFolder,
-            trait.visibility,
-            ...trait.effects,
-            ...trait.dependencies,
-            ...trait.conflicts,
-            trait.seasonId ?? '',
-          ].any((value) => value.toLowerCase().contains(query));
-        }).toList(growable: false);
+        final filtered = traits
+            .where((trait) {
+              if (query.isEmpty) return true;
+              return <String>[
+                trait.id,
+                trait.title,
+                trait.description,
+                trait.category,
+                trait.catalogId,
+                trait.packageFolder,
+                trait.visibility,
+                ...trait.effects,
+                ...trait.dependencies,
+                ...trait.conflicts,
+                trait.seasonId ?? '',
+              ].any((value) => value.toLowerCase().contains(query));
+            })
+            .toList(growable: false);
         final hidden = traits.where((trait) => trait.isHidden).length;
-        final discovered = widget.save.progression.legacySystems.discoveredTraits;
+        final discovered =
+            widget.save.progression.legacySystems.discoveredTraits;
         return GtnExpressiveCard(
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Trait Registry Inspector', style: Theme.of(context).textTheme.titleLarge),
+                Text(
+                  'Trait Registry Inspector',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
                 const SizedBox(height: 6),
-                Text('${traits.length} validated GTN1 traits · ${traits.length - hidden} visible · $hidden hidden'),
-                Text('${discovered.length} discovered in this save · pinned source ${TraitCatalogRepository.sourceCommit.substring(0, 8)}'),
+                Text(
+                  '${traits.length} validated GTN1 traits · ${traits.length - hidden} visible · $hidden hidden',
+                ),
+                Text(
+                  '${discovered.length} discovered in this save · pinned source ${TraitCatalogRepository.sourceCommit.substring(0, 8)}',
+                ),
                 const SizedBox(height: 12),
                 TextField(
                   controller: _traitSearch,
@@ -317,7 +334,9 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
                   onChanged: (_) => setState(() {}),
                 ),
                 const SizedBox(height: 8),
-                Text('Showing ${filtered.length > 40 ? 40 : filtered.length} of ${filtered.length} matching traits'),
+                Text(
+                  'Showing ${filtered.length > 40 ? 40 : filtered.length} of ${filtered.length} matching traits',
+                ),
                 const Divider(),
                 if (filtered.isEmpty)
                   const Text('No traits match this search.')
@@ -343,16 +362,25 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
                             ],
                           ),
                           SelectableText(trait.id),
-                          Text('${trait.category} · ${trait.catalogId} · ${trait.packageFolder}'),
+                          Text(
+                            '${trait.category} · ${trait.catalogId} · ${trait.packageFolder}',
+                          ),
                           Text('Effects: ${trait.effects.join(', ')}'),
-                          Text('Requirements: level ${trait.minimumLevel} · prestige ${trait.minimumPrestige} · ${trait.minimumCorrectGuesses} correct guesses'),
+                          Text(
+                            'Requirements: level ${trait.minimumLevel} · prestige ${trait.minimumPrestige} · ${trait.minimumCorrectGuesses} correct guesses',
+                          ),
                           if (trait.dependencies.isNotEmpty)
-                            Text('Dependencies: ${trait.dependencies.join(', ')}'),
+                            Text(
+                              'Dependencies: ${trait.dependencies.join(', ')}',
+                            ),
                           if (trait.conflicts.isNotEmpty)
                             Text('Conflicts: ${trait.conflicts.join(', ')}'),
-                          if (trait.seasonId != null) Text('Season: ${trait.seasonId}'),
+                          if (trait.seasonId != null)
+                            Text('Season: ${trait.seasonId}'),
                           Text(
-                            discovered.contains(trait.id) ? 'Discovered in current save' : 'Not discovered in current save',
+                            discovered.contains(trait.id)
+                                ? 'Discovered in current save'
+                                : 'Not discovered in current save',
                             style: Theme.of(context).textTheme.labelSmall,
                           ),
                         ],
@@ -361,7 +389,9 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
                     const Divider(),
                   ],
                 if (filtered.length > 40)
-                  const Text('Refine the search to inspect additional entries.'),
+                  const Text(
+                    'Refine the search to inspect additional entries.',
+                  ),
               ],
             ),
           ),
@@ -378,21 +408,41 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Runtime Inspector', style: Theme.of(context).textTheme.titleLarge),
+            Text(
+              'Runtime Inspector',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
             const SizedBox(height: 8),
             _runtimeValue('Platform', Platform.operatingSystem),
             _runtimeValue('OS version', Platform.operatingSystemVersion),
             _runtimeValue('Dart runtime', Platform.version.split(' ').first),
             _runtimeValue('Debug build', kDebugMode ? 'Yes' : 'No'),
-            _runtimeValue('Available processors', Platform.numberOfProcessors.toString()),
+            _runtimeValue(
+              'Available processors',
+              Platform.numberOfProcessors.toString(),
+            ),
             _runtimeValue('Save schema', widget.save.schemaVersion.toString()),
-            _runtimeValue('Current range', '${widget.save.minimum}–${widget.save.maximum}'),
+            _runtimeValue(
+              'Current range',
+              '${widget.save.minimum}–${widget.save.maximum}',
+            ),
             _runtimeValue('Total guesses', progression.totalGuesses.toString()),
-            _runtimeValue('Lua execution budget', '${_luaSandbox.executionBudget.inMilliseconds} ms'),
-            _runtimeValue('Lua source limit', '${LuaSandbox.maxSourceCharacters} characters'),
-            _runtimeValue('Lua result limit', '${LuaSandbox.maxResultNodes} nodes / depth ${LuaSandbox.maxResultDepth}'),
+            _runtimeValue(
+              'Lua execution budget',
+              '${_luaSandbox.executionBudget.inMilliseconds} ms',
+            ),
+            _runtimeValue(
+              'Lua source limit',
+              '${LuaSandbox.maxSourceCharacters} characters',
+            ),
+            _runtimeValue(
+              'Lua result limit',
+              '${LuaSandbox.maxResultNodes} nodes / depth ${LuaSandbox.maxResultDepth}',
+            ),
             const SizedBox(height: 6),
-            const Text('Read-only process and save diagnostics. No process memory or private filesystem data is collected.'),
+            const Text(
+              'Read-only process and save diagnostics. No process memory or private filesystem data is collected.',
+            ),
           ],
         ),
       ),
@@ -417,14 +467,18 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
 
   Widget _buildDiagnosticLogViewer() {
     final query = _diagnosticSearch.text.trim().toLowerCase();
-    final filtered = _diagnostics.where((entry) {
-      final matchesLevel = _diagnosticLevel == 'ALL' || entry.level == _diagnosticLevel;
-      final matchesQuery = query.isEmpty ||
-          entry.event.toLowerCase().contains(query) ||
-          entry.message.toLowerCase().contains(query) ||
-          entry.level.toLowerCase().contains(query);
-      return matchesLevel && matchesQuery;
-    }).toList(growable: false);
+    final filtered = _diagnostics
+        .where((entry) {
+          final matchesLevel =
+              _diagnosticLevel == 'ALL' || entry.level == _diagnosticLevel;
+          final matchesQuery =
+              query.isEmpty ||
+              entry.event.toLowerCase().contains(query) ||
+              entry.message.toLowerCase().contains(query) ||
+              entry.level.toLowerCase().contains(query);
+          return matchesLevel && matchesQuery;
+        })
+        .toList(growable: false);
     final export = filtered.map((entry) => entry.toLogLine()).join('\n');
     return GtnExpressiveCard(
       child: Padding(
@@ -432,9 +486,14 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Diagnostic Log Viewer', style: Theme.of(context).textTheme.titleLarge),
+            Text(
+              'Diagnostic Log Viewer',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
             const SizedBox(height: 4),
-            Text('${filtered.length} matching entries · in-memory developer session · max 200'),
+            Text(
+              '${filtered.length} matching entries · in-memory developer session · max 200',
+            ),
             const SizedBox(height: 10),
             TextField(
               controller: _diagnosticSearch,
@@ -457,7 +516,8 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
                 DropdownMenuItem(value: 'INFO', child: Text('Info')),
                 DropdownMenuItem(value: 'ERROR', child: Text('Error')),
               ],
-              onChanged: (value) => setState(() => _diagnosticLevel = value ?? 'ALL'),
+              onChanged: (value) =>
+                  setState(() => _diagnosticLevel = value ?? 'ALL'),
             ),
             const SizedBox(height: 8),
             Wrap(
@@ -470,7 +530,9 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
                           await Clipboard.setData(ClipboardData(text: export));
                           if (!mounted) return;
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Diagnostic logs copied.')),
+                            const SnackBar(
+                              content: Text('Diagnostic logs copied.'),
+                            ),
                           );
                         },
                   child: const Text('Copy filtered logs'),
@@ -485,7 +547,9 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
             ),
             const Divider(),
             if (filtered.isEmpty)
-              const Text('No diagnostic entries yet. Run a developer command, execute a Lua script or apply save JSON to create entries.')
+              const Text(
+                'No diagnostic entries yet. Run a developer command, execute a Lua script or apply save JSON to create entries.',
+              )
             else
               for (final entry in filtered.take(80))
                 Padding(
