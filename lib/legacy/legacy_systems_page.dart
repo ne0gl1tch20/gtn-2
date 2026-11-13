@@ -1709,6 +1709,21 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
               label: const Text('Create playlist'),
             ),
           ),
+          if (_systems.musicLibrary.isEmpty)
+            const Padding(
+              padding: EdgeInsets.fromLTRB(20, 8, 20, 16),
+              child: Column(
+                children: [
+                  Icon(Icons.library_music_outlined, size: 42),
+                  SizedBox(height: 8),
+                  Text('Your music library is empty.'),
+                  Text(
+                    'Import audio files from this device to start building your library.',
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
           ListTile(
             title: Text('Queue · ${_systems.musicQueue.length} tracks'),
             trailing: TextButton(
