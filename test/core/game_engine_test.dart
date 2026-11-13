@@ -149,7 +149,9 @@ void main() {
       final narrowed = engine.applyRangeScoutHint(afterMiss, 50);
       expect(narrowed.minimum, 51);
       expect(narrowed.maximum, 100);
-      expect(engine.guess(narrowed, 50).lastResult, GuessResult.outOfRange);
+      final clampedMiss = engine.guess(narrowed, 50);
+      expect(clampedMiss.lastResult, GuessResult.tooLow);
+      expect(clampedMiss.attempts, narrowed.attempts + 1);
       expect(engine.guess(narrowed, 75).lastResult, GuessResult.correct);
       final lastPossible = engine.applyRangeScoutHint(
         engine.guess(
