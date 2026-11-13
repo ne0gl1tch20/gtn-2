@@ -75,7 +75,7 @@ void main() {
       find.text('Restoring save slot 1 and preparing your next round.'),
       findsOneWidget,
     );
-    expect(find.byType(ModalBarrier), findsOneWidget);
+    expect(find.byKey(const Key('dashboard-loading-barrier')), findsOneWidget);
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
   });
 
