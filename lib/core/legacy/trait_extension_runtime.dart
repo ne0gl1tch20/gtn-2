@@ -51,10 +51,7 @@ class TraitExtensionModule {
 }
 
 class ValidatedTraitExtension {
-  const ValidatedTraitExtension({
-    required this.traitId,
-    required this.modules,
-  });
+  const ValidatedTraitExtension({required this.traitId, required this.modules});
 
   final String traitId;
   final List<ValidatedTraitModule> modules;
@@ -68,10 +65,7 @@ class ValidatedTraitExtension {
 }
 
 class ValidatedTraitModule {
-  const ValidatedTraitModule({
-    required this.descriptor,
-    required this.source,
-  });
+  const ValidatedTraitModule({required this.descriptor, required this.source});
 
   final TraitExtensionModule descriptor;
   final String source;
@@ -91,9 +85,8 @@ class TraitModuleDecision {
 /// Lua runs in the bounded sandbox. JSON is declarative. JavaScript is returned
 /// as presentation data and is never evaluated by this runtime.
 class TraitExtensionRuntime {
-  const TraitExtensionRuntime({
-    LuaSandbox sandbox = const LuaSandbox(),
-  }) : _sandbox = sandbox;
+  const TraitExtensionRuntime({LuaSandbox sandbox = const LuaSandbox()})
+    : _sandbox = sandbox;
 
   static const int maxModules = 8;
   static const int maxSourceCharacters = 32768;
@@ -109,8 +102,9 @@ class TraitExtensionRuntime {
 
   static final RegExp _traitIdPattern = RegExp(r'^[a-z][a-z0-9_.-]{1,63}$');
   static final RegExp _moduleIdPattern = RegExp(r'^[a-z][a-z0-9_-]{0,47}$');
-  static final RegExp _pathSegmentPattern =
-      RegExp(r'^[A-Za-z0-9_-][A-Za-z0-9_.-]*$');
+  static final RegExp _pathSegmentPattern = RegExp(
+    r'^[A-Za-z0-9_-][A-Za-z0-9_.-]*$',
+  );
   static final RegExp _forbiddenJavaScript = RegExp(
     r'\b(eval|fetch|XMLHttpRequest|WebSocket|importScripts|parent|top|opener|localStorage|sessionStorage|indexedDB|navigator|location|Worker|BroadcastChannel|postMessage)\b|\bnew\s+Function\b|\bFunction\s*\(|\bwindow\s*\.|\bdocument\s*\.|\bandroid\s*\.|\bJava\s*\.',
     caseSensitive: false,
@@ -124,11 +118,11 @@ class TraitExtensionRuntime {
     required String expectedTraitId,
   }) async {
     final manifestJson = _decodeObject(manifestText, 'Extension manifest');
-    _ensureKeys(
-      manifestJson,
-      const {'schemaVersion', 'traitId', 'modules'},
-      'Extension manifest',
-    );
+    _ensureKeys(manifestJson, const {
+      'schemaVersion',
+      'traitId',
+      'modules',
+    }, 'Extension manifest');
 
     final rawSchemaVersion = manifestJson.containsKey('schemaVersion')
         ? manifestJson['schemaVersion']
@@ -158,11 +152,12 @@ class TraitExtensionRuntime {
 
     for (final rawModule in rawModules) {
       final moduleJson = _asObject(rawModule, 'Extension module');
-      _ensureKeys(
-        moduleJson,
-        const {'id', 'type', 'entrypoint', 'capabilities'},
-        'Extension module',
-      );
+      _ensureKeys(moduleJson, const {
+        'id',
+        'type',
+        'entrypoint',
+        'capabilities',
+      }, 'Extension module');
 
       final id = _requiredString(moduleJson, 'id');
       if (!_moduleIdPattern.hasMatch(id)) {
@@ -191,9 +186,7 @@ class TraitExtensionRuntime {
         throw FormatException('Missing module entrypoint: $entrypoint');
       }
       if (source.trim().isEmpty || source.length > maxSourceCharacters) {
-        throw const FormatException(
-          'Module source is empty or too large.',
-        );
+        throw const FormatException('Module source is empty or too large.');
       }
 
       final allowedCapabilities = _allowedCapabilities[type];
@@ -212,14 +205,9 @@ class TraitExtensionRuntime {
 
       if (type == 'LUA') {
         if (!entrypoint.toLowerCase().endsWith('.lua')) {
-          throw const FormatException(
-            'Lua modules must use .lua entrypoints.',
-          );
+          throw const FormatException('Lua modules must use .lua entrypoints.');
         }
-        await _sandbox.validate(
-          scriptId: '${traitId}_${id}',
-          source: source,
-        );
+        await _sandbox.validate(scriptId: '${traitId}_${id}', source: source);
       } else if (type == 'JSON') {
         if (!entrypoint.toLowerCase().endsWith('.json')) {
           throw const FormatException(
@@ -302,9 +290,7 @@ class TraitExtensionRuntime {
     final decision = Map<String, Object?>.from(rawDecision);
     final eligibleValue = decision['eligible'];
     if (eligibleValue != null && eligibleValue is! bool) {
-      throw const FormatException(
-        'Lua module eligibility must be a boolean.',
-      );
+      throw const FormatException('Lua module eligibility must be a boolean.');
     }
     final eligible = eligibleValue == true;
     final rawEffects = decision['effects'];

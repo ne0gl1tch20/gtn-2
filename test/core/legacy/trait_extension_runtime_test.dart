@@ -55,9 +55,7 @@ void main() {
       modules: [
         {'id': 'logic', 'type': 'LUA', 'entrypoint': 'logic.lua'},
       ],
-      files: {
-        'logic.lua': 'return { eligible = "false", effects = {} }',
-      },
+      files: {'logic.lua': 'return { eligible = "false", effects = {} }'},
     );
     await expectLater(
       _runtime.evaluateLua(
@@ -125,8 +123,7 @@ void main() {
         {'id': 'logic', 'type': 'LUA', 'entrypoint': 'logic.lua'},
       ],
       files: {
-        'logic.lua':
-            'return { eligible = true, effects = {"NEBULA_BONUS"} }',
+        'logic.lua': 'return { eligible = true, effects = {"NEBULA_BONUS"} }',
       },
     );
     await expectLater(
@@ -180,8 +177,7 @@ void main() {
         },
       ],
       files: {
-        'rules.json':
-            '{"minimumBestStreak":25,"effects":["COSMETIC_BADGE"]}',
+        'rules.json': '{"minimumBestStreak":25,"effects":["COSMETIC_BADGE"]}',
       },
     );
 
@@ -211,10 +207,7 @@ void main() {
       files: {'view.js': goodSource},
     );
 
-    expect(
-      _runtime.javascriptPresentation(extension, 'view'),
-      goodSource,
-    );
+    expect(_runtime.javascriptPresentation(extension, 'view'), goodSource);
     expect(
       () => _runtime.readJsonModule(extension, 'view'),
       throwsA(isA<FormatException>()),
@@ -232,11 +225,7 @@ void main() {
           manifestText: _manifest(
             traitId: 'remote_view',
             modules: [
-              {
-                'id': 'view',
-                'type': 'JAVASCRIPT',
-                'entrypoint': 'view.js',
-              },
+              {'id': 'view', 'type': 'JAVASCRIPT', 'entrypoint': 'view.js'},
             ],
           ),
           files: {'view.js': unsafeSource},
@@ -253,11 +242,7 @@ void main() {
         manifestText: _manifest(
           traitId: 'remote_rules',
           modules: [
-            {
-              'id': 'rules',
-              'type': 'JSON',
-              'entrypoint': '../rules.json',
-            },
+            {'id': 'rules', 'type': 'JSON', 'entrypoint': '../rules.json'},
           ],
         ),
         files: const {'../rules.json': '{}'},
@@ -406,8 +391,7 @@ void main() {
             },
         ],
         files: {
-          for (var index = 0; index < 9; index++)
-            'rules_$index.json': '{}',
+          for (var index = 0; index < 9; index++) 'rules_$index.json': '{}',
         },
       ),
       throwsA(isA<FormatException>()),
@@ -422,7 +406,7 @@ void main() {
         files: {
           'rules.json': List<String>.filled(
             TraitExtensionRuntime.maxSourceCharacters + 1,
-            ' ',
+            'x',
           ).join(),
         },
       ),
