@@ -519,11 +519,13 @@ class _GameHomePageState extends State<GameHomePage>
   }
 
   Future<ProgressionState> _purchaseUpgrade(
-    UpgradeDefinition definition,
-  ) async {
-    final updated = _progressionEngine.purchaseUpgrade(
+    UpgradeDefinition definition, {
+    int levels = 1,
+  }) async {
+    final updated = _progressionEngine.purchaseUpgradeLevels(
       _progression,
       definition,
+      levels: levels,
     );
     if (updated != _progression) {
       final previousRange = _rangeMaximum(_progression, _settings);
