@@ -21,11 +21,13 @@ class DeveloperSettingsPage extends StatefulWidget {
     required this.save,
     required this.onCommand,
     required this.onApplySave,
+    this.loadTraitCatalog,
   });
 
   final SaveData save;
   final DeveloperCommand onCommand;
   final DeveloperSaveApply onApplySave;
+  final Future<List<TraitCatalogEntry>> Function()? loadTraitCatalog;
 
   @override
   State<DeveloperSettingsPage> createState() => _DeveloperSettingsPageState();
@@ -49,7 +51,7 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
   String _diagnosticLevel = 'ALL';
   final List<_DeveloperDiagnosticEntry> _diagnostics = [];
   late final Future<List<TraitCatalogEntry>> _traitCatalog =
-      TraitCatalogRepository().load();
+      widget.loadTraitCatalog?.call() ?? TraitCatalogRepository().load();
 
   Future<List<_RegisteredLuaScript>> _loadLuaScripts() async {
     final source = await rootBundle.loadString('assets/scripts/manifest.json');
