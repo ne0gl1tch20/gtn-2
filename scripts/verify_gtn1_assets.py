@@ -67,7 +67,7 @@ try:
     localization_source = APP_LOCALIZATIONS.read_text(encoding="utf-8")
 except OSError as error:
     fail(f"AppLocalizations source is missing: {error}")
-supported_locales = set(re.findall(r"\('([a-z]{2}(?:_[a-z]{2})?)',", localization_source))
+supported_locales = set(re.findall(r"\('([a-z]{2,3}(?:_[a-z]{2,3})?)',", localization_source))
 if supported_locales != expected_locales:
     fail(
         "AppLocalizations supported locale IDs do not match bundled locale files: "
