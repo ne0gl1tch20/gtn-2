@@ -42,11 +42,6 @@ jobs:
         run: flutter pub get
       - name: Restore analysis configuration
         run: git restore -- analysis_options.yaml
-      - name: Show exact Dart formatting diff
-        if: always()
-        run: |
-          dart format --output=show lib/legacy/legacy_pages.dart > /tmp/legacy_pages.formatted.dart
-          diff -u lib/legacy/legacy_pages.dart /tmp/legacy_pages.formatted.dart || true
       - name: Verify Dart formatting
         run: dart format --output=none --set-exit-if-changed .
       - name: Analyze
