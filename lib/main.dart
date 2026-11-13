@@ -13,6 +13,7 @@ import 'core/automation/clock_rollback_policy.dart';
 import 'core/automation/guessing_bot.dart';
 import 'core/automation/offline_earnings_policy.dart';
 import 'core/events/random_event_engine.dart';
+import 'core/game/adaptive_target_generator.dart';
 import 'core/game/difficulty_rules.dart';
 import 'core/game/game_engine.dart';
 import 'core/game/guess_economy_rules.dart';
@@ -118,15 +119,27 @@ class _GameHomePageState extends State<GameHomePage>
   GameEngine _engineFor(ProgressionState progression, GameSettings settings) =>
       GameEngine(maximum: _rangeMaximum(progression, settings));
 
-  GameState _createGame() =>
-      _newGameWithAdaptiveTarget(_engineFor(_progression, _settings).newGame());
+  GameState _createGame() => _engineFor(_progression, _settings).newGame();
 
-  GameState _newGameWithAdaptiveTarget(GameState candidate) {
-    final systems = _progression.legacySystems;
-    final profile = systems.adaptiveTraitProfile;
+  GameState _newGameAfterCorrectGuess(
+    GameState candidate,
+    ProgressionState beforeGuess, {
+    required int attempts,
+  }) {
+    var targetCandidate = candidate.secret;
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      targetCandidate = AdaptiveTargetGenerator.nextTarget(
+        rangeMin: candidate.minimum,
+        rangeMax: candidate.maximum,
+        difficultyId: _settings.difficultyId,
+        streak: beforeGuess.currentStreak,
+        attempts: attempts,
+        seed: AdaptiveTargetGenerator.randomSeed(_adaptiveTargetSeedRandom),
+      );
+    }
     final secret = _invisibleTraitEngine.adjustNextTarget(
-      profile: profile,
-      candidate: candidate.secret,
+      profile: beforeGuess.legacySystems.adaptiveTraitProfile,
+      candidate: targetCandidate,
       rangeMin: candidate.minimum,
       rangeMax: candidate.maximum,
     );
@@ -146,6 +159,7 @@ class _GameHomePageState extends State<GameHomePage>
   final InvisibleTraitEngine _invisibleTraitEngine =
       const InvisibleTraitEngine();
   final BotTeam _botTeam = BotTeam();
+  final Random _adaptiveTargetSeedRandom = Random.secure();
   final GuessRateLimiter _guessRateLimiter = GuessRateLimiter();
   final LuaSandbox _luaSandbox = const LuaSandbox();
   final RandomEventEngine _randomEventEngine = RandomEventEngine();
@@ -527,7 +541,7 @@ class _GameHomePageState extends State<GameHomePage>
         _progression = withQuestProgress;
         if (previousRange != nextRange) {
           _engine = _engineFor(withQuestProgress, _settings);
-          _game = _newGameWithAdaptiveTarget(_engine.newGame());
+          _game = _engine.newGame();
           _botTeam.reset(_game.minimum, _game.maximum);
           _message = 'Your range upgrade is active. A fresh round is ready.';
         }
@@ -562,7 +576,7 @@ class _GameHomePageState extends State<GameHomePage>
       setState(() {
         _progression = updated;
         _engine = _engineFor(updated, _settings);
-        _game = _newGameWithAdaptiveTarget(_engine.newGame());
+        _game = _engine.newGame();
         _botTeam.reset(_game.minimum, _game.maximum);
         _message = 'Prestige complete! Build your progress again.';
       });
@@ -596,7 +610,7 @@ class _GameHomePageState extends State<GameHomePage>
       setState(() {
         _progression = updated;
         _engine = _engineFor(updated, _settings);
-        _game = _newGameWithAdaptiveTarget(_engine.newGame());
+        _game = _engine.newGame();
         _botTeam.reset(_game.minimum, _game.maximum);
         _message = 'Ultra reset complete! A new run begins.';
       });
@@ -779,7 +793,7 @@ class _GameHomePageState extends State<GameHomePage>
     }
     if (_game.isComplete) {
       setState(() {
-        _game = _newGameWithAdaptiveTarget(_engine.newGame());
+        _game = _engine.newGame();
         _botTeam.reset(_game.minimum, _game.maximum);
         _message = 'Auto Clicker started a new round.';
       });
@@ -934,7 +948,7 @@ class _GameHomePageState extends State<GameHomePage>
         _activeSlot = slot;
         _engine = nextEngine;
         _game = save == null
-            ? _newGameWithAdaptiveTarget(_engine.newGame())
+            ? _engine.newGame()
             : _engine.restore(
                 secret: save.secret,
                 attempts: save.attempts,
@@ -997,7 +1011,7 @@ class _GameHomePageState extends State<GameHomePage>
       _settings = synchronizedSettings;
       if (difficultyChanged) {
         _engine = _engineFor(nextProgression, synchronizedSettings);
-        _game = _newGameWithAdaptiveTarget(_engine.newGame());
+        _game = _engine.newGame();
         _botTeam.reset(_game.minimum, _game.maximum);
         _message =
             'Difficulty changed to ${DifficultyRules.name(settings.difficultyId)}. A fresh round is ready.';
@@ -1132,7 +1146,7 @@ class _GameHomePageState extends State<GameHomePage>
         systems: ProgressionState.initial.legacySystems,
       );
       setState(() {
-        _game = _newGameWithAdaptiveTarget(_engine.newGame());
+        _game = _engine.newGame();
         _progression = ProgressionState.initial.copyWith(
           legacySystems: resetSystems,
         );
@@ -1229,7 +1243,7 @@ class _GameHomePageState extends State<GameHomePage>
       GtnApp.settingsNotifier.value = synchronizedSettings;
       if (oldRange != newRange) {
         _engine = _engineFor(progression, synchronizedSettings);
-        _game = _newGameWithAdaptiveTarget(_engine.newGame());
+        _game = _engine.newGame();
         _botTeam.reset(_game.minimum, _game.maximum);
         _message = 'Hardcore range changed. A fresh round is ready.';
       }
@@ -1541,7 +1555,7 @@ class _GameHomePageState extends State<GameHomePage>
         _progression = nextProgression;
         if (isBot) {
           if (correct) {
-            final nextGame = _newGameWithAdaptiveTarget(_engine.newGame());
+            final nextGame = _engine.newGame();
             _game = _engine.continueAfterCorrect(
               _game,
               nextGame,
@@ -1559,7 +1573,7 @@ class _GameHomePageState extends State<GameHomePage>
             );
           }
         } else if (correct) {
-          final nextGame = _newGameWithAdaptiveTarget(_engine.newGame());
+          final nextGame = _engine.newGame();
           _game = _engine.continueAfterCorrect(_game, nextGame);
           _botTeam.reset(_game.minimum, _game.maximum);
         }
@@ -1618,7 +1632,7 @@ class _GameHomePageState extends State<GameHomePage>
 
   Future<void> _newGame() async {
     setState(() {
-      _game = _newGameWithAdaptiveTarget(_engine.newGame());
+      _game = _engine.newGame();
       _botTeam.reset(_game.minimum, _game.maximum);
       _message = 'Make your move.';
       _controller.clear();
