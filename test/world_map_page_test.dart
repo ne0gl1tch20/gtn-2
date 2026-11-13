@@ -1,3 +1,5 @@
+import 'dart:ui' show Tristate;
+
 import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gtn_2/core/legacy/legacy_systems_state.dart';
@@ -103,11 +105,8 @@ void main() {
 
     expect(calls, isEmpty);
     expect(
-      tester
-          .getSemantics(lockedNode)
-          .flagsCollection
-          .contains(SemanticsFlag.isSelected),
-      isTrue,
+      tester.getSemantics(lockedNode).flagsCollection.isSelected,
+      Tristate.isTrue,
     );
     expect(find.text('Crystal Caverns'), findsWidgets);
     expect(find.text('Unlock world'), findsWidgets);
@@ -143,18 +142,12 @@ void main() {
 
     expect(calls, isEmpty);
     expect(
-      tester
-          .getSemantics(activeNode)
-          .flagsCollection
-          .contains(SemanticsFlag.isSelected),
-      isTrue,
+      tester.getSemantics(activeNode).flagsCollection.isSelected,
+      Tristate.isTrue,
     );
     expect(
-      tester
-          .getSemantics(otherNode)
-          .flagsCollection
-          .contains(SemanticsFlag.isSelected),
-      isFalse,
+      tester.getSemantics(otherNode).flagsCollection.isSelected,
+      Tristate.isFalse,
     );
   });
 
