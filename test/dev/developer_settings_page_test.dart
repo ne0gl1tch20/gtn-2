@@ -46,11 +46,16 @@ void main() {
         scrollable: find.byType(Scrollable).first,
       );
       await tester.enterText(commandField, '/help');
+      await tester.scrollUntilVisible(
+        find.text('Run command'),
+        120,
+        scrollable: find.byType(Scrollable).first,
+      );
       await tester.tap(find.text('Run command'));
       await tester.pumpAndSettle();
 
       await tester.scrollUntilVisible(
-        find.textContaining('[INFO][COMMAND_EXECUTED] /help'),
+        find.text('Diagnostic Log Viewer'),
         250,
         scrollable: find.byType(Scrollable).first,
       );
