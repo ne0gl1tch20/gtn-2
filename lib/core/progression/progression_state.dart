@@ -1,6 +1,12 @@
 import '../legacy/legacy_systems_state.dart';
 import '../numbers/big_number.dart';
 
+const Set<String> nebulaCosmeticIds = {
+  'cosmetic_nebula_ring',
+  'cosmetic_starfield',
+  'cosmetic_pixel_glow',
+};
+
 const Set<String> _randomEventSaveIds = {
   'cash_burst',
   'nebula_rain',
@@ -21,6 +27,7 @@ class ProgressionState {
     this.prestigeUpgrades = const {},
     this.ultraUpgrades = const {},
     this.nebulaItems = const {},
+    this.equippedCosmeticId,
     this.bossDamage = const {},
     this.defeatedBosses = const {},
     this.prestigeResets = 0,
@@ -47,6 +54,7 @@ class ProgressionState {
        legacySystems = legacySystems ?? LegacySystemsState.initial;
 
   final BigNumber money, prestige, ultra, nebula;
+  final String? equippedCosmeticId;
   final Map<String, int> upgrades,
       prestigeUpgrades,
       ultraUpgrades,
@@ -73,6 +81,7 @@ class ProgressionState {
     'prestigeUpgrades': prestigeUpgrades,
     'ultraUpgrades': ultraUpgrades,
     'nebulaItems': nebulaItems,
+    if (equippedCosmeticId != null) 'equippedCosmeticId': equippedCosmeticId!,
     'bossDamage': bossDamage,
     'defeatedBosses': defeatedBosses.toList(),
     'prestigeResets': prestigeResets,
@@ -129,6 +138,13 @@ class ProgressionState {
         result[entry.key as String] = entry.value as int;
       }
       return Map.unmodifiable(result);
+    }
+
+    final rawEquippedCosmeticId = json['equippedCosmeticId'];
+    if (rawEquippedCosmeticId != null &&
+        (rawEquippedCosmeticId is! String ||
+            !nebulaCosmeticIds.contains(rawEquippedCosmeticId))) {
+      throw const FormatException('Invalid equipped cosmetic ID.');
     }
 
     final rawLegacy = json['legacySystems'];
@@ -194,6 +210,7 @@ class ProgressionState {
       prestigeUpgrades: levels('prestigeUpgrades'),
       ultraUpgrades: levels('ultraUpgrades'),
       nebulaItems: levels('nebulaItems', optional: true),
+      equippedCosmeticId: rawEquippedCosmeticId as String?,
       bossDamage: Map.unmodifiable(bossDamage),
       defeatedBosses: Set.unmodifiable(defeatedBosses),
       prestigeResets: count('prestigeResets'),
@@ -224,6 +241,8 @@ class ProgressionState {
     Map<String, int>? prestigeUpgrades,
     Map<String, int>? ultraUpgrades,
     Map<String, int>? nebulaItems,
+    String? equippedCosmeticId,
+    bool clearEquippedCosmeticId = false,
     Map<String, int>? bossDamage,
     Set<String>? defeatedBosses,
     int? prestigeResets,
@@ -250,6 +269,9 @@ class ProgressionState {
     prestigeUpgrades: prestigeUpgrades ?? this.prestigeUpgrades,
     ultraUpgrades: ultraUpgrades ?? this.ultraUpgrades,
     nebulaItems: nebulaItems ?? this.nebulaItems,
+    equippedCosmeticId: clearEquippedCosmeticId
+        ? null
+        : equippedCosmeticId ?? this.equippedCosmeticId,
     bossDamage: bossDamage ?? this.bossDamage,
     defeatedBosses: defeatedBosses ?? this.defeatedBosses,
     prestigeResets: prestigeResets ?? this.prestigeResets,
