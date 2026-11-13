@@ -2,9 +2,9 @@
 
 **Authority:** GTN1 commit `fe9cf567169e19059e0330d08769fe454336ef94`  
 **Target snapshot:** GTN2 `main` at `2fbf14d9e3d47afc9946e5d8380c2c4d4652acdb`  
-**Inventory:** `docs/GTN1_SOURCE_INVENTORY.json` (107 production Kotlin files)
+**Inventory:** `docs/GTN1_SOURCE_INVENTORY.json` (Android app subset: 107 of 214 production Kotlin files)
 
-This is a file-level migration map, not a parity-completion claim. A mapped row only identifies the current Dart replacement and relevant regression-test surface. Behavioral equivalence remains governed by `docs/FINITE_PARITY_PLAN.md` and `docs/GTN1_TO_GTN2_MIGRATION_CHECKLIST.md`.
+This file maps only `app/src/main` Android application sources (107 of 214 production Kotlin files in the full GTN1 repository). Shared KMP, desktopApp and buildSrc mappings are tracked separately. This is a file-level migration map, not a parity-completion claim. A mapped row only identifies the current Dart replacement and relevant regression-test surface. Behavioral equivalence remains governed by `docs/FINITE_PARITY_PLAN.md` and `docs/GTN1_TO_GTN2_MIGRATION_CHECKLIST.md`.
 
 ## Inspected source files
 
@@ -120,7 +120,7 @@ This is a file-level migration map, not a parity-completion claim. A mapped row 
 
 ## Remaining work
 
-- [~] All 107 production Kotlin files have been inspected and assigned a target, N/A decision or explicit gap: 66 mapped/partial, 5 N/A, 36 unresolved gaps. Resolve the gaps and verify grouped replacements before marking this complete.
+- [~] All 107 Android app production Kotlin files have been inspected and assigned a target, N/A decision or explicit gap: 66 mapped/partial, 5 N/A, 36 gaps. The 50 shared KMP, 55 desktopApp and two buildSrc production files are not included in this map. Resolve the gaps and verify grouped replacements before marking this complete.
 - [ ] Identify grouped Dart replacements where one Dart module replaces multiple Kotlin classes.
 - [ ] Identify Android-only components and verify whether each has a Flutter plugin, platform-channel implementation, or a justified not-applicable decision for Windows.
 - [ ] Map every source file to the exact test or platform-verification evidence for its behavior.
