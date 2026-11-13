@@ -697,6 +697,7 @@ class GameDashboardPage extends StatelessWidget {
                 ),
               ),
               ),
+              ),
               if (loading)
                 Positioned.fill(
                   child: Stack(
