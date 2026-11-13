@@ -1,6 +1,5 @@
 import 'dart:ui' show Tristate;
 
-import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gtn_2/core/legacy/legacy_systems_state.dart';
 import 'package:gtn_2/core/numbers/big_number.dart';
