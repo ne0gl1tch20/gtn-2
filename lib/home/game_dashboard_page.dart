@@ -198,23 +198,23 @@ class GameDashboardPage extends StatelessWidget {
             destinations: [
               M3ENavigationBarDestination(
                 icon: Icon(Icons.public_rounded),
-                label: 'Beyond the Numbers',
+                label: AppLocalizations.text('nav_worlds', 'Beyond the Numbers'),
               ),
               M3ENavigationBarDestination(
                 icon: Icon(Icons.sports_esports_rounded),
-                label: 'Arcade',
+                label: AppLocalizations.text('nav_arcade', 'Arcade'),
               ),
               M3ENavigationBarDestination(
                 icon: Icon(Icons.play_arrow_rounded),
-                label: 'Play',
+                label: AppLocalizations.text('nav_play', 'Play'),
               ),
               M3ENavigationBarDestination(
                 icon: Icon(Icons.upgrade_rounded),
-                label: 'Upgrades',
+                label: AppLocalizations.text('nav_upgrades', 'Upgrades'),
               ),
               M3ENavigationBarDestination(
                 icon: Icon(Icons.menu_rounded),
-                label: 'More',
+                label: AppLocalizations.text('nav_more', 'More'),
               ),
             ],
             selectedIndex: selectedIndex,
