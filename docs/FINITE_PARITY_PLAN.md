@@ -39,7 +39,7 @@
 
 ### Stage 2 — Core gameplay and progression
 
-- [ ] Guess flow, number generation, validation, round lifecycle and difficulty rules.
+- [ ] Guess flow, number generation, validation, round lifecycle and difficulty rules.\n  - [x] Port GTN1's monotonic 50 ms manual-submission rate limit; automated bot submissions bypass it. Covered by `test/core/guess_rate_limit_policy_test.dart`.\n  - [ ] Port and verify GTN1's bounded adaptive next-target proposal/fallback and its difficulty/streak/attempt inputs.\n  - [ ] Compare the complete guess-state transition, invalid-range handling, source context and round lifecycle against GTN1.
 - [ ] Economy: Money, Nebula, rewards, multipliers, penalties, caps and big-number arithmetic.
 - [ ] Upgrades, prestige, Ultra progression and their reset/carry-over rules.
 - [ ] Traits, talents, mutators and relics, including actual gameplay effects.
