@@ -1958,9 +1958,18 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
             subtitle: Text('These links open in your browser.'),
           ),
           for (final link in const [
-            ('YouTube · @theg0ldne0_01', 'https://www.youtube.com/@theg0ldne0_01'),
-            ('Instagram · theg0ldne0_01', 'https://www.instagram.com/theg0ldne0_01/'),
-            ('NameMC · PearlSteve15', 'https://namemc.com/profile/PearlSteve15'),
+            (
+              'YouTube · @theg0ldne0_01',
+              'https://www.youtube.com/@theg0ldne0_01',
+            ),
+            (
+              'Instagram · theg0ldne0_01',
+              'https://www.instagram.com/theg0ldne0_01/',
+            ),
+            (
+              'NameMC · PearlSteve15',
+              'https://namemc.com/profile/PearlSteve15',
+            ),
             ('GitHub · ne0gl1tch20', 'https://github.com/ne0gl1tch20'),
             ('Website', 'https://ne0gl1tch20.github.io/GuessTheNumber'),
           ])
