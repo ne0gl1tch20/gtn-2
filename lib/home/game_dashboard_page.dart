@@ -232,8 +232,11 @@ class GameDashboardPage extends StatelessWidget {
         key: shellNavigatorKey,
         onGenerateRoute: (routeSettings) => MaterialPageRoute<void>(
           settings: routeSettings,
-          builder: (_) => Container(
-            decoration: BoxDecoration(
+          builder: (_) => Stack(
+            fit: StackFit.expand,
+            children: [
+              Container(
+                decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
@@ -693,7 +696,76 @@ class GameDashboardPage extends StatelessWidget {
                   ),
                 ),
               ),
-            ),
+              ),
+              if (loading)
+                Positioned.fill(
+                  child: Stack(
+                    children: [
+                      const ModalBarrier(
+                        dismissible: false,
+                        color: Color(0xB3000618),
+                      ),
+                      Center(
+                        child: Semantics(
+                          liveRegion: true,
+                          label: 'Loading your game',
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 320),
+                            child: Container(
+                              margin: const EdgeInsets.all(24),
+                              padding: const EdgeInsets.all(24),
+                              decoration: BoxDecoration(
+                                color: dark ? _panel : Colors.white,
+                                borderRadius: BorderRadius.circular(24),
+                                border: Border.all(color: line),
+                                boxShadow: const [
+                                  BoxShadow(
+                                    color: Color(0x33000000),
+                                    blurRadius: 28,
+                                    offset: Offset(0, 12),
+                                  ),
+                                ],
+                              ),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const SizedBox(
+                                    width: 34,
+                                    height: 34,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 3,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 20),
+                                  Text(
+                                    'Loading your game',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      color: foreground,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    'Restoring save slot $activeSlot and preparing your next round.',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      color: muted,
+                                      fontSize: 13,
+                                      height: 1.45,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
           ),
         ),
       ),
