@@ -31,7 +31,6 @@ class WorldMapPage extends StatefulWidget {
 class _WorldMapPageState extends State<WorldMapPage> {
   static const double _mapWidth = 920;
   static const double _mapHeight = 590;
-  static const List<(int, int)> _routes = [(0, 1), (1, 2), (1, 3), (2, 3)];
 
   late ProgressionState _state = widget.progression;
   late String _selectedWorldId = widget.progression.legacySystems.activeWorldId;
@@ -260,7 +259,7 @@ class _WorldMapPageState extends State<WorldMapPage> {
                                 child: CustomPaint(
                                   painter: _WorldRoutesPainter(
                                     worlds: WorldBossCatalog.worlds,
-                                    routes: _routes,
+                                    routes: WorldBossCatalog.routes,
                                     unlockedIds:
                                         _state.legacySystems.unlockedWorldIds,
                                     correctGuesses: _state.correctGuesses,
