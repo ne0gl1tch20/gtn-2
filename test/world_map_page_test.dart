@@ -122,7 +122,6 @@ void main() {
     );
     final calls = <(String, String)>[];
     final semantics = tester.ensureSemantics();
-    addTearDown(semantics.dispose);
 
     await pumpMap(
       tester,
