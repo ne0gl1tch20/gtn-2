@@ -13,6 +13,26 @@ void main() {
       );
     });
 
+    test('zero is a valid monotonic timestamp', () {
+      expect(
+        GuessRateLimitPolicy.isRateLimited(
+          lastSubmissionMicroseconds: 0,
+          nowMicroseconds: 1,
+        ),
+        isTrue,
+      );
+    });
+
+    test('supports negative monotonic clock origins', () {
+      expect(
+        GuessRateLimitPolicy.isRateLimited(
+          lastSubmissionMicroseconds: -100000,
+          nowMicroseconds: -60001,
+        ),
+        isTrue,
+      );
+    });
+
     test('blocks submissions before the 50 ms interval', () {
       expect(
         GuessRateLimitPolicy.isRateLimited(
