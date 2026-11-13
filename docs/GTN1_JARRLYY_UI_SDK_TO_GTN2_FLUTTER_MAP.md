@@ -21,7 +21,7 @@ The pinned `web-play/index.html` loads the SDK core, advanced runtime, host adap
 | `styles/jarrlyy-ui-advanced.css` | Advanced control/overlay styling for tabs, segmented controls, toolbars, accordions, sliders, banners, sheets, loading states and progress. | `lib/design/expressive_widgets.dart`; Flutter controls and native page widgets. | Partial — native controls exist; all source states, focus, responsive and reduced-motion variants need comparison. |
 | `icons/jarrlyy-icons.svg` | Small reusable SVG symbol sprite for the SDK's demo/component lab. | Native Flutter `Icon`/custom asset rendering; GTN1 Web Play also has its own inline icon sprite. | Partial/N/A for direct sprite loading — the HTML sprite transport is not used in Flutter; compare any icon that is actually used by a production screen rather than porting unused demo symbols. |
 
-## 2. TypeScript source and build configuration (9)
+## 2. TypeScript source and build configuration (10)
 
 These files author or export the generated JavaScript SDK. They are build/development sources, not runtime assets GTN2 must ship.
 
@@ -38,7 +38,7 @@ These files author or export the generated JavaScript SDK. They are build/develo
 | `typescript/tsconfig.core.json` | Emits classic-script core runtime from `runtime/jarrlyy-ui.ts`. | No JS runtime build; Flutter compiles Dart directly. | N/A — generated classic script is intentionally not shipped. |
 | `typescript/tsconfig.runtime.json` | Emits classic-script advanced runtime from `runtime/jarrlyy-ui-advanced.ts`. | No JS runtime build; Flutter compiles Dart directly. | N/A — generated classic script is intentionally not shipped. |
 
-## 3. Demo-only and documentation files (7)
+## 3. Demo-only and documentation files (6)
 
 | GTN1 SDK file | Purpose | GTN2 mapping |
 |---|---|---|
@@ -51,7 +51,7 @@ These files author or export the generated JavaScript SDK. They are build/develo
 
 ## 4. Inventory reconciliation and open behavior
 
-- **24/24 files reviewed:** 8 runtime/presentation assets, 9 TypeScript source/build files, and 6? demo/documentation files. The pinned tree's exact 24-file list is the authority; the grouped rows above should be read as a file inventory, not a claim that every demo artifact ships in the production Web Play shell.
+- **24/24 files reviewed:** 8 runtime/presentation assets, 10 TypeScript source/build files and 6 demo/documentation files. The pinned tree's exact 24-file list is the authority; the grouped rows above distinguish production-loaded assets from build-time and demo-only files.
 - **Production runtime usage confirmed from the pinned `index.html`:** core CSS, advanced CSS, core JS, advanced JS, host adapter, trait extension host, Vue/Jarrlyy adapter, Vue runtime, Pixi runtime, particle effects, bot arena, DOM utilities, `app.js` and Menu Studio.
 - **Confirmed partial behavior:** dialogs/toasts/tours, controls/events, focus and keyboard semantics, progress/motion, particle bursts, icon semantics, reduced motion and all CSS visual treatments.
 - **Intentional N/A:** DOM/HTML/Vue host transport, TypeScript compilation and standalone SDK demo gallery. This does not mark the equivalent player-facing behavior complete.
