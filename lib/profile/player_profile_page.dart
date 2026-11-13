@@ -249,7 +249,9 @@ class _PlayerProfilePageState extends State<PlayerProfilePage> {
                   boxShadow: widget.equippedCosmeticId == 'cosmetic_pixel_glow'
                       ? [
                           BoxShadow(
-                            color: theme.colorScheme.tertiary.withValues(alpha: 0.65),
+                            color: theme.colorScheme.tertiary.withValues(
+                              alpha: 0.65,
+                            ),
                             blurRadius: 24,
                             spreadRadius: 4,
                           ),
