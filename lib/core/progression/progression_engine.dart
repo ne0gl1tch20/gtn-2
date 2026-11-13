@@ -122,6 +122,31 @@ class ProgressionEngine {
     );
   }
 
+  ProgressionState purchaseUpgradeLevels(
+    ProgressionState state,
+    UpgradeDefinition definition, {
+    required int levels,
+  }) {
+    if (levels < 1) return state;
+    final currentLevel = state.upgrades[definition.id] ?? 0;
+    final maxLevel = definition.maxLevel ?? 999999;
+    if (currentLevel >= maxLevel || levels > maxLevel - currentLevel) {
+      return state;
+    }
+    var totalCost = BigNumber.fromInt(0);
+    for (var index = 0; index < levels; index++) {
+      totalCost += definition.costAtLevel(currentLevel + index);
+    }
+    if (state.money.compareTo(totalCost) < 0) return state;
+    final updatedLevels = Map<String, int>.of(state.upgrades)
+      ..[definition.id] = currentLevel + levels;
+    return state.copyWith(
+      money: state.money - totalCost,
+      moneySpent: state.moneySpent + totalCost,
+      upgrades: Map.unmodifiable(updatedLevels),
+    );
+  }
+
   ProgressionState purchasePrestigeUpgrade(
     ProgressionState state,
     UpgradeDefinition definition,
