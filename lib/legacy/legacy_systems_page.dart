@@ -1864,9 +1864,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Update channel: $_updateChannelLabel',
-                ),
+                Text('Update channel: $_updateChannelLabel'),
                 const Text(
                   'Flutter continuation of the original Kotlin game. Offline-first local saves.',
                 ),
