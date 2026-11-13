@@ -95,9 +95,7 @@ class AdaptiveTargetGenerator {
     return value ^ (value >> 31);
   }
 
-  static BigInt _difficultySalt(String difficultyId) => switch (
-    difficultyId
-  ) {
+  static BigInt _difficultySalt(String difficultyId) => switch (difficultyId) {
     'extreme' => BigInt.parse('E17E4E9B5A7C31D1', radix: 16),
     'hard' => BigInt.parse('A11CE5D4B8F23071', radix: 16),
     _ => BigInt.parse('C1A551C0DE2026A1', radix: 16),
