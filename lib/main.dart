@@ -1692,10 +1692,10 @@ class _GameHomePageState extends State<GameHomePage>
           }
         } else if (correct) {
           final nextGame = _newGameAfterCorrectGuess(
-              _engine.newGame(),
-              beforeGuess,
-              attempts: previousAttempts,
-            );
+            _engine.newGame(),
+            beforeGuess,
+            attempts: previousAttempts,
+          );
           _game = _engine.continueAfterCorrect(_game, nextGame);
           _botTeam.reset(_game.minimum, _game.maximum);
         }
