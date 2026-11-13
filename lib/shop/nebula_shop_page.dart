@@ -228,7 +228,8 @@ class _NebulaShopPageState extends State<NebulaShopPage> {
             ),
           ],
           const SizedBox(height: 16),
-          if (NebulaShopCatalog.botIds.any(
+          if ((_selectedCategory == 'all' || _selectedCategory == 'automation') &&
+              NebulaShopCatalog.botIds.any(
             (id) => (_state.nebulaItems[id] ?? 0) > 0,
           ))
             GtnExpressiveSwitchTile(
@@ -281,8 +282,7 @@ class _NebulaShopPageState extends State<NebulaShopPage> {
                       ),
                     ),
                     const SizedBox(height: 12),
-                    if (item.isCosmetic &&
-                        (_state.nebulaItems[item.id] ?? 0) > 0)
+                    if (item.isCosmetic && (_state.nebulaItems[item.id] ?? 0) > 0)
                       M3EButton.filled(
                         onPressed:
                             _equippingId != null ||
@@ -300,11 +300,7 @@ class _NebulaShopPageState extends State<NebulaShopPage> {
                       onPressed:
                           _buyingId != null ||
                               _state.nebula.compareTo(item.price) < 0 ||
-                              ((NebulaShopCatalog.automationIds.contains(
-                                        item.id,
-                                      ) ||
-                                      item.isCosmetic) &&
-                                  (_state.nebulaItems[item.id] ?? 0) > 0) ||
+                              (_state.nebulaItems[item.id] ?? 0) > 0 ||
                               (NebulaShopCatalog.botUpgradeIds.contains(
                                     item.id,
                                   ) &&
@@ -314,9 +310,7 @@ class _NebulaShopPageState extends State<NebulaShopPage> {
                           ? null
                           : () => _buy(item),
                       child: Text(
-                        (NebulaShopCatalog.automationIds.contains(item.id) ||
-                                    item.isCosmetic) &&
-                                (_state.nebulaItems[item.id] ?? 0) > 0
+                        (_state.nebulaItems[item.id] ?? 0) > 0
                             ? 'Purchased'
                             : 'Buy · ${item.price} Nebula',
                       ),
