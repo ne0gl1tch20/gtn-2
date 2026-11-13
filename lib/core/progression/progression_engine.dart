@@ -320,6 +320,7 @@ class ProgressionEngine {
       nebulaItems: Map.unmodifiable(inventory),
     );
   }
+
   ProgressionState equipNebulaCosmetic(
     ProgressionState state,
     String cosmeticId,
@@ -331,5 +332,4 @@ class ProgressionEngine {
     if (state.equippedCosmeticId == cosmeticId) return state;
     return state.copyWith(equippedCosmeticId: cosmeticId);
   }
-
 }
