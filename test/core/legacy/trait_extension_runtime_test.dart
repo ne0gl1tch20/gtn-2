@@ -406,7 +406,8 @@ void main() {
             },
         ],
         files: {
-          for (var index = 0; index < 9; index++) 'rules_$index.json': '{}',
+          for (var index = 0; index < 9; index++)
+            'rules_$index.json': '{}',
         },
       ),
       throwsA(isA<FormatException>()),

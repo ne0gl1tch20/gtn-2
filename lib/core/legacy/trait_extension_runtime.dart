@@ -107,9 +107,10 @@ class TraitExtensionRuntime {
     'JAVASCRIPT': {'render_ui', 'show_local_message'},
   };
 
-  static final RegExp _traitIdPattern = RegExp(r'^[a-z][a-z0-9_.-]{1,63}
-  static final RegExp _moduleIdPattern = RegExp(r'^[a-z][a-z0-9_-]{0,47}
-  static final RegExp _pathSegmentPattern = RegExp(r'^[A-Za-z0-9_-][A-Za-z0-9_.-]*
+  static final RegExp _traitIdPattern = RegExp(r'^[a-z][a-z0-9_.-]{1,63}$');
+  static final RegExp _moduleIdPattern = RegExp(r'^[a-z][a-z0-9_-]{0,47}$');
+  static final RegExp _pathSegmentPattern =
+      RegExp(r'^[A-Za-z0-9_-][A-Za-z0-9_.-]*$');
   static final RegExp _forbiddenJavaScript = RegExp(
     r'\b(eval|fetch|XMLHttpRequest|WebSocket|importScripts|parent|top|opener|localStorage|sessionStorage|indexedDB|navigator|location|Worker|BroadcastChannel|postMessage)\b|\bnew\s+Function\b|\bFunction\s*\(|\bwindow\s*\.|\bdocument\s*\.|\bandroid\s*\.|\bJava\s*\.',
     caseSensitive: false,
