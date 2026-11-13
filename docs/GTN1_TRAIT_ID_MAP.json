@@ -1,0 +1,1611 @@
+{
+  "schemaVersion": 1,
+  "sourceRepository": "ne0gl1tch20/GuessTheNumber",
+  "sourceCommit": "fe9cf567169e19059e0330d08769fe454336ef94",
+  "dartRepository": "ne0gl1tch20/gtn-2",
+  "dartFile": "lib/core/legacy/builtin_trait_catalog.dart",
+  "count": 320,
+  "comparison": "GTN1 BuiltInTraits.kt stable IDs compared to GTN2 builtInTraitCatalog stable IDs.",
+  "entries": [
+    {
+      "sourceId": "steady_start",
+      "dartId": "steady_start",
+      "status": "exact"
+    },
+    {
+      "sourceId": "quick_learner",
+      "dartId": "quick_learner",
+      "status": "exact"
+    },
+    {
+      "sourceId": "first_prestige",
+      "dartId": "first_prestige",
+      "status": "exact"
+    },
+    {
+      "sourceId": "veteran_focus",
+      "dartId": "veteran_focus",
+      "status": "exact"
+    },
+    {
+      "sourceId": "streak_guard",
+      "dartId": "streak_guard",
+      "status": "exact"
+    },
+    {
+      "sourceId": "focus_streak",
+      "dartId": "focus_streak",
+      "status": "exact"
+    },
+    {
+      "sourceId": "nebula_finder",
+      "dartId": "nebula_finder",
+      "status": "exact"
+    },
+    {
+      "sourceId": "nebula_hunter",
+      "dartId": "nebula_hunter",
+      "status": "exact"
+    },
+    {
+      "sourceId": "comet_collector",
+      "dartId": "comet_collector",
+      "status": "exact"
+    },
+    {
+      "sourceId": "hidden_night_owl",
+      "dartId": "hidden_night_owl",
+      "status": "exact"
+    },
+    {
+      "sourceId": "hidden_century_club",
+      "dartId": "hidden_century_club",
+      "status": "exact"
+    },
+    {
+      "sourceId": "hidden_precision_mind",
+      "dartId": "hidden_precision_mind",
+      "status": "exact"
+    },
+    {
+      "sourceId": "autumn_glow",
+      "dartId": "autumn_glow",
+      "status": "exact"
+    },
+    {
+      "sourceId": "winter_comet",
+      "dartId": "winter_comet",
+      "status": "exact"
+    },
+    {
+      "sourceId": "spring_spark",
+      "dartId": "spring_spark",
+      "status": "exact"
+    },
+    {
+      "sourceId": "summer_bloom",
+      "dartId": "summer_bloom",
+      "status": "exact"
+    },
+    {
+      "sourceId": "core_spark",
+      "dartId": "core_spark",
+      "status": "exact"
+    },
+    {
+      "sourceId": "calm_solver",
+      "dartId": "calm_solver",
+      "status": "exact"
+    },
+    {
+      "sourceId": "hundred_consecutive_guesses",
+      "dartId": "hundred_consecutive_guesses",
+      "status": "exact"
+    },
+    {
+      "sourceId": "first_hundred",
+      "dartId": "first_hundred",
+      "status": "exact"
+    },
+    {
+      "sourceId": "guess_marathon",
+      "dartId": "guess_marathon",
+      "status": "exact"
+    },
+    {
+      "sourceId": "clean_sweep",
+      "dartId": "clean_sweep",
+      "status": "exact"
+    },
+    {
+      "sourceId": "lucky_read",
+      "dartId": "lucky_read",
+      "status": "exact"
+    },
+    {
+      "sourceId": "century_spark",
+      "dartId": "century_spark",
+      "status": "exact"
+    },
+    {
+      "sourceId": "sharp_instinct",
+      "dartId": "sharp_instinct",
+      "status": "exact"
+    },
+    {
+      "sourceId": "early_bird",
+      "dartId": "early_bird",
+      "status": "exact"
+    },
+    {
+      "sourceId": "level_spark",
+      "dartId": "level_spark",
+      "status": "exact"
+    },
+    {
+      "sourceId": "growth_momentum",
+      "dartId": "growth_momentum",
+      "status": "exact"
+    },
+    {
+      "sourceId": "mastery_path",
+      "dartId": "mastery_path",
+      "status": "exact"
+    },
+    {
+      "sourceId": "experience_scholar",
+      "dartId": "experience_scholar",
+      "status": "exact"
+    },
+    {
+      "sourceId": "milestone_runner",
+      "dartId": "milestone_runner",
+      "status": "exact"
+    },
+    {
+      "sourceId": "ascendant_mind",
+      "dartId": "ascendant_mind",
+      "status": "exact"
+    },
+    {
+      "sourceId": "steady_climb",
+      "dartId": "steady_climb",
+      "status": "exact"
+    },
+    {
+      "sourceId": "bright_future",
+      "dartId": "bright_future",
+      "status": "exact"
+    },
+    {
+      "sourceId": "skill_compass",
+      "dartId": "skill_compass",
+      "status": "exact"
+    },
+    {
+      "sourceId": "rising_legend",
+      "dartId": "rising_legend",
+      "status": "exact"
+    },
+    {
+      "sourceId": "clean_hit",
+      "dartId": "clean_hit",
+      "status": "exact"
+    },
+    {
+      "sourceId": "narrow_margin",
+      "dartId": "narrow_margin",
+      "status": "exact"
+    },
+    {
+      "sourceId": "perfect_read",
+      "dartId": "perfect_read",
+      "status": "exact"
+    },
+    {
+      "sourceId": "sharp_eye",
+      "dartId": "sharp_eye",
+      "status": "exact"
+    },
+    {
+      "sourceId": "careful_guess",
+      "dartId": "careful_guess",
+      "status": "exact"
+    },
+    {
+      "sourceId": "exact_instinct",
+      "dartId": "exact_instinct",
+      "status": "exact"
+    },
+    {
+      "sourceId": "focused_line",
+      "dartId": "focused_line",
+      "status": "exact"
+    },
+    {
+      "sourceId": "pinpoint_path",
+      "dartId": "pinpoint_path",
+      "status": "exact"
+    },
+    {
+      "sourceId": "clear_signal",
+      "dartId": "clear_signal",
+      "status": "exact"
+    },
+    {
+      "sourceId": "true_north",
+      "dartId": "true_north",
+      "status": "exact"
+    },
+    {
+      "sourceId": "long_runner",
+      "dartId": "long_runner",
+      "status": "exact"
+    },
+    {
+      "sourceId": "patient_pulse",
+      "dartId": "patient_pulse",
+      "status": "exact"
+    },
+    {
+      "sourceId": "unbroken_focus",
+      "dartId": "unbroken_focus",
+      "status": "exact"
+    },
+    {
+      "sourceId": "marathon_mind",
+      "dartId": "marathon_mind",
+      "status": "exact"
+    },
+    {
+      "sourceId": "calm_return",
+      "dartId": "calm_return",
+      "status": "exact"
+    },
+    {
+      "sourceId": "steady_hand",
+      "dartId": "steady_hand",
+      "status": "exact"
+    },
+    {
+      "sourceId": "persistent_path",
+      "dartId": "persistent_path",
+      "status": "exact"
+    },
+    {
+      "sourceId": "quiet_grit",
+      "dartId": "quiet_grit",
+      "status": "exact"
+    },
+    {
+      "sourceId": "iron_will",
+      "dartId": "iron_will",
+      "status": "exact"
+    },
+    {
+      "sourceId": "endless_horizon",
+      "dartId": "endless_horizon",
+      "status": "exact"
+    },
+    {
+      "sourceId": "startrail_scout",
+      "dartId": "startrail_scout",
+      "status": "exact"
+    },
+    {
+      "sourceId": "hidden_orbit",
+      "dartId": "hidden_orbit",
+      "status": "exact"
+    },
+    {
+      "sourceId": "comet_wayfinder",
+      "dartId": "comet_wayfinder",
+      "status": "exact"
+    },
+    {
+      "sourceId": "distant_signal",
+      "dartId": "distant_signal",
+      "status": "exact"
+    },
+    {
+      "sourceId": "rift_walker",
+      "dartId": "rift_walker",
+      "status": "exact"
+    },
+    {
+      "sourceId": "cosmic_cartographer",
+      "dartId": "cosmic_cartographer",
+      "status": "exact"
+    },
+    {
+      "sourceId": "far_horizon",
+      "dartId": "far_horizon",
+      "status": "exact"
+    },
+    {
+      "sourceId": "starlit_route",
+      "dartId": "starlit_route",
+      "status": "exact"
+    },
+    {
+      "sourceId": "unknown_frontier",
+      "dartId": "unknown_frontier",
+      "status": "exact"
+    },
+    {
+      "sourceId": "galaxy_roamer",
+      "dartId": "galaxy_roamer",
+      "status": "exact"
+    },
+    {
+      "sourceId": "nebula_whisper",
+      "dartId": "nebula_whisper",
+      "status": "exact"
+    },
+    {
+      "sourceId": "nebula_surveyor",
+      "dartId": "nebula_surveyor",
+      "status": "exact"
+    },
+    {
+      "sourceId": "nebula_lantern",
+      "dartId": "nebula_lantern",
+      "status": "exact"
+    },
+    {
+      "sourceId": "violet_cloud",
+      "dartId": "violet_cloud",
+      "status": "exact"
+    },
+    {
+      "sourceId": "cosmic_drift",
+      "dartId": "cosmic_drift",
+      "status": "exact"
+    },
+    {
+      "sourceId": "astral_haze",
+      "dartId": "astral_haze",
+      "status": "exact"
+    },
+    {
+      "sourceId": "cloud_chaser",
+      "dartId": "cloud_chaser",
+      "status": "exact"
+    },
+    {
+      "sourceId": "stardust_current",
+      "dartId": "stardust_current",
+      "status": "exact"
+    },
+    {
+      "sourceId": "nebula_keeper",
+      "dartId": "nebula_keeper",
+      "status": "exact"
+    },
+    {
+      "sourceId": "deep_space_glow",
+      "dartId": "deep_space_glow",
+      "status": "exact"
+    },
+    {
+      "sourceId": "rare_finder",
+      "dartId": "rare_finder",
+      "status": "exact"
+    },
+    {
+      "sourceId": "artifact_keeper",
+      "dartId": "artifact_keeper",
+      "status": "exact"
+    },
+    {
+      "sourceId": "relic_sleuth",
+      "dartId": "relic_sleuth",
+      "status": "exact"
+    },
+    {
+      "sourceId": "archive_builder",
+      "dartId": "archive_builder",
+      "status": "exact"
+    },
+    {
+      "sourceId": "curious_collector",
+      "dartId": "curious_collector",
+      "status": "exact"
+    },
+    {
+      "sourceId": "trove_tracker",
+      "dartId": "trove_tracker",
+      "status": "exact"
+    },
+    {
+      "sourceId": "shard_gatherer",
+      "dartId": "shard_gatherer",
+      "status": "exact"
+    },
+    {
+      "sourceId": "lost_token",
+      "dartId": "lost_token",
+      "status": "exact"
+    },
+    {
+      "sourceId": "pocket_museum",
+      "dartId": "pocket_museum",
+      "status": "exact"
+    },
+    {
+      "sourceId": "vault_curator",
+      "dartId": "vault_curator",
+      "status": "exact"
+    },
+    {
+      "sourceId": "quiet_discovery",
+      "dartId": "quiet_discovery",
+      "status": "exact"
+    },
+    {
+      "sourceId": "secret_listener",
+      "dartId": "secret_listener",
+      "status": "exact"
+    },
+    {
+      "sourceId": "hidden_pattern",
+      "dartId": "hidden_pattern",
+      "status": "exact"
+    },
+    {
+      "sourceId": "moonlit_secret",
+      "dartId": "moonlit_secret",
+      "status": "exact"
+    },
+    {
+      "sourceId": "unknown_answer",
+      "dartId": "unknown_answer",
+      "status": "exact"
+    },
+    {
+      "sourceId": "locked_lore",
+      "dartId": "locked_lore",
+      "status": "exact"
+    },
+    {
+      "sourceId": "secret_keeper",
+      "dartId": "secret_keeper",
+      "status": "exact"
+    },
+    {
+      "sourceId": "masked_mystery",
+      "dartId": "masked_mystery",
+      "status": "exact"
+    },
+    {
+      "sourceId": "silent_reveal",
+      "dartId": "silent_reveal",
+      "status": "exact"
+    },
+    {
+      "sourceId": "unseen_signal",
+      "dartId": "unseen_signal",
+      "status": "exact"
+    },
+    {
+      "sourceId": "no_hint_challenge",
+      "dartId": "no_hint_challenge",
+      "status": "exact"
+    },
+    {
+      "sourceId": "blind_guess_trial",
+      "dartId": "blind_guess_trial",
+      "status": "exact"
+    },
+    {
+      "sourceId": "narrow_window",
+      "dartId": "narrow_window",
+      "status": "exact"
+    },
+    {
+      "sourceId": "patient_trial",
+      "dartId": "patient_trial",
+      "status": "exact"
+    },
+    {
+      "sourceId": "reverse_logic",
+      "dartId": "reverse_logic",
+      "status": "exact"
+    },
+    {
+      "sourceId": "low_attempt_run",
+      "dartId": "low_attempt_run",
+      "status": "exact"
+    },
+    {
+      "sourceId": "focus_gauntlet",
+      "dartId": "focus_gauntlet",
+      "status": "exact"
+    },
+    {
+      "sourceId": "careful_cadence",
+      "dartId": "careful_cadence",
+      "status": "exact"
+    },
+    {
+      "sourceId": "clean_attempts",
+      "dartId": "clean_attempts",
+      "status": "exact"
+    },
+    {
+      "sourceId": "challenge_veteran",
+      "dartId": "challenge_veteran",
+      "status": "exact"
+    },
+    {
+      "sourceId": "world_student",
+      "dartId": "world_student",
+      "status": "exact"
+    },
+    {
+      "sourceId": "world_expert",
+      "dartId": "world_expert",
+      "status": "exact"
+    },
+    {
+      "sourceId": "domain_master",
+      "dartId": "domain_master",
+      "status": "exact"
+    },
+    {
+      "sourceId": "seasoned_solver",
+      "dartId": "seasoned_solver",
+      "status": "exact"
+    },
+    {
+      "sourceId": "expert_instinct",
+      "dartId": "expert_instinct",
+      "status": "exact"
+    },
+    {
+      "sourceId": "skill_foundry",
+      "dartId": "skill_foundry",
+      "status": "exact"
+    },
+    {
+      "sourceId": "mastery_beacon",
+      "dartId": "mastery_beacon",
+      "status": "exact"
+    },
+    {
+      "sourceId": "masterful_route",
+      "dartId": "masterful_route",
+      "status": "exact"
+    },
+    {
+      "sourceId": "deep_practice",
+      "dartId": "deep_practice",
+      "status": "exact"
+    },
+    {
+      "sourceId": "grandmaster_mark",
+      "dartId": "grandmaster_mark",
+      "status": "exact"
+    },
+    {
+      "sourceId": "kindred_player",
+      "dartId": "kindred_player",
+      "status": "exact"
+    },
+    {
+      "sourceId": "shared_spark",
+      "dartId": "shared_spark",
+      "status": "exact"
+    },
+    {
+      "sourceId": "friendly_signal",
+      "dartId": "friendly_signal",
+      "status": "exact"
+    },
+    {
+      "sourceId": "good_sport",
+      "dartId": "good_sport",
+      "status": "exact"
+    },
+    {
+      "sourceId": "community_light",
+      "dartId": "community_light",
+      "status": "exact"
+    },
+    {
+      "sourceId": "welcoming_wave",
+      "dartId": "welcoming_wave",
+      "status": "exact"
+    },
+    {
+      "sourceId": "helpful_guide",
+      "dartId": "helpful_guide",
+      "status": "exact"
+    },
+    {
+      "sourceId": "bright_companion",
+      "dartId": "bright_companion",
+      "status": "exact"
+    },
+    {
+      "sourceId": "common_ground",
+      "dartId": "common_ground",
+      "status": "exact"
+    },
+    {
+      "sourceId": "together_strong",
+      "dartId": "together_strong",
+      "status": "exact"
+    },
+    {
+      "sourceId": "quickdraw",
+      "dartId": "quickdraw",
+      "status": "exact"
+    },
+    {
+      "sourceId": "combo_starter",
+      "dartId": "combo_starter",
+      "status": "exact"
+    },
+    {
+      "sourceId": "score_chaser",
+      "dartId": "score_chaser",
+      "status": "exact"
+    },
+    {
+      "sourceId": "highscore_horizon",
+      "dartId": "highscore_horizon",
+      "status": "exact"
+    },
+    {
+      "sourceId": "neon_runner",
+      "dartId": "neon_runner",
+      "status": "exact"
+    },
+    {
+      "sourceId": "arcade_ace",
+      "dartId": "arcade_ace",
+      "status": "exact"
+    },
+    {
+      "sourceId": "pixel_pioneer",
+      "dartId": "pixel_pioneer",
+      "status": "exact"
+    },
+    {
+      "sourceId": "bonus_round",
+      "dartId": "bonus_round",
+      "status": "exact"
+    },
+    {
+      "sourceId": "cabinet_legend",
+      "dartId": "cabinet_legend",
+      "status": "exact"
+    },
+    {
+      "sourceId": "perfect_round",
+      "dartId": "perfect_round",
+      "status": "exact"
+    },
+    {
+      "sourceId": "trailblazer",
+      "dartId": "trailblazer",
+      "status": "exact"
+    },
+    {
+      "sourceId": "pathfinder_mark",
+      "dartId": "pathfinder_mark",
+      "status": "exact"
+    },
+    {
+      "sourceId": "wild_waypoint",
+      "dartId": "wild_waypoint",
+      "status": "exact"
+    },
+    {
+      "sourceId": "brave_detour",
+      "dartId": "brave_detour",
+      "status": "exact"
+    },
+    {
+      "sourceId": "hidden_cove",
+      "dartId": "hidden_cove",
+      "status": "exact"
+    },
+    {
+      "sourceId": "ancient_trail",
+      "dartId": "ancient_trail",
+      "status": "exact"
+    },
+    {
+      "sourceId": "compass_heart",
+      "dartId": "compass_heart",
+      "status": "exact"
+    },
+    {
+      "sourceId": "summit_seeker",
+      "dartId": "summit_seeker",
+      "status": "exact"
+    },
+    {
+      "sourceId": "roaming_star",
+      "dartId": "roaming_star",
+      "status": "exact"
+    },
+    {
+      "sourceId": "horizon_hopper",
+      "dartId": "horizon_hopper",
+      "status": "exact"
+    },
+    {
+      "sourceId": "tidy_inventory",
+      "dartId": "tidy_inventory",
+      "status": "exact"
+    },
+    {
+      "sourceId": "save_guardian",
+      "dartId": "save_guardian",
+      "status": "exact"
+    },
+    {
+      "sourceId": "smart_planner",
+      "dartId": "smart_planner",
+      "status": "exact"
+    },
+    {
+      "sourceId": "efficient_habit",
+      "dartId": "efficient_habit",
+      "status": "exact"
+    },
+    {
+      "sourceId": "clean_profile",
+      "dartId": "clean_profile",
+      "status": "exact"
+    },
+    {
+      "sourceId": "organized_mind",
+      "dartId": "organized_mind",
+      "status": "exact"
+    },
+    {
+      "sourceId": "thoughtful_setup",
+      "dartId": "thoughtful_setup",
+      "status": "exact"
+    },
+    {
+      "sourceId": "settings_sage",
+      "dartId": "settings_sage",
+      "status": "exact"
+    },
+    {
+      "sourceId": "backup_buddy",
+      "dartId": "backup_buddy",
+      "status": "exact"
+    },
+    {
+      "sourceId": "careful_keeper",
+      "dartId": "careful_keeper",
+      "status": "exact"
+    },
+    {
+      "sourceId": "bonus_bloom",
+      "dartId": "bonus_bloom",
+      "status": "exact"
+    },
+    {
+      "sourceId": "reward_rhythm",
+      "dartId": "reward_rhythm",
+      "status": "exact"
+    },
+    {
+      "sourceId": "nebula_saver",
+      "dartId": "nebula_saver",
+      "status": "exact"
+    },
+    {
+      "sourceId": "claim_crafter",
+      "dartId": "claim_crafter",
+      "status": "exact"
+    },
+    {
+      "sourceId": "generous_orbit",
+      "dartId": "generous_orbit",
+      "status": "exact"
+    },
+    {
+      "sourceId": "extra_spark",
+      "dartId": "extra_spark",
+      "status": "exact"
+    },
+    {
+      "sourceId": "reward_scout",
+      "dartId": "reward_scout",
+      "status": "exact"
+    },
+    {
+      "sourceId": "bonus_beacon",
+      "dartId": "bonus_beacon",
+      "status": "exact"
+    },
+    {
+      "sourceId": "bright_claim",
+      "dartId": "bright_claim",
+      "status": "exact"
+    },
+    {
+      "sourceId": "nebula_ledger",
+      "dartId": "nebula_ledger",
+      "status": "exact"
+    },
+    {
+      "sourceId": "autumn_echo",
+      "dartId": "autumn_echo",
+      "status": "exact"
+    },
+    {
+      "sourceId": "winter_lantern",
+      "dartId": "winter_lantern",
+      "status": "exact"
+    },
+    {
+      "sourceId": "spring_sparkle",
+      "dartId": "spring_sparkle",
+      "status": "exact"
+    },
+    {
+      "sourceId": "summer_breeze",
+      "dartId": "summer_breeze",
+      "status": "exact"
+    },
+    {
+      "sourceId": "seasonal_memory",
+      "dartId": "seasonal_memory",
+      "status": "exact"
+    },
+    {
+      "sourceId": "event_explorer",
+      "dartId": "event_explorer",
+      "status": "exact"
+    },
+    {
+      "sourceId": "celebration_glow",
+      "dartId": "celebration_glow",
+      "status": "exact"
+    },
+    {
+      "sourceId": "festival_friend",
+      "dartId": "festival_friend",
+      "status": "exact"
+    },
+    {
+      "sourceId": "timekeeper_mark",
+      "dartId": "timekeeper_mark",
+      "status": "exact"
+    },
+    {
+      "sourceId": "special_moment",
+      "dartId": "special_moment",
+      "status": "exact"
+    },
+    {
+      "sourceId": "ten_step_mark",
+      "dartId": "ten_step_mark",
+      "status": "exact"
+    },
+    {
+      "sourceId": "fifty_guess_mark",
+      "dartId": "fifty_guess_mark",
+      "status": "exact"
+    },
+    {
+      "sourceId": "two_hundred_mark",
+      "dartId": "two_hundred_mark",
+      "status": "exact"
+    },
+    {
+      "sourceId": "five_hundred_mark",
+      "dartId": "five_hundred_mark",
+      "status": "exact"
+    },
+    {
+      "sourceId": "thousand_mark",
+      "dartId": "thousand_mark",
+      "status": "exact"
+    },
+    {
+      "sourceId": "long_path_mark",
+      "dartId": "long_path_mark",
+      "status": "exact"
+    },
+    {
+      "sourceId": "steady_milestone",
+      "dartId": "steady_milestone",
+      "status": "exact"
+    },
+    {
+      "sourceId": "landmark_finder",
+      "dartId": "landmark_finder",
+      "status": "exact"
+    },
+    {
+      "sourceId": "great_distance",
+      "dartId": "great_distance",
+      "status": "exact"
+    },
+    {
+      "sourceId": "legacy_milestone",
+      "dartId": "legacy_milestone",
+      "status": "exact"
+    },
+    {
+      "sourceId": "relic_maker",
+      "dartId": "relic_maker",
+      "status": "exact"
+    },
+    {
+      "sourceId": "token_weaver",
+      "dartId": "token_weaver",
+      "status": "exact"
+    },
+    {
+      "sourceId": "starforge",
+      "dartId": "starforge",
+      "status": "exact"
+    },
+    {
+      "sourceId": "bright_assembler",
+      "dartId": "bright_assembler",
+      "status": "exact"
+    },
+    {
+      "sourceId": "careful_crafter",
+      "dartId": "careful_crafter",
+      "status": "exact"
+    },
+    {
+      "sourceId": "artifact_smith",
+      "dartId": "artifact_smith",
+      "status": "exact"
+    },
+    {
+      "sourceId": "cosmic_stitcher",
+      "dartId": "cosmic_stitcher",
+      "status": "exact"
+    },
+    {
+      "sourceId": "fine_detail",
+      "dartId": "fine_detail",
+      "status": "exact"
+    },
+    {
+      "sourceId": "crafted_path",
+      "dartId": "crafted_path",
+      "status": "exact"
+    },
+    {
+      "sourceId": "masterwork_mark",
+      "dartId": "masterwork_mark",
+      "status": "exact"
+    },
+    {
+      "sourceId": "relic_whisper",
+      "dartId": "relic_whisper",
+      "status": "exact"
+    },
+    {
+      "sourceId": "guardian_trace",
+      "dartId": "guardian_trace",
+      "status": "exact"
+    },
+    {
+      "sourceId": "ancient_emblem",
+      "dartId": "ancient_emblem",
+      "status": "exact"
+    },
+    {
+      "sourceId": "shard_resonance",
+      "dartId": "shard_resonance",
+      "status": "exact"
+    },
+    {
+      "sourceId": "relic_harmony",
+      "dartId": "relic_harmony",
+      "status": "exact"
+    },
+    {
+      "sourceId": "sealed_relic",
+      "dartId": "sealed_relic",
+      "status": "exact"
+    },
+    {
+      "sourceId": "relic_spark",
+      "dartId": "relic_spark",
+      "status": "exact"
+    },
+    {
+      "sourceId": "keeper_of_shards",
+      "dartId": "keeper_of_shards",
+      "status": "exact"
+    },
+    {
+      "sourceId": "relic_compass",
+      "dartId": "relic_compass",
+      "status": "exact"
+    },
+    {
+      "sourceId": "relic_legend",
+      "dartId": "relic_legend",
+      "status": "exact"
+    },
+    {
+      "sourceId": "verdant_wanderer",
+      "dartId": "verdant_wanderer",
+      "status": "exact"
+    },
+    {
+      "sourceId": "crystal_roamer",
+      "dartId": "crystal_roamer",
+      "status": "exact"
+    },
+    {
+      "sourceId": "ember_traveler",
+      "dartId": "ember_traveler",
+      "status": "exact"
+    },
+    {
+      "sourceId": "rift_navigator",
+      "dartId": "rift_navigator",
+      "status": "exact"
+    },
+    {
+      "sourceId": "grove_friend",
+      "dartId": "grove_friend",
+      "status": "exact"
+    },
+    {
+      "sourceId": "cavern_cartographer",
+      "dartId": "cavern_cartographer",
+      "status": "exact"
+    },
+    {
+      "sourceId": "summit_watcher",
+      "dartId": "summit_watcher",
+      "status": "exact"
+    },
+    {
+      "sourceId": "observatory_guest",
+      "dartId": "observatory_guest",
+      "status": "exact"
+    },
+    {
+      "sourceId": "world_hopper",
+      "dartId": "world_hopper",
+      "status": "exact"
+    },
+    {
+      "sourceId": "world_anchor",
+      "dartId": "world_anchor",
+      "status": "exact"
+    },
+    {
+      "sourceId": "vault_whisper",
+      "dartId": "vault_whisper",
+      "status": "exact"
+    },
+    {
+      "sourceId": "hidden_hollow",
+      "dartId": "hidden_hollow",
+      "status": "exact"
+    },
+    {
+      "sourceId": "secret_archive",
+      "dartId": "secret_archive",
+      "status": "exact"
+    },
+    {
+      "sourceId": "sealed_chamber",
+      "dartId": "sealed_chamber",
+      "status": "exact"
+    },
+    {
+      "sourceId": "faint_footsteps",
+      "dartId": "faint_footsteps",
+      "status": "exact"
+    },
+    {
+      "sourceId": "unseen_door",
+      "dartId": "unseen_door",
+      "status": "exact"
+    },
+    {
+      "sourceId": "quiet_passage",
+      "dartId": "quiet_passage",
+      "status": "exact"
+    },
+    {
+      "sourceId": "mystery_map",
+      "dartId": "mystery_map",
+      "status": "exact"
+    },
+    {
+      "sourceId": "forgotten_key",
+      "dartId": "forgotten_key",
+      "status": "exact"
+    },
+    {
+      "sourceId": "secret_horizon",
+      "dartId": "secret_horizon",
+      "status": "exact"
+    },
+    {
+      "sourceId": "streak_starter",
+      "dartId": "streak_starter",
+      "status": "exact"
+    },
+    {
+      "sourceId": "streak_builder",
+      "dartId": "streak_builder",
+      "status": "exact"
+    },
+    {
+      "sourceId": "streak_keeper",
+      "dartId": "streak_keeper",
+      "status": "exact"
+    },
+    {
+      "sourceId": "rhythm_runner",
+      "dartId": "rhythm_runner",
+      "status": "exact"
+    },
+    {
+      "sourceId": "consecutive_climber",
+      "dartId": "consecutive_climber",
+      "status": "exact"
+    },
+    {
+      "sourceId": "chain_reaction",
+      "dartId": "chain_reaction",
+      "status": "exact"
+    },
+    {
+      "sourceId": "steady_sequence",
+      "dartId": "steady_sequence",
+      "status": "exact"
+    },
+    {
+      "sourceId": "clean_chain",
+      "dartId": "clean_chain",
+      "status": "exact"
+    },
+    {
+      "sourceId": "long_chain",
+      "dartId": "long_chain",
+      "status": "exact"
+    },
+    {
+      "sourceId": "unbroken_line",
+      "dartId": "unbroken_line",
+      "status": "exact"
+    },
+    {
+      "sourceId": "clever_opening",
+      "dartId": "clever_opening",
+      "status": "exact"
+    },
+    {
+      "sourceId": "range_reader",
+      "dartId": "range_reader",
+      "status": "exact"
+    },
+    {
+      "sourceId": "patient_strategy",
+      "dartId": "patient_strategy",
+      "status": "exact"
+    },
+    {
+      "sourceId": "adaptive_plan",
+      "dartId": "adaptive_plan",
+      "status": "exact"
+    },
+    {
+      "sourceId": "logical_route",
+      "dartId": "logical_route",
+      "status": "exact"
+    },
+    {
+      "sourceId": "careful_tactician",
+      "dartId": "careful_tactician",
+      "status": "exact"
+    },
+    {
+      "sourceId": "balanced_move",
+      "dartId": "balanced_move",
+      "status": "exact"
+    },
+    {
+      "sourceId": "planned_guess",
+      "dartId": "planned_guess",
+      "status": "exact"
+    },
+    {
+      "sourceId": "strategic_eye",
+      "dartId": "strategic_eye",
+      "status": "exact"
+    },
+    {
+      "sourceId": "master_plan",
+      "dartId": "master_plan",
+      "status": "exact"
+    },
+    {
+      "sourceId": "steady_rhythm",
+      "dartId": "steady_rhythm",
+      "status": "exact"
+    },
+    {
+      "sourceId": "tempo_keeper",
+      "dartId": "tempo_keeper",
+      "status": "exact"
+    },
+    {
+      "sourceId": "pulse_reader",
+      "dartId": "pulse_reader",
+      "status": "exact"
+    },
+    {
+      "sourceId": "cadence_builder",
+      "dartId": "cadence_builder",
+      "status": "exact"
+    },
+    {
+      "sourceId": "flowing_guesses",
+      "dartId": "flowing_guesses",
+      "status": "exact"
+    },
+    {
+      "sourceId": "measured_mind",
+      "dartId": "measured_mind",
+      "status": "exact"
+    },
+    {
+      "sourceId": "quick_pattern",
+      "dartId": "quick_pattern",
+      "status": "exact"
+    },
+    {
+      "sourceId": "calm_timing",
+      "dartId": "calm_timing",
+      "status": "exact"
+    },
+    {
+      "sourceId": "rhythm_scout",
+      "dartId": "rhythm_scout",
+      "status": "exact"
+    },
+    {
+      "sourceId": "perfect_pace",
+      "dartId": "perfect_pace",
+      "status": "exact"
+    },
+    {
+      "sourceId": "why_not",
+      "dartId": "why_not",
+      "status": "exact"
+    },
+    {
+      "sourceId": "question_mark",
+      "dartId": "question_mark",
+      "status": "exact"
+    },
+    {
+      "sourceId": "curious_mind",
+      "dartId": "curious_mind",
+      "status": "exact"
+    },
+    {
+      "sourceId": "wonder_walker",
+      "dartId": "wonder_walker",
+      "status": "exact"
+    },
+    {
+      "sourceId": "small_clue",
+      "dartId": "small_clue",
+      "status": "exact"
+    },
+    {
+      "sourceId": "pattern_peeker",
+      "dartId": "pattern_peeker",
+      "status": "exact"
+    },
+    {
+      "sourceId": "idea_spark",
+      "dartId": "idea_spark",
+      "status": "exact"
+    },
+    {
+      "sourceId": "oddity_hunter",
+      "dartId": "oddity_hunter",
+      "status": "exact"
+    },
+    {
+      "sourceId": "keen_question",
+      "dartId": "keen_question",
+      "status": "exact"
+    },
+    {
+      "sourceId": "wonder_keeper",
+      "dartId": "wonder_keeper",
+      "status": "exact"
+    },
+    {
+      "sourceId": "focus_anchor",
+      "dartId": "focus_anchor",
+      "status": "exact"
+    },
+    {
+      "sourceId": "quiet_center",
+      "dartId": "quiet_center",
+      "status": "exact"
+    },
+    {
+      "sourceId": "sharp_attention",
+      "dartId": "sharp_attention",
+      "status": "exact"
+    },
+    {
+      "sourceId": "deep_concentration",
+      "dartId": "deep_concentration",
+      "status": "exact"
+    },
+    {
+      "sourceId": "mindful_guess",
+      "dartId": "mindful_guess",
+      "status": "exact"
+    },
+    {
+      "sourceId": "focus_flare",
+      "dartId": "focus_flare",
+      "status": "exact"
+    },
+    {
+      "sourceId": "calm_precision",
+      "dartId": "calm_precision",
+      "status": "exact"
+    },
+    {
+      "sourceId": "clear_mind",
+      "dartId": "clear_mind",
+      "status": "exact"
+    },
+    {
+      "sourceId": "still_point",
+      "dartId": "still_point",
+      "status": "exact"
+    },
+    {
+      "sourceId": "focus_master",
+      "dartId": "focus_master",
+      "status": "exact"
+    },
+    {
+      "sourceId": "resilient_start",
+      "dartId": "resilient_start",
+      "status": "exact"
+    },
+    {
+      "sourceId": "bounce_back",
+      "dartId": "bounce_back",
+      "status": "exact"
+    },
+    {
+      "sourceId": "second_wind",
+      "dartId": "second_wind",
+      "status": "exact"
+    },
+    {
+      "sourceId": "patient_return",
+      "dartId": "patient_return",
+      "status": "exact"
+    },
+    {
+      "sourceId": "steady_recovery",
+      "dartId": "steady_recovery",
+      "status": "exact"
+    },
+    {
+      "sourceId": "calm_after_miss",
+      "dartId": "calm_after_miss",
+      "status": "exact"
+    },
+    {
+      "sourceId": "hopeful_path",
+      "dartId": "hopeful_path",
+      "status": "exact"
+    },
+    {
+      "sourceId": "iron_patience",
+      "dartId": "iron_patience",
+      "status": "exact"
+    },
+    {
+      "sourceId": "keep_going",
+      "dartId": "keep_going",
+      "status": "exact"
+    },
+    {
+      "sourceId": "resilient_heart",
+      "dartId": "resilient_heart",
+      "status": "exact"
+    },
+    {
+      "sourceId": "lucky_compass",
+      "dartId": "lucky_compass",
+      "status": "exact"
+    },
+    {
+      "sourceId": "fortune_flicker",
+      "dartId": "fortune_flicker",
+      "status": "exact"
+    },
+    {
+      "sourceId": "chance_keeper",
+      "dartId": "chance_keeper",
+      "status": "exact"
+    },
+    {
+      "sourceId": "bright_omen",
+      "dartId": "bright_omen",
+      "status": "exact"
+    },
+    {
+      "sourceId": "comet_luck",
+      "dartId": "comet_luck",
+      "status": "exact"
+    },
+    {
+      "sourceId": "lucky_horizon",
+      "dartId": "lucky_horizon",
+      "status": "exact"
+    },
+    {
+      "sourceId": "fortunate_find",
+      "dartId": "fortunate_find",
+      "status": "exact"
+    },
+    {
+      "sourceId": "silver_signal",
+      "dartId": "silver_signal",
+      "status": "exact"
+    },
+    {
+      "sourceId": "star_catcher",
+      "dartId": "star_catcher",
+      "status": "exact"
+    },
+    {
+      "sourceId": "lucky_legend",
+      "dartId": "lucky_legend",
+      "status": "exact"
+    },
+    {
+      "sourceId": "lunar_reader",
+      "dartId": "lunar_reader",
+      "status": "exact"
+    },
+    {
+      "sourceId": "solar_spark",
+      "dartId": "solar_spark",
+      "status": "exact"
+    },
+    {
+      "sourceId": "orbit_keeper",
+      "dartId": "orbit_keeper",
+      "status": "exact"
+    },
+    {
+      "sourceId": "comet_watch",
+      "dartId": "comet_watch",
+      "status": "exact"
+    },
+    {
+      "sourceId": "constellation_mind",
+      "dartId": "constellation_mind",
+      "status": "exact"
+    },
+    {
+      "sourceId": "meteor_tracker",
+      "dartId": "meteor_tracker",
+      "status": "exact"
+    },
+    {
+      "sourceId": "stargazer",
+      "dartId": "stargazer",
+      "status": "exact"
+    },
+    {
+      "sourceId": "eclipse_echo",
+      "dartId": "eclipse_echo",
+      "status": "exact"
+    },
+    {
+      "sourceId": "cosmic_calendar",
+      "dartId": "cosmic_calendar",
+      "status": "exact"
+    },
+    {
+      "sourceId": "celestial_guide",
+      "dartId": "celestial_guide",
+      "status": "exact"
+    },
+    {
+      "sourceId": "autumn_orbit",
+      "dartId": "autumn_orbit",
+      "status": "exact"
+    },
+    {
+      "sourceId": "winter_cometlight",
+      "dartId": "winter_cometlight",
+      "status": "exact"
+    },
+    {
+      "sourceId": "spring_orbit",
+      "dartId": "spring_orbit",
+      "status": "exact"
+    },
+    {
+      "sourceId": "summer_nova",
+      "dartId": "summer_nova",
+      "status": "exact"
+    },
+    {
+      "sourceId": "frost_whisper",
+      "dartId": "frost_whisper",
+      "status": "exact"
+    },
+    {
+      "sourceId": "leaflight",
+      "dartId": "leaflight",
+      "status": "exact"
+    },
+    {
+      "sourceId": "bloom_chaser",
+      "dartId": "bloom_chaser",
+      "status": "exact"
+    },
+    {
+      "sourceId": "solstice_spark",
+      "dartId": "solstice_spark",
+      "status": "exact"
+    },
+    {
+      "sourceId": "equinox_echo",
+      "dartId": "equinox_echo",
+      "status": "exact"
+    },
+    {
+      "sourceId": "harvest_glow",
+      "dartId": "harvest_glow",
+      "status": "exact"
+    },
+    {
+      "sourceId": "combo_momentum",
+      "dartId": "combo_momentum",
+      "status": "exact"
+    },
+    {
+      "sourceId": "range_scout",
+      "dartId": "range_scout",
+      "status": "exact"
+    },
+    {
+      "sourceId": "mistake_insurance",
+      "dartId": "mistake_insurance",
+      "status": "exact"
+    },
+    {
+      "sourceId": "risk_reward",
+      "dartId": "risk_reward",
+      "status": "exact"
+    }
+  ]
+}
