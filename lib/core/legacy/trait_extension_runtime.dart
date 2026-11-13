@@ -85,8 +85,7 @@ class TraitModuleDecision {
 /// Lua runs in the bounded sandbox. JSON is declarative. JavaScript is returned
 /// as presentation data and is never evaluated by this runtime.
 class TraitExtensionRuntime {
-  const TraitExtensionRuntime({LuaSandbox sandbox = const LuaSandbox()})
-    : _sandbox = sandbox;
+  const TraitExtensionRuntime() : _sandbox = const LuaSandbox();
 
   static const int maxModules = 8;
   static const int maxSourceCharacters = 32768;
@@ -207,7 +206,7 @@ class TraitExtensionRuntime {
         if (!entrypoint.toLowerCase().endsWith('.lua')) {
           throw const FormatException('Lua modules must use .lua entrypoints.');
         }
-        await _sandbox.validate(scriptId: '${traitId}_${id}', source: source);
+        await _sandbox.validate(scriptId: '${traitId}_$id', source: source);
       } else if (type == 'JSON') {
         if (!entrypoint.toLowerCase().endsWith('.json')) {
           throw const FormatException(
