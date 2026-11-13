@@ -44,6 +44,11 @@
   - [x] Port and verify GTN1's bounded adaptive next-target algorithm: 64-bit mixing, difficulty salt, streak/attempt pressure and range clamping. Its 128-case reference checksum matches GTN1 in `test/core/adaptive_target_generator_test.dart`; Android supplies pre-guess streak and attempt counts, while Windows retains its platform fallback.
   - [ ] Compare the complete guess-state transition, invalid-range handling, source context and round lifecycle against GTN1.
 - [ ] Economy: Money, Nebula, rewards, multipliers, penalties, caps and big-number arithmetic.
+  - [x] Verify GTN1 reward constants and formulas: 100 Money per range unit, 10 minimum, +10% per prior streak, five-guess frenzy tiers capped at 5×, 5× critical, +25% per reward upgrade level and 1.5× Prestige talent reward. Evidence: `lib/core/game/guess_economy_rules.dart`, `test/core/guess_economy_rules_test.dart`, GTN1 `GuessRewardRules.kt` and `FrenzyRules.kt`.
+  - [x] Verify difficulty reward and miss-penalty rates (Classic 1×/0%, Hard 1.5×/2%, Extreme 2.5×/5%) and valid configured range behavior. Evidence: `lib/core/game/difficulty_rules.dart`, `test/core/difficulty_rules_test.dart`, GTN1 `DifficultyRules.kt`.
+  - [x] Verify mutator identifiers, invalid-ID filtering, reward stacking (2×/3×/5×/10×), Hardcore range doubling and Tax 5% penalty. Evidence: `lib/core/legacy/legacy_systems_engine.dart`, `test/core/legacy/legacy_systems_engine_test.dart`, GTN1 `MutatorRules.kt` and `GuessPenaltyRules.kt`.
+  - [x] Verify permanent Prestige/Ultra Money boost compounding and BigNumber reward minimum/order. Evidence: `GuessEconomyRules.moneyEarningMultiplier`, `correctGuessReward` and `test/core/guess_economy_rules_test.dart`.
+  - [ ] Compare end-to-end Money/Nebula settlement, all caps, offline earnings, rounding and save persistence against GTN1 transaction tests.
 - [ ] Upgrades, prestige, Ultra progression and their reset/carry-over rules.
 - [ ] Traits, talents, mutators and relics, including actual gameplay effects.
 - [ ] Worlds, bosses, battles, mastery, secrets, codex and claim-once rewards.
