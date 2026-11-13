@@ -122,6 +122,31 @@ class ProgressionEngine {
     );
   }
 
+  ProgressionState purchaseUpgradeLevels(
+    ProgressionState state,
+    UpgradeDefinition definition, {
+    required int levels,
+  }) {
+    if (levels < 1) return state;
+    final currentLevel = state.upgrades[definition.id] ?? 0;
+    final maxLevel = definition.maxLevel ?? 999999;
+    if (currentLevel >= maxLevel || levels > maxLevel - currentLevel) {
+      return state;
+    }
+    var totalCost = BigNumber.fromInt(0);
+    for (var index = 0; index < levels; index++) {
+      totalCost += definition.costAtLevel(currentLevel + index);
+    }
+    if (state.money.compareTo(totalCost) < 0) return state;
+    final updatedLevels = Map<String, int>.of(state.upgrades)
+      ..[definition.id] = currentLevel + levels;
+    return state.copyWith(
+      money: state.money - totalCost,
+      moneySpent: state.moneySpent + totalCost,
+      upgrades: Map.unmodifiable(updatedLevels),
+    );
+  }
+
   ProgressionState purchasePrestigeUpgrade(
     ProgressionState state,
     UpgradeDefinition definition,
@@ -283,6 +308,10 @@ class ProgressionEngine {
     if (itemId.isEmpty || itemPrice.compareTo(BigNumber.fromInt(0)) < 0) {
       throw ArgumentError('Invalid Nebula shop purchase.');
     }
+    if (nebulaSinglePurchaseItemIds.contains(itemId) &&
+        (state.nebulaItems[itemId] ?? 0) > 0) {
+      return state;
+    }
     if (state.nebula.compareTo(itemPrice) < 0) return state;
     final inventory = Map<String, int>.of(state.nebulaItems)
       ..[itemId] = (state.nebulaItems[itemId] ?? 0) + 1;
@@ -290,5 +319,17 @@ class ProgressionEngine {
       nebula: state.nebula - itemPrice,
       nebulaItems: Map.unmodifiable(inventory),
     );
+  }
+
+  ProgressionState equipNebulaCosmetic(
+    ProgressionState state,
+    String cosmeticId,
+  ) {
+    if (!nebulaCosmeticIds.contains(cosmeticId) ||
+        (state.nebulaItems[cosmeticId] ?? 0) < 1) {
+      return state;
+    }
+    if (state.equippedCosmeticId == cosmeticId) return state;
+    return state.copyWith(equippedCosmeticId: cosmeticId);
   }
 }

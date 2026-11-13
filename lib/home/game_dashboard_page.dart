@@ -2,10 +2,13 @@ import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../core/game/game_engine.dart';
+import '../core/numbers/big_number.dart';
 import '../core/progression/progression_state.dart';
 import '../design/expressive_widgets.dart';
+import '../i18n/app_localizations.dart';
 import '../legacy/legacy_pages.dart';
 import '../legacy/legacy_systems_page.dart';
+import '../profile/player_profile_page.dart';
 import '../settings/game_settings.dart';
 
 const _purple = GtnUiTokens.purple;
@@ -45,11 +48,14 @@ class GameDashboardPage extends StatelessWidget {
     required this.onSystems,
     this.showDeveloperSettings = false,
     this.randomEventMessage,
+    this.incomePerSecond,
     required this.shellNavigatorKey,
     required this.selectedIndex,
     required this.onPrimarySelected,
     required this.onSystemsView,
     required this.onLegacySection,
+    this.playerProfile = const PlayerProfile(),
+    this.onPlayerProfile,
   });
 
   final GameState game;
@@ -75,35 +81,42 @@ class GameDashboardPage extends StatelessWidget {
   final VoidCallback onSystems;
   final bool showDeveloperSettings;
   final String? randomEventMessage;
+  final BigNumber? incomePerSecond;
   final GlobalKey<NavigatorState> shellNavigatorKey;
   final int selectedIndex;
   final ValueChanged<int> onPrimarySelected;
   final ValueChanged<LegacySystemsView> onSystemsView;
   final ValueChanged<LegacySection> onLegacySection;
+  final PlayerProfile playerProfile;
+  final VoidCallback? onPlayerProfile;
 
   void _openMoreMenu(BuildContext context, Color panel) {
-    shellNavigatorKey.currentState!.push<void>(
-      MaterialPageRoute<void>(
-        builder: (_) => _MoreMenuPage(
-          settings: settings,
-          showDeveloperSettings: showDeveloperSettings,
-          onPrestige: onPrestige,
-          onNebulaShop: onNebulaShop,
-          onLegacyPages: onLegacyPages,
-          onSaveSlots: onSaveSlots,
-          onSettings: onSettings,
-          onDeveloperSettings: onDeveloperSettings,
-          onWorldMap: onWorldMap,
-          onArcade: onArcade,
-          onMusic: onMusic,
-          onLuckyStake: onLuckyStake,
-          onSystems: onSystems,
-          onSystemsView: onSystemsView,
-          onLegacySection: onLegacySection,
-          onUpgradeShop: onUpgradeShop,
-        ),
-      ),
-    );
+    shellNavigatorKey.currentState!
+        .push<void>(
+          MaterialPageRoute<void>(
+            builder: (_) => _MoreMenuPage(
+              settings: settings,
+              showDeveloperSettings: showDeveloperSettings,
+              onPrestige: onPrestige,
+              onNebulaShop: onNebulaShop,
+              onLegacyPages: onLegacyPages,
+              onSaveSlots: onSaveSlots,
+              onSettings: onSettings,
+              onDeveloperSettings: onDeveloperSettings,
+              onWorldMap: onWorldMap,
+              onArcade: onArcade,
+              onMusic: onMusic,
+              onLuckyStake: onLuckyStake,
+              onSystems: onSystems,
+              onSystemsView: onSystemsView,
+              onLegacySection: onLegacySection,
+              onUpgradeShop: onUpgradeShop,
+              playerProfile: playerProfile,
+              onPlayerProfile: onPlayerProfile ?? () {},
+            ),
+          ),
+        )
+        .then((_) => onPrimarySelected(2));
   }
 
   @override
@@ -156,52 +169,58 @@ class GameDashboardPage extends StatelessWidget {
               height: 76,
               backgroundColor: panel,
               indicatorColor: _purple.withValues(alpha: .18),
-              destinations: const [
+              destinations: [
                 NavigationDestination(
                   icon: Icon(Icons.public_rounded),
-                  label: 'Beyond the Numbers',
+                  label: AppLocalizations.text(
+                    'nav_worlds',
+                    'Beyond the Numbers',
+                  ),
                 ),
                 NavigationDestination(
                   icon: Icon(Icons.sports_esports_rounded),
-                  label: 'Arcade',
+                  label: AppLocalizations.text('nav_arcade', 'Arcade'),
                 ),
                 NavigationDestination(
                   icon: Icon(Icons.play_arrow_rounded),
-                  label: 'Play',
+                  label: AppLocalizations.text('nav_play', 'Play'),
                 ),
                 NavigationDestination(
                   icon: Icon(Icons.upgrade_rounded),
-                  label: 'Upgrades',
+                  label: AppLocalizations.text('nav_upgrades', 'Upgrades'),
                 ),
                 NavigationDestination(
                   icon: Icon(Icons.menu_rounded),
-                  label: 'More',
+                  label: AppLocalizations.text('nav_more', 'More'),
                 ),
               ],
             );
           }
 
           return M3ENavigationBar(
-            destinations: const [
+            destinations: [
               M3ENavigationBarDestination(
                 icon: Icon(Icons.public_rounded),
-                label: 'Beyond the Numbers',
+                label: AppLocalizations.text(
+                  'nav_worlds',
+                  'Beyond the Numbers',
+                ),
               ),
               M3ENavigationBarDestination(
                 icon: Icon(Icons.sports_esports_rounded),
-                label: 'Arcade',
+                label: AppLocalizations.text('nav_arcade', 'Arcade'),
               ),
               M3ENavigationBarDestination(
                 icon: Icon(Icons.play_arrow_rounded),
-                label: 'Play',
+                label: AppLocalizations.text('nav_play', 'Play'),
               ),
               M3ENavigationBarDestination(
                 icon: Icon(Icons.upgrade_rounded),
-                label: 'Upgrades',
+                label: AppLocalizations.text('nav_upgrades', 'Upgrades'),
               ),
               M3ENavigationBarDestination(
                 icon: Icon(Icons.menu_rounded),
-                label: 'More',
+                label: AppLocalizations.text('nav_more', 'More'),
               ),
             ],
             selectedIndex: selectedIndex,
@@ -213,465 +232,570 @@ class GameDashboardPage extends StatelessWidget {
         key: shellNavigatorKey,
         onGenerateRoute: (routeSettings) => MaterialPageRoute<void>(
           settings: routeSettings,
-          builder: (_) => Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: dark
-                    ? const [Color(0xFF182142), _bg, _bg]
-                    : const [Color(0xFFEAE8FF), Color(0xFFF5F6FC)],
-              ),
-            ),
-            child: SafeArea(
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 1120),
-                  child: ListView(
-                    padding: EdgeInsets.fromLTRB(
-                      horizontalPadding,
-                      12,
-                      horizontalPadding,
-                      28,
-                    ),
-                    children: [
-                      LayoutBuilder(
-                        builder: (context, constraints) {
-                          final wide = constraints.maxWidth >= 640;
-                          final fullWidth = constraints.maxWidth;
-                          final columnWidth = wide
-                              ? (fullWidth - 14) / 2
-                              : fullWidth;
-                          return Wrap(
-                            spacing: 14,
-                            runSpacing: 14,
-                            children: [
-                              SizedBox(
-                                width: fullWidth,
-                                child: Row(
-                                  children: [
-                                    Container(
-                                      width: 42,
-                                      height: 42,
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(12),
-                                        gradient: const LinearGradient(
-                                          colors: [_purple, Color(0xFF6651D9)],
-                                        ),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: _purple.withValues(
-                                              alpha: .25,
+          builder: (_) => Stack(
+            fit: StackFit.expand,
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: dark
+                        ? const [Color(0xFF182142), _bg, _bg]
+                        : const [Color(0xFFEAE8FF), Color(0xFFF5F6FC)],
+                  ),
+                ),
+                child: SafeArea(
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 1120),
+                      child: ListView(
+                        padding: EdgeInsets.fromLTRB(
+                          horizontalPadding,
+                          12,
+                          horizontalPadding,
+                          28,
+                        ),
+                        children: [
+                          LayoutBuilder(
+                            builder: (context, constraints) {
+                              final fullWidth = constraints.maxWidth;
+                              return Wrap(
+                                spacing: 14,
+                                runSpacing: 14,
+                                children: [
+                                  SizedBox(
+                                    width: fullWidth,
+                                    child: Row(
+                                      children: [
+                                        Container(
+                                          width: 42,
+                                          height: 42,
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(
+                                              12,
                                             ),
-                                            blurRadius: 18,
-                                            offset: const Offset(0, 7),
+                                            gradient: const LinearGradient(
+                                              colors: [
+                                                _purple,
+                                                Color(0xFF6651D9),
+                                              ],
+                                            ),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: _purple.withValues(
+                                                  alpha: .25,
+                                                ),
+                                                blurRadius: 18,
+                                                offset: const Offset(0, 7),
+                                              ),
+                                            ],
+                                          ),
+                                          child: ClipRRect(
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
+                                            child: Image.asset(
+                                              'assets/gtn1/gtn-app-logo.png',
+                                              width: 42,
+                                              height: 42,
+                                              fit: BoxFit.contain,
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 11),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                'Guess The Number',
+                                                style: TextStyle(
+                                                  color: foreground,
+                                                  fontFamily: 'SpaceGrotesk',
+                                                  fontSize: 18,
+                                                  fontWeight: FontWeight.w700,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 10,
+                                            vertical: 7,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: foreground.withValues(
+                                              alpha: .06,
+                                            ),
+                                            borderRadius: BorderRadius.circular(
+                                              99,
+                                            ),
+                                            border: Border.all(
+                                              color: foreground.withValues(
+                                                alpha: .08,
+                                              ),
+                                            ),
+                                          ),
+                                          child: Row(
+                                            children: [
+                                              const Icon(
+                                                Icons.cloud_off_rounded,
+                                                color: _green,
+                                                size: 12,
+                                              ),
+                                              const SizedBox(width: 6),
+                                              Text(
+                                                'OFFLINE',
+                                                style: TextStyle(
+                                                  color: muted,
+                                                  fontSize: 10,
+                                                  fontWeight: FontWeight.w900,
+                                                  letterSpacing: 1,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    key: const Key('dashboard-hero-section'),
+                                    width: fullWidth,
+                                    child: Container(
+                                      padding: EdgeInsets.all(
+                                        compact ? 21 : 25,
+                                      ),
+                                      constraints: BoxConstraints(
+                                        minHeight: compact ? 190 : 205,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(32),
+                                        gradient: const LinearGradient(
+                                          begin: Alignment.topLeft,
+                                          end: Alignment.bottomRight,
+                                          colors: [
+                                            Color(0xFF292750),
+                                            Color(0xFF171B35),
+                                            Color(0xFF10172B),
+                                          ],
+                                        ),
+                                        border: Border.all(
+                                          color: Colors.white.withValues(
+                                            alpha: .1,
+                                          ),
+                                        ),
+                                        boxShadow: const [
+                                          BoxShadow(
+                                            color: Color(0x33000000),
+                                            blurRadius: 28,
+                                            offset: Offset(0, 14),
                                           ),
                                         ],
                                       ),
                                       child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(12),
-                                        child: Image.asset(
-                                          'assets/gtn1/gtn-app-logo.png',
-                                          width: 42,
-                                          height: 42,
-                                          fit: BoxFit.contain,
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 11),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            'Guess The Number',
-                                            style: TextStyle(
-                                              color: foreground,
-                                              fontFamily: 'SpaceGrotesk',
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.w700,
+                                        borderRadius: BorderRadius.circular(32),
+                                        child: Stack(
+                                          children: [
+                                            Positioned(
+                                              right: -80,
+                                              top: -95,
+                                              child: Container(
+                                                width: 220,
+                                                height: 220,
+                                                decoration: BoxDecoration(
+                                                  shape: BoxShape.circle,
+                                                  gradient: RadialGradient(
+                                                    colors: [
+                                                      _cyan.withValues(
+                                                        alpha: .24,
+                                                      ),
+                                                      _cyan.withValues(
+                                                        alpha: 0,
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
                                             ),
-                                          ),
-                                        ],
+                                            const Positioned(
+                                              right: 24,
+                                              top: 28,
+                                              child: _HeroSparkle(
+                                                size: 5,
+                                                opacity: .8,
+                                              ),
+                                            ),
+                                            const Positioned(
+                                              right: 12,
+                                              top: 88,
+                                              child: _HeroSparkle(
+                                                size: 4,
+                                                opacity: .55,
+                                              ),
+                                            ),
+                                            const Positioned(
+                                              right: 78,
+                                              bottom: 26,
+                                              child: _HeroSparkle(
+                                                size: 5,
+                                                opacity: .7,
+                                              ),
+                                            ),
+                                            const Positioned(
+                                              right: 132,
+                                              top: 44,
+                                              child: _HeroSparkle(
+                                                size: 3,
+                                                opacity: .45,
+                                              ),
+                                            ),
+                                            Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                const Row(
+                                                  children: [
+                                                    Icon(
+                                                      Icons.circle,
+                                                      color: _green,
+                                                      size: 8,
+                                                    ),
+                                                    SizedBox(width: 7),
+                                                    Text(
+                                                      'CURRENT RUN',
+                                                      style: TextStyle(
+                                                        color: Color(
+                                                          0xFF9BA5C4,
+                                                        ),
+                                                        fontSize: 10,
+                                                        fontWeight:
+                                                            FontWeight.w900,
+                                                        letterSpacing: 1.7,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                                const SizedBox(height: 16),
+                                                const Text(
+                                                  'Find your secret number',
+                                                  style: TextStyle(
+                                                    color: Color(0xFF9BA5C4),
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 4),
+                                                ShaderMask(
+                                                  shaderCallback: (bounds) =>
+                                                      const LinearGradient(
+                                                        colors: [
+                                                          Colors.white,
+                                                          _cyan,
+                                                        ],
+                                                      ).createShader(bounds),
+                                                  child: Text(
+                                                    '${game.minimum} — ${game.maximum}',
+                                                    style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: compact
+                                                          ? 35
+                                                          : 42,
+                                                      height: 1,
+                                                      fontWeight:
+                                                          FontWeight.w900,
+                                                      letterSpacing: -2.5,
+                                                    ),
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 15),
+                                                Text(
+                                                  message,
+                                                  maxLines: 2,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  style: const TextStyle(
+                                                    color: Color(0xFFD2D9F0),
+                                                    fontSize: 13,
+                                                    height: 1.4,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     ),
+                                  ),
+                                  if (randomEventMessage != null) ...[
+                                    const SizedBox(height: 12),
                                     Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 10,
-                                        vertical: 7,
-                                      ),
+                                      padding: const EdgeInsets.all(15),
                                       decoration: BoxDecoration(
-                                        color: foreground.withValues(
-                                          alpha: .06,
+                                        color: _gold.withValues(
+                                          alpha: dark ? .12 : .16,
                                         ),
-                                        borderRadius: BorderRadius.circular(99),
+                                        borderRadius: BorderRadius.circular(20),
                                         border: Border.all(
-                                          color: foreground.withValues(
-                                            alpha: .08,
-                                          ),
+                                          color: _gold.withValues(alpha: .38),
                                         ),
                                       ),
                                       child: Row(
                                         children: [
                                           const Icon(
-                                            Icons.cloud_off_rounded,
-                                            color: _green,
-                                            size: 12,
+                                            Icons.auto_awesome_rounded,
+                                            color: _gold,
                                           ),
-                                          const SizedBox(width: 6),
-                                          Text(
-                                            'OFFLINE',
-                                            style: TextStyle(
-                                              color: muted,
-                                              fontSize: 10,
-                                              fontWeight: FontWeight.w900,
-                                              letterSpacing: 1,
+                                          const SizedBox(width: 11),
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  'RANDOM EVENT',
+                                                  style: TextStyle(
+                                                    color: muted,
+                                                    fontSize: 9,
+                                                    fontWeight: FontWeight.w900,
+                                                    letterSpacing: 1.4,
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 3),
+                                                Text(
+                                                  randomEventMessage!,
+                                                  style: TextStyle(
+                                                    color: foreground,
+                                                    fontSize: 13,
+                                                    fontWeight: FontWeight.w800,
+                                                  ),
+                                                ),
+                                              ],
                                             ),
                                           ),
                                         ],
                                       ),
                                     ),
                                   ],
-                                ),
-                              ),
-                              SizedBox(
-                                width: columnWidth,
-                                child: Container(
-                                  padding: EdgeInsets.all(compact ? 21 : 25),
-                                  constraints: BoxConstraints(
-                                    minHeight: compact ? 190 : 205,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(32),
-                                    gradient: const LinearGradient(
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                      colors: [
-                                        Color(0xFF292750),
-                                        Color(0xFF171B35),
-                                        Color(0xFF10172B),
-                                      ],
+                                  SizedBox(
+                                    width: fullWidth,
+                                    child: _BotArena(
+                                      progression: progression,
+                                      onOpenShop: onNebulaShop,
+                                      panel: panel,
+                                      line: line,
+                                      foreground: foreground,
+                                      muted: muted,
                                     ),
-                                    border: Border.all(
-                                      color: Colors.white.withValues(alpha: .1),
-                                    ),
-                                    boxShadow: const [
-                                      BoxShadow(
-                                        color: Color(0x33000000),
-                                        blurRadius: 28,
-                                        offset: Offset(0, 14),
-                                      ),
-                                    ],
                                   ),
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(32),
-                                    child: Stack(
+                                  SizedBox(
+                                    key: const Key('dashboard-guess-section'),
+                                    width: fullWidth,
+                                    child: _GuessInput(
+                                      game: game,
+                                      controller: controller,
+                                      enabled: !loading && !game.isComplete,
+                                      completed: game.isComplete,
+                                      onGuess: onGuess,
+                                      panel: panel,
+                                      raised: raised,
+                                      line: line,
+                                      foreground: foreground,
+                                      muted: muted,
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    key: const Key('dashboard-stats-section'),
+                                    width: fullWidth,
+                                    child: Row(
                                       children: [
-                                        Positioned(
-                                          right: -80,
-                                          top: -95,
-                                          child: Container(
-                                            width: 220,
-                                            height: 220,
-                                            decoration: BoxDecoration(
-                                              shape: BoxShape.circle,
-                                              gradient: RadialGradient(
-                                                colors: [
-                                                  _cyan.withValues(alpha: .24),
-                                                  _cyan.withValues(alpha: 0),
-                                                ],
-                                              ),
-                                            ),
+                                        Expanded(
+                                          child: _Stat(
+                                            Icons.bolt_rounded,
+                                            game.attempts.toString(),
+                                            'ATTEMPTS',
+                                            _cyan,
+                                            panel,
+                                            line,
+                                            foreground,
+                                            muted,
                                           ),
                                         ),
-                                        const Positioned(
-                                          right: 24,
-                                          top: 28,
-                                          child: _HeroSparkle(
-                                            size: 5,
-                                            opacity: .8,
+                                        const SizedBox(width: 6),
+                                        Expanded(
+                                          child: _Stat(
+                                            Icons.check_circle_rounded,
+                                            progression.correctGuesses
+                                                .toString(),
+                                            'CORRECT',
+                                            _gold,
+                                            panel,
+                                            line,
+                                            foreground,
+                                            muted,
                                           ),
                                         ),
-                                        const Positioned(
-                                          right: 12,
-                                          top: 88,
-                                          child: _HeroSparkle(
-                                            size: 4,
-                                            opacity: .55,
+                                        const SizedBox(width: 6),
+                                        Expanded(
+                                          child: _Stat(
+                                            Icons.local_fire_department_rounded,
+                                            progression.currentStreak
+                                                .toString(),
+                                            'STREAK',
+                                            _green,
+                                            panel,
+                                            line,
+                                            foreground,
+                                            muted,
                                           ),
-                                        ),
-                                        const Positioned(
-                                          right: 78,
-                                          bottom: 26,
-                                          child: _HeroSparkle(
-                                            size: 5,
-                                            opacity: .7,
-                                          ),
-                                        ),
-                                        const Positioned(
-                                          right: 132,
-                                          top: 44,
-                                          child: _HeroSparkle(
-                                            size: 3,
-                                            opacity: .45,
-                                          ),
-                                        ),
-                                        Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            const Row(
-                                              children: [
-                                                Icon(
-                                                  Icons.circle,
-                                                  color: _green,
-                                                  size: 8,
-                                                ),
-                                                SizedBox(width: 7),
-                                                Text(
-                                                  'CURRENT RUN',
-                                                  style: TextStyle(
-                                                    color: Color(0xFF9BA5C4),
-                                                    fontSize: 10,
-                                                    fontWeight: FontWeight.w900,
-                                                    letterSpacing: 1.7,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                            const SizedBox(height: 16),
-                                            const Text(
-                                              'Find your secret number',
-                                              style: TextStyle(
-                                                color: Color(0xFF9BA5C4),
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.w600,
-                                              ),
-                                            ),
-                                            const SizedBox(height: 4),
-                                            ShaderMask(
-                                              shaderCallback: (bounds) =>
-                                                  const LinearGradient(
-                                                    colors: [
-                                                      Colors.white,
-                                                      _cyan,
-                                                    ],
-                                                  ).createShader(bounds),
-                                              child: Text(
-                                                '${game.minimum} — ${game.maximum}',
-                                                style: TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: compact ? 35 : 42,
-                                                  height: 1,
-                                                  fontWeight: FontWeight.w900,
-                                                  letterSpacing: -2.5,
-                                                ),
-                                              ),
-                                            ),
-                                            const SizedBox(height: 15),
-                                            Text(
-                                              message,
-                                              maxLines: 2,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: const TextStyle(
-                                                color: Color(0xFFD2D9F0),
-                                                fontSize: 13,
-                                                height: 1.4,
-                                              ),
-                                            ),
-                                          ],
                                         ),
                                       ],
                                     ),
                                   ),
-                                ),
-                              ),
-                              if (randomEventMessage != null) ...[
-                                const SizedBox(height: 12),
-                                Container(
-                                  padding: const EdgeInsets.all(15),
-                                  decoration: BoxDecoration(
-                                    color: _gold.withValues(
-                                      alpha: dark ? .12 : .16,
-                                    ),
-                                    borderRadius: BorderRadius.circular(20),
-                                    border: Border.all(
-                                      color: _gold.withValues(alpha: .38),
+                                  SizedBox(
+                                    key: const Key('dashboard-wallet-section'),
+                                    width: fullWidth,
+                                    child: _Wallet(
+                                      progression,
+                                      panel,
+                                      raised,
+                                      line,
+                                      foreground,
+                                      muted,
+                                      incomePerSecond,
                                     ),
                                   ),
-                                  child: Row(
-                                    children: [
-                                      const Icon(
-                                        Icons.auto_awesome_rounded,
-                                        color: _gold,
-                                      ),
-                                      const SizedBox(width: 11),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              'RANDOM EVENT',
-                                              style: TextStyle(
-                                                color: muted,
-                                                fontSize: 9,
-                                                fontWeight: FontWeight.w900,
-                                                letterSpacing: 1.4,
-                                              ),
+                                  SizedBox(
+                                    width: fullWidth,
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          child: _Action(
+                                            'Beyond the Numbers',
+                                            'Explore your progression',
+                                            Icons.public_rounded,
+                                            _cyan,
+                                            onWorldMap,
+                                            panel,
+                                            line,
+                                            foreground,
+                                            muted,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 10),
+                                        Expanded(
+                                          child: _Action(
+                                            'Daily Momentum',
+                                            'Keep the streak alive',
+                                            Icons.auto_awesome_rounded,
+                                            _gold,
+                                            () => onLegacySection(
+                                              LegacySection.rewards,
                                             ),
-                                            const SizedBox(height: 3),
-                                            Text(
-                                              randomEventMessage!,
-                                              style: TextStyle(
-                                                color: foreground,
-                                                fontSize: 13,
-                                                fontWeight: FontWeight.w800,
-                                              ),
-                                            ),
-                                          ],
+                                            panel,
+                                            line,
+                                            foreground,
+                                            muted,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  if (game.isComplete)
+                                    SizedBox(
+                                      width: fullWidth,
+                                      child: M3EButton.icon(
+                                        style: M3EButtonStyle.filled,
+                                        onPressed: loading ? null : onNewGame,
+                                        icon: const Icon(Icons.refresh_rounded),
+                                        label: const Text(
+                                          'Start another round',
                                         ),
                                       ),
-                                    ],
+                                    ),
+                                ],
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              if (loading)
+                Positioned.fill(
+                  child: Stack(
+                    children: [
+                      const ModalBarrier(
+                        key: Key('dashboard-loading-barrier'),
+                        dismissible: false,
+                        color: Color(0xB3000618),
+                      ),
+                      Center(
+                        child: Semantics(
+                          liveRegion: true,
+                          label: 'Loading your game',
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 320),
+                            child: Container(
+                              margin: const EdgeInsets.all(24),
+                              padding: const EdgeInsets.all(24),
+                              decoration: BoxDecoration(
+                                color: dark ? _panel : Colors.white,
+                                borderRadius: BorderRadius.circular(24),
+                                border: Border.all(color: line),
+                                boxShadow: const [
+                                  BoxShadow(
+                                    color: Color(0x33000000),
+                                    blurRadius: 28,
+                                    offset: Offset(0, 12),
                                   ),
-                                ),
-                              ],
-                              SizedBox(
-                                width: fullWidth,
-                                child: _BotArena(
-                                  progression: progression,
-                                  onOpenShop: onNebulaShop,
-                                  panel: panel,
-                                  line: line,
-                                  foreground: foreground,
-                                  muted: muted,
-                                ),
+                                ],
                               ),
-                              SizedBox(
-                                width: columnWidth,
-                                child: _GuessInput(
-                                  game: game,
-                                  controller: controller,
-                                  enabled: !loading && !game.isComplete,
-                                  completed: game.isComplete,
-                                  onGuess: onGuess,
-                                  panel: panel,
-                                  raised: raised,
-                                  line: line,
-                                  foreground: foreground,
-                                  muted: muted,
-                                ),
-                              ),
-                              SizedBox(
-                                width: columnWidth,
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      child: _Stat(
-                                        Icons.bolt_rounded,
-                                        game.attempts.toString(),
-                                        'ATTEMPTS',
-                                        _cyan,
-                                        panel,
-                                        line,
-                                        foreground,
-                                        muted,
-                                      ),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const SizedBox(
+                                    width: 34,
+                                    height: 34,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 3,
                                     ),
-                                    const SizedBox(width: 6),
-                                    Expanded(
-                                      child: _Stat(
-                                        Icons.check_circle_rounded,
-                                        progression.correctGuesses.toString(),
-                                        'CORRECT',
-                                        _gold,
-                                        panel,
-                                        line,
-                                        foreground,
-                                        muted,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 6),
-                                    Expanded(
-                                      child: _Stat(
-                                        Icons.local_fire_department_rounded,
-                                        progression.currentStreak.toString(),
-                                        'STREAK',
-                                        _green,
-                                        panel,
-                                        line,
-                                        foreground,
-                                        muted,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              SizedBox(
-                                width: columnWidth,
-                                child: _Wallet(
-                                  progression,
-                                  panel,
-                                  raised,
-                                  line,
-                                  foreground,
-                                  muted,
-                                ),
-                              ),
-                              SizedBox(
-                                width: fullWidth,
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      child: _Action(
-                                        'Beyond the Numbers',
-                                        'Explore your progression',
-                                        Icons.public_rounded,
-                                        _cyan,
-                                        onWorldMap,
-                                        panel,
-                                        line,
-                                        foreground,
-                                        muted,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 10),
-                                    Expanded(
-                                      child: _Action(
-                                        'Daily Momentum',
-                                        'Keep the streak alive',
-                                        Icons.auto_awesome_rounded,
-                                        _gold,
-                                        onLegacyPages,
-                                        panel,
-                                        line,
-                                        foreground,
-                                        muted,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              if (game.isComplete)
-                                SizedBox(
-                                  width: fullWidth,
-                                  child: M3EButton.icon(
-                                    style: M3EButtonStyle.filled,
-                                    onPressed: loading ? null : onNewGame,
-                                    icon: const Icon(Icons.refresh_rounded),
-                                    label: const Text('Start another round'),
                                   ),
-                                ),
-                            ],
-                          );
-                        },
+                                  const SizedBox(height: 20),
+                                  Text(
+                                    'Loading your game',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      color: foreground,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    'Restoring save slot $activeSlot and preparing your next round.',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      color: muted,
+                                      fontSize: 13,
+                                      height: 1.45,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
                       ),
                     ],
                   ),
                 ),
-              ),
-            ),
+            ],
           ),
         ),
       ),
@@ -871,6 +995,8 @@ class _MoreMenuPage extends StatelessWidget {
     required this.onSystemsView,
     required this.onLegacySection,
     required this.onUpgradeShop,
+    required this.playerProfile,
+    required this.onPlayerProfile,
   });
 
   final GameSettings settings;
@@ -889,6 +1015,8 @@ class _MoreMenuPage extends StatelessWidget {
   final ValueChanged<LegacySystemsView> onSystemsView;
   final ValueChanged<LegacySection> onLegacySection;
   final VoidCallback onUpgradeShop;
+  final PlayerProfile playerProfile;
+  final VoidCallback onPlayerProfile;
 
   Color _destinationColor(String? hex) {
     if (hex == null || hex.isEmpty) return _purple;
@@ -902,6 +1030,8 @@ class _MoreMenuPage extends StatelessWidget {
     final foreground = dark ? _white : const Color(0xFF172039);
     final muted = dark ? _muted : const Color(0xFF65708C);
     final panel = dark ? _panel : Colors.white;
+    final line = dark ? _line : const Color(0x180D1530);
+    final compact = MediaQuery.sizeOf(context).width <= 520;
 
     Widget entry(
       IconData icon,
@@ -910,74 +1040,70 @@ class _MoreMenuPage extends StatelessWidget {
       VoidCallback onTap,
       Color accent,
     ) {
+      final radius = BorderRadius.circular(18);
       return GtnExpressiveCard(
         color: panel,
         margin: EdgeInsets.zero,
-        elevation: 1,
+        elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
-          side: BorderSide(color: accent.withValues(alpha: .24)),
+          borderRadius: radius,
+          side: BorderSide(color: line),
         ),
         child: Material(
           color: Colors.transparent,
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: radius,
           child: InkWell(
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: radius,
             onTap: onTap,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
-              child: Row(
-                children: [
-                  Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: accent.withValues(alpha: dark ? .16 : .11),
-                      borderRadius: BorderRadius.circular(18),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: compact ? 70 : 78),
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: compact ? 12 : 15,
+                  vertical: compact ? 12 : 15,
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: compact ? 40 : 42,
+                      height: compact ? 40 : 42,
+                      decoration: BoxDecoration(
+                        color: accent.withValues(alpha: dark ? .16 : .11),
+                        borderRadius: BorderRadius.circular(13),
+                      ),
+                      child: Icon(icon, color: accent, size: 22),
                     ),
-                    child: Icon(icon, color: accent, size: 23),
-                  ),
-                  const SizedBox(width: 15),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          title,
-                          style: TextStyle(
-                            color: foreground,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: -.2,
+                    const SizedBox(width: 13),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            title,
+                            style: TextStyle(
+                              color: foreground,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: -.2,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          subtitle,
-                          style: TextStyle(
-                            color: muted,
-                            fontSize: 12,
-                            height: 1.3,
+                          const SizedBox(height: 5),
+                          Text(
+                            subtitle,
+                            style: TextStyle(
+                              color: muted,
+                              fontSize: 11,
+                              height: 1.35,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  Container(
-                    width: 32,
-                    height: 32,
-                    decoration: BoxDecoration(
-                      color: accent.withValues(alpha: .10),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.arrow_forward_rounded,
-                      color: accent,
-                      size: 17,
-                    ),
-                  ),
-                ],
+                    const SizedBox(width: 8),
+                    Icon(Icons.chevron_right_rounded, color: muted, size: 23),
+                  ],
+                ),
               ),
             ),
           ),
@@ -990,6 +1116,16 @@ class _MoreMenuPage extends StatelessWidget {
           String,
           ({IconData icon, String title, String subtitle, VoidCallback onTap})
         >{
+          'player_profile': (
+            icon: Icons.account_circle_rounded,
+            title: playerProfile.username.isEmpty
+                ? 'Player profile'
+                : playerProfile.username,
+            subtitle: playerProfile.bio.isEmpty
+                ? 'View your username and bio, then edit your profile'
+                : playerProfile.bio,
+            onTap: onPlayerProfile,
+          ),
           'world_map': (
             icon: Icons.public_rounded,
             title: 'Beyond the Numbers',
@@ -1129,10 +1265,13 @@ class _MoreMenuPage extends StatelessWidget {
             onTap: onNebulaShop,
           ),
         };
-    final orderedIds = settings.moreScreenOrder
-        .where(destinations.containsKey)
-        .toSet()
-        .toList();
+    final orderedIds = <String>['player_profile'];
+    orderedIds.addAll(
+      settings.moreScreenOrder
+          .where(destinations.containsKey)
+          .where((id) => id != 'player_profile')
+          .toSet(),
+    );
     for (final id in destinations.keys) {
       if (!orderedIds.contains(id)) orderedIds.add(id);
     }
@@ -1155,7 +1294,7 @@ class _MoreMenuPage extends StatelessWidget {
               const SizedBox(height: 18),
               LayoutBuilder(
                 builder: (context, constraints) {
-                  final columns = constraints.maxWidth >= 640 ? 2 : 1;
+                  final columns = constraints.maxWidth > 520 ? 2 : 1;
                   const spacing = 12.0;
                   final itemWidth =
                       (constraints.maxWidth - spacing * (columns - 1)) /
@@ -1273,6 +1412,7 @@ class _Wallet extends StatelessWidget {
     this.line,
     this.foreground,
     this.muted,
+    this.incomePerSecond,
   );
   final ProgressionState state;
   final Color panel;
@@ -1280,6 +1420,7 @@ class _Wallet extends StatelessWidget {
   final Color line;
   final Color foreground;
   final Color muted;
+  final BigNumber? incomePerSecond;
 
   @override
   Widget build(BuildContext context) => Container(
@@ -1310,9 +1451,22 @@ class _Wallet extends StatelessWidget {
               ),
             ),
             const Spacer(),
-            Text(
-              '${state.moneyEarned} earned',
-              style: const TextStyle(color: _green, fontSize: 10),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  '+ ${incomePerSecond ?? BigNumber.fromInt(0)} /s',
+                  style: const TextStyle(
+                    color: _green,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                Text(
+                  '${state.moneyEarned} earned',
+                  style: TextStyle(color: muted, fontSize: 9),
+                ),
+              ],
             ),
           ],
         ),
@@ -1532,8 +1686,6 @@ class _GuessInput extends StatelessWidget {
           children: [
             Expanded(
               child: Semantics(
-                container: true,
-                excludeSemantics: true,
                 label: 'Your guess',
                 textField: true,
                 child: GtnExpressiveTextField(
@@ -1543,7 +1695,12 @@ class _GuessInput extends StatelessWidget {
                   keyboardType: TextInputType.number,
                   textInputAction: TextInputAction.done,
                   onSubmitted: (_) => onGuess(),
-                  decoration: const InputDecoration(hintText: 'Enter a number'),
+                  decoration: InputDecoration(
+                    hintText: AppLocalizations.text(
+                      'play_enter_guess',
+                      'Enter your guess',
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -1559,19 +1716,19 @@ class _GuessInput extends StatelessWidget {
                 enabled: enabled,
                 child: M3EButton.filled(
                   onPressed: enabled ? onGuess : null,
-                  child: const Row(
+                  child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        'GUESS',
-                        style: TextStyle(
+                        AppLocalizations.text('play_guess_button', 'GUESS'),
+                        style: const TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w900,
                           letterSpacing: .35,
                         ),
                       ),
-                      SizedBox(width: 5),
-                      Icon(Icons.arrow_forward_rounded, size: 18),
+                      const SizedBox(width: 5),
+                      const Icon(Icons.arrow_forward_rounded, size: 18),
                     ],
                   ),
                 ),
@@ -1599,26 +1756,26 @@ class _GuessInput extends StatelessWidget {
           children: [
             _QuickGuessButton(
               semanticLabel: 'Use lower end of range',
-              label: 'LOW END',
+              label: AppLocalizations.text('web_guess_lower_end', 'LOW END'),
               enabled: enabled,
               onPressed: () => _setGuess(game.minimum),
             ),
             _QuickGuessButton(
               semanticLabel: 'Use midpoint of range',
-              label: 'MIDPOINT',
+              label: AppLocalizations.text('web_ui_midpoint', 'MIDPOINT'),
               enabled: enabled,
               onPressed: () =>
                   _setGuess(game.minimum + (game.maximum - game.minimum) ~/ 2),
             ),
             _QuickGuessButton(
               semanticLabel: 'Use upper end of range',
-              label: 'HIGH END',
+              label: AppLocalizations.text('web_guess_upper_end', 'HIGH END'),
               enabled: enabled,
               onPressed: () => _setGuess(game.maximum),
             ),
             _QuickGuessButton(
               semanticLabel: 'Clear guess input',
-              label: 'CLEAR',
+              label: AppLocalizations.text('clear', 'CLEAR'),
               enabled: enabled,
               onPressed: () {
                 controller.clear();

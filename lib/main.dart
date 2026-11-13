@@ -32,6 +32,7 @@ import 'home/game_dashboard_page.dart';
 import 'i18n/app_localizations.dart';
 import 'legacy/legacy_pages.dart';
 import 'legacy/legacy_systems_page.dart';
+import 'profile/player_profile_page.dart';
 import 'progression/progression_hub_page.dart';
 import 'saves/save_slots_page.dart';
 import 'settings/game_settings.dart';
@@ -65,25 +66,28 @@ class GtnApp extends StatelessWidget {
           ValueListenableBuilder<GameSettings>(
             valueListenable: settingsNotifier,
             builder: (context, settings, _) {
+              final brightness = settings.themeMode == 'System'
+                  ? MediaQuery.platformBrightnessOf(context)
+                  : settings.darkMode
+                  ? Brightness.dark
+                  : Brightness.light;
+              final seedColor = Color(
+                0xFF000000 |
+                    int.parse(
+                      settings.customPrimaryColor.substring(1),
+                      radix: 16,
+                    ),
+              );
               return M3EMaterialApp(
                 title: 'GuessTheNumber 2',
-                data: M3EThemeData.light(
-                  seedColor: Color(
-                    0xFF000000 |
-                        int.parse(
-                          settings.customPrimaryColor.substring(1),
-                          radix: 16,
-                        ),
-                  ),
-                ),
+                data: brightness == Brightness.dark
+                    ? M3EThemeData.dark(seedColor: seedColor)
+                    : M3EThemeData.light(seedColor: seedColor),
                 fontFamily: 'Manrope',
                 autoTheming: false,
                 dynamicColoring: false,
-                initialTheme: settings.themeMode == 'System'
-                    ? MediaQuery.platformBrightnessOf(context)
-                    : settings.darkMode
-                    ? Brightness.dark
-                    : Brightness.light,
+                initialTheme: brightness,
+                themeAnimationDuration: Duration.zero,
                 debugShowCheckedModeBanner: false,
                 appBuilder: (context, child) => MediaQuery(
                   data: MediaQuery.of(context)
@@ -169,9 +173,13 @@ class _GameHomePageState extends State<GameHomePage>
   bool _randomEventRunning = false;
   String? _randomEventMessage;
   Timer? _playtimeTimer;
+  BigNumber _lastIncomeMeasurement = BigNumber.fromInt(0);
+  BigNumber _incomePerSecond = BigNumber.fromInt(0);
   bool _autoClickerTickRunning = false;
   bool _resumeCatchUpPending = false;
   ProgressionState _progression = ProgressionState.initial;
+  final PlayerProfileStore _playerProfileStore = PlayerProfileStore();
+  PlayerProfile _playerProfile = const PlayerProfile();
   GameSettings _settings = GameSettings.initial;
   final TextEditingController _controller = TextEditingController();
   late GameState _game = _createGame();
@@ -188,7 +196,7 @@ class _GameHomePageState extends State<GameHomePage>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _restoreSave();
+    unawaited(_restoreSave().then((_) => _loadPlayerProfile()));
   }
 
   @override
@@ -209,15 +217,25 @@ class _GameHomePageState extends State<GameHomePage>
 
   void _startPlaytimeTimer() {
     if (!mounted || _isLoading || _playtimeTimer?.isActive == true) return;
+    _lastIncomeMeasurement = _progression.money;
+    _incomePerSecond = BigNumber.fromInt(0);
     _playtimeTimer = Timer.periodic(const Duration(seconds: 1), (_) {
       if (!mounted || _isLoading) return;
+      final currentMoney = _progression.money;
+      final income = _progression.legacySystems.autoClickerActive
+          ? currentMoney - _lastIncomeMeasurement
+          : BigNumber.fromInt(0);
+      _lastIncomeMeasurement = currentMoney;
       final next = _progression.copyWith(
         playtimeSeconds: _progression.playtimeSeconds + 1,
       );
       final evaluated = _progressionEngine.evaluateAchievements(next);
       final unlocked =
           evaluated.achievements.length > _progression.achievements.length;
-      setState(() => _progression = evaluated);
+      setState(() {
+        _progression = evaluated;
+        _incomePerSecond = income;
+      });
       if (unlocked || evaluated.playtimeSeconds % 30 == 0) {
         unawaited(_persist());
       }
@@ -518,11 +536,13 @@ class _GameHomePageState extends State<GameHomePage>
   }
 
   Future<ProgressionState> _purchaseUpgrade(
-    UpgradeDefinition definition,
-  ) async {
-    final updated = _progressionEngine.purchaseUpgrade(
+    UpgradeDefinition definition, {
+    int levels = 1,
+  }) async {
+    final updated = _progressionEngine.purchaseUpgradeLevels(
       _progression,
       definition,
+      levels: levels,
     );
     if (updated != _progression) {
       final previousRange = _rangeMaximum(_progression, _settings);
@@ -638,8 +658,21 @@ class _GameHomePageState extends State<GameHomePage>
     return _progression;
   }
 
+  Future<T?> _pushShellRoute<T>(Route<T> route) async {
+    final navigator = _shellNavigatorKey.currentState!;
+    final originIndex = _selectedPrimaryIndex;
+    final result = await navigator.push<T>(route);
+    if (mounted) {
+      if (originIndex == 4) {
+        navigator.popUntil((route) => route.isFirst);
+      }
+      _onPrimarySelected(2);
+    }
+    return result;
+  }
+
   Future<void> _openProgressionHub() async {
-    await _shellNavigatorKey.currentState!.push<void>(
+    await _pushShellRoute<void>(
       MaterialPageRoute<void>(
         builder: (_) => ProgressionHubPage(
           progression: _progression,
@@ -669,7 +702,7 @@ class _GameHomePageState extends State<GameHomePage>
   }
 
   Future<void> _openArcade() async {
-    await _shellNavigatorKey.currentState!.push<void>(
+    await _pushShellRoute<void>(
       MaterialPageRoute<void>(
         builder: (_) => ArcadePage(onReward: _awardArcadeReward),
       ),
@@ -707,6 +740,18 @@ class _GameHomePageState extends State<GameHomePage>
       setState(() => _progression = updated);
       await _persist();
       _scheduleAutoClicker();
+    }
+    return _progression;
+  }
+
+  Future<ProgressionState> _equipNebulaCosmetic(String cosmeticId) async {
+    final updated = _progressionEngine.equipNebulaCosmetic(
+      _progression,
+      cosmeticId,
+    );
+    if (updated != _progression) {
+      setState(() => _progression = updated);
+      await _persist();
     }
     return _progression;
   }
@@ -821,12 +866,13 @@ class _GameHomePageState extends State<GameHomePage>
   }
 
   Future<void> _openNebulaShop() async {
-    await _shellNavigatorKey.currentState!.push<void>(
+    await _pushShellRoute<void>(
       MaterialPageRoute<void>(
         builder: (_) => NebulaShopPage(
           progression: _progression,
           onPurchase: _purchaseNebulaItem,
           onAutomationChanged: _setAutomationActive,
+          onEquipCosmetic: _equipNebulaCosmetic,
         ),
       ),
     );
@@ -873,7 +919,7 @@ class _GameHomePageState extends State<GameHomePage>
   }
 
   Future<void> _openWorldMap() async {
-    await _shellNavigatorKey.currentState!.push<void>(
+    await _pushShellRoute<void>(
       MaterialPageRoute<void>(
         builder: (_) =>
             WorldMapPage(progression: _progression, onAction: _worldBossAction),
@@ -982,8 +1028,76 @@ class _GameHomePageState extends State<GameHomePage>
     }
   }
 
+  Future<void> _loadPlayerProfile() async {
+    try {
+      var profile = await _playerProfileStore.load();
+      if (profile.username.isEmpty) {
+        final savedGame = await (await _storage).load();
+        if (savedGame != null && savedGame.profileName.isNotEmpty) {
+          profile = PlayerProfile(
+            username: savedGame.profileName.length > 20
+                ? savedGame.profileName.substring(0, 20)
+                : savedGame.profileName,
+            avatarId: switch (savedGame.profileIconId) {
+              'bolt' => 'lightning',
+              'crown' => 'crown',
+              'planet' => 'moon',
+              _ => 'star',
+            },
+          );
+          await _playerProfileStore.save(profile);
+        }
+      }
+      if (mounted) setState(() => _playerProfile = profile);
+    } on Exception {
+      // A missing or unreadable profile never blocks loading the game.
+    }
+  }
+
+  Future<void> _syncPlayerProfileToSave(PlayerProfile profile) async {
+    final legacyIconId = switch (profile.avatarId) {
+      'lightning' => 'bolt',
+      'crown' => 'crown',
+      'moon' => 'planet',
+      'star' => 'star',
+      _ => 'default',
+    };
+    try {
+      final storage = await _storage;
+      await storage.update((existing) {
+        final base = existing ?? _currentSaveData();
+        return base.copyWith(
+          profileName: profile.username,
+          profileIconId: legacyIconId,
+        );
+      });
+    } on Exception {
+      if (mounted) {
+        setState(
+          () => _message = 'Profile saved, but save-slot metadata could not be synchronized.',
+        );
+      }
+    }
+  }
+
+  Future<void> _openPlayerProfile() async {
+    await _pushShellRoute<void>(
+      MaterialPageRoute<void>(
+        builder: (_) => PlayerProfilePage(
+          initialProfile: _playerProfile,
+          store: _playerProfileStore,
+          equippedCosmeticId: _progression.equippedCosmeticId,
+          onSaved: (profile) {
+            setState(() => _playerProfile = profile);
+            unawaited(_syncPlayerProfileToSave(profile));
+          },
+        ),
+      ),
+    );
+  }
+
   Future<void> _openSaveSlots() async {
-    await _shellNavigatorKey.currentState!.push<void>(
+    await _pushShellRoute<void>(
       MaterialPageRoute<void>(
         builder: (_) =>
             SaveSlotsPage(activeSlot: _activeSlot, onSelect: _switchSaveSlot),
@@ -1073,7 +1187,7 @@ class _GameHomePageState extends State<GameHomePage>
   }
 
   Future<void> _openSettings() async {
-    await _shellNavigatorKey.currentState!.push<void>(
+    await _pushShellRoute<void>(
       MaterialPageRoute<void>(
         builder: (_) => SettingsPage(
           settings: _settings,
@@ -1086,7 +1200,7 @@ class _GameHomePageState extends State<GameHomePage>
   }
 
   Future<void> _openMenuStudio() async {
-    await _shellNavigatorKey.currentState!.push<void>(
+    await _pushShellRoute<void>(
       MaterialPageRoute<void>(
         builder: (_) =>
             MenuStudioPage(settings: _settings, onChanged: _updateSettings),
@@ -1206,7 +1320,7 @@ class _GameHomePageState extends State<GameHomePage>
   }
 
   Future<void> _openDeveloperSettings() async {
-    await _shellNavigatorKey.currentState!.push<void>(
+    await _pushShellRoute<void>(
       MaterialPageRoute<void>(
         builder: (_) => DeveloperSettingsPage(
           save: _currentSaveData(),
@@ -1253,7 +1367,7 @@ class _GameHomePageState extends State<GameHomePage>
   }
 
   Future<void> _openLegacyPages() async {
-    await _shellNavigatorKey.currentState!.push<void>(
+    await _pushShellRoute<void>(
       MaterialPageRoute<void>(
         builder: (_) => LegacyHubPage(
           progression: _progression,
@@ -1266,7 +1380,7 @@ class _GameHomePageState extends State<GameHomePage>
   }
 
   Future<void> _openLegacySection(LegacySection section) async {
-    await _shellNavigatorKey.currentState!.push<void>(
+    await _pushShellRoute<void>(
       MaterialPageRoute<void>(
         builder: (_) =>
             LegacyDetailPage(section: section, progression: _progression),
@@ -1275,7 +1389,7 @@ class _GameHomePageState extends State<GameHomePage>
   }
 
   Future<void> _openLegacySystems(LegacySystemsView view) async {
-    await _shellNavigatorKey.currentState!.push<void>(
+    await _pushShellRoute<void>(
       MaterialPageRoute<void>(
         builder: (_) => LegacySystemsPage(
           progression: _progression,
@@ -1295,7 +1409,7 @@ class _GameHomePageState extends State<GameHomePage>
       _openLegacySystems(LegacySystemsView.luckyStake);
 
   Future<void> _openUpgradeShop() async {
-    await _shellNavigatorKey.currentState!.push<void>(
+    await _pushShellRoute<void>(
       MaterialPageRoute<void>(
         builder: (_) => UpgradeShopPage(
           progression: _progression,
@@ -1664,6 +1778,7 @@ class _GameHomePageState extends State<GameHomePage>
     return GameDashboardPage(
       game: _game,
       progression: _progression,
+      incomePerSecond: _incomePerSecond,
       settings: _settings,
       activeSlot: _activeSlot,
       loading: _isLoading,
@@ -1690,6 +1805,8 @@ class _GameHomePageState extends State<GameHomePage>
       onPrimarySelected: _onPrimarySelected,
       onSystemsView: _openLegacySystems,
       onLegacySection: _openLegacySection,
+      playerProfile: _playerProfile,
+      onPlayerProfile: _openPlayerProfile,
     );
   }
 }

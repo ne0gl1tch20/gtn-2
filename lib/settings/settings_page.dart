@@ -213,7 +213,9 @@ class SettingsPage extends StatelessWidget {
           _SettingsSection(
             eyebrow: '04 / NOTIFICATIONS',
             title: 'Notifications',
-            description: 'Preferences are saved. Scheduled delivery still needs platform integration.',
+            description:
+                'Preferences are saved. Scheduled delivery still needs '
+                'platform integration.',
             children: [
               _toggle(
                 'Game reminders',
@@ -278,7 +280,8 @@ class SettingsPage extends StatelessWidget {
                 },
               ),
               const Text(
-                'The preference is stored; background scheduling is not yet connected.',
+                'The preference is stored; background scheduling is not yet '
+                'connected.',
                 style: TextStyle(color: GtnUiTokens.muted, fontSize: 11),
               ),
             ],
@@ -326,7 +329,9 @@ class SettingsPage extends StatelessWidget {
           _SettingsSection(
             eyebrow: '08 / DEVELOPER & SAVE',
             title: 'Developer & Save Preferences',
-            description: 'Control diagnostic logging, matching the original GTN1 settings.',
+            description:
+                'Control diagnostic logging, matching the original GTN1 '
+                'settings.',
             children: [
               _toggle(
                 'Save logs to storage',
@@ -475,20 +480,139 @@ class _ColorSetting extends StatelessWidget {
   final String label, value;
   final ValueChanged<String> onSubmitted;
 
+  Color get _color {
+    final normalized = value.replaceFirst('#', '');
+    final parsed = int.tryParse(normalized, radix: 16) ?? 0x7C4DFF;
+    return Color(0xFF000000 | parsed);
+  }
+
+  Future<void> _showPicker(BuildContext context) async {
+    var selected = HSVColor.fromColor(_color);
+    final result = await showDialog<Color>(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setDialogState) {
+          final color = selected.toColor();
+          Widget channelSlider({
+            required String label,
+            required double value,
+            required double max,
+            required ValueChanged<double> onChanged,
+          }) => Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(label),
+              Slider(
+                value: value.clamp(0, max),
+                min: 0,
+                max: max,
+                onChanged: (next) => setDialogState(() => onChanged(next)),
+              ),
+            ],
+          );
+
+          return AlertDialog(
+            title: Text('Choose $label'),
+            content: SizedBox(
+              width: 360,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Container(
+                    height: 72,
+                    decoration: BoxDecoration(
+                      color: color,
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.outline,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    '#${color.toARGB32().toRadixString(16).substring(2).toUpperCase()}',
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  channelSlider(
+                    label: 'Hue',
+                    value: selected.hue,
+                    max: 360,
+                    onChanged: (v) => selected = selected.withHue(v),
+                  ),
+                  channelSlider(
+                    label: 'Saturation',
+                    value: selected.saturation,
+                    max: 1,
+                    onChanged: (v) => selected = selected.withSaturation(v),
+                  ),
+                  channelSlider(
+                    label: 'Brightness',
+                    value: selected.value,
+                    max: 1,
+                    onChanged: (v) => selected = selected.withValue(v),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext),
+                child: const Text('Cancel'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.pop(dialogContext, color),
+                child: const Text('Apply color'),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+    if (result != null) {
+      final hex = result
+          .toARGB32()
+          .toRadixString(16)
+          .substring(2)
+          .toUpperCase();
+      onSubmitted('#$hex');
+    }
+  }
+
   @override
-  Widget build(BuildContext context) => TextFormField(
-    key: ValueKey('$label-$value'),
-    initialValue: value,
-    decoration: InputDecoration(
-      labelText: label,
-      helperText: 'Hex color, for example #9B7CFF',
-      border: const OutlineInputBorder(),
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.symmetric(vertical: 6),
+    child: Row(
+      children: [
+        Container(
+          width: 42,
+          height: 42,
+          decoration: BoxDecoration(
+            color: _color,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: Theme.of(context).colorScheme.outline),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(label, style: Theme.of(context).textTheme.titleSmall),
+              Text(
+                value.toUpperCase(),
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ],
+          ),
+        ),
+        OutlinedButton.icon(
+          onPressed: () => _showPicker(context),
+          icon: const Icon(Icons.colorize_rounded),
+          label: const Text('Choose'),
+        ),
+      ],
     ),
-    onFieldSubmitted: (raw) {
-      final normalized = raw.trim().toUpperCase();
-      if (RegExp(r'^#[0-9A-F]{6}$').hasMatch(normalized)) {
-        onSubmitted(normalized);
-      }
-    },
   );
 }

@@ -1964,5 +1964,8 @@
   "web_prestige_label": "Prestige:",
   "web_ultra_label": "Ultra:",
   "web_zero_minutes": "0m",
-  "seasonal_snow_toggle": "❄️ Let It Snow"
+  "seasonal_snow_toggle": "❄️ Let It Snow",
+  "nav_worlds": "Beyond the Numbers",
+  "nav_arcade": "Arcade",
+  "nav_upgrades": "Upgrades"
 }

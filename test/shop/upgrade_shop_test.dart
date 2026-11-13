@@ -31,6 +31,41 @@ void main() {
     },
   );
 
+  test(
+    'bulk purchase spends the combined per-level cost and applies all levels',
+    () {
+      final upgrade = UpgradeCatalog.byId('reward_multiplier').definition;
+      final state = ProgressionState.initial.copyWith(
+        money: BigNumber.fromInt(475),
+      );
+      final result = engine.purchaseUpgradeLevels(state, upgrade, levels: 3);
+      expect(result.money.toString(), '0');
+      expect(result.moneySpent.toString(), '475');
+      expect(result.upgrades['reward_multiplier'], 3);
+    },
+  );
+
+  test('bulk purchase is atomic when the full amount is unaffordable', () {
+    final upgrade = UpgradeCatalog.byId('reward_multiplier').definition;
+    final state = ProgressionState.initial.copyWith(
+      money: BigNumber.fromInt(474),
+    );
+    expect(
+      engine.purchaseUpgradeLevels(state, upgrade, levels: 3),
+      same(state),
+    );
+  });
+
+  test('bulk purchase cannot exceed the source max level', () {
+    final upgrade = UpgradeCatalog.byId('better_range').definition;
+    final state = ProgressionState.initial.copyWith(
+      money: BigNumber.fromInt(1000000000),
+      upgrades: {'better_range': 19},
+    );
+    final result = engine.purchaseUpgradeLevels(state, upgrade, levels: 2);
+    expect(result, same(state));
+  });
+
   test('reward multiplier purchase spends the exact canonical cost', () {
     final upgrade = UpgradeCatalog.byId('reward_multiplier').definition;
     final state = ProgressionState.initial.copyWith(

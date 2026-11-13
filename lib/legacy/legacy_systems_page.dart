@@ -75,6 +75,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
   bool _checkingUpdate = false;
   String? _updateMessage;
   String? _updateDetails;
+  String? _updateDiagnostics;
   UpdateRelease? _availableUpdate;
   WindowsUpdateRelease? _availableWindowsUpdate;
   List<Map<String, dynamic>> _talentCatalog = [];
@@ -306,6 +307,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
   Widget _traitsSection(TraitEffectSummary traits) {
     return GtnExpressiveCard(
       child: ExpansionTile(
+        initiallyExpanded: widget.view == LegacySystemsView.traits,
         leading: const Icon(Icons.auto_awesome_rounded),
         title: const Text('Traits'),
         subtitle: Text(
@@ -1707,6 +1709,21 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
               label: const Text('Create playlist'),
             ),
           ),
+          if (_systems.musicLibrary.isEmpty)
+            const Padding(
+              padding: EdgeInsets.fromLTRB(20, 8, 20, 16),
+              child: Column(
+                children: [
+                  Icon(Icons.library_music_outlined, size: 42),
+                  SizedBox(height: 8),
+                  Text('Your music library is empty.'),
+                  Text(
+                    'Import audio files from this device to start building your library.',
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
           ListTile(
             title: Text('Queue · ${_systems.musicQueue.length} tracks'),
             trailing: TextButton(
@@ -1842,19 +1859,31 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
     );
   }
 
+  String get _updateChannelLabel {
+    if (Platform.isWindows) return 'Windows Debug';
+    if (Platform.isAndroid) return 'Android Debug';
+    return 'Unsupported platform';
+  }
+
   Widget _aboutSection() {
     return GtnExpressiveCard(
       child: ExpansionTile(
         leading: const Icon(Icons.info_outline_rounded),
         title: const Text('About & updater'),
         subtitle: Text(
-          'Version ${UpdateChecker.currentVersionName} · Flutter / Dart',
+          'Version ${UpdateChecker.currentVersionName} · Build ${UpdateChecker.currentVersionCode} · Flutter / Dart',
         ),
         children: [
-          const ListTile(
-            title: Text('Guess The Number 2'),
-            subtitle: Text(
-              'Flutter continuation of the original Kotlin game. Offline-first local saves.',
+          ListTile(
+            title: const Text('Guess The Number 2'),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Update channel: $_updateChannelLabel'),
+                const Text(
+                  'Flutter continuation of the original Kotlin game. Offline-first local saves.',
+                ),
+              ],
             ),
           ),
           ListTile(
@@ -1877,6 +1906,22 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Text(_updateDetails!),
+            ),
+          if (_updateDiagnostics != null)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+              child: M3EButton.text(
+                onPressed: () async {
+                  await Clipboard.setData(
+                    ClipboardData(text: _updateDiagnostics!),
+                  );
+                  if (!mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Update diagnostics copied.')),
+                  );
+                },
+                child: const Text('Copy update error logs'),
+              ),
             ),
           if (_availableUpdate != null || _availableWindowsUpdate != null) ...[
             Padding(
@@ -1922,10 +1967,37 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
             title: const Text('Source repository'),
             onTap: () => _openGithubUrl('https://github.com/ne0gl1tch20/gtn-2'),
           ),
+          const ListTile(
+            leading: Icon(Icons.public_rounded),
+            title: Text('Find us online'),
+            subtitle: Text('These links open in your browser.'),
+          ),
+          for (final link in const [
+            (
+              'YouTube · @theg0ldne0_01',
+              'https://www.youtube.com/@theg0ldne0_01',
+            ),
+            (
+              'Instagram · theg0ldne0_01',
+              'https://www.instagram.com/theg0ldne0_01/',
+            ),
+            (
+              'NameMC · PearlSteve15',
+              'https://namemc.com/profile/PearlSteve15',
+            ),
+            ('GitHub · ne0gl1tch20', 'https://github.com/ne0gl1tch20'),
+            ('Website', 'https://ne0gl1tch20.github.io/GuessTheNumber'),
+          ])
+            ListTile(
+              dense: true,
+              leading: const Icon(Icons.open_in_new_rounded),
+              title: Text(link.$1),
+              onTap: () => _openExternalUrl(link.$2),
+            ),
           const Padding(
             padding: EdgeInsets.fromLTRB(16, 0, 16, 16),
             child: Text(
-              'Debug release publishing is paused until the complete GTN1 port passes parity verification. Update installation remains disabled during this porting phase.',
+              'Debug update packages are published from validated main/master builds only. Feature branches and pull requests do not publish installable updates.',
             ),
           ),
         ],
@@ -1938,6 +2010,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
       _checkingUpdate = true;
       _updateMessage = 'Checking debug-latest…';
       _updateDetails = null;
+      _updateDiagnostics = null;
       _availableUpdate = null;
       _availableWindowsUpdate = null;
     });
@@ -1973,13 +2046,30 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
           'In-app updates are available on Android and Windows builds.',
         );
       }
-    } catch (error) {
+    } catch (error, stackTrace) {
       if (!mounted) return;
       final message = error.toString();
+      final channel = Platform.isWindows
+          ? 'windows-debug'
+          : Platform.isAndroid
+          ? 'android-debug'
+          : 'unsupported';
+      final trace = stackTrace.toString();
       setState(() {
         _updateMessage = message.contains('404')
             ? 'No debug-latest release has been published yet.'
             : 'Update check failed: $error';
+        _updateDiagnostics = [
+          'Update check failed',
+          'Time: ${DateTime.now().toIso8601String()}',
+          'Channel: $channel',
+          'Platform: ${Platform.operatingSystem}',
+          'App version: ${UpdateChecker.currentVersionName} (${UpdateChecker.currentVersionCode})',
+          'Failure: ${error.runtimeType}',
+          'Message: $error',
+          '',
+          trace.substring(0, trace.length > 8000 ? 8000 : trace.length),
+        ].join('\n');
       });
     } finally {
       if (mounted) setState(() => _checkingUpdate = false);
@@ -2030,6 +2120,12 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
   Future<void> _openGithubUrl(String value) async {
     final uri = Uri.tryParse(value);
     if (uri == null || !_isGithubUrl(value)) return;
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
+  }
+
+  Future<void> _openExternalUrl(String value) async {
+    final uri = Uri.tryParse(value);
+    if (uri == null || uri.scheme != 'https' || uri.host.isEmpty) return;
     await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 

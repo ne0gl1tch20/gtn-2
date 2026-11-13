@@ -1,19 +1,27 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gtn_2/core/game/game_engine.dart';
+import 'package:gtn_2/core/numbers/big_number.dart';
 import 'package:gtn_2/core/progression/progression_state.dart';
 import 'package:gtn_2/design/expressive_widgets.dart';
 import 'package:gtn_2/home/game_dashboard_page.dart';
+import 'package:gtn_2/legacy/legacy_pages.dart';
 import 'package:gtn_2/legacy/legacy_systems_page.dart';
+import 'package:gtn_2/profile/player_profile_page.dart';
 import 'package:gtn_2/settings/game_settings.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
 
 Widget buildDashboard({
   GameSettings? settings,
+  bool loading = false,
   VoidCallback? onGuess,
   String? randomEventMessage,
+  BigNumber? incomePerSecond,
   GlobalKey<NavigatorState>? shellNavigatorKey,
   ValueChanged<LegacySystemsView>? onSystemsView,
+  ValueChanged<LegacySection>? onLegacySection,
+  VoidCallback? onPlayerProfile,
+  ValueChanged<int>? onPrimarySelected,
 }) {
   final navigatorKey = shellNavigatorKey ?? GlobalKey<NavigatorState>();
   return M3EMaterialApp(
@@ -26,9 +34,10 @@ Widget buildDashboard({
       progression: ProgressionState.initial,
       settings: settings ?? GameSettings.initial,
       activeSlot: 1,
-      loading: false,
+      loading: loading,
       message: 'Make your move.',
       randomEventMessage: randomEventMessage,
+      incomePerSecond: incomePerSecond,
       controller: TextEditingController(),
       onGuess: onGuess ?? () {},
       onNewGame: () {},
@@ -47,14 +56,56 @@ Widget buildDashboard({
       showDeveloperSettings: true,
       shellNavigatorKey: navigatorKey,
       selectedIndex: 2,
-      onPrimarySelected: (_) {},
+      onPrimarySelected: onPrimarySelected ?? (_) {},
       onSystemsView: onSystemsView ?? (_) {},
-      onLegacySection: (_) {},
+      onLegacySection: onLegacySection ?? (_) {},
+      onPlayerProfile: onPlayerProfile,
     ),
   );
 }
 
 void main() {
+  testWidgets('save restoration shows a blocking loading state', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(buildDashboard(loading: true));
+
+    expect(find.text('Loading your game'), findsOneWidget);
+    expect(
+      find.text('Restoring save slot 1 and preparing your next round.'),
+      findsOneWidget,
+    );
+    expect(find.byKey(const Key('dashboard-loading-barrier')), findsOneWidget);
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+  });
+
+  testWidgets('Money displays the live income-per-second rate', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      buildDashboard(incomePerSecond: BigNumber.fromInt(24)),
+    );
+    expect(find.text('+ 24 /s'), findsOneWidget);
+    expect(find.text('0 earned'), findsOneWidget);
+  });
+
+  testWidgets('Daily Momentum opens the GTN1 Rewards destination', (
+    WidgetTester tester,
+  ) async {
+    LegacySection? openedSection;
+    await tester.pumpWidget(
+      buildDashboard(onLegacySection: (section) => openedSection = section),
+    );
+    await tester.scrollUntilVisible(
+      find.text('Daily Momentum'),
+      180,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Daily Momentum'));
+    expect(openedSection, LegacySection.rewards);
+  });
+
   testWidgets('shows the temporary random-event dashboard banner', (
     WidgetTester tester,
   ) async {
@@ -97,6 +148,22 @@ void main() {
       }
     },
   );
+
+  testWidgets('guess input receives focus and accepts typed numbers', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(buildDashboard());
+    final input = find.byKey(const Key('guess-input'));
+    await tester.ensureVisible(input);
+    await tester.pumpAndSettle();
+    await tester.tap(input);
+    await tester.enterText(input, '73');
+    await tester.pump();
+
+    final field = tester.widget<GtnExpressiveTextField>(input);
+    expect(field.controller!.text, '73');
+    expect(tester.testTextInput.isVisible, isTrue);
+  });
 
   testWidgets('shows the HTML-facing dashboard and quick-pick controls', (
     WidgetTester tester,
@@ -169,6 +236,30 @@ void main() {
     expect(find.text('NO BOTS YET'), findsOneWidget);
   });
 
+  testWidgets('closing More restores Play as the selected destination', (
+    WidgetTester tester,
+  ) async {
+    var selectedIndex = 2;
+    final shellKey = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(
+      buildDashboard(
+        shellNavigatorKey: shellKey,
+        onPrimarySelected: (index) => selectedIndex = index,
+      ),
+    );
+
+    await tester.tap(find.text('More').first);
+    await tester.pumpAndSettle();
+    expect(selectedIndex, 4);
+    expect(find.text('More Menu'), findsOneWidget);
+
+    shellKey.currentState!.pop();
+    await tester.pumpAndSettle();
+    expect(selectedIndex, 2);
+    expect(find.text('More Menu'), findsNothing);
+    expect(find.text('Guess The Number'), findsOneWidget);
+  });
+
   testWidgets('More detail pages keep the shell and Back returns to More', (
     WidgetTester tester,
   ) async {
@@ -210,6 +301,7 @@ void main() {
 
     expect(find.text('More Menu'), findsOneWidget);
     for (final label in [
+      'Player profile',
       'Rewards',
       'Journey',
       'Shop',
@@ -228,6 +320,62 @@ void main() {
       'Lucky Stake',
     ]) {
       expect(find.text(label), findsOneWidget);
+    }
+  });
+
+  testWidgets('Player Profile validates username before saving', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: PlayerProfilePage(
+          initialProfile: const PlayerProfile(),
+          store: PlayerProfileStore(),
+          onSaved: (_) {},
+        ),
+      ),
+    );
+    await tester.scrollUntilVisible(
+      find.text('Save profile'),
+      240,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.text('Save profile'));
+    await tester.pumpAndSettle();
+    expect(find.text('Username must be 2–20 characters.'), findsOneWidget);
+  });
+
+  testWidgets('More opens the Player Profile destination callback', (
+    WidgetTester tester,
+  ) async {
+    var opened = 0;
+    await tester.pumpWidget(buildDashboard(onPlayerProfile: () => opened++));
+    await tester.tap(find.text('More').first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Player profile'));
+    await tester.pumpAndSettle();
+    expect(opened, 1);
+  });
+
+  testWidgets('Play dashboard sections stay full width on desktop', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(1200, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(buildDashboard());
+    for (final key in [
+      'dashboard-hero-section',
+      'dashboard-guess-section',
+      'dashboard-stats-section',
+      'dashboard-wallet-section',
+    ]) {
+      expect(
+        tester.getSize(find.byKey(Key(key))).width,
+        greaterThan(700),
+        reason: '$key should follow GTN1 full-width Play flow on desktop.',
+      );
     }
   });
 

@@ -11,16 +11,19 @@ import '../design/expressive_widgets.dart';
 import '../settings/game_settings.dart';
 
 typedef SaveSlotSelection = Future<void> Function(int slot);
+typedef SaveSlotPreviewLoader = Future<SaveData?> Function(int slot);
 
 class SaveSlotsPage extends StatefulWidget {
   const SaveSlotsPage({
     super.key,
     required this.activeSlot,
     required this.onSelect,
+    this.previewLoader,
   });
 
   final int activeSlot;
   final SaveSlotSelection onSelect;
+  final SaveSlotPreviewLoader? previewLoader;
 
   @override
   State<SaveSlotsPage> createState() => _SaveSlotsPageState();
@@ -40,8 +43,10 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
   void _refreshPreviews() {
     _previews = {
       for (var slot = 1; slot <= SaveStorage.maxSaveSlots; slot++)
-        slot: SaveStorage.inApplicationDocuments(slot: slot)
-            .then((storage) => storage.load()),
+        slot:
+            widget.previewLoader?.call(slot) ??
+            SaveStorage.inApplicationDocuments(slot: slot)
+                .then((storage) => storage.load()),
     };
   }
 
@@ -410,9 +415,12 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
                 final save = snapshot.data;
                 final selected = widget.activeSlot == slot;
                 final busy = _switching == slot || _working == slot;
+                final readFailed = snapshot.hasError;
                 final subtitle =
                     snapshot.connectionState != ConnectionState.done
                     ? 'Checking save…'
+                    : readFailed
+                    ? 'Could not read save. Your data was not changed.'
                     : save == null
                     ? 'Empty slot'
                     : 'Games won: ${save.gamesWon}';
@@ -448,7 +456,9 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
                           enabled:
                               _switching == null &&
                               _working == null &&
-                              snapshot.connectionState == ConnectionState.done,
+                              snapshot.connectionState ==
+                                  ConnectionState.done &&
+                              !readFailed,
                           onSelected: (action) {
                             switch (action) {
                               case 'creative':
