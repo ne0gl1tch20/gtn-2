@@ -1,4 +1,4 @@
-import 'dart:ui' show Tristate;
+import 'dart:ui' show Offset, Tristate;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gtn_2/core/legacy/legacy_systems_state.dart';
@@ -187,6 +187,133 @@ void main() {
     final fittedScale = controller.value.getMaxScaleOnAxis();
     expect(fittedScale, greaterThan(0.35));
     expect(fittedScale, lessThan(1));
+  });
+
+  testWidgets('external progression updates the selected map world', (
+    tester,
+  ) async {
+    final unlocked = WorldBossCatalog.worlds.map((world) => world.id).toSet();
+    final initial = stateWith(unlocked: unlocked);
+    final semantics = tester.ensureSemantics();
+
+    await pumpMap(
+      tester,
+      state: initial,
+      onAction: (_, __) async => initial,
+    );
+
+    final updated = initial.copyWith(
+      legacySystems: initial.legacySystems.copyWith(
+        activeWorldId: 'crystal_caverns',
+      ),
+    );
+    await tester.pumpWidget(
+      M3EMaterialApp(
+        data: M3EThemeData.light(seedColor: const Color(0xFF7C5CFC)),
+        fontFamily: 'Manrope',
+        autoTheming: false,
+        initialTheme: Brightness.light,
+        home: WorldMapPage(
+          progression: updated,
+          onAction: (_, __) async => updated,
+        ),
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 400));
+
+    final crystalNode = find.byKey(
+      const ValueKey('world-node-crystal_caverns'),
+    );
+    final verdantNode = find.byKey(
+      const ValueKey('world-node-verdant_grove'),
+    );
+    expect(
+      tester.getSemantics(crystalNode).flagsCollection.isSelected,
+      Tristate.isTrue,
+    );
+    expect(
+      tester.getSemantics(verdantNode).flagsCollection.isSelected,
+      Tristate.isFalse,
+    );
+    semantics.dispose();
+  });
+
+  testWidgets('secret markers respect thresholds and discovered state', (
+    tester,
+  ) async {
+    final tooEarly = stateWith(correctGuesses: 49);
+    final calls = <(String, String)>[];
+
+    await pumpMap(
+      tester,
+      state: tooEarly,
+      onAction: (id, action) async {
+        calls.add((id, action));
+        return tooEarly;
+      },
+    );
+
+    final secret = find.byKey(
+      const ValueKey('secret-node-whispering_hollow'),
+    );
+    expect(secret, findsNothing);
+
+    final discovered = stateWith(
+      correctGuesses: 50,
+      discoveredSecrets: const {'whispering_hollow'},
+    );
+    await tester.pumpWidget(
+      M3EMaterialApp(
+        data: M3EThemeData.light(seedColor: const Color(0xFF7C5CFC)),
+        fontFamily: 'Manrope',
+        autoTheming: false,
+        initialTheme: Brightness.light,
+        home: WorldMapPage(
+          progression: discovered,
+          onAction: (id, action) async {
+            calls.add((id, action));
+            return discovered;
+          },
+        ),
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 400));
+
+    expect(secret, findsOneWidget);
+    expect(find.byTooltip('Secret area discovered'), findsOneWidget);
+    await tester.ensureVisible(secret);
+    await tester.tap(secret);
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(calls, isEmpty);
+  });
+
+  testWidgets('pinch gestures zoom the map viewport', (tester) async {
+    final state = stateWith();
+    await pumpMap(tester, state: state, onAction: (_, __) async => state);
+
+    final viewer = find.byType(InteractiveViewer);
+    final controller = tester
+        .widget<InteractiveViewer>(viewer)
+        .transformationController!;
+    final before = controller.value.getMaxScaleOnAxis();
+    final center = tester.getCenter(viewer);
+    final first = await tester.startGesture(
+      center - const Offset(24, 0),
+      pointer: 1,
+    );
+    final second = await tester.startGesture(
+      center + const Offset(24, 0),
+      pointer: 2,
+    );
+    await tester.pump();
+    await first.moveBy(const Offset(-20, 0));
+    await second.moveBy(const Offset(20, 0));
+    await tester.pump(const Duration(milliseconds: 100));
+    await first.up();
+    await second.up();
+    await tester.pump(const Duration(milliseconds: 400));
+
+    expect(controller.value.getMaxScaleOnAxis(), greaterThan(before));
   });
 
   testWidgets('dragging the map pans its transformation', (tester) async {
