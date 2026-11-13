@@ -154,10 +154,9 @@ The port is complete only when all of the following are true (it is just bullet 
 
 This checkpoint is intentionally not a completion claim:
 - Step 1's interactive map and Step 2's world/boss progression implementation are merged in PR #25. Branch validation passed Android and Windows builds plus automated tests; real Android play-test remains in Step 8.
+- Step 2 world/boss progression implementation remains merged in PR #25, but its behavioral acceptance is still open. The first concrete gap confirmed against GTN1 is that `WorldBossCatalog.canFight` does not bypass normal fight requirements during Endless Rift; GTN1 `WorldMapScreen.kt` and `GameViewModel.kt` allow it. Fix this and add a regression test, then audit unlock migration, phases, rewards, mastery, rotation and save restoration.
 - Step 3's source inventory confirms 320 built-in trait definitions: 244 cosmetic badges, 64 Nebula bonuses, 6 XP multipliers, 2 streak-protection traits, and one each for combo reward, range hint, miss-penalty reduction, and risk reward. Cosmetic entries still require correct unlock/discovery and presentation behavior; data presence alone is not parity.
-- The gameplay-content audit found a reward-parity defect: the Dart guess pipeline applied the `talent_reward_1` +50% bonus in both the base reward multiplier and the post-reward talent bonus. GTN1 stores this talent separately from the shop/upgrade flag used by the base engine, then applies its +50% once afterward.
-- Fix in progress on branch `port/gtn1-economy-talent-reward-parity`: the legacy Prestige talent no longer activates the base-reward flag, and a regression test asserts a 10,000 base reward becomes 15,000, not 22,500.
-- Candidate workflow: [#42451764578](https://github.com/ne0gl1tch20/gtn-2/actions/runs/42451764578). Its Android and Windows jobs are pending at the time of this checkpoint.
+- The previously identified `talent_reward_1` double-application defect is fixed on `main`: the base reward engine no longer treats the Prestige talent as the shop/upgrade flag, and `test/core/guess_economy_rules_test.dart` asserts a 10,000 base reward becomes 15,000, not 22,500. This is already implemented; do not repeat the fix.
 - The full-port APK gate remains closed.
 
 
