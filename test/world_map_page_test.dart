@@ -167,6 +167,7 @@ void main() {
 
     final startBattle = find.text('Start boss battle');
     expect(startBattle, findsOneWidget);
+    await tester.ensureVisible(startBattle);
     await tester.tap(startBattle);
     await tester.pump(const Duration(milliseconds: 400));
     expect(calls, contains(('verdant_grove', 'boss')));
