@@ -58,6 +58,16 @@ void main() {
         'ember_dragon',
         'nebula_titan',
       ]);
+      expect(
+        WorldBossCatalog.worlds.map((world) => (world.x, world.y)),
+        [
+          (0.16, 0.24),
+          (0.43, 0.43),
+          (0.67, 0.24),
+          (0.82, 0.59),
+        ],
+      );
+      expect(WorldBossCatalog.routes, [(0, 1), (1, 2), (1, 3), (2, 3)]);
       expect(WorldBossCatalog.worlds.map((world) => world.secretAt), [
         50,
         150,
