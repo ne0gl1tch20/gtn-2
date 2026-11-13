@@ -237,466 +237,494 @@ class GameDashboardPage extends StatelessWidget {
             children: [
               Container(
                 decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: dark
-                    ? const [Color(0xFF182142), _bg, _bg]
-                    : const [Color(0xFFEAE8FF), Color(0xFFF5F6FC)],
-              ),
-            ),
-            child: SafeArea(
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 1120),
-                  child: ListView(
-                    padding: EdgeInsets.fromLTRB(
-                      horizontalPadding,
-                      12,
-                      horizontalPadding,
-                      28,
-                    ),
-                    children: [
-                      LayoutBuilder(
-                        builder: (context, constraints) {
-                          final fullWidth = constraints.maxWidth;
-                          return Wrap(
-                            spacing: 14,
-                            runSpacing: 14,
-                            children: [
-                              SizedBox(
-                                width: fullWidth,
-                                child: Row(
-                                  children: [
-                                    Container(
-                                      width: 42,
-                                      height: 42,
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(12),
-                                        gradient: const LinearGradient(
-                                          colors: [_purple, Color(0xFF6651D9)],
-                                        ),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: _purple.withValues(
-                                              alpha: .25,
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: dark
+                        ? const [Color(0xFF182142), _bg, _bg]
+                        : const [Color(0xFFEAE8FF), Color(0xFFF5F6FC)],
+                  ),
+                ),
+                child: SafeArea(
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 1120),
+                      child: ListView(
+                        padding: EdgeInsets.fromLTRB(
+                          horizontalPadding,
+                          12,
+                          horizontalPadding,
+                          28,
+                        ),
+                        children: [
+                          LayoutBuilder(
+                            builder: (context, constraints) {
+                              final fullWidth = constraints.maxWidth;
+                              return Wrap(
+                                spacing: 14,
+                                runSpacing: 14,
+                                children: [
+                                  SizedBox(
+                                    width: fullWidth,
+                                    child: Row(
+                                      children: [
+                                        Container(
+                                          width: 42,
+                                          height: 42,
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(
+                                              12,
                                             ),
-                                            blurRadius: 18,
-                                            offset: const Offset(0, 7),
+                                            gradient: const LinearGradient(
+                                              colors: [
+                                                _purple,
+                                                Color(0xFF6651D9),
+                                              ],
+                                            ),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: _purple.withValues(
+                                                  alpha: .25,
+                                                ),
+                                                blurRadius: 18,
+                                                offset: const Offset(0, 7),
+                                              ),
+                                            ],
+                                          ),
+                                          child: ClipRRect(
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
+                                            child: Image.asset(
+                                              'assets/gtn1/gtn-app-logo.png',
+                                              width: 42,
+                                              height: 42,
+                                              fit: BoxFit.contain,
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 11),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                'Guess The Number',
+                                                style: TextStyle(
+                                                  color: foreground,
+                                                  fontFamily: 'SpaceGrotesk',
+                                                  fontSize: 18,
+                                                  fontWeight: FontWeight.w700,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 10,
+                                            vertical: 7,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: foreground.withValues(
+                                              alpha: .06,
+                                            ),
+                                            borderRadius: BorderRadius.circular(
+                                              99,
+                                            ),
+                                            border: Border.all(
+                                              color: foreground.withValues(
+                                                alpha: .08,
+                                              ),
+                                            ),
+                                          ),
+                                          child: Row(
+                                            children: [
+                                              const Icon(
+                                                Icons.cloud_off_rounded,
+                                                color: _green,
+                                                size: 12,
+                                              ),
+                                              const SizedBox(width: 6),
+                                              Text(
+                                                'OFFLINE',
+                                                style: TextStyle(
+                                                  color: muted,
+                                                  fontSize: 10,
+                                                  fontWeight: FontWeight.w900,
+                                                  letterSpacing: 1,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    key: const Key('dashboard-hero-section'),
+                                    width: fullWidth,
+                                    child: Container(
+                                      padding: EdgeInsets.all(
+                                        compact ? 21 : 25,
+                                      ),
+                                      constraints: BoxConstraints(
+                                        minHeight: compact ? 190 : 205,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(32),
+                                        gradient: const LinearGradient(
+                                          begin: Alignment.topLeft,
+                                          end: Alignment.bottomRight,
+                                          colors: [
+                                            Color(0xFF292750),
+                                            Color(0xFF171B35),
+                                            Color(0xFF10172B),
+                                          ],
+                                        ),
+                                        border: Border.all(
+                                          color: Colors.white.withValues(
+                                            alpha: .1,
+                                          ),
+                                        ),
+                                        boxShadow: const [
+                                          BoxShadow(
+                                            color: Color(0x33000000),
+                                            blurRadius: 28,
+                                            offset: Offset(0, 14),
                                           ),
                                         ],
                                       ),
                                       child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(12),
-                                        child: Image.asset(
-                                          'assets/gtn1/gtn-app-logo.png',
-                                          width: 42,
-                                          height: 42,
-                                          fit: BoxFit.contain,
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 11),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            'Guess The Number',
-                                            style: TextStyle(
-                                              color: foreground,
-                                              fontFamily: 'SpaceGrotesk',
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.w700,
+                                        borderRadius: BorderRadius.circular(32),
+                                        child: Stack(
+                                          children: [
+                                            Positioned(
+                                              right: -80,
+                                              top: -95,
+                                              child: Container(
+                                                width: 220,
+                                                height: 220,
+                                                decoration: BoxDecoration(
+                                                  shape: BoxShape.circle,
+                                                  gradient: RadialGradient(
+                                                    colors: [
+                                                      _cyan.withValues(
+                                                        alpha: .24,
+                                                      ),
+                                                      _cyan.withValues(
+                                                        alpha: 0,
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
                                             ),
-                                          ),
-                                        ],
+                                            const Positioned(
+                                              right: 24,
+                                              top: 28,
+                                              child: _HeroSparkle(
+                                                size: 5,
+                                                opacity: .8,
+                                              ),
+                                            ),
+                                            const Positioned(
+                                              right: 12,
+                                              top: 88,
+                                              child: _HeroSparkle(
+                                                size: 4,
+                                                opacity: .55,
+                                              ),
+                                            ),
+                                            const Positioned(
+                                              right: 78,
+                                              bottom: 26,
+                                              child: _HeroSparkle(
+                                                size: 5,
+                                                opacity: .7,
+                                              ),
+                                            ),
+                                            const Positioned(
+                                              right: 132,
+                                              top: 44,
+                                              child: _HeroSparkle(
+                                                size: 3,
+                                                opacity: .45,
+                                              ),
+                                            ),
+                                            Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                const Row(
+                                                  children: [
+                                                    Icon(
+                                                      Icons.circle,
+                                                      color: _green,
+                                                      size: 8,
+                                                    ),
+                                                    SizedBox(width: 7),
+                                                    Text(
+                                                      'CURRENT RUN',
+                                                      style: TextStyle(
+                                                        color: Color(
+                                                          0xFF9BA5C4,
+                                                        ),
+                                                        fontSize: 10,
+                                                        fontWeight:
+                                                            FontWeight.w900,
+                                                        letterSpacing: 1.7,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                                const SizedBox(height: 16),
+                                                const Text(
+                                                  'Find your secret number',
+                                                  style: TextStyle(
+                                                    color: Color(0xFF9BA5C4),
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 4),
+                                                ShaderMask(
+                                                  shaderCallback: (bounds) =>
+                                                      const LinearGradient(
+                                                        colors: [
+                                                          Colors.white,
+                                                          _cyan,
+                                                        ],
+                                                      ).createShader(bounds),
+                                                  child: Text(
+                                                    '${game.minimum} — ${game.maximum}',
+                                                    style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: compact
+                                                          ? 35
+                                                          : 42,
+                                                      height: 1,
+                                                      fontWeight:
+                                                          FontWeight.w900,
+                                                      letterSpacing: -2.5,
+                                                    ),
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 15),
+                                                Text(
+                                                  message,
+                                                  maxLines: 2,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  style: const TextStyle(
+                                                    color: Color(0xFFD2D9F0),
+                                                    fontSize: 13,
+                                                    height: 1.4,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     ),
+                                  ),
+                                  if (randomEventMessage != null) ...[
+                                    const SizedBox(height: 12),
                                     Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 10,
-                                        vertical: 7,
-                                      ),
+                                      padding: const EdgeInsets.all(15),
                                       decoration: BoxDecoration(
-                                        color: foreground.withValues(
-                                          alpha: .06,
+                                        color: _gold.withValues(
+                                          alpha: dark ? .12 : .16,
                                         ),
-                                        borderRadius: BorderRadius.circular(99),
+                                        borderRadius: BorderRadius.circular(20),
                                         border: Border.all(
-                                          color: foreground.withValues(
-                                            alpha: .08,
-                                          ),
+                                          color: _gold.withValues(alpha: .38),
                                         ),
                                       ),
                                       child: Row(
                                         children: [
                                           const Icon(
-                                            Icons.cloud_off_rounded,
-                                            color: _green,
-                                            size: 12,
+                                            Icons.auto_awesome_rounded,
+                                            color: _gold,
                                           ),
-                                          const SizedBox(width: 6),
-                                          Text(
-                                            'OFFLINE',
-                                            style: TextStyle(
-                                              color: muted,
-                                              fontSize: 10,
-                                              fontWeight: FontWeight.w900,
-                                              letterSpacing: 1,
+                                          const SizedBox(width: 11),
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  'RANDOM EVENT',
+                                                  style: TextStyle(
+                                                    color: muted,
+                                                    fontSize: 9,
+                                                    fontWeight: FontWeight.w900,
+                                                    letterSpacing: 1.4,
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 3),
+                                                Text(
+                                                  randomEventMessage!,
+                                                  style: TextStyle(
+                                                    color: foreground,
+                                                    fontSize: 13,
+                                                    fontWeight: FontWeight.w800,
+                                                  ),
+                                                ),
+                                              ],
                                             ),
                                           ),
                                         ],
                                       ),
                                     ),
                                   ],
-                                ),
-                              ),
-                              SizedBox(
-                                key: const Key('dashboard-hero-section'),
-                                width: fullWidth,
-                                child: Container(
-                                  padding: EdgeInsets.all(compact ? 21 : 25),
-                                  constraints: BoxConstraints(
-                                    minHeight: compact ? 190 : 205,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(32),
-                                    gradient: const LinearGradient(
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                      colors: [
-                                        Color(0xFF292750),
-                                        Color(0xFF171B35),
-                                        Color(0xFF10172B),
-                                      ],
+                                  SizedBox(
+                                    width: fullWidth,
+                                    child: _BotArena(
+                                      progression: progression,
+                                      onOpenShop: onNebulaShop,
+                                      panel: panel,
+                                      line: line,
+                                      foreground: foreground,
+                                      muted: muted,
                                     ),
-                                    border: Border.all(
-                                      color: Colors.white.withValues(alpha: .1),
-                                    ),
-                                    boxShadow: const [
-                                      BoxShadow(
-                                        color: Color(0x33000000),
-                                        blurRadius: 28,
-                                        offset: Offset(0, 14),
-                                      ),
-                                    ],
                                   ),
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(32),
-                                    child: Stack(
+                                  SizedBox(
+                                    key: const Key('dashboard-guess-section'),
+                                    width: fullWidth,
+                                    child: _GuessInput(
+                                      game: game,
+                                      controller: controller,
+                                      enabled: !loading && !game.isComplete,
+                                      completed: game.isComplete,
+                                      onGuess: onGuess,
+                                      panel: panel,
+                                      raised: raised,
+                                      line: line,
+                                      foreground: foreground,
+                                      muted: muted,
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    key: const Key('dashboard-stats-section'),
+                                    width: fullWidth,
+                                    child: Row(
                                       children: [
-                                        Positioned(
-                                          right: -80,
-                                          top: -95,
-                                          child: Container(
-                                            width: 220,
-                                            height: 220,
-                                            decoration: BoxDecoration(
-                                              shape: BoxShape.circle,
-                                              gradient: RadialGradient(
-                                                colors: [
-                                                  _cyan.withValues(alpha: .24),
-                                                  _cyan.withValues(alpha: 0),
-                                                ],
-                                              ),
-                                            ),
+                                        Expanded(
+                                          child: _Stat(
+                                            Icons.bolt_rounded,
+                                            game.attempts.toString(),
+                                            'ATTEMPTS',
+                                            _cyan,
+                                            panel,
+                                            line,
+                                            foreground,
+                                            muted,
                                           ),
                                         ),
-                                        const Positioned(
-                                          right: 24,
-                                          top: 28,
-                                          child: _HeroSparkle(
-                                            size: 5,
-                                            opacity: .8,
+                                        const SizedBox(width: 6),
+                                        Expanded(
+                                          child: _Stat(
+                                            Icons.check_circle_rounded,
+                                            progression.correctGuesses
+                                                .toString(),
+                                            'CORRECT',
+                                            _gold,
+                                            panel,
+                                            line,
+                                            foreground,
+                                            muted,
                                           ),
                                         ),
-                                        const Positioned(
-                                          right: 12,
-                                          top: 88,
-                                          child: _HeroSparkle(
-                                            size: 4,
-                                            opacity: .55,
+                                        const SizedBox(width: 6),
+                                        Expanded(
+                                          child: _Stat(
+                                            Icons.local_fire_department_rounded,
+                                            progression.currentStreak
+                                                .toString(),
+                                            'STREAK',
+                                            _green,
+                                            panel,
+                                            line,
+                                            foreground,
+                                            muted,
                                           ),
-                                        ),
-                                        const Positioned(
-                                          right: 78,
-                                          bottom: 26,
-                                          child: _HeroSparkle(
-                                            size: 5,
-                                            opacity: .7,
-                                          ),
-                                        ),
-                                        const Positioned(
-                                          right: 132,
-                                          top: 44,
-                                          child: _HeroSparkle(
-                                            size: 3,
-                                            opacity: .45,
-                                          ),
-                                        ),
-                                        Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            const Row(
-                                              children: [
-                                                Icon(
-                                                  Icons.circle,
-                                                  color: _green,
-                                                  size: 8,
-                                                ),
-                                                SizedBox(width: 7),
-                                                Text(
-                                                  'CURRENT RUN',
-                                                  style: TextStyle(
-                                                    color: Color(0xFF9BA5C4),
-                                                    fontSize: 10,
-                                                    fontWeight: FontWeight.w900,
-                                                    letterSpacing: 1.7,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                            const SizedBox(height: 16),
-                                            const Text(
-                                              'Find your secret number',
-                                              style: TextStyle(
-                                                color: Color(0xFF9BA5C4),
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.w600,
-                                              ),
-                                            ),
-                                            const SizedBox(height: 4),
-                                            ShaderMask(
-                                              shaderCallback: (bounds) =>
-                                                  const LinearGradient(
-                                                    colors: [
-                                                      Colors.white,
-                                                      _cyan,
-                                                    ],
-                                                  ).createShader(bounds),
-                                              child: Text(
-                                                '${game.minimum} — ${game.maximum}',
-                                                style: TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: compact ? 35 : 42,
-                                                  height: 1,
-                                                  fontWeight: FontWeight.w900,
-                                                  letterSpacing: -2.5,
-                                                ),
-                                              ),
-                                            ),
-                                            const SizedBox(height: 15),
-                                            Text(
-                                              message,
-                                              maxLines: 2,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: const TextStyle(
-                                                color: Color(0xFFD2D9F0),
-                                                fontSize: 13,
-                                                height: 1.4,
-                                              ),
-                                            ),
-                                          ],
                                         ),
                                       ],
                                     ),
                                   ),
-                                ),
-                              ),
-                              if (randomEventMessage != null) ...[
-                                const SizedBox(height: 12),
-                                Container(
-                                  padding: const EdgeInsets.all(15),
-                                  decoration: BoxDecoration(
-                                    color: _gold.withValues(
-                                      alpha: dark ? .12 : .16,
-                                    ),
-                                    borderRadius: BorderRadius.circular(20),
-                                    border: Border.all(
-                                      color: _gold.withValues(alpha: .38),
+                                  SizedBox(
+                                    key: const Key('dashboard-wallet-section'),
+                                    width: fullWidth,
+                                    child: _Wallet(
+                                      progression,
+                                      panel,
+                                      raised,
+                                      line,
+                                      foreground,
+                                      muted,
+                                      incomePerSecond,
                                     ),
                                   ),
-                                  child: Row(
-                                    children: [
-                                      const Icon(
-                                        Icons.auto_awesome_rounded,
-                                        color: _gold,
-                                      ),
-                                      const SizedBox(width: 11),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              'RANDOM EVENT',
-                                              style: TextStyle(
-                                                color: muted,
-                                                fontSize: 9,
-                                                fontWeight: FontWeight.w900,
-                                                letterSpacing: 1.4,
-                                              ),
+                                  SizedBox(
+                                    width: fullWidth,
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          child: _Action(
+                                            'Beyond the Numbers',
+                                            'Explore your progression',
+                                            Icons.public_rounded,
+                                            _cyan,
+                                            onWorldMap,
+                                            panel,
+                                            line,
+                                            foreground,
+                                            muted,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 10),
+                                        Expanded(
+                                          child: _Action(
+                                            'Daily Momentum',
+                                            'Keep the streak alive',
+                                            Icons.auto_awesome_rounded,
+                                            _gold,
+                                            () => onLegacySection(
+                                              LegacySection.rewards,
                                             ),
-                                            const SizedBox(height: 3),
-                                            Text(
-                                              randomEventMessage!,
-                                              style: TextStyle(
-                                                color: foreground,
-                                                fontSize: 13,
-                                                fontWeight: FontWeight.w800,
-                                              ),
-                                            ),
-                                          ],
+                                            panel,
+                                            line,
+                                            foreground,
+                                            muted,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  if (game.isComplete)
+                                    SizedBox(
+                                      width: fullWidth,
+                                      child: M3EButton.icon(
+                                        style: M3EButtonStyle.filled,
+                                        onPressed: loading ? null : onNewGame,
+                                        icon: const Icon(Icons.refresh_rounded),
+                                        label: const Text(
+                                          'Start another round',
                                         ),
                                       ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                              SizedBox(
-                                width: fullWidth,
-                                child: _BotArena(
-                                  progression: progression,
-                                  onOpenShop: onNebulaShop,
-                                  panel: panel,
-                                  line: line,
-                                  foreground: foreground,
-                                  muted: muted,
-                                ),
-                              ),
-                              SizedBox(
-                                key: const Key('dashboard-guess-section'),
-                                width: fullWidth,
-                                child: _GuessInput(
-                                  game: game,
-                                  controller: controller,
-                                  enabled: !loading && !game.isComplete,
-                                  completed: game.isComplete,
-                                  onGuess: onGuess,
-                                  panel: panel,
-                                  raised: raised,
-                                  line: line,
-                                  foreground: foreground,
-                                  muted: muted,
-                                ),
-                              ),
-                              SizedBox(
-                                key: const Key('dashboard-stats-section'),
-                                width: fullWidth,
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      child: _Stat(
-                                        Icons.bolt_rounded,
-                                        game.attempts.toString(),
-                                        'ATTEMPTS',
-                                        _cyan,
-                                        panel,
-                                        line,
-                                        foreground,
-                                        muted,
-                                      ),
                                     ),
-                                    const SizedBox(width: 6),
-                                    Expanded(
-                                      child: _Stat(
-                                        Icons.check_circle_rounded,
-                                        progression.correctGuesses.toString(),
-                                        'CORRECT',
-                                        _gold,
-                                        panel,
-                                        line,
-                                        foreground,
-                                        muted,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 6),
-                                    Expanded(
-                                      child: _Stat(
-                                        Icons.local_fire_department_rounded,
-                                        progression.currentStreak.toString(),
-                                        'STREAK',
-                                        _green,
-                                        panel,
-                                        line,
-                                        foreground,
-                                        muted,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              SizedBox(
-                                key: const Key('dashboard-wallet-section'),
-                                width: fullWidth,
-                                child: _Wallet(
-                                  progression,
-                                  panel,
-                                  raised,
-                                  line,
-                                  foreground,
-                                  muted,
-                                  incomePerSecond,
-                                ),
-                              ),
-                              SizedBox(
-                                width: fullWidth,
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      child: _Action(
-                                        'Beyond the Numbers',
-                                        'Explore your progression',
-                                        Icons.public_rounded,
-                                        _cyan,
-                                        onWorldMap,
-                                        panel,
-                                        line,
-                                        foreground,
-                                        muted,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 10),
-                                    Expanded(
-                                      child: _Action(
-                                        'Daily Momentum',
-                                        'Keep the streak alive',
-                                        Icons.auto_awesome_rounded,
-                                        _gold,
-                                        () => onLegacySection(
-                                          LegacySection.rewards,
-                                        ),
-                                        panel,
-                                        line,
-                                        foreground,
-                                        muted,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              if (game.isComplete)
-                                SizedBox(
-                                  width: fullWidth,
-                                  child: M3EButton.icon(
-                                    style: M3EButtonStyle.filled,
-                                    onPressed: loading ? null : onNewGame,
-                                    icon: const Icon(Icons.refresh_rounded),
-                                    label: const Text('Start another round'),
-                                  ),
-                                ),
-                            ],
-                          );
-                        },
+                                ],
+                              );
+                            },
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
-              ),
-              ),
               ),
               if (loading)
                 Positioned.fill(
