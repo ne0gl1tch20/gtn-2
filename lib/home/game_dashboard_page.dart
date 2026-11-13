@@ -90,8 +90,9 @@ class GameDashboardPage extends StatelessWidget {
   final VoidCallback? onPlayerProfile;
 
   void _openMoreMenu(BuildContext context, Color panel) {
-    shellNavigatorKey.currentState!.push<void>(
-      MaterialPageRoute<void>(
+    shellNavigatorKey.currentState!
+        .push<void>(
+          MaterialPageRoute<void>(
         builder: (_) => _MoreMenuPage(
           settings: settings,
           showDeveloperSettings: showDeveloperSettings,
@@ -111,9 +112,9 @@ class GameDashboardPage extends StatelessWidget {
           onUpgradeShop: onUpgradeShop,
           playerProfile: playerProfile,
           onPlayerProfile: onPlayerProfile ?? () {},
-        ),
-      ),
-    );
+          ),
+        )
+        .then((_) => onPrimarySelected(2));
   }
 
   @override
