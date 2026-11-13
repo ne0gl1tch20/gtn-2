@@ -42,10 +42,6 @@ jobs:
         run: flutter pub get
       - name: Restore analysis configuration
         run: git restore -- analysis_options.yaml
-      - name: Diagnose remaining world map test formatting
-        run: |
-          dart format --output=show test/world_map_page_test.dart > /tmp/world-map.formatted.dart
-          diff -u test/world_map_page_test.dart /tmp/world-map.formatted.dart || true
       - name: Verify Dart formatting
         run: dart format --output=none --set-exit-if-changed .
       - name: Analyze
