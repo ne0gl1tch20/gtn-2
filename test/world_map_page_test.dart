@@ -196,11 +196,7 @@ void main() {
     final initial = stateWith(unlocked: unlocked);
     final semantics = tester.ensureSemantics();
 
-    await pumpMap(
-      tester,
-      state: initial,
-      onAction: (_, __) async => initial,
-    );
+    await pumpMap(tester, state: initial, onAction: (_, __) async => initial);
 
     final updated = initial.copyWith(
       legacySystems: initial.legacySystems.copyWith(
@@ -224,9 +220,7 @@ void main() {
     final crystalNode = find.byKey(
       const ValueKey('world-node-crystal_caverns'),
     );
-    final verdantNode = find.byKey(
-      const ValueKey('world-node-verdant_grove'),
-    );
+    final verdantNode = find.byKey(const ValueKey('world-node-verdant_grove'));
     expect(
       tester.getSemantics(crystalNode).flagsCollection.isSelected,
       Tristate.isTrue,
@@ -253,9 +247,7 @@ void main() {
       },
     );
 
-    final secret = find.byKey(
-      const ValueKey('secret-node-whispering_hollow'),
-    );
+    final secret = find.byKey(const ValueKey('secret-node-whispering_hollow'));
     expect(secret, findsNothing);
 
     final discovered = stateWith(
