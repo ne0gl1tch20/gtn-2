@@ -1844,6 +1844,12 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
     );
   }
 
+  String get _updateChannelLabel {
+    if (Platform.isWindows) return 'Windows Debug';
+    if (Platform.isAndroid) return 'Android Debug';
+    return 'Unsupported platform';
+  }
+
   Widget _aboutSection() {
     return GtnExpressiveCard(
       child: ExpansionTile(
@@ -1859,7 +1865,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Update channel: ${Platform.isWindows ? 'Windows Debug' : Platform.isAndroid ? 'Android Debug' : 'Unsupported platform'}',
+                  'Update channel: $_updateChannelLabel',
                 ),
                 const Text(
                   'Flutter continuation of the original Kotlin game. Offline-first local saves.',
