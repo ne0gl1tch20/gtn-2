@@ -196,12 +196,14 @@ class WorldBossCatalog {
   static bool isUnlocked(ProgressionState state, WorldBossDefinition boss) =>
       state.legacySystems.unlockedWorldIds.contains(boss.id);
 
-  static bool canFight(ProgressionState state, WorldBossDefinition boss) =>
-      isUnlocked(state, boss) &&
-      state.correctGuesses >= boss.fightCorrectGuesses &&
-      ownedUpgradeLevels(state) >= boss.fightUpgradeCount &&
-      state.prestigeResets >= boss.fightPrestigeCount &&
-      state.ultraResets >= boss.fightUltraCount;
+  static bool canFight(ProgressionState state, WorldBossDefinition boss) {
+    if (!isUnlocked(state, boss)) return false;
+    if (state.legacySystems.endlessRiftActive) return true;
+    return state.correctGuesses >= boss.fightCorrectGuesses &&
+        ownedUpgradeLevels(state) >= boss.fightUpgradeCount &&
+        state.prestigeResets >= boss.fightPrestigeCount &&
+        state.ultraResets >= boss.fightUltraCount;
+  }
 
   static int damage(ProgressionState state, WorldBossDefinition boss) {
     final riftTier = state.legacySystems.endlessRiftActive
