@@ -299,24 +299,24 @@ class _NebulaShopPageState extends State<NebulaShopPage> {
                       )
                     else
                       M3EButton.filled(
-                      onPressed:
-                          _buyingId != null ||
-                              _state.nebula.compareTo(item.price) < 0 ||
-                              (_state.nebulaItems[item.id] ?? 0) > 0 ||
-                              (NebulaShopCatalog.botUpgradeIds.contains(
-                                    item.id,
-                                  ) &&
-                                  !NebulaShopCatalog.botIds.any(
-                                    (id) => (_state.nebulaItems[id] ?? 0) > 0,
-                                  ))
-                          ? null
-                          : () => _buy(item),
-                      child: Text(
-                        (_state.nebulaItems[item.id] ?? 0) > 0
-                            ? 'Purchased'
-                            : 'Buy · ${item.price} Nebula',
+                        onPressed:
+                            _buyingId != null ||
+                                _state.nebula.compareTo(item.price) < 0 ||
+                                (_state.nebulaItems[item.id] ?? 0) > 0 ||
+                                (NebulaShopCatalog.botUpgradeIds.contains(
+                                      item.id,
+                                    ) &&
+                                    !NebulaShopCatalog.botIds.any(
+                                      (id) => (_state.nebulaItems[id] ?? 0) > 0,
+                                    ))
+                            ? null
+                            : () => _buy(item),
+                        child: Text(
+                          (_state.nebulaItems[item.id] ?? 0) > 0
+                              ? 'Purchased'
+                              : 'Buy · ${item.price} Nebula',
+                        ),
                       ),
-                    ),
                   ],
                 ),
               ),
