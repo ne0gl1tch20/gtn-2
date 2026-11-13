@@ -153,7 +153,7 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
       });
     } on Object catch (error) {
       if (!mounted) return;
-      setState(() => _luaOutput = 'Lua execution failed: ${error}');
+      setState(() => _luaOutput = 'Lua execution failed: $error');
     } finally {
       if (mounted) setState(() => _luaBusy = false);
     }
