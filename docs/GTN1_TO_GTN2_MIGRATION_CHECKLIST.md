@@ -17,7 +17,7 @@ Do not mark an entire section complete when only its UI or data model exists.
 | Source surface | GTN1 inventory | GTN2 target | Current assessment |
 |---|---:|---|---|
 | Kotlin application sources | 107 `.kt` files | Dart services, engines and platform adapters | [~] Partial replacement; audit every source class |
-| Kotlin tests | 52 test files | Dart unit/widget/integration tests | [~] 24 Dart test files currently tracked; coverage parity not established |
+| Kotlin tests | 49 test files | Dart unit/widget/integration tests | [~] 31 Dart test files currently tracked; coverage parity not established |
 | Web Play | 1 HTML, 5 JavaScript, 1 CSS | Flutter screens and equivalent interactions | [~] Flutter UI exists; web behavior needs a complete mapping |
 | Jarrlyy UI SDK | 24 files | Flutter component/design system | [ ] SDK component and interaction parity |
 | Lua scripts | 4 `.lua` files | Dart extension/runtime layer or explicitly documented replacement | [ ] Sandboxed execution and script behavior |
