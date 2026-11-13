@@ -86,7 +86,6 @@ void main() {
     final state = stateWith();
     final calls = <(String, String)>[];
     final semantics = tester.ensureSemantics();
-    addTearDown(semantics.dispose);
 
     await pumpMap(
       tester,
@@ -109,6 +108,7 @@ void main() {
     );
     expect(find.text('Crystal Caverns'), findsWidgets);
     expect(find.text('Unlock world'), findsWidgets);
+    semantics.dispose();
   });
 
   testWidgets('Endless Rift keeps world selection on its active realm', (
@@ -148,6 +148,7 @@ void main() {
       tester.getSemantics(otherNode).flagsCollection.isSelected,
       Tristate.isFalse,
     );
+    semantics.dispose();
   });
 
   testWidgets('active boss battle state is visible on its world node', (
