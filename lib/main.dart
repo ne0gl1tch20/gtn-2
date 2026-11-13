@@ -1670,10 +1670,10 @@ class _GameHomePageState extends State<GameHomePage>
         if (isBot) {
           if (correct) {
             final nextGame = _newGameAfterCorrectGuess(
-              _engine.newGame(),
-              beforeGuess,
-              attempts: previousAttempts,
-            );
+            _engine.newGame(),
+            beforeGuess,
+            attempts: previousAttempts,
+          );
             _game = _engine.continueAfterCorrect(
               _game,
               nextGame,
