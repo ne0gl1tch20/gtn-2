@@ -638,10 +638,26 @@ class LegacyDetailPage extends StatelessWidget {
         ),
       ),
       const SizedBox(height: 8),
-      _valueCard('Current streak', '${progression.currentStreak}', Icons.local_fire_department_rounded),
-      _valueCard('Best streak', '${progression.bestStreak}', Icons.military_tech_rounded),
-      _valueCard('Prestige resets', '${progression.prestigeResets}', Icons.auto_awesome_rounded),
-      _valueCard('Ultra resets', '${progression.ultraResets}', Icons.bolt_rounded),
+      _valueCard(
+        'Current streak',
+        '${progression.currentStreak}',
+        Icons.local_fire_department_rounded,
+      ),
+      _valueCard(
+        'Best streak',
+        '${progression.bestStreak}',
+        Icons.military_tech_rounded,
+      ),
+      _valueCard(
+        'Prestige resets',
+        '${progression.prestigeResets}',
+        Icons.auto_awesome_rounded,
+      ),
+      _valueCard(
+        'Ultra resets',
+        '${progression.ultraResets}',
+        Icons.bolt_rounded,
+      ),
       _valueCard('Upgrade levels', '$totalUpgradeLevels', Icons.upgrade_rounded),
       _valueCard(
         'Bosses defeated',
