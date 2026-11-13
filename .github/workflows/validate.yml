@@ -42,6 +42,13 @@ jobs:
         run: git restore -- analysis_options.yaml
       - name: Verify Dart formatting
         run: dart format --output=none --set-exit-if-changed .
+      - name: Show formatted trait extension files (temporary diagnostic)
+        if: always()
+        run: |
+          echo "===== trait_extension_runtime.dart ====="
+          dart format --output=show lib/core/legacy/trait_extension_runtime.dart
+          echo "===== trait_extension_runtime_test.dart ====="
+          dart format --output=show test/core/legacy/trait_extension_runtime_test.dart
       - name: Analyze
         run: flutter analyze --fatal-infos
 
