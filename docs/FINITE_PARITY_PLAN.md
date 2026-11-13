@@ -28,7 +28,7 @@
 - [x] Verify the complete pinned repository inventory: 214 production Kotlin files and 111 Kotlin tests across app, shared KMP, desktopApp and buildSrc.
 - [~] Map the Android app module's 107/107 production Kotlin files. `docs/GTN1_TO_GTN2_SOURCE_MAP.md` records 66 mapped/partial, five N/A and 36 gaps; this is app-only coverage, not full-repository parity.
 - [x] Map the 50 shared KMP production files and 30 shared tests to Dart destinations/regression surfaces. `docs/GTN1_SHARED_KMP_TO_GTN2_SOURCE_MAP.md` maps every source/test and explicitly records partial ports and gaps; mapping completion does not close behavioral parity items.
-- [ ] Map the 55 Windows desktop production files and 29 desktop tests to the Flutter Windows implementation; explicitly account for desktop-only behaviors.
+- [x] Map the 55 Windows desktop production files and 29 desktop tests to the Flutter Windows implementation. `docs/GTN1_WINDOWS_DESKTOP_TO_GTN2_SOURCE_MAP.md` maps every source/test and records desktop-only gaps, N/A WebView transport, generated Windows runner behavior and updater coverage; mapping completion does not close behavioral parity items.
 - [ ] Review the two buildSrc Kotlin files and record build-only applicability or required CI parity.
 - [ ] Map the single Web Play HTML shell, its actual route/screen renderers and the five JavaScript modules to native Flutter destinations and behaviors.
 - [ ] Map the 24 SDK files to the Flutter components/events that are actually used by those screens.
