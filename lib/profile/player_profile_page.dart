@@ -243,10 +243,10 @@ class _PlayerProfilePageState extends State<PlayerProfilePage> {
                 padding: const EdgeInsets.all(5),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: equippedCosmeticId == 'cosmetic_nebula_ring'
+                  border: widget.equippedCosmeticId == 'cosmetic_nebula_ring'
                       ? Border.all(color: theme.colorScheme.primary, width: 4)
                       : null,
-                  boxShadow: equippedCosmeticId == 'cosmetic_pixel_glow'
+                  boxShadow: widget.equippedCosmeticId == 'cosmetic_pixel_glow'
                       ? [
                           BoxShadow(
                             color: theme.colorScheme.tertiary.withValues(alpha: 0.65),
@@ -270,7 +270,7 @@ class _PlayerProfilePageState extends State<PlayerProfilePage> {
                         ),
                       ),
                     ),
-                    if (equippedCosmeticId == 'cosmetic_starfield')
+                    if (widget.equippedCosmeticId == 'cosmetic_starfield')
                       Positioned(
                         right: -3,
                         bottom: -3,
