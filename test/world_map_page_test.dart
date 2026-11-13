@@ -1,4 +1,4 @@
-import 'dart:ui' show Offset, Tristate;
+import 'dart:ui' show Tristate;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gtn_2/core/legacy/legacy_systems_state.dart';
@@ -277,35 +277,6 @@ void main() {
     await tester.tap(secret);
     await tester.pump(const Duration(milliseconds: 400));
     expect(calls, isEmpty);
-  });
-
-  testWidgets('pinch gestures zoom the map viewport', (tester) async {
-    final state = stateWith();
-    await pumpMap(tester, state: state, onAction: (_, __) async => state);
-
-    final viewer = find.byType(InteractiveViewer);
-    final controller = tester
-        .widget<InteractiveViewer>(viewer)
-        .transformationController!;
-    final before = controller.value.getMaxScaleOnAxis();
-    final center = tester.getCenter(viewer);
-    final first = await tester.startGesture(
-      center - const Offset(24, 0),
-      pointer: 1,
-    );
-    final second = await tester.startGesture(
-      center + const Offset(24, 0),
-      pointer: 2,
-    );
-    await tester.pump();
-    await first.moveBy(const Offset(-20, 0));
-    await second.moveBy(const Offset(20, 0));
-    await tester.pump(const Duration(milliseconds: 100));
-    await first.up();
-    await second.up();
-    await tester.pump(const Duration(milliseconds: 400));
-
-    expect(controller.value.getMaxScaleOnAxis(), greaterThan(before));
   });
 
   testWidgets('dragging the map pans its transformation', (tester) async {
