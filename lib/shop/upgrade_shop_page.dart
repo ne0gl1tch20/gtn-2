@@ -9,7 +9,7 @@ import 'upgrade_catalog.dart';
 
 typedef UpgradePurchase = Future<ProgressionState> Function(
   UpgradeDefinition definition, {
-  int levels,
+  required int levels,
 });
 
 class UpgradeShopPage extends StatefulWidget {
@@ -45,7 +45,7 @@ class _UpgradeShopPageState extends State<UpgradeShopPage> {
         total += nextCost;
         levels++;
       }
-      return levels;
+      return levels == 0 ? 1 : levels;
     }
     return int.parse(_buyMultiplier).clamp(1, remaining);
   }
