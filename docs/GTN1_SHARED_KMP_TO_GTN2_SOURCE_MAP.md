@@ -1,0 +1,126 @@
+# GTN1 Shared KMP → GTN2 Dart source map
+
+**Authority:** `ne0gl1tch20/GuessTheNumber` at `fe9cf567169e19059e0330d08769fe454336ef94`  
+**GTN2 snapshot inspected:** `main` at `5f4a942417b8736fcacaac0950d0c6854d7f4cbf`  
+**Inventory:** `docs/GTN1_SOURCE_INVENTORY.json` — exactly 50 shared production Kotlin files and 30 shared Kotlin tests.
+
+This is a file-level destination map, not a parity-completion claim. A mapped target means a relevant implementation exists; it does not prove the source behavior, edge cases or platform behavior are equivalent. Gaps below remain parity work. UI sources are mapped to native Flutter destinations because GTN2 does not embed GTN1 Compose UI.
+
+## Status definitions
+
+- **Mapped:** a corresponding Dart implementation and relevant test surface are present; source-case parity still belongs to the applicable stage checklist.
+- **Partial:** a Dart destination exists, but the source contract is broader, a behavior/test is missing, or the target is only an adaptation.
+- **Gap:** no source-compatible Dart implementation or regression coverage was found in the inspected GTN2 snapshot.
+- **N/A:** the original implementation is tied to a platform or UI technology that GTN2 intentionally replaces; the user-facing behavior is mapped separately where applicable.
+
+## 1. Common KMP production sources (27)
+
+| GTN1 source | GTN2 destination | Regression surface | Mapping |
+|---|---|---|---|
+| `shared/domain/ChallengeRewardRules.kt` | `lib/arcade/arcade_reward_rules.dart`; challenge settlement in `lib/core/legacy/legacy_systems_engine.dart` | `test/arcade/arcade_reward_rules_test.dart`; `test/core/legacy/legacy_systems_engine_test.dart` | Partial — Arcade reward policy exists; full challenge reward eligibility/settlement comparison remains open. |
+| `shared/domain/CriticalChanceRules.kt` | `lib/core/game/guess_economy_rules.dart` | `test/core/guess_economy_rules_test.dart` | Mapped — critical chance formula and levels have focused coverage. |
+| `shared/domain/DifficultyRules.kt` | `lib/core/game/difficulty_rules.dart` | `test/core/difficulty_rules_test.dart` | Mapped — dedicated difficulty policy and tests exist. |
+| `shared/domain/FrenzyRules.kt` | `lib/core/game/guess_economy_rules.dart` | `test/core/guess_economy_rules_test.dart` | Mapped — streak/frenzy reward tiers have focused coverage. |
+| `shared/domain/GuessEconomyDecisionRules.kt` | `lib/core/game/guess_economy_rules.dart`; guess orchestration in `lib/main.dart` | `test/core/guess_economy_rules_test.dart`; `test/core/game_engine_test.dart` | Partial — reward calculation is centralized; full decision ordering/source context still needs case-by-case comparison. |
+| `shared/domain/GuessGameReducer.kt` | `lib/core/game/game_engine.dart` | `test/core/game_engine_test.dart` | Mapped — deterministic guess state transitions have a dedicated engine/test surface. |
+| `shared/domain/GuessPenaltyRules.kt` | `lib/core/game/guess_economy_rules.dart`; miss settlement in `lib/main.dart` | `test/core/guess_economy_rules_test.dart`; `test/core/legacy/legacy_systems_engine_test.dart` | Partial — penalties and trait refunds are wired; compare all source penalty ordering and bounds. |
+| `shared/domain/GuessRewardRules.kt` | `lib/core/game/guess_economy_rules.dart` | `test/core/guess_economy_rules_test.dart` | Mapped — base reward, streak, frenzy, critical, difficulty and multipliers are covered. |
+| `shared/domain/MutatorRules.kt` | `lib/core/legacy/legacy_systems_engine.dart` | `test/core/legacy/legacy_systems_engine_test.dart`; `test/legacy_systems_test.dart` | Mapped — four mutator multipliers stack to 300× and Hardcore doubles the range in tests. |
+| `shared/domain/ProgressionRequirementRules.kt` | `lib/core/progression/progression_engine.dart`; `lib/worlds/world_boss_battle_engine.dart` | `test/core/progression_engine_test.dart`; `test/world_boss_battle_engine_test.dart` | Partial — progression/world requirements exist; every shared requirement and rejection boundary needs source comparison. |
+| `shared/domain/ProgressionRewardRules.kt` | `lib/core/progression/progression_calculator.dart`; `lib/core/progression/progression_engine.dart` | `test/core/progression_calculator_test.dart`; `test/core/progression_engine_test.dart` | Partial — calculation and transactions exist; full source formula/overflow parity remains to verify. |
+| `shared/domain/SaveProfileRules.kt` | `lib/data/saves/save_data.dart` (`profileIconIds`); `lib/data/saves/save_storage.dart`; `lib/saves/save_slots_page.dart` | `test/data/save_data_test.dart` | Mapped — the five canonical icon IDs are persisted and validated. Profile editor work in PR #72 is not merged into this snapshot and must not be counted as current-main behavior. |
+| `shared/rules/GuessCoreState.kt` | `lib/core/game/game_engine.dart`; `lib/core/progression/progression_state.dart` | `test/core/game_engine_test.dart` | Partial — equivalent state is split across round and progression models; compare every field/invariant. |
+| `shared/rules/GuessRateLimitRules.kt` | Guess submission handler in `lib/main.dart`; localized retry key in `lib/i18n/app_localizations.dart` | `test/widget_test.dart` | Partial — a rate-limited UI message exists, but a source-equivalent monotonic 50 ms policy and its boundary/regression tests were not identified. |
+| `shared/rules/GuessRules.kt` | `lib/core/game/game_engine.dart` | `test/core/game_engine_test.dart` | Mapped — range validation and low/high/correct outcomes are represented. |
+| `shared/rules/GuessSourceContext.kt` | Bot identity passed through `_submitGuess(botId: ...)` in `lib/main.dart`; automation in `lib/core/automation/` | `test/core/automation/automation_policy_test.dart`; `test/core/game_engine_test.dart` | Partial — bot guesses are identified explicitly rather than through the source's pending thread-local marker; verify all stats/attempt paths. |
+| `shared/rules/GuessStateRules.kt` | `lib/core/game/game_engine.dart`; `lib/data/saves/save_data.dart` | `test/core/game_engine_test.dart`; `test/data/save_data_test.dart` | Mapped — game state and persisted-state validation are represented; complete invariant parity remains a Stage 5 gate. |
+| `shared/rules/GuessTransitionRules.kt` | `lib/core/game/game_engine.dart`; transition orchestration in `lib/main.dart` | `test/core/game_engine_test.dart` | Partial — round transition exists; compare source lifecycle ordering and bot/manual distinctions. |
+| `shared/ui/JarrlyyUiComponents.kt` | `lib/design/expressive_widgets.dart` | `test/design/expressive_widgets_test.dart` | Partial — native Flutter design adapters replace shared Compose components; individual SDK/component behavior is tracked in the UI/SDK audit. |
+| `shared/ui/SharedDeveloperSettingsScreen.kt` | `lib/dev/developer_settings_page.dart` | `test/widget_test.dart` | Partial — native developer settings destination exists; command and control parity remains open. |
+| `shared/ui/SharedGameContracts.kt` | `lib/core/game/game_engine.dart`; `lib/core/progression/progression_state.dart`; `lib/main.dart` | `test/core/game_engine_test.dart`; `test/widget_test.dart` | Partial — contracts are represented by Dart state/actions, not a one-to-one shared interface. |
+| `shared/ui/SharedGuessEntryPanel.kt` | `lib/home/game_dashboard_page.dart` | `test/widget_test.dart` | Partial — native guess-entry panel exists; visual/input parity remains in Stage 4. |
+| `shared/ui/SharedGuessFeedbackCard.kt` | `lib/home/game_dashboard_page.dart` | `test/widget_test.dart` | Partial — feedback surface exists; all source states, semantics and animation need comparison. |
+| `shared/ui/SharedGuessGameContent.kt` | `lib/home/game_dashboard_page.dart` | `test/widget_test.dart` | Partial — dashboard content is native Flutter; source layout and interaction audit remains open. |
+| `shared/ui/SharedGuessGameScreen.kt` | `lib/home/game_dashboard_page.dart`; shell/navigation in `lib/main.dart` | `test/widget_test.dart` | Partial — native screen route exists; screen-level parity remains open. |
+| `shared/ui/SharedGuessInputField.kt` | `lib/home/game_dashboard_page.dart`; `lib/design/expressive_widgets.dart` | `test/widget_test.dart`; `test/design/expressive_widgets_test.dart` | Partial — native input exists; keyboard, focus and feedback details require source comparison. |
+| `shared/ui/SharedSaveSlotCard.kt` | `lib/saves/save_slots_page.dart` | `test/widget_test.dart` | Partial — native save-slot UI exists; source card states/actions and visual parity remain open. |
+
+## 2. JVM + Android shared production sources (21)
+
+| GTN1 source | GTN2 destination | Regression surface | Mapping |
+|---|---|---|---|
+| `domain/command/CommandAutocomplete.kt` | `lib/dev/developer_settings_page.dart`; command handling in `lib/main.dart` | `test/widget_test.dart` | Partial — command surface exists; source autocomplete ranking, tokenization and suggestions need explicit verification. |
+| `domain/engine/ArcadeRewardRules.kt` | `lib/arcade/arcade_reward_rules.dart` | `test/arcade/arcade_reward_rules_test.dart` | Mapped — score/time caps and reward eligibility have dedicated tests. |
+| `domain/engine/BigNumberProgressionRewardRules.kt` | `lib/core/progression/progression_calculator.dart`; `lib/core/numbers/big_number.dart` | `test/core/progression_calculator_test.dart`; `test/core/big_number_test.dart` | Partial — arbitrary-precision calculation exists; exact floor/boundary parity must be verified against the Kotlin BigDecimal algorithm. |
+| `domain/engine/GameEngine.kt` | `lib/core/game/game_engine.dart`; guess orchestration in `lib/main.dart` | `test/core/game_engine_test.dart`; `test/widget_test.dart` | Partial — playable game loop exists; GTN1 adaptive target proposal/native fallback and full transition contract are not mapped yet. |
+| `domain/engine/OfflineEarningsPolicy.kt` | `lib/core/automation/offline_earnings_policy.dart` | `test/core/automation/automation_policy_test.dart` | Mapped — offline earning bounds and activation policy have focused tests. |
+| `domain/model/BigNumber.kt` | `lib/core/numbers/big_number.dart` | `test/core/big_number_test.dart` | Mapped — arbitrary precision Dart currency type exists with tests. |
+| `domain/model/DailyRewardPolicy.kt` | Daily claim logic in `lib/core/legacy/legacy_systems_engine.dart`; UI in `lib/legacy/legacy_systems_page.dart` | `test/core/legacy/legacy_systems_engine_test.dart`; `test/legacy_systems_test.dart` | Partial — daily reward state/claim path exists; full source streak/calendar/cap parity needs verification. |
+| `domain/model/Difficulty.kt` | `lib/core/game/difficulty_rules.dart` | `test/core/difficulty_rules_test.dart` | Mapped — supported difficulty IDs and rule mapping exist. |
+| `domain/model/GameState.kt` | `lib/core/progression/progression_state.dart`; `lib/core/legacy/legacy_systems_state.dart`; `lib/data/saves/save_data.dart` | `test/data/save_data_test.dart`; `test/core/progression_engine_test.dart` | Partial — save/progression state is split into typed Dart models; compare every source field and migration behavior. |
+| `domain/model/LiveOpsClaimPolicy.kt` | No equivalent claim transaction found. `liveOpsClaims` is present in state, but that alone does not implement claim eligibility/settlement. | No source-equivalent claim-policy test found. | Gap — bounded claim validation, eligibility, claim caps, Nebula settlement and permanent-boost update are not mapped. |
+| `domain/model/TraitProfile.kt` | `lib/core/legacy/adaptive_trait_profile.dart`; `lib/core/legacy/invisible_trait_engine.dart` | `test/core/legacy/invisible_trait_engine_test.dart` | Partial — adaptive profile exists; compare serialized fields, observation updates and source migration. |
+| `shared/domain/AntiTimeTravelRules.kt` | `lib/core/automation/clock_rollback_policy.dart` | `test/core/automation/automation_policy_test.dart` | Mapped — clock rollback decision and pause policy have focused tests. |
+| `shared/domain/CreativeModeRuntime.kt` | `lib/core/creative/creative_mode.dart` | `test/core/creative/creative_mode_test.dart` | Mapped — isolated run lifecycle, guess outcomes, validation and persistence hooks exist. |
+| `shared/domain/CreativeModeSave.kt` | `lib/core/creative/creative_mode.dart`; `lib/data/saves/save_data.dart` | `test/core/creative/creative_mode_test.dart`; `test/data/save_data_test.dart` | Mapped — schema migration, validation and per-save-slot storage are represented. |
+| `shared/domain/InvisibleTraitEngine.kt` | `lib/core/legacy/invisible_trait_engine.dart`; `lib/core/legacy/adaptive_trait_profile.dart` | `test/core/legacy/invisible_trait_engine_test.dart` | Partial — adaptive helper logic exists; compare every source threshold, cooldown, ordering and persistence effect. |
+| `shared/domain/SaveStateRules.kt` | `lib/data/saves/save_data.dart`; `lib/data/saves/save_storage.dart`; progression validation | `test/data/save_data_test.dart` | Partial — save validation exists, but source state has additional counters/maps that require field-by-field validation review. |
+| `shared/domain/TraitGameplayRules.kt` | `lib/core/legacy/legacy_systems_engine.dart`; trait/reward integration in `lib/main.dart` | `test/core/legacy/legacy_systems_engine_test.dart`; `test/core/guess_economy_rules_test.dart` | Partial — trait modifiers are wired into manual guesses; compare complete source effect allowlist, adaptive decisions and non-manual guess paths. |
+| `shared/engine/NativeGameplayOptimizer.kt` | No native optimizer/JNI bridge found. `lib/core/game/game_engine.dart` uses Dart random target generation. | No native optimizer integration or deterministic fallback parity test found. | Gap — GTN1 uses a bounded native adaptive target proposal with Kotlin fallback; GTN2 has no equivalent proposal path. |
+| `shared/seasonal/SeasonalThemeCalendar.kt` | Season selection in `lib/main.dart` and `lib/legacy/legacy_systems_page.dart` | `test/core/legacy/legacy_systems_engine_test.dart`; `test/legacy_systems_test.dart` | Partial — season IDs are selected in Dart; exact date boundaries and cross-year winter behavior need dedicated source-case tests. |
+| `shared/ui/ArcadeCanvasGame.kt` | `lib/arcade/arcade_page.dart` | `test/arcade/arcade_page_test.dart` | Partial — native minigame page exists; canvas/game-by-game behavior is not yet proven equivalent. |
+| `shared/ui/SeasonalThemeSimulatorCard.kt` | No source-equivalent seasonal theme simulator destination identified in `lib/dev/developer_settings_page.dart`. | No dedicated test identified. | Gap — developer seasonal-theme preview/simulator is not mapped. |
+
+## 3. JVM-only production sources (2)
+
+| GTN1 source | GTN2 destination | Regression surface | Mapping |
+|---|---|---|---|
+| `desktop/economy/DesktopEconomyTransactions.kt` | `lib/core/legacy/legacy_systems_engine.dart`; transaction orchestration in `lib/main.dart` | `test/core/legacy/legacy_systems_engine_test.dart`; `test/core/guess_economy_rules_test.dart`; `test/world_boss_battle_engine_test.dart` | Partial — shared Dart transactions cover many systems; compare all desktop-only transaction invariants and relic/world settlement. |
+| `desktop/persistence/DesktopSaveStore.kt` | `lib/data/saves/save_storage.dart`; `lib/data/saves/save_data.dart` | `test/data/save_data_test.dart` | Partial — slot persistence and recovery exist; source file locking/atomic replacement and failure semantics need platform verification. |
+
+## 4. Shared KMP regression tests (30)
+
+The source test inventory is mapped below. These rows identify the closest GTN2 regression surface; a missing or partial destination is not treated as proof of parity.
+
+| GTN1 test | GTN2 regression surface | Mapping |
+|---|---|---|
+| `commonTest/.../ChallengeRewardRulesTest.kt` | `test/arcade/arcade_reward_rules_test.dart`; `test/core/legacy/legacy_systems_engine_test.dart` | Partial — arcade policy is tested; challenge-specific claim cases need coverage. |
+| `commonTest/.../CriticalChanceRulesTest.kt` | `test/core/guess_economy_rules_test.dart` | Mapped |
+| `commonTest/.../DifficultyRulesTest.kt` | `test/core/difficulty_rules_test.dart` | Mapped |
+| `commonTest/.../DomainRulesTest.kt` | `test/core/game_engine_test.dart`; `test/core/progression_engine_test.dart` | Partial — source's combined domain invariants need a dedicated coverage review. |
+| `commonTest/.../FrenzyRulesTest.kt` | `test/core/guess_economy_rules_test.dart` | Mapped |
+| `commonTest/.../GuessEconomyDecisionRulesTest.kt` | `test/core/guess_economy_rules_test.dart`; `test/core/game_engine_test.dart` | Partial |
+| `commonTest/.../GuessGameReducerTest.kt` | `test/core/game_engine_test.dart` | Mapped |
+| `commonTest/.../GuessPenaltyRulesTest.kt` | `test/core/guess_economy_rules_test.dart`; `test/core/legacy/legacy_systems_engine_test.dart` | Partial |
+| `commonTest/.../GuessRewardRulesTest.kt` | `test/core/guess_economy_rules_test.dart` | Mapped |
+| `commonTest/.../MutatorRulesTest.kt` | `test/core/legacy/legacy_systems_engine_test.dart`; `test/legacy_systems_test.dart` | Mapped |
+| `commonTest/.../ProgressionRequirementRulesTest.kt` | `test/core/progression_engine_test.dart`; `test/world_boss_battle_engine_test.dart` | Partial |
+| `commonTest/.../ProgressionRewardRulesTest.kt` | `test/core/progression_calculator_test.dart`; `test/core/progression_engine_test.dart` | Partial |
+| `commonTest/.../GuessCoreStateTest.kt` | `test/core/game_engine_test.dart` | Partial |
+| `commonTest/.../GuessRateLimitRulesTest.kt` | No focused monotonic 50 ms policy test identified. | Gap |
+| `commonTest/.../GuessRulesTest.kt` | `test/core/game_engine_test.dart` | Mapped |
+| `commonTest/.../GuessStateRulesTest.kt` | `test/core/game_engine_test.dart`; `test/data/save_data_test.dart` | Partial |
+| `commonTest/.../GuessTransitionRulesTest.kt` | `test/core/game_engine_test.dart` | Partial |
+| `commonTest/.../SharedGameContractsTest.kt` | `test/core/game_engine_test.dart`; `test/widget_test.dart` | Partial |
+| `jvmTest/.../DesktopEconomyTransactionsTest.kt` | `test/core/legacy/legacy_systems_engine_test.dart`; `test/core/guess_economy_rules_test.dart` | Partial |
+| `jvmTest/.../RelicSetBonusGameplayTest.kt` | `test/core/guess_economy_rules_test.dart`; `test/core/legacy/legacy_systems_engine_test.dart` | Partial — inspect whether every set composition and proc case is covered before marking verified. |
+| `jvmTest/.../DesktopSaveStoreTest.kt` | `test/data/save_data_test.dart` | Partial — persistence exists; desktop atomic-write/locking failure cases are not proven. |
+| `jvmTest/.../ArcadeRewardRulesTest.kt` | `test/arcade/arcade_reward_rules_test.dart` | Mapped |
+| `jvmTest/.../AutoClickerTimingTest.kt` | `test/core/automation/automation_policy_test.dart` | Partial — policy tests exist; timing/clock scheduling parity needs source-case review. |
+| `jvmTest/.../BigNumberProgressionRewardRulesTest.kt` | `test/core/progression_calculator_test.dart`; `test/core/big_number_test.dart` | Partial — large-number implementation exists; exact rounding/floor boundaries need direct comparisons. |
+| `jvmTest/.../OfflineEarningsPolicyTest.kt` | `test/core/automation/automation_policy_test.dart` | Mapped |
+| `jvmTest/.../PermanentUpgradeEffectsTest.kt` | `test/core/guess_economy_rules_test.dart`; `test/core/progression_engine_test.dart` | Partial — some compound effects covered; every upgrade effect and reset boundary needs verification. |
+| `jvmTest/.../DailyRewardPolicyTest.kt` | `test/core/legacy/legacy_systems_engine_test.dart`; `test/legacy_systems_test.dart` | Partial — daily claim flow exists; exact streak/calendar/claim-cap cases need comparison. |
+| `jvmTest/.../AntiTimeTravelRulesTest.kt` | `test/core/automation/automation_policy_test.dart` | Mapped |
+| `jvmTest/.../SaveStateRulesTest.kt` | `test/data/save_data_test.dart` | Partial — Dart validation exists; compare all source fields and invalid-state cases. |
+| `jvmTest/.../SeasonalThemeCalendarTest.kt` | `test/legacy_systems_test.dart`; `test/core/legacy/legacy_systems_engine_test.dart` | Partial — season logic exists; exact source boundary cases need explicit tests. |
+
+## 5. Mapping summary and follow-up
+
+- **Inventory reconciled:** 50/50 shared production Kotlin files and 30/30 shared Kotlin tests at the pinned source commit.
+- **Mapped destinations:** all 50 production files have an identified Dart destination or an explicit gap; all 30 tests have an identified regression surface or explicit missing coverage.
+- **Confirmed gaps requiring parity work:** `LiveOpsClaimPolicy` claim settlement; `NativeGameplayOptimizer` bounded adaptive target proposal; `SeasonalThemeSimulatorCard` developer simulator; shared monotonic guess-rate policy/test; source-specific challenge claim settlement/coverage.
+- **Partial areas requiring behavioral comparison:** progression requirements/rewards, trait activation/gameplay, game state invariants, source bot context, daily rewards, BigNumber progression rounding, desktop save semantics, UI component interactions.
+- **Do not infer completion from this map.** The Stage 2/3/4/5 checklists remain authoritative for implementing and verifying those behaviors. The source map only closes the inventory-to-destination discovery task.
+
+**Next Stage 1 item:** map the 55 Windows desktop production Kotlin files and 29 desktop tests to the existing Flutter Windows implementation, including explicit desktop-only behavior.
