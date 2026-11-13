@@ -308,7 +308,7 @@ class ProgressionEngine {
     if (itemId.isEmpty || itemPrice.compareTo(BigNumber.fromInt(0)) < 0) {
       throw ArgumentError('Invalid Nebula shop purchase.');
     }
-    if (nebulaCosmeticIds.contains(itemId) &&
+    if (nebulaSinglePurchaseItemIds.contains(itemId) &&
         (state.nebulaItems[itemId] ?? 0) > 0) {
       return state;
     }
