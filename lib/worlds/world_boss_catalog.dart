@@ -66,6 +66,9 @@ class WorldBossDefinition {
 class WorldBossCatalog {
   WorldBossCatalog._();
 
+  /// Canonical GTN1 world-map connections, expressed as indices into [worlds].
+  static const routes = <(int, int)>[(0, 1), (1, 2), (1, 3), (2, 3)];
+
   static const worlds = <WorldBossDefinition>[
     WorldBossDefinition(
       id: 'verdant_grove',
