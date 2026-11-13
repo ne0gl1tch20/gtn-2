@@ -76,7 +76,8 @@ class LegacyHubPage extends StatelessWidget {
       ),
       _MoreDestination(
         title: 'All gameplay systems',
-        description: 'Traits, talents, mutators, relics, sanctuary, stakes, rewards, loot and music.',
+        description:
+            'Traits, talents, mutators, relics, sanctuary, stakes, rewards, loot and music.',
         icon: Icons.grid_view_rounded,
         accent: GtnUiTokens.cyan,
         onTap: () => _openSystems(context),
@@ -658,7 +659,11 @@ class LegacyDetailPage extends StatelessWidget {
         '${progression.ultraResets}',
         Icons.bolt_rounded,
       ),
-      _valueCard('Upgrade levels', '$totalUpgradeLevels', Icons.upgrade_rounded),
+      _valueCard(
+        'Upgrade levels',
+        '$totalUpgradeLevels',
+        Icons.upgrade_rounded,
+      ),
       _valueCard(
         'Bosses defeated',
         '${progression.defeatedBosses.length} / ${WorldBossCatalog.worlds.length}',
