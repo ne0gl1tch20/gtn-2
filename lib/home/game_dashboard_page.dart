@@ -172,7 +172,10 @@ class GameDashboardPage extends StatelessWidget {
               destinations: [
                 NavigationDestination(
                   icon: Icon(Icons.public_rounded),
-                  label: AppLocalizations.text('nav_worlds', 'Beyond the Numbers'),
+                  label: AppLocalizations.text(
+                    'nav_worlds',
+                    'Beyond the Numbers',
+                  ),
                 ),
                 NavigationDestination(
                   icon: Icon(Icons.sports_esports_rounded),
@@ -198,7 +201,10 @@ class GameDashboardPage extends StatelessWidget {
             destinations: [
               M3ENavigationBarDestination(
                 icon: Icon(Icons.public_rounded),
-                label: AppLocalizations.text('nav_worlds', 'Beyond the Numbers'),
+                label: AppLocalizations.text(
+                    'nav_worlds',
+                    'Beyond the Numbers',
+                  ),
               ),
               M3ENavigationBarDestination(
                 icon: Icon(Icons.sports_esports_rounded),
@@ -1608,19 +1614,19 @@ class _GuessInput extends StatelessWidget {
                 enabled: enabled,
                 child: M3EButton.filled(
                   onPressed: enabled ? onGuess : null,
-                  child: const Row(
+                  child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
                         AppLocalizations.text('play_guess_button', 'GUESS'),
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w900,
                           letterSpacing: .35,
                         ),
                       ),
-                      SizedBox(width: 5),
-                      Icon(Icons.arrow_forward_rounded, size: 18),
+                      const SizedBox(width: 5),
+                      const Icon(Icons.arrow_forward_rounded, size: 18),
                     ],
                   ),
                 ),
