@@ -536,50 +536,125 @@ class LegacyDetailPage extends StatelessWidget {
     ),
   ];
 
-  List<Widget> _statistics(BuildContext context) => [
-    Text('Your records', style: Theme.of(context).textTheme.titleLarge),
-    const SizedBox(height: 12),
-    _valueCard(
-      'Total guesses',
-      '${progression.totalGuesses}',
-      Icons.bolt_rounded,
-    ),
-    _valueCard(
-      'Correct guesses',
-      '${progression.correctGuesses}',
-      Icons.check_circle_rounded,
-    ),
-    _valueCard(
-      'Current streak',
-      '${progression.currentStreak}',
-      Icons.local_fire_department_rounded,
-    ),
-    _valueCard(
-      'Best streak',
-      '${progression.bestStreak}',
-      Icons.military_tech_rounded,
-    ),
-    _valueCard(
-      'Prestige resets',
-      '${progression.prestigeResets}',
-      Icons.auto_awesome_rounded,
-    ),
-    _valueCard(
-      'Ultra resets',
-      '${progression.ultraResets}',
-      Icons.bolt_rounded,
-    ),
-    _valueCard(
-      'Upgrade levels',
-      '${progression.upgrades.values.fold<int>(0, (sum, level) => sum + level)}',
-      Icons.upgrade_rounded,
-    ),
-    _valueCard(
-      'Bosses defeated',
-      '${progression.defeatedBosses.length} / 4',
-      Icons.public_rounded,
-    ),
-  ];
+  List<Widget> _statistics(BuildContext context) {
+    final theme = Theme.of(context);
+    final total = progression.totalGuesses;
+    final correct = progression.correctGuesses;
+    final failed = total - correct;
+    final accuracy = total == 0 ? 0.0 : correct / total;
+    final hours = progression.playtimeSeconds ~/ 3600;
+    final minutes = (progression.playtimeSeconds % 3600) ~/ 60;
+    final seconds = progression.playtimeSeconds % 60;
+    final playtime = hours > 0
+        ? '${hours}h ${minutes}m ${seconds}s'
+        : minutes > 0
+        ? '${minutes}m ${seconds}s'
+        : '${seconds}s';
+    final totalUpgradeLevels = progression.upgrades.values.fold<int>(
+      0,
+      (sum, level) => sum + level,
+    );
+
+    return [
+      GtnExpressiveCard(
+        color: theme.colorScheme.primaryContainer,
+        padding: const EdgeInsets.all(18),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Guessing Precision',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: theme.colorScheme.onPrimaryContainer,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+                Icon(
+                  Icons.analytics_rounded,
+                  color: theme.colorScheme.primary,
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '${(accuracy * 100).toStringAsFixed(1)}%',
+              style: theme.textTheme.displayMedium?.copyWith(
+                color: theme.colorScheme.onPrimaryContainer,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+            const SizedBox(height: 12),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(99),
+              child: LinearProgressIndicator(
+                value: accuracy,
+                minHeight: 9,
+                backgroundColor: theme.colorScheme.surface.withValues(
+                  alpha: .45,
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+            Wrap(
+              spacing: 12,
+              runSpacing: 6,
+              children: [
+                Text('Correct: $correct'),
+                Text('Failed: $failed'),
+                Text('Total: $total'),
+              ],
+            ),
+          ],
+        ),
+      ),
+      const SizedBox(height: 8),
+      Text(
+        'Performance & Economy',
+        style: theme.textTheme.titleLarge?.copyWith(
+          fontWeight: FontWeight.w900,
+        ),
+      ),
+      const SizedBox(height: 8),
+      _valueCard(
+        'Money earned',
+        progression.moneyEarned.toString(),
+        Icons.trending_up_rounded,
+      ),
+      _valueCard(
+        'Money spent',
+        progression.moneySpent.toString(),
+        Icons.shopping_cart_rounded,
+      ),
+      _valueCard('Play time', playtime, Icons.timer_rounded),
+      const SizedBox(height: 8),
+      Text(
+        'Progression Records',
+        style: theme.textTheme.titleLarge?.copyWith(
+          fontWeight: FontWeight.w900,
+        ),
+      ),
+      const SizedBox(height: 8),
+      _valueCard('Current streak', '${progression.currentStreak}', Icons.local_fire_department_rounded),
+      _valueCard('Best streak', '${progression.bestStreak}', Icons.military_tech_rounded),
+      _valueCard('Prestige resets', '${progression.prestigeResets}', Icons.auto_awesome_rounded),
+      _valueCard('Ultra resets', '${progression.ultraResets}', Icons.bolt_rounded),
+      _valueCard('Upgrade levels', '$totalUpgradeLevels', Icons.upgrade_rounded),
+      _valueCard(
+        'Bosses defeated',
+        '${progression.defeatedBosses.length} / ${WorldBossCatalog.worlds.length}',
+        Icons.public_rounded,
+      ),
+      _valueCard(
+        'Random events',
+        '${progression.randomEventsTriggered}',
+        Icons.casino_rounded,
+      ),
+    ];
+  }
 
   List<Widget> _codex(BuildContext context) => [
     Text('World codex', style: Theme.of(context).textTheme.titleLarge),
