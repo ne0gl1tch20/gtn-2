@@ -19,7 +19,7 @@ void main() {
             save: SaveData(secret: 42, attempts: 0, gamesWon: 0),
             onCommand: (command) async => 'Executed $command',
             onApplySave: (_) async {},
-          loadTraitCatalog: () async => const <TraitCatalogEntry>[],
+            loadTraitCatalog: () async => const <TraitCatalogEntry>[],
           ),
         ),
       );
