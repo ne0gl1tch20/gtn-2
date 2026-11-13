@@ -103,7 +103,7 @@ void main() {
 
     expect(calls, isEmpty);
     expect(
-      tester.getSemantics(lockedNode).hasFlag(SemanticsFlag.isSelected),
+      tester.getSemantics(lockedNode).flagsCollection.contains(SemanticsFlag.isSelected),
       isTrue,
     );
     expect(find.text('Crystal Caverns'), findsWidgets);
@@ -140,11 +140,11 @@ void main() {
 
     expect(calls, isEmpty);
     expect(
-      tester.getSemantics(activeNode).hasFlag(SemanticsFlag.isSelected),
+      tester.getSemantics(activeNode).flagsCollection.contains(SemanticsFlag.isSelected),
       isTrue,
     );
     expect(
-      tester.getSemantics(otherNode).hasFlag(SemanticsFlag.isSelected),
+      tester.getSemantics(otherNode).flagsCollection.contains(SemanticsFlag.isSelected),
       isFalse,
     );
   });
