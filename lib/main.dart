@@ -641,8 +641,21 @@ class _GameHomePageState extends State<GameHomePage>
     return _progression;
   }
 
+  Future<T?> _pushShellRoute<T>(Route<T> route) async {
+    final navigator = _shellNavigatorKey.currentState!;
+    final originIndex = _selectedPrimaryIndex;
+    final result = await navigator.push<T>(route);
+    if (mounted) {
+      if (originIndex == 4) {
+        navigator.popUntil((route) => route.isFirst);
+      }
+      _onPrimarySelected(2);
+    }
+    return result;
+  }
+
   Future<void> _openProgressionHub() async {
-    await _shellNavigatorKey.currentState!.push<void>(
+    await _pushShellRoute<void>(
       MaterialPageRoute<void>(
         builder: (_) => ProgressionHubPage(
           progression: _progression,
@@ -672,7 +685,7 @@ class _GameHomePageState extends State<GameHomePage>
   }
 
   Future<void> _openArcade() async {
-    await _shellNavigatorKey.currentState!.push<void>(
+    await _pushShellRoute<void>(
       MaterialPageRoute<void>(
         builder: (_) => ArcadePage(onReward: _awardArcadeReward),
       ),
@@ -836,7 +849,7 @@ class _GameHomePageState extends State<GameHomePage>
   }
 
   Future<void> _openNebulaShop() async {
-    await _shellNavigatorKey.currentState!.push<void>(
+    await _pushShellRoute<void>(
       MaterialPageRoute<void>(
         builder: (_) => NebulaShopPage(
           progression: _progression,
@@ -889,7 +902,7 @@ class _GameHomePageState extends State<GameHomePage>
   }
 
   Future<void> _openWorldMap() async {
-    await _shellNavigatorKey.currentState!.push<void>(
+    await _pushShellRoute<void>(
       MaterialPageRoute<void>(
         builder: (_) =>
             WorldMapPage(progression: _progression, onAction: _worldBossAction),
@@ -1051,7 +1064,7 @@ class _GameHomePageState extends State<GameHomePage>
   }
 
   Future<void> _openPlayerProfile() async {
-    await _shellNavigatorKey.currentState!.push<void>(
+    await _pushShellRoute<void>(
       MaterialPageRoute<void>(
         builder: (_) => PlayerProfilePage(
           initialProfile: _playerProfile,
@@ -1067,7 +1080,7 @@ class _GameHomePageState extends State<GameHomePage>
   }
 
   Future<void> _openSaveSlots() async {
-    await _shellNavigatorKey.currentState!.push<void>(
+    await _pushShellRoute<void>(
       MaterialPageRoute<void>(
         builder: (_) =>
             SaveSlotsPage(activeSlot: _activeSlot, onSelect: _switchSaveSlot),
@@ -1157,7 +1170,7 @@ class _GameHomePageState extends State<GameHomePage>
   }
 
   Future<void> _openSettings() async {
-    await _shellNavigatorKey.currentState!.push<void>(
+    await _pushShellRoute<void>(
       MaterialPageRoute<void>(
         builder: (_) => SettingsPage(
           settings: _settings,
@@ -1170,7 +1183,7 @@ class _GameHomePageState extends State<GameHomePage>
   }
 
   Future<void> _openMenuStudio() async {
-    await _shellNavigatorKey.currentState!.push<void>(
+    await _pushShellRoute<void>(
       MaterialPageRoute<void>(
         builder: (_) =>
             MenuStudioPage(settings: _settings, onChanged: _updateSettings),
@@ -1290,7 +1303,7 @@ class _GameHomePageState extends State<GameHomePage>
   }
 
   Future<void> _openDeveloperSettings() async {
-    await _shellNavigatorKey.currentState!.push<void>(
+    await _pushShellRoute<void>(
       MaterialPageRoute<void>(
         builder: (_) => DeveloperSettingsPage(
           save: _currentSaveData(),
@@ -1337,7 +1350,7 @@ class _GameHomePageState extends State<GameHomePage>
   }
 
   Future<void> _openLegacyPages() async {
-    await _shellNavigatorKey.currentState!.push<void>(
+    await _pushShellRoute<void>(
       MaterialPageRoute<void>(
         builder: (_) => LegacyHubPage(
           progression: _progression,
@@ -1350,7 +1363,7 @@ class _GameHomePageState extends State<GameHomePage>
   }
 
   Future<void> _openLegacySection(LegacySection section) async {
-    await _shellNavigatorKey.currentState!.push<void>(
+    await _pushShellRoute<void>(
       MaterialPageRoute<void>(
         builder: (_) =>
             LegacyDetailPage(section: section, progression: _progression),
@@ -1359,7 +1372,7 @@ class _GameHomePageState extends State<GameHomePage>
   }
 
   Future<void> _openLegacySystems(LegacySystemsView view) async {
-    await _shellNavigatorKey.currentState!.push<void>(
+    await _pushShellRoute<void>(
       MaterialPageRoute<void>(
         builder: (_) => LegacySystemsPage(
           progression: _progression,
@@ -1379,7 +1392,7 @@ class _GameHomePageState extends State<GameHomePage>
       _openLegacySystems(LegacySystemsView.luckyStake);
 
   Future<void> _openUpgradeShop() async {
-    await _shellNavigatorKey.currentState!.push<void>(
+    await _pushShellRoute<void>(
       MaterialPageRoute<void>(
         builder: (_) => UpgradeShopPage(
           progression: _progression,
