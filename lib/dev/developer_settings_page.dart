@@ -106,7 +106,7 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
     });
     try {
       final source = await rootBundle.loadString(
-        'assets/scripts/\${script.file}',
+        'assets/scripts/${script.file}',
       );
       final progression = widget.save.progression;
       final profile = progression.legacySystems.adaptiveTraitProfile;
@@ -153,7 +153,7 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
       });
     } on Object catch (error) {
       if (!mounted) return;
-      setState(() => _luaOutput = 'Lua execution failed: \${error}');
+      setState(() => _luaOutput = 'Lua execution failed: ${error}');
     } finally {
       if (mounted) setState(() => _luaBusy = false);
     }
@@ -231,7 +231,7 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
                 return const LinearProgressIndicator();
               }
               if (snapshot.hasError) {
-                return Text('Could not load Lua manifest: \${snapshot.error}');
+                return Text('Could not load Lua manifest: ${snapshot.error}');
               }
               final scripts = snapshot.data ?? const <_RegisteredLuaScript>[];
               if (scripts.isEmpty) {
