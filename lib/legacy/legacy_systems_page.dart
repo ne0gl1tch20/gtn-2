@@ -75,6 +75,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
   bool _checkingUpdate = false;
   String? _updateMessage;
   String? _updateDetails;
+  String? _updateDiagnostics;
   UpdateRelease? _availableUpdate;
   WindowsUpdateRelease? _availableWindowsUpdate;
   List<Map<String, dynamic>> _talentCatalog = [];
@@ -1852,8 +1853,11 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
           'Version ${UpdateChecker.currentVersionName} · Build ${UpdateChecker.currentVersionCode} · Flutter / Dart',
         ),
         children: [
-          const ListTile(
-            title: Text('Guess The Number 2'),
+          ListTile(
+            title: const Text('Guess The Number 2'),
+            subtitle: Text(
+              'Update channel: ${Platform.isWindows ? 'Windows Debug' : Platform.isAndroid ? 'Android Debug' : 'Unsupported platform'}',
+            ),
             subtitle: Text(
               'Flutter continuation of the original Kotlin game. Offline-first local saves.',
             ),
@@ -1878,6 +1882,22 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Text(_updateDetails!),
+            ),
+          if (_updateDiagnostics != null)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+              child: M3EButton.text(
+                onPressed: () async {
+                  await Clipboard.setData(
+                    ClipboardData(text: _updateDiagnostics!),
+                  );
+                  if (!mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Update diagnostics copied.')),
+                  );
+                },
+                child: const Text('Copy update error logs'),
+              ),
             ),
           if (_availableUpdate != null || _availableWindowsUpdate != null) ...[
             Padding(
@@ -1939,6 +1959,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
       _checkingUpdate = true;
       _updateMessage = 'Checking debug-latest…';
       _updateDetails = null;
+      _updateDiagnostics = null;
       _availableUpdate = null;
       _availableWindowsUpdate = null;
     });
@@ -1974,13 +1995,30 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
           'In-app updates are available on Android and Windows builds.',
         );
       }
-    } catch (error) {
+    } catch (error, stackTrace) {
       if (!mounted) return;
       final message = error.toString();
+      final channel = Platform.isWindows
+          ? 'windows-debug'
+          : Platform.isAndroid
+          ? 'android-debug'
+          : 'unsupported';
+      final trace = stackTrace.toString();
       setState(() {
         _updateMessage = message.contains('404')
             ? 'No debug-latest release has been published yet.'
             : 'Update check failed: $error';
+        _updateDiagnostics = [
+          'Update check failed',
+          'Time: ${DateTime.now().toIso8601String()}',
+          'Channel: $channel',
+          'Platform: ${Platform.operatingSystem}',
+          'App version: ${UpdateChecker.currentVersionName} (${UpdateChecker.currentVersionCode})',
+          'Failure: ${error.runtimeType}',
+          'Message: $error',
+          '',
+          trace.substring(0, trace.length > 8000 ? 8000 : trace.length),
+        ].join('\\n');
       });
     } finally {
       if (mounted) setState(() => _checkingUpdate = false);
