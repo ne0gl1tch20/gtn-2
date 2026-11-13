@@ -76,8 +76,7 @@ class LegacyHubPage extends StatelessWidget {
       ),
       _MoreDestination(
         title: 'All gameplay systems',
-        description:
-            'Traits, talents, mutators, relics, sanctuary, stakes, rewards, loot and music.',
+        description: 'Traits, talents, mutators, relics, sanctuary, stakes, rewards, loot and music.',
         icon: Icons.grid_view_rounded,
         accent: GtnUiTokens.cyan,
         onTap: () => _openSystems(context),
@@ -549,8 +548,8 @@ class LegacyDetailPage extends StatelessWidget {
     final playtime = hours > 0
         ? '${hours}h ${minutes}m ${seconds}s'
         : minutes > 0
-            ? '${minutes}m ${seconds}s'
-            : '${seconds}s';
+        ? '${minutes}m ${seconds}s'
+        : '${seconds}s';
     final totalUpgradeLevels = progression.upgrades.values.fold<int>(
       0,
       (sum, level) => sum + level,
@@ -574,10 +573,7 @@ class LegacyDetailPage extends StatelessWidget {
                     ),
                   ),
                 ),
-                Icon(
-                  Icons.analytics_rounded,
-                  color: theme.colorScheme.primary,
-                ),
+                Icon(Icons.analytics_rounded, color: theme.colorScheme.primary),
               ],
             ),
             const SizedBox(height: 8),
