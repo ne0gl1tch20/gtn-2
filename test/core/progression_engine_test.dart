@@ -158,6 +158,26 @@ void main() {
     expect(bought.nebulaItems['arcade_boost'], 1);
     expect(bought.money.toString(), '0');
   });
+  test('Nebula permanent shop items cannot be purchased twice', () {
+    final rich = ProgressionState.initial.copyWith(
+      nebula: BigNumber.fromInt(200),
+    );
+    final bought = engine.purchaseNebulaItem(
+      rich,
+      itemId: 'nebula_boost',
+      price: BigNumber.fromInt(50),
+    );
+    expect(bought.nebula.toString(), '150');
+    expect(
+      engine.purchaseNebulaItem(
+        bought,
+        itemId: 'nebula_boost',
+        price: BigNumber.fromInt(50),
+      ),
+      same(bought),
+    );
+  });
+
   test('Nebula cosmetics can be purchased once and equipped only when owned', () {
     final rich = ProgressionState.initial.copyWith(
       nebula: BigNumber.fromInt(500),
