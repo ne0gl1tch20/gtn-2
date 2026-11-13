@@ -2018,7 +2018,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
           'Message: $error',
           '',
           trace.substring(0, trace.length > 8000 ? 8000 : trace.length),
-        ].join('\\n');
+        ].join('\n');
       });
     } finally {
       if (mounted) setState(() => _checkingUpdate = false);
