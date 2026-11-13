@@ -17,6 +17,8 @@ void main() {
         final progression = ProgressionState.initial.copyWith(
           achievements: const {'correct_10', 'playtime_1h'},
           playtimeSeconds: 3600,
+          nebulaItems: const {'cosmetic_nebula_ring': 1},
+          equippedCosmeticId: 'cosmetic_nebula_ring',
         );
         final save = SaveData(
           secret: 42,
@@ -27,6 +29,8 @@ void main() {
         final restored = SaveData.fromJson(save.toJson());
         expect(restored.progression.achievements, progression.achievements);
         expect(restored.progression.playtimeSeconds, 3600);
+        expect(restored.progression.equippedCosmeticId, 'cosmetic_nebula_ring');
+        expect(restored.progression.nebulaItems['cosmetic_nebula_ring'], 1);
 
         final oldProgression = Map<String, dynamic>.from(progression.toJson())
           ..remove('achievements')
@@ -34,8 +38,18 @@ void main() {
         final migrated = ProgressionState.fromJson(oldProgression);
         expect(migrated.achievements, isEmpty);
         expect(migrated.playtimeSeconds, 0);
+        expect(migrated.equippedCosmeticId, isNull);
       },
     );
+
+    test('rejects unknown equipped Nebula cosmetics', () {
+      final progression = ProgressionState.initial.toJson()
+        ..['equippedCosmeticId'] = 'cosmetic_unknown';
+      expect(
+        () => ProgressionState.fromJson(progression),
+        throwsFormatException,
+      );
+    });
 
     test('round-trips progression and settings through JSON', () {
       final save = SaveData(
