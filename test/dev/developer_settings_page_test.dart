@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gtn_2/core/legacy/trait_catalog_repository.dart';
 import 'package:gtn_2/data/saves/save_data.dart';
 import 'package:gtn_2/dev/developer_settings_page.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
@@ -18,6 +19,7 @@ void main() {
             save: SaveData(secret: 42, attempts: 0, gamesWon: 0),
             onCommand: (command) async => 'Executed $command',
             onApplySave: (_) async {},
+          loadTraitCatalog: () async => const <TraitCatalogEntry>[],
           ),
         ),
       );
