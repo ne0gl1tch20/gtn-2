@@ -173,9 +173,9 @@ class GameDashboardPage extends StatelessWidget {
                 NavigationDestination(
                   icon: Icon(Icons.public_rounded),
                   label: AppLocalizations.text(
-                  'nav_worlds',
-                  'Beyond the Numbers',
-                ),
+                    'nav_worlds',
+                    'Beyond the Numbers',
+                  ),
                 ),
                 NavigationDestination(
                   icon: Icon(Icons.sports_esports_rounded),
@@ -202,9 +202,9 @@ class GameDashboardPage extends StatelessWidget {
               M3ENavigationBarDestination(
                 icon: Icon(Icons.public_rounded),
                 label: AppLocalizations.text(
-                    'nav_worlds',
-                    'Beyond the Numbers',
-                  ),
+                  'nav_worlds',
+                  'Beyond the Numbers',
+                ),
               ),
               M3ENavigationBarDestination(
                 icon: Icon(Icons.sports_esports_rounded),
