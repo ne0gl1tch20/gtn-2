@@ -63,7 +63,10 @@ class _UpgradeShopPageState extends State<UpgradeShopPage> {
     if (_buyingId != null) return;
     setState(() => _buyingId = upgrade.definition.id);
     try {
-      final updated = await widget.onPurchase(upgrade.definition, levels: levels);
+      final updated = await widget.onPurchase(
+        upgrade.definition,
+        levels: levels,
+      );
       if (mounted) setState(() => _progression = updated);
     } finally {
       if (mounted) setState(() => _buyingId = null);
@@ -88,7 +91,10 @@ class _UpgradeShopPageState extends State<UpgradeShopPage> {
           const SizedBox(height: 16),
           Row(
             children: [
-              Text('Buy multiplier', style: Theme.of(context).textTheme.titleSmall),
+              Text(
+                'Buy multiplier',
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
               const Spacer(),
               SegmentedButton<String>(
                 segments: const [
@@ -99,7 +105,8 @@ class _UpgradeShopPageState extends State<UpgradeShopPage> {
                 ],
                 selected: {_buyMultiplier},
                 onSelectionChanged: _buyingId == null
-                    ? (selection) => setState(() => _buyMultiplier = selection.first)
+                    ? (selection) =>
+                          setState(() => _buyMultiplier = selection.first)
                     : null,
                 showSelectedIcon: false,
               ),
