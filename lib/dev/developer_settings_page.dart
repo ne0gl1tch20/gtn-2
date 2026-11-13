@@ -200,16 +200,6 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
   }
 
   Future<void> _applyJson() async {
-
-        });
-      }
-      _command.clear();
-    } finally {
-      if (mounted) setState(() => _busy = false);
-    }
-  }
-
-  Future<void> _applyJson() async {
     if (_busy) return;
     setState(() => _busy = true);
     try {
