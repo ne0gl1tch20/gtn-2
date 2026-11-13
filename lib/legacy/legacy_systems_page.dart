@@ -1849,7 +1849,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
         leading: const Icon(Icons.info_outline_rounded),
         title: const Text('About & updater'),
         subtitle: Text(
-          'Version ${UpdateChecker.currentVersionName} · Flutter / Dart',
+          'Version ${UpdateChecker.currentVersionName} · Build ${UpdateChecker.currentVersionCode} · Flutter / Dart',
         ),
         children: [
           const ListTile(
@@ -1926,7 +1926,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
           const Padding(
             padding: EdgeInsets.fromLTRB(16, 0, 16, 16),
             child: Text(
-              'Debug release publishing is paused until the complete GTN1 port passes parity verification. Update installation remains disabled during this porting phase.',
+              'Debug update packages are published from validated main/master builds only. Feature branches and pull requests do not publish installable updates.',
             ),
           ),
         ],
