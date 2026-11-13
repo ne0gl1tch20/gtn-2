@@ -24,7 +24,7 @@
 
 ### Stage 1 — Freeze and map the source (one-time)
 
-- [ ] Record the exact GTN1 source commit used by the port.
+- [x] Record the exact GTN1 source commit used by the port (`fe9cf567169e19059e0330d08769fe454336ef94`; verified against `scripts/sync_gtn1_assets.sh`, `docs/GTN1_SOURCE_INVENTORY.json`, and both CI workflows).
 - [x] Confirm the finite inventory counts above against that commit (see `docs/GTN1_SOURCE_INVENTORY.md`).
 - [ ] Map every Kotlin source file to a GTN2 implementation, a grouped replacement, or a documented not-applicable item.
 - [ ] Map the single Web Play HTML shell, its actual route/screen renderers and the five JavaScript modules to native Flutter destinations and behaviors.
