@@ -1126,10 +1126,12 @@ class _MoreMenuPage extends StatelessWidget {
       String title,
       String subtitle,
       VoidCallback onTap,
-      Color accent,
-    ) {
+      Color accent, {
+      Key? key,
+    }) {
       final radius = BorderRadius.circular(18);
       return GtnExpressiveCard(
+        key: key,
         color: panel,
         margin: EdgeInsets.zero,
         elevation: 0,
@@ -1399,6 +1401,7 @@ class _MoreMenuPage extends StatelessWidget {
                           _destinationColor(
                             settings.moreScreenButtonColors['player_profile'],
                           ),
+                          key: const Key('more-profile-card'),
                         ),
                       ),
                       const SizedBox(height: spacing),
@@ -1417,6 +1420,7 @@ class _MoreMenuPage extends StatelessWidget {
                                 _destinationColor(
                                   settings.moreScreenButtonColors[id],
                                 ),
+                                key: Key('more-card-$id'),
                               ),
                             ),
                         ],
