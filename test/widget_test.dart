@@ -5,6 +5,7 @@ import 'package:gtn_2/core/numbers/big_number.dart';
 import 'package:gtn_2/core/progression/progression_state.dart';
 import 'package:gtn_2/design/expressive_widgets.dart';
 import 'package:gtn_2/home/game_dashboard_page.dart';
+import 'package:gtn_2/progression/progression_hub_page.dart';
 import 'package:gtn_2/legacy/legacy_pages.dart';
 import 'package:gtn_2/legacy/legacy_systems_page.dart';
 import 'package:gtn_2/profile/player_profile_page.dart';
@@ -215,6 +216,47 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Ultra').first);
     expect(openedUltra, 1);
+  });
+
+  testWidgets('Prestige destination shows only Prestige controls', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      M3EMaterialApp(
+        data: M3EThemeData.light(seedColor: const Color(0xFF7C5CFC)),
+        home: ProgressionHubPage(
+          progression: ProgressionState.initial,
+          onPrestige: () async => ProgressionState.initial,
+          onUltra: () async => ProgressionState.initial,
+          onPurchasePermanentUpgrade: (_, __) async =>
+              ProgressionState.initial,
+        ),
+      ),
+    );
+
+    expect(find.text('Prestige reset'), findsOneWidget);
+    expect(find.text('Ultra reset'), findsNothing);
+  });
+
+  testWidgets('Ultra destination shows only Ultra controls', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      M3EMaterialApp(
+        data: M3EThemeData.light(seedColor: const Color(0xFF7C5CFC)),
+        home: ProgressionHubPage(
+          progression: ProgressionState.initial,
+          initialUltra: true,
+          onPrestige: () async => ProgressionState.initial,
+          onUltra: () async => ProgressionState.initial,
+          onPurchasePermanentUpgrade: (_, __) async =>
+              ProgressionState.initial,
+        ),
+      ),
+    );
+
+    expect(find.text('Ultra reset'), findsOneWidget);
+    expect(find.text('Prestige reset'), findsNothing);
   });
 
   testWidgets('Daily Momentum opens the GTN1 Rewards destination', (
