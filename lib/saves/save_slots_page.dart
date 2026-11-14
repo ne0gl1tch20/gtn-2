@@ -592,96 +592,96 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
                     ),
                     clipBehavior: Clip.antiAlias,
                     child: ListTile(
-                    leading: CircleAvatar(
-                      child: Text(
-                        save == null
-                            ? '$slot'
-                            : _iconSymbol(save.profileIconId),
-                      ),
-                    ),
-                    title: Text(
-                      save?.profileName.isNotEmpty == true
-                          ? save!.profileName
-                          : 'Slot $slot',
-                    ),
-                    subtitle: Text(subtitle),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (busy)
-                          const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: M3EProgressIndicator.circular(
-                              strokeWidth: 2,
-                            ),
-                          )
-                        else if (selected)
-                          const Text('Active'),
-                        PopupMenuButton<String>(
-                          enabled:
-                              _switching == null &&
-                              _working == null &&
-                              snapshot.connectionState ==
-                                  ConnectionState.done &&
-                              !readFailed,
-                          onSelected: (action) {
-                            switch (action) {
-                              case 'creative':
-                                _openCreativeMode(slot);
-                              case 'create':
-                                _create(slot);
-                              case 'profile':
-                                _editProfile(slot);
-                              case 'duplicate':
-                                _duplicate(slot);
-                              case 'restore':
-                                _restore(slot);
-                              case 'reset':
-                                _reset(slot);
-                            }
-                          },
-                          itemBuilder: (context) => [
-                            if (save == null)
-                              const PopupMenuItem(
-                                value: 'create',
-                                child: Text('Create save'),
-                              ),
-                            if (save != null)
-                              const PopupMenuItem(
-                                value: 'creative',
-                                child: Text('Creative Mode'),
-                              ),
-                            if (save != null)
-                              const PopupMenuItem(
-                                value: 'profile',
-                                child: Text('Edit profile'),
-                              ),
-                            if (save != null)
-                              const PopupMenuItem(
-                                value: 'duplicate',
-                                child: Text('Duplicate'),
-                              ),
-                            const PopupMenuItem(
-                              value: 'restore',
-                              child: Text('Restore backup'),
-                            ),
-                            if (save != null)
-                              const PopupMenuItem(
-                                value: 'reset',
-                                child: Text('Reset slot'),
-                              ),
-                          ],
+                      leading: CircleAvatar(
+                        child: Text(
+                          save == null
+                              ? '$slot'
+                              : _iconSymbol(save.profileIconId),
                         ),
-                      ],
-                    ),
-                    onTap:
-                        _switching != null ||
-                            _working != null ||
-                            selected ||
-                            save == null
-                        ? null
-                        : () => _select(slot),
+                      ),
+                      title: Text(
+                        save?.profileName.isNotEmpty == true
+                            ? save!.profileName
+                            : 'Slot $slot',
+                      ),
+                      subtitle: Text(subtitle),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (busy)
+                            const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: M3EProgressIndicator.circular(
+                                strokeWidth: 2,
+                              ),
+                            )
+                          else if (selected)
+                            const Text('Active'),
+                          PopupMenuButton<String>(
+                            enabled:
+                                _switching == null &&
+                                _working == null &&
+                                snapshot.connectionState ==
+                                    ConnectionState.done &&
+                                !readFailed,
+                            onSelected: (action) {
+                              switch (action) {
+                                case 'creative':
+                                  _openCreativeMode(slot);
+                                case 'create':
+                                  _create(slot);
+                                case 'profile':
+                                  _editProfile(slot);
+                                case 'duplicate':
+                                  _duplicate(slot);
+                                case 'restore':
+                                  _restore(slot);
+                                case 'reset':
+                                  _reset(slot);
+                              }
+                            },
+                            itemBuilder: (context) => [
+                              if (save == null)
+                                const PopupMenuItem(
+                                  value: 'create',
+                                  child: Text('Create save'),
+                                ),
+                              if (save != null)
+                                const PopupMenuItem(
+                                  value: 'creative',
+                                  child: Text('Creative Mode'),
+                                ),
+                              if (save != null)
+                                const PopupMenuItem(
+                                  value: 'profile',
+                                  child: Text('Edit profile'),
+                                ),
+                              if (save != null)
+                                const PopupMenuItem(
+                                  value: 'duplicate',
+                                  child: Text('Duplicate'),
+                                ),
+                              const PopupMenuItem(
+                                value: 'restore',
+                                child: Text('Restore backup'),
+                              ),
+                              if (save != null)
+                                const PopupMenuItem(
+                                  value: 'reset',
+                                  child: Text('Reset slot'),
+                                ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      onTap:
+                          _switching != null ||
+                              _working != null ||
+                              selected ||
+                              save == null
+                          ? null
+                          : () => _select(slot),
                     ),
                   ),
                 );
