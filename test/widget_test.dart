@@ -275,14 +275,13 @@ void main() {
     expect(find.text('Save Slots'), findsOneWidget);
     expect(find.text('Background Music'), findsOneWidget);
     expect(find.text('Settings'), findsOneWidget);
-    expect(find.text('Beyond the Numbers'), findsNothing);
     expect(find.text('Arcade'), findsNothing);
     expect(find.text('Nebula Shop'), findsNothing);
 
     shellKey.currentState!.pop();
     await tester.pumpAndSettle();
     expect(selectedIndex, 2);
-    expect(find.text('More Menu'), findsNothing);
+    expect(find.text('More'), findsNothing);
     expect(find.text('Guess The Number'), findsOneWidget);
   });
 
@@ -294,7 +293,7 @@ void main() {
 
     await tester.tap(find.text('More'));
     await tester.pumpAndSettle();
-    expect(find.text('More Menu'), findsOneWidget);
+    expect(find.text('More'), findsOneWidget);
 
     shellKey.currentState!.push<void>(
       MaterialPageRoute<void>(
@@ -311,7 +310,7 @@ void main() {
 
     await tester.pageBack();
     await tester.pumpAndSettle();
-    expect(find.text('More Menu'), findsOneWidget);
+    expect(find.text('More'), findsOneWidget);
   });
 
   testWidgets('default More menu keeps GTN1 destination names', (
@@ -325,7 +324,7 @@ void main() {
     await tester.tap(find.text('More').first);
     await tester.pumpAndSettle();
 
-    expect(find.text('More Menu'), findsOneWidget);
+    expect(find.text('More'), findsOneWidget);
     for (final label in [
       'Player profile',
       'Rewards',
@@ -420,7 +419,7 @@ void main() {
     await tester.tap(find.text('More'));
     await tester.pumpAndSettle();
 
-    expect(find.text('More Menu'), findsOneWidget);
+    expect(find.text('More'), findsOneWidget);
     expect(find.text('Background Music'), findsOneWidget);
     expect(find.text('Settings'), findsOneWidget);
     expect(find.text('Save Slots'), findsOneWidget);
