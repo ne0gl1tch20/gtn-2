@@ -118,7 +118,7 @@ class SaveData {
         minimum is! int ||
         maximum is! int ||
         minimum < 1 ||
-        maximum > 500 ||
+        maximum > (creativeModeEnabled ? 1000000 : 500) ||
         minimum > maximum ||
         secret < minimum ||
         secret > maximum ||
