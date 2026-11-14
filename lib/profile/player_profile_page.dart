@@ -11,6 +11,7 @@ class PlayerProfile {
     this.username = '',
     this.bio = '',
     this.avatarId = 'star',
+    this.customAvatarPath,
     this.customAvatarData,
     this.profileId = '',
     this.setupComplete = false,
@@ -19,6 +20,8 @@ class PlayerProfile {
   final String username;
   final String bio;
   final String avatarId;
+  final String? customAvatarPath;
+  // Read only for migration from early GTN2 builds; new saves use app-private files.
   final String? customAvatarData;
   final String profileId;
   final bool setupComplete;
@@ -27,6 +30,7 @@ class PlayerProfile {
     String? username,
     String? bio,
     String? avatarId,
+    String? customAvatarPath,
     String? customAvatarData,
     bool clearCustomAvatar = false,
     String? profileId,
@@ -35,6 +39,9 @@ class PlayerProfile {
     username: username ?? this.username,
     bio: bio ?? this.bio,
     avatarId: avatarId ?? this.avatarId,
+    customAvatarPath: clearCustomAvatar
+        ? null
+        : customAvatarPath ?? this.customAvatarPath,
     customAvatarData: clearCustomAvatar
         ? null
         : customAvatarData ?? this.customAvatarData,
@@ -47,7 +54,7 @@ class PlayerProfile {
     'username': username,
     'bio': bio,
     'avatarId': avatarId,
-    'customAvatarData': customAvatarData,
+    'customAvatarPath': customAvatarPath,
     'profileId': profileId,
     'setupComplete': setupComplete,
   };
@@ -56,6 +63,7 @@ class PlayerProfile {
     final username = json['username'] ?? '';
     final bio = json['bio'] ?? '';
     final avatarId = json['avatarId'] ?? 'star';
+    final customAvatarPath = json['customAvatarPath'];
     final customAvatarData = json['customAvatarData'];
     final profileId = json['profileId'];
     final setupComplete = json['setupComplete'];
@@ -65,6 +73,8 @@ class PlayerProfile {
         bio.length > 120 ||
         avatarId is! String ||
         (!avatarPresets.containsKey(avatarId) && avatarId != 'custom') ||
+        customAvatarPath != null &&
+            (customAvatarPath is! String || customAvatarPath.length > 2048) ||
         customAvatarData != null &&
             (customAvatarData is! String ||
                 !customAvatarData.startsWith('data:image/')) ||
@@ -76,6 +86,7 @@ class PlayerProfile {
       username: username,
       bio: bio,
       avatarId: avatarId,
+      customAvatarPath: customAvatarPath as String?,
       customAvatarData: customAvatarData as String?,
       profileId: (profileId as String?)?.isNotEmpty == true
           ? profileId as String
@@ -93,6 +104,85 @@ String _newProfileId() {
   final hex = bytes.map((value) => value.toRadixString(16).padLeft(2, '0'));
   final value = hex.join();
   return '${value.substring(0, 8)}-${value.substring(8, 12)}-${value.substring(12, 16)}-${value.substring(16, 20)}-${value.substring(20)}';
+}
+
+class PlayerProfileStore {
+  Future<File> get _file async {
+    final directory = await getApplicationDocumentsDirectory();
+    return File('${directory.path}/gtn2-player-profile.json');
+  }
+
+  Future<PlayerProfile> load() async {
+    final file = await _file;
+    if (!await file.exists()) return const PlayerProfile();
+    try {
+      final decoded = jsonDecode(await file.readAsString());
+      if (decoded is! Map<String, dynamic> || decoded['schemaVersion'] != 1) {
+        return const PlayerProfile();
+      }
+      var profile = PlayerProfile.fromJson(decoded);
+      final directory = await getApplicationDocumentsDirectory();
+      final avatarPath = profile.customAvatarPath;
+      if (avatarPath != null &&
+          !avatarPath.startsWith('${directory.path}${Platform.pathSeparator}')) {
+        profile = profile.copyWith(clearCustomAvatar: true, avatarId: 'star');
+      }
+      if (profile.customAvatarData != null) {
+        profile = await save(profile);
+      }
+      return profile;
+    } on FormatException {
+      return const PlayerProfile();
+    }
+  }
+
+  Future<PlayerProfile> save(PlayerProfile profile) async {
+    final directory = await getApplicationDocumentsDirectory();
+    final identity = profile.profileId.isNotEmpty
+        ? profile.profileId
+        : _newProfileId();
+    var persisted = profile.copyWith(profileId: identity);
+    final legacyData = persisted.customAvatarData;
+    if (legacyData != null) {
+      final comma = legacyData.indexOf(',');
+      if (comma < 0) throw const FormatException('Invalid custom avatar data.');
+      final header = legacyData.substring(0, comma).toLowerCase();
+      final extension = header.contains('image/png')
+          ? 'png'
+          : header.contains('image/jpeg')
+          ? 'jpg'
+          : header.contains('image/webp')
+          ? 'webp'
+          : header.contains('image/gif')
+          ? 'gif'
+          : null;
+      if (extension == null) {
+        throw const FormatException('Unsupported custom avatar format.');
+      }
+      final bytes = base64Decode(legacyData.substring(comma + 1));
+      if (bytes.isEmpty || bytes.length > 4 * 1024 * 1024) {
+        throw const FormatException('Custom avatar must be smaller than 4 MB.');
+      }
+      final avatarDirectory = Directory(
+        '${directory.path}${Platform.pathSeparator}player-profile-avatars',
+      );
+      await avatarDirectory.create(recursive: true);
+      final avatarFile = File(
+        '${avatarDirectory.path}${Platform.pathSeparator}profile_${identity}.${extension}',
+      );
+      await avatarFile.writeAsBytes(bytes, flush: true);
+      persisted = persisted.copyWith(
+        customAvatarPath: avatarFile.path,
+        clearCustomAvatar: true,
+      );
+    }
+    final file = await _file;
+    await file.parent.create(recursive: true);
+    final temporary = File('${file.path}.tmp');
+    await temporary.writeAsString(jsonEncode(persisted.toJson()), flush: true);
+    await temporary.rename(file.path);
+    return persisted;
+  }
 }
 
 const avatarPresets = <String, String>{
@@ -173,6 +263,7 @@ class _PlayerProfilePageState extends State<PlayerProfilePage> {
     text: widget.initialProfile.bio,
   );
   late String _avatarId = widget.initialProfile.avatarId;
+  late String? _customAvatarPath = widget.initialProfile.customAvatarPath;
   late String? _customAvatarData = widget.initialProfile.customAvatarData;
   bool _saving = false;
   late bool _editing =
@@ -215,6 +306,7 @@ class _PlayerProfilePageState extends State<PlayerProfilePage> {
     }
     setState(() {
       _customAvatarData = 'data:$mime;base64,${base64Encode(bytes)}';
+      _customAvatarPath = null;
       _avatarId = 'custom';
       _error = null;
     });
@@ -238,6 +330,7 @@ class _PlayerProfilePageState extends State<PlayerProfilePage> {
       username: username,
       bio: _bio.text.trim(),
       avatarId: _avatarId,
+      customAvatarPath: _customAvatarPath,
       customAvatarData: _customAvatarData,
       profileId: widget.initialProfile.profileId.isNotEmpty
           ? widget.initialProfile.profileId
@@ -245,9 +338,9 @@ class _PlayerProfilePageState extends State<PlayerProfilePage> {
       setupComplete: true,
     );
     try {
-      await widget.store.save(profile);
+      final savedProfile = await widget.store.save(profile);
       if (!mounted) return;
-      widget.onSaved(profile);
+      widget.onSaved(savedProfile);
       if (widget.firstLaunch) {
         setState(() => _editing = false);
       } else {
@@ -266,7 +359,13 @@ class _PlayerProfilePageState extends State<PlayerProfilePage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final profileImage = _avatarId == 'custom' && _customAvatarData != null
+    final profileImage = _avatarId == 'custom' && _customAvatarPath != null
+        ? Image.file(
+            File(_customAvatarPath!),
+            fit: BoxFit.cover,
+            errorBuilder: (_, _, _) => const Icon(Icons.person_rounded),
+          )
+        : _avatarId == 'custom' && _customAvatarData != null
         ? Image.memory(
             base64Decode(_customAvatarData!.split(',').last),
             fit: BoxFit.cover,
@@ -436,6 +535,7 @@ class _PlayerProfilePageState extends State<PlayerProfilePage> {
                         ? null
                         : (_) => setState(() {
                             _avatarId = entry.key;
+                            _customAvatarPath = null;
                             _customAvatarData = null;
                           }),
                   ),
