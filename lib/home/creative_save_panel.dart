@@ -193,16 +193,15 @@ class _CreativeSavePanelState extends State<CreativeSavePanel> {
     ),
   );
 
-  Widget _upgradeGroup(String title, List<GameUpgrade> upgrades) {
+  Widget _upgradeGroup(
+    String title,
+    List<GameUpgrade> upgrades, {
+    required String emptyText,
+  }) {
     if (upgrades.isEmpty) {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 6),
-        child: Text(switch (title) {
-          'Upgrade levels' => 'Upgrade catalog unavailable.',
-          'Prestige upgrades' => 'Prestige upgrade catalog unavailable.',
-          'Ultra upgrades' => 'Ultra upgrade catalog unavailable.',
-          _ => '$title catalog unavailable.',
-        }),
+        child: Text(emptyText),
       );
     }
     return Column(
@@ -230,20 +229,26 @@ class _CreativeSavePanelState extends State<CreativeSavePanel> {
                 ),
                 SizedBox(
                   width: 92,
-                  child: TextField(
-                    controller: _controller(
-                      _upgradeKey(upgrade),
-                      _levelFor(upgrade).toString(),
-                    ),
-                    focusNode: _focusNode(_upgradeKey(upgrade)),
-                    enabled: !_saving,
-                    keyboardType: TextInputType.number,
-                    maxLength: 7,
-                    decoration: const InputDecoration(
-                      labelText: _t('web_ui_level', 'Level'),
-                      counterText: '',
-                      isDense: true,
-                      border: OutlineInputBorder(),
+                  child: Semantics(
+                    label: _t(
+                      'web_creative_level_aria',
+                      'Creative level for %s',
+                    ).replaceFirst('%s', _localizedUpgradeName(upgrade)),
+                    child: TextField(
+                      controller: _controller(
+                        _upgradeKey(upgrade),
+                        _levelFor(upgrade).toString(),
+                      ),
+                      focusNode: _focusNode(_upgradeKey(upgrade)),
+                      enabled: !_saving,
+                      keyboardType: TextInputType.number,
+                      maxLength: 7,
+                      decoration: InputDecoration(
+                        labelText: _t('web_ui_level', 'Level'),
+                        counterText: '',
+                        isDense: true,
+                        border: const OutlineInputBorder(),
+                      ),
                     ),
                   ),
                 ),
@@ -373,9 +378,30 @@ class _CreativeSavePanelState extends State<CreativeSavePanel> {
               'Set owned upgrade levels directly, within each upgrade’s configured maximum.',
             ),
           ),
-          _upgradeGroup(_t('web_ui_upgrade_levels', 'Upgrade levels'), UpgradeCatalog.all),
-          _upgradeGroup(_t('web_ui_prestige_upgrades', 'Prestige upgrades'), UpgradeCatalog.prestige),
-          _upgradeGroup(_t('web_ui_ultra_upgrades', 'Ultra upgrades'), UpgradeCatalog.ultra),
+          _upgradeGroup(
+            _t('web_ui_upgrade_levels', 'Upgrade levels'),
+            UpgradeCatalog.all,
+            emptyText: _t(
+              'web_ui_upgrade_catalog_unavailable',
+              'Upgrade catalog unavailable.',
+            ),
+          ),
+          _upgradeGroup(
+            _t('web_ui_prestige_upgrades', 'Prestige upgrades'),
+            UpgradeCatalog.prestige,
+            emptyText: _t(
+              'web_ui_prestige_upgrade_catalog_unavailable',
+              'Prestige upgrade catalog unavailable.',
+            ),
+          ),
+          _upgradeGroup(
+            _t('web_ui_ultra_upgrades', 'Ultra upgrades'),
+            UpgradeCatalog.ultra,
+            emptyText: _t(
+              'web_ui_ultra_upgrade_catalog_unavailable',
+              'Ultra upgrade catalog unavailable.',
+            ),
+          ),
           const SizedBox(height: 8),
           Semantics(
             liveRegion: true,
