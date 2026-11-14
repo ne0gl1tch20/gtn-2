@@ -68,7 +68,7 @@ void main() {
         autoTheming: false,
         initialTheme: Brightness.dark,
         home: SettingsPage(
-          settings: latest,
+          settings: latest.copyWith(notificationsEnabled: true),
           onChanged: (next) async {
             latest = next;
           },
@@ -87,12 +87,12 @@ void main() {
     expect(find.text('Progression milestones'), findsOneWidget);
     expect(find.text('Game events'), findsOneWidget);
     expect(
-      find.text('Periodic reminders to return to the game.'),
+      find.text('Periodic reminders to return to the game'),
       findsOneWidget,
     );
-    expect(find.text('World unlocks and boss victories.'), findsOneWidget);
+    expect(find.text('World unlocks and boss victories'), findsOneWidget);
     expect(
-      find.text('New random events and limited-time event rewards.'),
+      find.text('New random events and limited-time event rewards'),
       findsOneWidget,
     );
   });
@@ -164,6 +164,8 @@ void main() {
       260,
       scrollable: find.byType(Scrollable).first,
     );
+    await tester.ensureVisible(find.text('Notifications'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Notifications'));
     await tester.pumpAndSettle();
 
