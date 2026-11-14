@@ -1257,17 +1257,9 @@ class _MoreMenuPage extends StatelessWidget {
           child: ListView(
             padding: const EdgeInsets.fromLTRB(12, 14, 12, 28),
             children: [
-              const GtnPageHeader(
-                eyebrow: 'Explore',
-                title: 'More',
-                description: 'Your game sections and settings.',
-                icon: Icons.explore_rounded,
-                accent: _purple,
-              ),
-              const SizedBox(height: 18),
               LayoutBuilder(
                 builder: (context, constraints) {
-                  const columns = 1;
+                  final columns = constraints.maxWidth >= 640 ? 2 : 1;
                   const spacing = 12.0;
                   final itemWidth =
                       (constraints.maxWidth - spacing * (columns - 1)) /
