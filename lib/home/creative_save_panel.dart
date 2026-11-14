@@ -219,7 +219,12 @@ class _CreativeSavePanelState extends State<CreativeSavePanel> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(_localizedUpgradeName(upgrade)),
+                      Text(
+                        _localizedUpgradeName(upgrade),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
                       Text(
                         '${_t('web_ui_level', 'Level')} ${_levelFor(upgrade)} / ${upgrade.definition.maxLevel ?? 0}',
                         style: Theme.of(context).textTheme.bodySmall,
@@ -253,11 +258,14 @@ class _CreativeSavePanelState extends State<CreativeSavePanel> {
                   ),
                 ),
                 const SizedBox(width: 8),
-                M3EButton.filled(
-                  onPressed: _saving
-                      ? null
-                      : () => _applyValue(_upgradeKey(upgrade)),
-                  child: Text(_t('web_ui_set', 'Set')),
+                SizedBox(
+                  width: 56,
+                  child: M3EButton.filled(
+                    onPressed: _saving
+                        ? null
+                        : () => _applyValue(_upgradeKey(upgrade)),
+                    child: Text(_t('web_ui_set', 'Set')),
+                  ),
                 ),
               ],
             ),
@@ -270,8 +278,10 @@ class _CreativeSavePanelState extends State<CreativeSavePanel> {
   Widget build(BuildContext context) {
     return GtnExpressiveCard(
       key: const Key('creative-save-panel'),
-      margin: EdgeInsets.zero,
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.only(bottom: 14),
+      padding: EdgeInsets.all(
+        (MediaQuery.sizeOf(context).width * 0.04).clamp(16.0, 24.0),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -292,7 +302,10 @@ class _CreativeSavePanelState extends State<CreativeSavePanel> {
                     ),
                     Text(
                       'Creative Tools',
-                      style: Theme.of(context).textTheme.titleMedium,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontSize: (MediaQuery.sizeOf(context).width * 0.055)
+                            .clamp(20.0, 26.0),
+                      ),
                     ),
                   ],
                 ),
@@ -305,16 +318,26 @@ class _CreativeSavePanelState extends State<CreativeSavePanel> {
               'web_ui_changes_are_validated_and_saved_by_the_android_game_upda',
               'Changes are validated and saved by the Android game. Updating the range starts a fresh guessing round.',
             ),
+            style: const TextStyle(fontSize: 13, height: 1.6),
           ),
           const SizedBox(height: 14),
-          Row(
-            children: [
-              Expanded(child: _field('rangeMin', _t('web_ui_range_minimum', 'Range minimum'), numeric: true, maxLength: 7)),
-              const SizedBox(width: 10),
-              Expanded(child: _field('rangeMax', _t('web_ui_range_maximum', 'Range maximum'), numeric: true, maxLength: 7)),
-            ],
-          ),
-          const SizedBox(height: 8),
+          if (MediaQuery.sizeOf(context).width <= 390)
+            Column(
+              children: [
+                _field('rangeMin', _t('web_ui_range_minimum', 'Range minimum'), numeric: true, maxLength: 7),
+                const SizedBox(height: 10),
+                _field('rangeMax', _t('web_ui_range_maximum', 'Range maximum'), numeric: true, maxLength: 7),
+              ],
+            )
+          else
+            Row(
+              children: [
+                Expanded(child: _field('rangeMin', _t('web_ui_range_minimum', 'Range minimum'), numeric: true, maxLength: 7)),
+                const SizedBox(width: 10),
+                Expanded(child: _field('rangeMax', _t('web_ui_range_maximum', 'Range maximum'), numeric: true, maxLength: 7)),
+              ],
+            ),
+          const SizedBox(height: 14),
           SizedBox(
             width: double.infinity,
             child: M3EButton.filled(
@@ -330,10 +353,11 @@ class _CreativeSavePanelState extends State<CreativeSavePanel> {
               'web_ui_set_currencies_and_run_counters_directly_values_are_chec',
               'Set currencies and run counters directly. Values are checked before saving.',
             ),
+            style: const TextStyle(fontSize: 13, height: 1.6),
           ),
           const SizedBox(height: 10),
           GridView.count(
-            crossAxisCount: MediaQuery.sizeOf(context).width >= 720 ? 4 : 2,
+            crossAxisCount: MediaQuery.sizeOf(context).width <= 390 ? 1 : 2,
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             crossAxisSpacing: 10,
@@ -351,9 +375,13 @@ class _CreativeSavePanelState extends State<CreativeSavePanel> {
             ],
           ),
           const SizedBox(height: 10),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
+          GridView.count(
+            crossAxisCount: MediaQuery.sizeOf(context).width <= 390 ? 1 : 2,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            crossAxisSpacing: 8,
+            mainAxisSpacing: 8,
+            childAspectRatio: 3.2,
             children: [
               for (final item in [
                 ('money', _t('web_creative_set_money', 'Set money')),
