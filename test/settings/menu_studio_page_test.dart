@@ -80,7 +80,7 @@ void main() {
         jsonDecode(saved!.webMenuStudioLayout!) as Map<String, dynamic>;
     final areas = payload['areas'] as Map<String, dynamic>;
     final orders = payload['orders'] as Map<String, dynamic>;
-    expect(orders['nav'], isA<List<dynamic>>());
+    expect(orders['nav'], isA<List<Object?>>());
     expect(orders['more'], contains('worlds'));
     expect(areas['worlds'], 'more');
     expect(saved!.moreScreenOrder, contains('worlds'));
