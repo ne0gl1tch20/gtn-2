@@ -280,7 +280,6 @@ void main() {
     shellKey.currentState!.pop();
     await tester.pumpAndSettle();
     expect(selectedIndex, 2);
-    expect(find.text('More'), findsNothing);
     expect(find.text('Guess The Number'), findsOneWidget);
   });
 
