@@ -406,7 +406,9 @@ class _GameHomePageState extends State<GameHomePage>
         await AppLocalizations.load(restoredSettings.localeCode);
         if (!mounted) return;
         setState(() {
-          _engine = restoredEngine;
+          _engine = save.creativeModeEnabled
+              ? GameEngine(minimum: save.minimum, maximum: save.maximum)
+              : restoredEngine;
           _game = _engine.restore(
             secret: save.secret,
             attempts: save.attempts,
@@ -508,6 +510,7 @@ class _GameHomePageState extends State<GameHomePage>
     );
     if (updated == null) return false;
 
+    _engine = GameEngine(minimum: minimum, maximum: maximum);
     final nextGame = _engine.restore(
       secret: updated.secret,
       attempts: updated.attempts,
@@ -988,7 +991,9 @@ class _GameHomePageState extends State<GameHomePage>
       setState(() {
         _storage = Future.value(storage);
         _activeSlot = slot;
-        _engine = nextEngine;
+        _engine = save?.creativeModeEnabled == true
+            ? GameEngine(minimum: save!.minimum, maximum: save.maximum)
+            : nextEngine;
         _game = save == null
             ? _engine.newGame()
             : _engine.restore(
@@ -1306,7 +1311,11 @@ class _GameHomePageState extends State<GameHomePage>
       settings: save.settings,
       systems: restoredSystems,
     );
+    final restoredEngine = save.creativeModeEnabled
+        ? GameEngine(minimum: save.minimum, maximum: save.maximum)
+        : _engineFor(restoredProgression, restoredSettings);
     setState(() {
+      _engine = restoredEngine;
       _game = _engine.restore(
         secret: save.secret,
         attempts: save.attempts,
