@@ -12,7 +12,6 @@ class PlayerProfile {
     this.username = '',
     this.bio = '',
     this.avatarId = 'star',
-    this.customAvatarPath,
     this.customAvatarData,
     this.customAvatarPath,
     this.profileId = '',
@@ -22,46 +21,53 @@ class PlayerProfile {
   final String username;
   final String bio;
   final String avatarId;
-  final String? customAvatarPath;
-  // Read only for migration from early GTN2 builds; new saves use app-private files.
   final String? customAvatarData;
   final String? customAvatarPath;
   final String profileId;
   final bool setupComplete;
 
+  static String generateId() {
+    final random = Random.secure();
+    final bytes = List<int>.generate(16, (_) => random.nextInt(256));
+    bytes[6] = (bytes[6] & 0x0f) | 0x40;
+    bytes[8] = (bytes[8] & 0x3f) | 0x80;
+    final hex = bytes.map((value) => value.toRadixString(16).padLeft(2, '0'));
+    final value = hex.join();
+    return '${value.substring(0, 8)}-${value.substring(8, 12)}-${value.substring(12, 16)}-${value.substring(16, 20)}-${value.substring(20)}';
+  }
+
   PlayerProfile copyWith({
     String? username,
     String? bio,
     String? avatarId,
-    String? customAvatarPath,
     String? customAvatarData,
     String? customAvatarPath,
-    bool clearCustomAvatar = false,
     String? profileId,
     bool? setupComplete,
-  }) => PlayerProfile(
-    username: username ?? this.username,
-    bio: bio ?? this.bio,
-    avatarId: avatarId ?? this.avatarId,
-    customAvatarPath: clearCustomAvatar
-        ? null
-        : customAvatarPath ?? this.customAvatarPath,
-    customAvatarData: clearCustomAvatar
-        ? null
-        : customAvatarData ?? this.customAvatarData,
-    customAvatarPath: clearCustomAvatar
-        ? null
-        : customAvatarPath ?? this.customAvatarPath,
-    profileId: profileId ?? this.profileId,
-    setupComplete: setupComplete ?? this.setupComplete,
-  );
+    bool clearCustomAvatar = false,
+  }) {
+    return PlayerProfile(
+      username: username ?? this.username,
+      bio: bio ?? this.bio,
+      avatarId: avatarId ?? this.avatarId,
+      customAvatarData: clearCustomAvatar
+          ? null
+          : customAvatarData ?? this.customAvatarData,
+      customAvatarPath: clearCustomAvatar
+          ? null
+          : customAvatarPath ?? this.customAvatarPath,
+      profileId: profileId ?? this.profileId,
+      setupComplete: setupComplete ?? this.setupComplete,
+    );
+  }
 
   Map<String, Object?> toJson() => {
-    'schemaVersion': 1,
+    'schemaVersion': 2,
     'username': username,
     'bio': bio,
     'avatarId': avatarId,
     'customAvatarPath': customAvatarPath,
+    if (customAvatarData != null) 'customAvatarData': customAvatarData,
     'profileId': profileId,
     'setupComplete': setupComplete,
   };
@@ -70,144 +76,35 @@ class PlayerProfile {
     final username = json['username'] ?? '';
     final bio = json['bio'] ?? '';
     final avatarId = json['avatarId'] ?? 'star';
-    final customAvatarPath = json['customAvatarPath'];
     final customAvatarData = json['customAvatarData'];
     final customAvatarPath = json['customAvatarPath'];
-    final profileId = json['profileId'];
-    final setupComplete = json['setupComplete'];
+    final profileId = json['profileId'] ?? '';
+    final setupComplete =
+        json['setupComplete'] ?? (username is String && username.isNotEmpty);
     if (username is! String ||
         username.length > 20 ||
         bio is! String ||
         bio.length > 120 ||
         avatarId is! String ||
         (!avatarPresets.containsKey(avatarId) && avatarId != 'custom') ||
-        customAvatarPath != null &&
-            (customAvatarPath is! String || customAvatarPath.length > 2048) ||
         customAvatarData != null &&
             (customAvatarData is! String ||
                 !customAvatarData.startsWith('data:image/')) ||
         customAvatarPath != null && customAvatarPath is! String ||
-        profileId != null && profileId is! String ||
-        setupComplete != null && setupComplete is! bool) {
+        profileId is! String ||
+        profileId.length > 80 ||
+        setupComplete is! bool) {
       throw const FormatException('Invalid player profile.');
     }
     return PlayerProfile(
       username: username,
       bio: bio,
       avatarId: avatarId,
-      customAvatarPath: customAvatarPath as String?,
       customAvatarData: customAvatarData as String?,
       customAvatarPath: customAvatarPath as String?,
-      profileId: (profileId as String?)?.isNotEmpty == true
-          ? profileId as String
-          : _newProfileId(),
-      setupComplete: setupComplete as bool? ?? username.isNotEmpty,
+      profileId: profileId.isEmpty ? generateId() : profileId,
+      setupComplete: setupComplete,
     );
-  }
-}
-
-String _newProfileId() {
-  final random = Random.secure();
-  final bytes = List<int>.generate(16, (_) => random.nextInt(256));
-  bytes[6] = (bytes[6] & 0x0f) | 0x40;
-  bytes[8] = (bytes[8] & 0x3f) | 0x80;
-  final hex = bytes.map((value) => value.toRadixString(16).padLeft(2, '0'));
-  final value = hex.join();
-  return '${value.substring(0, 8)}-${value.substring(8, 12)}-${value.substring(12, 16)}-${value.substring(16, 20)}-${value.substring(20)}';
-}
-
-class PlayerProfileStore {
-  Future<File> get _file async {
-    final directory = await getApplicationDocumentsDirectory();
-    return File('${directory.path}/gtn2-player-profile.json');
-  }
-
-  Future<String> importCustomAvatar(Uint8List bytes, String extension) async {
-    final directory = await getApplicationDocumentsDirectory();
-    final safeExtension = extension.toLowerCase().replaceAll(
-      RegExp(r'[^a-z0-9]'),
-      '',
-    );
-    final fileName =
-        'player_profile_avatar_${DateTime.now().microsecondsSinceEpoch}.${safeExtension.isEmpty ? 'img' : safeExtension}';
-    final file = File('${directory.path}/$fileName');
-    await file.parent.create(recursive: true);
-    await file.writeAsBytes(bytes, flush: true);
-    return file.path;
-  }
-
-  Future<PlayerProfile> load() async {
-    final file = await _file;
-    if (!await file.exists()) {
-      return PlayerProfile(profileId: _newProfileId());
-    }
-    try {
-      final decoded = jsonDecode(await file.readAsString());
-      if (decoded is! Map<String, dynamic> || decoded['schemaVersion'] != 1) {
-        return const PlayerProfile();
-      }
-      var profile = PlayerProfile.fromJson(decoded);
-      final directory = await getApplicationDocumentsDirectory();
-      final avatarPath = profile.customAvatarPath;
-      if (avatarPath != null &&
-          !avatarPath.startsWith('${directory.path}${Platform.pathSeparator}')) {
-        profile = profile.copyWith(clearCustomAvatar: true, avatarId: 'star');
-      }
-      if (profile.customAvatarData != null) {
-        profile = await save(profile);
-      }
-      return profile;
-    } on FormatException {
-      return const PlayerProfile();
-    }
-  }
-
-  Future<PlayerProfile> save(PlayerProfile profile) async {
-    final directory = await getApplicationDocumentsDirectory();
-    final identity = profile.profileId.isNotEmpty
-        ? profile.profileId
-        : _newProfileId();
-    var persisted = profile.copyWith(profileId: identity);
-    final legacyData = persisted.customAvatarData;
-    if (legacyData != null) {
-      final comma = legacyData.indexOf(',');
-      if (comma < 0) throw const FormatException('Invalid custom avatar data.');
-      final header = legacyData.substring(0, comma).toLowerCase();
-      final extension = header.contains('image/png')
-          ? 'png'
-          : header.contains('image/jpeg')
-          ? 'jpg'
-          : header.contains('image/webp')
-          ? 'webp'
-          : header.contains('image/gif')
-          ? 'gif'
-          : null;
-      if (extension == null) {
-        throw const FormatException('Unsupported custom avatar format.');
-      }
-      final bytes = base64Decode(legacyData.substring(comma + 1));
-      if (bytes.isEmpty || bytes.length > 4 * 1024 * 1024) {
-        throw const FormatException('Custom avatar must be smaller than 4 MB.');
-      }
-      final avatarDirectory = Directory(
-        '${directory.path}${Platform.pathSeparator}player-profile-avatars',
-      );
-      await avatarDirectory.create(recursive: true);
-      final avatarFile = File(
-        '${avatarDirectory.path}${Platform.pathSeparator}profile_${identity}.${extension}',
-      );
-      await avatarFile.writeAsBytes(bytes, flush: true);
-      persisted = persisted.copyWith(
-        customAvatarPath: avatarFile.path,
-        clearCustomAvatar: true,
-      );
-    }
-    final file = await _file;
-    await file.parent.create(recursive: true);
-    final temporary = File('${file.path}.tmp');
-    await temporary.writeAsString(jsonEncode(persisted.toJson()), flush: true);
-    await temporary.rename(file.path);
-    return persisted;
   }
 }
 
@@ -236,29 +133,78 @@ class PlayerProfileStore {
     return File('${directory.path}/gtn2-player-profile.json');
   }
 
+  Future<String> importCustomAvatar(Uint8List bytes, String extension) async {
+    final directory = await getApplicationDocumentsDirectory();
+    final safeExtension = extension.toLowerCase().replaceAll(
+      RegExp(r'[^a-z0-9]'),
+      '',
+    );
+    final fileName =
+        'player_profile_avatar_${DateTime.now().microsecondsSinceEpoch}.${safeExtension.isEmpty ? 'img' : safeExtension}';
+    final file = File('${directory.path}/$fileName');
+    await file.parent.create(recursive: true);
+    await file.writeAsBytes(bytes, flush: true);
+    return file.path;
+  }
+
   Future<PlayerProfile> load() async {
     final file = await _file;
-    if (!await file.exists()) return const PlayerProfile();
+    if (!await file.exists()) {
+      return PlayerProfile(profileId: PlayerProfile.generateId());
+    }
     try {
       final decoded = jsonDecode(await file.readAsString());
       if (decoded is! Map<String, dynamic> ||
           (decoded['schemaVersion'] != 1 && decoded['schemaVersion'] != 2)) {
-        return PlayerProfile(profileId: _newProfileId());
+        return PlayerProfile(profileId: PlayerProfile.generateId());
       }
-      return PlayerProfile.fromJson(decoded);
+      var profile = PlayerProfile.fromJson(decoded);
+      final legacyData = profile.customAvatarData;
+      if (legacyData != null && profile.customAvatarPath == null) {
+        final parts = legacyData.split(',');
+        if (parts.length == 2) {
+          final mime = legacyData.substring(5, legacyData.indexOf(';'));
+          final extension = switch (mime) {
+            'image/png' => 'png',
+            'image/jpeg' => 'jpg',
+            'image/webp' => 'webp',
+            'image/gif' => 'gif',
+            _ => 'img',
+          };
+          try {
+            final path = await importCustomAvatar(
+              base64Decode(parts.last),
+              extension,
+            );
+            profile = profile.copyWith(
+              customAvatarPath: path,
+              clearCustomAvatar: false,
+              customAvatarData: null,
+            );
+            await save(profile);
+          } on Object {
+            // Keep the legacy data URI if migration cannot complete.
+          }
+        }
+      }
+      return profile;
     } on FormatException {
-      return PlayerProfile(profileId: _newProfileId());
+      return PlayerProfile(profileId: PlayerProfile.generateId());
     } on FileSystemException {
-      return PlayerProfile(profileId: _newProfileId());
+      return PlayerProfile(profileId: PlayerProfile.generateId());
     }
   }
 
-  Future<void> save(PlayerProfile profile) async {
+  Future<PlayerProfile> save(PlayerProfile profile) async {
     final file = await _file;
     await file.parent.create(recursive: true);
+    final saved = profile.profileId.isEmpty
+        ? profile.copyWith(profileId: PlayerProfile.generateId())
+        : profile;
     final temporary = File('${file.path}.tmp');
-    await temporary.writeAsString(jsonEncode(profile.toJson()), flush: true);
+    await temporary.writeAsString(jsonEncode(saved.toJson()), flush: true);
     await temporary.rename(file.path);
+    return saved;
   }
 }
 
@@ -285,15 +231,16 @@ class PlayerProfilePage extends StatefulWidget {
 }
 
 class _PlayerProfilePageState extends State<PlayerProfilePage> {
+  late PlayerProfile _profile = widget.initialProfile;
   late final TextEditingController _username = TextEditingController(
-    text: widget.initialProfile.username,
+    text: _profile.username,
   );
   late final TextEditingController _bio = TextEditingController(
-    text: widget.initialProfile.bio,
+    text: _profile.bio,
   );
-  late String _avatarId = widget.initialProfile.avatarId;
-  late String? _customAvatarPath = widget.initialProfile.customAvatarPath;
-  late String? _customAvatarData = widget.initialProfile.customAvatarData;
+  late String _avatarId = _profile.avatarId;
+  late String? _customAvatarData = _profile.customAvatarData;
+  late String? _customAvatarPath = _profile.customAvatarPath;
   bool _saving = false;
   late bool _editing =
       widget.firstLaunch ||
@@ -302,10 +249,65 @@ class _PlayerProfilePageState extends State<PlayerProfilePage> {
   String? _error;
 
   @override
+  void didUpdateWidget(covariant PlayerProfilePage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.initialProfile != widget.initialProfile) {
+      _profile = widget.initialProfile;
+      _username.text = _profile.username;
+      _bio.text = _profile.bio;
+      _avatarId = _profile.avatarId;
+      _customAvatarData = _profile.customAvatarData;
+      _customAvatarPath = _profile.customAvatarPath;
+    }
+  }
+
+  @override
   void dispose() {
     _username.dispose();
     _bio.dispose();
     super.dispose();
+  }
+
+  Widget _avatarImage() {
+    if (_avatarId == 'custom' && _customAvatarPath != null) {
+      return Image.file(
+        File(_customAvatarPath!),
+        fit: BoxFit.cover,
+        errorBuilder: (_, _, _) => const Icon(Icons.person_rounded),
+      );
+    }
+    if (_avatarId == 'custom' && _customAvatarData != null) {
+      return Image.memory(
+        base64Decode(_customAvatarData!.split(',').last),
+        fit: BoxFit.cover,
+        errorBuilder: (_, _, _) => const Icon(Icons.person_rounded),
+      );
+    }
+    return Text(
+      avatarPresets[_avatarId] ?? '⭐',
+      style: const TextStyle(fontSize: 48),
+    );
+  }
+
+  Widget _profileAvatar(PlayerProfile profile) {
+    if (profile.avatarId == 'custom' && profile.customAvatarPath != null) {
+      return Image.file(
+        File(profile.customAvatarPath!),
+        fit: BoxFit.cover,
+        errorBuilder: (_, _, _) => const Icon(Icons.person_rounded),
+      );
+    }
+    if (profile.avatarId == 'custom' && profile.customAvatarData != null) {
+      return Image.memory(
+        base64Decode(profile.customAvatarData!.split(',').last),
+        fit: BoxFit.cover,
+        errorBuilder: (_, _, _) => const Icon(Icons.person_rounded),
+      );
+    }
+    return Text(
+      avatarPresets[profile.avatarId] ?? '⭐',
+      style: const TextStyle(fontSize: 56),
+    );
   }
 
   Future<void> _choosePicture() async {
@@ -358,27 +360,27 @@ class _PlayerProfilePageState extends State<PlayerProfilePage> {
       _saving = true;
       _error = null;
     });
-    final profile = PlayerProfile(
+    final profile = _profile.copyWith(
       username: username,
       bio: _bio.text.trim(),
       avatarId: _avatarId,
       customAvatarPath: _customAvatarPath,
       customAvatarData: _customAvatarData,
-      customAvatarPath: _customAvatarPath,
-      profileId: widget.initialProfile.profileId.isNotEmpty
-          ? widget.initialProfile.profileId
-          : _newProfileId(),
+      profileId: _profile.profileId.isEmpty
+          ? PlayerProfile.generateId()
+          : _profile.profileId,
       setupComplete: true,
+      clearCustomAvatar: _avatarId != 'custom',
     );
     try {
       final savedProfile = await widget.store.save(profile);
       if (!mounted) return;
+      setState(() {
+        _profile = savedProfile;
+        _editing = false;
+      });
       widget.onSaved(savedProfile);
-      if (widget.firstLaunch) {
-        setState(() => _editing = false);
-      } else {
-        Navigator.of(context).pop();
-      }
+      if (widget.firstLaunch) Navigator.of(context).pop();
     } on Exception {
       if (mounted) {
         setState(() {
@@ -386,163 +388,163 @@ class _PlayerProfilePageState extends State<PlayerProfilePage> {
           _error = 'Could not save your profile. Please try again.';
         });
       }
+    } finally {
+      if (mounted) setState(() => _saving = false);
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildReadOnly(BuildContext context) {
     final theme = Theme.of(context);
-    final profileImage = _avatarId == 'custom' && _customAvatarPath != null
-        ? Image.file(
-            File(_customAvatarPath!),
-            fit: BoxFit.cover,
-            errorBuilder: (_, _, _) => const Icon(Icons.person_rounded),
-          )
-        : _avatarId == 'custom' && _customAvatarData != null
-        ? Image.memory(
-            base64Decode(_customAvatarData!.split(',').last),
-            fit: BoxFit.cover,
-            errorBuilder: (_, _, _) => const Icon(Icons.person_rounded),
-          )
-        : Text(
-            avatarPresets[_avatarId] ?? '⭐',
-            style: const TextStyle(fontSize: 48),
-          );
-
-    if (!_editing) {
-      return Scaffold(
-        appBar: AppBar(
-          title: const Text('Player profile'),
-          leading: IconButton(
-            tooltip: 'Back',
-            onPressed: () => Navigator.of(context).pop(),
-            icon: const Icon(Icons.arrow_back_rounded),
-          ),
-        ),
-        body: SafeArea(
-          child: ListView(
-            padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
-            children: [
-              Center(
-                child: CircleAvatar(
-                  radius: 56,
-                  backgroundColor: theme.colorScheme.secondaryContainer,
-                  child: ClipOval(
-                    child: SizedBox(
-                      width: 112,
-                      height: 112,
-                      child: Center(child: profileImage),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 18),
-              Center(
-                child: Text(
-                  widget.initialProfile.username,
-                  style: theme.textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 8),
-              Center(
-                child: Text(
-                  'Offline player profile',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 28),
-              Text(
-                'Bio',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                widget.initialProfile.bio.isEmpty
-                    ? 'No bio yet. Add a little introduction about yourself.'
-                    : widget.initialProfile.bio,
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  color: widget.initialProfile.bio.isEmpty
-                      ? theme.colorScheme.onSurfaceVariant
-                      : theme.colorScheme.onSurface,
-                ),
-              ),
-              const SizedBox(height: 28),
-              FilledButton(
-                onPressed: () => setState(() => _editing = true),
-                child: const Text('Edit profile'),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.firstLaunch ? 'Create your profile' : 'Player profile'),
+        title: const Text('Player profile'),
+        leading: IconButton(
+          tooltip: 'Back',
+          onPressed: () => Navigator.of(context).pop(),
+          icon: const Icon(Icons.arrow_back_rounded),
+        ),
+      ),
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(24, 20, 24, 28),
+        children: [
+          Center(
+            child: CircleAvatar(
+              radius: 56,
+              backgroundColor: theme.colorScheme.secondaryContainer,
+              child: ClipOval(
+                child: SizedBox(
+                  width: 112,
+                  height: 112,
+                  child: Center(child: _profileAvatar(_profile)),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 18),
+          Center(
+            child: Text(
+              _profile.username.isEmpty ? 'Player' : _profile.username,
+              style: theme.textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Center(
+            child: Text(
+              'Offline player profile',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+          const SizedBox(height: 28),
+          Text(
+            'Bio',
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            _profile.bio.isEmpty
+                ? 'No bio yet. Add a little introduction about yourself.'
+                : _profile.bio,
+            style: theme.textTheme.bodyLarge?.copyWith(
+              color: _profile.bio.isEmpty
+                  ? theme.colorScheme.onSurfaceVariant
+                  : theme.colorScheme.onSurface,
+            ),
+          ),
+          const SizedBox(height: 28),
+          FilledButton(
+            onPressed: () => setState(() => _editing = true),
+            child: const Text('Edit profile'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEditor(BuildContext context) {
+    final theme = Theme.of(context);
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          widget.firstLaunch ? 'Create your profile' : 'Player profile',
+        ),
         automaticallyImplyLeading: !widget.firstLaunch,
       ),
       body: SafeArea(
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
           children: [
+            const SizedBox(height: 4),
+            Text(
+              widget.firstLaunch
+                  ? 'Make this game yours.'
+                  : 'Your identity stays on this device.',
+              style: theme.textTheme.bodyLarge?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 16),
             Center(
-              child: Container(
-                padding: const EdgeInsets.all(5),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: widget.equippedCosmeticId == 'cosmetic_nebula_ring'
-                      ? Border.all(color: theme.colorScheme.primary, width: 4)
-                      : null,
-                  boxShadow: widget.equippedCosmeticId == 'cosmetic_pixel_glow'
-                      ? [
-                          BoxShadow(
-                            color: theme.colorScheme.tertiary.withValues(
-                              alpha: 0.65,
-                            ),
-                            blurRadius: 24,
-                            spreadRadius: 4,
-                          ),
-                        ]
-                      : null,
-                ),
-                child: Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    CircleAvatar(
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(5),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border:
+                          widget.equippedCosmeticId == 'cosmetic_nebula_ring'
+                          ? Border.all(
+                              color: theme.colorScheme.primary,
+                              width: 4,
+                            )
+                          : null,
+                      boxShadow:
+                          widget.equippedCosmeticId == 'cosmetic_pixel_glow'
+                          ? [
+                              BoxShadow(
+                                color: theme.colorScheme.tertiary.withValues(
+                                  alpha: 0.65,
+                                ),
+                                blurRadius: 24,
+                                spreadRadius: 4,
+                              ),
+                            ]
+                          : null,
+                    ),
+                    child: CircleAvatar(
                       radius: 56,
                       backgroundColor: theme.colorScheme.secondaryContainer,
                       child: ClipOval(
                         child: SizedBox(
                           width: 112,
                           height: 112,
-                          child: Center(child: profileImage),
+                          child: Center(child: _avatarImage()),
                         ),
                       ),
                     ),
-                    if (widget.equippedCosmeticId == 'cosmetic_starfield')
-                      Positioned(
-                        right: -3,
-                        bottom: -3,
-                        child: DecoratedBox(
-                          decoration: BoxDecoration(
-                            color: theme.colorScheme.primaryContainer,
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Padding(
-                            padding: EdgeInsets.all(7),
-                            child: Icon(Icons.auto_awesome_rounded, size: 20),
-                          ),
+                  ),
+                  if (widget.equippedCosmeticId == 'cosmetic_starfield')
+                    Positioned(
+                      right: -3,
+                      bottom: -3,
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.primaryContainer,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Padding(
+                          padding: EdgeInsets.all(7),
+                          child: Icon(Icons.auto_awesome_rounded, size: 20),
                         ),
                       ),
-                  ],
-                ),
+                    ),
+                ],
               ),
             ),
             const SizedBox(height: 12),
@@ -573,7 +575,6 @@ class _PlayerProfilePageState extends State<PlayerProfilePage> {
                             _avatarId = entry.key;
                             _customAvatarPath = null;
                             _customAvatarData = null;
-                            _customAvatarPath = null;
                           }),
                   ),
               ],
@@ -603,7 +604,10 @@ class _PlayerProfilePageState extends State<PlayerProfilePage> {
             ),
             if (_error != null) ...[
               const SizedBox(height: 8),
-              Text(_error!, style: TextStyle(color: theme.colorScheme.error)),
+              Text(
+                _error!,
+                style: TextStyle(color: theme.colorScheme.error),
+              ),
             ],
             const SizedBox(height: 12),
             FilledButton(
@@ -620,5 +624,10 @@ class _PlayerProfilePageState extends State<PlayerProfilePage> {
         ),
       ),
     );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _editing ? _buildEditor(context) : _buildReadOnly(context);
   }
 }
