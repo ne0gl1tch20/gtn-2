@@ -1422,15 +1422,101 @@ class _MoreMenuPage extends StatelessWidget {
       orderedIds.insert(insertAt, 'save_slots');
     }
 
+    final viewportWidth = MediaQuery.sizeOf(context).width;
+    final horizontalPadding = viewportWidth <= 430
+        ? 12.0
+        : viewportWidth >= 720
+        ? (viewportWidth * .03).clamp(20.0, 36.0).toDouble()
+        : 16.0;
     return Scaffold(
-      appBar: GtnExpressiveAppBar(title: const Text('More')),
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 1280),
-          child: ListView(
-            padding: const EdgeInsets.fromLTRB(12, 14, 12, 28),
-            children: [
-              LayoutBuilder(
+      body: SafeArea(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 1280),
+            child: ListView(
+              padding: EdgeInsets.fromLTRB(
+                horizontalPadding,
+                16,
+                horizontalPadding,
+                28,
+              ),
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 42,
+                      height: 42,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        gradient: const LinearGradient(
+                          colors: [_purple, Color(0xFF6651D9)],
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: _purple.withValues(alpha: .25),
+                            blurRadius: 18,
+                            offset: const Offset(0, 7),
+                          ),
+                        ],
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: Image.asset(
+                          'assets/gtn1/gtn-app-logo.png',
+                          width: 42,
+                          height: 42,
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 11),
+                    Expanded(
+                      child: Text(
+                        'Guess The Number',
+                        style: TextStyle(
+                          color: foreground,
+                          fontFamily: 'SpaceGrotesk',
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 7,
+                      ),
+                      decoration: BoxDecoration(
+                        color: foreground.withValues(alpha: .06),
+                        borderRadius: BorderRadius.circular(99),
+                        border: Border.all(
+                          color: foreground.withValues(alpha: .08),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.cloud_off_rounded,
+                            color: _green,
+                            size: 12,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            'OFFLINE',
+                            style: TextStyle(
+                              color: muted,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 1,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 18),
+                LayoutBuilder(
                 builder: (context, constraints) {
                   final columns = constraints.maxWidth > 520 ? 2 : 1;
                   const spacing = 12.0;
@@ -1479,7 +1565,8 @@ class _MoreMenuPage extends StatelessWidget {
                   );
                 },
               ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
