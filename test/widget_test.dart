@@ -21,6 +21,7 @@ Widget buildDashboard({
   ValueChanged<LegacySystemsView>? onSystemsView,
   ValueChanged<LegacySection>? onLegacySection,
   VoidCallback? onPlayerProfile,
+  VoidCallback? onNebulaShop,
   ValueChanged<int>? onPrimarySelected,
 }) {
   final navigatorKey = shellNavigatorKey ?? GlobalKey<NavigatorState>();
@@ -44,7 +45,7 @@ Widget buildDashboard({
       onUpgradeShop: () {},
       onPrestige: () {},
       onArcade: () {},
-      onNebulaShop: () {},
+      onNebulaShop: onNebulaShop ?? () {},
       onWorldMap: () {},
       onSaveSlots: () {},
       onSettings: () {},
@@ -88,6 +89,23 @@ void main() {
     );
     expect(find.text('+ 24 /s'), findsOneWidget);
     expect(find.text('0 earned'), findsOneWidget);
+  });
+
+  testWidgets('More menu has one Dev Settings item and opens Nebula Shop', (
+    WidgetTester tester,
+  ) async {
+    var openedNebulaShop = 0;
+    await tester.pumpWidget(
+      buildDashboard(onNebulaShop: () => openedNebulaShop++),
+    );
+
+    await tester.tap(find.text('More').first);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Dev Settings'), findsOneWidget);
+    await tester.tap(find.text('Shop').first);
+    await tester.pumpAndSettle();
+    expect(openedNebulaShop, 1);
   });
 
   testWidgets('Daily Momentum opens the GTN1 Rewards destination', (
