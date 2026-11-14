@@ -135,6 +135,8 @@ Green CI is build/test evidence only. It does not prove live Android/Windows beh
 | 2026-11-14 21:49:12 | `a0fc3e8f3052b4501f84d127af693eb3bd7c6212` | Remove temporary single-file formatter | CI support | — | `.github/workflows/temporary-batch-a-policy-format.yml` | Temporary workflow removed; validation run 43644826813 passed formatting but failed analysis |
 | 2026-11-14 21:50:18 | `6e9b6cf48152e892615d28c134bf312dfd6253bb` | Promote loaded slot before reading Creative Save range | Save Slots / Dashboard | `GameViewModel.kt` | `lib/main.dart` | Fixes two nullable range accesses reported by analyzer; pending fresh CI |
 | 2026-11-14 21:50:24 | `3495e4e3fb4ad4c0ad41613f481747f94ae318cc` | Sort dashboard relative imports | Dashboard | `web-play/index.html` | `lib/home/game_dashboard_page.dart` | Fixes directives-ordering info reported by analyzer; pending fresh CI |
+| 2026-11-14 21:51:00 | `93fa8ec47b1f0752a1e035e6490eeda7a3ffaaea` | Append formatter and analyzer corrections | Audit | `GameViewModel.kt; web-play/index.html` | `docs/BATCH_A_COMMIT_LOG.md` | Ledger update; validation run 43645027984 started on this SHA and was superseded by later test fix |
+| 2026-11-14 21:53:45 | `3b30c73931557227f00231c13b9ce350ae9e2631` | Expose stable keys for Creative Save fields | Dashboard | `web-play/index.html` | `lib/home/creative_save_panel.dart` | Aligns field widgets with existing counter-source assertions; current validation run pending |
 
 ### Current Creative Save implementation state
 
