@@ -90,4 +90,54 @@ void main() {
     expect(restored!.visibleNavigationIds, isNot(contains('worlds')));
     expect(restored.visibleMoreIds, contains('worlds'));
   });
+  testWidgets('Menu Studio cancel restores the original live preview', (
+    tester,
+  ) async {
+    GameSettings? previewed;
+    var cancelled = false;
+    await tester.pumpWidget(
+      M3EMaterialApp(
+        data: M3EThemeData.light(seedColor: const Color(0xFF7C5CFC)),
+        fontFamily: 'Manrope',
+        autoTheming: false,
+        initialTheme: Brightness.dark,
+        home: Builder(
+          builder: (context) => Scaffold(
+            body: Center(
+              child: TextButton(
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => MenuStudioPage(
+                        settings: GameSettings.initial,
+                        onChanged: (_) async {},
+                        onPreview: (settings) => previewed = settings,
+                        onCancel: () => cancelled = true,
+                      ),
+                    ),
+                  );
+                },
+                child: const Text('Open Menu Studio'),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('Open Menu Studio'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Move to More').first);
+    await tester.pumpAndSettle();
+    expect(
+      MenuStudioLayout.tryParse(previewed!.webMenuStudioLayout)!
+          .visibleMoreIds,
+      contains('worlds'),
+    );
+
+    await tester.tap(find.byTooltip('Back'));
+    await tester.pumpAndSettle();
+    expect(cancelled, isTrue);
+    expect(find.text('Open Menu Studio'), findsOneWidget);
+  });
+
 }
