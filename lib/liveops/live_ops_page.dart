@@ -67,7 +67,8 @@ class _LiveOpsPageState extends State<LiveOpsPage> {
           if (snapshot.connectionState != ConnectionState.done) {
             return const Center(child: CircularProgressIndicator());
           }
-          final data = snapshot.data ??
+          final data =
+              snapshot.data ??
               const LiveOpsSnapshot(enabled: false, events: []);
           final systems = _progression.legacySystems;
           return RefreshIndicator(
@@ -91,7 +92,9 @@ class _LiveOpsPageState extends State<LiveOpsPage> {
                   ),
                   icon: Icons.event_available_rounded,
                   accent: GtnUiTokens.cyan,
-                  trailing: _BonusLevelChip(level: systems.permanentEventBoosts),
+                  trailing: _BonusLevelChip(
+                    level: systems.permanentEventBoosts,
+                  ),
                 ),
                 const SizedBox(height: 14),
                 GtnExpressiveCard(
@@ -193,10 +196,8 @@ class _BonusLevelChip extends StatelessWidget {
       children: [
         Text(
           '+$level',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            color: GtnUiTokens.gold,
-            fontWeight: FontWeight.w900,
-          ),
+          style: Theme.of(context).textTheme.titleMedium
+              ?.copyWith(color: GtnUiTokens.gold, fontWeight: FontWeight.w900),
         ),
         Text(
           AppLocalizations.text('live_ops_bonus_level', 'BONUS LEVEL'),
@@ -275,10 +276,7 @@ class _EventCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
-                  child: Text(
-                    event.title,
-                    style: theme.textTheme.titleLarge,
-                  ),
+                  child: Text(event.title, style: theme.textTheme.titleLarge),
                 ),
                 const SizedBox(width: 8),
                 Container(

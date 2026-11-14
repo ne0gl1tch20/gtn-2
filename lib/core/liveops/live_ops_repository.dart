@@ -106,7 +106,9 @@ class LiveOpsContentValidator {
     for (final event in manifest.events) {
       if (!RegExp(r'^[a-z0-9_-]{1,64}$').hasMatch(event.id) ||
           !ids.add(event.id)) {
-        throw FormatException('LiveOps event ID is invalid or duplicated: ${event.id}');
+        throw FormatException(
+          'LiveOps event ID is invalid or duplicated: ${event.id}',
+        );
       }
       if (event.title.trim().isEmpty ||
           event.title.length > 100 ||
@@ -114,15 +116,21 @@ class LiveOpsContentValidator {
           event.description.length > 500 ||
           event.currencyName.trim().isEmpty ||
           event.currencyName.length > 32) {
-        throw FormatException('LiveOps event ${event.id} has invalid display content.');
+        throw FormatException(
+          'LiveOps event ${event.id} has invalid display content.',
+        );
       }
       if (!_statuses.contains(event.status)) {
-        throw FormatException('LiveOps event ${event.id} has an invalid status.');
+        throw FormatException(
+          'LiveOps event ${event.id} has an invalid status.',
+        );
       }
       final start = _parseInstant(event.startDate, event.id);
       final end = _parseInstant(event.endDate, event.id);
       if (!end.isAfter(start)) {
-        throw FormatException('LiveOps event ${event.id} has an invalid date window.');
+        throw FormatException(
+          'LiveOps event ${event.id} has an invalid date window.',
+        );
       }
       if (event.maxClaims < 1 ||
           event.maxClaims > 10000 ||
@@ -132,14 +140,18 @@ class LiveOpsContentValidator {
           event.minCorrectGuesses < 0 ||
           event.minPrestigeCount < 0 ||
           event.minUltraCount < 0) {
-        throw FormatException('LiveOps event ${event.id} has invalid reward or eligibility values.');
+        throw FormatException(
+          'LiveOps event ${event.id} has invalid reward or eligibility values.',
+        );
       }
     }
   }
 
   static DateTime _parseInstant(String value, String eventId) {
     if (!RegExp(r'(Z|[+-]\d{2}:\d{2})$').hasMatch(value)) {
-      throw FormatException('LiveOps event $eventId date must include a timezone.');
+      throw FormatException(
+        'LiveOps event $eventId date must include a timezone.',
+      );
     }
     final parsed = DateTime.tryParse(value);
     if (parsed == null) {
@@ -150,11 +162,9 @@ class LiveOpsContentValidator {
 }
 
 class LiveOpsRepository {
-  LiveOpsRepository({
-    LiveOpsAssetLoader? loadAsset,
-    DateTime Function()? clock,
-  }) : _loadAsset = loadAsset ?? ((path) => rootBundle.loadString(path)),
-       _clock = clock ?? DateTime.now;
+  LiveOpsRepository({LiveOpsAssetLoader? loadAsset, DateTime Function()? clock})
+    : _loadAsset = loadAsset ?? ((path) => rootBundle.loadString(path)),
+      _clock = clock ?? DateTime.now;
 
   static const _defaultFlags = <String, bool>{
     'live_ops': true,
@@ -177,18 +187,20 @@ class LiveOpsRepository {
       );
       LiveOpsContentValidator.validate(manifest);
       final now = _clock().toUtc();
-      final events = manifest.events.map((event) {
-        final start = DateTime.parse(event.startDate).toUtc();
-        final end = DateTime.parse(event.endDate).toUtc();
-        final status = switch (true) {
-          _ when event.status == 'ARCHIVED' => 'ARCHIVED',
-          _ when now.isBefore(start) => 'UPCOMING',
-          _ when !now.isBefore(end) => 'ARCHIVED',
-          _ when event.status == 'ENDING' => 'ENDING',
-          _ => 'ACTIVE',
-        };
-        return event.withStatus(status);
-      }).toList(growable: false);
+      final events = manifest.events
+          .map((event) {
+            final start = DateTime.parse(event.startDate).toUtc();
+            final end = DateTime.parse(event.endDate).toUtc();
+            final status = switch (true) {
+              _ when event.status == 'ARCHIVED' => 'ARCHIVED',
+              _ when now.isBefore(start) => 'UPCOMING',
+              _ when !now.isBefore(end) => 'ARCHIVED',
+              _ when event.status == 'ENDING' => 'ENDING',
+              _ => 'ACTIVE',
+            };
+            return event.withStatus(status);
+          })
+          .toList(growable: false);
       return LiveOpsSnapshot(
         enabled: flags['live_ops'] == true && flags['seasonal_rewards'] == true,
         events: List.unmodifiable(events),

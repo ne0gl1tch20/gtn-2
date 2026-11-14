@@ -6,12 +6,12 @@ import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
 
 void main() {
-  testWidgets('LiveOps page displays event claims and invokes the claim action', (
-    tester,
-  ) async {
-    final repository = LiveOpsRepository(
-      loadAsset: (path) async => path.endsWith('liveops_manifest.json')
-          ? '''
+  testWidgets(
+    'LiveOps page displays event claims and invokes the claim action',
+    (tester) async {
+      final repository = LiveOpsRepository(
+        loadAsset: (path) async => path.endsWith('liveops_manifest.json')
+            ? '''
             {
               "schemaVersion": 1,
               "manifestVersion": 2,
@@ -32,43 +32,44 @@ void main() {
               }]
             }
             '''
-          : '{"schemaVersion":1,"flags":{"live_ops":true,"seasonal_rewards":true}}',
-      clock: () => DateTime.utc(2026, 11, 14, 12),
-    );
-    final progression = ProgressionState.initial.copyWith(
-      totalGuesses: 100,
-      correctGuesses: 100,
-    );
-    String? claimedId;
+            : '{"schemaVersion":1,"flags":{"live_ops":true,"seasonal_rewards":true}}',
+        clock: () => DateTime.utc(2026, 11, 14, 12),
+      );
+      final progression = ProgressionState.initial.copyWith(
+        totalGuesses: 100,
+        correctGuesses: 100,
+      );
+      String? claimedId;
 
-    await tester.pumpWidget(
-      M3EMaterialApp(
-        data: M3EThemeData.light(seedColor: const Color(0xFF7C5CFC)),
-        fontFamily: 'Manrope',
-        autoTheming: false,
-        initialTheme: Brightness.light,
-        home: LiveOpsPage(
-          progression: progression,
-          repository: repository,
-          onClaim: (event) async {
-            claimedId = event.id;
-            return progression.copyWith(
-              legacySystems: progression.legacySystems.copyWith(
-                liveOpsClaims: {'test_event': 1},
-              ),
-            );
-          },
+      await tester.pumpWidget(
+        M3EMaterialApp(
+          data: M3EThemeData.light(seedColor: const Color(0xFF7C5CFC)),
+          fontFamily: 'Manrope',
+          autoTheming: false,
+          initialTheme: Brightness.light,
+          home: LiveOpsPage(
+            progression: progression,
+            repository: repository,
+            onClaim: (event) async {
+              claimedId = event.id;
+              return progression.copyWith(
+                legacySystems: progression.legacySystems.copyWith(
+                  liveOpsClaims: {'test_event': 1},
+                ),
+              );
+            },
+          ),
         ),
-      ),
-    );
-    await tester.pumpAndSettle();
+      );
+      await tester.pumpAndSettle();
 
-    expect(find.text('Seasonal Events'), findsNWidgets(2));
-    expect(find.text('Test Seasonal Event'), findsOneWidget);
-    expect(find.text('Claims: 0 / 2'), findsOneWidget);
-    await tester.tap(find.text('Claim Reward (+10 Nebula)'));
-    await tester.pumpAndSettle();
-    expect(claimedId, 'test_event');
-    expect(find.text('Claims: 1 / 2'), findsOneWidget);
-  });
+      expect(find.text('Seasonal Events'), findsNWidgets(2));
+      expect(find.text('Test Seasonal Event'), findsOneWidget);
+      expect(find.text('Claims: 0 / 2'), findsOneWidget);
+      await tester.tap(find.text('Claim Reward (+10 Nebula)'));
+      await tester.pumpAndSettle();
+      expect(claimedId, 'test_event');
+      expect(find.text('Claims: 1 / 2'), findsOneWidget);
+    },
+  );
 }
