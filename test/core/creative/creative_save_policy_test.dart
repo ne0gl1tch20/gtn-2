@@ -207,6 +207,29 @@ void main() {
       );
       expect(updated?.progression.upgrades['reward_multiplier'], 12);
 
+      final prestigeUpdated = CreativeSavePolicy.updateValue(
+        current: creativeSave(),
+        key: 'prestigeUpgradeLevel:prestige_gain_boost',
+        value: '8',
+        upgrades: [normal],
+        prestigeUpgrades: [prestige],
+        ultraUpgrades: [ultra],
+      );
+      expect(
+        prestigeUpdated?.progression.prestigeUpgrades['prestige_gain_boost'],
+        8,
+      );
+
+      final ultraUpdated = CreativeSavePolicy.updateValue(
+        current: creativeSave(),
+        key: 'ultraUpgradeLevel:ultra_gain_boost',
+        value: '5',
+        upgrades: [normal],
+        prestigeUpgrades: [prestige],
+        ultraUpgrades: [ultra],
+      );
+      expect(ultraUpdated?.progression.ultraUpgrades['ultra_gain_boost'], 5);
+
       expect(
         CreativeSavePolicy.updateValue(
           current: creativeSave(),
@@ -226,6 +249,31 @@ void main() {
           upgrades: [normal],
           prestigeUpgrades: [prestige],
           ultraUpgrades: [ultra],
+        ),
+        isNull,
+      );
+    });
+
+    test('enforces the source input length and attempts ceiling', () {
+      expect(
+        CreativeSavePolicy.updateValue(
+          current: creativeSave(),
+          key: 'money',
+          value: List.filled(101, '1').join(),
+          upgrades: emptyCatalog,
+          prestigeUpgrades: emptyCatalog,
+          ultraUpgrades: emptyCatalog,
+        ),
+        isNull,
+      );
+      expect(
+        CreativeSavePolicy.updateValue(
+          current: creativeSave(),
+          key: 'attempts',
+          value: '1000000000001',
+          upgrades: emptyCatalog,
+          prestigeUpgrades: emptyCatalog,
+          ultraUpgrades: emptyCatalog,
         ),
         isNull,
       );
