@@ -3,6 +3,7 @@ library;
 
 class SeasonalMonthDay {
   const SeasonalMonthDay(this.month, this.day);
+
   final int month;
   final int day;
 
@@ -24,7 +25,12 @@ class SeasonalMonthDay {
 }
 
 class SeasonalDateWindow {
-  const SeasonalDateWindow({required this.start, required this.endExclusive});
+  SeasonalDateWindow({required this.start, required this.endExclusive}) {
+    if (!endExclusive.isAfter(start)) {
+      throw ArgumentError('Seasonal date window must have a positive duration.');
+    }
+  }
+
   final DateTime start;
   final DateTime endExclusive;
 
@@ -47,12 +53,18 @@ class SeasonalThemeCalendarConfig {
          lunarNewYearWindows ?? SeasonalThemeCalendar.lunarNewYearWindows,
        ) {
     if (!RegExp(r'^[A-Za-z0-9_-]{2,16}$').hasMatch(regionCode)) {
-      throw ArgumentError.value(regionCode, 'regionCode', 'Region code is invalid.');
+      throw ArgumentError.value(
+        regionCode,
+        'regionCode',
+        'Region code is invalid.',
+      );
     }
     if (!backToSchoolStart.isValid ||
         !backToSchoolEndExclusive.isValid ||
         backToSchoolStart == backToSchoolEndExclusive) {
-      throw ArgumentError('Back-to-school window must have a positive duration.');
+      throw ArgumentError(
+        'Back-to-school window must have a positive duration.',
+      );
     }
     if (!winterStart.isValid ||
         !winterEndExclusive.isValid ||
@@ -77,6 +89,7 @@ class ActiveSeasonalTheme {
     required this.endExclusive,
     required this.priority,
   });
+
   final String id;
   final DateTime start;
   final DateTime endExclusive;
@@ -90,9 +103,13 @@ class ActiveSeasonalTheme {
 
 class _RecurringSeasonalWindow {
   const _RecurringSeasonalWindow(
-    this.id, this.start, this.endExclusive, this.priority, {
+    this.id,
+    this.start,
+    this.endExclusive,
+    this.priority, {
     this.philippinesOnly = false,
   });
+
   final String id;
   final SeasonalMonthDay start;
   final SeasonalMonthDay endExclusive;
@@ -106,24 +123,66 @@ class SeasonalThemeCalendar {
   static final Map<int, SeasonalDateWindow> lunarNewYearWindows =
       Map.unmodifiable({
         for (final entry in const <int, (int, int)>{
-          2026: (2, 17), 2027: (2, 6), 2028: (1, 26), 2029: (2, 13),
-          2030: (2, 3), 2031: (1, 23), 2032: (2, 11), 2033: (1, 31),
-          2034: (2, 19), 2035: (2, 8),
+          2026: (2, 17),
+          2027: (2, 6),
+          2028: (1, 26),
+          2029: (2, 13),
+          2030: (2, 3),
+          2031: (1, 23),
+          2032: (2, 11),
+          2033: (1, 31),
+          2034: (2, 19),
+          2035: (2, 8),
         }.entries)
           entry.key: SeasonalDateWindow(
             start: DateTime(entry.key, entry.value.$1, entry.value.$2),
-            endExclusive: DateTime(entry.key, entry.value.$1, entry.value.$2)
-                .add(const Duration(days: 15)),
+            endExclusive: DateTime(
+              entry.key,
+              entry.value.$1,
+              entry.value.$2,
+            ).add(const Duration(days: 15)),
           ),
       });
 
   static const List<_RecurringSeasonalWindow> _recurring = [
-    _RecurringSeasonalWindow('new_year', SeasonalMonthDay(12, 26), SeasonalMonthDay(1, 8), 110),
-    _RecurringSeasonalWindow('christmas', SeasonalMonthDay(12, 1), SeasonalMonthDay(1, 7), 100),
-    _RecurringSeasonalWindow('halloween', SeasonalMonthDay(10, 15), SeasonalMonthDay(11, 2), 90),
-    _RecurringSeasonalWindow('valentines', SeasonalMonthDay(2, 7), SeasonalMonthDay(2, 16), 70),
-    _RecurringSeasonalWindow('philippine_summer', SeasonalMonthDay(3, 1), SeasonalMonthDay(6, 1), 50, philippinesOnly: true),
-    _RecurringSeasonalWindow('philippine_independence_day', SeasonalMonthDay(6, 12), SeasonalMonthDay(6, 13), 80, philippinesOnly: true),
+    _RecurringSeasonalWindow(
+      'new_year',
+      SeasonalMonthDay(12, 26),
+      SeasonalMonthDay(1, 8),
+      110,
+    ),
+    _RecurringSeasonalWindow(
+      'christmas',
+      SeasonalMonthDay(12, 1),
+      SeasonalMonthDay(1, 7),
+      100,
+    ),
+    _RecurringSeasonalWindow(
+      'halloween',
+      SeasonalMonthDay(10, 15),
+      SeasonalMonthDay(11, 2),
+      90,
+    ),
+    _RecurringSeasonalWindow(
+      'valentines',
+      SeasonalMonthDay(2, 7),
+      SeasonalMonthDay(2, 16),
+      70,
+    ),
+    _RecurringSeasonalWindow(
+      'philippine_summer',
+      SeasonalMonthDay(3, 1),
+      SeasonalMonthDay(6, 1),
+      50,
+      philippinesOnly: true,
+    ),
+    _RecurringSeasonalWindow(
+      'philippine_independence_day',
+      SeasonalMonthDay(6, 12),
+      SeasonalMonthDay(6, 13),
+      80,
+      philippinesOnly: true,
+    ),
   ];
 
   static List<ActiveSeasonalTheme> activeThemes(
@@ -143,8 +202,11 @@ class SeasonalThemeCalendar {
 
     if (isPhilippines) {
       final rule = _RecurringSeasonalWindow(
-        'back_to_school', settings.backToSchoolStart,
-        settings.backToSchoolEndExclusive, 60, philippinesOnly: true,
+        'back_to_school',
+        settings.backToSchoolStart,
+        settings.backToSchoolEndExclusive,
+        60,
+        philippinesOnly: true,
       );
       final theme = _recurringForDate(rule, day);
       if (theme != null) active.add(theme);
@@ -152,23 +214,34 @@ class SeasonalThemeCalendar {
 
     final lunar = settings.lunarNewYearWindows[day.year];
     if (lunar != null && lunar.contains(day)) {
-      active.add(ActiveSeasonalTheme(
-        id: 'lunar_new_year', start: lunar.start,
-        endExclusive: lunar.endExclusive, priority: 85,
-      ));
+      active.add(
+        ActiveSeasonalTheme(
+          id: 'lunar_new_year',
+          start: lunar.start,
+          endExclusive: lunar.endExclusive,
+          priority: 85,
+        ),
+      );
     }
 
     final easter = _easterWindow(day.year);
     if (easter.contains(day)) {
-      active.add(ActiveSeasonalTheme(
-        id: 'easter', start: easter.start,
-        endExclusive: easter.endExclusive, priority: 95,
-      ));
+      active.add(
+        ActiveSeasonalTheme(
+          id: 'easter',
+          start: easter.start,
+          endExclusive: easter.endExclusive,
+          priority: 95,
+        ),
+      );
     }
 
     if (settings.winterEnabled) {
       final rule = _RecurringSeasonalWindow(
-        'winter', settings.winterStart, settings.winterEndExclusive, 40,
+        'winter',
+        settings.winterStart,
+        settings.winterEndExclusive,
+        40,
       );
       final theme = _recurringForDate(rule, day);
       if (theme != null) active.add(theme);
@@ -176,11 +249,10 @@ class SeasonalThemeCalendar {
 
     final unique = <String, ActiveSeasonalTheme>{
       for (final theme in active) theme.id: theme,
-    }.values.toList()
-      ..sort((a, b) {
-        final priority = b.priority.compareTo(a.priority);
-        return priority != 0 ? priority : a.id.compareTo(b.id);
-      });
+    }.values.toList()..sort((a, b) {
+      final priority = b.priority.compareTo(a.priority);
+      return priority != 0 ? priority : a.id.compareTo(b.id);
+    });
     return List.unmodifiable(unique);
   }
 
@@ -193,7 +265,8 @@ class SeasonalThemeCalendar {
   }
 
   static ActiveSeasonalTheme? _recurringForDate(
-    _RecurringSeasonalWindow rule, DateTime date,
+    _RecurringSeasonalWindow rule,
+    DateTime date,
   ) {
     for (var year = date.year - 1; year <= date.year; year++) {
       final start = DateTime(year, rule.start.month, rule.start.day);
@@ -205,7 +278,10 @@ class SeasonalThemeCalendar {
       );
       if (!date.isBefore(start) && date.isBefore(end)) {
         return ActiveSeasonalTheme(
-          id: rule.id, start: start, endExclusive: end, priority: rule.priority,
+          id: rule.id,
+          start: start,
+          endExclusive: end,
+          priority: rule.priority,
         );
       }
     }

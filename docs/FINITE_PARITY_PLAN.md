@@ -45,7 +45,7 @@
 
 - [ ] Guess flow, number generation, validation, round lifecycle and difficulty rules.
   - [x] Port GTN1's monotonic 50 ms manual-submission rate limit; automated bot submissions bypass it. Covered by `test/core/guess_rate_limit_policy_test.dart`.
-  - [x] Port and verify GTN1's bounded adaptive next-target algorithm: 64-bit mixing, difficulty salt, streak/attempt pressure and range clamping. Its 128-case reference checksum matches GTN1 in `test/core/adaptive_target_generator_test.dart`; Android supplies pre-guess streak and attempt counts, while Windows retains its platform fallback.
+  - [x] Port and verify GTN1's bounded adaptive next-target algorithm: 64-bit mixing, difficulty salt, streak/attempt pressure and range clamping. Its 128-case reference checksum matches GTN1 in `test/core/adaptive_target_generator_test.dart`; Android uses the adaptive Dart proposal, while Windows retains GTN1's uniform-random fallback. The JNI layer is a platform optimization, not a separate gameplay behavior.
   - [ ] Compare the complete guess-state transition, invalid-range handling, source context and round lifecycle against GTN1.
 - [ ] Economy: Money, Nebula, rewards, multipliers, penalties, caps and big-number arithmetic.
   - [x] Verify GTN1 reward constants and formulas: 100 Money per range unit, 10 minimum, +10% per prior streak, five-guess frenzy tiers capped at 5×, 5× critical, +25% per reward upgrade level and 1.5× Prestige talent reward. Evidence: `lib/core/game/guess_economy_rules.dart`, `test/core/guess_economy_rules_test.dart`, GTN1 `GuessRewardRules.kt` and `FrenzyRules.kt`.

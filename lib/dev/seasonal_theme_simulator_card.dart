@@ -7,10 +7,12 @@ class SeasonalThemeSimulatorCard extends StatefulWidget {
   const SeasonalThemeSimulatorCard({super.key});
 
   @override
-  State<SeasonalThemeSimulatorCard> createState() => _SeasonalThemeSimulatorCardState();
+  State<SeasonalThemeSimulatorCard> createState() =>
+      _SeasonalThemeSimulatorCardState();
 }
 
-class _SeasonalThemeSimulatorCardState extends State<SeasonalThemeSimulatorCard> {
+class _SeasonalThemeSimulatorCardState
+    extends State<SeasonalThemeSimulatorCard> {
   static final List<(String, DateTime)> _presets = [
     ('Christmas', DateTime(2026, 12, 15)),
     ('New Year', DateTime(2027, 1, 2)),
@@ -38,14 +40,18 @@ class _SeasonalThemeSimulatorCardState extends State<SeasonalThemeSimulatorCard>
   };
 
   late DateTime _previewDate = DateTime.now();
-  late final TextEditingController _dateController =
-      TextEditingController(text: _formatDate(_previewDate));
+  late final TextEditingController _dateController = TextEditingController(
+    text: _formatDate(_previewDate),
+  );
   bool _dateError = false;
-  final SeasonalThemeCalendarConfig _config =
-      SeasonalThemeCalendarConfig(winterEnabled: true);
+  final SeasonalThemeCalendarConfig _config = SeasonalThemeCalendarConfig(
+    winterEnabled: true,
+  );
 
   static String _formatDate(DateTime date) =>
-      '${date.year.toString().padLeft(4, '0')}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+      '${date.year.toString().padLeft(4, '0')}-'
+      '${date.month.toString().padLeft(2, '0')}-'
+      '${date.day.toString().padLeft(2, '0')}';
 
   @override
   void dispose() {
@@ -83,7 +89,10 @@ class _SeasonalThemeSimulatorCardState extends State<SeasonalThemeSimulatorCard>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Season Simulator', style: Theme.of(context).textTheme.titleLarge),
+            Text(
+              'Season Simulator',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
             const SizedBox(height: 6),
             Text(
               'Preview calendar windows without changing saves, rewards or trait eligibility. Winter is enabled here so it can be tested in any region.',
@@ -97,7 +106,9 @@ class _SeasonalThemeSimulatorCardState extends State<SeasonalThemeSimulatorCard>
               decoration: InputDecoration(
                 labelText: 'Preview date (YYYY-MM-DD)',
                 border: const OutlineInputBorder(),
-                errorText: _dateError ? 'Enter a valid date like 2027-02-06.' : null,
+                errorText: _dateError
+                    ? 'Enter a valid date like 2027-02-06.'
+                    : null,
               ),
               onChanged: (_) {
                 if (_dateError) setState(() => _dateError = false);
@@ -109,7 +120,10 @@ class _SeasonalThemeSimulatorCardState extends State<SeasonalThemeSimulatorCard>
               spacing: 8,
               runSpacing: 8,
               children: [
-                FilledButton(onPressed: _applyDate, child: const Text('Preview date')),
+                FilledButton(
+                  onPressed: _applyDate,
+                  child: const Text('Preview date'),
+                ),
                 OutlinedButton(
                   onPressed: () => _selectDate(DateTime.now()),
                   child: const Text('Today'),
@@ -117,7 +131,10 @@ class _SeasonalThemeSimulatorCardState extends State<SeasonalThemeSimulatorCard>
               ],
             ),
             const SizedBox(height: 12),
-            Text('Quick presets', style: Theme.of(context).textTheme.labelLarge),
+            Text(
+              'Quick presets',
+              style: Theme.of(context).textTheme.labelLarge,
+            ),
             const SizedBox(height: 8),
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
@@ -125,7 +142,9 @@ class _SeasonalThemeSimulatorCardState extends State<SeasonalThemeSimulatorCard>
                 children: [
                   for (final preset in _presets) ...[
                     OutlinedButton(
-                      key: ValueKey('season-preset-${preset.$1.toLowerCase().replaceAll(' ', '-')}'),
+                      key: ValueKey(
+                        'season-preset-${preset.$1.toLowerCase().replaceAll(' ', '-')}',
+                      ),
                       onPressed: () => _selectDate(preset.$2),
                       child: Text(preset.$1),
                     ),
@@ -142,7 +161,7 @@ class _SeasonalThemeSimulatorCardState extends State<SeasonalThemeSimulatorCard>
             ),
             const SizedBox(height: 8),
             if (active.isEmpty)
-              Text('No seasonal event is active on this date.')
+              const Text('No seasonal event is active on this date.')
             else
               for (var index = 0; index < active.length; index++)
                 Padding(
@@ -154,19 +173,24 @@ class _SeasonalThemeSimulatorCardState extends State<SeasonalThemeSimulatorCard>
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              '${_labels[active[index].id]?.$1 ?? '✨'}  ${_labels[active[index].id]?.$2 ?? active[index].id}',
+                              '${_labels[active[index].id]?.$1 ?? '✨'}  '
+                              '${_labels[active[index].id]?.$2 ?? active[index].id}',
                               style: Theme.of(context).textTheme.titleSmall,
                             ),
-                            Text(active[index].id, style: Theme.of(context).textTheme.labelSmall),
+                            Text(
+                              active[index].id,
+                              style: Theme.of(context).textTheme.labelSmall,
+                            ),
                           ],
                         ),
                       ),
                       if (index == 0)
                         Text(
                           'PRIMARY',
-                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
+                          style: Theme.of(context).textTheme.labelSmall
+                              ?.copyWith(
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
                         ),
                     ],
                   ),
