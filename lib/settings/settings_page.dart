@@ -35,7 +35,7 @@ class SettingsPage extends StatelessWidget {
     bool enabled,
   ) async {
     if (!enabled) {
-      await _update(settings.copyWith(notificationsEnabled: false));
+      await onChanged(settings.copyWith(notificationsEnabled: false));
       return;
     }
     if (defaultTargetPlatform != TargetPlatform.android) {
