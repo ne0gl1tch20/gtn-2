@@ -109,6 +109,7 @@ class GameDashboardPage extends StatelessWidget {
               onSystemsView: onSystemsView,
               onLegacySection: onLegacySection,
               onUpgradeShop: onUpgradeShop,
+              onNebulaShop: onNebulaShop,
               playerProfile: playerProfile,
               onPlayerProfile: onPlayerProfile ?? () {},
             ),
@@ -989,6 +990,7 @@ class _MoreMenuPage extends StatelessWidget {
     required this.onSystemsView,
     required this.onLegacySection,
     required this.onUpgradeShop,
+    required this.onNebulaShop,
     required this.playerProfile,
     required this.onPlayerProfile,
   });
@@ -1005,6 +1007,7 @@ class _MoreMenuPage extends StatelessWidget {
   final ValueChanged<LegacySystemsView> onSystemsView;
   final ValueChanged<LegacySection> onLegacySection;
   final VoidCallback onUpgradeShop;
+  final VoidCallback onNebulaShop;
   final PlayerProfile playerProfile;
   final VoidCallback onPlayerProfile;
 
@@ -1131,8 +1134,8 @@ class _MoreMenuPage extends StatelessWidget {
           'shop': (
             icon: Icons.storefront_rounded,
             title: 'Shop',
-            subtitle: 'Browse upgrades',
-            onTap: onUpgradeShop,
+            subtitle: 'Browse available items',
+            onTap: onNebulaShop,
           ),
           'mutators': (
             icon: Icons.tune_rounded,
@@ -1284,17 +1287,6 @@ class _MoreMenuPage extends StatelessWidget {
                             _destinationColor(
                               settings.moreScreenButtonColors[id],
                             ),
-                          ),
-                        ),
-                      if (showDeveloperSettings)
-                        SizedBox(
-                          width: itemWidth,
-                          child: entry(
-                            Icons.bug_report_rounded,
-                            'Dev Settings',
-                            'Developer tools',
-                            onDeveloperSettings,
-                            _destinationColor(null),
                           ),
                         ),
                     ],
