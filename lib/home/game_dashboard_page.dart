@@ -421,7 +421,8 @@ class GameDashboardPage extends StatelessWidget {
                                               Text(
                                                 'Guess The Number',
                                                 style: TextStyle(
-                                                  color: menuColor ?? foreground,
+                                                  color:
+                                                      menuColor ?? foreground,
                                                   fontFamily: 'SpaceGrotesk',
                                                   fontSize: 18,
                                                   fontWeight: FontWeight.w700,
@@ -1388,9 +1389,7 @@ class _MoreMenuPage extends StatelessWidget {
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: radius,
-          side: BorderSide(
-            color: Color.lerp(line, menuColor ?? _purple, .32)!,
-          ),
+          side: BorderSide(color: Color.lerp(line, menuColor ?? _purple, .32)!),
         ),
         child: Material(
           color: Colors.transparent,
@@ -1773,8 +1772,12 @@ class _MoreMenuPage extends StatelessWidget {
                                           width: 42,
                                           height: 42,
                                           decoration: BoxDecoration(
-                                            color: _purple.withValues(alpha: .12),
-                                            borderRadius: BorderRadius.circular(13),
+                                            color: _purple.withValues(
+                                              alpha: .12,
+                                            ),
+                                            borderRadius: BorderRadius.circular(
+                                              13,
+                                            ),
                                           ),
                                           alignment: Alignment.center,
                                           child: const Text(
