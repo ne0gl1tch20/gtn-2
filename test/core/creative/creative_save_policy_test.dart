@@ -110,17 +110,16 @@ void main() {
         ),
         isNull,
       );
-      expect(
-        CreativeSavePolicy.updateValue(
-          current: creativeSave(),
-          key: 'money',
-          value: '1XYZ',
-          upgrades: emptyCatalog,
-          prestigeUpgrades: emptyCatalog,
-          ultraUpgrades: emptyCatalog,
-        ),
-        isNull,
+      final unknownSuffix = CreativeSavePolicy.updateValue(
+        current: creativeSave(),
+        key: 'money',
+        value: '1XYZ',
+        upgrades: emptyCatalog,
+        prestigeUpgrades: emptyCatalog,
+        ultraUpgrades: emptyCatalog,
       );
+      // GTN1's BigNumber constructor maps unrecognized suffixes to zero.
+      expect(unknownSuffix?.progression.money, BigNumber.fromInt(0));
     });
 
     test('validates attempts and correct guesses against each other', () {
