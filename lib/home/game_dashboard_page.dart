@@ -1380,7 +1380,7 @@ class _MoreMenuPage extends StatelessWidget {
             children: [
               LayoutBuilder(
                 builder: (context, constraints) {
-                  final columns = constraints.maxWidth >= 640 ? 2 : 1;
+                  final columns = constraints.maxWidth > 520 ? 2 : 1;
                   const spacing = 12.0;
                   final itemWidth =
                       (constraints.maxWidth - spacing * (columns - 1)) /
