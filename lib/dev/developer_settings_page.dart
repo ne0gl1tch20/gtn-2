@@ -8,10 +8,10 @@ import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../core/legacy/trait_catalog_repository.dart';
-import 'seasonal_theme_simulator_card.dart';
 import '../core/scripting/lua_sandbox.dart';
 import '../data/saves/save_data.dart';
 import '../design/expressive_widgets.dart';
+import 'seasonal_theme_simulator_card.dart';
 
 typedef DeveloperCommand = Future<String> Function(String command);
 typedef DeveloperSaveApply = Future<void> Function(SaveData save);

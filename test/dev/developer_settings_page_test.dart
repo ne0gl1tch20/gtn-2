@@ -5,8 +5,6 @@ import 'package:gtn_2/dev/developer_settings_page.dart';
 import 'package:gtn_2/dev/seasonal_theme_simulator_card.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:material_3_expressive/material_3_expressive.dart';
-import 'package:material_ui/material_ui.dart';
 
 void main() {
   testWidgets(

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../core/seasonal/seasonal_theme_calendar.dart';
 import '../design/expressive_widgets.dart';
