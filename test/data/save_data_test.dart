@@ -239,10 +239,37 @@ void main() {
       );
     });
 
+    test('accepts Creative Save ranges through the GTN1 one-million limit', () {
+      final creative = SaveData(
+        secret: 500001,
+        attempts: 0,
+        gamesWon: 0,
+        minimum: 1,
+        maximum: 1000000,
+        creativeModeEnabled: true,
+      );
+      final restored = SaveData.fromJson(creative.toJson());
+      expect(restored.maximum, 1000000);
+      expect(restored.secret, 500001);
+      expect(restored.creativeModeEnabled, isTrue);
+
+      final ordinary = SaveData(
+        secret: 501,
+        attempts: 0,
+        gamesWon: 0,
+        minimum: 1,
+        maximum: 501,
+      );
+      expect(
+        () => SaveData.fromJson(ordinary.toJson()),
+        throwsFormatException,
+      );
+    });
+
     test('rejects unknown versions and invalid fields', () {
       expect(
         () => SaveData.fromJson({
-          'schemaVersion': 6,
+          'schemaVersion': 7,
           'secret': 42,
           'attempts': 0,
           'gamesWon': 0,
@@ -395,6 +422,29 @@ void main() {
       expect(restored?.settings.difficultyId, 'hard');
     },
   );
+
+  test('persists a Creative Save range through the storage layer', () async {
+    final directory = await Directory.systemTemp.createTemp(
+      'gtn2-creative-save-range-test-',
+    );
+    addTearDown(() => directory.delete(recursive: true));
+    final storage = SaveStorage(directory: directory);
+    final creative = SaveData(
+      secret: 500001,
+      attempts: 0,
+      gamesWon: 0,
+      minimum: 1,
+      maximum: 1000000,
+      creativeModeEnabled: true,
+    );
+
+    await storage.save(creative);
+
+    final restored = await storage.load();
+    expect(restored?.maximum, 1000000);
+    expect(restored?.secret, 500001);
+    expect(restored?.creativeModeEnabled, isTrue);
+  });
 
   test('persists Extreme Hardcore saves through the storage layer', () async {
     final directory = await Directory.systemTemp.createTemp(
