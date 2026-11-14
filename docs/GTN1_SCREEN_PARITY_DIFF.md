@@ -205,32 +205,15 @@ The following source surfaces are in GTN1's frozen production inventory. Some ar
 - GTN1's encrypted whole-save export/import, passphrase-protected portable backup (minimum 12-character passphrase), legacy encrypted import and legacy single-save migration into Slot 1 are still absent from Flutter. The pinned source bundle contains app preferences, active slot, ten primary slots, ten backups and Creative Mode slot data; the portable wrapper uses PBKDF2-HMAC-SHA256 + AES-256-GCM with a fixed AAD and a 12-byte nonce.
 - **Open:** port the source transfer envelope and compatible import/export semantics plus legacy migration; add tests for wrong passphrases, malformed payloads, empty/occupied slots, backup retention and successful reset completion.
 
-### Latest validation state
+### Latest validation state — 2026-11-14
 
-- Dart analysis passed on commit `62e96e0`; the test suite then reported 340 passed / 7 failed. The failures included outdated viewport assumptions in Settings and stale More-title assertions.
-- Test assertions were updated; the next run reported 342 passed / 5 failed. The remaining failures were traced to one Settings test scrolling down before checking the top preview, an assertion that incorrectly expected the pinned Arcade navigation label to be absent, and More title finders that matched both the app bar and bottom navigation.
-- Those test fixes were committed. The official Dart formatter ran through a temporary one-time workflow and committed the formatter output as `6560a22`; the temporary workflow was removed in `bc1cdd2`. The latest post-format validation is pending. Do not treat the earlier test counts as a pass.
-- Last confirmed Android and Windows debug builds passed together in run `43579955796` on commit `a850061`; subsequent code changes still require a fresh successful build. No paired runtime screenshots or real-device/Windows smoke evidence exist.
+- Main commit `bf63d7655593e5801cf8ebf31c38e007f9381e21` passed Dart formatting, analysis and the complete Flutter test suite: **371 tests passed**. The test log is from Validate run [43594019915](https://github.com/ne0gl1tch20/gtn-2/actions/runs/43594019915).
+- The independent Build Debug run [43594019800](https://github.com/ne0gl1tch20/gtn-2/actions/runs/43594019800) passed both Android debug APK and Windows desktop debug, then published the paired `debug-latest` artifacts. Build success does not prove screen parity or runtime behavior.
+- Settings findings in the older checklist entry have been superseded by the current code: GTN2 now has the Theme Colors live preview, the shared HSV/hex picker, category descriptions and a generated Android notification-permission bridge. The active plan records remaining runtime, localization and persistence checks.
+- Save Slots remain a concrete functional gap: GTN2 contains the PBKDF2/AES-GCM portable encryption helper, but the Save Slots UI does not yet expose source-equivalent export/import. More importantly, GTN1's exported `GameState` and bundle schema are materially different from GTN2's `SaveData` and `ProgressionState`; wrapping GTN2 JSON in the GTN1 envelope would not be a compatible migration and could cause data loss. The adapter must explicitly map and preserve source fields before import can be enabled.
+- Paired runtime screenshots, Android permission prompt verification, Windows smoke checks, profile persistence/reload and actual settings persistence remain outstanding.
 
-**Batch A remains open.** Dashboard/More routing corrections and the Settings live preview are code changes, not closure evidence. Menu Studio, Profile and Save Slots have source-backed functional gaps listed above.
-
-## Finite implementation batches
-
-- **Batch A — Core shell and settings:** Play/dashboard, More navigation, Settings, Menu Studio, profile and save-slot screens. Verify route shell, layout, responsive behavior, settings controls and persistence.
-- **Batch B — Economy and progression:** Upgrades, Nebula shop, Prestige, Ultra, talents, mutators, traits, relics and Home Base. Verify catalog ordering, locked/owned/maxed states, transaction feedback and reset dialogs.
-- **Batch C — Secondary player screens:** Music, daily/weekly rewards, journey, stats, codex, Lucky Stake, achievements, arcade and worlds/boss screens. Verify full screen hierarchy and all source-defined states.
-- **Batch D — About, LiveOps and content:** About/updater, changelog/Markdown viewer, LiveOps, Lua/activity surfaces and content-driven screens.
-- **Batch E — Developer and diagnostics:** Developer Settings, developer console, playground, process/runtime inspectors, SDK lab, crash recovery and test tools. Keep debug-only visibility and Android/Windows differences.
-- **Batch F — Cross-platform visual closure:** paired screenshots at agreed mobile and desktop viewports; fix only demonstrated differences; run route/interaction regression tests; record final evidence for every route.
-
-Each batch must inspect both repositories before changes, implement the full source structure for that batch (not just visual fragments), run targeted tests plus formatting/analyzer, and update this diff with exact evidence. No batch may mark a route visually complete without paired runtime captures.
-
-## Current verified findings vs. pending evidence
-
-- **Verified from source code:** the five deep-diff structures above. Batch 1 removes the music route's generic expansion shell and restores a dedicated player-page layout; metadata/artwork and platform media-service gaps remain open.
-- **Not yet verified:** paired runtime screenshots, all remaining route-by-route source diffs, actual reproduction of the blank music screen on device, and Android/Windows visual parity. The latest test-fix commit has not yet completed a fresh full validation and Android/Windows build. No screen is closed by code inspection alone.
-- **No screen is declared fully restored by this audit.**
-
+**Batch A remains open.** Do not start Batch B until Dashboard/More, Settings, Menu Studio, Profile and Save Slots have source-backed behavior, regression tests, persistence checks and paired Android/Windows runtime evidence.
 
 ### Dashboard / More responsive parity pass — 2026-11-14
 
