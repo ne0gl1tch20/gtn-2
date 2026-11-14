@@ -72,7 +72,9 @@ class _GtnColorPickerDialogState extends State<_GtnColorPickerDialog> {
     setState(() {
       _hsv = _hsv
           .withSaturation((position.dx / size.width).clamp(0.0, 1.0).toDouble())
-          .withValue((1 - position.dy / size.height).clamp(0.0, 1.0).toDouble());
+          .withValue(
+            (1 - position.dy / size.height).clamp(0.0, 1.0).toDouble(),
+          );
       _hexController.text = _formatHex(_hsv.toColor());
     });
   }
@@ -182,10 +184,8 @@ class _GtnColorPickerDialogState extends State<_GtnColorPickerDialog> {
       actions: [
         if (widget.allowReset)
           TextButton(
-            onPressed: () => Navigator.pop(
-              context,
-              const GtnColorPickerResult(reset: true),
-            ),
+            onPressed: () =>
+                Navigator.pop(context, const GtnColorPickerResult(reset: true)),
             child: const Text('Use theme'),
           ),
         TextButton(
@@ -221,9 +221,8 @@ class _SaturationValuePainter extends CustomPainter {
     canvas.drawRect(
       rect,
       Paint()
-        ..shader = LinearGradient(
-          colors: [Colors.white, hueColor],
-        ).createShader(rect),
+        ..shader = LinearGradient(colors: [Colors.white, hueColor])
+            .createShader(rect),
     );
     canvas.drawRect(
       rect,

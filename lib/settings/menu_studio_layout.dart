@@ -68,9 +68,10 @@ class MenuStudioLayout {
 
     final defaults = MenuStudioLayout.defaults();
     final moreOrder = <String>[];
-    for (final id in settings.moreScreenOrder
-        .map((id) => _settingsToSource[id] ?? id)
-        .where(moreIds.contains)) {
+    for (final id
+        in settings.moreScreenOrder
+            .map((id) => _settingsToSource[id] ?? id)
+            .where(moreIds.contains)) {
       if (!moreOrder.contains(id)) moreOrder.add(id);
     }
     for (final id in moreIds) {
@@ -214,9 +215,8 @@ class MenuStudioLayout {
   static String sourceIdForSettings(String settingsId) =>
       _settingsToSource[settingsId] ?? settingsId;
 
-  List<String> get settingsMoreOrder => visibleMoreIds
-      .map((id) => _sourceToSettings[id] ?? id)
-      .toList();
+  List<String> get settingsMoreOrder =>
+      visibleMoreIds.map((id) => _sourceToSettings[id] ?? id).toList();
 
   Map<String, String> get settingsColors => {
     for (final entry in colors.entries)

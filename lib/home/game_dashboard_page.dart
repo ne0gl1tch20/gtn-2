@@ -293,7 +293,8 @@ class GameDashboardPage extends StatelessWidget {
                   labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
                   height: 76,
                   backgroundColor: panel,
-                  indicatorColor: colorFor(navigationIds[selected]).withValues(alpha: .18),
+                  indicatorColor: colorFor(navigationIds[selected])
+                      .withValues(alpha: .18),
                   destinations: [
                     for (final id in navigationIds)
                       NavigationDestination(
@@ -1185,7 +1186,10 @@ class _MoreMenuPage extends StatelessWidget {
     }
 
     final destinations =
-        <String, ({IconData icon, String title, String subtitle, VoidCallback onTap})>{
+        <
+          String,
+          ({IconData icon, String title, String subtitle, VoidCallback onTap})
+        >{
           'player_profile': (
             icon: Icons.account_circle_rounded,
             title: playerProfile.username.isEmpty

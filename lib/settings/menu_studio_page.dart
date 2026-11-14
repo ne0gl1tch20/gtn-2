@@ -90,9 +90,7 @@ class _MenuStudioPageState extends State<MenuStudioPage> {
 
   void _reorder(String area, int oldIndex, int newIndex) {
     final order = List<String>.of(
-      area == 'nav'
-          ? _layout.visibleNavigationIds
-          : _layout.visibleMoreIds,
+      area == 'nav' ? _layout.visibleNavigationIds : _layout.visibleMoreIds,
     );
     final item = order.removeAt(oldIndex);
     order.insert(newIndex, item);
@@ -146,9 +144,8 @@ class _MenuStudioPageState extends State<MenuStudioPage> {
         ),
       );
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Menu layout saved.')),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text('Menu layout saved.')));
       }
     } on Exception {
       if (mounted) {
@@ -241,9 +238,9 @@ class _MenuStudioPageState extends State<MenuStudioPage> {
                               id,
                               style: Theme.of(context).textTheme.labelSmall
                                   ?.copyWith(
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.onSurfaceVariant,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
                                   ),
                             ),
                           ],
@@ -255,9 +252,7 @@ class _MenuStudioPageState extends State<MenuStudioPage> {
                         icon: Icon(Icons.colorize_rounded, color: color),
                       ),
                       TextButton(
-                        onPressed: _saving
-                            ? null
-                            : () => _move(id, targetArea),
+                        onPressed: _saving ? null : () => _move(id, targetArea),
                         child: Text(
                           area == 'nav' ? 'Move to More' : 'Move to top bar',
                           textAlign: TextAlign.center,
@@ -297,9 +292,8 @@ class _MenuStudioPageState extends State<MenuStudioPage> {
           const SizedBox(height: 5),
           Text(
             'Customize buttons',
-            style: Theme.of(
-              context,
-            ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w900),
+            style: Theme.of(context).textTheme.headlineSmall
+                ?.copyWith(fontWeight: FontWeight.w900),
           ),
           const SizedBox(height: 5),
           Text(
@@ -342,9 +336,10 @@ class _MenuStudioPageState extends State<MenuStudioPage> {
                         decoration: BoxDecoration(
                           color: _colorFor(id, context).withValues(alpha: 0.16),
                           border: Border.all(
-                            color: _colorFor(id, context).withValues(
-                              alpha: 0.55,
-                            ),
+                            color: _colorFor(
+                              id,
+                              context,
+                            ).withValues(alpha: 0.55),
                           ),
                           borderRadius: BorderRadius.circular(12),
                         ),

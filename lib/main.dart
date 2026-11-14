@@ -413,12 +413,12 @@ class _GameHomePageState extends State<GameHomePage>
           _gamesWon = save.gamesWon;
           _progression = restoredProgression;
           _settings = restoredSettings;
-          _selectedPrimaryIndex = MenuStudioLayout.fromSettings(
-            restoredSettings,
-          ).primaryNavigationIds
-              .where((id) => id != 'dev_settings' || kDebugMode)
-              .toList()
-              .indexOf('play');
+          _selectedPrimaryIndex =
+              MenuStudioLayout.fromSettings(restoredSettings)
+                  .primaryNavigationIds
+                  .where((id) => id != 'dev_settings' || kDebugMode)
+                  .toList()
+                  .indexOf('play');
           GtnApp.settingsNotifier.value = _settings;
           _message = timeTravelDetected
               ? 'Clock rollback detected. Auto Clicker paused for 24 hours.'
@@ -1040,10 +1040,10 @@ class _GameHomePageState extends State<GameHomePage>
     final difficultyChanged = settings.difficultyId != _settings.difficultyId;
     final menuLayoutChanged =
         settings.webMenuStudioLayout != _settings.webMenuStudioLayout ||
-        settings.moreScreenOrder.join('|') != _settings.moreScreenOrder.join('|');
-    final currentNavigation = MenuStudioLayout.fromSettings(
-      _settings,
-    ).primaryNavigationIds
+        settings.moreScreenOrder.join('|') !=
+            _settings.moreScreenOrder.join('|');
+    final currentNavigation = MenuStudioLayout.fromSettings(_settings)
+        .primaryNavigationIds
         .where((id) => id != 'dev_settings' || kDebugMode)
         .toList();
     final selectedDestination =
@@ -1051,9 +1051,8 @@ class _GameHomePageState extends State<GameHomePage>
             _selectedPrimaryIndex < currentNavigation.length
         ? currentNavigation[_selectedPrimaryIndex]
         : 'play';
-    final nextNavigation = MenuStudioLayout.fromSettings(
-      settings,
-    ).primaryNavigationIds
+    final nextNavigation = MenuStudioLayout.fromSettings(settings)
+        .primaryNavigationIds
         .where((id) => id != 'dev_settings' || kDebugMode)
         .toList();
     final restoredSystems = restoreMusicStateFromSettings(
@@ -1074,9 +1073,8 @@ class _GameHomePageState extends State<GameHomePage>
         final nextIndex = nextNavigation.indexOf(selectedDestination);
         _selectedPrimaryIndex = nextIndex >= 0
             ? nextIndex
-            : MenuStudioLayout.fromSettings(
-                synchronizedSettings,
-              ).primaryNavigationIds
+            : MenuStudioLayout.fromSettings(synchronizedSettings)
+                  .primaryNavigationIds
                   .where((id) => id != 'dev_settings' || kDebugMode)
                   .toList()
                   .indexOf('play');
