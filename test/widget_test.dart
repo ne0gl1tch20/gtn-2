@@ -252,7 +252,14 @@ void main() {
     await tester.tap(find.text('More').first);
     await tester.pumpAndSettle();
     expect(selectedIndex, 4);
-    expect(find.text('More Menu'), findsOneWidget);
+    expect(find.text('More'), findsWidgets);
+    expect(find.text('Player profile'), findsOneWidget);
+    expect(find.text('Save Slots'), findsOneWidget);
+    expect(find.text('Background Music'), findsOneWidget);
+    expect(find.text('Settings'), findsOneWidget);
+    expect(find.text('Beyond the Numbers'), findsNothing);
+    expect(find.text('Arcade'), findsNothing);
+    expect(find.text('Nebula Shop'), findsNothing);
 
     shellKey.currentState!.pop();
     await tester.pumpAndSettle();
