@@ -156,18 +156,24 @@ class _CreativeSavePanelState extends State<CreativeSavePanel> {
     }
   }
 
-  Widget _field(String key, String label, {bool numeric = false}) =>
-      TextField(
-        controller: _controller(key),
-        focusNode: _focusNode(key),
-        enabled: !_saving,
-        keyboardType: numeric ? TextInputType.number : TextInputType.text,
-        decoration: InputDecoration(
-          labelText: label,
-          isDense: true,
-          border: const OutlineInputBorder(),
-        ),
-      );
+  Widget _field(
+    String key,
+    String label, {
+    bool numeric = false,
+    int? maxLength,
+  }) => TextField(
+    controller: _controller(key),
+    focusNode: _focusNode(key),
+    enabled: !_saving,
+    maxLength: maxLength,
+    keyboardType: numeric ? TextInputType.number : TextInputType.text,
+    decoration: InputDecoration(
+      labelText: label,
+      isDense: true,
+      counterText: '',
+      border: const OutlineInputBorder(),
+    ),
+  );
 
   Widget _upgradeGroup(String title, List<GameUpgrade> upgrades) {
     if (upgrades.isEmpty) {
@@ -209,8 +215,10 @@ class _CreativeSavePanelState extends State<CreativeSavePanel> {
                     focusNode: _focusNode(_upgradeKey(upgrade)),
                     enabled: !_saving,
                     keyboardType: TextInputType.number,
+                    maxLength: 7,
                     decoration: const InputDecoration(
                       labelText: 'Level',
+                      counterText: '',
                       isDense: true,
                       border: OutlineInputBorder(),
                     ),
@@ -272,9 +280,9 @@ class _CreativeSavePanelState extends State<CreativeSavePanel> {
           const SizedBox(height: 8),
           Row(
             children: [
-              Expanded(child: _field('rangeMin', 'Range minimum', numeric: true)),
+              Expanded(child: _field('rangeMin', 'Range minimum', numeric: true, maxLength: 7)),
               const SizedBox(width: 10),
-              Expanded(child: _field('rangeMax', 'Range maximum', numeric: true)),
+              Expanded(child: _field('rangeMax', 'Range maximum', numeric: true, maxLength: 7)),
             ],
           ),
           const SizedBox(height: 8),
@@ -300,14 +308,14 @@ class _CreativeSavePanelState extends State<CreativeSavePanel> {
             mainAxisSpacing: 10,
             childAspectRatio: 2.8,
             children: [
-              _field('money', 'Money'),
-              _field('prestige', 'Prestige'),
-              _field('ultra', 'Ultra'),
-              _field('nebula', 'Nebula'),
-              _field('attempts', 'Attempts', numeric: true),
-              _field('correctGuesses', 'Correct guesses', numeric: true),
-              _field('streak', 'Current streak', numeric: true),
-              _field('bestStreak', 'Best streak', numeric: true),
+              _field('money', 'Money', maxLength: 100),
+              _field('prestige', 'Prestige', maxLength: 100),
+              _field('ultra', 'Ultra', maxLength: 100),
+              _field('nebula', 'Nebula', maxLength: 100),
+              _field('attempts', 'Attempts', numeric: true, maxLength: 13),
+              _field('correctGuesses', 'Correct guesses', numeric: true, maxLength: 13),
+              _field('streak', 'Current streak', numeric: true, maxLength: 7),
+              _field('bestStreak', 'Best streak', numeric: true, maxLength: 7),
             ],
           ),
           const SizedBox(height: 10),
