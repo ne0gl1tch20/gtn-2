@@ -175,7 +175,8 @@ class _PlayerProfilePageState extends State<PlayerProfilePage> {
   late String _avatarId = widget.initialProfile.avatarId;
   late String? _customAvatarData = widget.initialProfile.customAvatarData;
   bool _saving = false;
-  late bool _editing = widget.firstLaunch ||
+  late bool _editing =
+      widget.firstLaunch ||
       !widget.viewOnly ||
       !widget.initialProfile.setupComplete;
   String? _error;
@@ -295,7 +296,11 @@ class _PlayerProfilePageState extends State<PlayerProfilePage> {
                   radius: 56,
                   backgroundColor: theme.colorScheme.secondaryContainer,
                   child: ClipOval(
-                    child: SizedBox(width: 112, height: 112, child: Center(child: profileImage)),
+                    child: SizedBox(
+                      width: 112,
+                      height: 112,
+                      child: Center(child: profileImage),
+                    ),
                   ),
                 ),
               ),
@@ -303,22 +308,36 @@ class _PlayerProfilePageState extends State<PlayerProfilePage> {
               Center(
                 child: Text(
                   widget.initialProfile.username,
-                  style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
+                  style: theme.textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
               const SizedBox(height: 8),
               Center(
-                child: Text('Offline player profile', style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+                child: Text(
+                  'Offline player profile',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
               ),
               const SizedBox(height: 28),
-              Text('Bio', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+              Text(
+                'Bio',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
               const SizedBox(height: 8),
               Text(
                 widget.initialProfile.bio.isEmpty
                     ? 'No bio yet. Add a little introduction about yourself.'
                     : widget.initialProfile.bio,
                 style: theme.textTheme.bodyLarge?.copyWith(
-                  color: widget.initialProfile.bio.isEmpty ? theme.colorScheme.onSurfaceVariant : theme.colorScheme.onSurface,
+                  color: widget.initialProfile.bio.isEmpty
+                      ? theme.colorScheme.onSurfaceVariant
+                      : theme.colorScheme.onSurface,
                 ),
               ),
               const SizedBox(height: 28),
