@@ -120,7 +120,7 @@ void main() {
     await tester.tap(find.text('More').first);
     await tester.pumpAndSettle();
 
-    expect(find.text('Beyond the Numbers'), findsOneWidget);
+    expect(find.text('Worlds'), findsOneWidget);
   });
 
   testWidgets('Menu Studio moves a More destination into navigation', (
