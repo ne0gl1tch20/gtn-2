@@ -10,6 +10,7 @@ import '../legacy/legacy_pages.dart';
 import '../legacy/legacy_systems_page.dart';
 import '../profile/player_profile_page.dart';
 import '../settings/game_settings.dart';
+import '../settings/menu_studio_layout.dart';
 
 const _purple = GtnUiTokens.purple;
 const _cyan = GtnUiTokens.cyan;
@@ -92,30 +93,67 @@ class GameDashboardPage extends StatelessWidget {
   final PlayerProfile playerProfile;
   final VoidCallback? onPlayerProfile;
 
-  void _openMoreMenu(BuildContext context, Color panel) {
+  void _openMoreMenu(BuildContext context, Color panel, int playIndex) {
     shellNavigatorKey.currentState!
         .push<void>(
           MaterialPageRoute<void>(
             builder: (_) => _MoreMenuPage(
               settings: settings,
               showDeveloperSettings: showDeveloperSettings,
-              onPrestige: onPrestige,
               onSaveSlots: onSaveSlots,
-              onSettings: onSettings,
-              onDeveloperSettings: onDeveloperSettings,
-              onMusic: onMusic,
-              onLuckyStake: onLuckyStake,
-              onSystems: onSystems,
-              onSystemsView: onSystemsView,
-              onLegacySection: onLegacySection,
-              onUpgradeShop: onUpgradeShop,
-              onNebulaShop: onNebulaShop,
               playerProfile: playerProfile,
               onPlayerProfile: onPlayerProfile ?? () {},
+              onDestination: _openMenuDestination,
             ),
           ),
         )
-        .then((_) => onPrimarySelected(2));
+        .then((_) => onPrimarySelected(playIndex));
+  }
+
+  void _openMenuDestination(String id) {
+    switch (id) {
+      case 'worlds':
+        onWorldMap();
+      case 'arcade':
+        onArcade();
+      case 'upgrades':
+        onUpgradeShop();
+      case 'rewards':
+        onLegacySection(LegacySection.rewards);
+      case 'journey':
+        onLegacySection(LegacySection.journey);
+      case 'shop':
+        onNebulaShop();
+      case 'homebase':
+        onSystemsView(LegacySystemsView.homeBase);
+      case 'relics':
+        onSystemsView(LegacySystemsView.relics);
+      case 'codex':
+        onLegacySection(LegacySection.codex);
+      case 'changelog':
+        onLegacySection(LegacySection.changelog);
+      case 'about':
+        onLegacySection(LegacySection.about);
+      case 'music':
+        onMusic();
+      case 'settings':
+        onSettings();
+      case 'prestige':
+      case 'ultra':
+        onPrestige();
+      case 'talent':
+        onSystemsView(LegacySystemsView.talents);
+      case 'traits':
+        onSystemsView(LegacySystemsView.traits);
+      case 'mutators':
+        onSystemsView(LegacySystemsView.mutators);
+      case 'stats':
+        onLegacySection(LegacySection.statistics);
+      case 'dev_settings':
+        onDeveloperSettings();
+      case 'stake':
+        onLuckyStake();
+    }
   }
 
   @override
@@ -980,36 +1018,18 @@ class _MoreMenuPage extends StatelessWidget {
   const _MoreMenuPage({
     required this.settings,
     required this.showDeveloperSettings,
-    required this.onPrestige,
     required this.onSaveSlots,
-    required this.onSettings,
-    required this.onDeveloperSettings,
-    required this.onMusic,
-    required this.onLuckyStake,
-    required this.onSystems,
-    required this.onSystemsView,
-    required this.onLegacySection,
-    required this.onUpgradeShop,
-    required this.onNebulaShop,
     required this.playerProfile,
     required this.onPlayerProfile,
+    required this.onDestination,
   });
 
   final GameSettings settings;
   final bool showDeveloperSettings;
-  final VoidCallback onPrestige;
   final VoidCallback onSaveSlots;
-  final VoidCallback onSettings;
-  final VoidCallback onDeveloperSettings;
-  final VoidCallback onMusic;
-  final VoidCallback onLuckyStake;
-  final VoidCallback onSystems;
-  final ValueChanged<LegacySystemsView> onSystemsView;
-  final ValueChanged<LegacySection> onLegacySection;
-  final VoidCallback onUpgradeShop;
-  final VoidCallback onNebulaShop;
   final PlayerProfile playerProfile;
   final VoidCallback onPlayerProfile;
+  final ValueChanged<String> onDestination;
 
   Color _destinationColor(String? hex) {
     if (hex == null || hex.isEmpty) return _purple;
