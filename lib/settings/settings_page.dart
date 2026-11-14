@@ -1,6 +1,5 @@
 import 'package:material_ui/material_ui.dart';
 
-import '../core/game/difficulty_rules.dart';
 import '../design/expressive_widgets.dart';
 import '../i18n/app_localizations.dart';
 import 'game_settings.dart';
@@ -44,8 +43,9 @@ class SettingsPage extends StatelessWidget {
                     DropdownMenuItem(value: locale.$1, child: Text(locale.$2)),
                 ],
                 (value) {
-                  if (value != null)
+                  if (value != null) {
                     _update(settings.copyWith(localeCode: value));
+                  }
                 },
               ),
             ],
