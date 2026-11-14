@@ -160,6 +160,17 @@ class PlayerProfileStore {
         return PlayerProfile(profileId: PlayerProfile.generateId());
       }
       var profile = PlayerProfile.fromJson(decoded);
+      final documents = await getApplicationDocumentsDirectory();
+      final avatarPath = profile.customAvatarPath;
+      if (avatarPath != null) {
+        final privateRoot = '${documents.path}${Platform.pathSeparator}';
+        final avatarFile = File(avatarPath);
+        if (!avatarPath.startsWith(privateRoot) ||
+            !await avatarFile.exists()) {
+          profile = profile.copyWith(clearCustomAvatar: true, avatarId: 'star');
+          await save(profile);
+        }
+      }
       final legacyData = profile.customAvatarData;
       if (legacyData != null && profile.customAvatarPath == null) {
         final parts = legacyData.split(',');
