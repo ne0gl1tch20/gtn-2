@@ -11,6 +11,7 @@ import 'arcade/arcade_page.dart';
 import 'core/automation/bot_team.dart';
 import 'core/automation/guessing_bot.dart';
 import 'core/automation/offline_earnings_settlement.dart';
+import 'core/creative/creative_save_policy.dart';
 import 'core/events/random_event_engine.dart';
 import 'core/game/adaptive_target_generator.dart';
 import 'core/game/difficulty_rules.dart';
@@ -450,11 +451,13 @@ class _GameHomePageState extends State<GameHomePage>
     _scheduleAutoClicker();
   }
 
-  Future<void> _persist() async {
-    final evaluated = _progressionEngine.evaluateAchievements(_progression);
-    if (evaluated != _progression) {
-      _progression = evaluated;
-      if (mounted) setState(() {});
+  Future<void> _persist({bool evaluateAchievements = true}) async {
+    if (evaluateAchievements) {
+      final evaluated = _progressionEngine.evaluateAchievements(_progression);
+      if (evaluated != _progression) {
+        _progression = evaluated;
+        if (mounted) setState(() {});
+      }
     }
     try {
       final storage = await _storage;
@@ -494,6 +497,63 @@ class _GameHomePageState extends State<GameHomePage>
         setState(() => _message = 'Game is still playable, but saving failed.');
       }
     }
+  }
+
+  Future<bool> _updateCreativeRange(int minimum, int maximum) async {
+    if (!_creativeModeEnabled) return false;
+    final updated = CreativeSavePolicy.updateRange(
+      current: _currentSaveData(),
+      minimum: minimum,
+      maximum: maximum,
+    );
+    if (updated == null) return false;
+
+    final nextGame = _engine.restore(
+      secret: updated.secret,
+      attempts: updated.attempts,
+      isComplete: updated.isComplete,
+      savedMinimum: updated.minimum,
+      savedMaximum: updated.maximum,
+    );
+    setState(() {
+      _game = nextGame;
+      _progression = updated.progression;
+      _controller.clear();
+      _message = 'Creative Save range updated. A fresh round is ready.';
+    });
+    _botTeam.reset(minimum, maximum);
+    await _persist(evaluateAchievements: false);
+    return true;
+  }
+
+  Future<bool> _updateCreativeValue(String key, String value) async {
+    if (!_creativeModeEnabled) return false;
+    final updated = CreativeSavePolicy.updateValue(
+      current: _currentSaveData(),
+      key: key,
+      value: value,
+      upgrades: UpgradeCatalog.all,
+      prestigeUpgrades: UpgradeCatalog.prestige,
+      ultraUpgrades: UpgradeCatalog.ultra,
+    );
+    if (updated == null) return false;
+
+    setState(() {
+      _progression = updated.progression;
+      if (key == 'attempts') {
+        _game = GameState(
+          secret: _game.secret,
+          attempts: updated.attempts,
+          isComplete: _game.isComplete,
+          lastResult: _game.lastResult,
+          minimum: _game.minimum,
+          maximum: _game.maximum,
+        );
+      }
+      _message = 'Creative Save updated.';
+    });
+    await _persist(evaluateAchievements: false);
+    return true;
   }
 
   Future<ProgressionState> _purchaseUpgrade(
@@ -1875,6 +1935,9 @@ class _GameHomePageState extends State<GameHomePage>
       onLegacySection: _openLegacySection,
       playerProfile: _playerProfile,
       onPlayerProfile: _openPlayerProfile,
+      creativeModeEnabled: _creativeModeEnabled,
+      onCreativeRange: _updateCreativeRange,
+      onCreativeValue: _updateCreativeValue,
     );
   }
 }
