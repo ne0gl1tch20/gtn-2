@@ -269,7 +269,7 @@ void main() {
     test('rejects unknown versions and invalid fields', () {
       expect(
         () => SaveData.fromJson({
-          'schemaVersion': 7,
+          'schemaVersion': 8,
           'secret': 42,
           'attempts': 0,
           'gamesWon': 0,
