@@ -1,10 +1,10 @@
-import 'dart:convert';
-
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../design/expressive_widgets.dart';
+import '../design/gtn_color_picker_dialog.dart';
 import 'game_settings.dart';
+import 'menu_studio_layout.dart';
 
 typedef MenuStudioChanged = Future<void> Function(GameSettings settings);
 
@@ -14,6 +14,7 @@ class MenuStudioPage extends StatefulWidget {
     required this.settings,
     required this.onChanged,
   });
+
   final GameSettings settings;
   final MenuStudioChanged onChanged;
 
@@ -22,30 +23,31 @@ class MenuStudioPage extends StatefulWidget {
 }
 
 class _MenuStudioPageState extends State<MenuStudioPage> {
-  late List<String> _order;
-  late Map<String, String> _colors;
+  late MenuStudioLayout _layout;
   bool _saving = false;
 
   static const _labels = <String, String>{
-    'world_map': 'World map',
-    'achievements': 'Achievements',
-    'mutators': 'Mutators',
-    'talent': 'Talents',
-    'relics': 'Relics',
-    'home_base': 'Home Base',
-    'codex': 'Codex',
-    'endgame': 'Endgame',
+    'worlds': 'Worlds',
     'arcade': 'Arcade',
-    'nebula': 'Nebula Shop',
-    'stats': 'Statistics',
+    'upgrades': 'Upgrades',
+    'rewards': 'Rewards',
+    'journey': 'Journey',
+    'shop': 'Shop',
+    'homebase': 'Home Base',
+    'relics': 'Relics',
+    'codex': 'Codex',
     'changelog': 'Changelog',
-    'settings': 'Settings',
     'about': 'About',
-    'staking': 'Lucky Stake',
-    'ultra': 'Ultra',
+    'music': 'Background Music',
+    'settings': 'Settings',
     'prestige': 'Prestige',
-    'save_slots': 'Save slots',
-    'music': 'Music',
+    'ultra': 'Ultra',
+    'talent': 'Talents',
+    'traits': 'Traits',
+    'mutators': 'Mutators',
+    'stats': 'Stats',
+    'dev_settings': 'Dev Settings',
+    'stake': 'Lucky Stake',
   };
 
   @override
@@ -61,95 +63,158 @@ class _MenuStudioPageState extends State<MenuStudioPage> {
   }
 
   void _load() {
-    _order = widget.settings.moreScreenOrder
-        .where(_labels.containsKey)
-        .toSet()
-        .toList();
-    for (final id in _labels.keys) {
-      if (!_order.contains(id)) _order.add(id);
+    _layout = MenuStudioLayout.fromSettings(widget.settings);
+  }
+
+  void _move(String id, String targetArea) {
+    final currentArea = _layout.areas[id] ?? 'more';
+    if (currentArea == targetArea) return;
+
+    final areas = Map<String, String>.of(_layout.areas)..[id] = targetArea;
+    final navOrder = List<String>.of(_layout.navOrder)..remove(id);
+    final moreOrder = List<String>.of(_layout.moreOrder)..remove(id);
+    if (targetArea == 'nav') {
+      navOrder.add(id);
+    } else {
+      moreOrder.add(id);
     }
-    _colors = Map.of(widget.settings.moreScreenButtonColors);
+
+    setState(() {
+      _layout = _layout.copyWith(
+        areas: areas,
+        navOrder: navOrder,
+        moreOrder: moreOrder,
+      );
+    });
+  }
+
+  void _reorder(String area, int oldIndex, int newIndex) {
+    final order = List<String>.of(
+      area == 'nav' ? _layout.navOrder : _layout.moreOrder,
+    );
+    final item = order.removeAt(oldIndex);
+    order.insert(newIndex, item);
+    setState(() {
+      _layout = _layout.copyWith(
+        navOrder: area == 'nav' ? order : null,
+        moreOrder: area == 'more' ? order : null,
+      );
+    });
+  }
+
+  Color _colorFor(String id, BuildContext context) {
+    final hex = _layout.colors[id];
+    if (hex == null) return Theme.of(context).colorScheme.primary;
+    final parsed = int.tryParse(hex.replaceFirst('#', ''), radix: 16);
+    return parsed == null
+        ? Theme.of(context).colorScheme.primary
+        : Color(0xFF000000 | parsed);
+  }
+
+  Future<void> _chooseColor(String id) async {
+    final result = await showGtnColorPickerDialog(
+      context,
+      initialHex: _layout.colors[id] ?? '#9B7CFF',
+      title: 'Choose ${_labels[id] ?? id} color',
+      allowReset: true,
+    );
+    if (!mounted || result == null) return;
+
+    final colors = Map<String, String>.of(_layout.colors);
+    if (result.reset) {
+      colors.remove(id);
+    } else if (result.hex != null) {
+      colors[id] = result.hex!;
+    }
+    setState(() => _layout = _layout.copyWith(colors: colors));
   }
 
   Future<void> _save() async {
     setState(() => _saving = true);
-    final layout = jsonEncode({
-      'areas': {for (final id in _order) id: 'more'},
-      'orders': {'more': _order},
-      'colors': _colors,
-    });
-    await widget.onChanged(
-      widget.settings.copyWith(
-        moreScreenOrder: List.unmodifiable(_order),
-        moreScreenButtonColors: Map.unmodifiable(_colors),
-        webMenuStudioLayout: layout,
-      ),
-    );
-    if (mounted) setState(() => _saving = false);
+    try {
+      await widget.onChanged(
+        widget.settings.copyWith(
+          moreScreenOrder: List.unmodifiable(_layout.settingsMoreOrder),
+          moreScreenButtonColors: Map.unmodifiable(_layout.settingsColors),
+          webMenuStudioLayout: _layout.encode(),
+        ),
+      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Menu layout saved.')),
+        );
+      }
+    } on Exception {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not save the menu layout.')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
   }
 
-  void _reorder(int oldIndex, int newIndex) {
-    setState(() {
-      final item = _order.removeAt(oldIndex);
-      _order.insert(newIndex, item);
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const GtnExpressiveAppBar(titleText: 'Menu Studio'),
-      body: Column(
+  Widget _menuSection(String area, String title, String description) {
+    final order = area == 'nav'
+        ? _layout.visibleNavigationIds
+        : _layout.visibleMoreIds;
+    return GtnExpressiveCard(
+      margin: const EdgeInsets.only(bottom: 14),
+      padding: const EdgeInsets.all(14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'PERSONALIZE',
-                  style: TextStyle(
-                    color: GtnUiTokens.cyan,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 1.4,
-                  ),
-                ),
-                const SizedBox(height: 5),
-                Text(
-                  'Customize buttons',
-                  style: Theme.of(context).textTheme.headlineSmall
-                      ?.copyWith(fontWeight: FontWeight.w900),
-                ),
-                const SizedBox(height: 5),
-                const Text(
-                  'Reorder the More destinations and assign a color to each entry. The main Play, Worlds, Shop and Arcade tabs remain pinned in this Flutter layout.',
-                ),
-              ],
+          Text(title, style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: 4),
+          Text(
+            description,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
-          Expanded(
-            child: ReorderableListView.builder(
-              padding: const EdgeInsets.fromLTRB(12, 8, 12, 16),
+          const SizedBox(height: 12),
+          if (order.isEmpty)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.outlineVariant,
+                ),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: const Text(
+                'No buttons here yet. Move a button into this section.',
+                textAlign: TextAlign.center,
+              ),
+            )
+          else
+            ReorderableListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
               buildDefaultDragHandles: false,
-              itemCount: _order.length,
-              onReorderItem: _reorder,
+              itemCount: order.length,
+              onReorderItem: (oldIndex, newIndex) =>
+                  _reorder(area, oldIndex, newIndex),
               itemBuilder: (context, index) {
-                final id = _order[index];
-                final color = _colors[id] ?? '';
+                final id = order[index];
+                final color = _colorFor(id, context);
+                final targetArea = area == 'nav' ? 'more' : 'nav';
                 return GtnExpressiveCard(
-                  key: ValueKey(id),
+                  key: ValueKey('$area-$id'),
                   margin: const EdgeInsets.only(bottom: 8),
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
+                    horizontal: 10,
                     vertical: 8,
                   ),
+                  color: color.withValues(alpha: 0.08),
                   child: Row(
                     children: [
                       ReorderableDragStartListener(
                         index: index,
                         child: const Padding(
-                          padding: EdgeInsets.all(8),
+                          padding: EdgeInsets.all(7),
                           child: Icon(
                             Icons.drag_handle_rounded,
                             color: GtnUiTokens.muted,
@@ -157,34 +222,39 @@ class _MenuStudioPageState extends State<MenuStudioPage> {
                         ),
                       ),
                       Expanded(
-                        child: Text(
-                          _labels[id] ?? id,
-                          style: const TextStyle(fontWeight: FontWeight.w700),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              _labels[id] ?? id,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                            Text(
+                              id,
+                              style: Theme.of(context).textTheme.labelSmall
+                                  ?.copyWith(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onSurfaceVariant,
+                                  ),
+                            ),
+                          ],
                         ),
                       ),
-                      SizedBox(
-                        width: 112,
-                        child: TextFormField(
-                          key: ValueKey('$id-$color'),
-                          initialValue: color,
-                          textCapitalization: TextCapitalization.characters,
-                          decoration: const InputDecoration(
-                            labelText: 'Color',
-                            hintText: '#9B7CFF',
-                            isDense: true,
-                            border: OutlineInputBorder(),
-                          ),
-                          onChanged: (value) {
-                            final normalized = value.trim().toUpperCase();
-                            setState(() {
-                              if (normalized.isEmpty) {
-                                _colors.remove(id);
-                              } else if (RegExp(r'^#[0-9A-F]{6}$')
-                                  .hasMatch(normalized)) {
-                                _colors[id] = normalized;
-                              }
-                            });
-                          },
+                      IconButton(
+                        tooltip: 'Choose color for ${_labels[id] ?? id}',
+                        onPressed: _saving ? null : () => _chooseColor(id),
+                        icon: Icon(Icons.colorize_rounded, color: color),
+                      ),
+                      TextButton(
+                        onPressed: _saving
+                            ? null
+                            : () => _move(id, targetArea),
+                        child: Text(
+                          area == 'nav' ? 'Move to More' : 'Move to top bar',
+                          textAlign: TextAlign.center,
                         ),
                       ),
                     ],
@@ -192,31 +262,125 @@ class _MenuStudioPageState extends State<MenuStudioPage> {
                 );
               },
             ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final previewIds = [
+      ..._layout.visibleNavigationIds,
+      ..._layout.visibleMoreIds,
+    ].take(8);
+
+    return Scaffold(
+      appBar: const GtnExpressiveAppBar(titleText: 'Customize buttons'),
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+        children: [
+          const Text(
+            'PERSONALIZE',
+            style: TextStyle(
+              color: GtnUiTokens.cyan,
+              fontSize: 10,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 1.4,
+            ),
           ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-            child: Row(
+          const SizedBox(height: 5),
+          Text(
+            'Customize buttons',
+            style: Theme.of(
+              context,
+            ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w900),
+          ),
+          const SizedBox(height: 5),
+          Text(
+            'Reorder your navigation, move destinations into More and choose each button color with GTN’s built-in color picker.',
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+          const SizedBox(height: 14),
+          _menuSection(
+            'nav',
+            'Top bar',
+            'Drag to reorder buttons. Play and More remain pinned.',
+          ),
+          _menuSection(
+            'more',
+            'More menu',
+            'Move extra destinations here to keep your main navigation tidy.',
+          ),
+          GtnExpressiveCard(
+            margin: const EdgeInsets.only(bottom: 14),
+            padding: const EdgeInsets.all(14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: M3EButton.tonal(
-                    onPressed: _saving
-                        ? null
-                        : () => setState(() {
-                            _order = [...GameSettings.initial.moreScreenOrder];
-                            _colors.clear();
-                          }),
-                    child: const Text('Reset layout'),
-                  ),
+                Text(
+                  'Live preview',
+                  style: Theme.of(context).textTheme.titleMedium,
                 ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: M3EButton.filled(
-                    onPressed: _saving ? null : _save,
-                    child: Text(_saving ? 'Saving…' : 'Save changes'),
-                  ),
+                const SizedBox(height: 4),
+                Text(
+                  'Preview the first buttons in your navigation layout.',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    for (final id in previewIds)
+                      DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: _colorFor(id, context).withValues(alpha: 0.16),
+                          border: Border.all(
+                            color: _colorFor(id, context).withValues(
+                              alpha: 0.55,
+                            ),
+                          ),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 9,
+                          ),
+                          child: Text(
+                            _labels[id] ?? id,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
               ],
             ),
+          ),
+          Row(
+            children: [
+              Expanded(
+                child: M3EButton.tonal(
+                  onPressed: _saving
+                      ? null
+                      : () => setState(
+                          () => _layout = MenuStudioLayout.defaults(),
+                        ),
+                  child: const Text('Reset layout'),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: M3EButton.filled(
+                  onPressed: _saving ? null : _save,
+                  child: Text(_saving ? 'Saving…' : 'Save changes'),
+                ),
+              ),
+            ],
           ),
         ],
       ),
