@@ -43,6 +43,33 @@ void main() {
     );
   });
 
+  test('Prestige reward preserves exact floor-square-root boundaries', () {
+    // GTN1 divides the exact BigDecimal ratio to an integer before taking
+    // its integer square root. Values immediately around four must not
+    // be rounded to the same side of the square boundary.
+    expect(
+      ProgressionCalculator.prestigeReward(
+        BigNumber.parse('3.999999999999999999999999999999999999'),
+        BigNumber.fromInt(1),
+      ),
+      BigNumber.fromInt(1),
+    );
+    expect(
+      ProgressionCalculator.prestigeReward(
+        BigNumber.parse('4.000000000000000000000000000000000001'),
+        BigNumber.fromInt(1),
+      ),
+      BigNumber.fromInt(2),
+    );
+    expect(
+      ProgressionCalculator.prestigeReward(
+        BigNumber.parse('999999999999999999999999999999999999'),
+        BigNumber.fromInt(1),
+      ),
+      BigNumber.parse('999999999999999999'),
+    );
+  });
+
   test('Ultra reward is zero below threshold and capped at 2000', () {
     expect(
       ProgressionCalculator.ultraReward(
