@@ -432,7 +432,8 @@ void main() {
       expect(
         tester.getTopLeft(find.text(sourceOrder[index])).dy,
         lessThan(tester.getTopLeft(find.text(sourceOrder[index + 1])).dy),
-        reason: '${sourceOrder[index]} should precede ${sourceOrder[index + 1]}',
+        reason:
+            '${sourceOrder[index]} should precede ${sourceOrder[index + 1]}',
       );
     }
   });
@@ -516,9 +517,7 @@ void main() {
     beyond = tester.getTopLeft(
       find.byKey(const Key('dashboard-action-beyond')),
     );
-    daily = tester.getTopLeft(
-      find.byKey(const Key('dashboard-action-daily')),
-    );
+    daily = tester.getTopLeft(find.byKey(const Key('dashboard-action-daily')));
     expect(beyond.dy, daily.dy);
     expect(beyond.dx, lessThan(daily.dx));
   });
@@ -532,12 +531,12 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
     await tester.pumpWidget(buildDashboard());
 
-    final heroWidth = tester.getSize(
-      find.byKey(const Key('dashboard-hero-section')),
-    ).width;
-    final botArenaWidth = tester.getSize(
-      find.byKey(const Key('dashboard-bot-arena-section')),
-    ).width;
+    final heroWidth = tester
+        .getSize(find.byKey(const Key('dashboard-hero-section')))
+        .width;
+    final botArenaWidth = tester
+        .getSize(find.byKey(const Key('dashboard-bot-arena-section')))
+        .width;
     expect(botArenaWidth, lessThan(heroWidth));
     expect(botArenaWidth, greaterThan(500));
   });
@@ -553,14 +552,14 @@ void main() {
     await tester.tap(find.text('More').first);
     await tester.pumpAndSettle();
 
-    final profileWidth = tester.getSize(
-      find.byKey(const Key('more-profile-card')),
-    ).width;
+    final profileWidth = tester
+        .getSize(find.byKey(const Key('more-profile-card')))
+        .width;
     final rewards = tester.getTopLeft(find.text('Rewards'));
     final journey = tester.getTopLeft(find.text('Journey'));
-    final rewardsWidth = tester.getSize(
-      find.byKey(const Key('more-card-rewards')),
-    ).width;
+    final rewardsWidth = tester
+        .getSize(find.byKey(const Key('more-card-rewards')))
+        .width;
     expect(profileWidth, greaterThan(rewardsWidth));
     expect(rewards.dy, journey.dy);
     expect(rewards.dx, lessThan(journey.dx));

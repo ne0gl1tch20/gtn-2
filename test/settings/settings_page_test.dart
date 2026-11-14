@@ -86,7 +86,10 @@ void main() {
     expect(find.text('Reminders'), findsOneWidget);
     expect(find.text('Progression milestones'), findsOneWidget);
     expect(find.text('Game events'), findsOneWidget);
-    expect(find.text('Periodic reminders to return to the game.'), findsOneWidget);
+    expect(
+      find.text('Periodic reminders to return to the game.'),
+      findsOneWidget,
+    );
     expect(find.text('World unlocks and boss victories.'), findsOneWidget);
     expect(
       find.text('New random events and limited-time event rewards.'),
@@ -208,5 +211,4 @@ void main() {
     expect(latest.notificationsEnabled, isFalse);
     expect(find.text('Notification permission denied.'), findsOneWidget);
   });
-
 }

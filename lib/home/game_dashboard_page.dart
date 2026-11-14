@@ -475,9 +475,13 @@ class GameDashboardPage extends StatelessWidget {
                                             : 25,
                                       ),
                                       constraints: BoxConstraints(
-                                        minHeight: MediaQuery.sizeOf(context).width >= 1100
+                                        minHeight:
+                                            MediaQuery.sizeOf(context).width >=
+                                                1100
                                             ? 250
-                                            : MediaQuery.sizeOf(context).width >= 720
+                                            : MediaQuery.sizeOf(context)
+                                                      .width >=
+                                                  720
                                             ? 220
                                             : compact
                                             ? 190
@@ -614,9 +618,18 @@ class GameDashboardPage extends StatelessWidget {
                                                       color: Colors.white,
                                                       fontSize: compact
                                                           ? 35
-                                                          : MediaQuery.sizeOf(context).width >= 1100
-                                                          ? (MediaQuery.sizeOf(context).width * .04)
-                                                                .clamp(42.0, 58.0)
+                                                          : MediaQuery.sizeOf(
+                                                                  context,
+                                                                ).width >=
+                                                                1100
+                                                          ? (MediaQuery.sizeOf(
+                                                                      context,
+                                                                    ).width *
+                                                                    .04)
+                                                                .clamp(
+                                                                  42.0,
+                                                                  58.0,
+                                                                )
                                                                 .toDouble()
                                                           : 42,
                                                       height: 1,
@@ -696,7 +709,9 @@ class GameDashboardPage extends StatelessWidget {
                                     ),
                                   ],
                                   SizedBox(
-                                    key: const Key('dashboard-bot-arena-section'),
+                                    key: const Key(
+                                      'dashboard-bot-arena-section',
+                                    ),
                                     width: fullWidth >= 720
                                         ? (fullWidth - 14) / 2
                                         : fullWidth,
@@ -743,7 +758,12 @@ class GameDashboardPage extends StatelessWidget {
                                           ),
                                         ),
                                         SizedBox(
-                                          width: MediaQuery.sizeOf(context).width >= 1100 ? 12 : 10,
+                                          width:
+                                              MediaQuery.sizeOf(context)
+                                                      .width >=
+                                                  1100
+                                              ? 12
+                                              : 10,
                                         ),
                                         Expanded(
                                           child: _Stat(
@@ -795,8 +815,52 @@ class GameDashboardPage extends StatelessWidget {
                                             children: [
                                               Expanded(
                                                 child: SizedBox(
-                                                  key: const Key('dashboard-action-beyond'),
+                                                  key: const Key(
+                                                    'dashboard-action-beyond',
+                                                  ),
                                                   child: _Action(
+                                                    'Beyond the Numbers',
+                                                    'Explore your progression',
+                                                    Icons.public_rounded,
+                                                    _cyan,
+                                                    onWorldMap,
+                                                    panel,
+                                                    line,
+                                                    foreground,
+                                                    muted,
+                                                  ),
+                                                ),
+                                              ),
+                                              const SizedBox(width: 9),
+                                              Expanded(
+                                                child: SizedBox(
+                                                  key: const Key(
+                                                    'dashboard-action-daily',
+                                                  ),
+                                                  child: _Action(
+                                                    'Daily Momentum',
+                                                    'Keep the streak alive',
+                                                    Icons.auto_awesome_rounded,
+                                                    _gold,
+                                                    () => onLegacySection(
+                                                      LegacySection.rewards,
+                                                    ),
+                                                    panel,
+                                                    line,
+                                                    foreground,
+                                                    muted,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          )
+                                        : Column(
+                                            children: [
+                                              SizedBox(
+                                                key: const Key(
+                                                  'dashboard-action-beyond',
+                                                ),
+                                                child: _Action(
                                                   'Beyond the Numbers',
                                                   'Explore your progression',
                                                   Icons.public_rounded,
@@ -807,13 +871,13 @@ class GameDashboardPage extends StatelessWidget {
                                                   foreground,
                                                   muted,
                                                 ),
-                                                ),
                                               ),
-                                              const SizedBox(width: 9),
-                                              Expanded(
-                                                child: SizedBox(
-                                                  key: const Key('dashboard-action-daily'),
-                                                  child: _Action(
+                                              const SizedBox(height: 9),
+                                              SizedBox(
+                                                key: const Key(
+                                                  'dashboard-action-daily',
+                                                ),
+                                                child: _Action(
                                                   'Daily Momentum',
                                                   'Keep the streak alive',
                                                   Icons.auto_awesome_rounded,
@@ -826,42 +890,6 @@ class GameDashboardPage extends StatelessWidget {
                                                   foreground,
                                                   muted,
                                                 ),
-                                                ),
-                                              ),
-                                            ],
-                                          )
-                                        : Column(
-                                            children: [
-                                              SizedBox(
-                                                key: const Key('dashboard-action-beyond'),
-                                                child: _Action(
-                                                'Beyond the Numbers',
-                                                'Explore your progression',
-                                                Icons.public_rounded,
-                                                _cyan,
-                                                onWorldMap,
-                                                panel,
-                                                line,
-                                                foreground,
-                                                muted,
-                                              ),
-                                              ),
-                                              const SizedBox(height: 9),
-                                              SizedBox(
-                                                key: const Key('dashboard-action-daily'),
-                                                child: _Action(
-                                                'Daily Momentum',
-                                                'Keep the streak alive',
-                                                Icons.auto_awesome_rounded,
-                                                _gold,
-                                                () => onLegacySection(
-                                                  LegacySection.rewards,
-                                                ),
-                                                panel,
-                                                line,
-                                                foreground,
-                                                muted,
-                                              ),
                                               ),
                                             ],
                                           ),
@@ -1526,54 +1554,54 @@ class _MoreMenuPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 18),
                 LayoutBuilder(
-                builder: (context, constraints) {
-                  final columns = constraints.maxWidth > 520 ? 2 : 1;
-                  const spacing = 12.0;
-                  final itemWidth =
-                      (constraints.maxWidth - spacing * (columns - 1)) /
-                      columns;
-                  final profile = destinations['player_profile']!;
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      SizedBox(
-                        width: constraints.maxWidth,
-                        child: entry(
-                          profile.icon,
-                          profile.title,
-                          profile.subtitle,
-                          profile.onTap,
-                          _destinationColor(
-                            settings.moreScreenButtonColors['player_profile'],
-                          ),
-                          key: const Key('more-profile-card'),
-                        ),
-                      ),
-                      const SizedBox(height: spacing),
-                      Wrap(
-                        spacing: spacing,
-                        runSpacing: spacing,
-                        children: [
-                          for (final id in orderedIds)
-                            SizedBox(
-                              width: itemWidth,
-                              child: entry(
-                                destinations[id]!.icon,
-                                destinations[id]!.title,
-                                destinations[id]!.subtitle,
-                                destinations[id]!.onTap,
-                                _destinationColor(
-                                  settings.moreScreenButtonColors[id],
-                                ),
-                                key: Key('more-card-$id'),
-                              ),
+                  builder: (context, constraints) {
+                    final columns = constraints.maxWidth > 520 ? 2 : 1;
+                    const spacing = 12.0;
+                    final itemWidth =
+                        (constraints.maxWidth - spacing * (columns - 1)) /
+                        columns;
+                    final profile = destinations['player_profile']!;
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        SizedBox(
+                          width: constraints.maxWidth,
+                          child: entry(
+                            profile.icon,
+                            profile.title,
+                            profile.subtitle,
+                            profile.onTap,
+                            _destinationColor(
+                              settings.moreScreenButtonColors['player_profile'],
                             ),
-                        ],
-                      ),
-                    ],
-                  );
-                },
-              ),
+                            key: const Key('more-profile-card'),
+                          ),
+                        ),
+                        const SizedBox(height: spacing),
+                        Wrap(
+                          spacing: spacing,
+                          runSpacing: spacing,
+                          children: [
+                            for (final id in orderedIds)
+                              SizedBox(
+                                width: itemWidth,
+                                child: entry(
+                                  destinations[id]!.icon,
+                                  destinations[id]!.title,
+                                  destinations[id]!.subtitle,
+                                  destinations[id]!.onTap,
+                                  _destinationColor(
+                                    settings.moreScreenButtonColors[id],
+                                  ),
+                                  key: Key('more-card-$id'),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ],
+                    );
+                  },
+                ),
               ],
             ),
           ),
@@ -1675,9 +1703,7 @@ class _Wallet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-    padding: EdgeInsets.all(
-      MediaQuery.sizeOf(context).width >= 720 ? 22 : 17,
-    ),
+    padding: EdgeInsets.all(MediaQuery.sizeOf(context).width >= 720 ? 22 : 17),
     decoration: BoxDecoration(
       color: panel,
       borderRadius: BorderRadius.circular(24),
@@ -1711,7 +1737,10 @@ class _Wallet extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.baseline,
                   textBaseline: TextBaseline.alphabetic,
                   children: [
-                    const Text('＋', style: TextStyle(color: _green, fontSize: 10)),
+                    const Text(
+                      '＋',
+                      style: TextStyle(color: _green, fontSize: 10),
+                    ),
                     Text(
                       '${incomePerSecond ?? BigNumber.fromInt(0)}',
                       style: const TextStyle(
@@ -1720,7 +1749,10 @@ class _Wallet extends StatelessWidget {
                         fontWeight: FontWeight.w800,
                       ),
                     ),
-                    const Text('/s', style: TextStyle(color: _green, fontSize: 10)),
+                    const Text(
+                      '/s',
+                      style: TextStyle(color: _green, fontSize: 10),
+                    ),
                   ],
                 ),
                 Text(
@@ -1911,9 +1943,7 @@ class _GuessInput extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-    padding: EdgeInsets.all(
-      MediaQuery.sizeOf(context).width >= 720 ? 22 : 18,
-    ),
+    padding: EdgeInsets.all(MediaQuery.sizeOf(context).width >= 720 ? 22 : 18),
     decoration: BoxDecoration(
       color: panel,
       borderRadius: BorderRadius.circular(28),
@@ -2165,7 +2195,11 @@ class _Action extends StatelessWidget {
                 ],
               ),
             ),
-            Icon(Icons.chevron_right_rounded, color: const Color(0xFF6F7B9D), size: 23),
+            Icon(
+              Icons.chevron_right_rounded,
+              color: const Color(0xFF6F7B9D),
+              size: 23,
+            ),
           ],
         ),
       ),
