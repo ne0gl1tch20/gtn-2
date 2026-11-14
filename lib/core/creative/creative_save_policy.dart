@@ -26,13 +26,12 @@ class CreativeSavePolicy {
     return current.copyWith(
       secret: minimum + ((maximum - minimum) ~/ 2),
       attempts: 0,
+      correctGuesses: 0,
+      streak: 0,
       isComplete: false,
       minimum: minimum,
       maximum: maximum,
-      progression: current.progression.copyWith(
-        correctGuesses: 0,
-        currentStreak: 0,
-      ),
+      progression: current.progression.copyWith(currentStreak: 0),
     );
   }
 
@@ -67,7 +66,7 @@ class CreativeSavePolicy {
       case 'attempts':
         final number = int.tryParse(value);
         if (number == null ||
-            number < progression.correctGuesses ||
+            number < current.correctGuesses ||
             number > maxCounter) {
           return null;
         }
@@ -77,30 +76,32 @@ class CreativeSavePolicy {
         if (number == null || number < 0 || number > current.attempts) {
           return null;
         }
-        return current.copyWith(
-          progression: progression.copyWith(correctGuesses: number),
-        );
+        return current.copyWith(correctGuesses: number);
       case 'streak':
         final number = int.tryParse(value);
         if (number == null || number < 0 || number > maxStreak) {
           return null;
         }
+        final best = current.bestStreak < number
+            ? number
+            : current.bestStreak;
         return current.copyWith(
+          streak: number,
+          bestStreak: best,
           progression: progression.copyWith(
             currentStreak: number,
-            bestStreak: progression.bestStreak < number
-                ? number
-                : progression.bestStreak,
+            bestStreak: best,
           ),
         );
       case 'bestStreak':
         final number = int.tryParse(value);
         if (number == null ||
-            number < progression.currentStreak ||
+            number < current.streak ||
             number > maxStreak) {
           return null;
         }
         return current.copyWith(
+          bestStreak: number,
           progression: progression.copyWith(bestStreak: number),
         );
     }
