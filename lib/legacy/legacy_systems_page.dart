@@ -1759,14 +1759,9 @@ Padding(
               label: const Text('Import audio files'),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
-            child: M3EButton.icon(
-              style: M3EButtonStyle.tonal,
-              onPressed: _createPlaylist,
-              icon: const Icon(Icons.playlist_add_rounded),
-              label: const Text('Create playlist'),
-            ),
+          const Padding(
+            padding: EdgeInsets.fromLTRB(16, 12, 16, 4),
+            child: Text('Library', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
           ),
           if (_systems.musicLibrary.isEmpty)
             const Padding(
@@ -1779,6 +1774,36 @@ Padding(
                   Text(
                     'Import audio files from this device to start building your library.',
                     textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+          for (final track in _systems.musicLibrary)
+            ListTile(
+              dense: true,
+              leading: const Icon(Icons.music_note_rounded),
+              title: Text(
+                track.split(Platform.pathSeparator).last,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              trailing: Wrap(
+                spacing: 0,
+                children: [
+                  IconButton(
+                    tooltip: 'Play track',
+                    onPressed: () => _playTrack(track),
+                    icon: const Icon(Icons.play_circle_outline_rounded),
+                  ),
+                  IconButton(
+                    tooltip: 'Add to queue',
+                    onPressed: () => _enqueueMusicTrack(track),
+                    icon: const Icon(Icons.queue_music_rounded),
+                  ),
+                  IconButton(
+                    tooltip: 'Remove from library',
+                    onPressed: () => _removeMusicTrack(track),
+                    icon: const Icon(Icons.delete_outline_rounded),
                   ),
                 ],
               ),
@@ -1833,6 +1858,19 @@ Padding(
               ),
               onTap: () => _playTrack(_systems.musicQueue[queueIndex]),
             ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+            child: M3EButton.icon(
+              style: M3EButtonStyle.tonal,
+              onPressed: _createPlaylist,
+              icon: const Icon(Icons.playlist_add_rounded),
+              label: const Text('Create playlist'),
+            ),
+          ),
+          const Padding(
+            padding: EdgeInsets.fromLTRB(16, 12, 16, 4),
+            child: Text('Playlists', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
+          ),
           for (final playlist in _systems.musicPlaylists.entries)
             ListTile(
               leading: const Icon(Icons.queue_music_rounded),
@@ -1855,36 +1893,6 @@ Padding(
                   IconButton(
                     tooltip: 'Delete playlist',
                     onPressed: () => _deletePlaylist(playlist.key),
-                    icon: const Icon(Icons.delete_outline_rounded),
-                  ),
-                ],
-              ),
-            ),
-          for (final track in _systems.musicLibrary)
-            ListTile(
-              dense: true,
-              leading: const Icon(Icons.music_note_rounded),
-              title: Text(
-                track.split(Platform.pathSeparator).last,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              trailing: Wrap(
-                spacing: 0,
-                children: [
-                  IconButton(
-                    tooltip: 'Play track',
-                    onPressed: () => _playTrack(track),
-                    icon: const Icon(Icons.play_circle_outline_rounded),
-                  ),
-                  IconButton(
-                    tooltip: 'Add to queue',
-                    onPressed: () => _enqueueMusicTrack(track),
-                    icon: const Icon(Icons.queue_music_rounded),
-                  ),
-                  IconButton(
-                    tooltip: 'Remove from library',
-                    onPressed: () => _removeMusicTrack(track),
                     icon: const Icon(Icons.delete_outline_rounded),
                   ),
                 ],
