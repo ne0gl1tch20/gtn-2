@@ -32,6 +32,9 @@ void main() {
       expect(finder, findsWidgets);
     }
 
+    await scrollTo(find.text('Live preview'));
+    expect(find.text('Nice guess!'), findsOneWidget);
+    expect(find.text('Guess'), findsOneWidget);
     for (final label in [
       'Game Preferences',
       'Theme Appearance',
@@ -43,9 +46,6 @@ void main() {
     ]) {
       await scrollTo(find.text(label));
     }
-    await scrollTo(find.text('Live preview'));
-    expect(find.text('Nice guess!'), findsOneWidget);
-    expect(find.text('Guess'), findsOneWidget);
     await scrollTo(find.textContaining('Master Volume ·'));
     expect(find.textContaining('Master Volume ·'), findsOneWidget);
     expect(find.textContaining('Sound Effects Volume ·'), findsOneWidget);
