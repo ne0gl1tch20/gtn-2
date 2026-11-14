@@ -171,6 +171,22 @@ void main() {
       expect(engine.guess(lastPossible, 75).lastResult, GuessResult.correct);
     });
 
+    test('restores the GTN1 Creative Save maximum range', () {
+      final engine = GameEngine();
+      final game = engine.restore(
+        secret: 500001,
+        attempts: 0,
+        isComplete: false,
+        savedMinimum: 1,
+        savedMaximum: 1000000,
+      );
+
+      expect(game.secret, 500001);
+      expect(game.minimum, 1);
+      expect(game.maximum, 1000000);
+      expect(engine.guess(game, 500001).lastResult, GuessResult.correct);
+    });
+
     test('rejects invalid restored state', () {
       final engine = GameEngine(random: FixedRandom(0));
       expect(
