@@ -40,5 +40,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add lib/main.dart lib/profile/player_profile_page.dart lib/settings/settings_page.dart lib/settings/menu_studio_page.dart lib/home/game_dashboard_page.dart lib/saves/save_slots_page.dart test/profile/player_profile_page_test.dart test/settings/menu_studio_page_test.dart test/settings/settings_page_test.dart test/saves/save_slots_page_test.dart test/widget_test.dart
-          git commit -m "style: format Batch A parity and settings work"
+          git commit -m "style: format Batch A parity work"
           git push
