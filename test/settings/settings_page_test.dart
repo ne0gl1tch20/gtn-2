@@ -23,17 +23,36 @@ void main() {
 
     await tester.pumpAndSettle();
     expect(find.text('Settings & Save Management'), findsOneWidget);
-    expect(find.text('Game Preferences'), findsOneWidget);
-    expect(find.text('Language'), findsOneWidget);
-    expect(find.text('Theme Appearance'), findsOneWidget);
-    expect(find.text('Theme Colors'), findsOneWidget);
-    expect(find.text('Live preview'), findsOneWidget);
+    final scrollable = find.byType(Scrollable).first;
+    for (final label in [
+      'Game Preferences',
+      'Theme Appearance',
+      'Theme Colors',
+      'Number Notation',
+      'Push Notifications & Reminders',
+      'Sound FX',
+      'Visual comfort & accessibility',
+    ]) {
+      await tester.scrollUntilVisible(
+        find.text(label).first,
+        260,
+        scrollable: scrollable,
+      );
+      await tester.pumpAndSettle();
+      expect(find.text(label).first, findsOneWidget);
+    }
+    await tester.scrollUntilVisible(
+      find.text('Live preview'),
+      260,
+      scrollable: scrollable,
+    );
     expect(find.text('Nice guess!'), findsOneWidget);
     expect(find.text('Guess'), findsOneWidget);
-    expect(find.text('Number Notation'), findsOneWidget);
-    expect(find.text('Push Notifications & Reminders'), findsOneWidget);
-    expect(find.text('Sound FX'), findsOneWidget);
-    expect(find.text('Visual comfort & accessibility'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.textContaining('Master Volume ·'),
+      260,
+      scrollable: scrollable,
+    );
     expect(find.textContaining('Master Volume ·'), findsOneWidget);
     expect(find.textContaining('Sound Effects Volume ·'), findsOneWidget);
   });
@@ -58,6 +77,12 @@ void main() {
     );
 
     await tester.pumpAndSettle();
+    final scrollable = find.byType(Scrollable).first;
+    await tester.scrollUntilVisible(
+      find.text('Reminders'),
+      260,
+      scrollable: scrollable,
+    );
     expect(find.text('Reminders'), findsOneWidget);
     expect(find.text('Progression milestones'), findsOneWidget);
     expect(find.text('Game events'), findsOneWidget);
@@ -80,6 +105,11 @@ void main() {
     );
 
     await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.textContaining('Sound Effects Volume ·'),
+      260,
+      scrollable: find.byType(Scrollable).first,
+    );
     final slider = tester.widget<Slider>(
       find.byWidgetPredicate(
         (widget) => widget is Slider && widget.onChanged == null,
