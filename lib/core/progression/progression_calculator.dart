@@ -45,8 +45,7 @@ class ProgressionCalculator {
     // 60-digit fixed-point value. A double can round 1e20 - 1 up to 1e20,
     // incorrectly granting the 2,000 reward cap one unit early.
     final mantissaDenominator = denominator * BigInt.from(10).pow(exponent);
-    final mantissaScaled =
-        (numerator * _decimalScale) ~/ mantissaDenominator;
+    final mantissaScaled = (numerator * _decimalScale) ~/ mantissaDenominator;
     final naturalLogMantissa = _naturalLogScaled(mantissaScaled);
     final log10Mantissa =
         (naturalLogMantissa * _decimalScale) ~/ _naturalLogTen;
