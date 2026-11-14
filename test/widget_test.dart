@@ -446,17 +446,17 @@ void main() {
         reason: 'GTN1 icon mapping for ${entry.key}',
       );
     }
-    final profilePadding = tester.widget<Padding>(
-      find
-          .descendant(
-            of: find.byKey(const Key('more-profile-card')),
-            matching: find.byType(Padding),
-          )
-          .first,
-    );
     expect(
-      profilePadding.padding,
-      const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+      find.descendant(
+        of: find.byKey(const Key('more-profile-card')),
+        matching: find.byWidgetPredicate(
+          (widget) =>
+              widget is Padding &&
+              widget.padding ==
+                  const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+        ),
+      ),
+      findsOneWidget,
     );
     for (final subtitle in [
       'View your username and bio, then edit your profile.',
