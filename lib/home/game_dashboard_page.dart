@@ -36,14 +36,9 @@ class GameDashboardPage extends StatelessWidget {
     required this.onNewGame,
     required this.onUpgradeShop,
     required this.onPrestige,
-    required this.onArcade,
-    required this.onNebulaShop,
-    required this.onWorldMap,
     required this.onSaveSlots,
     required this.onSettings,
     required this.onDeveloperSettings,
-    required this.onLegacyPages,
-    required this.onLiveOps,
     required this.onMusic,
     required this.onLuckyStake,
     required this.onSystems,
@@ -70,14 +65,9 @@ class GameDashboardPage extends StatelessWidget {
   final VoidCallback onNewGame;
   final VoidCallback onUpgradeShop;
   final VoidCallback onPrestige;
-  final VoidCallback onArcade;
-  final VoidCallback onNebulaShop;
-  final VoidCallback onWorldMap;
   final VoidCallback onSaveSlots;
   final VoidCallback onSettings;
   final VoidCallback onDeveloperSettings;
-  final VoidCallback onLegacyPages;
-  final VoidCallback onLiveOps;
   final VoidCallback onMusic;
   final VoidCallback onLuckyStake;
   final VoidCallback onSystems;
@@ -100,14 +90,9 @@ class GameDashboardPage extends StatelessWidget {
               settings: settings,
               showDeveloperSettings: showDeveloperSettings,
               onPrestige: onPrestige,
-              onNebulaShop: onNebulaShop,
-              onLegacyPages: onLegacyPages,
-              onLiveOps: onLiveOps,
               onSaveSlots: onSaveSlots,
               onSettings: onSettings,
               onDeveloperSettings: onDeveloperSettings,
-              onWorldMap: onWorldMap,
-              onArcade: onArcade,
               onMusic: onMusic,
               onLuckyStake: onLuckyStake,
               onSystems: onSystems,
