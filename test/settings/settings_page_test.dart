@@ -27,6 +27,9 @@ void main() {
     expect(find.text('Language'), findsOneWidget);
     expect(find.text('Theme Appearance'), findsOneWidget);
     expect(find.text('Theme Colors'), findsOneWidget);
+    expect(find.text('Live preview'), findsOneWidget);
+    expect(find.text('Nice guess!'), findsOneWidget);
+    expect(find.text('Guess'), findsOneWidget);
     expect(find.text('Number Notation'), findsOneWidget);
     expect(find.text('Push Notifications & Reminders'), findsOneWidget);
     expect(find.text('Sound FX'), findsOneWidget);
