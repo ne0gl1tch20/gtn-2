@@ -36,6 +36,11 @@ class GameDashboardPage extends StatelessWidget {
     required this.onNewGame,
     required this.onUpgradeShop,
     required this.onPrestige,
+    required this.onArcade,
+    required this.onNebulaShop,
+    required this.onWorldMap,
+    required this.onLiveOps,
+    required this.onLegacyPages,
     required this.onSaveSlots,
     required this.onSettings,
     required this.onDeveloperSettings,
@@ -65,6 +70,11 @@ class GameDashboardPage extends StatelessWidget {
   final VoidCallback onNewGame;
   final VoidCallback onUpgradeShop;
   final VoidCallback onPrestige;
+  final VoidCallback onArcade;
+  final VoidCallback onNebulaShop;
+  final VoidCallback onWorldMap;
+  final VoidCallback onLiveOps;
+  final VoidCallback onLegacyPages;
   final VoidCallback onSaveSlots;
   final VoidCallback onSettings;
   final VoidCallback onDeveloperSettings;
@@ -970,14 +980,9 @@ class _MoreMenuPage extends StatelessWidget {
     required this.settings,
     required this.showDeveloperSettings,
     required this.onPrestige,
-    required this.onNebulaShop,
-    required this.onLegacyPages,
-    required this.onLiveOps,
     required this.onSaveSlots,
     required this.onSettings,
     required this.onDeveloperSettings,
-    required this.onWorldMap,
-    required this.onArcade,
     required this.onMusic,
     required this.onLuckyStake,
     required this.onSystems,
@@ -991,14 +996,9 @@ class _MoreMenuPage extends StatelessWidget {
   final GameSettings settings;
   final bool showDeveloperSettings;
   final VoidCallback onPrestige;
-  final VoidCallback onNebulaShop;
-  final VoidCallback onLegacyPages;
-  final VoidCallback onLiveOps;
   final VoidCallback onSaveSlots;
   final VoidCallback onSettings;
   final VoidCallback onDeveloperSettings;
-  final VoidCallback onWorldMap;
-  final VoidCallback onArcade;
   final VoidCallback onMusic;
   final VoidCallback onLuckyStake;
   final VoidCallback onSystems;
