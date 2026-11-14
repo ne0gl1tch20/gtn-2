@@ -94,6 +94,7 @@ void main() {
     );
     expect(engine.purchaseUpgrade(state, upgrade), same(state));
   });
+
   test('loads source Prestige and Ultra upgrade catalogs', () {
     expect(UpgradeCatalog.prestige.map((item) => item.definition.id).toList(), [
       'prestige_money_boost',
@@ -128,7 +129,9 @@ void main() {
     expect(result.ultra.toString(), '0');
     expect(result.ultraUpgrades['ultra_money_boost'], 1);
   });
-  test('fixed and MAX batch modes stop at the largest affordable prefix', () {
+  test(
+    'fixed and MAX batch modes stop at the largest affordable prefix',
+    () {
     final upgrade = UpgradeDefinition(
       id: 'batch_test',
       baseCost: BigNumber.fromInt(100),
@@ -147,9 +150,12 @@ void main() {
         2,
       );
     }
-  });
+    },
+  );
 
-  test('batch policy respects selected count, remaining cap and no-funds case', () {
+  test(
+    'batch policy respects selected count, remaining cap and no-funds case',
+    () {
     final upgrade = UpgradeDefinition(
       id: 'batch_test',
       baseCost: BigNumber.fromInt(1),
@@ -211,6 +217,6 @@ void main() {
       ),
       1,
     );
-  });
-
+    },
+  );
 }
