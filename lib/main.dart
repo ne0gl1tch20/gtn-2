@@ -415,6 +415,12 @@ class _GameHomePageState extends State<GameHomePage>
             isComplete: save.isComplete,
             savedMinimum: save.minimum,
             savedMaximum: save.maximum,
+
+            savedCorrectGuesses: save.correctGuesses,
+
+            savedStreak: save.streak,
+
+            savedBestStreak: save.bestStreak,
           );
           _gamesWon = save.gamesWon;
           _creativeModeEnabled = save.creativeModeEnabled;
@@ -474,6 +480,13 @@ class _GameHomePageState extends State<GameHomePage>
             SaveData(
               secret: _game.secret,
               attempts: _game.attempts,
+
+              correctGuesses: _game.correctGuesses,
+
+              streak: _game.streak,
+
+              bestStreak: _game.bestStreak,
+
               gamesWon: _gamesWon,
               isComplete: _game.isComplete,
               minimum: _game.minimum,
@@ -485,6 +498,13 @@ class _GameHomePageState extends State<GameHomePage>
         return base.copyWith(
           secret: _game.secret,
           attempts: _game.attempts,
+
+          correctGuesses: _game.correctGuesses,
+
+          streak: _game.streak,
+
+          bestStreak: _game.bestStreak,
+
           gamesWon: _gamesWon,
           isComplete: _game.isComplete,
           minimum: _game.minimum,
@@ -519,6 +539,12 @@ class _GameHomePageState extends State<GameHomePage>
       isComplete: updated.isComplete,
       savedMinimum: updated.minimum,
       savedMaximum: updated.maximum,
+
+      savedCorrectGuesses: updated.correctGuesses,
+
+      savedStreak: updated.streak,
+
+      savedBestStreak: updated.bestStreak,
     );
     setState(() {
       _game = nextGame;
@@ -548,6 +574,13 @@ class _GameHomePageState extends State<GameHomePage>
         _game = GameState(
           secret: _game.secret,
           attempts: updated.attempts,
+
+          correctGuesses: updated.correctGuesses,
+
+          streak: updated.streak,
+
+          bestStreak: updated.bestStreak,
+
           isComplete: _game.isComplete,
           lastResult: _game.lastResult,
           minimum: _game.minimum,
@@ -1002,6 +1035,12 @@ class _GameHomePageState extends State<GameHomePage>
                 isComplete: save.isComplete,
                 savedMinimum: save.minimum,
                 savedMaximum: save.maximum,
+
+                savedCorrectGuesses: save.correctGuesses,
+
+                savedStreak: save.streak,
+
+                savedBestStreak: save.bestStreak,
               );
         _gamesWon = save?.gamesWon ?? 0;
         _creativeModeEnabled = save?.creativeModeEnabled ?? false;
@@ -1290,6 +1329,13 @@ class _GameHomePageState extends State<GameHomePage>
   SaveData _currentSaveData() => SaveData(
     secret: _game.secret,
     attempts: _game.attempts,
+
+    correctGuesses: _game.correctGuesses,
+
+    streak: _game.streak,
+
+    bestStreak: _game.bestStreak,
+
     gamesWon: _gamesWon,
     isComplete: _game.isComplete,
     minimum: _game.minimum,
@@ -1322,6 +1368,12 @@ class _GameHomePageState extends State<GameHomePage>
         isComplete: save.isComplete,
         savedMinimum: save.minimum,
         savedMaximum: save.maximum,
+
+        savedCorrectGuesses: save.correctGuesses,
+
+        savedStreak: save.streak,
+
+        savedBestStreak: save.bestStreak,
       );
       _gamesWon = save.gamesWon;
       _creativeModeEnabled = save.creativeModeEnabled;
@@ -1568,7 +1620,7 @@ class _GameHomePageState extends State<GameHomePage>
     setState(() {
       var rangeScoutActive = false;
       final previousAttempts = _game.attempts;
-      _game = _engine.guess(_game, guess);
+      _game = _engine.guess(_game, guess, countPlayerGuess: !isBot);
       resultForMessage = _game.lastResult;
       if (_game.attempts > previousAttempts) {
         final correct = resultForMessage == GuessResult.correct;
@@ -1802,6 +1854,13 @@ class _GameHomePageState extends State<GameHomePage>
             _game = GameState(
               secret: _game.secret,
               attempts: previousAttempts,
+
+              correctGuesses: _game.correctGuesses,
+
+              streak: _game.streak,
+
+              bestStreak: _game.bestStreak,
+
               isComplete: false,
               lastResult: resultForMessage,
               minimum: _game.minimum,
