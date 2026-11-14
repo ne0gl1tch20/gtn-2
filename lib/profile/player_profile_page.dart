@@ -165,8 +165,7 @@ class PlayerProfileStore {
       if (avatarPath != null) {
         final privateRoot = '${documents.path}${Platform.pathSeparator}';
         final avatarFile = File(avatarPath);
-        if (!avatarPath.startsWith(privateRoot) ||
-            !await avatarFile.exists()) {
+        if (!avatarPath.startsWith(privateRoot) || !await avatarFile.exists()) {
           profile = profile.copyWith(clearCustomAvatar: true, avatarId: 'star');
           await save(profile);
         }
