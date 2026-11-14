@@ -10,12 +10,12 @@ import '../core/numbers/big_number.dart';
 import '../core/progression/progression_state.dart';
 import '../design/expressive_widgets.dart';
 import '../i18n/app_localizations.dart';
-import 'creative_save_panel.dart';
 import '../legacy/legacy_pages.dart';
 import '../legacy/legacy_systems_page.dart';
 import '../profile/player_profile_page.dart';
 import '../settings/game_settings.dart';
 import '../settings/menu_studio_layout.dart';
+import 'creative_save_panel.dart';
 
 const _purple = GtnUiTokens.purple;
 const _cyan = GtnUiTokens.cyan;
