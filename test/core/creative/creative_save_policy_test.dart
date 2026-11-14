@@ -20,10 +20,13 @@ SaveData creativeSave({
   gamesWon: 1,
   minimum: minimum,
   maximum: maximum,
+  correctGuesses: correctGuesses,
+  streak: currentStreak,
+  bestStreak: bestStreak,
   creativeModeEnabled: enabled,
   progression: ProgressionState.initial.copyWith(
-    totalGuesses: attempts,
-    correctGuesses: correctGuesses,
+    totalGuesses: 100,
+    correctGuesses: 50,
     currentStreak: currentStreak,
     bestStreak: bestStreak,
   ),
@@ -58,7 +61,10 @@ void main() {
       expect(updated.secret, 500010);
       expect(updated.attempts, 0);
       expect(updated.isComplete, isFalse);
-      expect(updated.progression.correctGuesses, 0);
+      expect(updated.correctGuesses, 0);
+      expect(updated.streak, 0);
+      expect(updated.progression.totalGuesses, 100);
+      expect(updated.progression.correctGuesses, 50);
       expect(updated.progression.currentStreak, 0);
       expect(updated.progression.bestStreak, 5);
     });
@@ -141,7 +147,9 @@ void main() {
         prestigeUpgrades: emptyCatalog,
         ultraUpgrades: emptyCatalog,
       );
-      expect(correct?.progression.correctGuesses, 9);
+      expect(correct?.correctGuesses, 9);
+      expect(correct?.progression.correctGuesses, 50);
+      expect(correct?.progression.totalGuesses, 100);
 
       expect(
         CreativeSavePolicy.updateValue(
@@ -176,8 +184,11 @@ void main() {
         prestigeUpgrades: emptyCatalog,
         ultraUpgrades: emptyCatalog,
       );
+      expect(raised?.streak, 8);
+      expect(raised?.bestStreak, 8);
       expect(raised?.progression.currentStreak, 8);
       expect(raised?.progression.bestStreak, 8);
+      expect(raised?.progression.correctGuesses, 50);
 
       expect(
         CreativeSavePolicy.updateValue(
