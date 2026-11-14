@@ -27,20 +27,25 @@ void main() {
   );
 
   group('LiveOpsClaimPolicy', () {
-    test('awards Nebula, lifetime earnings, claim progress and permanent boost',
-        () {
-      final result = LiveOpsClaimPolicy.apply(
-        progression: eligibleProgression,
-        systems: initialSystems,
-        event: event,
-      );
+    test(
+      'awards Nebula, lifetime earnings, claim progress and permanent boost',
+      () {
+        final result = LiveOpsClaimPolicy.apply(
+          progression: eligibleProgression,
+          systems: initialSystems,
+          event: event,
+        );
 
-      expect(result, isNotNull);
-      expect(result!.progression.nebula.compareTo(BigNumber.fromInt(15)), 0);
-      expect(result.progression.nebulaEarned.compareTo(BigNumber.fromInt(10)), 0);
-      expect(result.systems.liveOpsClaims['test_season'], 1);
-      expect(result.systems.permanentEventBoosts, 4);
-    });
+        expect(result, isNotNull);
+        expect(result!.progression.nebula.compareTo(BigNumber.fromInt(15)), 0);
+        expect(
+          result.progression.nebulaEarned.compareTo(BigNumber.fromInt(10)),
+          0,
+        );
+        expect(result.systems.liveOpsClaims['test_season'], 1);
+        expect(result.systems.permanentEventBoosts, 4);
+      },
+    );
 
     test('enforces all three progression requirements', () {
       expect(
@@ -198,7 +203,10 @@ void main() {
         event: event.copyWithForTest(rewardNebula: 0),
       );
       expect(result, isNotNull);
-      expect(result!.progression.nebula.compareTo(eligibleProgression.nebula), 0);
+      expect(
+        result!.progression.nebula.compareTo(eligibleProgression.nebula),
+        0,
+      );
       expect(result.systems.liveOpsClaims['test_season'], 1);
     });
 
@@ -212,9 +220,7 @@ void main() {
         secret: 42,
         attempts: 0,
         gamesWon: 0,
-        progression: result.progression.copyWith(
-          legacySystems: result.systems,
-        ),
+        progression: result.progression.copyWith(legacySystems: result.systems),
       );
 
       final restored = SaveData.fromJson(save.toJson()).progression;
