@@ -203,9 +203,17 @@ class _CreativeSavePanelState extends State<CreativeSavePanel> {
     required String emptyText,
   }) {
     if (upgrades.isEmpty) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 6),
-        child: Text(emptyText),
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 12),
+          Text(title, style: Theme.of(context).textTheme.titleSmall),
+          const SizedBox(height: 8),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 6),
+            child: Text(emptyText),
+          ),
+        ],
       );
     }
     return Column(
