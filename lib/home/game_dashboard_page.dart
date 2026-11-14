@@ -1527,7 +1527,7 @@ class _Stat extends StatelessWidget {
             color: color.withValues(alpha: .13),
             borderRadius: BorderRadius.circular(13),
           ),
-          child: Icon(icon, color: color, size: 19),
+          child: Icon(icon, color: color, size: 18),
         ),
         const SizedBox(height: 8),
         Text(
@@ -1540,7 +1540,7 @@ class _Stat extends StatelessWidget {
                 ? 26
                 : MediaQuery.sizeOf(context).width <= 360
                 ? 18
-                 : 22,
+                : 22,
             fontWeight: FontWeight.w900,
           ),
         ),
@@ -1549,9 +1549,9 @@ class _Stat extends StatelessWidget {
           label,
           style: TextStyle(
             color: muted,
-            fontSize: 10,
+            fontSize: 8,
             fontWeight: FontWeight.w900,
-            letterSpacing: 1,
+            letterSpacing: 1.5,
           ),
         ),
       ],
@@ -2024,12 +2024,12 @@ class _Action extends StatelessWidget {
     borderRadius: BorderRadius.circular(21),
     child: InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(22),
+      borderRadius: BorderRadius.circular(21),
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(22),
+          borderRadius: BorderRadius.circular(21),
           border: Border.all(color: line),
         ),
         child: Row(
