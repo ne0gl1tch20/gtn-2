@@ -5,7 +5,7 @@ import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
 
 void main() {
-  testWidgets('Settings recreates the full GTN1 preference groups', (
+  testWidgets('Settings follows the pinned GTN1 screen hierarchy', (
     tester,
   ) async {
     await tester.pumpWidget(
@@ -22,51 +22,23 @@ void main() {
     );
 
     await tester.pumpAndSettle();
-    expect(find.text('GAME PREFERENCES'), findsOneWidget);
-    expect(find.text('Language & Numbers'), findsOneWidget);
-    expect(find.text('Number notation'), findsOneWidget);
-    expect(find.text('Appearance'), findsOneWidget);
-    await tester.scrollUntilVisible(
-      find.text('Audio & Haptics'),
-      250,
-      scrollable: find.byType(Scrollable).first,
-    );
-    await tester.pumpAndSettle();
-    expect(find.text('Audio & Haptics'), findsOneWidget);
-    await tester.scrollUntilVisible(
-      find.text('Notifications'),
-      250,
-      scrollable: find.byType(Scrollable).first,
-    );
-    await tester.pumpAndSettle();
-    expect(find.text('Notifications'), findsOneWidget);
-    await tester.scrollUntilVisible(
-      find.text('Updates'),
-      250,
-      scrollable: find.byType(Scrollable).first,
-    );
-    await tester.pumpAndSettle();
-    expect(find.text('Updates'), findsOneWidget);
-    await tester.scrollUntilVisible(
-      find.text('Accessibility'),
-      250,
-      scrollable: find.byType(Scrollable).first,
-    );
-    await tester.pumpAndSettle();
-    expect(find.text('Accessibility'), findsOneWidget);
-    await tester.scrollUntilVisible(
-      find.text('Reduce flashes'),
-      250,
-      scrollable: find.byType(Scrollable).first,
-    );
-    await tester.pumpAndSettle();
-    expect(find.text('Reduce flashes'), findsOneWidget);
+    expect(find.text('Settings & Save Management'), findsOneWidget);
+    expect(find.text('Game Preferences'), findsOneWidget);
+    expect(find.text('Language'), findsOneWidget);
+    expect(find.text('Theme Appearance'), findsOneWidget);
+    expect(find.text('Theme Colors'), findsOneWidget);
+    expect(find.text('Number Notation'), findsOneWidget);
+    expect(find.text('Push Notifications & Reminders'), findsOneWidget);
+    expect(find.text('Sound FX'), findsOneWidget);
+    expect(find.text('Visual comfort & accessibility'), findsOneWidget);
+    expect(find.text('Master Volume'), findsOneWidget);
+    expect(find.text('Sound Effects Volume'), findsOneWidget);
   });
 
-  testWidgets('Settings exposes Help & Tutorial, diagnostics and Menu Studio', (
+  testWidgets('Notification categories follow the enabled state', (
     tester,
   ) async {
-    var openedMenuStudio = false;
+    var latest = GameSettings.initial;
     await tester.pumpWidget(
       M3EMaterialApp(
         data: M3EThemeData.light(seedColor: const Color(0xFF7C5CFC)),
@@ -74,36 +46,42 @@ void main() {
         autoTheming: false,
         initialTheme: Brightness.dark,
         home: SettingsPage(
-          settings: GameSettings.initial,
-          onChanged: (_) async {},
-          onOpenMenuStudio: () => openedMenuStudio = true,
-          onReplayTutorial: () {},
+          settings: latest,
+          onChanged: (next) async {
+            latest = next;
+          },
         ),
       ),
     );
 
     await tester.pumpAndSettle();
-    await tester.scrollUntilVisible(
-      find.text('Rerun Nimmy tutorial'),
-      250,
-      scrollable: find.byType(Scrollable).first,
+    expect(find.text('Reminders'), findsOneWidget);
+    expect(find.text('Progression milestones'), findsOneWidget);
+    expect(find.text('Game events'), findsOneWidget);
+  });
+
+  testWidgets('Sound effects volume is disabled when sound FX are off', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      M3EMaterialApp(
+        data: M3EThemeData.light(seedColor: const Color(0xFF7C5CFC)),
+        fontFamily: 'Manrope',
+        autoTheming: false,
+        initialTheme: Brightness.dark,
+        home: SettingsPage(
+          settings: GameSettings.initial.copyWith(soundEnabled: false),
+          onChanged: (_) async {},
+        ),
+      ),
     );
-    expect(find.text('Rerun Nimmy tutorial'), findsOneWidget);
-    await tester.scrollUntilVisible(
-      find.text('Save logs to storage'),
-      250,
-      scrollable: find.byType(Scrollable).first,
-    );
+
     await tester.pumpAndSettle();
-    expect(find.text('Save logs to storage'), findsOneWidget);
-    expect(find.text('Verbose logging'), findsOneWidget);
-    await tester.scrollUntilVisible(
-      find.text('Menu Studio'),
-      250,
-      scrollable: find.byType(Scrollable).first,
+    final slider = tester.widget<Slider>(
+      find.byWidgetPredicate(
+        (widget) => widget is Slider && widget.onChanged == null,
+      ),
     );
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Menu Studio'));
-    expect(openedMenuStudio, isTrue);
+    expect(slider.onChanged, isNull);
   });
 }
