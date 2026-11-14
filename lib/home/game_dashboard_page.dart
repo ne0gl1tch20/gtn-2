@@ -712,7 +712,7 @@ class GameDashboardPage extends StatelessWidget {
                                     key: const Key(
                                       'dashboard-bot-arena-section',
                                     ),
-                                    width: fullWidth >= 720
+                                    width: MediaQuery.sizeOf(context).width >= 720
                                         ? (fullWidth - 14) / 2
                                         : fullWidth,
                                     child: _BotArena(
@@ -810,7 +810,7 @@ class GameDashboardPage extends StatelessWidget {
                                   ),
                                   SizedBox(
                                     width: fullWidth,
-                                    child: fullWidth >= 720
+                                    child: MediaQuery.sizeOf(context).width >= 720
                                         ? Row(
                                             children: [
                                               Expanded(
@@ -1555,7 +1555,7 @@ class _MoreMenuPage extends StatelessWidget {
                 const SizedBox(height: 18),
                 LayoutBuilder(
                   builder: (context, constraints) {
-                    final columns = constraints.maxWidth > 520 ? 2 : 1;
+                    final columns = MediaQuery.sizeOf(context).width > 520 ? 2 : 1;
                     const spacing = 12.0;
                     final itemWidth =
                         (constraints.maxWidth - spacing * (columns - 1)) /
