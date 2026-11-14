@@ -588,9 +588,6 @@ class _ResetEverythingDialog extends StatefulWidget {
 }
 
 class _ResetEverythingDialogState extends State<_ResetEverythingDialog> {
-  late final DateTime _readyAt = DateTime.now().add(
-    const Duration(seconds: 45),
-  );
   late final ({String expression, int result}) _challenge =
       _makeResetChallenge();
   final TextEditingController _answer = TextEditingController();
@@ -601,13 +598,12 @@ class _ResetEverythingDialogState extends State<_ResetEverythingDialog> {
   @override
   void initState() {
     super.initState();
-    _timer = Timer.periodic(const Duration(milliseconds: 250), (_) {
-      final remaining = _readyAt.difference(DateTime.now()).inMilliseconds;
-      final seconds = remaining <= 0 ? 0 : (remaining / 1000).ceil();
-      if (seconds != _secondsRemaining && mounted) {
-        setState(() => _secondsRemaining = seconds);
-      }
-      if (seconds == 0) _timer?.cancel();
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (!mounted) return;
+      setState(() {
+        _secondsRemaining = (_secondsRemaining - 1).clamp(0, 45);
+      });
+      if (_secondsRemaining == 0) _timer?.cancel();
     });
   }
 
@@ -677,7 +673,7 @@ class _ResetEverythingDialogState extends State<_ResetEverythingDialog> {
             ),
             TextField(
               controller: _answer,
-              keyboardType: TextInputType.number,
+              keyboardType: const TextInputType.numberWithOptions(signed: true),
               onChanged: (_) => setState(() {}),
               decoration: const InputDecoration(
                 labelText: 'Solve the expression',
