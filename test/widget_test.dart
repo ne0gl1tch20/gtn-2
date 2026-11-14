@@ -25,6 +25,8 @@ Widget buildDashboard({
   ValueChanged<LegacySection>? onLegacySection,
   VoidCallback? onPlayerProfile,
   VoidCallback? onNebulaShop,
+  VoidCallback? onPrestige,
+  VoidCallback? onUltra,
   ValueChanged<int>? onPrimarySelected,
 }) {
   final navigatorKey = shellNavigatorKey ?? GlobalKey<NavigatorState>();
@@ -182,6 +184,36 @@ void main() {
     await tester.tap(find.text('Shop').first);
     await tester.pumpAndSettle();
     expect(openedNebulaShop, 1);
+  });
+
+  testWidgets('More routes Prestige and Ultra to distinct destinations', (
+    WidgetTester tester,
+  ) async {
+    var openedPrestige = 0;
+    var openedUltra = 0;
+    await tester.pumpWidget(
+      buildDashboard(
+        onPrestige: () => openedPrestige++,
+        onUltra: () => openedUltra++,
+      ),
+    );
+
+    await tester.tap(find.text('More').first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Prestige').first);
+    expect(openedPrestige, 1);
+    expect(openedUltra, 0);
+
+    await tester.pumpWidget(
+      buildDashboard(
+        onPrestige: () => openedPrestige++,
+        onUltra: () => openedUltra++,
+      ),
+    );
+    await tester.tap(find.text('More').first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Ultra').first);
+    expect(openedUltra, 1);
   });
 
   testWidgets('Daily Momentum opens the GTN1 Rewards destination', (
