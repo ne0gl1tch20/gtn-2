@@ -243,7 +243,7 @@ class _GameHomePageState extends State<GameHomePage>
         _incomePerSecond = income;
       });
       if (unlocked || evaluated.playtimeSeconds % 30 == 0) {
-        unawaited(_persist());
+        unawaited(_persist().then<void>((_) {}));
       }
     });
   }
@@ -453,7 +453,7 @@ class _GameHomePageState extends State<GameHomePage>
     _scheduleAutoClicker();
   }
 
-  Future<void> _persist({bool evaluateAchievements = true}) async {
+  Future<bool> _persist({bool evaluateAchievements = true}) async {
     if (evaluateAchievements) {
       final evaluated = _progressionEngine.evaluateAchievements(_progression);
       if (evaluated != _progression) {
@@ -494,10 +494,12 @@ class _GameHomePageState extends State<GameHomePage>
           creativeModeEnabled: _creativeModeEnabled,
         );
       });
+      return true;
     } on Exception {
       if (mounted) {
         setState(() => _message = 'Game is still playable, but saving failed.');
       }
+      return false;
     }
   }
 
@@ -525,8 +527,7 @@ class _GameHomePageState extends State<GameHomePage>
       _message = 'Creative Save range updated. A fresh round is ready.';
     });
     _botTeam.reset(minimum, maximum);
-    await _persist(evaluateAchievements: false);
-    return true;
+    return _persist(evaluateAchievements: false);
   }
 
   Future<bool> _updateCreativeValue(String key, String value) async {
