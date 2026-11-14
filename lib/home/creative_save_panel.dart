@@ -25,6 +25,7 @@ class CreativeSavePanel extends StatefulWidget {
 
 class _CreativeSavePanelState extends State<CreativeSavePanel> {
   final Map<String, TextEditingController> _controllers = {};
+  final Map<String, FocusNode> _focusNodes = {};
   bool _saving = false;
   String _status = '';
 
@@ -43,13 +44,14 @@ class _CreativeSavePanelState extends State<CreativeSavePanel> {
   };
 
   TextEditingController _controller(String key, [String? value]) {
-    final controller = _controllers.putIfAbsent(
+    return _controllers.putIfAbsent(
       key,
       () => TextEditingController(text: value ?? _valueFor(key)),
     );
-    if (value != null && controller.text != value) controller.text = value;
-    return controller;
   }
+
+  FocusNode _focusNode(String key) =>
+      _focusNodes.putIfAbsent(key, FocusNode.new);
 
   @override
   void didUpdateWidget(covariant CreativeSavePanel oldWidget) {
@@ -67,7 +69,7 @@ class _CreativeSavePanelState extends State<CreativeSavePanel> {
       'bestStreak',
     ]) {
       final controller = _controllers[key];
-      if (controller != null && !controller.selection.isValid) {
+      if (controller != null && !(_focusNodes[key]?.hasFocus ?? false)) {
         controller.text = _valueFor(key);
       }
     }
@@ -78,7 +80,7 @@ class _CreativeSavePanelState extends State<CreativeSavePanel> {
     ]) {
       final key = _upgradeKey(upgrade);
       final controller = _controllers[key];
-      if (controller != null && !controller.selection.isValid) {
+      if (controller != null && !(_focusNodes[key]?.hasFocus ?? false)) {
         controller.text = _levelFor(upgrade).toString();
       }
     }
@@ -88,6 +90,9 @@ class _CreativeSavePanelState extends State<CreativeSavePanel> {
   void dispose() {
     for (final controller in _controllers.values) {
       controller.dispose();
+    }
+    for (final focusNode in _focusNodes.values) {
+      focusNode.dispose();
     }
     super.dispose();
   }
@@ -154,6 +159,7 @@ class _CreativeSavePanelState extends State<CreativeSavePanel> {
   Widget _field(String key, String label, {bool numeric = false}) =>
       TextField(
         controller: _controller(key),
+        focusNode: _focusNode(key),
         enabled: !_saving,
         keyboardType: numeric ? TextInputType.number : TextInputType.text,
         decoration: InputDecoration(
@@ -200,6 +206,7 @@ class _CreativeSavePanelState extends State<CreativeSavePanel> {
                       _upgradeKey(upgrade),
                       _levelFor(upgrade).toString(),
                     ),
+                    focusNode: _focusNode(_upgradeKey(upgrade)),
                     enabled: !_saving,
                     keyboardType: TextInputType.number,
                     decoration: const InputDecoration(
