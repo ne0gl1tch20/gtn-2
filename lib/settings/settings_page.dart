@@ -60,7 +60,7 @@ class SettingsPage extends StatelessWidget {
           );
         }
       }
-    } on PlatformException {
+    } on Exception {
       await _update(settings.copyWith(notificationsEnabled: false));
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -364,8 +364,6 @@ class SettingsPage extends StatelessWidget {
                 'Notifications',
                 settings.notificationsEnabled,
                 (value) => unawaited(_setNotificationsEnabled(context, value)),
-                description:
-                    'Enable optional game reminders and notifications. You can turn them off at any time.',
               ),
               if (settings.notificationsEnabled) ...[
                 const Padding(
@@ -429,8 +427,6 @@ class SettingsPage extends StatelessWidget {
                 'Sound effects',
                 settings.soundEnabled,
                 (value) => _update(settings.copyWith(soundEnabled: value)),
-                description:
-                    'Turn sound effects for in-game interactions on or off.',
               ),
               _toggle(
                 'Vibration',
