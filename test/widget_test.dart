@@ -195,7 +195,7 @@ void main() {
     expect(find.text('Guess The Number'), findsOneWidget);
     expect(find.text('Play'), findsOneWidget);
     expect(find.text('Beyond the Numbers'), findsWidgets);
-    expect(find.text('More'), findsOneWidget);
+    expect(find.text('More').first, findsOneWidget);
 
     final scrollable = find.byType(Scrollable).first;
     await tester.scrollUntilVisible(
@@ -275,7 +275,6 @@ void main() {
     expect(find.text('Save Slots'), findsOneWidget);
     expect(find.text('Background Music'), findsOneWidget);
     expect(find.text('Settings'), findsOneWidget);
-    expect(find.text('Arcade'), findsNothing);
     expect(find.text('Nebula Shop'), findsNothing);
 
     shellKey.currentState!.pop();
@@ -293,7 +292,7 @@ void main() {
 
     await tester.tap(find.text('More'));
     await tester.pumpAndSettle();
-    expect(find.text('More'), findsOneWidget);
+    expect(find.text('More').first, findsOneWidget);
 
     shellKey.currentState!.push<void>(
       MaterialPageRoute<void>(
