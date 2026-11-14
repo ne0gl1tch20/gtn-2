@@ -43,6 +43,7 @@ class GameDashboardPage extends StatelessWidget {
     required this.onSettings,
     required this.onDeveloperSettings,
     required this.onLegacyPages,
+    required this.onLiveOps,
     required this.onMusic,
     required this.onLuckyStake,
     required this.onSystems,
@@ -76,6 +77,7 @@ class GameDashboardPage extends StatelessWidget {
   final VoidCallback onSettings;
   final VoidCallback onDeveloperSettings;
   final VoidCallback onLegacyPages;
+  final VoidCallback onLiveOps;
   final VoidCallback onMusic;
   final VoidCallback onLuckyStake;
   final VoidCallback onSystems;
@@ -100,6 +102,7 @@ class GameDashboardPage extends StatelessWidget {
               onPrestige: onPrestige,
               onNebulaShop: onNebulaShop,
               onLegacyPages: onLegacyPages,
+              onLiveOps: onLiveOps,
               onSaveSlots: onSaveSlots,
               onSettings: onSettings,
               onDeveloperSettings: onDeveloperSettings,
@@ -984,6 +987,7 @@ class _MoreMenuPage extends StatelessWidget {
     required this.onPrestige,
     required this.onNebulaShop,
     required this.onLegacyPages,
+    required this.onLiveOps,
     required this.onSaveSlots,
     required this.onSettings,
     required this.onDeveloperSettings,
@@ -1004,6 +1008,7 @@ class _MoreMenuPage extends StatelessWidget {
   final VoidCallback onPrestige;
   final VoidCallback onNebulaShop;
   final VoidCallback onLegacyPages;
+  final VoidCallback onLiveOps;
   final VoidCallback onSaveSlots;
   final VoidCallback onSettings;
   final VoidCallback onDeveloperSettings;
@@ -1257,6 +1262,12 @@ class _MoreMenuPage extends StatelessWidget {
             title: 'Background Music',
             subtitle: 'Offline library, playlists and queue',
             onTap: onMusic,
+          ),
+          'live_ops': (
+            icon: Icons.event_available_rounded,
+            title: 'Seasonal Events',
+            subtitle: 'Claim limited-time rewards and permanent bonuses',
+            onTap: onLiveOps,
           ),
           'nebula': (
             icon: Icons.diamond_rounded,

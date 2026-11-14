@@ -19,6 +19,7 @@ import 'core/game/guess_economy_rules.dart';
 import 'core/game/guess_rate_limit_policy.dart';
 import 'core/legacy/invisible_trait_engine.dart';
 import 'core/legacy/legacy_systems_engine.dart';
+import 'core/legacy/live_ops_claim_policy.dart';
 import 'core/numbers/big_number.dart';
 import 'core/progression/progression_calculator.dart';
 import 'core/progression/progression_engine.dart';
@@ -31,6 +32,7 @@ import 'home/game_dashboard_page.dart';
 import 'i18n/app_localizations.dart';
 import 'legacy/legacy_pages.dart';
 import 'legacy/legacy_systems_page.dart';
+import 'liveops/live_ops_page.dart';
 import 'profile/player_profile_page.dart';
 import 'progression/progression_hub_page.dart';
 import 'saves/save_slots_page.dart';
@@ -1286,6 +1288,32 @@ class _GameHomePageState extends State<GameHomePage>
     _scheduleAutoClicker();
   }
 
+  Future<void> _claimLiveOpsReward(LiveOpsEvent event) async {
+    final result = _legacySystemsEngine.claimLiveOpsReward(
+      progression: _progression,
+      systems: _progression.legacySystems,
+      event: event.toClaimDefinition(),
+    );
+    if (!result.accepted) {
+      if (mounted) setState(() => _message = result.message);
+      return;
+    }
+    await _applyLegacyProgression(
+      result.progression.copyWith(legacySystems: result.systems),
+    );
+  }
+
+  Future<void> _openLiveOps() async {
+    await _pushShellRoute<void>(
+      MaterialPageRoute<void>(
+        builder: (_) => LiveOpsPage(
+          progression: _progression,
+          onClaim: _claimLiveOpsReward,
+        ),
+      ),
+    );
+  }
+
   Future<void> _openLegacyPages() async {
     await _pushShellRoute<void>(
       MaterialPageRoute<void>(
@@ -1716,6 +1744,7 @@ class _GameHomePageState extends State<GameHomePage>
       onSettings: _openSettings,
       onDeveloperSettings: _openDeveloperSettings,
       onLegacyPages: _openLegacyPages,
+      onLiveOps: _openLiveOps,
       onMusic: _openMusic,
       onLuckyStake: _openLuckyStake,
       onSystems: _openSystems,
