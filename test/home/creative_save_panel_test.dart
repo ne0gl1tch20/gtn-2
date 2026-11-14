@@ -57,14 +57,29 @@ void main() {
     expect(find.text('Prestige upgrades'), findsOneWidget);
     expect(find.text('Ultra upgrades'), findsOneWidget);
 
-    await tester.enterText(find.widgetWithText(TextField, 'Range minimum'), '20');
-    await tester.enterText(find.widgetWithText(TextField, 'Range maximum'), '500');
+    await tester.enterText(
+      find.byWidgetPredicate(
+        (widget) => widget is TextField && widget.decoration?.labelText == 'Range minimum',
+      ),
+      '20',
+    );
+    await tester.enterText(
+      find.byWidgetPredicate(
+        (widget) => widget is TextField && widget.decoration?.labelText == 'Range maximum',
+      ),
+      '500',
+    );
     await tester.tap(find.text('Apply range'));
     await tester.pumpAndSettle();
     expect(appliedRange, (20, 500));
     expect(find.text('Creative Save updated.'), findsOneWidget);
 
-    await tester.enterText(find.widgetWithText(TextField, 'Money'), '12.5K');
+    await tester.enterText(
+      find.byWidgetPredicate(
+        (widget) => widget is TextField && widget.decoration?.labelText == 'Money',
+      ),
+      '12.5K',
+    );
     await tester.tap(find.text('Set money'));
     await tester.pumpAndSettle();
     expect(appliedKey, 'money');
