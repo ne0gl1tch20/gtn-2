@@ -53,6 +53,14 @@ void main() {
     expect(find.text('Live preview'), findsOneWidget);
     expect(find.text('Worlds'), findsWidgets);
 
+    await tester.tap(find.byTooltip('Choose color for Worlds'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Hue:'), findsOneWidget);
+    expect(find.text('Hex'), findsOneWidget);
+    expect(find.text('Use theme'), findsOneWidget);
+    await tester.tap(find.text('Use theme'));
+    await tester.pumpAndSettle();
+
     await tester.tap(find.text('Move to More').first);
     await tester.pumpAndSettle();
     await tester.ensureVisible(find.text('Save changes'));
