@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:material_ui/material_ui.dart';
@@ -13,6 +14,7 @@ class PlayerProfile {
     this.avatarId = 'star',
     this.customAvatarPath,
     this.customAvatarData,
+    this.customAvatarPath,
     this.profileId = '',
     this.setupComplete = false,
   });
@@ -23,6 +25,7 @@ class PlayerProfile {
   final String? customAvatarPath;
   // Read only for migration from early GTN2 builds; new saves use app-private files.
   final String? customAvatarData;
+  final String? customAvatarPath;
   final String profileId;
   final bool setupComplete;
 
@@ -32,6 +35,7 @@ class PlayerProfile {
     String? avatarId,
     String? customAvatarPath,
     String? customAvatarData,
+    String? customAvatarPath,
     bool clearCustomAvatar = false,
     String? profileId,
     bool? setupComplete,
@@ -45,6 +49,9 @@ class PlayerProfile {
     customAvatarData: clearCustomAvatar
         ? null
         : customAvatarData ?? this.customAvatarData,
+    customAvatarPath: clearCustomAvatar
+        ? null
+        : customAvatarPath ?? this.customAvatarPath,
     profileId: profileId ?? this.profileId,
     setupComplete: setupComplete ?? this.setupComplete,
   );
@@ -65,6 +72,7 @@ class PlayerProfile {
     final avatarId = json['avatarId'] ?? 'star';
     final customAvatarPath = json['customAvatarPath'];
     final customAvatarData = json['customAvatarData'];
+    final customAvatarPath = json['customAvatarPath'];
     final profileId = json['profileId'];
     final setupComplete = json['setupComplete'];
     if (username is! String ||
@@ -78,6 +86,7 @@ class PlayerProfile {
         customAvatarData != null &&
             (customAvatarData is! String ||
                 !customAvatarData.startsWith('data:image/')) ||
+        customAvatarPath != null && customAvatarPath is! String ||
         profileId != null && profileId is! String ||
         setupComplete != null && setupComplete is! bool) {
       throw const FormatException('Invalid player profile.');
@@ -88,6 +97,7 @@ class PlayerProfile {
       avatarId: avatarId,
       customAvatarPath: customAvatarPath as String?,
       customAvatarData: customAvatarData as String?,
+      customAvatarPath: customAvatarPath as String?,
       profileId: (profileId as String?)?.isNotEmpty == true
           ? profileId as String
           : _newProfileId(),
@@ -112,9 +122,25 @@ class PlayerProfileStore {
     return File('${directory.path}/gtn2-player-profile.json');
   }
 
+  Future<String> importCustomAvatar(Uint8List bytes, String extension) async {
+    final directory = await getApplicationDocumentsDirectory();
+    final safeExtension = extension.toLowerCase().replaceAll(
+      RegExp(r'[^a-z0-9]'),
+      '',
+    );
+    final fileName =
+        'player_profile_avatar_${DateTime.now().microsecondsSinceEpoch}.${safeExtension.isEmpty ? 'img' : safeExtension}';
+    final file = File('${directory.path}/$fileName');
+    await file.parent.create(recursive: true);
+    await file.writeAsBytes(bytes, flush: true);
+    return file.path;
+  }
+
   Future<PlayerProfile> load() async {
     final file = await _file;
-    if (!await file.exists()) return const PlayerProfile();
+    if (!await file.exists()) {
+      return PlayerProfile(profileId: _newProfileId());
+    }
     try {
       final decoded = jsonDecode(await file.readAsString());
       if (decoded is! Map<String, dynamic> || decoded['schemaVersion'] != 1) {
@@ -215,12 +241,15 @@ class PlayerProfileStore {
     if (!await file.exists()) return const PlayerProfile();
     try {
       final decoded = jsonDecode(await file.readAsString());
-      if (decoded is! Map<String, dynamic> || decoded['schemaVersion'] != 1) {
-        return const PlayerProfile();
+      if (decoded is! Map<String, dynamic> ||
+          (decoded['schemaVersion'] != 1 && decoded['schemaVersion'] != 2)) {
+        return PlayerProfile(profileId: _newProfileId());
       }
       return PlayerProfile.fromJson(decoded);
     } on FormatException {
-      return const PlayerProfile();
+      return PlayerProfile(profileId: _newProfileId());
+    } on FileSystemException {
+      return PlayerProfile(profileId: _newProfileId());
     }
   }
 
@@ -288,28 +317,31 @@ class _PlayerProfilePageState extends State<PlayerProfilePage> {
     if (result == null || result.files.isEmpty) return;
     final file = result.files.single;
     final bytes = file.bytes;
-    if (bytes == null || bytes.isEmpty || bytes.length > 4 * 1024 * 1024) {
-      setState(() => _error = 'Choose an image smaller than 4 MB.');
+    if (bytes == null || bytes.isEmpty) {
+      setState(() => _error = 'Could not load that picture. Try another image.');
       return;
     }
     final extension = (file.extension ?? '').toLowerCase();
-    final mime = switch (extension) {
-      'png' => 'image/png',
-      'jpg' || 'jpeg' => 'image/jpeg',
-      'webp' => 'image/webp',
-      'gif' => 'image/gif',
-      _ => null,
-    };
-    if (mime == null) {
-      setState(() => _error = 'Use a PNG, JPG, WEBP or GIF image.');
+    if (!const ['png', 'jpg', 'jpeg', 'webp', 'gif', 'bmp', 'heic'].contains(
+      extension,
+    )) {
+      setState(() => _error = 'Choose a supported image file.');
       return;
     }
-    setState(() {
-      _customAvatarData = 'data:$mime;base64,${base64Encode(bytes)}';
-      _customAvatarPath = null;
-      _avatarId = 'custom';
-      _error = null;
-    });
+    try {
+      final path = await widget.store.importCustomAvatar(bytes, extension);
+      if (!mounted) return;
+      setState(() {
+        _customAvatarPath = path;
+        _customAvatarData = null;
+        _avatarId = 'custom';
+        _error = null;
+      });
+    } on Exception {
+      if (mounted) {
+        setState(() => _error = 'Could not save that picture. Try another image.');
+      }
+    }
   }
 
   Future<void> _save() async {
@@ -332,6 +364,7 @@ class _PlayerProfilePageState extends State<PlayerProfilePage> {
       avatarId: _avatarId,
       customAvatarPath: _customAvatarPath,
       customAvatarData: _customAvatarData,
+      customAvatarPath: _customAvatarPath,
       profileId: widget.initialProfile.profileId.isNotEmpty
           ? widget.initialProfile.profileId
           : _newProfileId(),
@@ -451,7 +484,10 @@ class _PlayerProfilePageState extends State<PlayerProfilePage> {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Player profile')),
+      appBar: AppBar(
+        title: Text(widget.firstLaunch ? 'Create your profile' : 'Player profile'),
+        automaticallyImplyLeading: !widget.firstLaunch,
+      ),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
@@ -537,6 +573,7 @@ class _PlayerProfilePageState extends State<PlayerProfilePage> {
                             _avatarId = entry.key;
                             _customAvatarPath = null;
                             _customAvatarData = null;
+                            _customAvatarPath = null;
                           }),
                   ),
               ],
@@ -571,7 +608,13 @@ class _PlayerProfilePageState extends State<PlayerProfilePage> {
             const SizedBox(height: 12),
             FilledButton(
               onPressed: _saving ? null : _save,
-              child: Text(_saving ? 'Saving…' : 'Save profile'),
+              child: Text(
+                _saving
+                    ? 'Saving…'
+                    : widget.firstLaunch
+                    ? 'Create profile & continue'
+                    : 'Save profile',
+              ),
             ),
           ],
         ),
