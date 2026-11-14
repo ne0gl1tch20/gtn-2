@@ -192,6 +192,7 @@ class _GameHomePageState extends State<GameHomePage>
       GlobalKey<NavigatorState>();
   int _gamesWon = 0;
   bool _isLoading = true;
+  bool _isPlayerProfileLoaded = false;
   String _message = 'Make your move.';
 
   @override
@@ -977,9 +978,15 @@ class _GameHomePageState extends State<GameHomePage>
           await _playerProfileStore.save(profile);
         }
       }
-      if (mounted) setState(() => _playerProfile = profile);
+      if (mounted) {
+        setState(() {
+          _playerProfile = profile;
+          _isPlayerProfileLoaded = true;
+        });
+      }
     } on Exception {
       // A missing or unreadable profile never blocks loading the game.
+      if (mounted) setState(() => _isPlayerProfileLoaded = true);
     }
   }
 
@@ -1764,6 +1771,22 @@ class _GameHomePageState extends State<GameHomePage>
 
   @override
   Widget build(BuildContext context) {
+    if (!_isPlayerProfileLoaded) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+    if (!_playerProfile.setupComplete) {
+      return PlayerProfilePage(
+        firstLaunch: true,
+        viewOnly: false,
+        initialProfile: _playerProfile,
+        store: _playerProfileStore,
+        equippedCosmeticId: _progression.equippedCosmeticId,
+        onSaved: (profile) {
+          setState(() => _playerProfile = profile);
+          unawaited(_syncPlayerProfileToSave(profile));
+        },
+      );
+    }
     return GameDashboardPage(
       game: _game,
       progression: _progression,
