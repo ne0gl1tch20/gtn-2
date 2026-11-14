@@ -1653,18 +1653,8 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
 Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Expanded(
-                  child: Text(
-                    _systems.currentTrackId == null
-                        ? 'No track selected'
-                        : _systems.currentTrackId!
-                              .split(Platform.pathSeparator)
-                              .last,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
                 IconButton(
                   tooltip: 'Previous track',
                   onPressed: _systems.musicQueue.isEmpty
@@ -1698,6 +1688,36 @@ Padding(
                       ? null
                       : _playNextTrack,
                   icon: const Icon(Icons.skip_next_rounded),
+                ),
+                IconButton(
+                  tooltip: 'Shuffle',
+                  onPressed: () => _saveSystems(
+                    _systems.copyWith(musicShuffle: !_systems.musicShuffle),
+                  ),
+                  icon: Icon(
+                    Icons.shuffle_rounded,
+                    color: _systems.musicShuffle
+                        ? Theme.of(context).colorScheme.primary
+                        : null,
+                  ),
+                ),
+                IconButton(
+                  tooltip: 'Repeat mode',
+                  onPressed: () {
+                    final modes = ['off', 'one', 'all'];
+                    final current = modes.indexOf(_systems.musicRepeatMode);
+                    _saveSystems(
+                      _systems.copyWith(
+                        musicRepeatMode: modes[(current + 1) % modes.length],
+                      ),
+                    );
+                  },
+                  icon: Icon(
+                    Icons.repeat_rounded,
+                    color: _systems.musicRepeatMode == 'off'
+                        ? null
+                        : Theme.of(context).colorScheme.primary,
+                  ),
                 ),
               ],
             ),
@@ -1840,29 +1860,6 @@ Padding(
                 ],
               ),
             ),
-          GtnExpressiveSwitchTile(
-            title: const Text('Shuffle'),
-            value: _systems.musicShuffle,
-            onChanged: (value) =>
-                _saveSystems(_systems.copyWith(musicShuffle: value)),
-          ),
-          ListTile(
-            title: const Text('Repeat mode'),
-            subtitle: Text(_systems.musicRepeatMode.toUpperCase()),
-            trailing: GtnExpressiveDropdown<String>(
-              value: _systems.musicRepeatMode,
-              items: const [
-                DropdownMenuItem(value: 'off', child: Text('Off')),
-                DropdownMenuItem(value: 'one', child: Text('One')),
-                DropdownMenuItem(value: 'all', child: Text('All')),
-              ],
-              onChanged: (value) {
-                if (value != null) {
-                  _saveSystems(_systems.copyWith(musicRepeatMode: value));
-                }
-              },
-            ),
-          ),
           for (final track in _systems.musicLibrary)
             ListTile(
               dense: true,
