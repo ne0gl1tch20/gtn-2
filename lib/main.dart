@@ -1014,7 +1014,7 @@ class _GameHomePageState extends State<GameHomePage>
       setState(() {
         _storage = Future.value(storage);
         _activeSlot = slot;
-        _engine = save?.creativeModeEnabled == true
+        _engine = save != null && save.creativeModeEnabled
             ? GameEngine(minimum: save.minimum, maximum: save.maximum)
             : nextEngine;
         _game = save == null
