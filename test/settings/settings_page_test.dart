@@ -23,7 +23,15 @@ void main() {
 
     await tester.pumpAndSettle();
     expect(find.text('Settings & Save Management'), findsOneWidget);
-    final scrollable = find.byType(Scrollable).first;
+    final list = find.byType(ListView).first;
+    Future<void> scrollTo(Finder finder) async {
+      for (var attempt = 0; attempt < 12 && finder.evaluate().isEmpty; attempt++) {
+        await tester.drag(list, const Offset(0, -320));
+        await tester.pumpAndSettle();
+      }
+      expect(finder, findsWidgets);
+    }
+
     for (final label in [
       'Game Preferences',
       'Theme Appearance',
@@ -33,26 +41,12 @@ void main() {
       'Sound FX',
       'Visual comfort & accessibility',
     ]) {
-      await tester.scrollUntilVisible(
-        find.text(label).first,
-        260,
-        scrollable: scrollable,
-      );
-      await tester.pumpAndSettle();
-      expect(find.text(label).first, findsOneWidget);
+      await scrollTo(find.text(label));
     }
-    await tester.scrollUntilVisible(
-      find.text('Live preview'),
-      260,
-      scrollable: scrollable,
-    );
+    await scrollTo(find.text('Live preview'));
     expect(find.text('Nice guess!'), findsOneWidget);
     expect(find.text('Guess'), findsOneWidget);
-    await tester.scrollUntilVisible(
-      find.textContaining('Master Volume ·'),
-      260,
-      scrollable: scrollable,
-    );
+    await scrollTo(find.textContaining('Master Volume ·'));
     expect(find.textContaining('Master Volume ·'), findsOneWidget);
     expect(find.textContaining('Sound Effects Volume ·'), findsOneWidget);
   });
