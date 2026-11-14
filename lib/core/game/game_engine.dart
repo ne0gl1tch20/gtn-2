@@ -6,6 +6,9 @@ class GameState {
   const GameState({
     required this.secret,
     required this.attempts,
+    this.correctGuesses = 0,
+    this.streak = 0,
+    this.bestStreak = 0,
     required this.isComplete,
     this.lastResult,
     this.minimum = 1,
@@ -14,6 +17,9 @@ class GameState {
 
   final int secret;
   final int attempts;
+  final int correctGuesses;
+  final int streak;
+  final int bestStreak;
   final bool isComplete;
   final GuessResult? lastResult;
   final int minimum;
@@ -70,6 +76,9 @@ class GameEngine {
     return GameState(
       secret: nextGame.secret,
       attempts: nextAttempts,
+      correctGuesses: completed.correctGuesses,
+      streak: completed.streak,
+      bestStreak: completed.bestStreak,
       isComplete: false,
       lastResult: GuessResult.correct,
       minimum: nextGame.minimum,
@@ -83,6 +92,9 @@ class GameEngine {
     required bool isComplete,
     int? savedMinimum,
     int? savedMaximum,
+    int savedCorrectGuesses = 0,
+    int savedStreak = 0,
+    int savedBestStreak = 0,
   }) {
     final restoredMinimum = savedMinimum ?? minimum;
     final restoredMaximum = savedMaximum ?? maximum;
@@ -91,12 +103,21 @@ class GameEngine {
         restoredMinimum > restoredMaximum ||
         secret < restoredMinimum ||
         secret > restoredMaximum ||
-        attempts < 0) {
+        attempts < 0 ||
+        savedCorrectGuesses < 0 ||
+        savedCorrectGuesses > attempts ||
+        savedStreak < 0 ||
+        savedStreak > 1000000 ||
+        savedBestStreak < savedStreak ||
+        savedBestStreak > 1000000) {
       throw ArgumentError('Saved game state is invalid.');
     }
     return GameState(
       secret: secret,
       attempts: attempts,
+      correctGuesses: savedCorrectGuesses,
+      streak: savedStreak,
+      bestStreak: savedBestStreak,
       isComplete: isComplete,
       minimum: restoredMinimum,
       maximum: restoredMaximum,
@@ -116,6 +137,9 @@ class GameEngine {
     return GameState(
       secret: state.secret,
       attempts: state.attempts,
+      correctGuesses: state.correctGuesses,
+      streak: state.streak,
+      bestStreak: state.bestStreak,
       isComplete: state.isComplete,
       lastResult: state.lastResult,
       minimum: nextMinimum,
@@ -136,6 +160,9 @@ class GameEngine {
     return GameState(
       secret: state.secret,
       attempts: state.attempts + 1,
+      correctGuesses: state.correctGuesses,
+      streak: state.streak,
+      bestStreak: state.bestStreak,
       isComplete: result == GuessResult.correct,
       lastResult: result,
       minimum: state.minimum,
