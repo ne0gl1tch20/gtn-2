@@ -17,7 +17,7 @@ for permission in permissions:
     permission_name = re.search(r'android:name="([^"]+)"', permission).group(1)
     if permission_name not in text:
         updated, count = re.subn(
-            r"(<manifest\\b[^>]*>)", r"\\1\\n" + permission, text, count=1
+            r"(<manifest\b[^>]*>)", r"\1\n" + permission, text, count=1
         )
         if count != 1:
             print("Could not locate the manifest root element.", file=sys.stderr)
@@ -54,7 +54,7 @@ if len(main_activity_files) != 1:
     raise SystemExit(1)
 main_activity = main_activity_files[0]
 activity_text = main_activity.read_text(encoding="utf-8")
-package_match = re.search(r"(?m)^package\\s+[\\w.]+", activity_text)
+package_match = re.search(r"(?m)^package\s+[\w.]+, activity_text)
 if not package_match:
     print("Could not read the generated MainActivity package.", file=sys.stderr)
     raise SystemExit(1)
