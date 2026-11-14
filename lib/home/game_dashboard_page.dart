@@ -349,7 +349,7 @@ class GameDashboardPage extends StatelessWidget {
                 child: SafeArea(
                   child: Center(
                     child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 1120),
+                      constraints: const BoxConstraints(maxWidth: 1280),
                       child: ListView(
                         padding: EdgeInsets.fromLTRB(
                           horizontalPadding,
@@ -1376,7 +1376,7 @@ class _MoreMenuPage extends StatelessWidget {
       appBar: GtnExpressiveAppBar(title: const Text('More')),
       body: Center(
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 1000),
+          constraints: const BoxConstraints(maxWidth: 1280),
           child: ListView(
             padding: const EdgeInsets.fromLTRB(12, 14, 12, 28),
             children: [
