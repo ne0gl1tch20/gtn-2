@@ -165,7 +165,7 @@ void main() {
       scrollable: find.byType(Scrollable).first,
     );
     await tester.scrollUntilVisible(
-      find.byType(Switch).first,
+      find.byType(M3ESwitch),
       260,
       scrollable: find.byType(Scrollable).first,
     );
@@ -206,11 +206,11 @@ void main() {
     );
     await tester.pumpAndSettle();
     await tester.scrollUntilVisible(
-      find.text('Notifications'),
+      find.byType(M3ESwitch),
       260,
       scrollable: find.byType(Scrollable).first,
     );
-    await tester.tap(find.text('Notifications'));
+    await tester.tap(find.byType(M3ESwitch).first);
     await tester.pumpAndSettle();
 
     expect(latest.notificationsEnabled, isFalse);
