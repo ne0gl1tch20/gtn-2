@@ -569,6 +569,10 @@ void main() {
   testWidgets('More route reacts to live Menu Studio order changes', (
     WidgetTester tester,
   ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
     final settings = ValueNotifier(GameSettings.initial);
     addTearDown(settings.dispose);
     await tester.pumpWidget(buildDashboard(settingsListenable: settings));
