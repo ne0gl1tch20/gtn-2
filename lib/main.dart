@@ -981,26 +981,15 @@ class _GameHomePageState extends State<GameHomePage>
           profile = await _playerProfileStore.save(profile);
         }
       }
-      if (mounted) setState(() => _playerProfile = profile);
-
-      if (!profile.setupComplete && mounted) {
-        await _pushShellRoute<void>(
-          MaterialPageRoute<void>(
-            builder: (_) => PlayerProfilePage(
-              initialProfile: profile,
-              store: _playerProfileStore,
-              firstLaunch: true,
-              viewOnly: false,
-              onSaved: (savedProfile) {
-                setState(() => _playerProfile = savedProfile);
-                unawaited(_syncPlayerProfileToSave(savedProfile));
-              },
-            ),
-          ),
-        );
+      if (mounted) {
+        setState(() {
+          _playerProfile = profile;
+          _isPlayerProfileLoaded = true;
+        });
       }
     } on Exception {
       // A missing or unreadable profile never blocks loading the game.
+      if (mounted) setState(() => _isPlayerProfileLoaded = true);
     }
   }
 
