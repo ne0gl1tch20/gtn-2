@@ -585,7 +585,13 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
                     ? 'Empty slot'
                     : 'Games won: ${save.gamesWon}';
                 return GtnExpressiveCard(
-                  child: ListTile(
+                  child: Material(
+                    color: Colors.transparent,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(28),
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: ListTile(
                     leading: CircleAvatar(
                       child: Text(
                         save == null
@@ -676,6 +682,7 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
                             save == null
                         ? null
                         : () => _select(slot),
+                    ),
                   ),
                 );
               },
