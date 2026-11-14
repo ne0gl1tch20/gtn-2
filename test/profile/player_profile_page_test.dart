@@ -49,44 +49,52 @@ void main() {
     },
   );
 
-  test('profile store persists and reloads identity and custom avatar path', () async {
-    TestWidgetsFlutterBinding.ensureInitialized();
-    const channel = MethodChannel('plugins.flutter.io/path_provider');
-    final directory = await Directory.systemTemp.createTemp('gtn-profile-test-');
-    final messenger =
-        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
-    messenger.setMockMethodCallHandler(channel, (call) async {
-      if (call.method == 'getApplicationDocumentsDirectory') {
-        return directory.path;
-      }
-      return null;
-    });
-    addTearDown(() async {
-      messenger.setMockMethodCallHandler(channel, null);
-      await directory.delete(recursive: true);
-    });
+  test(
+    'profile store persists and reloads identity and custom avatar path',
+    () async {
+      TestWidgetsFlutterBinding.ensureInitialized();
+      const channel = MethodChannel('plugins.flutter.io/path_provider');
+      final directory = await Directory.systemTemp.createTemp(
+        'gtn-profile-test-',
+      );
+      final messenger =
+          TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+      messenger.setMockMethodCallHandler(channel, (call) async {
+        if (call.method == 'getApplicationDocumentsDirectory') {
+          return directory.path;
+        }
+        return null;
+      });
+      addTearDown(() async {
+        messenger.setMockMethodCallHandler(channel, null);
+        await directory.delete(recursive: true);
+      });
 
-    final store = PlayerProfileStore();
-    final avatar = await store.importCustomAvatar(Uint8List.fromList([1, 2, 3, 4]), 'png');
-    final profile = PlayerProfile(
-      username: 'Player One',
-      bio: 'Offline player',
-      avatarId: 'custom',
-      customAvatarPath: avatar,
-      profileId: 'profile-persisted',
-      setupComplete: true,
-    );
+      final store = PlayerProfileStore();
+      final avatar = await store.importCustomAvatar(
+        Uint8List.fromList([1, 2, 3, 4]),
+        'png',
+      );
+      final profile = PlayerProfile(
+        username: 'Player One',
+        bio: 'Offline player',
+        avatarId: 'custom',
+        customAvatarPath: avatar,
+        profileId: 'profile-persisted',
+        setupComplete: true,
+      );
 
-    await store.save(profile);
-    final restored = await store.load();
+      await store.save(profile);
+      final restored = await store.load();
 
-    expect(restored.profileId, 'profile-persisted');
-    expect(restored.username, 'Player One');
-    expect(restored.bio, 'Offline player');
-    expect(restored.setupComplete, isTrue);
-    expect(restored.customAvatarPath, avatar);
-    expect(await File(avatar).exists(), isTrue);
-  });
+      expect(restored.profileId, 'profile-persisted');
+      expect(restored.username, 'Player One');
+      expect(restored.bio, 'Offline player');
+      expect(restored.setupComplete, isTrue);
+      expect(restored.customAvatarPath, avatar);
+      expect(await File(avatar).exists(), isTrue);
+    },
+  );
 
   testWidgets('first launch opens the required profile creation flow', (
     tester,
