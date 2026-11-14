@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gtn_2/settings/game_settings.dart';
 import 'package:gtn_2/settings/settings_page.dart';
@@ -115,4 +116,90 @@ void main() {
     );
     expect(slider.onChanged, isNull);
   });
+
+  testWidgets('Android notification permission enables the setting on grant', (
+    tester,
+  ) async {
+    const channel = MethodChannel('gtn/notification_permission');
+    debugDefaultTargetPlatformOverride = TargetPlatform.android;
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (call) async {
+          expect(call.method, 'request');
+          return true;
+        });
+    addTearDown(() {
+      debugDefaultTargetPlatformOverride = null;
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, null);
+    });
+
+    var latest = GameSettings.initial.copyWith(notificationsEnabled: false);
+    await tester.pumpWidget(
+      M3EMaterialApp(
+        data: M3EThemeData.light(seedColor: const Color(0xFF7C5CFC)),
+        fontFamily: 'Manrope',
+        autoTheming: false,
+        initialTheme: Brightness.dark,
+        home: SettingsPage(
+          settings: latest,
+          onChanged: (next) async {
+            latest = next;
+          },
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.text('Notifications'),
+      260,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.text('Notifications'));
+    await tester.pumpAndSettle();
+
+    expect(latest.notificationsEnabled, isTrue);
+    expect(find.text('Notifications enabled!'), findsOneWidget);
+  });
+
+  testWidgets('Android notification permission denial leaves it disabled', (
+    tester,
+  ) async {
+    const channel = MethodChannel('gtn/notification_permission');
+    debugDefaultTargetPlatformOverride = TargetPlatform.android;
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (_) async => false);
+    addTearDown(() {
+      debugDefaultTargetPlatformOverride = null;
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, null);
+    });
+
+    var latest = GameSettings.initial.copyWith(notificationsEnabled: false);
+    await tester.pumpWidget(
+      M3EMaterialApp(
+        data: M3EThemeData.light(seedColor: const Color(0xFF7C5CFC)),
+        fontFamily: 'Manrope',
+        autoTheming: false,
+        initialTheme: Brightness.dark,
+        home: SettingsPage(
+          settings: latest,
+          onChanged: (next) async {
+            latest = next;
+          },
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.text('Notifications'),
+      260,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.text('Notifications'));
+    await tester.pumpAndSettle();
+
+    expect(latest.notificationsEnabled, isFalse);
+    expect(find.text('Notification permission denied.'), findsOneWidget);
+  });
+
 }
