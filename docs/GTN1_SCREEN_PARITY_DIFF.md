@@ -167,7 +167,7 @@ The following source surfaces are in GTN1's frozen production inventory. Some ar
 
 - Compared GTN1 `SettingsScreen.kt` against GTN2 `settings_page.dart` and `game_settings.dart`, including notification permission launcher, color picker, all toggles and volume controls.
 - The major section order and source-facing labels are restored, with M3 Expressive cards and controls retained as the presentation layer.
-- Restored GTN1's live Theme Colors preview card in GTN2 (commit `849b5a9`) and added assertions for its preview title, success copy and Guess action. The implementation is **not yet parity-complete**: the Flutter color dialog still differs from `ReusableColorPickerDialog.kt` (GTN1 uses a saturation/value plane, hue slider, hex input, preview and optional reset); Android notification permission request and result toasts are missing; notification category descriptions and several control descriptions are omitted; volume control descriptions and exact source labels differ.
+- Restored GTN1's live Theme Colors preview card in GTN2 (commit `849b5a9`) and added assertions for its preview title, success copy and Guess action. The shared Flutter color picker now reproduces the source saturation/value plane, hue slider, live preview, hex input and optional Use theme reset. Remaining: Android notification permission request/result toasts and notification delivery/scheduling are missing; notification category descriptions and several control descriptions are omitted; volume control descriptions, localized copy and exact source labels still need a final diff.
 - No paired runtime screenshots or persistence/device evidence exist for these screens.
 
 ### CI evidence and gate
