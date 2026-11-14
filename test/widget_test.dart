@@ -679,7 +679,7 @@ void main() {
       find.byWidgetPredicate(
         (widget) =>
             widget is Icon &&
-            widget.icon == Icons.library_music_rounded &&
+            widget.icon == Icons.music_note_rounded &&
             widget.color == const Color(0xFFFF5722),
       ),
       findsOneWidget,
