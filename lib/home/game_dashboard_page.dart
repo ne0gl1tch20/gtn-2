@@ -1125,10 +1125,7 @@ class _MoreMenuPage extends StatelessWidget {
     }
 
     final destinations =
-        <
-          String,
-          ({IconData icon, String title, String subtitle, VoidCallback onTap})
-        >{
+        <String, ({IconData icon, String title, String subtitle, VoidCallback onTap})>{
           'player_profile': (
             icon: Icons.account_circle_rounded,
             title: playerProfile.username.isEmpty
@@ -1139,107 +1136,125 @@ class _MoreMenuPage extends StatelessWidget {
                 : playerProfile.bio,
             onTap: onPlayerProfile,
           ),
+          'worlds': (
+            icon: Icons.public_rounded,
+            title: 'Beyond the Numbers',
+            subtitle: 'Explore worlds and guardians',
+            onTap: () => onDestination('worlds'),
+          ),
+          'arcade': (
+            icon: Icons.sports_esports_rounded,
+            title: 'Arcade',
+            subtitle: 'Play arcade challenges',
+            onTap: () => onDestination('arcade'),
+          ),
+          'upgrades': (
+            icon: Icons.upgrade_rounded,
+            title: 'Upgrades',
+            subtitle: 'Improve your game',
+            onTap: () => onDestination('upgrades'),
+          ),
           'rewards': (
             icon: Icons.card_giftcard_rounded,
             title: 'Rewards',
             subtitle: 'Achievements and daily rewards',
-            onTap: () => onLegacySection(LegacySection.rewards),
+            onTap: () => onDestination('rewards'),
           ),
           'journey': (
             icon: Icons.timeline_rounded,
             title: 'Journey',
             subtitle: 'Your run history and progress',
-            onTap: () => onLegacySection(LegacySection.journey),
+            onTap: () => onDestination('journey'),
           ),
           'shop': (
             icon: Icons.storefront_rounded,
             title: 'Shop',
             subtitle: 'Browse available items',
-            onTap: onNebulaShop,
+            onTap: () => onDestination('shop'),
           ),
           'mutators': (
             icon: Icons.tune_rounded,
             title: 'Mutators',
             subtitle: 'Customize challenge rules',
-            onTap: () => onSystemsView(LegacySystemsView.mutators),
+            onTap: () => onDestination('mutators'),
           ),
           'talent': (
             icon: Icons.psychology_alt_rounded,
             title: 'Talents',
             subtitle: 'Build your talent path',
-            onTap: () => onSystemsView(LegacySystemsView.talents),
+            onTap: () => onDestination('talent'),
           ),
           'traits': (
             icon: Icons.auto_awesome_rounded,
             title: 'Traits',
             subtitle: 'Choose gameplay traits and variants',
-            onTap: () => onSystemsView(LegacySystemsView.traits),
+            onTap: () => onDestination('traits'),
           ),
           'relics': (
             icon: Icons.auto_awesome_rounded,
             title: 'Relics',
             subtitle: 'Manage your relic collection',
-            onTap: () => onSystemsView(LegacySystemsView.relics),
+            onTap: () => onDestination('relics'),
           ),
           'home_base': (
             icon: Icons.home_work_rounded,
             title: 'Home Base',
             subtitle: 'Build up your base',
-            onTap: () => onSystemsView(LegacySystemsView.homeBase),
+            onTap: () => onDestination('homebase'),
           ),
           'codex': (
             icon: Icons.menu_book_rounded,
             title: 'Codex',
             subtitle: 'Discoveries and lore entries',
-            onTap: () => onLegacySection(LegacySection.codex),
+            onTap: () => onDestination('codex'),
           ),
           'stats': (
             icon: Icons.query_stats_rounded,
             title: 'Stats',
             subtitle: 'Review your gameplay records',
-            onTap: () => onLegacySection(LegacySection.statistics),
+            onTap: () => onDestination('stats'),
           ),
           'dev_settings': (
             icon: Icons.build_rounded,
             title: 'Dev Settings',
             subtitle: 'Developer console and diagnostics',
-            onTap: onDeveloperSettings,
+            onTap: () => onDestination('dev_settings'),
           ),
           'changelog': (
             icon: Icons.history_rounded,
             title: 'Changelog',
             subtitle: 'Review version history',
-            onTap: () => onLegacySection(LegacySection.changelog),
+            onTap: () => onDestination('changelog'),
           ),
           'settings': (
             icon: Icons.settings_rounded,
             title: 'Settings',
             subtitle: 'Game preferences and Menu Studio',
-            onTap: onSettings,
+            onTap: () => onDestination('settings'),
           ),
           'about': (
             icon: Icons.info_outline_rounded,
             title: 'About',
             subtitle: 'Credits, links and app information',
-            onTap: () => onLegacySection(LegacySection.about),
+            onTap: () => onDestination('about'),
           ),
           'staking': (
             icon: Icons.casino_rounded,
             title: 'Lucky Stake',
             subtitle: 'Risk Money for streak-based rewards',
-            onTap: onLuckyStake,
+            onTap: () => onDestination('stake'),
           ),
           'ultra': (
             icon: Icons.bolt_rounded,
             title: 'Ultra',
             subtitle: 'Permanent progression upgrades',
-            onTap: onPrestige,
+            onTap: () => onDestination('ultra'),
           ),
           'prestige': (
             icon: Icons.auto_awesome_rounded,
             title: 'Prestige',
             subtitle: 'Reset and advance your progression',
-            onTap: onPrestige,
+            onTap: () => onDestination('prestige'),
           ),
           'save_slots': (
             icon: Icons.save_rounded,
@@ -1251,22 +1266,30 @@ class _MoreMenuPage extends StatelessWidget {
             icon: Icons.library_music_rounded,
             title: 'Background Music',
             subtitle: 'Offline library, playlists and queue',
-            onTap: onMusic,
+            onTap: () => onDestination('music'),
           ),
         };
+    final layout = MenuStudioLayout.fromSettings(settings);
     final orderedIds = <String>['player_profile'];
-    orderedIds.addAll(
-      settings.moreScreenOrder
-          .where(destinations.containsKey)
-          .where((id) => id != 'player_profile')
-          .where((id) => id != 'dev_settings' || showDeveloperSettings)
-          .toSet(),
-    );
-    for (final id in destinations.keys) {
-      if ((id != 'dev_settings' || showDeveloperSettings) &&
-          !orderedIds.contains(id)) {
+    for (final sourceId in layout.visibleMoreIds) {
+      final id = MenuStudioLayout.settingsIdFor(sourceId);
+      if (id == 'music' && !orderedIds.contains('save_slots')) {
+        orderedIds.add('save_slots');
+      }
+      if (destinations.containsKey(id) &&
+          (id != 'dev_settings' || showDeveloperSettings)) {
         orderedIds.add(id);
       }
+    }
+    if (!orderedIds.contains('save_slots')) {
+      final aboutIndex = orderedIds.indexOf('about');
+      final changelogIndex = orderedIds.indexOf('changelog');
+      final insertAt = aboutIndex >= 0
+          ? aboutIndex + 1
+          : changelogIndex >= 0
+          ? changelogIndex + 1
+          : orderedIds.length;
+      orderedIds.insert(insertAt, 'save_slots');
     }
 
     return Scaffold(
