@@ -31,11 +31,11 @@ void main() {
     expect(find.text('Push Notifications & Reminders'), findsOneWidget);
     expect(find.text('Sound FX'), findsOneWidget);
     expect(find.text('Visual comfort & accessibility'), findsOneWidget);
-    expect(find.text('Master Volume'), findsOneWidget);
-    expect(find.text('Sound Effects Volume'), findsOneWidget);
+    expect(find.textContaining('Master Volume ·'), findsOneWidget);
+    expect(find.textContaining('Sound Effects Volume ·'), findsOneWidget);
   });
 
-  testWidgets('Notification categories follow the enabled state', (
+  testWidgets('Enabled notifications show all source categories', (
     tester,
   ) async {
     var latest = GameSettings.initial;
