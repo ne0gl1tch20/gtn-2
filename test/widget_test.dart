@@ -461,6 +461,25 @@ void main() {
     }
   });
 
+  testWidgets('desktop Bot Arena uses the GTN1 half-column width', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(1200, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(buildDashboard());
+
+    final heroWidth = tester.getSize(
+      find.byKey(const Key('dashboard-hero-section')),
+    ).width;
+    final botArenaWidth = tester.getSize(
+      find.byKey(const Key('dashboard-bot-arena-section')),
+    ).width;
+    expect(botArenaWidth, lessThan(heroWidth));
+    expect(botArenaWidth, greaterThan(500));
+  });
+
   testWidgets('More follows the saved Menu Studio order and includes tools', (
     WidgetTester tester,
   ) async {
