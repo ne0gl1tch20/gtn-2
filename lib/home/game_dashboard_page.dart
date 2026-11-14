@@ -1176,6 +1176,12 @@ class _MoreMenuPage extends StatelessWidget {
             subtitle: 'Review your gameplay records',
             onTap: () => onLegacySection(LegacySection.statistics),
           ),
+          'dev_settings': (
+            icon: Icons.build_rounded,
+            title: 'Dev Settings',
+            subtitle: 'Developer console and diagnostics',
+            onTap: onDeveloperSettings,
+          ),
           'changelog': (
             icon: Icons.history_rounded,
             title: 'Changelog',
@@ -1230,6 +1236,7 @@ class _MoreMenuPage extends StatelessWidget {
       settings.moreScreenOrder
           .where(destinations.containsKey)
           .where((id) => id != 'player_profile')
+          .where((id) => id != 'dev_settings' || showDeveloperSettings)
           .toSet(),
     );
     for (final id in destinations.keys) {
