@@ -391,6 +391,8 @@ void main() {
       'Relics',
       'Codex',
       'Changelog',
+      'About',
+      'Save Slots',
       'Background Music',
       'Settings',
       'Prestige',
@@ -402,6 +404,33 @@ void main() {
       'Lucky Stake',
     ]) {
       expect(find.text(label), findsOneWidget);
+    }
+    const sourceOrder = [
+      'Rewards',
+      'Journey',
+      'Shop',
+      'Home Base',
+      'Relics',
+      'Codex',
+      'Changelog',
+      'About',
+      'Save Slots',
+      'Background Music',
+      'Settings',
+      'Prestige',
+      'Ultra',
+      'Talents',
+      'Traits',
+      'Mutators',
+      'Stats',
+      'Lucky Stake',
+    ];
+    for (var index = 0; index < sourceOrder.length - 1; index++) {
+      expect(
+        tester.getTopLeft(find.text(sourceOrder[index])).dy,
+        lessThan(tester.getTopLeft(find.text(sourceOrder[index + 1])).dy),
+        reason: '${sourceOrder[index]} should precede ${sourceOrder[index + 1]}',
+      );
     }
   });
 
