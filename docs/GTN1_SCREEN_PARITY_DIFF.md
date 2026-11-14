@@ -150,6 +150,32 @@ The following source surfaces are in GTN1's frozen production inventory. Some ar
 - `shared/src/jvmAndAndroidMain/kotlin/com/jarrlyyy/guessthenumber/shared/ui/ArcadeCanvasGame.kt`
 - `shared/src/jvmAndAndroidMain/kotlin/com/jarrlyyy/guessthenumber/shared/ui/SeasonalThemeSimulatorCard.kt`
 
+## Verification pass — Batch A settings and More navigation (2026-11-14)
+
+**Pinned source:** GTN1 `fe9cf567169e19059e0330d08769fe454336ef94`. **Target:** GTN2 `main`.
+
+### More navigation cross-diff
+
+- Compared the GTN1 `#screen-more` HTML root and its ordered `data-screen-target`/`data-route` list against GTN2 `_MoreMenuPage`, the legacy `LegacyHubPage`, `GameSettings.moreScreenOrder` and the main navigation callbacks.
+- GTN1 order: player profile, Rewards, Journey, Shop, Home Base, Relics, Codex, Changelog, About, Save Slots, Background Music, Settings, Prestige, Ultra, Talents, Traits, Mutators, Stats, debug-only Dev Settings, Lucky Stake.
+- Found and corrected two functional mismatches in the actual dashboard More menu: the Shop item was incorrectly routed to the Money Upgrade Shop instead of the Nebula Shop; Dev Settings was rendered twice in debug mode because it existed both in the ordered destinations and as a separate trailing card.
+- Removed an extra Flutter-only More page header that was not present in the GTN1 Web Play root and restored the two-column desktop / one-column narrow layout behavior. Kept the GTN1 item order and profile-first entry.
+- Added a widget test for one Dev Settings entry and the Shop-to-Nebula-Shop route. The test is committed but has not yet executed successfully because the validation workflow stopped at formatting.
+- **Still open:** verify each More item destination and persisted Menu Studio order/color customization; compare card icons, colors, widths, gaps and interaction states at mobile/desktop runtime sizes. The old `LegacyHubPage` remains a second route and must not be mistaken for the dashboard's actual bottom-navigation More page.
+
+### Settings screen cross-diff
+
+- Compared GTN1 `SettingsScreen.kt` against GTN2 `settings_page.dart` and `game_settings.dart`, including notification permission launcher, color picker, all toggles and volume controls.
+- The major section order and source-facing labels are restored, with M3 Expressive cards and controls retained as the presentation layer.
+- Confirmed the implementation is **not yet parity-complete**: the source live preview card is missing; the Flutter color dialog is not the same source picker; Android notification permission request and result toasts are missing; notification category descriptions and several control descriptions are omitted; volume control descriptions and exact source labels differ. These are recorded as open, not marked complete.
+- No paired runtime screenshots or persistence/device evidence exist for these screens.
+
+### CI evidence and gate
+
+- Validation run `43579731488` on commit `ef55720b9b1c86a532a5774b6a89176701e87b25` stopped at **Dart formatting**. The preceding run `43579680591` identified four unformatted files: `lib/legacy/legacy_pages.dart`, `lib/legacy/legacy_systems_page.dart`, `lib/settings/game_settings.dart` and `lib/settings/settings_page.dart`. Analysis and the test suite were skipped as dependent jobs.
+- Android/Windows debug build run `43579731519` was still in progress at the time of this audit. No build or runtime pass is claimed.
+- **Batch A remains open.** No screen in this pass is declared visually or behaviorally complete.
+
 ## Finite implementation batches
 
 - **Batch A — Core shell and settings:** Play/dashboard, More navigation, Settings, Menu Studio, profile and save-slot screens. Verify route shell, layout, responsive behavior, settings controls and persistence.
