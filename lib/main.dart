@@ -1430,12 +1430,20 @@ class _GameHomePageState extends State<GameHomePage>
           return '$action set to $amount.';
         case '/attempts':
           final value = int.parse(parts[1]);
-          if (value < 0) return 'Attempts cannot be negative.';
+          if (value < _game.correctGuesses ||
+              value > CreativeSavePolicy.maxCounter) {
+            return 'Attempts must be between the current correct guesses and 1,000,000,000,000.';
+          }
           setState(() {
             _game = _engine.restore(
               secret: _game.secret,
               attempts: value,
               isComplete: _game.isComplete,
+              savedMinimum: _game.minimum,
+              savedMaximum: _game.maximum,
+              savedCorrectGuesses: _game.correctGuesses,
+              savedStreak: _game.streak,
+              savedBestStreak: _game.bestStreak,
             );
           });
           await _persist();
