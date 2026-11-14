@@ -139,7 +139,8 @@ class ProgressionCalculator {
     }
     if (valueScaled == _decimalScale) return BigInt.zero;
 
-    final z = ((valueScaled - _decimalScale) * _decimalScale) ~/
+    final z =
+        ((valueScaled - _decimalScale) * _decimalScale) ~/
         (valueScaled + _decimalScale);
     final zSquared = (z * z) ~/ _decimalScale;
     var term = z;

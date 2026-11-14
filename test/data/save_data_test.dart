@@ -90,10 +90,7 @@ void main() {
           'prestige_money_boost': 4,
           'prestige_gain_boost': 5,
         },
-        ultraUpgrades: const {
-          'ultra_money_boost': 3,
-          'ultra_gain_boost': 2,
-        },
+        ultraUpgrades: const {'ultra_money_boost': 3, 'ultra_gain_boost': 2},
       );
       final save = SaveData(
         secret: 42,
