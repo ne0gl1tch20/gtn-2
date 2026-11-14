@@ -73,5 +73,35 @@ void main() {
     );
     expect(confirm.onPressed, isNull);
     expect(resetCalled, isFalse);
+
+    final expression = tester
+        .widgetList<Text>(find.byType(Text))
+        .map((widget) => widget.data ?? '')
+        .firstWhere(
+          (value) => RegExp(r'^\\d+(?: [+-/*] \\d+)+
+}
+).hasMatch(value),
+        );
+    final tokens = expression.split(' ');
+    var answer = int.parse(tokens.first);
+    for (var index = 1; index < tokens.length; index += 2) {
+      final operand = int.parse(tokens[index + 1]);
+      answer = switch (tokens[index]) {
+        '+' => answer + operand,
+        '-' => answer - operand,
+        '*' => answer * operand,
+        _ => answer ~/ operand,
+      };
+    }
+    await tester.tap(find.byType(CheckboxListTile));
+    await tester.enterText(find.byType(TextField).last, answer.toString());
+    await tester.pump();
+    final enabledConfirm = tester.widget<TextButton>(
+      find.widgetWithText(TextButton, 'Confirm reset'),
+    );
+    expect(enabledConfirm.onPressed, isNotNull);
+    await tester.tap(find.text('Confirm reset'));
+    await tester.pumpAndSettle();
+    expect(resetCalled, isTrue);
   });
 }
