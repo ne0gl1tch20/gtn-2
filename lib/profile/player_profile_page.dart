@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:material_ui/material_ui.dart';
@@ -11,12 +12,16 @@ class PlayerProfile {
     this.bio = '',
     this.avatarId = 'star',
     this.customAvatarData,
+    this.profileId = '',
+    this.setupComplete = false,
   });
 
   final String username;
   final String bio;
   final String avatarId;
   final String? customAvatarData;
+  final String profileId;
+  final bool setupComplete;
 
   PlayerProfile copyWith({
     String? username,
@@ -24,6 +29,8 @@ class PlayerProfile {
     String? avatarId,
     String? customAvatarData,
     bool clearCustomAvatar = false,
+    String? profileId,
+    bool? setupComplete,
   }) => PlayerProfile(
     username: username ?? this.username,
     bio: bio ?? this.bio,
@@ -31,6 +38,8 @@ class PlayerProfile {
     customAvatarData: clearCustomAvatar
         ? null
         : customAvatarData ?? this.customAvatarData,
+    profileId: profileId ?? this.profileId,
+    setupComplete: setupComplete ?? this.setupComplete,
   );
 
   Map<String, Object?> toJson() => {
@@ -39,6 +48,8 @@ class PlayerProfile {
     'bio': bio,
     'avatarId': avatarId,
     'customAvatarData': customAvatarData,
+    'profileId': profileId,
+    'setupComplete': setupComplete,
   };
 
   factory PlayerProfile.fromJson(Map<String, dynamic> json) {
@@ -46,6 +57,8 @@ class PlayerProfile {
     final bio = json['bio'] ?? '';
     final avatarId = json['avatarId'] ?? 'star';
     final customAvatarData = json['customAvatarData'];
+    final profileId = json['profileId'];
+    final setupComplete = json['setupComplete'];
     if (username is! String ||
         username.length > 20 ||
         bio is! String ||
@@ -54,7 +67,9 @@ class PlayerProfile {
         (!avatarPresets.containsKey(avatarId) && avatarId != 'custom') ||
         customAvatarData != null &&
             (customAvatarData is! String ||
-                !customAvatarData.startsWith('data:image/'))) {
+                !customAvatarData.startsWith('data:image/')) ||
+        profileId != null && profileId is! String ||
+        setupComplete != null && setupComplete is! bool) {
       throw const FormatException('Invalid player profile.');
     }
     return PlayerProfile(
@@ -62,8 +77,22 @@ class PlayerProfile {
       bio: bio,
       avatarId: avatarId,
       customAvatarData: customAvatarData as String?,
+      profileId: (profileId as String?)?.isNotEmpty == true
+          ? profileId as String
+          : _newProfileId(),
+      setupComplete: setupComplete as bool? ?? username.isNotEmpty,
     );
   }
+}
+
+String _newProfileId() {
+  final random = Random.secure();
+  final bytes = List<int>.generate(16, (_) => random.nextInt(256));
+  bytes[6] = (bytes[6] & 0x0f) | 0x40;
+  bytes[8] = (bytes[8] & 0x3f) | 0x80;
+  final hex = bytes.map((value) => value.toRadixString(16).padLeft(2, '0'));
+  final value = hex.join();
+  return '${value.substring(0, 8)}-${value.substring(8, 12)}-${value.substring(12, 16)}-${value.substring(16, 20)}-${value.substring(20)}';
 }
 
 const avatarPresets = <String, String>{
@@ -121,12 +150,14 @@ class PlayerProfilePage extends StatefulWidget {
     required this.store,
     required this.onSaved,
     this.equippedCosmeticId,
+    this.viewOnly = true,
   });
 
   final PlayerProfile initialProfile;
   final PlayerProfileStore store;
   final ValueChanged<PlayerProfile> onSaved;
   final String? equippedCosmeticId;
+  final bool viewOnly;
 
   @override
   State<PlayerProfilePage> createState() => _PlayerProfilePageState();
@@ -142,6 +173,7 @@ class _PlayerProfilePageState extends State<PlayerProfilePage> {
   late String _avatarId = widget.initialProfile.avatarId;
   late String? _customAvatarData = widget.initialProfile.customAvatarData;
   bool _saving = false;
+  late bool _editing = !widget.viewOnly || !widget.initialProfile.setupComplete;
   String? _error;
 
   @override
@@ -202,6 +234,10 @@ class _PlayerProfilePageState extends State<PlayerProfilePage> {
       bio: _bio.text.trim(),
       avatarId: _avatarId,
       customAvatarData: _customAvatarData,
+      profileId: widget.initialProfile.profileId.isNotEmpty
+          ? widget.initialProfile.profileId
+          : _newProfileId(),
+      setupComplete: true,
     );
     try {
       await widget.store.save(profile);
@@ -231,6 +267,62 @@ class _PlayerProfilePageState extends State<PlayerProfilePage> {
             avatarPresets[_avatarId] ?? '⭐',
             style: const TextStyle(fontSize: 48),
           );
+
+    if (!_editing) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Player profile'),
+          leading: IconButton(
+            tooltip: 'Back',
+            onPressed: () => Navigator.of(context).pop(),
+            icon: const Icon(Icons.arrow_back_rounded),
+          ),
+        ),
+        body: SafeArea(
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
+            children: [
+              Center(
+                child: CircleAvatar(
+                  radius: 56,
+                  backgroundColor: theme.colorScheme.secondaryContainer,
+                  child: ClipOval(
+                    child: SizedBox(width: 112, height: 112, child: Center(child: profileImage)),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 18),
+              Center(
+                child: Text(
+                  widget.initialProfile.username,
+                  style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Center(
+                child: Text('Offline player profile', style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+              ),
+              const SizedBox(height: 28),
+              Text('Bio', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+              const SizedBox(height: 8),
+              Text(
+                widget.initialProfile.bio.isEmpty
+                    ? 'No bio yet. Add a little introduction about yourself.'
+                    : widget.initialProfile.bio,
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  color: widget.initialProfile.bio.isEmpty ? theme.colorScheme.onSurfaceVariant : theme.colorScheme.onSurface,
+                ),
+              ),
+              const SizedBox(height: 28),
+              FilledButton(
+                onPressed: () => setState(() => _editing = true),
+                child: const Text('Edit profile'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(title: const Text('Player profile')),
