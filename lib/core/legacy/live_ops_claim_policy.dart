@@ -69,7 +69,9 @@ class LiveOpsClaimPolicy {
 
     final nebulaEarned = progression.nebulaEarned;
     if (nebulaEarned.compareTo(BigNumber.fromInt(0)) < 0 ||
-        nebulaEarned.compareTo(BigNumber.fromInt(_maxLong - event.rewardNebula)) >
+        nebulaEarned.compareTo(
+              BigNumber.fromInt(_maxLong - event.rewardNebula),
+            ) >
             0) {
       return null;
     }
@@ -83,10 +85,10 @@ class LiveOpsClaimPolicy {
     final reward = BigNumber.fromInt(event.rewardNebula);
     final nextClaims = Map<String, int>.of(systems.liveOpsClaims)
       ..[event.id] = claims + 1;
-    final nextBoost = (systems.permanentEventBoosts +
-            event.permanentBoostPerClaim)
-        .clamp(0, 25)
-        .toInt();
+    final nextBoost =
+        (systems.permanentEventBoosts + event.permanentBoostPerClaim)
+            .clamp(0, 25)
+            .toInt();
 
     return LiveOpsClaimSettlement(
       progression: progression.copyWith(
