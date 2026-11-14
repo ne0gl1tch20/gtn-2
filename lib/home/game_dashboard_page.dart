@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
@@ -1199,6 +1202,56 @@ class _MoreMenuPage extends StatelessWidget {
     return value == null ? _purple : Color(value | 0xFF000000);
   }
 
+  Widget _profileAvatar(
+    BuildContext context, {
+    required bool compact,
+    required bool dark,
+  }) {
+    final fallback = Center(
+      child: Text(
+        avatarPresets[playerProfile.avatarId] ?? '⭐',
+        style: const TextStyle(fontSize: 22),
+      ),
+    );
+    Widget content = fallback;
+    if (playerProfile.avatarId == 'custom') {
+      final data = playerProfile.customAvatarData;
+      if (data != null && data.startsWith('data:image/')) {
+        final separator = data.indexOf(',');
+        if (separator >= 0) {
+          try {
+            content = Image.memory(
+              base64Decode(data.substring(separator + 1)),
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) => fallback,
+            );
+          } on FormatException {
+            content = fallback;
+          }
+        }
+      } else {
+        final path = playerProfile.customAvatarPath;
+        if (path != null && path.isNotEmpty) {
+          content = Image.file(
+            File(path),
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) => fallback,
+          );
+        }
+      }
+    }
+    return Container(
+      width: compact ? 40 : 42,
+      height: compact ? 40 : 42,
+      decoration: BoxDecoration(
+        color: _purple.withValues(alpha: dark ? .16 : .11),
+        borderRadius: BorderRadius.circular(13),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: content,
+    );
+  }
+
   @override
   Widget build(BuildContext context) => ValueListenableBuilder<GameSettings>(
     valueListenable: settingsListenable,
@@ -1220,6 +1273,8 @@ class _MoreMenuPage extends StatelessWidget {
       String subtitle,
       VoidCallback onTap,
       Color accent, {
+      Widget? leading,
+      EdgeInsets? cardPadding,
       Key? key,
     }) {
       final radius = BorderRadius.circular(18);
@@ -1247,15 +1302,16 @@ class _MoreMenuPage extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    Container(
-                      width: compact ? 40 : 42,
-                      height: compact ? 40 : 42,
-                      decoration: BoxDecoration(
-                        color: accent.withValues(alpha: dark ? .16 : .11),
-                        borderRadius: BorderRadius.circular(13),
-                      ),
-                      child: Icon(icon, color: accent, size: 22),
-                    ),
+                    leading ??
+                        Container(
+                          width: compact ? 40 : 42,
+                          height: compact ? 40 : 42,
+                          decoration: BoxDecoration(
+                            color: accent.withValues(alpha: dark ? .16 : .11),
+                            borderRadius: BorderRadius.circular(13),
+                          ),
+                          child: Icon(icon, color: accent, size: 22),
+                        ),
                     const SizedBox(width: 13),
                     Expanded(
                       child: Column(
@@ -1305,7 +1361,7 @@ class _MoreMenuPage extends StatelessWidget {
                 ? 'Player profile'
                 : playerProfile.username,
             subtitle: playerProfile.bio.isEmpty
-                ? 'View your username and bio, then edit your profile'
+                ? 'View your username and bio, then edit your profile.'
                 : playerProfile.bio,
             onTap: onPlayerProfile,
           ),
@@ -1328,39 +1384,39 @@ class _MoreMenuPage extends StatelessWidget {
             onTap: () => onDestination('upgrades'),
           ),
           'rewards': (
-            icon: Icons.card_giftcard_rounded,
+            icon: Icons.emoji_events_rounded,
             title: 'Rewards',
             subtitle: 'Achievements and daily rewards',
             onTap: () => onDestination('rewards'),
           ),
           'journey': (
-            icon: Icons.timeline_rounded,
+            icon: Icons.access_time_rounded,
             title: 'Journey',
             subtitle: 'Your run history and progress',
             onTap: () => onDestination('journey'),
           ),
           'shop': (
-            icon: Icons.storefront_rounded,
+            icon: Icons.shopping_bag_rounded,
             title: 'Shop',
             subtitle: 'Browse available items',
             onTap: () => onDestination('shop'),
           ),
           'mutators': (
-            icon: Icons.tune_rounded,
+            icon: Icons.explore_rounded,
             title: 'Mutators',
             subtitle: 'Customize challenge rules',
             onTap: () => onDestination('mutators'),
           ),
           'talent': (
-            icon: Icons.psychology_alt_rounded,
+            icon: Icons.layers_rounded,
             title: 'Talents',
             subtitle: 'Build your talent path',
             onTap: () => onDestination('talent'),
           ),
           'traits': (
-            icon: Icons.auto_awesome_rounded,
+            icon: Icons.layers_rounded,
             title: 'Traits',
-            subtitle: 'Choose gameplay traits and variants',
+            subtitle: 'Gameplay modules and selectable variants',
             onTap: () => onDestination('traits'),
           ),
           'relics': (
@@ -1370,7 +1426,7 @@ class _MoreMenuPage extends StatelessWidget {
             onTap: () => onDestination('relics'),
           ),
           'home_base': (
-            icon: Icons.home_work_rounded,
+            icon: Icons.home_rounded,
             title: 'Home Base',
             subtitle: 'Build up your base',
             onTap: () => onDestination('homebase'),
@@ -1378,13 +1434,13 @@ class _MoreMenuPage extends StatelessWidget {
           'codex': (
             icon: Icons.menu_book_rounded,
             title: 'Codex',
-            subtitle: 'Discoveries and lore entries',
+            subtitle: 'Explore discoveries',
             onTap: () => onDestination('codex'),
           ),
           'stats': (
             icon: Icons.query_stats_rounded,
             title: 'Stats',
-            subtitle: 'Review your gameplay records',
+            subtitle: 'Review your game statistics',
             onTap: () => onDestination('stats'),
           ),
           'dev_settings': (
@@ -1396,37 +1452,37 @@ class _MoreMenuPage extends StatelessWidget {
           'changelog': (
             icon: Icons.history_rounded,
             title: 'Changelog',
-            subtitle: 'Review version history',
+            subtitle: 'See what changed in recent updates',
             onTap: () => onDestination('changelog'),
           ),
           'settings': (
             icon: Icons.settings_rounded,
             title: 'Settings',
-            subtitle: 'Game preferences and Menu Studio',
+            subtitle: 'Customize your experience',
             onTap: () => onDestination('settings'),
           ),
           'about': (
             icon: Icons.info_outline_rounded,
             title: 'About',
-            subtitle: 'Credits, links and app information',
+            subtitle: 'About & Licenses',
             onTap: () => onDestination('about'),
           ),
           'staking': (
             icon: Icons.casino_rounded,
             title: 'Lucky Stake',
-            subtitle: 'Risk Money for streak-based rewards',
+            subtitle: 'Try your luck with a stake',
             onTap: () => onDestination('stake'),
           ),
           'ultra': (
-            icon: Icons.bolt_rounded,
+            icon: Icons.auto_awesome_rounded,
             title: 'Ultra',
-            subtitle: 'Permanent progression upgrades',
+            subtitle: 'Ultra progression',
             onTap: () => onDestination('ultra'),
           ),
           'prestige': (
-            icon: Icons.auto_awesome_rounded,
+            icon: Icons.workspace_premium_rounded,
             title: 'Prestige',
-            subtitle: 'Reset and advance your progression',
+            subtitle: 'Prestige upgrades and resets',
             onTap: () => onDestination('prestige'),
           ),
           'save_slots': (
@@ -1436,9 +1492,9 @@ class _MoreMenuPage extends StatelessWidget {
             onTap: onSaveSlots,
           ),
           'music': (
-            icon: Icons.library_music_rounded,
+            icon: Icons.music_note_rounded,
             title: 'Background Music',
-            subtitle: 'Offline library, playlists and queue',
+            subtitle: 'Control your background music',
             onTap: () => onDestination('music'),
           ),
         };
@@ -1582,6 +1638,15 @@ class _MoreMenuPage extends StatelessWidget {
                             profile.onTap,
                             _destinationColor(
                               settings.moreScreenButtonColors['player_profile'],
+                            ),
+                            leading: _profileAvatar(
+                              context,
+                              compact: compact,
+                              dark: dark,
+                            ),
+                            cardPadding: EdgeInsets.symmetric(
+                              horizontal: compact ? 18 : 22,
+                              vertical: compact ? 18 : 22,
                             ),
                             key: const Key('more-profile-card'),
                           ),

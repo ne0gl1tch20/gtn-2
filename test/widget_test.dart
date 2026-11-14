@@ -412,6 +412,30 @@ void main() {
     ]) {
       expect(find.text(label), findsOneWidget);
     }
+    expect(find.text('⭐'), findsOneWidget);
+    for (final subtitle in [
+      'View your username and bio, then edit your profile.',
+      'Achievements and daily rewards',
+      'Your run history and progress',
+      'Browse available items',
+      'Build up your base',
+      'Manage your relic collection',
+      'Explore discoveries',
+      'See what changed in recent updates',
+      'About & Licenses',
+      'Control your background music',
+      'Customize your experience',
+      'Prestige upgrades and resets',
+      'Ultra progression',
+      'Build your talent path',
+      'Gameplay modules and selectable variants',
+      'Customize challenge rules',
+      'Review your game statistics',
+      'Developer console and diagnostics',
+      'Try your luck with a stake',
+    ]) {
+      expect(find.text(subtitle), findsOneWidget);
+    }
     const sourceOrder = [
       'Rewards',
       'Journey',
