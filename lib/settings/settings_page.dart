@@ -39,7 +39,7 @@ class SettingsPage extends StatelessWidget {
       return;
     }
     if (defaultTargetPlatform != TargetPlatform.android) {
-      await _update(settings.copyWith(notificationsEnabled: true));
+      await onChanged(settings.copyWith(notificationsEnabled: true));
       return;
     }
     try {
@@ -47,7 +47,7 @@ class SettingsPage extends StatelessWidget {
           await _notificationPermissionChannel.invokeMethod<bool>('request') ??
           false;
       if (granted) {
-        await _update(settings.copyWith(notificationsEnabled: true));
+        await onChanged(settings.copyWith(notificationsEnabled: true));
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -61,7 +61,7 @@ class SettingsPage extends StatelessWidget {
           );
         }
       } else {
-        await _update(settings.copyWith(notificationsEnabled: false));
+        await onChanged(settings.copyWith(notificationsEnabled: false));
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -76,7 +76,7 @@ class SettingsPage extends StatelessWidget {
         }
       }
     } on Exception {
-      await _update(settings.copyWith(notificationsEnabled: false));
+      await onChanged(settings.copyWith(notificationsEnabled: false));
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
