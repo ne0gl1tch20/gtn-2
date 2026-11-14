@@ -81,10 +81,28 @@ class SettingsPage extends StatelessWidget {
             description:
                 'Customize the app’s primary, secondary and tertiary colors. Changes apply immediately.',
             children: [
-              _ThemeColorPreview(
-                primary: settings.customPrimaryColor,
-                secondary: settings.customSecondaryColor,
-                tertiary: settings.customTertiaryColor,
+              Row(
+                children: [
+                  for (final hex in [
+                    settings.customPrimaryColor,
+                    settings.customSecondaryColor,
+                    settings.customTertiaryColor,
+                  ])
+                    Expanded(
+                      child: Container(
+                        height: 12,
+                        margin: const EdgeInsets.symmetric(horizontal: 3),
+                        decoration: BoxDecoration(
+                          color: Color(
+                            0xFF000000 |
+                                (int.tryParse(hex.replaceFirst('#', ''), radix: 16) ??
+                                    0x7C4DFF),
+                          ),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                      ),
+                    ),
+                ],
               ),
               _dropdown<String>(
                 'Theme preset',
