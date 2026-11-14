@@ -1,7 +1,7 @@
 # GTN1 Shared KMP → GTN2 Dart source map
 
 **Authority:** `ne0gl1tch20/GuessTheNumber` at `fe9cf567169e19059e0330d08769fe454336ef94`  
-**GTN2 snapshot inspected:** `main` at `5f4a942417b8736fcacaac0950d0c6854d7f4cbf`  
+**GTN2 snapshot inspected:** `main` at `e314459698e9b691a89b496be3a87b57ae1bd147`  
 **Inventory:** `docs/GTN1_SOURCE_INVENTORY.json` — exactly 50 shared production Kotlin files and 30 shared Kotlin tests.
 
 This is a file-level destination map, not a parity-completion claim. A mapped target means a relevant implementation exists; it does not prove the source behavior, edge cases or platform behavior are equivalent. Gaps below remain parity work. UI sources are mapped to native Flutter destinations because GTN2 does not embed GTN1 Compose UI.
