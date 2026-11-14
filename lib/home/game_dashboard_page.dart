@@ -1348,7 +1348,7 @@ class _MoreMenuPage extends StatelessWidget {
           ),
         };
     final layout = MenuStudioLayout.fromSettings(settings);
-    final orderedIds = <String>['player_profile'];
+    final orderedIds = <String>[];
     for (final sourceId in layout.visibleMoreIds) {
       final id = MenuStudioLayout.settingsIdFor(sourceId);
       if (id == 'music' && !orderedIds.contains('save_slots')) {
@@ -1385,23 +1385,42 @@ class _MoreMenuPage extends StatelessWidget {
                   final itemWidth =
                       (constraints.maxWidth - spacing * (columns - 1)) /
                       columns;
-                  return Wrap(
-                    spacing: spacing,
-                    runSpacing: spacing,
+                  final profile = destinations['player_profile']!;
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      for (final id in orderedIds)
-                        SizedBox(
-                          width: itemWidth,
-                          child: entry(
-                            destinations[id]!.icon,
-                            destinations[id]!.title,
-                            destinations[id]!.subtitle,
-                            destinations[id]!.onTap,
-                            _destinationColor(
-                              settings.moreScreenButtonColors[id],
-                            ),
+                      SizedBox(
+                        width: constraints.maxWidth,
+                        child: entry(
+                          profile.icon,
+                          profile.title,
+                          profile.subtitle,
+                          profile.onTap,
+                          _destinationColor(
+                            settings.moreScreenButtonColors['player_profile'],
                           ),
                         ),
+                      ),
+                      const SizedBox(height: spacing),
+                      Wrap(
+                        spacing: spacing,
+                        runSpacing: spacing,
+                        children: [
+                          for (final id in orderedIds)
+                            SizedBox(
+                              width: itemWidth,
+                              child: entry(
+                                destinations[id]!.icon,
+                                destinations[id]!.title,
+                                destinations[id]!.subtitle,
+                                destinations[id]!.onTap,
+                                _destinationColor(
+                                  settings.moreScreenButtonColors[id],
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
                     ],
                   );
                 },
