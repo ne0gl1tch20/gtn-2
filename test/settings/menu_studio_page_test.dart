@@ -53,6 +53,7 @@ void main() {
 
     expect(find.text('Top bar'), findsOneWidget);
     expect(find.text('More menu'), findsOneWidget);
+    await tester.ensureVisible(find.text('Live preview'));
     expect(find.text('Live preview'), findsOneWidget);
     expect(find.text('Worlds'), findsWidgets);
 
