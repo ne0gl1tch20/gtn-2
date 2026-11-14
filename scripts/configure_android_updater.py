@@ -54,7 +54,7 @@ if len(main_activity_files) != 1:
     raise SystemExit(1)
 main_activity = main_activity_files[0]
 activity_text = main_activity.read_text(encoding="utf-8")
-package_match = re.search(r"(?m)^package\s+[\w.]+, activity_text)
+package_match = re.search(r"(?m)^package\s+[\w.]+", activity_text)
 if not package_match:
     print("Could not read the generated MainActivity package.", file=sys.stderr)
     raise SystemExit(1)
