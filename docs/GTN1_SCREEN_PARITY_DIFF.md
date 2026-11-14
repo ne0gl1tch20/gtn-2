@@ -160,14 +160,14 @@ The following source surfaces are in GTN1's frozen production inventory. Some ar
 - GTN1 order: player profile, Rewards, Journey, Shop, Home Base, Relics, Codex, Changelog, About, Save Slots, Background Music, Settings, Prestige, Ultra, Talents, Traits, Mutators, Stats, debug-only Dev Settings, Lucky Stake.
 - Found and corrected two functional mismatches in the actual dashboard More menu: the Shop item was incorrectly routed to the Money Upgrade Shop instead of the Nebula Shop; Dev Settings was rendered twice in debug mode because it existed both in the ordered destinations and as a separate trailing card.
 - Removed an extra Flutter-only More page header that was not present in the GTN1 Web Play root and restored the two-column desktop / one-column narrow layout behavior. Kept the GTN1 item order and profile-first entry.
-- Added a widget test for one Dev Settings entry and the Shop-to-Nebula-Shop route. The test is committed but has not yet executed successfully because the validation workflow stopped at formatting.
+- Added a widget test for one Dev Settings entry and the Shop-to-Nebula-Shop route. The first complete test run exposed stale test assumptions about the More title and pinned bottom-navigation labels; those assertions were corrected. A later run reached 342 passing / 5 failing tests, with remaining failures in viewport scrolling and duplicated More title assertions. Those test fixes are committed and formatted; a post-format full validation run is still pending.
 - **Still open:** verify each More item destination and persisted Menu Studio order/color customization; compare card icons, colors, widths, gaps and interaction states at mobile/desktop runtime sizes. The old `LegacyHubPage` remains a second route and must not be mistaken for the dashboard's actual bottom-navigation More page.
 
 ### Settings screen cross-diff
 
 - Compared GTN1 `SettingsScreen.kt` against GTN2 `settings_page.dart` and `game_settings.dart`, including notification permission launcher, color picker, all toggles and volume controls.
 - The major section order and source-facing labels are restored, with M3 Expressive cards and controls retained as the presentation layer.
-- Confirmed the implementation is **not yet parity-complete**: the source live preview card is missing; the Flutter color dialog is not the same source picker; Android notification permission request and result toasts are missing; notification category descriptions and several control descriptions are omitted; volume control descriptions and exact source labels differ. These are recorded as open, not marked complete.
+- Restored GTN1's live Theme Colors preview card in GTN2 (commit `849b5a9`) and added assertions for its preview title, success copy and Guess action. The implementation is **not yet parity-complete**: the Flutter color dialog still differs from `ReusableColorPickerDialog.kt` (GTN1 uses a saturation/value plane, hue slider, hex input, preview and optional reset); Android notification permission request and result toasts are missing; notification category descriptions and several control descriptions are omitted; volume control descriptions and exact source labels differ.
 - No paired runtime screenshots or persistence/device evidence exist for these screens.
 
 ### CI evidence and gate
@@ -175,6 +175,41 @@ The following source surfaces are in GTN1's frozen production inventory. Some ar
 - Validation run `43579731488` on commit `ef55720b9b1c86a532a5774b6a89176701e87b25` stopped at **Dart formatting**. The preceding run `43579680591` identified four unformatted files: `lib/legacy/legacy_pages.dart`, `lib/legacy/legacy_systems_page.dart`, `lib/settings/game_settings.dart` and `lib/settings/settings_page.dart`. Analysis and the test suite were skipped as dependent jobs.
 - Android/Windows debug build run `43579731519` was still in progress at the time of this audit. No build or runtime pass is claimed.
 - **Batch A remains open.** No screen in this pass is declared visually or behaviorally complete.
+
+## Verification pass — Menu Studio, Profile and Save Slots (2026-11-14)
+
+**Pinned source:** GTN1 `fe9cf567169e19059e0330d08769fe454336ef94`. **Target:** current GTN2 `main`.
+
+### Menu Studio cross-diff
+
+- Compared GTN1 `app/src/main/assets/web-play/menu-studio.js` and its dedicated CSS with GTN2 `lib/settings/menu_studio_page.dart`, `lib/settings/game_settings.dart` and the actual dashboard navigation in `lib/home/game_dashboard_page.dart`.
+- GTN1 edits two areas: the top navigation (`worlds`, `arcade`, `upgrades`) and More. Play and More remain pinned. The editor supports reordering within each area, moving entries between areas, per-button colors through the shared native color picker, a live preview, reset and save.
+- GTN2 currently exposes only one reorderable More list. Its labels/inventory do not match the GTN1 IDs: it includes Flutter-only entries such as `world_map`, `endgame`, `nebula` and `save_slots`, while omitting source IDs such as `rewards`, `journey`, `shop`, `traits` and `dev_settings`. It has no top-navigation editor, area-move controls or live preview, and accepts raw hex text instead of opening the source picker.
+- **Schema mismatch:** GTN1's `validLayout()` requires both `orders.nav` and `orders.more`; GTN2 currently serializes only `orders.more`. The current Flutter layout payload is therefore rejected by GTN1's source validator. This is a functional compatibility defect, not merely a UI difference.
+- **Open:** implement the exact source inventory and two-area behavior, write the compatible schema, use the shared picker and verify persistence/reload plus actual dashboard navigation changes.
+
+### Player Profile cross-diff
+
+- Compared GTN1 `PlayerProfileScreen.kt` with GTN2 `lib/profile/player_profile_page.dart` and `lib/main.dart`.
+- GTN1 has distinct first-launch/edit and read-only profile modes. The read-only view shows avatar, username and bio, then offers an Edit profile action. Its persisted model includes `profileId` and `setupComplete`; custom images are copied into app-private files.
+- GTN2 currently opens the edit form directly from the More profile entry. It supports the same 16 avatar presets and a custom image, but stores image data as a base64 data URI (limited to 4 MB) and its profile model has no `profileId` or `setupComplete` fields. A separate read-only profile destination and source first-launch completion behavior are not implemented.
+- **Open:** add the read-only view/edit transition, preserve source profile identity/setup fields and verify profile persistence/reload and save-slot metadata synchronization.
+
+### Save Slots cross-diff
+
+- Compared GTN1 `SaveSlotsScreen.kt`, `SaveManager.kt` and `PortableSaveBackup.kt` against GTN2 `lib/saves/save_slots_page.dart` and `lib/data/saves/save_storage.dart`.
+- Both implementations support 10 slots. GTN2 already has create, edit slot profile, duplicate, reset one slot, restore local backup and Creative Mode actions.
+- GTN1 additionally exposes encrypted whole-save export/import, passphrase-protected portable backup (minimum 12-character passphrase), legacy encrypted import, legacy single-save migration into Slot 1 and a guarded Reset Everything flow (45-second wait, acknowledgement checkbox and math challenge). Those flows are absent from the current Flutter Save Slots screen/storage.
+- **Open:** port the source transfer envelope and compatible import/export semantics, migration behavior and guarded global reset; add tests for wrong passphrases, malformed payloads, empty/occupied slots, backup retention and reset confirmation.
+
+### Latest validation state
+
+- Dart analysis passed on commit `62e96e0`; the test suite then reported 340 passed / 7 failed. The failures included outdated viewport assumptions in Settings and stale More-title assertions.
+- Test assertions were updated; the next run reported 342 passed / 5 failed. The remaining failures were traced to one Settings test scrolling down before checking the top preview, an assertion that incorrectly expected the pinned Arcade navigation label to be absent, and More title finders that matched both the app bar and bottom navigation.
+- Those test fixes were committed. The official Dart formatter ran through a temporary one-time workflow and committed the formatter output as `6560a22`; the temporary workflow was removed in `bc1cdd2`. The latest post-format validation is pending. Do not treat the earlier test counts as a pass.
+- Last confirmed Android and Windows debug builds passed together in run `43579955796` on commit `a850061`; subsequent code changes still require a fresh successful build. No paired runtime screenshots or real-device/Windows smoke evidence exist.
+
+**Batch A remains open.** Dashboard/More routing corrections and the Settings live preview are code changes, not closure evidence. Menu Studio, Profile and Save Slots have source-backed functional gaps listed above.
 
 ## Finite implementation batches
 
@@ -190,5 +225,5 @@ Each batch must inspect both repositories before changes, implement the full sou
 ## Current verified findings vs. pending evidence
 
 - **Verified from source code:** the five deep-diff structures above. Batch 1 removes the music route's generic expansion shell and restores a dedicated player-page layout; metadata/artwork and platform media-service gaps remain open.
-- **Not yet verified:** paired runtime screenshots, all remaining route-by-route source diffs, actual reproduction of the blank music screen on device, and Android/Windows visual parity. Batch 1 has not yet passed Dart formatting, Flutter analysis, widget tests or a debug build; no CI status checks were returned for commit `5cfe029`.
+- **Not yet verified:** paired runtime screenshots, all remaining route-by-route source diffs, actual reproduction of the blank music screen on device, and Android/Windows visual parity. The latest test-fix commit has not yet completed a fresh full validation and Android/Windows build. No screen is closed by code inspection alone.
 - **No screen is declared fully restored by this audit.**
