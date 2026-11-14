@@ -69,16 +69,10 @@ void main() {
       previewed!.webMenuStudioLayout,
     );
     expect(previewLayout!.visibleMoreIds, contains('worlds'));
-    await tester.drag(
-      find.byType(ListView).first,
-      const Offset(0, -900),
-    );
+    await tester.drag(find.byType(ListView).first, const Offset(0, -900));
     await tester.pumpAndSettle();
     expect(find.text('Live preview'), findsOneWidget);
-    await tester.drag(
-      find.byType(ListView).first,
-      const Offset(0, -900),
-    );
+    await tester.drag(find.byType(ListView).first, const Offset(0, -900));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Save changes'));
     await tester.pumpAndSettle();
