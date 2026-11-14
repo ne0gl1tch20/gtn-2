@@ -94,6 +94,14 @@
 
 ### Stage 4 — Screens, content and visual behavior
 
+**User-reported screen-parity failures now confirmed by source inspection (all remain open):**
+- [ ] **Developer Settings:** Compare and reproduce the pinned GTN1 developer console hierarchy, sections, controls and diagnostics in Flutter. Sources: GTN1 `app/src/main/java/com/jarrlyyy/guessthenumber/ui/screens/DevSettingsScreen.kt`; destination: GTN2 `lib/dev/developer_settings_page.dart`. Existing functionality is not proof of visual parity.
+- [ ] **Background Music:** Restore the dedicated GTN1 music-player screen structure and interactions (artwork/player card, seek/progress, transport controls, shuffle/repeat, library, queue and playlists). Source: GTN1 `app/src/main/java/com/jarrlyyy/guessthenumber/ui/screens/MusicPlayerScreen.kt`; GTN2 currently routes `_openMusic()` to `LegacySystemsPage(view: LegacySystemsView.music)` instead of a dedicated player destination. Verify the reported blank route is fixed.
+- [ ] **Settings:** Reproduce GTN1's actual settings grouping, ordering, descriptions, controls and save-management behavior; do not treat the current GTN2 custom section layout as equivalent. Source: GTN1 `app/src/main/java/com/jarrlyyy/guessthenumber/ui/screens/SettingsScreen.kt`; destination: GTN2 `lib/settings/settings_page.dart`.
+- [ ] **About:** Reproduce the dedicated GTN1 About screen, including version/update channel, update checking and installation states, diagnostics, description, online links and source/license list. Source: GTN1 `app/src/main/java/com/jarrlyyy/guessthenumber/ui/screens/AboutScreen.kt`; destination: GTN2 About section in `lib/legacy/legacy_pages.dart`.
+- [ ] **Upgrades:** Match GTN1's balance header, buy-multiplier dropdown and upgrade-card hierarchy, including labels, affordability/maxed states and purchase feedback. Source: GTN1 `app/src/main/java/com/jarrlyyy/guessthenumber/ui/screens/UpgradeScreen.kt`; destination: GTN2 `lib/shop/upgrade_shop_page.dart`.
+- [ ] For each of these five screens, capture GTN1 and GTN2 at the same viewport, document the concrete differences, then verify the corrected screen and its interactions. Keep the existing Material 3 Expressive blend, but do not substitute generic GTN2-only layouts for GTN1's structure.
+
 **Required visual acceptance for every production screen/route (Kotlin and Web Play):**
 - [ ] Capture/inspect the pinned GTN1 source screen and compare GTN2 at the same agreed phone and desktop viewport sizes.
 - [ ] Match the source information hierarchy, layout proportions, typography, color roles, spacing, iconography, component density and visible labels. Preserve source-specific content rather than substituting generic cards or placeholder copy.
