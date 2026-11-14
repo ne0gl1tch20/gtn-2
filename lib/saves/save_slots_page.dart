@@ -122,15 +122,18 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
                       }
                     },
                   ),
-                  SwitchListTile(
-                    contentPadding: EdgeInsets.zero,
+                  Material(
+                    color: Colors.transparent,
+                    child: SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
                     title: const Text('Creative Mode'),
                     subtitle: const Text(
                       'Permanent for this save. You can’t turn it off later.',
                     ),
                     value: creativeSave,
-                    onChanged: (value) =>
-                        setDialogState(() => creativeSave = value),
+                      onChanged: (value) =>
+                          setDialogState(() => creativeSave = value),
+                    ),
                   ),
                   if (creativeSave) ...[
                     GtnExpressiveTextField(
