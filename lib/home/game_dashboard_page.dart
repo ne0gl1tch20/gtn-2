@@ -223,6 +223,13 @@ class GameDashboardPage extends StatelessWidget {
             _ => Icons.circle_outlined,
           };
 
+          Color colorFor(String id) {
+            final hex = menuLayout.colors[id];
+            if (hex == null) return _purple;
+            final value = int.tryParse(hex.replaceFirst('#', ''), radix: 16);
+            return value == null ? _purple : Color(0xFF000000 | value);
+          }
+
           String labelFor(String id) => switch (id) {
             'worlds' => AppLocalizations.text(
               'nav_worlds',
@@ -286,11 +293,11 @@ class GameDashboardPage extends StatelessWidget {
                   labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
                   height: 76,
                   backgroundColor: panel,
-                  indicatorColor: _purple.withValues(alpha: .18),
+                  indicatorColor: colorFor(navigationIds[selected]).withValues(alpha: .18),
                   destinations: [
                     for (final id in navigationIds)
                       NavigationDestination(
-                        icon: Icon(iconFor(id)),
+                        icon: Icon(iconFor(id), color: colorFor(id)),
                         label: labelFor(id),
                       ),
                   ],
@@ -307,7 +314,7 @@ class GameDashboardPage extends StatelessWidget {
                 destinations: [
                   for (final id in navigationIds)
                     M3ENavigationBarDestination(
-                      icon: Icon(iconFor(id)),
+                      icon: Icon(iconFor(id), color: colorFor(id)),
                       label: labelFor(id),
                     ),
                 ],
