@@ -69,7 +69,11 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Create your profile'), findsOneWidget);
-    await tester.ensureVisible(find.text('Create profile & continue'));
+    await tester.scrollUntilVisible(
+      find.text('Create profile & continue'),
+      220,
+      scrollable: find.byType(Scrollable).first,
+    );
     expect(find.text('Create profile & continue'), findsOneWidget);
     expect(find.byTooltip('Back'), findsNothing);
     expect(find.byType(TextField), findsNWidgets(2));
@@ -106,7 +110,11 @@ void main() {
       await tester.tap(find.text('Edit profile'));
       await tester.pumpAndSettle();
       expect(find.byType(TextField), findsNWidgets(2));
-      await tester.ensureVisible(find.text('Save profile'));
+      await tester.scrollUntilVisible(
+        find.text('Save profile'),
+        220,
+        scrollable: find.byType(Scrollable).first,
+      );
       expect(find.text('Save profile'), findsOneWidget);
     },
   );
