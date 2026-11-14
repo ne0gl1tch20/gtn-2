@@ -480,6 +480,26 @@ void main() {
     expect(botArenaWidth, greaterThan(500));
   });
 
+  testWidgets('More profile stays full width and links use GTN1 breakpoint', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(600, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(buildDashboard());
+    await tester.tap(find.text('More').first);
+    await tester.pumpAndSettle();
+
+    final profileWidth = tester.getSize(find.text('Player profile')).width;
+    final rewards = tester.getTopLeft(find.text('Rewards'));
+    final journey = tester.getTopLeft(find.text('Journey'));
+    final rewardsWidth = tester.getSize(find.text('Rewards')).width;
+    expect(profileWidth, greaterThan(rewardsWidth));
+    expect(rewards.dy, journey.dy);
+    expect(rewards.dx, lessThan(journey.dx));
+  });
+
   testWidgets('More follows the saved Menu Studio order and includes tools', (
     WidgetTester tester,
   ) async {
