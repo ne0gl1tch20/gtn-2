@@ -25,7 +25,11 @@ void main() {
     expect(find.text('Settings & Save Management'), findsOneWidget);
     final list = find.byType(ListView).first;
     Future<void> scrollTo(Finder finder) async {
-      for (var attempt = 0; attempt < 12 && finder.evaluate().isEmpty; attempt++) {
+      for (
+        var attempt = 0;
+        attempt < 12 && finder.evaluate().isEmpty;
+        attempt++
+      ) {
         await tester.drag(list, const Offset(0, -320));
         await tester.pumpAndSettle();
       }
