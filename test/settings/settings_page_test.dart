@@ -86,6 +86,12 @@ void main() {
     expect(find.text('Reminders'), findsOneWidget);
     expect(find.text('Progression milestones'), findsOneWidget);
     expect(find.text('Game events'), findsOneWidget);
+    expect(find.text('Periodic reminders to return to the game.'), findsOneWidget);
+    expect(find.text('World unlocks and boss victories.'), findsOneWidget);
+    expect(
+      find.text('New random events and limited-time event rewards.'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('Sound effects volume is disabled when sound FX are off', (
