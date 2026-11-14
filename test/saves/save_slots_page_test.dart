@@ -36,4 +36,43 @@ void main() {
     );
     expect(firstSlotMenu.enabled, isFalse);
   });
+
+
+  testWidgets('Reset Everything requires the source safety checks', (
+    tester,
+  ) async {
+    var resetCalled = false;
+    await tester.pumpWidget(
+      M3EMaterialApp(
+        data: M3EThemeData.light(seedColor: const Color(0xFF7C5CFC)),
+        fontFamily: 'Manrope',
+        autoTheming: false,
+        initialTheme: Brightness.dark,
+        home: SaveSlotsPage(
+          activeSlot: 1,
+          onSelect: (_) async {},
+          onResetEverything: () async {
+            resetCalled = true;
+          },
+          previewLoader: (_) => Future<SaveData?>.value(null),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Reset Everything').last);
+    await tester.pumpAndSettle();
+    expect(find.text('Confirm Data Reset'), findsOneWidget);
+    expect(find.textContaining('Wait 45 seconds'), findsOneWidget);
+    expect(resetCalled, isFalse);
+
+    await tester.pump(const Duration(seconds: 45));
+    await tester.pump();
+    expect(find.text('You may confirm the reset.'), findsOneWidget);
+    final confirm = tester.widget<TextButton>(
+      find.widgetWithText(TextButton, 'Confirm reset'),
+    );
+    expect(confirm.onPressed, isNull);
+    expect(resetCalled, isFalse);
+  });
 }
