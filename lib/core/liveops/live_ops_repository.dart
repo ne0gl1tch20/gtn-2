@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/services.dart';
 
-import 'live_ops_claim_policy.dart';
+import '../legacy/live_ops_claim_policy.dart';
 
 typedef LiveOpsAssetLoader = Future<String> Function(String path);
 

@@ -1,10 +1,9 @@
 import 'package:material_ui/material_ui.dart';
 
-import '../core/legacy/legacy_systems_state.dart';
+import '../core/liveops/live_ops_repository.dart';
 import '../core/progression/progression_state.dart';
 import '../design/expressive_widgets.dart';
 import '../i18n/app_localizations.dart';
-import '../core/liveops/live_ops_repository.dart';
 
 typedef LiveOpsClaim = Future<void> Function(LiveOpsEvent event);
 

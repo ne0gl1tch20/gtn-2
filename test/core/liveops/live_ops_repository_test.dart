@@ -100,8 +100,8 @@ void main() {
 
   test('archives expired events and preserves explicitly archived events', () async {
     final expired = _manifest.replaceFirst(
-      '2026-12-31T23:59:59Z',
-      '2026-11-01T00:00:00Z',
+      '"startDate": "2026-11-01T00:00:00Z",\n      "endDate": "2026-12-31T23:59:59Z"',
+      '"startDate": "2026-10-01T00:00:00Z",\n      "endDate": "2026-11-01T00:00:00Z"',
     );
     final result = await repository(manifest: expired).load();
     expect(result.events[1].status, 'ARCHIVED');

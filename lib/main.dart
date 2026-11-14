@@ -19,7 +19,6 @@ import 'core/game/guess_economy_rules.dart';
 import 'core/game/guess_rate_limit_policy.dart';
 import 'core/legacy/invisible_trait_engine.dart';
 import 'core/legacy/legacy_systems_engine.dart';
-import 'core/legacy/live_ops_claim_policy.dart';
 import 'core/numbers/big_number.dart';
 import 'core/progression/progression_calculator.dart';
 import 'core/progression/progression_engine.dart';
