@@ -14,12 +14,14 @@ class ProgressionHubPage extends StatefulWidget {
   const ProgressionHubPage({
     super.key,
     required this.progression,
+    this.initialUltra = false,
     required this.onPrestige,
     required this.onUltra,
     required this.onPurchasePermanentUpgrade,
   });
 
   final ProgressionState progression;
+  final bool initialUltra;
   final ResetAction onPrestige;
   final ResetAction onUltra;
   final Future<ProgressionState> Function(GameUpgrade upgrade, bool ultra)
@@ -77,25 +79,30 @@ class _ProgressionHubPageState extends State<ProgressionHubPage> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: GtnExpressiveAppBar(title: const Text('Prestige & Ultra')),
+      appBar: GtnExpressiveAppBar(
+        title: Text(widget.initialUltra ? 'Ultra' : 'Prestige'),
+      ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(12, 14, 12, 28),
         children: [
           GtnPageHeader(
-            eyebrow: 'Long-term progression',
-            title: 'Prestige & Ultra',
-            description: 'Reset strategically, earn permanent power and push your run further.',
-            icon: Icons.auto_awesome_rounded,
-            accent: GtnUiTokens.purple,
+            eyebrow: widget.initialUltra ? 'ASCEND BEYOND PRESTIGE' : 'RESET FOR PERMANENT POWER',
+            title: widget.initialUltra ? 'Ultra' : 'Prestige',
+            description: widget.initialUltra
+                ? 'Ascend beyond Prestige and earn permanent Ultra power.'
+                : 'Reset your run to earn permanent Prestige power.',
+            icon: widget.initialUltra ? Icons.auto_awesome_rounded : Icons.workspace_premium_rounded,
+            accent: widget.initialUltra ? GtnUiTokens.purple : GtnUiTokens.cyan,
           ),
           const SizedBox(height: 8),
-          GtnExpressiveCard(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text('Prestige', style: theme.textTheme.headlineSmall),
+          if (!widget.initialUltra)
+            GtnExpressiveCard(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text('Prestige', style: theme.textTheme.headlineSmall),
                   const SizedBox(height: 8),
                   Text('Current Prestige: ${_state.prestige}'),
                   Text('Money: ${_state.money}'),
@@ -125,13 +132,14 @@ class _ProgressionHubPageState extends State<ProgressionHubPage> {
               ),
             ),
           ),
-          GtnExpressiveCard(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text('Ultra', style: theme.textTheme.headlineSmall),
+          if (widget.initialUltra)
+            GtnExpressiveCard(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text('Ultra', style: theme.textTheme.headlineSmall),
                   const SizedBox(height: 8),
                   Text('Current Ultra: ${_state.ultra}'),
                   Text('Prestige balance: ${_state.prestige} / 1000'),
