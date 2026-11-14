@@ -682,7 +682,10 @@ class GameDashboardPage extends StatelessWidget {
                                     ),
                                   ],
                                   SizedBox(
-                                    width: fullWidth,
+                                    key: const Key('dashboard-bot-arena-section'),
+                                    width: fullWidth >= 720
+                                        ? (fullWidth - 14) / 2
+                                        : fullWidth,
                                     child: _BotArena(
                                       progression: progression,
                                       onOpenShop: onNebulaShop,
