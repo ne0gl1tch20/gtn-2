@@ -421,8 +421,7 @@ class GameDashboardPage extends StatelessWidget {
                                               Text(
                                                 'Guess The Number',
                                                 style: TextStyle(
-                                                  color:
-                                                      foreground,
+                                                  color: foreground,
                                                   fontFamily: 'SpaceGrotesk',
                                                   fontSize: 18,
                                                   fontWeight: FontWeight.w700,
