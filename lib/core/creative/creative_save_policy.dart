@@ -42,9 +42,7 @@ class CreativeSavePolicy {
     required List<GameUpgrade> prestigeUpgrades,
     required List<GameUpgrade> ultraUpgrades,
   }) {
-    if (!current.creativeModeEnabled ||
-        value.isEmpty ||
-        value.length > 100) {
+    if (!current.creativeModeEnabled || value.isEmpty || value.length > 100) {
       return null;
     }
 
@@ -148,9 +146,8 @@ class CreativeSavePolicy {
   }
 
   static BigNumber? _parseSourceBigNumber(String input) {
-    final match = RegExp(
-      r'^([0-9]+(?:\.[0-9]+)?)([A-Za-z]{1,4})?$',
-    ).firstMatch(input);
+    final match = RegExp(r'^([0-9]+(?:\.[0-9]+)?)([A-Za-z]{1,4})?$')
+        .firstMatch(input);
     if (match == null || match.group(0) != input) return null;
 
     final numeric = match.group(1)!;
