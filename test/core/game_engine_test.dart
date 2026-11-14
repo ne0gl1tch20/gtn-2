@@ -30,13 +30,20 @@ void main() {
       final low = engine.guess(initial, 10);
       expect(low.lastResult, GuessResult.tooLow);
       expect(low.attempts, 1);
+      expect(low.correctGuesses, 0);
+      expect(low.streak, 0);
       final high = engine.guess(low, 90);
       expect(high.lastResult, GuessResult.tooHigh);
       expect(high.attempts, 2);
+      expect(high.correctGuesses, 0);
+      expect(high.streak, 0);
       final won = engine.guess(high, 42);
       expect(won.lastResult, GuessResult.correct);
       expect(won.isComplete, isTrue);
       expect(won.attempts, 3);
+      expect(won.correctGuesses, 1);
+      expect(won.streak, 1);
+      expect(won.bestStreak, 1);
     });
 
     test(
@@ -77,6 +84,50 @@ void main() {
         expect(continued.isComplete, isFalse);
       },
     );
+
+    test('tracks active correct guesses and streaks using GTN1 rules', () {
+      final engine = GameEngine();
+      final restored = engine.restore(
+        secret: 42,
+        attempts: 3,
+        isComplete: false,
+        savedCorrectGuesses: 2,
+        savedStreak: 2,
+        savedBestStreak: 4,
+      );
+
+      final miss = engine.guess(restored, 10);
+      expect(miss.attempts, 4);
+      expect(miss.correctGuesses, 2);
+      expect(miss.streak, 0);
+      expect(miss.bestStreak, 4);
+
+      final win = engine.guess(miss, 42);
+      expect(win.attempts, 5);
+      expect(win.correctGuesses, 3);
+      expect(win.streak, 1);
+      expect(win.bestStreak, 4);
+    });
+
+    test('bot guesses do not mutate player counters', () {
+      final engine = GameEngine();
+      final restored = engine.restore(
+        secret: 42,
+        attempts: 5,
+        isComplete: false,
+        savedCorrectGuesses: 2,
+        savedStreak: 1,
+        savedBestStreak: 3,
+      );
+
+      final botWin = engine.guess(restored, 42, countPlayerGuess: false);
+
+      expect(botWin.isComplete, isTrue);
+      expect(botWin.attempts, 5);
+      expect(botWin.correctGuesses, 2);
+      expect(botWin.streak, 1);
+      expect(botWin.bestStreak, 3);
+    });
 
     test('rejects advancing a game that was not won', () {
       final engine = GameEngine(random: FixedRandom(41));
