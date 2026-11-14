@@ -158,6 +158,19 @@
 
 Parity is finished when Stage 6 passes. Only reproducible defects in the delivered GTN2 build are maintenance bugs. New features, optional improvements and later GTN1 additions require a separate project/version decision; they do not reopen this checklist.
 
+## Batch A verification status — 2026-11-14
+
+Batch A is the active implementation gate. B–F remain queued in the fixed order below and must not be treated as complete because their routes or files exist.
+
+- **Dashboard / More:** the actual dashboard `_MoreMenuPage` was cross-compared with GTN1's `#screen-more`. Shop now opens the Nebula Shop, duplicate debug Dev Settings rendering was removed, the Flutter-only More header was removed and responsive two-column desktop / one-column mobile layout was restored. The source order is represented in the default settings. Remaining: verify every destination action, icon/card details, Menu Studio effects and runtime responsive behavior.
+- **Settings:** source-facing hierarchy and labels were restored; the Theme Colors live preview card is now implemented in commit `849b5a9`. Remaining: source-equivalent reusable color picker, Android notification permission request/result toasts, omitted category/control descriptions, exact labels and runtime persistence/device evidence.
+- **Menu Studio:** not complete. GTN1's `menu-studio.js` manages both top navigation and More, supports area moves/reordering, per-button native color picking, live preview, reset and save. GTN2 currently edits only a single More list, has a mismatched ID inventory and writes a payload without required `orders.nav`; the source validator rejects that payload. Implement the complete two-area model and compatible JSON schema before closure.
+- **Player Profile:** not complete. GTN1 has a read-only view, separate edit action, first-launch completion state, persistent `profileId` and `setupComplete`. GTN2 currently opens the edit form directly and omits those model fields. Add the view/edit flow and source model compatibility.
+- **Save Slots:** not complete. Both support ten slots and GTN2 has create/edit/duplicate/reset/restore/Creative Mode. GTN1 additionally has portable encrypted export/import, legacy encrypted import, legacy-save migration and guarded Reset Everything. Port and test those source behaviors.
+- **Evidence gate:** Dart analysis passed on `62e96e0`; subsequent full test runs exposed stale test assumptions (340/7, then 342/5). Those assertions were corrected and formatted by the one-time formatter workflow; that temporary workflow was removed. A fresh full validation and Android/Windows build for the latest main commit are still required. Paired runtime captures and real-device/Windows smoke checks are also still missing.
+
+**Batch A exit is blocked** until all six surfaces above have source-backed behavior, tests/persistence checks and paired runtime evidence. Keep all unverified items open; do not advance to Batch B until this gate passes.
+
 ## Progress tracking
 
 Keep one status per checklist item: **Not started**, **In progress**, **Verified**, or **Not applicable**. A verified item records the GTN1 source reference and the GTN2 test or platform evidence. Do not create a new checklist section for each newly noticed idea.
