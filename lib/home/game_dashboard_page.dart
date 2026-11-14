@@ -29,7 +29,7 @@ class GameDashboardPage extends StatelessWidget {
     required this.game,
     required this.progression,
     required this.settings,
-    required this.settingsListenable,
+    this.settingsListenable,
     required this.activeSlot,
     required this.loading,
     required this.message,
@@ -64,7 +64,7 @@ class GameDashboardPage extends StatelessWidget {
   final GameState game;
   final ProgressionState progression;
   final GameSettings settings;
-  final ValueListenable<GameSettings> settingsListenable;
+  final ValueListenable<GameSettings>? settingsListenable;
   final int activeSlot;
   final bool loading;
   final String message;
@@ -101,7 +101,7 @@ class GameDashboardPage extends StatelessWidget {
           MaterialPageRoute<void>(
             builder: (_) => _MoreMenuPage(
               settings: settings,
-              settingsListenable: settingsListenable,
+              settingsListenable: settingsListenable ?? ValueNotifier(settings),
               showDeveloperSettings: showDeveloperSettings,
               onSaveSlots: onSaveSlots,
               playerProfile: playerProfile,
