@@ -380,7 +380,7 @@ class _PlayerProfilePageState extends State<PlayerProfilePage> {
         _editing = false;
       });
       widget.onSaved(savedProfile);
-      if (widget.firstLaunch) Navigator.of(context).pop();
+      if (!widget.firstLaunch) Navigator.of(context).pop();
     } on Exception {
       if (mounted) {
         setState(() {
