@@ -224,9 +224,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
     };
     if (widget.view == LegacySystemsView.music) {
       return Scaffold(
-        appBar: GtnExpressiveAppBar(
-          title: const Text('Offline Music Player'),
-        ),
+        appBar: GtnExpressiveAppBar(title: const Text('Offline Music Player')),
         body: ListView(
           padding: const EdgeInsets.fromLTRB(12, 14, 12, 28),
           children: [_musicSection(expanded: true)],
@@ -1644,260 +1642,263 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
             ),
             const SizedBox(height: 4),
             Text(
-              _systems.currentTrackId == null ? 'Offline Music Player' : 'Local audio',
+              _systems.currentTrackId == null
+                  ? 'Offline Music Player'
+                  : 'Local audio',
               style: Theme.of(context).textTheme.bodyMedium,
             ),
           ],
         ),
       ),
-Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                IconButton(
-                  tooltip: 'Previous track',
-                  onPressed: _systems.musicQueue.isEmpty
-                      ? null
-                      : () async {
-                          if (_musicPosition > const Duration(seconds: 3)) {
-                            await _audioPlayer.seek(Duration.zero);
-                            return;
-                          }
-                          final index = _systems.musicQueue.indexOf(
-                            _systems.currentTrackId ?? '',
-                          );
-                          final previous = (index - 1).clamp(
-                            0,
-                            _systems.musicQueue.length - 1,
-                          );
-                          await _playTrack(_systems.musicQueue[previous]);
-                        },
-                  icon: const Icon(Icons.skip_previous_rounded),
-                ),
-                IconButton(
-                  tooltip: _isPlaying ? 'Pause' : 'Play',
-                  onPressed: _toggleMusicPlayback,
-                  icon: Icon(
-                    _isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
-                  ),
-                ),
-                IconButton(
-                  tooltip: 'Next track',
-                  onPressed: _systems.musicQueue.isEmpty
-                      ? null
-                      : _playNextTrack,
-                  icon: const Icon(Icons.skip_next_rounded),
-                ),
-                IconButton(
-                  tooltip: 'Shuffle',
-                  onPressed: () => _saveSystems(
-                    _systems.copyWith(musicShuffle: !_systems.musicShuffle),
-                  ),
-                  icon: Icon(
-                    Icons.shuffle_rounded,
-                    color: _systems.musicShuffle
-                        ? Theme.of(context).colorScheme.primary
-                        : null,
-                  ),
-                ),
-                IconButton(
-                  tooltip: 'Repeat mode',
-                  onPressed: () {
-                    final modes = ['off', 'one', 'all'];
-                    final current = modes.indexOf(_systems.musicRepeatMode);
-                    _saveSystems(
-                      _systems.copyWith(
-                        musicRepeatMode: modes[(current + 1) % modes.length],
-                      ),
-                    );
-                  },
-                  icon: Icon(
-                    Icons.repeat_rounded,
-                    color: _systems.musicRepeatMode == 'off'
-                        ? null
-                        : Theme.of(context).colorScheme.primary,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Slider(
-              value: _musicDuration.inMilliseconds <= 0
-                  ? 0
-                  : _musicPosition.inMilliseconds
-                        .clamp(0, _musicDuration.inMilliseconds)
-                        .toDouble(),
-              max: _musicDuration.inMilliseconds <= 0
-                  ? 1
-                  : _musicDuration.inMilliseconds.toDouble(),
-              onChanged: _musicDuration.inMilliseconds <= 0
-                  ? null
-                  : (value) => _audioPlayer.seek(
-                      Duration(milliseconds: value.round()),
-                    ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(_formatMusicDuration(_musicPosition)),
-                Text(_formatMusicDuration(_musicDuration)),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-            child: M3EButton.icon(
-              style: M3EButtonStyle.tonal,
-              onPressed: _importMusicTracks,
-              icon: const Icon(Icons.add_rounded),
-              label: const Text('Import audio files'),
-            ),
-          ),
-          const Padding(
-            padding: EdgeInsets.fromLTRB(16, 12, 16, 4),
-            child: Text('Library', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
-          ),
-          if (_systems.musicLibrary.isEmpty)
-            const Padding(
-              padding: EdgeInsets.fromLTRB(20, 8, 20, 16),
-              child: Column(
-                children: [
-                  Icon(Icons.library_music_outlined, size: 42),
-                  SizedBox(height: 8),
-                  Text('Your music library is empty.'),
-                  Text(
-                    'Import audio files from this device to start building your library.',
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
-            ),
-          for (final track in _systems.musicLibrary)
-            ListTile(
-              dense: true,
-              leading: const Icon(Icons.music_note_rounded),
-              title: Text(
-                track.split(Platform.pathSeparator).last,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              trailing: Wrap(
-                spacing: 0,
-                children: [
-                  IconButton(
-                    tooltip: 'Play track',
-                    onPressed: () => _playTrack(track),
-                    icon: const Icon(Icons.play_circle_outline_rounded),
-                  ),
-                  IconButton(
-                    tooltip: 'Add to queue',
-                    onPressed: () => _enqueueMusicTrack(track),
-                    icon: const Icon(Icons.queue_music_rounded),
-                  ),
-                  IconButton(
-                    tooltip: 'Remove from library',
-                    onPressed: () => _removeMusicTrack(track),
-                    icon: const Icon(Icons.delete_outline_rounded),
-                  ),
-                ],
-              ),
-            ),
-          ListTile(
-            title: Text('Queue · ${_systems.musicQueue.length} tracks'),
-            trailing: TextButton(
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            IconButton(
+              tooltip: 'Previous track',
               onPressed: _systems.musicQueue.isEmpty
                   ? null
-                  : () => _saveSystems(_systems.copyWith(musicQueue: const [])),
-              child: const Text('Clear'),
+                  : () async {
+                      if (_musicPosition > const Duration(seconds: 3)) {
+                        await _audioPlayer.seek(Duration.zero);
+                        return;
+                      }
+                      final index = _systems.musicQueue.indexOf(
+                        _systems.currentTrackId ?? '',
+                      );
+                      final previous = (index - 1).clamp(
+                        0,
+                        _systems.musicQueue.length - 1,
+                      );
+                      await _playTrack(_systems.musicQueue[previous]);
+                    },
+              icon: const Icon(Icons.skip_previous_rounded),
             ),
-          ),
-          for (
-            var queueIndex = 0;
-            queueIndex < _systems.musicQueue.length;
-            queueIndex++
-          )
-            ListTile(
-              dense: true,
-              leading: Text('${queueIndex + 1}'),
-              title: Text(
-                _systems.musicQueue[queueIndex]
-                    .split(Platform.pathSeparator)
-                    .last,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              trailing: Wrap(
-                spacing: 0,
-                children: [
-                  IconButton(
-                    tooltip: 'Move up',
-                    onPressed: queueIndex == 0
-                        ? null
-                        : () => _moveQueuedTrack(queueIndex, queueIndex - 1),
-                    icon: const Icon(Icons.arrow_upward_rounded),
-                  ),
-                  IconButton(
-                    tooltip: 'Move down',
-                    onPressed: queueIndex == _systems.musicQueue.length - 1
-                        ? null
-                        : () => _moveQueuedTrack(queueIndex, queueIndex + 1),
-                    icon: const Icon(Icons.arrow_downward_rounded),
-                  ),
-                  IconButton(
-                    tooltip: 'Remove from queue',
-                    onPressed: () => _removeQueuedTrack(queueIndex),
-                    icon: const Icon(Icons.close_rounded),
-                  ),
-                ],
-              ),
-              onTap: () => _playTrack(_systems.musicQueue[queueIndex]),
-            ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
-            child: M3EButton.icon(
-              style: M3EButtonStyle.tonal,
-              onPressed: _createPlaylist,
-              icon: const Icon(Icons.playlist_add_rounded),
-              label: const Text('Create playlist'),
-            ),
-          ),
-          const Padding(
-            padding: EdgeInsets.fromLTRB(16, 12, 16, 4),
-            child: Text('Playlists', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
-          ),
-          for (final playlist in _systems.musicPlaylists.entries)
-            ListTile(
-              leading: const Icon(Icons.queue_music_rounded),
-              title: Text(playlist.key),
-              subtitle: Text('${playlist.value.length} tracks'),
-              onTap: () => _editPlaylist(playlist.key),
-              trailing: Wrap(
-                spacing: 0,
-                children: [
-                  IconButton(
-                    tooltip: 'Play playlist',
-                    onPressed: () => _playPlaylist(playlist.value),
-                    icon: const Icon(Icons.play_arrow_rounded),
-                  ),
-                  IconButton(
-                    tooltip: 'Edit playlist',
-                    onPressed: () => _editPlaylist(playlist.key),
-                    icon: const Icon(Icons.edit_outlined),
-                  ),
-                  IconButton(
-                    tooltip: 'Delete playlist',
-                    onPressed: () => _deletePlaylist(playlist.key),
-                    icon: const Icon(Icons.delete_outline_rounded),
-                  ),
-                ],
+            IconButton(
+              tooltip: _isPlaying ? 'Pause' : 'Play',
+              onPressed: _toggleMusicPlayback,
+              icon: Icon(
+                _isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
               ),
             ),
+            IconButton(
+              tooltip: 'Next track',
+              onPressed: _systems.musicQueue.isEmpty ? null : _playNextTrack,
+              icon: const Icon(Icons.skip_next_rounded),
+            ),
+            IconButton(
+              tooltip: 'Shuffle',
+              onPressed: () => _saveSystems(
+                _systems.copyWith(musicShuffle: !_systems.musicShuffle),
+              ),
+              icon: Icon(
+                Icons.shuffle_rounded,
+                color: _systems.musicShuffle
+                    ? Theme.of(context).colorScheme.primary
+                    : null,
+              ),
+            ),
+            IconButton(
+              tooltip: 'Repeat mode',
+              onPressed: () {
+                final modes = ['off', 'one', 'all'];
+                final current = modes.indexOf(_systems.musicRepeatMode);
+                _saveSystems(
+                  _systems.copyWith(
+                    musicRepeatMode: modes[(current + 1) % modes.length],
+                  ),
+                );
+              },
+              icon: Icon(
+                Icons.repeat_rounded,
+                color: _systems.musicRepeatMode == 'off'
+                    ? null
+                    : Theme.of(context).colorScheme.primary,
+              ),
+            ),
+          ],
+        ),
+      ),
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Slider(
+          value: _musicDuration.inMilliseconds <= 0
+              ? 0
+              : _musicPosition.inMilliseconds
+                    .clamp(0, _musicDuration.inMilliseconds)
+                    .toDouble(),
+          max: _musicDuration.inMilliseconds <= 0
+              ? 1
+              : _musicDuration.inMilliseconds.toDouble(),
+          onChanged: _musicDuration.inMilliseconds <= 0
+              ? null
+              : (value) =>
+                    _audioPlayer.seek(Duration(milliseconds: value.round())),
+        ),
+      ),
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(_formatMusicDuration(_musicPosition)),
+            Text(_formatMusicDuration(_musicDuration)),
+          ],
+        ),
+      ),
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        child: M3EButton.icon(
+          style: M3EButtonStyle.tonal,
+          onPressed: _importMusicTracks,
+          icon: const Icon(Icons.add_rounded),
+          label: const Text('Import audio files'),
+        ),
+      ),
+      const Padding(
+        padding: EdgeInsets.fromLTRB(16, 12, 16, 4),
+        child: Text(
+          'Library',
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+        ),
+      ),
+      if (_systems.musicLibrary.isEmpty)
+        const Padding(
+          padding: EdgeInsets.fromLTRB(20, 8, 20, 16),
+          child: Column(
+            children: [
+              Icon(Icons.library_music_outlined, size: 42),
+              SizedBox(height: 8),
+              Text('Your music library is empty.'),
+              Text(
+                'Import audio files from this device to start building your library.',
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      for (final track in _systems.musicLibrary)
+        ListTile(
+          dense: true,
+          leading: const Icon(Icons.music_note_rounded),
+          title: Text(
+            track.split(Platform.pathSeparator).last,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          trailing: Wrap(
+            spacing: 0,
+            children: [
+              IconButton(
+                tooltip: 'Play track',
+                onPressed: () => _playTrack(track),
+                icon: const Icon(Icons.play_circle_outline_rounded),
+              ),
+              IconButton(
+                tooltip: 'Add to queue',
+                onPressed: () => _enqueueMusicTrack(track),
+                icon: const Icon(Icons.queue_music_rounded),
+              ),
+              IconButton(
+                tooltip: 'Remove from library',
+                onPressed: () => _removeMusicTrack(track),
+                icon: const Icon(Icons.delete_outline_rounded),
+              ),
+            ],
+          ),
+        ),
+      ListTile(
+        title: Text('Queue · ${_systems.musicQueue.length} tracks'),
+        trailing: TextButton(
+          onPressed: _systems.musicQueue.isEmpty
+              ? null
+              : () => _saveSystems(_systems.copyWith(musicQueue: const [])),
+          child: const Text('Clear'),
+        ),
+      ),
+      for (
+        var queueIndex = 0;
+        queueIndex < _systems.musicQueue.length;
+        queueIndex++
+      )
+        ListTile(
+          dense: true,
+          leading: Text('${queueIndex + 1}'),
+          title: Text(
+            _systems.musicQueue[queueIndex].split(Platform.pathSeparator).last,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          trailing: Wrap(
+            spacing: 0,
+            children: [
+              IconButton(
+                tooltip: 'Move up',
+                onPressed: queueIndex == 0
+                    ? null
+                    : () => _moveQueuedTrack(queueIndex, queueIndex - 1),
+                icon: const Icon(Icons.arrow_upward_rounded),
+              ),
+              IconButton(
+                tooltip: 'Move down',
+                onPressed: queueIndex == _systems.musicQueue.length - 1
+                    ? null
+                    : () => _moveQueuedTrack(queueIndex, queueIndex + 1),
+                icon: const Icon(Icons.arrow_downward_rounded),
+              ),
+              IconButton(
+                tooltip: 'Remove from queue',
+                onPressed: () => _removeQueuedTrack(queueIndex),
+                icon: const Icon(Icons.close_rounded),
+              ),
+            ],
+          ),
+          onTap: () => _playTrack(_systems.musicQueue[queueIndex]),
+        ),
+      Padding(
+        padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+        child: M3EButton.icon(
+          style: M3EButtonStyle.tonal,
+          onPressed: _createPlaylist,
+          icon: const Icon(Icons.playlist_add_rounded),
+          label: const Text('Create playlist'),
+        ),
+      ),
+      const Padding(
+        padding: EdgeInsets.fromLTRB(16, 12, 16, 4),
+        child: Text(
+          'Playlists',
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+        ),
+      ),
+      for (final playlist in _systems.musicPlaylists.entries)
+        ListTile(
+          leading: const Icon(Icons.queue_music_rounded),
+          title: Text(playlist.key),
+          subtitle: Text('${playlist.value.length} tracks'),
+          onTap: () => _editPlaylist(playlist.key),
+          trailing: Wrap(
+            spacing: 0,
+            children: [
+              IconButton(
+                tooltip: 'Play playlist',
+                onPressed: () => _playPlaylist(playlist.value),
+                icon: const Icon(Icons.play_arrow_rounded),
+              ),
+              IconButton(
+                tooltip: 'Edit playlist',
+                onPressed: () => _editPlaylist(playlist.key),
+                icon: const Icon(Icons.edit_outlined),
+              ),
+              IconButton(
+                tooltip: 'Delete playlist',
+                onPressed: () => _deletePlaylist(playlist.key),
+                icon: const Icon(Icons.delete_outline_rounded),
+              ),
+            ],
+          ),
+        ),
     ];
     if (expanded) return Column(children: musicContent);
     return GtnExpressiveCard(

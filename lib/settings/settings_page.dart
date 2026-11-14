@@ -44,7 +44,8 @@ class SettingsPage extends StatelessWidget {
                     DropdownMenuItem(value: locale.$1, child: Text(locale.$2)),
                 ],
                 (value) {
-                  if (value != null) _update(settings.copyWith(localeCode: value));
+                  if (value != null)
+                    _update(settings.copyWith(localeCode: value));
                 },
               ),
             ],
@@ -52,8 +53,7 @@ class SettingsPage extends StatelessWidget {
           _SettingsSection(
             eyebrow: 'THEME APPEARANCE',
             title: 'Theme Appearance',
-            description:
-                'Choose whether the app follows your device theme or uses Dark, Light or AMOLED mode.',
+            description: 'Choose whether the app follows your device theme or uses Dark, Light or AMOLED mode.',
             children: [
               _dropdown<String>(
                 'Theme mode',
@@ -66,10 +66,12 @@ class SettingsPage extends StatelessWidget {
                 ],
                 (value) {
                   if (value != null) {
-                    _update(settings.copyWith(
-                      themeMode: value,
-                      darkMode: value == 'Dark' || value == 'AMOLED',
-                    ));
+                    _update(
+                      settings.copyWith(
+                        themeMode: value,
+                        darkMode: value == 'Dark' || value == 'AMOLED',
+                      ),
+                    );
                   }
                 },
               ),
@@ -78,8 +80,7 @@ class SettingsPage extends StatelessWidget {
           _SettingsSection(
             eyebrow: 'THEME COLORS',
             title: 'Theme Colors',
-            description:
-                'Customize the app’s primary, secondary and tertiary colors. Changes apply immediately.',
+            description: 'Customize the app’s primary, secondary and tertiary colors. Changes apply immediately.',
             children: [
               Row(
                 children: [
@@ -95,7 +96,10 @@ class SettingsPage extends StatelessWidget {
                         decoration: BoxDecoration(
                           color: Color(
                             0xFF000000 |
-                                (int.tryParse(hex.replaceFirst('#', ''), radix: 16) ??
+                                (int.tryParse(
+                                      hex.replaceFirst('#', ''),
+                                      radix: 16,
+                                    ) ??
                                     0x7C4DFF),
                           ),
                           borderRadius: BorderRadius.circular(20),
@@ -123,53 +127,66 @@ class SettingsPage extends StatelessWidget {
                     'Forest': ['#4CAF50', '#009688', '#8BC34A'],
                   };
                   final colors = presets[value];
-                  _update(settings.copyWith(
-                    themePreset: value,
-                    customPrimaryColor: colors?[0],
-                    customSecondaryColor: colors?[1],
-                    customTertiaryColor: colors?[2],
-                  ));
+                  _update(
+                    settings.copyWith(
+                      themePreset: value,
+                      customPrimaryColor: colors?[0],
+                      customSecondaryColor: colors?[1],
+                      customTertiaryColor: colors?[2],
+                    ),
+                  );
                 },
               ),
               _ColorSetting(
                 label: 'Primary',
                 value: settings.customPrimaryColor,
-                onSubmitted: (value) => _update(settings.copyWith(
-                  themePreset: 'Custom',
-                  customPrimaryColor: value,
-                )),
+                onSubmitted: (value) => _update(
+                  settings.copyWith(
+                    themePreset: 'Custom',
+                    customPrimaryColor: value,
+                  ),
+                ),
               ),
               _ColorSetting(
                 label: 'Secondary',
                 value: settings.customSecondaryColor,
-                onSubmitted: (value) => _update(settings.copyWith(
-                  themePreset: 'Custom',
-                  customSecondaryColor: value,
-                )),
+                onSubmitted: (value) => _update(
+                  settings.copyWith(
+                    themePreset: 'Custom',
+                    customSecondaryColor: value,
+                  ),
+                ),
               ),
               _ColorSetting(
                 label: 'Tertiary',
                 value: settings.customTertiaryColor,
-                onSubmitted: (value) => _update(settings.copyWith(
-                  themePreset: 'Custom',
-                  customTertiaryColor: value,
-                )),
+                onSubmitted: (value) => _update(
+                  settings.copyWith(
+                    themePreset: 'Custom',
+                    customTertiaryColor: value,
+                  ),
+                ),
               ),
             ],
           ),
           _SettingsSection(
             eyebrow: 'NUMBER NOTATION',
             title: 'Number Notation',
-            description:
-                'Choose how large numbers are displayed: Standard, Scientific or Engineering.',
+            description: 'Choose how large numbers are displayed: Standard, Scientific or Engineering.',
             children: [
               _dropdown<String>(
                 'Number notation',
                 settings.numberNotation,
                 const [
                   DropdownMenuItem(value: 'Standard', child: Text('Standard')),
-                  DropdownMenuItem(value: 'Scientific', child: Text('Scientific')),
-                  DropdownMenuItem(value: 'Engineering', child: Text('Engineering')),
+                  DropdownMenuItem(
+                    value: 'Scientific',
+                    child: Text('Scientific'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'Engineering',
+                    child: Text('Engineering'),
+                  ),
                 ],
                 (value) {
                   if (value != null) {
@@ -182,13 +199,13 @@ class SettingsPage extends StatelessWidget {
           _SettingsSection(
             eyebrow: 'PUSH NOTIFICATIONS & REMINDERS',
             title: 'Push Notifications & Reminders',
-            description:
-                'Enable optional game reminders and notifications. You can turn them off at any time.',
+            description: 'Enable optional game reminders and notifications. You can turn them off at any time.',
             children: [
               _toggle(
                 'Notifications',
                 settings.notificationsEnabled,
-                (value) => _update(settings.copyWith(notificationsEnabled: value)),
+                (value) =>
+                    _update(settings.copyWith(notificationsEnabled: value)),
               ),
               if (settings.notificationsEnabled) ...[
                 _dropdown<int>(
@@ -201,30 +218,32 @@ class SettingsPage extends StatelessWidget {
                   ],
                   (value) {
                     if (value != null) {
-                      _update(settings.copyWith(notificationIntervalHours: value));
+                      _update(
+                        settings.copyWith(notificationIntervalHours: value),
+                      );
                     }
                   },
                 ),
                 _toggle(
                   'Reminders',
                   settings.notificationRemindersEnabled,
-                  (value) => _update(settings.copyWith(
-                    notificationRemindersEnabled: value,
-                  )),
+                  (value) => _update(
+                    settings.copyWith(notificationRemindersEnabled: value),
+                  ),
                 ),
                 _toggle(
                   'Progression milestones',
                   settings.notificationProgressionEnabled,
-                  (value) => _update(settings.copyWith(
-                    notificationProgressionEnabled: value,
-                  )),
+                  (value) => _update(
+                    settings.copyWith(notificationProgressionEnabled: value),
+                  ),
                 ),
                 _toggle(
                   'Game events',
                   settings.notificationEventsEnabled,
-                  (value) => _update(settings.copyWith(
-                    notificationEventsEnabled: value,
-                  )),
+                  (value) => _update(
+                    settings.copyWith(notificationEventsEnabled: value),
+                  ),
                 ),
               ],
             ],
@@ -250,7 +269,8 @@ class SettingsPage extends StatelessWidget {
           _SettingsSection(
             eyebrow: 'VISUAL COMFORT & ACCESSIBILITY',
             title: 'Visual comfort & accessibility',
-            description: 'Reduce flashes and soften animated screen transitions.',
+            description:
+                'Reduce flashes and soften animated screen transitions.',
             children: [
               _toggle(
                 'Reduce Flashes',

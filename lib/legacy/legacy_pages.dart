@@ -225,7 +225,8 @@ class LegacyHubPage extends StatelessWidget {
             _MoreDestinationCard(
               destination: _MoreDestination(
                 title: 'Player profile',
-                description: 'View your username and bio, then edit your profile.',
+                description:
+                    'View your username and bio, then edit your profile.',
                 icon: Icons.account_circle_rounded,
                 accent: GtnUiTokens.cyan,
                 onTap: onOpenProfile!,

@@ -302,18 +302,51 @@ class GameSettings {
     final tutorialFeatures = readStrings('tutorialSeenFeatures');
     final moreOrder = readStrings('moreScreenOrder');
     const legacyDefaultMoreOrder = [
-      'rewards', 'journey', 'shop', 'home_base', 'relics', 'codex',
-      'changelog', 'about', 'music', 'settings', 'prestige', 'ultra',
-      'talent', 'traits', 'mutators', 'stats', 'staking', 'world_map',
-      'arcade', 'nebula', 'save_slots',
+      'rewards',
+      'journey',
+      'shop',
+      'home_base',
+      'relics',
+      'codex',
+      'changelog',
+      'about',
+      'music',
+      'settings',
+      'prestige',
+      'ultra',
+      'talent',
+      'traits',
+      'mutators',
+      'stats',
+      'staking',
+      'world_map',
+      'arcade',
+      'nebula',
+      'save_slots',
     ];
     const sourceDefaultMoreOrder = [
-      'rewards', 'journey', 'shop', 'home_base', 'relics', 'codex',
-      'changelog', 'about', 'save_slots', 'music', 'settings', 'prestige',
-      'ultra', 'talent', 'traits', 'mutators', 'stats', 'dev_settings',
+      'rewards',
+      'journey',
+      'shop',
+      'home_base',
+      'relics',
+      'codex',
+      'changelog',
+      'about',
+      'save_slots',
+      'music',
+      'settings',
+      'prestige',
+      'ultra',
+      'talent',
+      'traits',
+      'mutators',
+      'stats',
+      'dev_settings',
       'staking',
     ];
-    final migratedMoreOrder = moreOrder.isEmpty ||
+    final migratedMoreOrder =
+        moreOrder.isEmpty ||
             moreOrder.join('|') == legacyDefaultMoreOrder.join('|')
         ? sourceDefaultMoreOrder
         : moreOrder;
