@@ -222,6 +222,17 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
       LegacySystemsView.codex =>
         'Review the worlds, guardians and discoveries in your game.',
     };
+    if (widget.view == LegacySystemsView.music) {
+      return Scaffold(
+        appBar: GtnExpressiveAppBar(
+          title: const Text('Offline Music Player'),
+        ),
+        body: ListView(
+          padding: const EdgeInsets.fromLTRB(12, 14, 12, 28),
+          children: [_musicSection(expanded: true)],
+        ),
+      );
+    }
     return Scaffold(
       appBar: GtnExpressiveAppBar(title: Text(pageTitle)),
       body: ListView(
@@ -1602,16 +1613,44 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
   }
 
   Widget _musicSection({bool expanded = false}) {
-    return GtnExpressiveCard(
-      child: ExpansionTile(
-        initiallyExpanded: expanded,
-        leading: const Icon(Icons.library_music_rounded),
-        title: const Text('Offline music player'),
-        subtitle: Text(
-          '${_systems.musicLibrary.length} tracks · ${_systems.musicPlaylists.length} playlists',
+    final musicContent = <Widget>[
+      GtnExpressiveCard(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 220,
+              height: 220,
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(28),
+              ),
+              child: Icon(
+                Icons.music_note_rounded,
+                size: 76,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              _systems.currentTrackId == null
+                  ? 'No track selected'
+                  : _systems.currentTrackId!.split(Platform.pathSeparator).last,
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              _systems.currentTrackId == null ? 'Offline Music Player' : 'Local audio',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          ],
         ),
-        children: [
-          Padding(
+      ),
+Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
               children: [
@@ -1854,7 +1893,16 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
                 ],
               ),
             ),
-        ],
+    ];
+    if (expanded) return Column(children: musicContent);
+    return GtnExpressiveCard(
+      child: ExpansionTile(
+        leading: const Icon(Icons.library_music_rounded),
+        title: const Text('Offline music player'),
+        subtitle: Text(
+          '${_systems.musicLibrary.length} tracks · ${_systems.musicPlaylists.length} playlists',
+        ),
+        children: musicContent,
       ),
     );
   }
