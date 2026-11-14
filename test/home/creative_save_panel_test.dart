@@ -12,8 +12,8 @@ void main() {
     (int, int)? appliedRange;
     String? appliedKey;
     String? appliedValue;
-    await tester.view.setPhysicalSize(const Size(900, 1200));
-    await tester.view.setDevicePixelRatio(1);
+    tester.view.physicalSize = const Size(900, 1200);
+    tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
