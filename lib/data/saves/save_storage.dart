@@ -232,7 +232,7 @@ class SaveStorage {
   bool _isValidSave(SaveData data) {
     if (data.schemaVersion != SaveData.currentSchemaVersion ||
         data.minimum < 1 ||
-        data.maximum > 500 ||
+        data.maximum > (data.creativeModeEnabled ? 1000000 : 500) ||
         data.minimum > data.maximum ||
         data.secret < data.minimum ||
         data.secret > data.maximum ||
