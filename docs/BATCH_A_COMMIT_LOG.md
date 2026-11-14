@@ -37,7 +37,7 @@ Green CI is build/test evidence only. It does not prove live Android/Windows beh
 
 ## 3. Active continuation — Creative Save implementation
 
-**Implementation checkpoint:** current branch head before this ledger update is `82e01e3703cf50bfb2b4cef38489aaacf30dfa91`. All implementation commits are on top of the inspected `4fe04ee1572c3e4fb307cd37d796ee5312f30ce1` checkpoint. CI runs on intermediate heads were cancelled or failed during formatting/analyzer cleanup. No current-head full test or Android/Windows build has passed yet. The source-sync cleanup was audited against `main`; all ten tracked `assets/game/*.json` catalogs were restored and the accidental `gtn1-source` gitlink and generated `pubspec.lock` were removed. A fresh PR validation run is required before treating any tests as verified.
+**Implementation checkpoint:** current branch head before this ledger update is `c31ee6facf7ac2f019e8dc394b8c613303d4d2a5`. All implementation commits are on top of the inspected `4fe04ee1572c3e4fb307cd37d796ee5312f30ce1` checkpoint. CI runs on intermediate heads were cancelled or failed during formatting/analyzer cleanup. Run `43644101277` failed only at `dart format --output=none --set-exit-if-changed .` because the policy parser expression differed from formatter output; analyzer, tests and platform builds were skipped. Commit `3a1bf57715f361864b114a02485e2c45c160dda4` applies the format adjustment. No current-head full test or Android/Windows build has passed yet. The source-sync cleanup was audited against `main`; all ten tracked `assets/game/*.json` catalogs were restored and the accidental `gtn1-source` gitlink and generated `pubspec.lock` were removed. A fresh PR validation run is required before treating any tests as verified.
 
 **GTN1 sources compared for this pass:**
 - `shared/src/jvmAndAndroidMain/kotlin/com/jarrlyyy/guessthenumber/domain/model/GameState.kt`
@@ -123,6 +123,10 @@ Green CI is build/test evidence only. It does not prove live Android/Windows beh
 | 2026-11-14 21:38:13 | `2233a0824b11af21dbc2bf00f40a2bb3bccd3112` | Remove redundant nullable assertion | Dashboard | `GameViewModel.kt` | `lib/main.dart` | Null-safety lint cleanup; pending fresh CI |
 | 2026-11-14 21:38:15 | `aa9ac18ffd7843a75982be81cdd02411f6595f79` | Use current Flutter test view properties | Dashboard | `web-play/index.html` | `test/home/creative_save_panel_test.dart` | Test API updated; pending fresh CI |
 | 2026-11-14 21:40:53 | `82e01e3703cf50bfb2b4cef38489aaacf30dfa91` | Restore tracked catalogs and remove CI checkout artifacts | CI / source inventory | `main asset tree and checkout state` | `10 assets/game JSON catalogs; gtn1-source; pubspec.lock` | PR diff cleanup verified; new CI run still required |
+| 2026-11-14 21:41:20 | `5df39a3c79667794a683fe6771017b7e1ca07b4a` | Log every Batch A Creative Save commit (48 rows) | Audit | `docs/BATCH_A_COMMIT_LOG.md` | Append-only audit expansion; no runtime claim |
+| 2026-11-14 21:41:32 | `3a1bf57715f361864b114a02485e2c45c160dda4` | Format source currency parser expression | Dashboard | `GameViewModel.kt; BigNumber.kt` | `lib/core/creative/creative_save_policy.dart` | Addresses sole formatter diff in run 43644101277; fresh CI pending |
+| 2026-11-14 21:41:40 | `e2b1a2911a1919a5f6835c8cb9489c41305c91c5` | Correct Creative Save schema and CI evidence | Audit | `GameState.kt` | `docs/FINITE_PARITY_PLAN.md` | Documentation correction: schema v7, exact formatter failure evidence |
+| 2026-11-14 21:41:44 | `c31ee6facf7ac2f019e8dc394b8c613303d4d2a5` | Record Creative Save CI and source inventory status | Audit / Dashboard | `web-play/index.html; app.js; styles.css` | `docs/GTN1_SCREEN_PARITY_DIFF.md` | Documentation; runtime and paired screenshots remain open |
 
 ### Current Creative Save implementation state
 
