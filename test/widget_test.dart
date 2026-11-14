@@ -427,25 +427,48 @@ void main() {
     }
     expect(find.text('⭐'), findsOneWidget);
     const sourceIconMap = <String, IconData>{
+      'more-card-rewards': Icons.emoji_events_rounded,
+      'more-card-journey': Icons.access_time_rounded,
+      'more-card-shop': Icons.shopping_bag_rounded,
+      'more-card-home_base': Icons.home_rounded,
+      'more-card-relics': Icons.auto_awesome_rounded,
+      'more-card-codex': Icons.menu_book_rounded,
       'more-card-changelog': Icons.menu_book_rounded,
+      'more-card-about': Icons.info_outline_rounded,
+      'more-card-music': Icons.music_note_rounded,
+      'more-card-settings': Icons.settings_rounded,
       'more-card-prestige': Icons.workspace_premium_rounded,
+      'more-card-ultra': Icons.auto_awesome_rounded,
+      'more-card-talent': Icons.layers_rounded,
+      'more-card-traits': Icons.layers_rounded,
       'more-card-mutators': Icons.explore_rounded,
       'more-card-stats': Icons.menu_book_rounded,
+      'more-card-dev_settings': Icons.build_rounded,
       'more-card-staking': Icons.star_rounded,
-      'more-card-save_slots': Icons.grid_view_rounded,
     };
     for (final entry in sourceIconMap.entries) {
       expect(
         find.descendant(
           of: find.byKey(Key(entry.key)),
           matching: find.byWidgetPredicate(
-            (widget) => widget is Icon && widget.icon == entry.value,
+            (widget) =>
+                widget is Icon &&
+                widget.icon == entry.value &&
+                widget.size == 25 &&
+                widget.color == const Color(0xFF62E8FF),
           ),
         ),
         findsOneWidget,
-        reason: 'GTN1 icon mapping for ${entry.key}',
+        reason: 'GTN1 icon mapping, size and color for ${entry.key}',
       );
     }
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('more-card-save_slots')),
+        matching: find.text('▣'),
+      ),
+      findsOneWidget,
+    );
     expect(
       find.descendant(
         of: find.byKey(const Key('more-profile-card')),
