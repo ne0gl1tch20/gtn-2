@@ -37,9 +37,9 @@ class _CreativeSavePanelState extends State<CreativeSavePanel> {
     'ultra' => widget.progression.ultra.toString(),
     'nebula' => widget.progression.nebula.toString(),
     'attempts' => widget.game.attempts.toString(),
-    'correctGuesses' => widget.progression.correctGuesses.toString(),
-    'streak' => widget.progression.currentStreak.toString(),
-    'bestStreak' => widget.progression.bestStreak.toString(),
+    'correctGuesses' => widget.game.correctGuesses.toString(),
+    'streak' => widget.game.streak.toString(),
+    'bestStreak' => widget.game.bestStreak.toString(),
     _ => '0',
   };
 
