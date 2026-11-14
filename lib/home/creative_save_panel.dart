@@ -183,6 +183,7 @@ class _CreativeSavePanelState extends State<CreativeSavePanel> {
     bool numeric = false,
     int? maxLength,
   }) => TextField(
+    key: ValueKey('creative-save-$key'),
     controller: _controller(key),
     focusNode: _focusNode(key),
     enabled: !_saving,
