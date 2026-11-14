@@ -1322,6 +1322,12 @@ class _GameHomePageState extends State<GameHomePage>
           progression: _progression,
           activeSlot: _activeSlot,
           onSystemsChanged: _applyLegacyProgression,
+          onOpenProfile: _openPlayerProfile,
+          onOpenSaveSlots: _openSaveSlots,
+          onOpenSettings: _openSettings,
+          onOpenDeveloperSettings: kDebugMode ? _openDeveloperSettings : null,
+          onOpenShop: _openNebulaShop,
+          onOpenProgression: _openProgressionHub,
         ),
       ),
     );
