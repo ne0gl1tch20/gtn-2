@@ -90,14 +90,20 @@ class _MenuStudioPageState extends State<MenuStudioPage> {
 
   void _reorder(String area, int oldIndex, int newIndex) {
     final order = List<String>.of(
-      area == 'nav' ? _layout.navOrder : _layout.moreOrder,
+      area == 'nav'
+          ? _layout.visibleNavigationIds
+          : _layout.visibleMoreIds,
     );
     final item = order.removeAt(oldIndex);
     order.insert(newIndex, item);
+    final hidden = area == 'nav'
+        ? _layout.navOrder.where((id) => _layout.areas[id] != 'nav')
+        : _layout.moreOrder.where((id) => _layout.areas[id] != 'more');
+    final updatedOrder = [...order, ...hidden];
     setState(() {
       _layout = _layout.copyWith(
-        navOrder: area == 'nav' ? order : null,
-        moreOrder: area == 'more' ? order : null,
+        navOrder: area == 'nav' ? updatedOrder : null,
+        moreOrder: area == 'more' ? updatedOrder : null,
       );
     });
   }
