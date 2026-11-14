@@ -1399,10 +1399,12 @@ class _MoreMenuPage extends StatelessWidget {
             child: ConstrainedBox(
               constraints: BoxConstraints(minHeight: compact ? 70 : 78),
               child: Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: compact ? 12 : 15,
-                  vertical: compact ? 12 : 15,
-                ),
+                padding:
+                    cardPadding ??
+                    EdgeInsets.symmetric(
+                      horizontal: compact ? 12 : 15,
+                      vertical: compact ? 12 : 15,
+                    ),
                 child: Row(
                   children: [
                     leading ??
@@ -1541,7 +1543,7 @@ class _MoreMenuPage extends StatelessWidget {
             onTap: () => onDestination('codex'),
           ),
           'stats': (
-            icon: Icons.query_stats_rounded,
+            icon: Icons.menu_book_rounded,
             title: 'Stats',
             subtitle: 'Review your game statistics',
             onTap: () => onDestination('stats'),
@@ -1553,7 +1555,7 @@ class _MoreMenuPage extends StatelessWidget {
             onTap: () => onDestination('dev_settings'),
           ),
           'changelog': (
-            icon: Icons.history_rounded,
+            icon: Icons.menu_book_rounded,
             title: 'Changelog',
             subtitle: 'See what changed in recent updates',
             onTap: () => onDestination('changelog'),
@@ -1571,7 +1573,7 @@ class _MoreMenuPage extends StatelessWidget {
             onTap: () => onDestination('about'),
           ),
           'staking': (
-            icon: Icons.casino_rounded,
+            icon: Icons.star_rounded,
             title: 'Lucky Stake',
             subtitle: 'Try your luck with a stake',
             onTap: () => onDestination('stake'),
@@ -1589,7 +1591,7 @@ class _MoreMenuPage extends StatelessWidget {
             onTap: () => onDestination('prestige'),
           ),
           'save_slots': (
-            icon: Icons.save_rounded,
+            icon: Icons.grid_view_rounded,
             title: 'Save Slots',
             subtitle: 'Manage your saved games',
             onTap: onSaveSlots,

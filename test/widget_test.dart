@@ -426,6 +426,33 @@ void main() {
       expect(find.text(label), findsOneWidget);
     }
     expect(find.text('⭐'), findsOneWidget);
+    const sourceIconMap = <String, IconData>{
+      'more-card-changelog': Icons.menu_book_rounded,
+      'more-card-prestige': Icons.workspace_premium_rounded,
+      'more-card-mutators': Icons.explore_rounded,
+      'more-card-stats': Icons.menu_book_rounded,
+      'more-card-staking': Icons.star_rounded,
+      'more-card-save_slots': Icons.grid_view_rounded,
+    };
+    for (final entry in sourceIconMap.entries) {
+      expect(
+        find.descendant(
+          of: find.byKey(Key(entry.key)),
+          matching: find.byWidgetPredicate(
+            (widget) => widget is Icon && widget.icon == entry.value,
+          ),
+        ),
+        findsOneWidget,
+        reason: 'GTN1 icon mapping for ${entry.key}',
+      );
+    }
+    final profilePadding = tester.widget<Padding>(
+      find.descendant(
+        of: find.byKey(const Key('more-profile-card')),
+        matching: find.byType(Padding),
+      ).first,
+    );
+    expect(profilePadding.padding, const EdgeInsets.symmetric(horizontal: 18, vertical: 18));
     for (final subtitle in [
       'View your username and bio, then edit your profile.',
       'Achievements and daily rewards',
