@@ -5,7 +5,6 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../core/progression/achievement_catalog.dart';
 import '../core/progression/progression_state.dart';
-import '../creative/creative_mode_page.dart';
 import '../design/expressive_widgets.dart';
 import '../i18n/app_localizations.dart';
 import '../worlds/world_boss_catalog.dart';
@@ -255,39 +254,6 @@ class _MoreDestination {
   final IconData icon;
   final Color accent;
   final VoidCallback onTap;
-}
-
-class _MoreSectionHeading extends StatelessWidget {
-  const _MoreSectionHeading({required this.title, required this.description});
-
-  final String title;
-  final String description;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w900,
-            ),
-          ),
-          const SizedBox(height: 3),
-          Text(
-            description,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 class _MoreDestinationGrid extends StatelessWidget {
