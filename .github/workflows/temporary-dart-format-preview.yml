@@ -1,0 +1,18 @@
+name: Temporary Dart formatter preview
+on:
+  push:
+    branches:
+      - debug/dart-format-preview-30e3fb7
+jobs:
+  format-preview:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - name: Print formatter output
+        run: |
+          dart format --output=show lib/core/progression/progression_calculator.dart
+          dart format --output=show test/core/progression/progression_calculator_test.dart
+          dart format --output=show test/data/save_data_test.dart
