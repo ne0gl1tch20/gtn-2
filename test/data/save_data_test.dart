@@ -79,13 +79,13 @@ void main() {
 
     test('round-trips huge progression currencies and permanent levels', () {
       final progression = ProgressionState.initial.copyWith(
-        money: BigNumber.parse('1e100'),
-        prestige: BigNumber.parse('2.5e80'),
-        ultra: BigNumber.parse('3e60'),
-        nebula: BigNumber.parse('4e40'),
-        moneyEarned: BigNumber.parse('5e100'),
-        moneySpent: BigNumber.parse('6e90'),
-        nebulaEarned: BigNumber.parse('7e50'),
+        money: BigNumber.parse('10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000'),
+        prestige: BigNumber.parse('250000000000000000000000000000000000000000000000000000000000000000000000000000000'),
+        ultra: BigNumber.parse('3000000000000000000000000000000000000000000000000000000000000'),
+        nebula: BigNumber.parse('40000000000000000000000000000000000000000'),
+        moneyEarned: BigNumber.parse('50000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000'),
+        moneySpent: BigNumber.parse('6000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000'),
+        nebulaEarned: BigNumber.parse('700000000000000000000000000000000000000000000000000'),
         prestigeUpgrades: const {
           'prestige_money_boost': 4,
           'prestige_gain_boost': 5,
