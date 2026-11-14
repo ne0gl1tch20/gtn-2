@@ -1442,6 +1442,7 @@ class _MoreMenuPage extends StatelessWidget {
               ),
               children: [
                 Row(
+                  key: const Key('more-global-topbar'),
                   children: [
                     Container(
                       width: 42,
