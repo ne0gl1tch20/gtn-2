@@ -2,6 +2,10 @@
 
 **Purpose:** Finish the Flutter port of GTN1 without turning parity into an expanding, indefinite project.
 
+## MOST IMPORTANT NOTE — THE GTN2 PRODUCT STANDARD
+
+**GTN2 must be a fully functioning game and a 100% faithful port of the pinned GTN1 experience, with one deliberate twist: our original GTN1 identity is blended coherently with Material 3 Expressive.** This means matching GTN1's actual gameplay, systems, progression, content, screens, interactions, visual language and platform behavior—not merely creating routes, placeholder screens or partial lookalikes. Material 3 Expressive enhances the presentation and interaction design; it must never replace, simplify, omit or distort GTN1 behavior or recognizable identity. The finished result must feel like our game, faithfully carried into Flutter and thoughtfully integrated with Material 3. A feature counts as complete only when it works end-to-end in the running app and is verified against its GTN1 source. A successful build alone is not proof that the game is finished.
+
 ## Fixed scope
 
 - **Source of truth:** `ne0gl1tch20/GuessTheNumber`, pinned to the exact commit recorded by GTN2's asset-sync configuration. That commit is the feature boundary.
