@@ -1032,11 +1032,36 @@ class _GameHomePageState extends State<GameHomePage>
     );
   }
 
+  Future<void> _resetEverything() async {
+    for (var slot = 1; slot <= SaveStorage.maxSaveSlots; slot++) {
+      final storage = await SaveStorage.inApplicationDocuments(slot: slot);
+      await storage.reset();
+    }
+    final firstSlot = await SaveStorage.inApplicationDocuments(slot: 1);
+    await firstSlot.saveActiveSlot(1);
+    if (!mounted) return;
+    setState(() {
+      _activeSlot = 1;
+      _storage = Future.value(firstSlot);
+      _progression = ProgressionState.initial;
+      _engine = _engineFor(_progression, _settings);
+      _game = _engine.newGame();
+      _gamesWon = 0;
+      _controller.clear();
+      _botTeam.reset(_game.minimum, _game.maximum);
+      _message = 'All game data has been reset.';
+    });
+  }
+
   Future<void> _openSaveSlots() async {
     await _pushShellRoute<void>(
       MaterialPageRoute<void>(
         builder: (_) =>
-            SaveSlotsPage(activeSlot: _activeSlot, onSelect: _switchSaveSlot),
+            SaveSlotsPage(
+              activeSlot: _activeSlot,
+              onSelect: _switchSaveSlot,
+              onResetEverything: _resetEverything,
+            ),
       ),
     );
   }
