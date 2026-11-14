@@ -1,4 +1,4 @@
-name: One-time Batch A final formatter
+name: One-time Batch A final formatter (retry)
 on:
   push:
     branches: [main]
