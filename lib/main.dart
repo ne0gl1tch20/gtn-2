@@ -415,7 +415,10 @@ class _GameHomePageState extends State<GameHomePage>
           _settings = restoredSettings;
           _selectedPrimaryIndex = MenuStudioLayout.fromSettings(
             restoredSettings,
-          ).playIndex;
+          ).primaryNavigationIds
+              .where((id) => id != 'dev_settings' || kDebugMode)
+              .toList()
+              .indexOf('play');
           GtnApp.settingsNotifier.value = _settings;
           _message = timeTravelDetected
               ? 'Clock rollback detected. Auto Clicker paused for 24 hours.'
@@ -1040,7 +1043,9 @@ class _GameHomePageState extends State<GameHomePage>
         settings.moreScreenOrder.join('|') != _settings.moreScreenOrder.join('|');
     final currentNavigation = MenuStudioLayout.fromSettings(
       _settings,
-    ).primaryNavigationIds;
+    ).primaryNavigationIds
+        .where((id) => id != 'dev_settings' || kDebugMode)
+        .toList();
     final selectedDestination =
         _selectedPrimaryIndex >= 0 &&
             _selectedPrimaryIndex < currentNavigation.length
@@ -1048,7 +1053,9 @@ class _GameHomePageState extends State<GameHomePage>
         : 'play';
     final nextNavigation = MenuStudioLayout.fromSettings(
       settings,
-    ).primaryNavigationIds;
+    ).primaryNavigationIds
+        .where((id) => id != 'dev_settings' || kDebugMode)
+        .toList();
     final restoredSystems = restoreMusicStateFromSettings(
       settings: settings,
       systems: _progression.legacySystems,
@@ -1067,7 +1074,12 @@ class _GameHomePageState extends State<GameHomePage>
         final nextIndex = nextNavigation.indexOf(selectedDestination);
         _selectedPrimaryIndex = nextIndex >= 0
             ? nextIndex
-            : MenuStudioLayout.fromSettings(synchronizedSettings).playIndex;
+            : MenuStudioLayout.fromSettings(
+                synchronizedSettings,
+              ).primaryNavigationIds
+                  .where((id) => id != 'dev_settings' || kDebugMode)
+                  .toList()
+                  .indexOf('play');
       }
       if (difficultyChanged) {
         _engine = _engineFor(nextProgression, synchronizedSettings);
