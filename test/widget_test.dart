@@ -14,6 +14,7 @@ import 'package:material_ui/material_ui.dart';
 
 Widget buildDashboard({
   GameSettings? settings,
+  ValueListenable<GameSettings>? settingsListenable,
   bool loading = false,
   VoidCallback? onGuess,
   String? randomEventMessage,
@@ -37,6 +38,7 @@ Widget buildDashboard({
       game: const GameState(secret: 42, attempts: 0, isComplete: false),
       progression: ProgressionState.initial,
       settings: dashboardSettings,
+      settingsListenable: settingsListenable,
       activeSlot: 1,
       loading: loading,
       message: 'Make your move.',
@@ -539,6 +541,34 @@ void main() {
         .width;
     expect(botArenaWidth, lessThan(heroWidth));
     expect(botArenaWidth, greaterThan(500));
+  });
+
+  testWidgets('More route reacts to live Menu Studio order changes', (
+    WidgetTester tester,
+  ) async {
+    final settings = ValueNotifier(GameSettings.initial);
+    await tester.pumpWidget(buildDashboard(settingsListenable: settings));
+    await tester.tap(find.text('More').first);
+    await tester.pumpAndSettle();
+
+    final rewardsBefore = tester.getTopLeft(find.text('Rewards')).dy;
+    final journeyBefore = tester.getTopLeft(find.text('Journey')).dy;
+    expect(rewardsBefore, lessThan(journeyBefore));
+
+    final layout = MenuStudioLayout.defaults();
+    final order = [...layout.moreOrder];
+    order.remove('journey');
+    order.insert(0, 'journey');
+    final edited = layout.copyWith(moreOrder: order);
+    settings.value = GameSettings.initial.copyWith(
+      webMenuStudioLayout: edited.encode(),
+      moreScreenOrder: edited.settingsMoreOrder,
+    );
+    await tester.pumpAndSettle();
+
+    final rewardsAfter = tester.getTopLeft(find.text('Rewards')).dy;
+    final journeyAfter = tester.getTopLeft(find.text('Journey')).dy;
+    expect(journeyAfter, lessThan(rewardsAfter));
   });
 
   testWidgets('More profile stays full width and links use GTN1 breakpoint', (
