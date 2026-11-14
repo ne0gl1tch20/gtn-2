@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gtn_2/settings/game_settings.dart';
 import 'package:gtn_2/settings/menu_studio_layout.dart';
@@ -68,7 +67,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(saved, isNotNull);
-    final payload = jsonDecode(saved!.webMenuStudioLayout!) as Map;
+    final payload = jsonDecode(saved!.webMenuStudioLayout!) as Map<String, dynamic>;
     final areas = payload['areas'] as Map;
     final orders = payload['orders'] as Map;
     expect(orders['nav'], isA<List>());
