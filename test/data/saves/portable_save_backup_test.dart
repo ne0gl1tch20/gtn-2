@@ -13,9 +13,15 @@ void main() {
   });
 
   test('wrong passphrase and tampered ciphertext are rejected', () async {
-    final encrypted = await PortableSaveBackup.encrypt('private-save', passphrase);
+    final encrypted = await PortableSaveBackup.encrypt(
+      'private-save',
+      passphrase,
+    );
     expect(
-      await PortableSaveBackup.decrypt(encrypted, 'another incorrect passphrase'),
+      await PortableSaveBackup.decrypt(
+        encrypted,
+        'another incorrect passphrase',
+      ),
       isNull,
     );
 
@@ -32,22 +38,28 @@ void main() {
     );
   });
 
-  test('malformed and unknown GTNPORT versions are classified as portable', () async {
-    expect(PortableSaveBackup.isPortableFormat('GTNPORT2:not-a-backup'), isTrue);
-    expect(
-      await PortableSaveBackup.decrypt('GTNPORT2:not-a-backup', passphrase),
-      isNull,
-    );
-    expect(
-      await PortableSaveBackup.decrypt('${PortableSaveBackup.prefix}not-base64!', passphrase),
-      isNull,
-    );
-  });
+  test(
+    'malformed and unknown GTNPORT versions are classified as portable',
+    () async {
+      expect(
+        PortableSaveBackup.isPortableFormat('GTNPORT2:not-a-backup'),
+        isTrue,
+      );
+      expect(
+        await PortableSaveBackup.decrypt('GTNPORT2:not-a-backup', passphrase),
+        isNull,
+      );
+      expect(
+        await PortableSaveBackup.decrypt(
+          '${PortableSaveBackup.prefix}not-base64!',
+          passphrase,
+        ),
+        isNull,
+      );
+    },
+  );
 
   test('short passphrases are rejected', () async {
-    expect(
-      PortableSaveBackup.encrypt('payload', 'short'),
-      throwsArgumentError,
-    );
+    expect(PortableSaveBackup.encrypt('payload', 'short'), throwsArgumentError);
   });
 }

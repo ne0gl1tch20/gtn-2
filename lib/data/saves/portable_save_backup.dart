@@ -31,7 +31,9 @@ class PortableSaveBackup {
 
   static Future<String> encrypt(String payload, String passphrase) async {
     if (passphrase.length < minPassphraseLength) {
-      throw ArgumentError('Passphrase must be at least $minPassphraseLength characters.');
+      throw ArgumentError(
+        'Passphrase must be at least $minPassphraseLength characters.',
+      );
     }
 
     final random = Random.secure();
@@ -54,7 +56,10 @@ class PortableSaveBackup {
         aad: utf8.encode(_aad),
       );
       final envelope = Uint8List(
-        salt.length + nonce.length + box.cipherText.length + box.mac.bytes.length,
+        salt.length +
+            nonce.length +
+            box.cipherText.length +
+            box.mac.bytes.length,
       );
       var offset = 0;
       envelope.setRange(offset, offset + salt.length, salt);
@@ -92,11 +97,7 @@ class PortableSaveBackup {
         nonce: salt,
       );
       final cleartext = await _cipher.decrypt(
-        SecretBox(
-          ciphertext,
-          nonce: nonce,
-          mac: Mac(tag),
-        ),
+        SecretBox(ciphertext, nonce: nonce, mac: Mac(tag)),
         secretKey: key,
         aad: utf8.encode(_aad),
       );
@@ -114,6 +115,7 @@ class PortableSaveBackup {
 
   // Java's PBEKeySpec uses the low byte of each UTF-16 code unit for the
   // PBKDF2 password input. Keeping that conversion preserves GTN1's envelope.
-  static Uint8List _passwordBytes(String passphrase) =>
-      Uint8List.fromList(passphrase.codeUnits.map((unit) => unit & 0xff).toList());
+  static Uint8List _passwordBytes(String passphrase) => Uint8List.fromList(
+    passphrase.codeUnits.map((unit) => unit & 0xff).toList(),
+  );
 }
