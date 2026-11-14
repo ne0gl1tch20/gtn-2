@@ -68,9 +68,7 @@ class LiveOpsClaimPolicy {
     if (claims < 0 || claims >= event.maxClaims) return null;
 
     final nebulaEarned = progression.nebulaEarned;
-    final maxNebulaEarned = BigNumber.fromInt(
-      _maxLong - event.rewardNebula,
-    );
+    final maxNebulaEarned = BigNumber.fromInt(_maxLong - event.rewardNebula);
     if (nebulaEarned.compareTo(BigNumber.fromInt(0)) < 0 ||
         nebulaEarned.compareTo(maxNebulaEarned) > 0) {
       return null;
