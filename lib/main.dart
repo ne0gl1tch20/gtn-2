@@ -11,6 +11,7 @@ import 'arcade/arcade_page.dart';
 import 'core/automation/bot_team.dart';
 import 'core/automation/guessing_bot.dart';
 import 'core/automation/offline_earnings_settlement.dart';
+import 'core/creative/creative_save_policy.dart';
 import 'core/events/random_event_engine.dart';
 import 'core/game/adaptive_target_generator.dart';
 import 'core/game/difficulty_rules.dart';
@@ -191,6 +192,7 @@ class _GameHomePageState extends State<GameHomePage>
   final GlobalKey<NavigatorState> _shellNavigatorKey =
       GlobalKey<NavigatorState>();
   int _gamesWon = 0;
+  bool _creativeModeEnabled = false;
   bool _isLoading = true;
   bool _isPlayerProfileLoaded = false;
   GameSettings? _menuStudioPreviewSettings;
@@ -241,7 +243,7 @@ class _GameHomePageState extends State<GameHomePage>
         _incomePerSecond = income;
       });
       if (unlocked || evaluated.playtimeSeconds % 30 == 0) {
-        unawaited(_persist());
+        unawaited(_persist().then<void>((_) {}));
       }
     });
   }
@@ -329,7 +331,7 @@ class _GameHomePageState extends State<GameHomePage>
           _randomEventMessage = null;
           _progression = _progression.copyWith(clearLastRandomEventId: true);
         });
-        unawaited(_persist());
+        unawaited(_persist().then<void>((_) {}));
       });
       await _persist();
     } catch (error) {
@@ -404,15 +406,21 @@ class _GameHomePageState extends State<GameHomePage>
         await AppLocalizations.load(restoredSettings.localeCode);
         if (!mounted) return;
         setState(() {
-          _engine = restoredEngine;
+          _engine = save.creativeModeEnabled
+              ? GameEngine(minimum: save.minimum, maximum: save.maximum)
+              : restoredEngine;
           _game = _engine.restore(
             secret: save.secret,
             attempts: save.attempts,
             isComplete: save.isComplete,
             savedMinimum: save.minimum,
             savedMaximum: save.maximum,
+            savedCorrectGuesses: save.correctGuesses,
+            savedStreak: save.streak,
+            savedBestStreak: save.bestStreak,
           );
           _gamesWon = save.gamesWon;
+          _creativeModeEnabled = save.creativeModeEnabled;
           _progression = restoredProgression;
           _settings = restoredSettings;
           _selectedPrimaryIndex =
@@ -448,11 +456,13 @@ class _GameHomePageState extends State<GameHomePage>
     _scheduleAutoClicker();
   }
 
-  Future<void> _persist() async {
-    final evaluated = _progressionEngine.evaluateAchievements(_progression);
-    if (evaluated != _progression) {
-      _progression = evaluated;
-      if (mounted) setState(() {});
+  Future<bool> _persist({bool evaluateAchievements = true}) async {
+    if (evaluateAchievements) {
+      final evaluated = _progressionEngine.evaluateAchievements(_progression);
+      if (evaluated != _progression) {
+        _progression = evaluated;
+        if (mounted) setState(() {});
+      }
     }
     try {
       final storage = await _storage;
@@ -467,29 +477,109 @@ class _GameHomePageState extends State<GameHomePage>
             SaveData(
               secret: _game.secret,
               attempts: _game.attempts,
+              correctGuesses: _game.correctGuesses,
+              streak: _game.streak,
+              bestStreak: _game.bestStreak,
+
               gamesWon: _gamesWon,
               isComplete: _game.isComplete,
               minimum: _game.minimum,
               maximum: _game.maximum,
               progression: _progression,
               settings: _settings,
+              creativeModeEnabled: _creativeModeEnabled,
             );
         return base.copyWith(
           secret: _game.secret,
           attempts: _game.attempts,
+          correctGuesses: _game.correctGuesses,
+          streak: _game.streak,
+          bestStreak: _game.bestStreak,
+
           gamesWon: _gamesWon,
           isComplete: _game.isComplete,
           minimum: _game.minimum,
           maximum: _game.maximum,
           progression: _progression,
           settings: _settings,
+          creativeModeEnabled: _creativeModeEnabled,
         );
       });
+      return true;
     } on Exception {
       if (mounted) {
         setState(() => _message = 'Game is still playable, but saving failed.');
       }
+      return false;
     }
+  }
+
+  Future<bool> _updateCreativeRange(int minimum, int maximum) async {
+    if (!_creativeModeEnabled) return false;
+    final updated = CreativeSavePolicy.updateRange(
+      current: _currentSaveData(),
+      minimum: minimum,
+      maximum: maximum,
+    );
+    if (updated == null) return false;
+
+    _engine = GameEngine(minimum: minimum, maximum: maximum);
+    final nextGame = _engine.restore(
+      secret: updated.secret,
+      attempts: updated.attempts,
+      isComplete: updated.isComplete,
+      savedMinimum: updated.minimum,
+      savedMaximum: updated.maximum,
+      savedCorrectGuesses: updated.correctGuesses,
+      savedStreak: updated.streak,
+      savedBestStreak: updated.bestStreak,
+    );
+    setState(() {
+      _game = nextGame;
+      _progression = updated.progression;
+      _controller.clear();
+      _message = 'Creative Save range updated. A fresh round is ready.';
+    });
+    _botTeam.reset(minimum, maximum);
+    return _persist(evaluateAchievements: false);
+  }
+
+  Future<bool> _updateCreativeValue(String key, String value) async {
+    if (!_creativeModeEnabled) return false;
+    final updated = CreativeSavePolicy.updateValue(
+      current: _currentSaveData(),
+      key: key,
+      value: value,
+      upgrades: UpgradeCatalog.all,
+      prestigeUpgrades: UpgradeCatalog.prestige,
+      ultraUpgrades: UpgradeCatalog.ultra,
+    );
+    if (updated == null) return false;
+
+    setState(() {
+      _progression = updated.progression;
+      if (const {
+        'attempts',
+        'correctGuesses',
+        'streak',
+        'bestStreak',
+      }.contains(key)) {
+        _game = GameState(
+          secret: _game.secret,
+          attempts: updated.attempts,
+          correctGuesses: updated.correctGuesses,
+          streak: updated.streak,
+          bestStreak: updated.bestStreak,
+
+          isComplete: _game.isComplete,
+          lastResult: _game.lastResult,
+          minimum: _game.minimum,
+          maximum: _game.maximum,
+        );
+      }
+      _message = 'Creative Save updated.';
+    });
+    return _persist(evaluateAchievements: false);
   }
 
   Future<ProgressionState> _purchaseUpgrade(
@@ -924,7 +1014,9 @@ class _GameHomePageState extends State<GameHomePage>
       setState(() {
         _storage = Future.value(storage);
         _activeSlot = slot;
-        _engine = nextEngine;
+        _engine = save != null && save.creativeModeEnabled
+            ? GameEngine(minimum: save.minimum, maximum: save.maximum)
+            : nextEngine;
         _game = save == null
             ? _engine.newGame()
             : _engine.restore(
@@ -933,8 +1025,12 @@ class _GameHomePageState extends State<GameHomePage>
                 isComplete: save.isComplete,
                 savedMinimum: save.minimum,
                 savedMaximum: save.maximum,
+                savedCorrectGuesses: save.correctGuesses,
+                savedStreak: save.streak,
+                savedBestStreak: save.bestStreak,
               );
         _gamesWon = save?.gamesWon ?? 0;
+        _creativeModeEnabled = save?.creativeModeEnabled ?? false;
         _progression = nextProgression;
         _settings = nextSettings;
         GtnApp.settingsNotifier.value = _settings;
@@ -1053,6 +1149,7 @@ class _GameHomePageState extends State<GameHomePage>
       _engine = _engineFor(_progression, _settings);
       _game = _engine.newGame();
       _gamesWon = 0;
+      _creativeModeEnabled = false;
       _controller.clear();
       _botTeam.reset(_game.minimum, _game.maximum);
       _message = 'All game data has been reset.';
@@ -1219,12 +1316,17 @@ class _GameHomePageState extends State<GameHomePage>
   SaveData _currentSaveData() => SaveData(
     secret: _game.secret,
     attempts: _game.attempts,
+    correctGuesses: _game.correctGuesses,
+    streak: _game.streak,
+    bestStreak: _game.bestStreak,
+
     gamesWon: _gamesWon,
     isComplete: _game.isComplete,
     minimum: _game.minimum,
     maximum: _game.maximum,
     progression: _progression,
     settings: _settings,
+    creativeModeEnabled: _creativeModeEnabled,
   );
 
   Future<void> _applyDeveloperSave(SaveData save) async {
@@ -1239,15 +1341,23 @@ class _GameHomePageState extends State<GameHomePage>
       settings: save.settings,
       systems: restoredSystems,
     );
+    final restoredEngine = save.creativeModeEnabled
+        ? GameEngine(minimum: save.minimum, maximum: save.maximum)
+        : _engineFor(restoredProgression, restoredSettings);
     setState(() {
+      _engine = restoredEngine;
       _game = _engine.restore(
         secret: save.secret,
         attempts: save.attempts,
         isComplete: save.isComplete,
         savedMinimum: save.minimum,
         savedMaximum: save.maximum,
+        savedCorrectGuesses: save.correctGuesses,
+        savedStreak: save.streak,
+        savedBestStreak: save.bestStreak,
       );
       _gamesWon = save.gamesWon;
+      _creativeModeEnabled = save.creativeModeEnabled;
       _progression = restoredProgression;
       _settings = restoredSettings;
       GtnApp.settingsNotifier.value = _settings;
@@ -1301,12 +1411,20 @@ class _GameHomePageState extends State<GameHomePage>
           return '$action set to $amount.';
         case '/attempts':
           final value = int.parse(parts[1]);
-          if (value < 0) return 'Attempts cannot be negative.';
+          if (value < _game.correctGuesses ||
+              value > CreativeSavePolicy.maxCounter) {
+            return 'Attempts must be between the current correct guesses and 1,000,000,000,000.';
+          }
           setState(() {
             _game = _engine.restore(
               secret: _game.secret,
               attempts: value,
               isComplete: _game.isComplete,
+              savedMinimum: _game.minimum,
+              savedMaximum: _game.maximum,
+              savedCorrectGuesses: _game.correctGuesses,
+              savedStreak: _game.streak,
+              savedBestStreak: _game.bestStreak,
             );
           });
           await _persist();
@@ -1491,7 +1609,7 @@ class _GameHomePageState extends State<GameHomePage>
     setState(() {
       var rangeScoutActive = false;
       final previousAttempts = _game.attempts;
-      _game = _engine.guess(_game, guess);
+      _game = _engine.guess(_game, guess, countPlayerGuess: !isBot);
       resultForMessage = _game.lastResult;
       if (_game.attempts > previousAttempts) {
         final correct = resultForMessage == GuessResult.correct;
@@ -1725,6 +1843,10 @@ class _GameHomePageState extends State<GameHomePage>
             _game = GameState(
               secret: _game.secret,
               attempts: previousAttempts,
+              correctGuesses: _game.correctGuesses,
+              streak: _game.streak,
+              bestStreak: _game.bestStreak,
+
               isComplete: false,
               lastResult: resultForMessage,
               minimum: _game.minimum,
@@ -1867,6 +1989,9 @@ class _GameHomePageState extends State<GameHomePage>
       onLegacySection: _openLegacySection,
       playerProfile: _playerProfile,
       onPlayerProfile: _openPlayerProfile,
+      creativeModeEnabled: _creativeModeEnabled,
+      onCreativeRange: _updateCreativeRange,
+      onCreativeValue: _updateCreativeValue,
     );
   }
 }
