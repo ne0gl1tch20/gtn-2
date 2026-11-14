@@ -79,7 +79,7 @@ The single GTN1 HTML shell renders these 22 roots. Each is a separate player-fac
 - **GTN1 source:** `app/src/main/java/com/jarrlyyy/guessthenumber/ui/screens/MusicPlayerScreen.kt` and `data/audio/BackgroundMusicManager.kt`
 - **GTN2 destination:** `lib/legacy/legacy_systems_page.dart`, entered from `_openMusic()` in `lib/main.dart`
 - **GTN1 structure observed:** dedicated player screen; 220dp album-art surface; current title and artist/album; elapsed/total duration; seek slider; previous/play-pause/next/shuffle/repeat controls; import action; library with metadata and play/queue/remove actions; queue with ordering/removal; playlist creation, playback, expansion and deletion.
-- **GTN2 finding before Batch 1:** `_openMusic()` opened an expanded `ExpansionTile` inside a generic systems page. **Batch 1 change:** the music view now branches to its own app-bar/body shell and renders player content directly, with a 220px artwork-placeholder surface, current-track title, playback controls, seek/progress, library, queue and playlist controls. This restores the dedicated page structure but is not full parity: the artwork is still a generic icon, track artist/album/duration metadata is not extracted, and Android background media-service/notification lifecycle is not implemented. The reported blank screen still needs runtime reproduction and widget/device verification.
+- **GTN2 finding before Batch 1:** `_openMusic()` opened an expanded `ExpansionTile` inside a generic systems page. **Batch 1 change (commits `392b74f`, `5cfe029`):** the music view now branches to its own app-bar/body shell and renders player content directly, with a 220px artwork-placeholder surface, current-track title, playback controls (previous/play/next/shuffle/repeat), seek/progress, library, queue and playlist controls. This restores the dedicated page structure but is not full parity: the artwork is still a generic icon, track artist/album/duration metadata is not extracted, and Android background media-service/notification lifecycle is not implemented. The reported blank screen still needs runtime reproduction and widget/device verification.
 
 ## Complete Kotlin UI source inventory
 
@@ -163,5 +163,5 @@ Each batch must inspect both repositories before changes, implement the full sou
 ## Current verified findings vs. pending evidence
 
 - **Verified from source code:** the five deep-diff structures above. Batch 1 removes the music route's generic expansion shell and restores a dedicated player-page layout; metadata/artwork and platform media-service gaps remain open.
-- **Not yet verified:** paired runtime screenshots, all remaining route-by-route source diffs, actual reproduction of the blank music screen on device, and Android/Windows visual parity.
+- **Not yet verified:** paired runtime screenshots, all remaining route-by-route source diffs, actual reproduction of the blank music screen on device, and Android/Windows visual parity. Batch 1 has not yet passed Dart formatting, Flutter analysis, widget tests or a debug build; no CI status checks were returned for commit `5cfe029`.
 - **No screen is declared fully restored by this audit.**
