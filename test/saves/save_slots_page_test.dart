@@ -61,16 +61,18 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Create Slot 1'), findsOneWidget);
-    expect(find.text('Creative Save'), findsOneWidget);
+    expect(find.text('Creative Mode'), findsOneWidget);
     expect(find.byType(SwitchListTile), findsOneWidget);
-    expect(find.text('Range minimum (1–1,000,000)'), findsNothing);
+    expect(find.text('Number range minimum (1–1,000,000)'), findsNothing);
 
     await tester.tap(find.byType(SwitchListTile));
     await tester.pumpAndSettle();
 
-    expect(find.text('Range minimum (1–1,000,000)'), findsOneWidget);
-    expect(find.text('Range maximum (1–1,000,000)'), findsOneWidget);
-    expect(find.text('Permanently enables the active-save Creative Save tools.'), findsOneWidget);
+    expect(find.text('Number range minimum (1–1,000,000)'), findsOneWidget);
+    expect(find.text('Number range maximum (1–1,000,000)'), findsOneWidget);
+    expect(find.text('Extra hints (0–5)'), findsOneWidget);
+    expect(find.text('Attempt limit (0 = unlimited, 1–100)'), findsOneWidget);
+    expect(find.text('Permanent for this save. You can’t turn it off later.'), findsOneWidget);
 
     await tester.tap(find.text('Cancel'));
     await tester.pumpAndSettle();
