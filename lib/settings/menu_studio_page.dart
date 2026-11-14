@@ -29,6 +29,7 @@ class MenuStudioPage extends StatefulWidget {
 class _MenuStudioPageState extends State<MenuStudioPage> {
   late MenuStudioLayout _layout;
   bool _saving = false;
+  bool _allowPop = false;
 
   static const _labels = <String, String>{
     'worlds': 'Worlds',
@@ -79,9 +80,12 @@ class _MenuStudioPageState extends State<MenuStudioPage> {
   void _preview() => widget.onPreview?.call(_settingsForLayout());
 
   void _cancel() {
-    if (_saving) return;
+    if (_saving || _allowPop) return;
     widget.onCancel?.call();
-    Navigator.of(context).pop();
+    setState(() => _allowPop = true);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) Navigator.of(context).pop();
+    });
   }
 
   void _move(String id, String targetArea) {
@@ -288,7 +292,7 @@ class _MenuStudioPageState extends State<MenuStudioPage> {
     ].take(8);
 
     return PopScope<void>(
-      canPop: false,
+      canPop: _allowPop,
       onPopInvokedWithResult: (didPop, result) {
         if (!didPop) _cancel();
       },
