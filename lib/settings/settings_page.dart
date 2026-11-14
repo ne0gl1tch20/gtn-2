@@ -82,6 +82,116 @@ class SettingsPage extends StatelessWidget {
             title: 'Theme Colors',
             description: 'Customize the app’s primary, secondary and tertiary colors. Changes apply immediately.',
             children: [
+              Builder(
+                builder: (context) {
+                  final scheme = Theme.of(context).colorScheme;
+                  Color parsePreviewColor(String value, Color fallback) {
+                    final parsed = int.tryParse(
+                      value.replaceFirst('#', ''),
+                      radix: 16,
+                    );
+                    return parsed == null
+                        ? fallback
+                        : Color(0xFF000000 | parsed);
+                  }
+
+                  final primary = parsePreviewColor(
+                    settings.customPrimaryColor,
+                    scheme.primary,
+                  );
+                  final secondary = parsePreviewColor(
+                    settings.customSecondaryColor,
+                    scheme.secondary,
+                  );
+                  final tertiary = parsePreviewColor(
+                    settings.customTertiaryColor,
+                    scheme.tertiary,
+                  );
+                  return Card(
+                    color: scheme.surfaceContainerLow,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Text(
+                            'Live preview',
+                            style: Theme.of(context).textTheme.titleSmall,
+                          ),
+                          const SizedBox(height: 12),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Nice guess!',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium,
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      'Secret number found. Your streak keeps growing.',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall
+                                          ?.copyWith(
+                                            color: scheme.onSurfaceVariant,
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              DecoratedBox(
+                                decoration: BoxDecoration(
+                                  color: primary,
+                                  borderRadius: BorderRadius.circular(24),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 20,
+                                    vertical: 10,
+                                  ),
+                                  child: Text(
+                                    'Guess',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .labelLarge
+                                        ?.copyWith(color: scheme.onPrimary),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          Row(
+                            children: [
+                              for (final color in [
+                                primary,
+                                secondary,
+                                tertiary,
+                              ])
+                                Expanded(
+                                  child: Container(
+                                    height: 8,
+                                    margin: const EdgeInsets.only(right: 8),
+                                    decoration: BoxDecoration(
+                                      color: color,
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
               Row(
                 children: [
                   for (final hex in [
