@@ -93,7 +93,7 @@ class _SeasonalThemeSimulatorCardState extends State<SeasonalThemeSimulatorCard>
             TextField(
               key: const ValueKey('season-simulator-date'),
               controller: _dateController,
-              singleLine: true,
+              maxLines: 1,
               decoration: InputDecoration(
                 labelText: 'Preview date (YYYY-MM-DD)',
                 border: const OutlineInputBorder(),
