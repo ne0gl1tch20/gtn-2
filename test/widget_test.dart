@@ -491,10 +491,14 @@ void main() {
     await tester.tap(find.text('More').first);
     await tester.pumpAndSettle();
 
-    final profileWidth = tester.getSize(find.text('Player profile')).width;
+    final profileWidth = tester.getSize(
+      find.byKey(const Key('more-profile-card')),
+    ).width;
     final rewards = tester.getTopLeft(find.text('Rewards'));
     final journey = tester.getTopLeft(find.text('Journey'));
-    final rewardsWidth = tester.getSize(find.text('Rewards')).width;
+    final rewardsWidth = tester.getSize(
+      find.byKey(const Key('more-card-rewards')),
+    ).width;
     expect(profileWidth, greaterThan(rewardsWidth));
     expect(rewards.dy, journey.dy);
     expect(rewards.dx, lessThan(journey.dx));
