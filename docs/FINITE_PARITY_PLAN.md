@@ -48,7 +48,8 @@
   - [x] Verify difficulty reward and miss-penalty rates (Classic 1×/0%, Hard 1.5×/2%, Extreme 2.5×/5%) and valid configured range behavior. Evidence: `lib/core/game/difficulty_rules.dart`, `test/core/difficulty_rules_test.dart`, GTN1 `DifficultyRules.kt`.
   - [x] Verify mutator identifiers, invalid-ID filtering, reward stacking (2×/3×/5×/10×), Hardcore range doubling and Tax 5% penalty. Evidence: `lib/core/legacy/legacy_systems_engine.dart`, `test/core/legacy/legacy_systems_engine_test.dart`, GTN1 `MutatorRules.kt` and `GuessPenaltyRules.kt`.
   - [x] Verify permanent Prestige/Ultra Money boost compounding and BigNumber reward minimum/order. Evidence: `GuessEconomyRules.moneyEarningMultiplier`, `correctGuessReward` and `test/core/guess_economy_rules_test.dart`.
-  - [ ] Compare end-to-end Money/Nebula settlement, all caps, offline earnings, rounding and save persistence against GTN1 transaction tests.
+  - [x] Port GTN1 offline earnings settlement into one shared path used by save restoration and app resume: 500 Money/second, eight-hour cap, inactive/zero-timestamp handling, clock rollback pause and timestamp advancement. `lib/core/automation/offline_earnings_settlement.dart` and `test/core/automation/offline_earnings_settlement_test.dart` cover payout into Money and lifetime earnings, cap behavior, rollback and repeat-settlement prevention after the updated timestamp is persisted.
+  - [ ] Verify offline settlement through real SaveStorage restart/recovery and finish Money/Nebula transaction, rounding and save-persistence comparison against GTN1.
 - [ ] Upgrades, prestige, Ultra progression and their reset/carry-over rules.
 - [ ] Traits, talents, mutators and relics, including actual gameplay effects.
 - [ ] Worlds, bosses, battles, mastery, secrets, codex and claim-once rewards.
