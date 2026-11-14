@@ -164,20 +164,26 @@ void main() {
       );
     });
 
-    test('round-trips save profile name and icon', () {
+    test('round-trips profile metadata and permanent Creative Save eligibility', () {
       final save = SaveData(
         secret: 42,
         attempts: 0,
         gamesWon: 0,
         profileName: 'My Run',
         profileIconId: 'planet',
+        creativeModeEnabled: true,
       );
       final restored = SaveData.fromJson(save.toJson());
       expect(restored.profileName, 'My Run');
       expect(restored.profileIconId, 'planet');
+      expect(restored.creativeModeEnabled, isTrue);
       expect(
         restored.copyWith(profileName: 'New Name').profileIconId,
         'planet',
+      );
+      expect(
+        restored.copyWith(creativeModeEnabled: false).creativeModeEnabled,
+        isFalse,
       );
     });
 
@@ -190,11 +196,13 @@ void main() {
               gamesWon: 0,
             ).toJson()
             ..remove('profileName')
-            ..remove('profileIconId');
+            ..remove('profileIconId')
+            ..remove('creativeModeEnabled');
       final migrated = SaveData.fromJson(oldSave);
       expect(migrated.schemaVersion, SaveData.currentSchemaVersion);
       expect(migrated.profileName, isEmpty);
       expect(migrated.profileIconId, 'default');
+      expect(migrated.creativeModeEnabled, isFalse);
     });
 
     test('rejects invalid profile metadata', () {
