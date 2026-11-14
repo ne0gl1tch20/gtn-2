@@ -1061,12 +1061,11 @@ class _GameHomePageState extends State<GameHomePage>
   Future<void> _openSaveSlots() async {
     await _pushShellRoute<void>(
       MaterialPageRoute<void>(
-        builder: (_) =>
-            SaveSlotsPage(
-              activeSlot: _activeSlot,
-              onSelect: _switchSaveSlot,
-              onResetEverything: _resetEverything,
-            ),
+        builder: (_) => SaveSlotsPage(
+          activeSlot: _activeSlot,
+          onSelect: _switchSaveSlot,
+          onResetEverything: _resetEverything,
+        ),
       ),
     );
   }

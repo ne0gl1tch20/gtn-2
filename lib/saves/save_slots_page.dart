@@ -445,9 +445,14 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Reset Everything', style: Theme.of(context).textTheme.titleMedium),
+                  Text(
+                    'Reset Everything',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
                   const SizedBox(height: 6),
-                  const Text('Erase every save slot and its backups. This action cannot be undone.'),
+                  const Text(
+                    'Erase every save slot and its backups. This action cannot be undone.',
+                  ),
                   const SizedBox(height: 12),
                   M3EButton.filled(
                     onPressed: _working == null ? _resetEverything : null,
@@ -575,7 +580,6 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
   }
 }
 
-
 class _ResetEverythingDialog extends StatefulWidget {
   const _ResetEverythingDialog();
 
@@ -584,8 +588,11 @@ class _ResetEverythingDialog extends StatefulWidget {
 }
 
 class _ResetEverythingDialogState extends State<_ResetEverythingDialog> {
-  late final DateTime _readyAt = DateTime.now().add(const Duration(seconds: 45));
-  late final ({String expression, int result}) _challenge = _makeResetChallenge();
+  late final DateTime _readyAt = DateTime.now().add(
+    const Duration(seconds: 45),
+  );
+  late final ({String expression, int result}) _challenge =
+      _makeResetChallenge();
   final TextEditingController _answer = TextEditingController();
   Timer? _timer;
   int _secondsRemaining = 45;
@@ -635,9 +642,8 @@ class _ResetEverythingDialogState extends State<_ResetEverythingDialog> {
   @override
   Widget build(BuildContext context) {
     final answer = int.tryParse(_answer.text.trim());
-    final canConfirm = _secondsRemaining == 0 &&
-        _acknowledged &&
-        answer == _challenge.result;
+    final canConfirm =
+        _secondsRemaining == 0 && _acknowledged && answer == _challenge.result;
     return AlertDialog(
       title: const Text('Confirm Data Reset'),
       content: SingleChildScrollView(
@@ -645,9 +651,14 @@ class _ResetEverythingDialogState extends State<_ResetEverythingDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text('Are you sure you want to reset all progress? This action is irreversible.'),
+            const Text(
+              'Are you sure you want to reset all progress? This action is irreversible.',
+            ),
             const SizedBox(height: 14),
-            Text(_challenge.expression, style: Theme.of(context).textTheme.headlineSmall),
+            Text(
+              _challenge.expression,
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
             const SizedBox(height: 8),
             Text(
               _secondsRemaining > 0
@@ -659,7 +670,8 @@ class _ResetEverythingDialogState extends State<_ResetEverythingDialog> {
             CheckboxListTile(
               contentPadding: EdgeInsets.zero,
               value: _acknowledged,
-              onChanged: (value) => setState(() => _acknowledged = value ?? false),
+              onChanged: (value) =>
+                  setState(() => _acknowledged = value ?? false),
               title: const Text('I understand this will erase all my progress'),
               controlAffinity: ListTileControlAffinity.leading,
             ),
@@ -667,7 +679,9 @@ class _ResetEverythingDialogState extends State<_ResetEverythingDialog> {
               controller: _answer,
               keyboardType: TextInputType.number,
               onChanged: (_) => setState(() {}),
-              decoration: const InputDecoration(labelText: 'Solve the expression'),
+              decoration: const InputDecoration(
+                labelText: 'Solve the expression',
+              ),
             ),
           ],
         ),

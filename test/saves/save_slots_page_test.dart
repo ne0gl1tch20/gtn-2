@@ -37,7 +37,6 @@ void main() {
     expect(firstSlotMenu.enabled, isFalse);
   });
 
-
   testWidgets('Reset Everything requires the source safety checks', (
     tester,
   ) async {

@@ -31,16 +31,19 @@ void main() {
     expect(profile.toJson()['customAvatarPath'], profile.customAvatarPath);
   });
 
-  test('legacy profile data receives a stable identity and completed setup', () {
-    final profile = PlayerProfile.fromJson({
-      'username': 'Legacy Player',
-      'bio': '',
-      'avatarId': 'star',
-    });
+  test(
+    'legacy profile data receives a stable identity and completed setup',
+    () {
+      final profile = PlayerProfile.fromJson({
+        'username': 'Legacy Player',
+        'bio': '',
+        'avatarId': 'star',
+      });
 
-    expect(profile.profileId, isNotEmpty);
-    expect(profile.setupComplete, isTrue);
-  });
+      expect(profile.profileId, isNotEmpty);
+      expect(profile.setupComplete, isTrue);
+    },
+  );
 
   testWidgets('first launch opens the required profile creation flow', (
     tester,

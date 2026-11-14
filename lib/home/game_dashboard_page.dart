@@ -1106,7 +1106,8 @@ class _MoreMenuPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) => ValueListenableBuilder<GameSettings>(
     valueListenable: settingsListenable,
-    builder: (context, liveSettings, _) => _buildWithSettings(context, liveSettings),
+    builder: (context, liveSettings, _) =>
+        _buildWithSettings(context, liveSettings),
   );
 
   Widget _buildWithSettings(BuildContext context, GameSettings settings) {

@@ -297,122 +297,125 @@ class _MenuStudioPageState extends State<MenuStudioPage> {
         if (!didPop) _cancel();
       },
       child: Scaffold(
-      appBar: AppBar(
-        title: const Text('Customize buttons'),
-        leading: IconButton(
-          tooltip: 'Back',
-          onPressed: _cancel,
-          icon: const Icon(Icons.arrow_back_rounded),
+        appBar: AppBar(
+          title: const Text('Customize buttons'),
+          leading: IconButton(
+            tooltip: 'Back',
+            onPressed: _cancel,
+            icon: const Icon(Icons.arrow_back_rounded),
+          ),
         ),
-      ),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-        children: [
-          const Text(
-            'PERSONALIZE',
-            style: TextStyle(
-              color: GtnUiTokens.cyan,
-              fontSize: 10,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 1.4,
+        body: ListView(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+          children: [
+            const Text(
+              'PERSONALIZE',
+              style: TextStyle(
+                color: GtnUiTokens.cyan,
+                fontSize: 10,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 1.4,
+              ),
             ),
-          ),
-          const SizedBox(height: 5),
-          Text(
-            'Customize buttons',
-            style: Theme.of(context).textTheme.headlineSmall
-                ?.copyWith(fontWeight: FontWeight.w900),
-          ),
-          const SizedBox(height: 5),
-          Text(
-            'Reorder your navigation, move destinations into More and choose each button color with GTN’s built-in color picker.',
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
-          const SizedBox(height: 14),
-          _menuSection(
-            'nav',
-            'Top bar',
-            'Drag to reorder buttons. Play and More remain pinned.',
-          ),
-          _menuSection(
-            'more',
-            'More menu',
-            'Move extra destinations here to keep your main navigation tidy.',
-          ),
-          GtnExpressiveCard(
-            margin: const EdgeInsets.only(bottom: 14),
-            padding: const EdgeInsets.all(14),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Live preview',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Preview the first buttons in your navigation layout.',
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-                const SizedBox(height: 12),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    for (final id in previewIds)
-                      DecoratedBox(
-                        decoration: BoxDecoration(
-                          color: _colorFor(id, context).withValues(alpha: 0.16),
-                          border: Border.all(
+            const SizedBox(height: 5),
+            Text(
+              'Customize buttons',
+              style: Theme.of(context).textTheme.headlineSmall
+                  ?.copyWith(fontWeight: FontWeight.w900),
+            ),
+            const SizedBox(height: 5),
+            Text(
+              'Reorder your navigation, move destinations into More and choose each button color with GTN’s built-in color picker.',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 14),
+            _menuSection(
+              'nav',
+              'Top bar',
+              'Drag to reorder buttons. Play and More remain pinned.',
+            ),
+            _menuSection(
+              'more',
+              'More menu',
+              'Move extra destinations here to keep your main navigation tidy.',
+            ),
+            GtnExpressiveCard(
+              margin: const EdgeInsets.only(bottom: 14),
+              padding: const EdgeInsets.all(14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Live preview',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Preview the first buttons in your navigation layout.',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      for (final id in previewIds)
+                        DecoratedBox(
+                          decoration: BoxDecoration(
                             color: _colorFor(
                               id,
                               context,
-                            ).withValues(alpha: 0.55),
+                            ).withValues(alpha: 0.16),
+                            border: Border.all(
+                              color: _colorFor(
+                                id,
+                                context,
+                              ).withValues(alpha: 0.55),
+                            ),
+                            borderRadius: BorderRadius.circular(12),
                           ),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 9,
-                          ),
-                          child: Text(
-                            _labels[id] ?? id,
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w800,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 9,
+                            ),
+                            child: Text(
+                              _labels[id] ?? id,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w800,
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                  ],
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            Row(
+              children: [
+                Expanded(
+                  child: M3EButton.tonal(
+                    onPressed: _saving
+                        ? null
+                        : () => setState(
+                            () => _layout = MenuStudioLayout.defaults(),
+                          ),
+                    child: const Text('Reset layout'),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: M3EButton.filled(
+                    onPressed: _saving ? null : _save,
+                    child: Text(_saving ? 'Saving…' : 'Save changes'),
+                  ),
                 ),
               ],
             ),
-          ),
-          Row(
-            children: [
-              Expanded(
-                child: M3EButton.tonal(
-                  onPressed: _saving
-                      ? null
-                      : () => setState(
-                          () => _layout = MenuStudioLayout.defaults(),
-                        ),
-                  child: const Text('Reset layout'),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: M3EButton.filled(
-                  onPressed: _saving ? null : _save,
-                  child: Text(_saving ? 'Saving…' : 'Save changes'),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
+          ],
+        ),
       ),
     );
   }

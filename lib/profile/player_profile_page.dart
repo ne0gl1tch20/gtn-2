@@ -320,13 +320,21 @@ class _PlayerProfilePageState extends State<PlayerProfilePage> {
     final file = result.files.single;
     final bytes = file.bytes;
     if (bytes == null || bytes.isEmpty) {
-      setState(() => _error = 'Could not load that picture. Try another image.');
+      setState(
+        () => _error = 'Could not load that picture. Try another image.',
+      );
       return;
     }
     final extension = (file.extension ?? '').toLowerCase();
-    if (!const ['png', 'jpg', 'jpeg', 'webp', 'gif', 'bmp', 'heic'].contains(
-      extension,
-    )) {
+    if (!const [
+      'png',
+      'jpg',
+      'jpeg',
+      'webp',
+      'gif',
+      'bmp',
+      'heic',
+    ].contains(extension)) {
       setState(() => _error = 'Choose a supported image file.');
       return;
     }
@@ -341,7 +349,9 @@ class _PlayerProfilePageState extends State<PlayerProfilePage> {
       });
     } on Exception {
       if (mounted) {
-        setState(() => _error = 'Could not save that picture. Try another image.');
+        setState(
+          () => _error = 'Could not save that picture. Try another image.',
+        );
       }
     }
   }
@@ -604,10 +614,7 @@ class _PlayerProfilePageState extends State<PlayerProfilePage> {
             ),
             if (_error != null) ...[
               const SizedBox(height: 8),
-              Text(
-                _error!,
-                style: TextStyle(color: theme.colorScheme.error),
-              ),
+              Text(_error!, style: TextStyle(color: theme.colorScheme.error)),
             ],
             const SizedBox(height: 12),
             FilledButton(
