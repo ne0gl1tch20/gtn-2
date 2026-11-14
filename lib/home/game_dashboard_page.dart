@@ -9,6 +9,7 @@ import '../core/game/game_engine.dart';
 import '../core/numbers/big_number.dart';
 import '../core/progression/progression_state.dart';
 import '../design/expressive_widgets.dart';
+import 'creative_save_panel.dart';
 import '../i18n/app_localizations.dart';
 import '../legacy/legacy_pages.dart';
 import '../legacy/legacy_systems_page.dart';
@@ -57,6 +58,9 @@ class GameDashboardPage extends StatelessWidget {
     this.showDeveloperSettings = false,
     this.randomEventMessage,
     this.incomePerSecond,
+    this.creativeModeEnabled = false,
+    this.onCreativeRange,
+    this.onCreativeValue,
     required this.shellNavigatorKey,
     required this.selectedIndex,
     required this.onPrimarySelected,
@@ -93,6 +97,9 @@ class GameDashboardPage extends StatelessWidget {
   final bool showDeveloperSettings;
   final String? randomEventMessage;
   final BigNumber? incomePerSecond;
+  final bool creativeModeEnabled;
+  final Future<bool> Function(int minimum, int maximum)? onCreativeRange;
+  final Future<bool> Function(String key, String value)? onCreativeValue;
   final GlobalKey<NavigatorState> shellNavigatorKey;
   final int selectedIndex;
   final ValueChanged<int> onPrimarySelected;
@@ -908,6 +915,18 @@ class GameDashboardPage extends StatelessWidget {
                                             ],
                                           ),
                                   ),
+                                  if (creativeModeEnabled &&
+                                      onCreativeRange != null &&
+                                      onCreativeValue != null)
+                                    SizedBox(
+                                      width: fullWidth,
+                                      child: CreativeSavePanel(
+                                        game: game,
+                                        progression: progression,
+                                        onRange: onCreativeRange!,
+                                        onValue: onCreativeValue!,
+                                      ),
+                                    ),
                                   if (game.isComplete)
                                     SizedBox(
                                       width: fullWidth,
