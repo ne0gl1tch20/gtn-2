@@ -1311,7 +1311,7 @@ class _MoreMenuPage extends StatelessWidget {
           ),
           'worlds': (
             icon: Icons.public_rounded,
-            title: 'Beyond the Numbers',
+            title: 'Worlds',
             subtitle: 'Explore worlds and guardians',
             onTap: () => onDestination('worlds'),
           ),
