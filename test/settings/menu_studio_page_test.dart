@@ -61,6 +61,11 @@ void main() {
     expect(find.text('Live preview'), findsOneWidget);
     expect(find.text('Worlds'), findsWidgets);
 
+    await tester.scrollUntilVisible(
+      find.byTooltip('Choose color for Worlds'),
+      220,
+      scrollable: find.byType(Scrollable).first,
+    );
     await tester.tap(find.byTooltip('Choose color for Worlds'));
     await tester.pumpAndSettle();
     expect(find.textContaining('Hue:'), findsOneWidget);
@@ -69,6 +74,11 @@ void main() {
     await tester.tap(find.text('Use theme'));
     await tester.pumpAndSettle();
 
+    await tester.scrollUntilVisible(
+      find.text('Move to More'),
+      220,
+      scrollable: find.byType(Scrollable).first,
+    );
     await tester.tap(find.text('Move to More').first);
     await tester.pumpAndSettle();
     expect(previewed, isNotNull);
@@ -76,7 +86,11 @@ void main() {
       previewed!.webMenuStudioLayout,
     );
     expect(previewLayout!.visibleMoreIds, contains('worlds'));
-    await tester.ensureVisible(find.text('Save changes'));
+    await tester.scrollUntilVisible(
+      find.text('Save changes'),
+      220,
+      scrollable: find.byType(Scrollable).first,
+    );
     await tester.tap(find.text('Save changes'));
     await tester.pumpAndSettle();
 
