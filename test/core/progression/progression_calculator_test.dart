@@ -59,4 +59,29 @@ void main() {
       2000,
     );
   });
+
+  test('Ultra reward preserves GTN1 floor boundaries below powers of ten', () {
+    expect(
+      ProgressionCalculator.ultraReward(
+        BigNumber.fromInt(9999999999),
+        BigNumber.fromInt(1),
+      ),
+      999,
+    );
+    expect(
+      ProgressionCalculator.ultraReward(
+        BigNumber.parse('99999999999999999999'),
+        BigNumber.fromInt(1),
+      ),
+      1999,
+    );
+    expect(
+      ProgressionCalculator.ultraReward(
+        BigNumber.parse('100000000000000000000'),
+        BigNumber.fromInt(1),
+      ),
+      2000,
+    );
+  });
+
 }

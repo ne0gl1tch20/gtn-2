@@ -77,6 +77,44 @@ void main() {
       expect(SaveData.fromJson(save.toJson()).settings.difficultyId, 'hard');
     });
 
+    test('round-trips huge progression currencies and permanent levels', () {
+      final progression = ProgressionState.initial.copyWith(
+        money: BigNumber.parse('1e100'),
+        prestige: BigNumber.parse('2.5e80'),
+        ultra: BigNumber.parse('3e60'),
+        nebula: BigNumber.parse('4e40'),
+        moneyEarned: BigNumber.parse('5e100'),
+        moneySpent: BigNumber.parse('6e90'),
+        nebulaEarned: BigNumber.parse('7e50'),
+        prestigeUpgrades: const {
+          'prestige_money_boost': 4,
+          'prestige_gain_boost': 5,
+        },
+        ultraUpgrades: const {
+          'ultra_money_boost': 3,
+          'ultra_gain_boost': 2,
+        },
+      );
+      final save = SaveData(
+        secret: 42,
+        attempts: 0,
+        gamesWon: 0,
+        progression: progression,
+      );
+
+      final restored = SaveData.fromJson(save.toJson()).progression;
+
+      expect(restored.money, progression.money);
+      expect(restored.prestige, progression.prestige);
+      expect(restored.ultra, progression.ultra);
+      expect(restored.nebula, progression.nebula);
+      expect(restored.moneyEarned, progression.moneyEarned);
+      expect(restored.moneySpent, progression.moneySpent);
+      expect(restored.nebulaEarned, progression.nebulaEarned);
+      expect(restored.prestigeUpgrades, progression.prestigeUpgrades);
+      expect(restored.ultraUpgrades, progression.ultraUpgrades);
+    });
+
     test('persists Creative Mode configuration and active run per save', () {
       final creative = CreativeModeSave(
         enabled: true,

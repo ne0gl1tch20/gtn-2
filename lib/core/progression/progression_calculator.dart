@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import '../numbers/big_number.dart';
 import 'progression_engine.dart';
 import 'progression_state.dart';
@@ -7,6 +5,13 @@ import 'progression_state.dart';
 /// Progression formulas kept in one place to match the original GTN economy.
 class ProgressionCalculator {
   ProgressionCalculator._();
+
+  // Fixed-point precision keeps floor boundaries stable for very large ratios.
+  // GTN1 uses BigDecimal/DECIMAL128 and an explicit high-precision natural log.
+  static final BigInt _decimalScale = BigInt.from(10).pow(60);
+  static final BigInt _naturalLogTen = _naturalLogScaled(
+    _decimalScale * BigInt.from(10),
+  );
 
   static BigNumber prestigeRequirement(int prestigeResets) {
     if (prestigeResets < 0) throw ArgumentError.value(prestigeResets);
@@ -36,17 +41,19 @@ class ProgressionCalculator {
     final exponent = _decimalExponent(numerator, denominator);
     if (exponent >= 20) return 2000;
 
-    final shift = 16 - exponent;
-    final scaled = shift >= 0
-        ? (numerator * BigInt.from(10).pow(shift)) ~/ denominator
-        : numerator ~/ (denominator * BigInt.from(10).pow(-shift));
-    final digits = scaled.toString().padLeft(17, '0');
-    final mantissa = double.parse(
-      '${digits.substring(0, 1)}.${digits.substring(1, 16)}',
-    );
-    final reward = (100 * (exponent + ((math.log(mantissa) / math.ln10))))
-        .floor();
-    return reward.clamp(0, 2000);
+    // Keep the mantissa as an exact rational until it is converted to a
+    // 60-digit fixed-point value. A double can round 1e20 - 1 up to 1e20,
+    // incorrectly granting the 2,000 reward cap one unit early.
+    final mantissaDenominator = denominator * BigInt.from(10).pow(exponent);
+    final mantissaScaled =
+        (numerator * _decimalScale) ~/ mantissaDenominator;
+    final naturalLogMantissa = _naturalLogScaled(mantissaScaled);
+    final log10Mantissa =
+        (naturalLogMantissa * _decimalScale) ~/ _naturalLogTen;
+    final logarithmScaled =
+        BigInt.from(exponent) * _decimalScale + log10Mantissa;
+    final reward = (logarithmScaled * BigInt.from(100)) ~/ _decimalScale;
+    return reward.toInt().clamp(0, 2000);
   }
 
   static PrestigeRules prestigeRules(ProgressionState state) {
@@ -122,6 +129,31 @@ class ProgressionCalculator {
       if (next >= estimate) return estimate;
       estimate = next;
     }
+  }
+
+  /// Natural logarithm using ln(x) = 2 * (z + z^3/3 + ...),
+  /// where z = (x - 1) / (x + 1). All operations use fixed-point integers.
+  static BigInt _naturalLogScaled(BigInt valueScaled) {
+    if (valueScaled <= BigInt.zero) {
+      throw ArgumentError.value(valueScaled, 'valueScaled');
+    }
+    if (valueScaled == _decimalScale) return BigInt.zero;
+
+    final z = ((valueScaled - _decimalScale) * _decimalScale) ~/
+        (valueScaled + _decimalScale);
+    final zSquared = (z * z) ~/ _decimalScale;
+    var term = z;
+    var sum = z;
+    var divisor = 3;
+
+    for (var iteration = 0; iteration < 512; iteration++) {
+      term = (term * zSquared) ~/ _decimalScale;
+      final contribution = term ~/ BigInt.from(divisor);
+      if (contribution == BigInt.zero) break;
+      sum += contribution;
+      divisor += 2;
+    }
+    return sum * BigInt.from(2);
   }
 
   static int _decimalExponent(BigInt numerator, BigInt denominator) {
