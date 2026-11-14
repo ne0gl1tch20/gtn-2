@@ -882,39 +882,13 @@ class _GameHomePageState extends State<GameHomePage>
       var nextProgression = _worldBossBattleEngine.migrateLegacyWorldUnlocks(
         save?.progression ?? ProgressionState.initial,
       );
-      final savedAt = nextProgression.legacySystems.lastSaveTimestamp;
-      final now = DateTime.now().millisecondsSinceEpoch;
-      final clockCheck = ClockRollbackPolicy.check(
-        nowMillis: now,
-        lastSaveTimestamp: savedAt,
-        timeTravelPenaltyUntil:
-            nextProgression.legacySystems.timeTravelPenaltyUntil,
-        autoClickerActive: nextProgression.legacySystems.autoClickerActive,
+      final settlement = OfflineEarningsSettlement.settle(
+        progression: nextProgression,
+        nowMillis: DateTime.now().millisecondsSinceEpoch,
       );
-      final timeTravelDetected = clockCheck.detected;
-      nextProgression = nextProgression.copyWith(
-        legacySystems: nextProgression.legacySystems.copyWith(
-          autoClickerActive: clockCheck.autoClickerActive,
-          lastSaveTimestamp: clockCheck.lastSaveTimestamp,
-          timeTravelPenaltyUntil: clockCheck.timeTravelPenaltyUntil,
-        ),
-      );
-      final elapsedSeconds = savedAt > 0 && !timeTravelDetected
-          ? ((now - savedAt) ~/ 1000)
-          : 0;
-      final offlineEarnings = timeTravelDetected
-          ? BigNumber.fromInt(0)
-          : OfflineEarningsPolicy.calculate(
-              autoClickerWasActive:
-                  nextProgression.legacySystems.autoClickerActive,
-              elapsedSeconds: elapsedSeconds,
-            );
-      if (offlineEarnings.compareTo(BigNumber.fromInt(0)) > 0) {
-        nextProgression = nextProgression.copyWith(
-          money: nextProgression.money + offlineEarnings,
-          moneyEarned: nextProgression.moneyEarned + offlineEarnings,
-        );
-      }
+      nextProgression = settlement.progression;
+      final timeTravelDetected = settlement.clockRollbackDetected;
+      final offlineEarnings = settlement.earnings;
 
       // Slot changes must run the same legacy music migration as startup.
       // Otherwise a slot with settings-backed music can appear empty until
