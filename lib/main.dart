@@ -1200,11 +1200,13 @@ class _GameHomePageState extends State<GameHomePage>
           onPreview: (settings) {
             if (mounted) {
               setState(() => _menuStudioPreviewSettings = settings);
+              GtnApp.settingsNotifier.value = settings;
             }
           },
           onCancel: () {
             if (mounted) {
               setState(() => _menuStudioPreviewSettings = null);
+              GtnApp.settingsNotifier.value = _settings;
             }
           },
         ),
@@ -1833,6 +1835,7 @@ class _GameHomePageState extends State<GameHomePage>
       progression: _progression,
       incomePerSecond: _incomePerSecond,
       settings: _menuStudioPreviewSettings ?? _settings,
+      settingsListenable: GtnApp.settingsNotifier,
       activeSlot: _activeSlot,
       loading: _isLoading,
       message: _message,
