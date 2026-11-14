@@ -126,11 +126,11 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
                     color: Colors.transparent,
                     child: SwitchListTile(
                       contentPadding: EdgeInsets.zero,
-                    title: const Text('Creative Mode'),
-                    subtitle: const Text(
-                      'Permanent for this save. You can’t turn it off later.',
-                    ),
-                    value: creativeSave,
+                      title: const Text('Creative Mode'),
+                      subtitle: const Text(
+                        'Permanent for this save. You can’t turn it off later.',
+                      ),
+                      value: creativeSave,
                       onChanged: (value) =>
                           setDialogState(() => creativeSave = value),
                     ),
