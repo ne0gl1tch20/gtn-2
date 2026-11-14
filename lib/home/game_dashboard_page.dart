@@ -291,6 +291,7 @@ class GameDashboardPage extends StatelessWidget {
             return SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: SizedBox(
+                key: const Key('dashboard-navigation-bar'),
                 width: barWidth,
                 child: NavigationBar(
                   selectedIndex: selected,
@@ -315,6 +316,7 @@ class GameDashboardPage extends StatelessWidget {
           return SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: SizedBox(
+              key: const Key('dashboard-navigation-bar'),
               width: barWidth,
               child: M3ENavigationBar(
                 destinations: [
