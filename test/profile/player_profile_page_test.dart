@@ -18,6 +18,19 @@ void main() {
     expect(PlayerProfile.fromJson(profile.toJson()).profileId, 'profile-123');
   });
 
+  test('profile JSON keeps the app-private custom avatar path', () {
+    final profile = PlayerProfile.fromJson({
+      'username': 'Player One',
+      'avatarId': 'custom',
+      'customAvatarPath': '/app/documents/player-profile-avatars/avatar.png',
+      'profileId': 'profile-456',
+      'setupComplete': true,
+    });
+
+    expect(profile.customAvatarPath, contains('player-profile-avatars'));
+    expect(profile.toJson()['customAvatarPath'], profile.customAvatarPath);
+  });
+
   testWidgets(
     'completed profile opens read-only and has a separate edit action',
     (tester) async {
