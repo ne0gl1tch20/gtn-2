@@ -18,6 +18,7 @@ void main() {
   );
 
   final eligibleProgression = ProgressionState.initial.copyWith(
+    totalGuesses: 100,
     correctGuesses: 100,
     prestigeResets: 1,
     nebula: BigNumber.fromInt(5),
