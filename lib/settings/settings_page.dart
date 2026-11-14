@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 
 import '../design/expressive_widgets.dart';
+import '../design/gtn_color_picker_dialog.dart';
 import '../i18n/app_localizations.dart';
 import 'game_settings.dart';
 
@@ -532,97 +533,12 @@ class _ColorSetting extends StatelessWidget {
   }
 
   Future<void> _showPicker(BuildContext context) async {
-    var selected = HSVColor.fromColor(_color);
-    final result = await showDialog<Color>(
-      context: context,
-      builder: (dialogContext) => StatefulBuilder(
-        builder: (context, setDialogState) {
-          final color = selected.toColor();
-          Widget channelSlider({
-            required String label,
-            required double value,
-            required double max,
-            required ValueChanged<double> onChanged,
-          }) => Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(label),
-              Slider(
-                value: value.clamp(0, max),
-                min: 0,
-                max: max,
-                onChanged: (next) => setDialogState(() => onChanged(next)),
-              ),
-            ],
-          );
-
-          return AlertDialog(
-            title: Text('Choose $label'),
-            content: SizedBox(
-              width: 360,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Container(
-                    height: 72,
-                    decoration: BoxDecoration(
-                      color: color,
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(
-                        color: Theme.of(context).colorScheme.outline,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    '#${color.toARGB32().toRadixString(16).substring(2).toUpperCase()}',
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  channelSlider(
-                    label: 'Hue',
-                    value: selected.hue,
-                    max: 360,
-                    onChanged: (v) => selected = selected.withHue(v),
-                  ),
-                  channelSlider(
-                    label: 'Saturation',
-                    value: selected.saturation,
-                    max: 1,
-                    onChanged: (v) => selected = selected.withSaturation(v),
-                  ),
-                  channelSlider(
-                    label: 'Brightness',
-                    value: selected.value,
-                    max: 1,
-                    onChanged: (v) => selected = selected.withValue(v),
-                  ),
-                ],
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(dialogContext),
-                child: const Text('Cancel'),
-              ),
-              FilledButton(
-                onPressed: () => Navigator.pop(dialogContext, color),
-                child: const Text('Apply color'),
-              ),
-            ],
-          );
-        },
-      ),
+    final result = await showGtnColorPickerDialog(
+      context,
+      initialHex: value,
+      title: 'Choose $label',
     );
-    if (result != null) {
-      final hex = result
-          .toARGB32()
-          .toRadixString(16)
-          .substring(2)
-          .toUpperCase();
-      onSubmitted('#$hex');
-    }
+    if (result?.hex != null) onSubmitted(result!.hex!);
   }
 
   @override
