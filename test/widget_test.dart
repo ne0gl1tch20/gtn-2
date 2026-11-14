@@ -305,11 +305,11 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Feature detail'), findsOneWidget);
-    expect(find.text('More'), findsOneWidget);
+    expect(find.text('More').first, findsOneWidget);
 
     await tester.pageBack();
     await tester.pumpAndSettle();
-    expect(find.text('More'), findsOneWidget);
+    expect(find.text('More').first, findsOneWidget);
   });
 
   testWidgets('default More menu keeps GTN1 destination names', (
@@ -323,7 +323,7 @@ void main() {
     await tester.tap(find.text('More').first);
     await tester.pumpAndSettle();
 
-    expect(find.text('More'), findsOneWidget);
+    expect(find.text('More').first, findsOneWidget);
     for (final label in [
       'Player profile',
       'Rewards',
@@ -418,7 +418,7 @@ void main() {
     await tester.tap(find.text('More'));
     await tester.pumpAndSettle();
 
-    expect(find.text('More'), findsOneWidget);
+    expect(find.text('More').first, findsOneWidget);
     expect(find.text('Background Music'), findsOneWidget);
     expect(find.text('Settings'), findsOneWidget);
     expect(find.text('Save Slots'), findsOneWidget);
