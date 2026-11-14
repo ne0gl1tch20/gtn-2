@@ -78,9 +78,11 @@ void main() {
         .widgetList<Text>(find.byType(Text))
         .map((widget) => widget.data ?? '')
         .firstWhere(
-          (value) => RegExp(r'^\\d+(?: [+-/*] \\d+)+
-}
-).hasMatch(value),
+          (value) =>
+              value.contains(' + ') ||
+              value.contains(' - ') ||
+              value.contains(' * ') ||
+              value.contains(' / '),
         );
     final tokens = expression.split(' ');
     var answer = int.parse(tokens.first);
