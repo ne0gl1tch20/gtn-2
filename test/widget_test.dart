@@ -454,12 +454,34 @@ void main() {
             (widget) =>
                 widget is Icon &&
                 widget.icon == entry.value &&
-                widget.size == 25 &&
+                widget.size == 17 &&
                 widget.color == const Color(0xFF62E8FF),
           ),
         ),
         findsOneWidget,
         reason: 'GTN1 icon mapping, size and color for ${entry.key}',
+      );
+      expect(
+        find.ancestor(
+          of: find.descendant(
+            of: find.byKey(Key(entry.key)),
+            matching: find.byWidgetPredicate(
+              (widget) => widget is Icon && widget.icon == entry.value,
+            ),
+          ),
+          matching: find.byWidgetPredicate(
+            (widget) =>
+                widget is Container &&
+                widget.constraints == null &&
+                widget.decoration is BoxDecoration &&
+                (widget.decoration as BoxDecoration).borderRadius ==
+                    BorderRadius.circular(9) &&
+                (widget.decoration as BoxDecoration).color ==
+                    const Color(0xFF62E8FF).withValues(alpha: .08),
+          ),
+        ),
+        findsOneWidget,
+        reason: 'GTN1 cyan icon tile for ${entry.key}',
       );
     }
     expect(
