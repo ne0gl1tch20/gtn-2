@@ -471,7 +471,13 @@ class GameDashboardPage extends StatelessWidget {
                                         compact ? 21 : 25,
                                       ),
                                       constraints: BoxConstraints(
-                                        minHeight: compact ? 190 : 205,
+                                        minHeight: MediaQuery.sizeOf(context).width >= 1100
+                                            ? 250
+                                            : MediaQuery.sizeOf(context).width >= 720
+                                            ? 220
+                                            : compact
+                                            ? 190
+                                            : 205,
                                       ),
                                       decoration: BoxDecoration(
                                         borderRadius: BorderRadius.circular(32),
@@ -774,39 +780,69 @@ class GameDashboardPage extends StatelessWidget {
                                   ),
                                   SizedBox(
                                     width: fullWidth,
-                                    child: Row(
-                                      children: [
-                                        Expanded(
-                                          child: _Action(
-                                            'Beyond the Numbers',
-                                            'Explore your progression',
-                                            Icons.public_rounded,
-                                            _cyan,
-                                            onWorldMap,
-                                            panel,
-                                            line,
-                                            foreground,
-                                            muted,
+                                    child: fullWidth >= 720
+                                        ? Row(
+                                            children: [
+                                              Expanded(
+                                                child: _Action(
+                                                  'Beyond the Numbers',
+                                                  'Explore your progression',
+                                                  Icons.public_rounded,
+                                                  _cyan,
+                                                  onWorldMap,
+                                                  panel,
+                                                  line,
+                                                  foreground,
+                                                  muted,
+                                                ),
+                                              ),
+                                              const SizedBox(width: 9),
+                                              Expanded(
+                                                child: _Action(
+                                                  'Daily Momentum',
+                                                  'Keep the streak alive',
+                                                  Icons.auto_awesome_rounded,
+                                                  _gold,
+                                                  () => onLegacySection(
+                                                    LegacySection.rewards,
+                                                  ),
+                                                  panel,
+                                                  line,
+                                                  foreground,
+                                                  muted,
+                                                ),
+                                              ),
+                                            ],
+                                          )
+                                        : Column(
+                                            children: [
+                                              _Action(
+                                                'Beyond the Numbers',
+                                                'Explore your progression',
+                                                Icons.public_rounded,
+                                                _cyan,
+                                                onWorldMap,
+                                                panel,
+                                                line,
+                                                foreground,
+                                                muted,
+                                              ),
+                                              const SizedBox(height: 9),
+                                              _Action(
+                                                'Daily Momentum',
+                                                'Keep the streak alive',
+                                                Icons.auto_awesome_rounded,
+                                                _gold,
+                                                () => onLegacySection(
+                                                  LegacySection.rewards,
+                                                ),
+                                                panel,
+                                                line,
+                                                foreground,
+                                                muted,
+                                              ),
+                                            ],
                                           ),
-                                        ),
-                                        const SizedBox(width: 10),
-                                        Expanded(
-                                          child: _Action(
-                                            'Daily Momentum',
-                                            'Keep the streak alive',
-                                            Icons.auto_awesome_rounded,
-                                            _gold,
-                                            () => onLegacySection(
-                                              LegacySection.rewards,
-                                            ),
-                                            panel,
-                                            line,
-                                            foreground,
-                                            muted,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
                                   ),
                                   if (game.isComplete)
                                     SizedBox(
@@ -1459,7 +1495,10 @@ class _Stat extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 10),
+    padding: EdgeInsets.symmetric(
+      vertical: MediaQuery.sizeOf(context).width >= 1100 ? 20 : 15,
+      horizontal: MediaQuery.sizeOf(context).width >= 1100 ? 12 : 10,
+    ),
     decoration: BoxDecoration(
       color: panel,
       borderRadius: BorderRadius.circular(22),
@@ -1483,7 +1522,11 @@ class _Stat extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
           style: TextStyle(
             color: foreground,
-            fontSize: MediaQuery.sizeOf(context).width <= 360 ? 18 : 21,
+            fontSize: MediaQuery.sizeOf(context).width >= 1100
+                ? 26
+                : MediaQuery.sizeOf(context).width <= 360
+                ? 18
+                : 21,
             fontWeight: FontWeight.w900,
           ),
         ),
@@ -1522,7 +1565,9 @@ class _Wallet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.all(17),
+    padding: EdgeInsets.all(
+      MediaQuery.sizeOf(context).width >= 720 ? 22 : 17,
+    ),
     decoration: BoxDecoration(
       color: panel,
       borderRadius: BorderRadius.circular(24),
@@ -1575,7 +1620,7 @@ class _Wallet extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
           style: const TextStyle(
             color: _gold,
-            fontSize: 28,
+            fontSize: 24,
             fontWeight: FontWeight.w900,
             letterSpacing: -.8,
           ),
@@ -1587,7 +1632,7 @@ class _Wallet extends StatelessWidget {
             value: state.bestStreak == 0
                 ? 0
                 : (state.currentStreak / state.bestStreak).clamp(0.0, 1.0),
-            minHeight: 8,
+            minHeight: 7,
             backgroundColor: raised,
             color: _purple,
           ),
@@ -1748,7 +1793,9 @@ class _GuessInput extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.all(18),
+    padding: EdgeInsets.all(
+      MediaQuery.sizeOf(context).width >= 720 ? 22 : 18,
+    ),
     decoration: BoxDecoration(
       color: panel,
       borderRadius: BorderRadius.circular(28),
@@ -1804,7 +1851,7 @@ class _GuessInput extends StatelessWidget {
             ),
             const SizedBox(width: 9),
             SizedBox(
-              width: MediaQuery.sizeOf(context).width <= 360 ? 104 : 120,
+              width: MediaQuery.sizeOf(context).width <= 430 ? 100 : 116,
               height: 56,
               child: Semantics(
                 container: true,
