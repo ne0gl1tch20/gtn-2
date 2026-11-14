@@ -50,7 +50,7 @@ class SettingsPage extends StatelessWidget {
         await _update(settings.copyWith(notificationsEnabled: true));
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text(AppLocalizations.text('notifications_enabled_toast', 'Notifications enabled!'))),
+            SnackBar(content: Text(AppLocalizations.text('notifications_enabled_toast', 'Notifications enabled!'))),
           );
         }
       } else {
@@ -65,7 +65,7 @@ class SettingsPage extends StatelessWidget {
       await _update(settings.copyWith(notificationsEnabled: false));
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Notification permission denied.')),
+          SnackBar(content: Text(AppLocalizations.text('notification_permission_denied_toast', 'Notification permission denied.'))),
         );
       }
     }
