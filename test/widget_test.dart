@@ -461,7 +461,6 @@ void main() {
         findsOneWidget,
         reason: 'GTN1 icon mapping, size and color for ${entry.key}',
       );
-
     }
     expect(
       find.descendant(
