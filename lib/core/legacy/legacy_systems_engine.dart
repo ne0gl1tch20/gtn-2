@@ -4,6 +4,7 @@ import '../numbers/big_number.dart';
 import '../progression/progression_state.dart';
 import 'builtin_trait_catalog.dart';
 import 'legacy_systems_state.dart';
+import 'live_ops_claim_policy.dart';
 
 /// A validated definition loaded from the pinned GTN1 talent catalog.
 class TalentDefinition {
@@ -805,6 +806,24 @@ class LegacySystemsEngine {
       accepted: result.accepted,
       message: result.message,
     );
+  }
+
+  /// Settles one bounded LiveOps reward. Event-window and feature-flag
+  /// validation belong to the trusted catalog/repository caller.
+  LegacyActionResult claimLiveOpsReward({
+    required ProgressionState progression,
+    required LegacySystemsState systems,
+    required LiveOpsClaimDefinition event,
+  }) {
+    final settlement = LiveOpsClaimPolicy.apply(
+      progression: progression,
+      systems: systems,
+      event: event,
+    );
+    if (settlement == null) {
+      return _reject(progression, systems, 'LiveOps reward is not claimable.');
+    }
+    return _accept(settlement.progression, settlement.systems);
   }
 
   LegacyActionResult claimChallenge({
