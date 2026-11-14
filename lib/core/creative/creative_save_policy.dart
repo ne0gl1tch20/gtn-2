@@ -1,6 +1,5 @@
-import '../numbers/big_number.dart';
-import '../progression/progression_state.dart';
 import '../../data/saves/save_data.dart';
+import '../numbers/big_number.dart';
 import '../../shop/upgrade_catalog.dart';
 
 /// Source-backed validation and state transformation for GTN1's active-save
@@ -44,7 +43,7 @@ class CreativeSavePolicy {
     required List<GameUpgrade> ultraUpgrades,
   }) {
     if (!current.creativeModeEnabled ||
-        value.length < 1 ||
+        value.isEmpty ||
         value.length > 100) {
       return null;
     }
