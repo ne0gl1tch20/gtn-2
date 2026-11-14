@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:material_3_expressive/material_3_expressive.dart';
@@ -19,11 +20,13 @@ class SaveSlotsPage extends StatefulWidget {
     required this.activeSlot,
     required this.onSelect,
     this.previewLoader,
+    this.onResetEverything,
   });
 
   final int activeSlot;
   final SaveSlotSelection onSelect;
   final SaveSlotPreviewLoader? previewLoader;
+  final Future<void> Function()? onResetEverything;
 
   @override
   State<SaveSlotsPage> createState() => _SaveSlotsPageState();
@@ -247,6 +250,33 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
     _ => '🎮',
   };
 
+  Future<void> _resetEverything() async {
+    if (widget.onResetEverything == null || _working != null) return;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => const _ResetEverythingDialog(),
+    );
+    if (confirmed != true || !mounted) return;
+    setState(() => _working = 0);
+    try {
+      await widget.onResetEverything!();
+      await _refresh();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('All game data has been reset.')),
+        );
+      }
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not reset all game data: $error')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _working = null);
+    }
+  }
+
   Future<void> _openCreativeMode(int slot) async {
     await Navigator.of(context).push<void>(
       MaterialPageRoute<void>(builder: (_) => CreativeModePage(slot: slot)),
@@ -408,6 +438,25 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
             'Your saves stay on this device. Choose a slot to continue or manage its backup.',
           ),
           const SizedBox(height: 12),
+          if (widget.onResetEverything != null) ...[
+            const SizedBox(height: 8),
+            GtnExpressiveCard(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Reset Everything', style: Theme.of(context).textTheme.titleMedium),
+                  const SizedBox(height: 6),
+                  const Text('Erase every save slot and its backups. This action cannot be undone.'),
+                  const SizedBox(height: 12),
+                  M3EButton.filled(
+                    onPressed: _working == null ? _resetEverything : null,
+                    child: const Text('Reset Everything'),
+                  ),
+                ],
+              ),
+            ),
+          ],
           for (var slot = 1; slot <= SaveStorage.maxSaveSlots; slot++)
             FutureBuilder<SaveData?>(
               future: _previews[slot],
@@ -522,6 +571,117 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
             ),
         ],
       ),
+    );
+  }
+}
+
+
+class _ResetEverythingDialog extends StatefulWidget {
+  const _ResetEverythingDialog();
+
+  @override
+  State<_ResetEverythingDialog> createState() => _ResetEverythingDialogState();
+}
+
+class _ResetEverythingDialogState extends State<_ResetEverythingDialog> {
+  late final DateTime _readyAt = DateTime.now().add(const Duration(seconds: 45));
+  late final ({String expression, int result}) _challenge = _makeResetChallenge();
+  final TextEditingController _answer = TextEditingController();
+  Timer? _timer;
+  int _secondsRemaining = 45;
+  bool _acknowledged = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer.periodic(const Duration(milliseconds: 250), (_) {
+      final remaining = _readyAt.difference(DateTime.now()).inMilliseconds;
+      final seconds = remaining <= 0 ? 0 : (remaining / 1000).ceil();
+      if (seconds != _secondsRemaining && mounted) {
+        setState(() => _secondsRemaining = seconds);
+      }
+      if (seconds == 0) _timer?.cancel();
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _answer.dispose();
+    super.dispose();
+  }
+
+  static ({String expression, int result}) _makeResetChallenge() {
+    const operations = ['+', '-', '*', '/'];
+    final random = Random.secure();
+    final terms = random.nextBool() ? 2 : 3;
+    final numbers = List<int>.generate(terms, (_) => random.nextInt(90) + 10);
+    var value = numbers.first;
+    var expression = numbers.first.toString();
+    for (var index = 1; index < terms; index++) {
+      final operation = operations[random.nextInt(operations.length)];
+      final number = operation == '/' ? random.nextInt(9) + 1 : numbers[index];
+      value = switch (operation) {
+        '+' => value + number,
+        '-' => value - number,
+        '*' => value * number,
+        _ => value ~/ number,
+      };
+      expression = '$expression $operation $number';
+    }
+    return (expression: expression, result: value);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final answer = int.tryParse(_answer.text.trim());
+    final canConfirm = _secondsRemaining == 0 &&
+        _acknowledged &&
+        answer == _challenge.result;
+    return AlertDialog(
+      title: const Text('Confirm Data Reset'),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Text('Are you sure you want to reset all progress? This action is irreversible.'),
+            const SizedBox(height: 14),
+            Text(_challenge.expression, style: Theme.of(context).textTheme.headlineSmall),
+            const SizedBox(height: 8),
+            Text(
+              _secondsRemaining > 0
+                  ? 'Wait $_secondsRemaining seconds before confirming.'
+                  : 'You may confirm the reset.',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            const SizedBox(height: 8),
+            CheckboxListTile(
+              contentPadding: EdgeInsets.zero,
+              value: _acknowledged,
+              onChanged: (value) => setState(() => _acknowledged = value ?? false),
+              title: const Text('I understand this will erase all my progress'),
+              controlAffinity: ListTileControlAffinity.leading,
+            ),
+            TextField(
+              controller: _answer,
+              keyboardType: TextInputType.number,
+              onChanged: (_) => setState(() {}),
+              decoration: const InputDecoration(labelText: 'Solve the expression'),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: const Text('Cancel'),
+        ),
+        TextButton(
+          onPressed: canConfirm ? () => Navigator.of(context).pop(true) : null,
+          child: const Text('Confirm reset'),
+        ),
+      ],
     );
   }
 }
