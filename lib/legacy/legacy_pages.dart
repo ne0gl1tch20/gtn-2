@@ -30,11 +30,23 @@ class LegacyHubPage extends StatelessWidget {
     required this.progression,
     required this.activeSlot,
     required this.onSystemsChanged,
+    this.onOpenProfile,
+    this.onOpenSaveSlots,
+    this.onOpenSettings,
+    this.onOpenDeveloperSettings,
+    this.onOpenShop,
+    this.onOpenProgression,
   });
 
   final ProgressionState progression;
   final int activeSlot;
   final LegacyProgressionChanged onSystemsChanged;
+  final VoidCallback? onOpenProfile;
+  final VoidCallback? onOpenSaveSlots;
+  final VoidCallback? onOpenSettings;
+  final VoidCallback? onOpenDeveloperSettings;
+  final VoidCallback? onOpenShop;
+  final VoidCallback? onOpenProgression;
 
   void _openSystems(
     BuildContext context, {
@@ -62,85 +74,145 @@ class LegacyHubPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final quickAccess = [
+    final destinations = [
       _MoreDestination(
-        title: 'Creative Mode',
-        description: 'Build a separate sandbox with custom ranges and rules.',
-        icon: Icons.palette_rounded,
-        accent: GtnUiTokens.purple,
-        onTap: () => Navigator.of(context).push<void>(
-          MaterialPageRoute<void>(
-            builder: (_) => CreativeModePage(slot: activeSlot),
-          ),
-        ),
-      ),
-      _MoreDestination(
-        title: 'All gameplay systems',
-        description: 'Traits, talents, mutators, relics, sanctuary, stakes, rewards, loot and music.',
-        icon: Icons.grid_view_rounded,
-        accent: GtnUiTokens.cyan,
-        onTap: () => _openSystems(context),
-      ),
-    ];
-    final progressDestinations = [
-      _MoreDestination(
-        title: LegacySection.journey.label,
-        description: 'Achievements, milestones and earned perks.',
-        icon: LegacySection.journey.icon,
+        title: 'Rewards',
+        description: 'Achievements and daily rewards',
+        icon: Icons.emoji_events_rounded,
         accent: GtnUiTokens.gold,
-        onTap: () => _openSection(context, LegacySection.journey),
-      ),
-      _MoreDestination(
-        title: LegacySection.rewards.label,
-        description: 'Review rewards and lifetime earnings.',
-        icon: LegacySection.rewards.icon,
-        accent: GtnUiTokens.green,
         onTap: () => _openSection(context, LegacySection.rewards),
       ),
       _MoreDestination(
-        title: LegacySection.statistics.label,
-        description: 'Inspect records, streaks and long-term progress.',
-        icon: LegacySection.statistics.icon,
+        title: 'Journey',
+        description: 'Your run history and progress',
+        icon: Icons.schedule_rounded,
         accent: GtnUiTokens.cyan,
-        onTap: () => _openSection(context, LegacySection.statistics),
+        onTap: () => _openSection(context, LegacySection.journey),
+      ),
+      if (onOpenShop != null)
+        _MoreDestination(
+          title: 'Shop',
+          description: 'Browse available items',
+          icon: Icons.shopping_bag_rounded,
+          accent: GtnUiTokens.purple,
+          onTap: onOpenShop!,
+        ),
+      _MoreDestination(
+        title: 'Home Base',
+        description: 'Build up your base',
+        icon: Icons.home_rounded,
+        accent: GtnUiTokens.green,
+        onTap: () => _openSystems(context, view: LegacySystemsView.homeBase),
       ),
       _MoreDestination(
-        title: LegacySection.codex.label,
-        description: 'Explore the worlds, guardians and discoveries.',
-        icon: LegacySection.codex.icon,
+        title: 'Relics',
+        description: 'Manage your relic collection',
+        icon: Icons.auto_awesome_rounded,
         accent: GtnUiTokens.purple,
+        onTap: () => _openSystems(context, view: LegacySystemsView.relics),
+      ),
+      _MoreDestination(
+        title: 'Codex',
+        description: 'Explore discoveries',
+        icon: Icons.menu_book_rounded,
+        accent: GtnUiTokens.cyan,
         onTap: () => _openSection(context, LegacySection.codex),
       ),
-    ];
-    final gameDestinations = [
       _MoreDestination(
-        title: 'Music',
-        description:
-            'Offline player, library, playlists and playback controls.',
-        icon: Icons.library_music_rounded,
-        accent: GtnUiTokens.purple,
-        onTap: () => _openSystems(context, view: LegacySystemsView.music),
-      ),
-      _MoreDestination(
-        title: 'Lucky Stake',
-        description: 'Place a stake and settle a validated 50/50 round.',
-        icon: Icons.casino_rounded,
-        accent: GtnUiTokens.gold,
-        onTap: () => _openSystems(context, view: LegacySystemsView.luckyStake),
-      ),
-      _MoreDestination(
-        title: LegacySection.changelog.label,
-        description: 'See what changed across Guess The Number updates.',
-        icon: LegacySection.changelog.icon,
+        title: 'Changelog',
+        description: 'See what changed in recent updates',
+        icon: Icons.article_outlined,
         accent: GtnUiTokens.cyan,
         onTap: () => _openSection(context, LegacySection.changelog),
       ),
       _MoreDestination(
-        title: LegacySection.about.label,
-        description: 'Game information, source links and acknowledgements.',
-        icon: LegacySection.about.icon,
+        title: 'About',
+        description: 'About & Licenses',
+        icon: Icons.info_outline_rounded,
         accent: GtnUiTokens.muted,
         onTap: () => _openSection(context, LegacySection.about),
+      ),
+      if (onOpenSaveSlots != null)
+        _MoreDestination(
+          title: 'Save Slots',
+          description: 'Switch or manage saved games',
+          icon: Icons.save_outlined,
+          accent: GtnUiTokens.gold,
+          onTap: onOpenSaveSlots!,
+        ),
+      _MoreDestination(
+        title: 'Background Music',
+        description: 'Control your background music',
+        icon: Icons.library_music_rounded,
+        accent: GtnUiTokens.purple,
+        onTap: () => _openSystems(context, view: LegacySystemsView.music),
+      ),
+      if (onOpenSettings != null)
+        _MoreDestination(
+          title: 'Settings',
+          description: 'Customize your experience',
+          icon: Icons.settings_rounded,
+          accent: GtnUiTokens.cyan,
+          onTap: onOpenSettings!,
+        ),
+      if (onOpenProgression != null) ...[
+        _MoreDestination(
+          title: 'Prestige',
+          description: 'Prestige upgrades and resets',
+          icon: Icons.workspace_premium_rounded,
+          accent: GtnUiTokens.gold,
+          onTap: onOpenProgression!,
+        ),
+        _MoreDestination(
+          title: 'Ultra',
+          description: 'Ultra progression',
+          icon: Icons.auto_awesome_rounded,
+          accent: GtnUiTokens.purple,
+          onTap: onOpenProgression!,
+        ),
+      ],
+      _MoreDestination(
+        title: 'Talents',
+        description: 'Build your talent path',
+        icon: Icons.layers_rounded,
+        accent: GtnUiTokens.purple,
+        onTap: () => _openSystems(context, view: LegacySystemsView.talents),
+      ),
+      _MoreDestination(
+        title: 'Traits',
+        description: 'Gameplay modules and selectable variants',
+        icon: Icons.layers_rounded,
+        accent: GtnUiTokens.cyan,
+        onTap: () => _openSystems(context, view: LegacySystemsView.traits),
+      ),
+      _MoreDestination(
+        title: 'Mutators',
+        description: 'Customize challenge rules',
+        icon: Icons.explore_rounded,
+        accent: GtnUiTokens.gold,
+        onTap: () => _openSystems(context, view: LegacySystemsView.mutators),
+      ),
+      _MoreDestination(
+        title: 'Stats',
+        description: 'Review your game statistics',
+        icon: Icons.query_stats_rounded,
+        accent: GtnUiTokens.cyan,
+        onTap: () => _openSection(context, LegacySection.statistics),
+      ),
+      if (onOpenDeveloperSettings != null)
+        _MoreDestination(
+          title: 'Dev Settings',
+          description: 'Developer console and diagnostics',
+          icon: Icons.build_rounded,
+          accent: GtnUiTokens.muted,
+          onTap: onOpenDeveloperSettings!,
+        ),
+      _MoreDestination(
+        title: 'Lucky Stake',
+        description: 'Try your luck with a stake',
+        icon: Icons.star_rounded,
+        accent: GtnUiTokens.gold,
+        onTap: () => _openSystems(context, view: LegacySystemsView.luckyStake),
       ),
     ];
 
@@ -149,36 +221,19 @@ class LegacyHubPage extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(12, 14, 12, 28),
         children: [
-          GtnPageHeader(
-            eyebrow: 'Explore GTN1',
-            title: 'More',
-            description:
-                'Your achievements, game systems and extra ways to play.',
-            icon: Icons.explore_rounded,
-            accent: GtnUiTokens.cyan,
-          ),
-          const SizedBox(height: 18),
-          _MoreSectionHeading(
-            title: 'Quick access',
-            description:
-                'Jump into a creative run or browse the full systems hub.',
-          ),
-          const SizedBox(height: 10),
-          _MoreDestinationGrid(destinations: quickAccess),
-          const SizedBox(height: 22),
-          _MoreSectionHeading(
-            title: 'Progress & discoveries',
-            description: 'Keep track of what you have earned and explored.',
-          ),
-          const SizedBox(height: 10),
-          _MoreDestinationGrid(destinations: progressDestinations),
-          const SizedBox(height: 22),
-          _MoreSectionHeading(
-            title: 'Game & information',
-            description: 'Manage your game experience and see what is new.',
-          ),
-          const SizedBox(height: 10),
-          _MoreDestinationGrid(destinations: gameDestinations),
+          if (onOpenProfile != null) ...[
+            _MoreDestinationCard(
+              destination: _MoreDestination(
+                title: 'Player profile',
+                description: 'View your username and bio, then edit your profile.',
+                icon: Icons.account_circle_rounded,
+                accent: GtnUiTokens.cyan,
+                onTap: onOpenProfile!,
+              ),
+            ),
+            const SizedBox(height: 12),
+          ],
+          _MoreDestinationGrid(destinations: destinations),
         ],
       ),
     );
@@ -243,7 +298,7 @@ class _MoreDestinationGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final columns = constraints.maxWidth >= 640 ? 2 : 1;
+        const columns = 1;
         const spacing = 10.0;
         final width =
             (constraints.maxWidth - spacing * (columns - 1)) / columns;
