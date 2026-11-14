@@ -13,10 +13,14 @@ class MenuStudioPage extends StatefulWidget {
     super.key,
     required this.settings,
     required this.onChanged,
+    this.onPreview,
+    this.onCancel,
   });
 
   final GameSettings settings;
   final MenuStudioChanged onChanged;
+  final ValueChanged<GameSettings>? onPreview;
+  final VoidCallback? onCancel;
 
   @override
   State<MenuStudioPage> createState() => _MenuStudioPageState();
@@ -66,6 +70,20 @@ class _MenuStudioPageState extends State<MenuStudioPage> {
     _layout = MenuStudioLayout.fromSettings(widget.settings);
   }
 
+  GameSettings _settingsForLayout() => widget.settings.copyWith(
+    moreScreenOrder: List.unmodifiable(_layout.settingsMoreOrder),
+    moreScreenButtonColors: Map.unmodifiable(_layout.settingsColors),
+    webMenuStudioLayout: _layout.encode(),
+  );
+
+  void _preview() => widget.onPreview?.call(_settingsForLayout());
+
+  void _cancel() {
+    if (_saving) return;
+    widget.onCancel?.call();
+    Navigator.of(context).pop();
+  }
+
   void _move(String id, String targetArea) {
     final currentArea = _layout.areas[id] ?? 'more';
     if (currentArea == targetArea) return;
@@ -86,6 +104,7 @@ class _MenuStudioPageState extends State<MenuStudioPage> {
         moreOrder: moreOrder,
       );
     });
+    _preview();
   }
 
   void _reorder(String area, int oldIndex, int newIndex) {
@@ -104,6 +123,7 @@ class _MenuStudioPageState extends State<MenuStudioPage> {
         moreOrder: area == 'more' ? updatedOrder : null,
       );
     });
+    _preview();
   }
 
   Color _colorFor(String id, BuildContext context) {
@@ -131,22 +151,14 @@ class _MenuStudioPageState extends State<MenuStudioPage> {
       colors[id] = result.hex!;
     }
     setState(() => _layout = _layout.copyWith(colors: colors));
+    _preview();
   }
 
   Future<void> _save() async {
     setState(() => _saving = true);
     try {
-      await widget.onChanged(
-        widget.settings.copyWith(
-          moreScreenOrder: List.unmodifiable(_layout.settingsMoreOrder),
-          moreScreenButtonColors: Map.unmodifiable(_layout.settingsColors),
-          webMenuStudioLayout: _layout.encode(),
-        ),
-      );
-      if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('Menu layout saved.')));
-      }
+      await widget.onChanged(_settingsForLayout());
+      if (mounted) Navigator.of(context).pop();
     } on Exception {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -275,8 +287,20 @@ class _MenuStudioPageState extends State<MenuStudioPage> {
       ..._layout.visibleMoreIds,
     ].take(8);
 
-    return Scaffold(
-      appBar: const GtnExpressiveAppBar(titleText: 'Customize buttons'),
+    return PopScope<void>(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) _cancel();
+      },
+      child: Scaffold(
+      appBar: AppBar(
+        title: const Text('Customize buttons'),
+        leading: IconButton(
+          tooltip: 'Back',
+          onPressed: _cancel,
+          icon: const Icon(Icons.arrow_back_rounded),
+        ),
+      ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
         children: [
@@ -384,6 +408,7 @@ class _MenuStudioPageState extends State<MenuStudioPage> {
             ],
           ),
         ],
+      ),
       ),
     );
   }
