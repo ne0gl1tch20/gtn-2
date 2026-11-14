@@ -69,11 +69,17 @@ void main() {
       previewed!.webMenuStudioLayout,
     );
     expect(previewLayout!.visibleMoreIds, contains('worlds'));
-    await tester.ensureVisible(find.text('Live preview'));
-    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.text('Live preview'),
+      240,
+      scrollable: find.byKey(const Key('menu-studio-scroll')),
+    );
     expect(find.text('Live preview'), findsOneWidget);
-    await tester.ensureVisible(find.text('Save changes'));
-    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.text('Save changes'),
+      240,
+      scrollable: find.byKey(const Key('menu-studio-scroll')),
+    );
     await tester.tap(find.text('Save changes'));
     await tester.pumpAndSettle();
 
