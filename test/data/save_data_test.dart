@@ -308,6 +308,59 @@ void main() {
       );
     });
 
+    test('round-trips active counters independently from lifetime statistics', () {
+      final save = SaveData(
+        secret: 42,
+        attempts: 17,
+        correctGuesses: 6,
+        streak: 2,
+        bestStreak: 5,
+        gamesWon: 3,
+        progression: ProgressionState.initial.copyWith(
+          totalGuesses: 900,
+          correctGuesses: 700,
+          currentStreak: 2,
+          bestStreak: 5,
+        ),
+      );
+
+      final restored = SaveData.fromJson(save.toJson());
+
+      expect(restored.attempts, 17);
+      expect(restored.correctGuesses, 6);
+      expect(restored.streak, 2);
+      expect(restored.bestStreak, 5);
+      expect(restored.progression.totalGuesses, 900);
+      expect(restored.progression.correctGuesses, 700);
+    });
+
+    test('migrates old progression counters into the new active fields', () {
+      final legacy = SaveData(
+        secret: 42,
+        attempts: 12,
+        gamesWon: 2,
+        progression: ProgressionState.initial.copyWith(
+          totalGuesses: 12,
+          correctGuesses: 4,
+          currentStreak: 2,
+          bestStreak: 3,
+        ),
+      ).toJson()
+        ..['schemaVersion'] = 6
+        ..remove('correctGuesses')
+        ..remove('streak')
+        ..remove('bestStreak');
+
+      final migrated = SaveData.fromJson(legacy);
+
+      expect(migrated.attempts, 12);
+      expect(migrated.correctGuesses, 4);
+      expect(migrated.streak, 2);
+      expect(migrated.bestStreak, 3);
+      expect(migrated.progression.totalGuesses, 12);
+      expect(migrated.progression.correctGuesses, 4);
+    });
+
     test('migrates schema 1 saves and preserves nested legacy systems', () {
       final legacy = LegacySystemsState.initial.copyWith(
         activeMutators: const {'mut_hardcore'},
