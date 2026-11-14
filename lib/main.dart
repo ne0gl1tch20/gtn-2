@@ -331,7 +331,7 @@ class _GameHomePageState extends State<GameHomePage>
           _randomEventMessage = null;
           _progression = _progression.copyWith(clearLastRandomEventId: true);
         });
-        unawaited(_persist());
+        unawaited(_persist().then<void>((_) {}));
       });
       await _persist();
     } catch (error) {
