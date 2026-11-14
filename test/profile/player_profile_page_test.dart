@@ -31,6 +31,46 @@ void main() {
     expect(profile.toJson()['customAvatarPath'], profile.customAvatarPath);
   });
 
+  test('legacy profile data receives a stable identity and completed setup', () {
+    final profile = PlayerProfile.fromJson({
+      'username': 'Legacy Player',
+      'bio': '',
+      'avatarId': 'star',
+    });
+
+    expect(profile.profileId, isNotEmpty);
+    expect(profile.setupComplete, isTrue);
+  });
+
+  testWidgets('first launch opens the required profile creation flow', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      M3EMaterialApp(
+        data: M3EThemeData.light(seedColor: const Color(0xFF7C5CFC)),
+        fontFamily: 'Manrope',
+        autoTheming: false,
+        initialTheme: Brightness.dark,
+        home: PlayerProfilePage(
+          initialProfile: const PlayerProfile(
+            profileId: 'new-profile',
+            setupComplete: false,
+          ),
+          store: PlayerProfileStore(),
+          firstLaunch: true,
+          viewOnly: false,
+          onSaved: (_) {},
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Create your profile'), findsOneWidget);
+    expect(find.text('Create profile & continue'), findsOneWidget);
+    expect(find.byTooltip('Back'), findsNothing);
+    expect(find.byType(TextField), findsNWidgets(2));
+  });
+
   testWidgets(
     'completed profile opens read-only and has a separate edit action',
     (tester) async {
