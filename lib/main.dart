@@ -1038,6 +1038,17 @@ class _GameHomePageState extends State<GameHomePage>
     final menuLayoutChanged =
         settings.webMenuStudioLayout != _settings.webMenuStudioLayout ||
         settings.moreScreenOrder.join('|') != _settings.moreScreenOrder.join('|');
+    final currentNavigation = MenuStudioLayout.fromSettings(
+      _settings,
+    ).primaryNavigationIds;
+    final selectedDestination =
+        _selectedPrimaryIndex >= 0 &&
+            _selectedPrimaryIndex < currentNavigation.length
+        ? currentNavigation[_selectedPrimaryIndex]
+        : 'play';
+    final nextNavigation = MenuStudioLayout.fromSettings(
+      settings,
+    ).primaryNavigationIds;
     final restoredSystems = restoreMusicStateFromSettings(
       settings: settings,
       systems: _progression.legacySystems,
@@ -1053,9 +1064,10 @@ class _GameHomePageState extends State<GameHomePage>
       _progression = nextProgression;
       _settings = synchronizedSettings;
       if (menuLayoutChanged) {
-        _selectedPrimaryIndex = MenuStudioLayout.fromSettings(
-          synchronizedSettings,
-        ).playIndex;
+        final nextIndex = nextNavigation.indexOf(selectedDestination);
+        _selectedPrimaryIndex = nextIndex >= 0
+            ? nextIndex
+            : MenuStudioLayout.fromSettings(synchronizedSettings).playIndex;
       }
       if (difficultyChanged) {
         _engine = _engineFor(nextProgression, synchronizedSettings);
