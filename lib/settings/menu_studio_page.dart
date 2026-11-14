@@ -83,8 +83,11 @@ class _MenuStudioPageState extends State<MenuStudioPage> {
     if (_saving || _allowPop) return;
     widget.onCancel?.call();
     setState(() => _allowPop = true);
+    if (!Navigator.of(context).canPop()) return;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) Navigator.of(context).pop();
+      if (mounted && Navigator.of(context).canPop()) {
+        Navigator.of(context).pop();
+      }
     });
   }
 
