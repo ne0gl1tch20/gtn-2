@@ -278,11 +278,13 @@ class GameDashboardPage extends StatelessWidget {
           final selected = selectedIndex
               .clamp(0, navigationIds.length - 1)
               .toInt();
-          final wide = constraints.maxWidth > 600;
-          final minimumItemWidth = wide ? 124.0 : 76.0;
-          final minimumBarWidth = navigationIds.length * minimumItemWidth;
-          final barWidth = constraints.maxWidth > minimumBarWidth
-              ? constraints.maxWidth
+          final wide = MediaQuery.sizeOf(context).width >= 720;
+          final minimumBarWidth = wide ? navigationIds.length * 124.0 : 0.0;
+          final availableWidth = (constraints.maxWidth - 24)
+              .clamp(0.0, 1000.0)
+              .toDouble();
+          final barWidth = availableWidth > minimumBarWidth
+              ? availableWidth
               : minimumBarWidth;
 
           if (wide) {
@@ -294,7 +296,7 @@ class GameDashboardPage extends StatelessWidget {
                   selectedIndex: selected,
                   onDestinationSelected: selectDestination,
                   labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-                  height: 76,
+                  height: 72,
                   backgroundColor: panel,
                   indicatorColor: colorFor(navigationIds[selected])
                       .withValues(alpha: .18),
