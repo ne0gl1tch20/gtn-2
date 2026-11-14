@@ -154,6 +154,21 @@ void main() {
     expect(openedSection, LegacySection.rewards);
   });
 
+  testWidgets('debug build info card is shown on the Play screen', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(buildDashboard());
+    expect(find.text('DEVELOPER INFO'), findsOneWidget);
+    expect(find.text('Debug build'), findsOneWidget);
+    expect(find.text('DEBUG'), findsOneWidget);
+    expect(
+      find.textContaining(
+        'This copy of Guess The Number is a debug build.',
+      ),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('More menu has one Dev Settings item and opens Nebula Shop', (
     WidgetTester tester,
   ) async {

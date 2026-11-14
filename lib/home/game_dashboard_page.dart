@@ -916,6 +916,104 @@ class GameDashboardPage extends StatelessWidget {
                                         ),
                                       ),
                                     ),
+                                  if (kDebugMode)
+                                    SizedBox(
+                                      width: fullWidth,
+                                      child: GtnExpressiveCard(
+                                        color: panel,
+                                        margin: EdgeInsets.zero,
+                                        padding: const EdgeInsets.all(14),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(18),
+                                          side: BorderSide(
+                                            color: const Color(
+                                              0xFFF59E0B,
+                                            ).withValues(alpha: .5),
+                                          ),
+                                        ),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                const Icon(
+                                                  Icons.code_rounded,
+                                                  color: Color(0xFFD97706),
+                                                  size: 22,
+                                                ),
+                                                const SizedBox(width: 9),
+                                                Expanded(
+                                                  child: Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment.start,
+                                                    children: [
+                                                      Text(
+                                                        'DEVELOPER INFO',
+                                                        style: Theme.of(context)
+                                                            .textTheme
+                                                            .labelSmall
+                                                            ?.copyWith(
+                                                              letterSpacing: 1.1,
+                                                              fontWeight:
+                                                                  FontWeight.w800,
+                                                            ),
+                                                      ),
+                                                      Text(
+                                                        'Debug build',
+                                                        style: Theme.of(context)
+                                                            .textTheme
+                                                            .titleMedium
+                                                            ?.copyWith(
+                                                              fontWeight:
+                                                                  FontWeight.w800,
+                                                            ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                                Container(
+                                                  padding:
+                                                      const EdgeInsets.symmetric(
+                                                        horizontal: 8,
+                                                        vertical: 4,
+                                                      ),
+                                                  decoration: BoxDecoration(
+                                                    color: const Color(
+                                                      0xFFF59E0B,
+                                                    ).withValues(alpha: .16),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          999,
+                                                        ),
+                                                  ),
+                                                  child: const Text(
+                                                    'DEBUG',
+                                                    style: TextStyle(
+                                                      fontSize: 10,
+                                                      fontWeight:
+                                                          FontWeight.w800,
+                                                      letterSpacing: .8,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            const SizedBox(height: 8),
+                                            Text(
+                                              'This copy of Guess The Number is a debug build. Developer tools and diagnostics may be available, and behavior can differ from a release build. Your progress is saved to the active local save slot.',
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .bodySmall
+                                                  ?.copyWith(
+                                                    color: muted,
+                                                    height: 1.5,
+                                                  ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
                                 ],
                               );
                             },
