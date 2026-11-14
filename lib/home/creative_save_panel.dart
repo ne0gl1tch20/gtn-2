@@ -250,7 +250,6 @@ class _CreativeSavePanelState extends State<CreativeSavePanel> {
                       keyboardType: TextInputType.number,
                       maxLength: 7,
                       decoration: InputDecoration(
-                        labelText: _t('web_ui_level', 'Level'),
                         counterText: '',
                         isDense: true,
                         border: const OutlineInputBorder(),
@@ -261,7 +260,7 @@ class _CreativeSavePanelState extends State<CreativeSavePanel> {
                 const SizedBox(width: 8),
                 SizedBox(
                   width: 56,
-                  child: M3EButton.filled(
+                  child: M3EButton.outlined(
                     onPressed: _saving
                         ? null
                         : () => _applyValue(_upgradeKey(upgrade)),
