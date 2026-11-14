@@ -496,6 +496,28 @@ void main() {
     }
   });
 
+  testWidgets('bottom navigation matches GTN1 width limits', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(buildDashboard());
+    expect(
+      tester.getSize(find.byKey(const Key('dashboard-navigation-bar'))).width,
+      366,
+    );
+
+    tester.view.physicalSize = const Size(1200, 900);
+    await tester.pumpWidget(buildDashboard());
+    await tester.pumpAndSettle();
+    expect(
+      tester.getSize(find.byKey(const Key('dashboard-navigation-bar'))).width,
+      1000,
+    );
+  });
+
   testWidgets('quick actions stack on mobile and split on desktop', (
     WidgetTester tester,
   ) async {
