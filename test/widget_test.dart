@@ -383,6 +383,7 @@ void main() {
 
     expect(find.text('More').first, findsOneWidget);
     expect(find.byKey(const Key('more-global-topbar')), findsOneWidget);
+    expect(find.widgetWithText(AppBar, 'More'), findsNothing);
     expect(find.text('OFFLINE'), findsWidgets);
     for (final label in [
       'Player profile',
