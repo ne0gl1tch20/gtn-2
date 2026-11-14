@@ -31,6 +31,7 @@ void main() {
     tester,
   ) async {
     GameSettings? saved;
+    GameSettings? previewed;
     await tester.pumpWidget(
       M3EMaterialApp(
         data: M3EThemeData.light(seedColor: const Color(0xFF7C5CFC)),
@@ -41,6 +42,9 @@ void main() {
           settings: GameSettings.initial,
           onChanged: (settings) async {
             saved = settings;
+          },
+          onPreview: (settings) {
+            previewed = settings;
           },
         ),
       ),
@@ -62,6 +66,11 @@ void main() {
 
     await tester.tap(find.text('Move to More').first);
     await tester.pumpAndSettle();
+    expect(previewed, isNotNull);
+    final previewLayout = MenuStudioLayout.tryParse(
+      previewed!.webMenuStudioLayout,
+    );
+    expect(previewLayout!.visibleMoreIds, contains('worlds'));
     await tester.ensureVisible(find.text('Save changes'));
     await tester.tap(find.text('Save changes'));
     await tester.pumpAndSettle();
