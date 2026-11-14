@@ -421,7 +421,7 @@ class GameDashboardPage extends StatelessWidget {
                                               Text(
                                                 'Guess The Number',
                                                 style: TextStyle(
-                                                  color: foreground,
+                                                  color: menuColor ?? foreground,
                                                   fontFamily: 'SpaceGrotesk',
                                                   fontSize: 18,
                                                   fontWeight: FontWeight.w700,
@@ -1299,10 +1299,10 @@ class _MoreMenuPage extends StatelessWidget {
   final VoidCallback onPlayerProfile;
   final ValueChanged<String> onDestination;
 
-  Color _destinationColor(String? hex) {
-    if (hex == null || hex.isEmpty) return _purple;
+  Color? _destinationColor(String? hex) {
+    if (hex == null || hex.isEmpty) return null;
     final value = int.tryParse(hex.replaceFirst('#', ''), radix: 16);
-    return value == null ? _purple : Color(value | 0xFF000000);
+    return value == null ? null : Color(value | 0xFF000000);
   }
 
   Widget _profileAvatar(
@@ -1375,7 +1375,7 @@ class _MoreMenuPage extends StatelessWidget {
       String title,
       String subtitle,
       VoidCallback onTap,
-      Color accent, {
+      Color? menuColor, {
       Widget? leading,
       EdgeInsets? cardPadding,
       Key? key,
@@ -1388,7 +1388,9 @@ class _MoreMenuPage extends StatelessWidget {
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: radius,
-          side: BorderSide(color: line),
+          side: BorderSide(
+            color: Color.lerp(line, menuColor ?? _purple, .32)!,
+          ),
         ),
         child: Material(
           color: Colors.transparent,
@@ -1408,14 +1410,10 @@ class _MoreMenuPage extends StatelessWidget {
                 child: Row(
                   children: [
                     leading ??
-                        Container(
-                          width: compact ? 40 : 42,
-                          height: compact ? 40 : 42,
-                          decoration: BoxDecoration(
-                            color: accent.withValues(alpha: dark ? .16 : .11),
-                            borderRadius: BorderRadius.circular(13),
-                          ),
-                          child: Icon(icon, color: accent, size: 22),
+                        Icon(
+                          icon,
+                          color: menuColor ?? const Color(0xFF62E8FF),
+                          size: 25,
                         ),
                     const SizedBox(width: 13),
                     Expanded(
@@ -1741,9 +1739,7 @@ class _MoreMenuPage extends StatelessWidget {
                             profile.title,
                             profile.subtitle,
                             profile.onTap,
-                            _destinationColor(
-                              settings.moreScreenButtonColors['player_profile'],
-                            ),
+                            null,
                             leading: _profileAvatar(
                               context,
                               compact: compact,
@@ -1772,6 +1768,21 @@ class _MoreMenuPage extends StatelessWidget {
                                   _destinationColor(
                                     settings.moreScreenButtonColors[id],
                                   ),
+                                  leading: id == 'save_slots'
+                                      ? Container(
+                                          width: 42,
+                                          height: 42,
+                                          decoration: BoxDecoration(
+                                            color: _purple.withValues(alpha: .12),
+                                            borderRadius: BorderRadius.circular(13),
+                                          ),
+                                          alignment: Alignment.center,
+                                          child: const Text(
+                                            '▣',
+                                            style: TextStyle(fontSize: 21),
+                                          ),
+                                        )
+                                      : null,
                                   key: Key('more-card-$id'),
                                 ),
                               ),
