@@ -230,3 +230,18 @@ Each batch must inspect both repositories before changes, implement the full sou
 - **Verified from source code:** the five deep-diff structures above. Batch 1 removes the music route's generic expansion shell and restores a dedicated player-page layout; metadata/artwork and platform media-service gaps remain open.
 - **Not yet verified:** paired runtime screenshots, all remaining route-by-route source diffs, actual reproduction of the blank music screen on device, and Android/Windows visual parity. The latest test-fix commit has not yet completed a fresh full validation and Android/Windows build. No screen is closed by code inspection alone.
 - **No screen is declared fully restored by this audit.**
+
+
+### Dashboard / More responsive parity pass — 2026-11-14
+
+**Pinned GTN1 source:** `app/src/main/assets/web-play/index.html` and `styles.css` at `fe9cf567169e19059e0330d08769fe454336ef94`.
+
+**GTN2 target:** `lib/home/game_dashboard_page.dart` and `test/widget_test.dart`.
+
+- GTN1 desktop content width is 1120px from 720px viewport width and 1280px from 1100px; GTN2's dashboard content cap was 1120px. Raised the Flutter dashboard and More content caps to 1280px so the wide desktop layout can use the source width.
+- GTN1's Play screen uses a two-column grid at 720px, but the Bot Arena is the one half-column card while the hero, guess, stats, economy and quick actions span the full row. GTN2 had made the Bot Arena full width; it now uses half the available width at 720px+ and full width below that breakpoint. Added a keyed widget assertion for the desktop width.
+- GTN1 More has a full-width Player Profile card above the link grid; GTN2 had placed it as the first item inside the two-column grid. It is now full width and separate from the reorderable 18-link list, matching the source's separation of profile from `.more-links`.
+- GTN1 More links use two columns above 520px and one column at 520px or below. Flutter's breakpoint was 640px; it now uses the source 520px breakpoint. Added a 600px widget test checking profile width and side-by-side Rewards/Journey cards.
+- The More link card dimensions, minimum heights, padding and 42px/40px icon sizes were compared with source CSS and already align; no unnecessary redesign was made.
+
+**Still open:** GTN1 includes a conditional Update Available notice at the top of Play; an equivalent conditional dashboard notice has not been verified in GTN2. Compare its update-state source with the Flutter updater before adding UI. Also verify the debug-build card and Creative Save tools placement against the native GTN1 routes. No paired Android/Windows runtime screenshots have been captured, so Batch A remains open.
