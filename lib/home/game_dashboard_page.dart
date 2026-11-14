@@ -1026,10 +1026,10 @@ class _BotArena extends StatelessWidget {
               }}';
 
     return Container(
-      padding: const EdgeInsets.all(15),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: panel,
-        borderRadius: BorderRadius.circular(22),
+        borderRadius: BorderRadius.circular(26),
         border: Border.all(color: line),
       ),
       child: Column(
@@ -1515,7 +1515,7 @@ class _Stat extends StatelessWidget {
     ),
     decoration: BoxDecoration(
       color: panel,
-      borderRadius: BorderRadius.circular(22),
+      borderRadius: BorderRadius.circular(20),
       border: Border.all(color: line),
     ),
     child: Column(
@@ -1540,7 +1540,7 @@ class _Stat extends StatelessWidget {
                 ? 26
                 : MediaQuery.sizeOf(context).width <= 360
                 ? 18
-                : 21,
+                 : 22,
             fontWeight: FontWeight.w900,
           ),
         ),
@@ -2021,12 +2021,13 @@ class _Action extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Material(
     color: panel,
-    borderRadius: BorderRadius.circular(22),
+    borderRadius: BorderRadius.circular(21),
     child: InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(22),
       child: Container(
-        padding: const EdgeInsets.all(14),
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(22),
           border: Border.all(color: line),
@@ -2034,15 +2035,15 @@ class _Action extends StatelessWidget {
         child: Row(
           children: [
             Container(
-              width: 42,
-              height: 42,
+              width: 36,
+              height: 36,
               decoration: BoxDecoration(
                 color: color.withValues(alpha: .14),
-                borderRadius: BorderRadius.circular(15),
+                borderRadius: BorderRadius.circular(13),
               ),
               child: Icon(icon, color: color, size: 21),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: 11),
             Expanded(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -2054,7 +2055,7 @@ class _Action extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       color: foreground,
-                      fontSize: 10,
+                      fontSize: 12,
                       fontWeight: FontWeight.w900,
                     ),
                   ),
@@ -2063,12 +2064,12 @@ class _Action extends StatelessWidget {
                     subtitle,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(color: muted, fontSize: 10, height: 1.2),
+                    style: TextStyle(color: muted, fontSize: 10, height: 1.4),
                   ),
                 ],
               ),
             ),
-            Icon(Icons.chevron_right_rounded, color: muted, size: 16),
+            Icon(Icons.chevron_right_rounded, color: const Color(0xFF6F7B9D), size: 23),
           ],
         ),
       ),
