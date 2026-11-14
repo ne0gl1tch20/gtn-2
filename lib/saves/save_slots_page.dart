@@ -601,7 +601,7 @@ class _ResetEverythingDialogState extends State<_ResetEverythingDialog> {
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
       if (!mounted) return;
       setState(() {
-        _secondsRemaining = (_secondsRemaining - 1).clamp(0, 45);
+        _secondsRemaining = (_secondsRemaining - 1).clamp(0, 45).toInt();
       });
       if (_secondsRemaining == 0) _timer?.cancel();
     });
