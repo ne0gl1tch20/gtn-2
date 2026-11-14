@@ -447,12 +447,17 @@ void main() {
       );
     }
     final profilePadding = tester.widget<Padding>(
-      find.descendant(
-        of: find.byKey(const Key('more-profile-card')),
-        matching: find.byType(Padding),
-      ).first,
+      find
+          .descendant(
+            of: find.byKey(const Key('more-profile-card')),
+            matching: find.byType(Padding),
+          )
+          .first,
     );
-    expect(profilePadding.padding, const EdgeInsets.symmetric(horizontal: 18, vertical: 18));
+    expect(
+      profilePadding.padding,
+      const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+    );
     for (final subtitle in [
       'View your username and bio, then edit your profile.',
       'Achievements and daily rewards',
