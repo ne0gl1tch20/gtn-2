@@ -202,6 +202,8 @@ void main() {
 
     await tester.tap(find.text('More').first);
     await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('Prestige').first);
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Prestige').first);
     expect(openedPrestige, 1);
     expect(openedUltra, 0);
@@ -213,6 +215,8 @@ void main() {
       ),
     );
     await tester.tap(find.text('More').first);
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('Ultra').first);
     await tester.pumpAndSettle();
     await tester.tap(find.text('Ultra').first);
     expect(openedUltra, 1);
