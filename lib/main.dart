@@ -12,6 +12,7 @@ import 'core/automation/bot_team.dart';
 import 'core/automation/clock_rollback_policy.dart';
 import 'core/automation/guessing_bot.dart';
 import 'core/automation/offline_earnings_policy.dart';
+import 'core/automation/offline_earnings_settlement.dart';
 import 'core/events/random_event_engine.dart';
 import 'core/game/adaptive_target_generator.dart';
 import 'core/game/difficulty_rules.dart';
@@ -341,46 +342,20 @@ class _GameHomePageState extends State<GameHomePage>
       _resumeCatchUpPending = true;
       return;
     }
-    final systems = _progression.legacySystems;
-    final now = DateTime.now().millisecondsSinceEpoch;
-    final savedAt = systems.lastSaveTimestamp;
-    final clockCheck = ClockRollbackPolicy.check(
-      nowMillis: now,
-      lastSaveTimestamp: savedAt,
-      timeTravelPenaltyUntil: systems.timeTravelPenaltyUntil,
-      autoClickerActive: systems.autoClickerActive,
+    final settlement = OfflineEarningsSettlement.settle(
+      progression: _progression,
+      nowMillis: DateTime.now().millisecondsSinceEpoch,
     );
-    if (clockCheck.detected) {
-      setState(() {
-        _progression = _progression.copyWith(
-          legacySystems: systems.copyWith(
-            autoClickerActive: clockCheck.autoClickerActive,
-            lastSaveTimestamp: clockCheck.lastSaveTimestamp,
-            timeTravelPenaltyUntil: clockCheck.timeTravelPenaltyUntil,
-          ),
-        );
+    setState(() {
+      _progression = settlement.progression;
+      if (settlement.clockRollbackDetected) {
         _message = 'Clock rollback detected. Auto Clicker paused for 24 hours.';
-      });
-      await _persist();
-    } else {
-      final offlineEarnings = systems.autoClickerActive && savedAt > 0
-          ? OfflineEarningsPolicy.calculate(
-              autoClickerWasActive: true,
-              elapsedSeconds: (now - savedAt) ~/ 1000,
-            )
-          : BigNumber.fromInt(0);
-      if (offlineEarnings.compareTo(BigNumber.fromInt(0)) > 0) {
-        setState(() {
-          _progression = _progression.copyWith(
-            money: _progression.money + offlineEarnings,
-            moneyEarned: _progression.moneyEarned + offlineEarnings,
-          );
-          _message =
-              'Auto Clicker earned $offlineEarnings Money while the app was away.';
-        });
+      } else if (settlement.earnings.compareTo(BigNumber.fromInt(0)) > 0) {
+        _message =
+            'Auto Clicker earned ${settlement.earnings} Money while the app was away.';
       }
-      await _persist();
-    }
+    });
+    await _persist();
     _scheduleAutoClicker();
   }
 
@@ -401,40 +376,13 @@ class _GameHomePageState extends State<GameHomePage>
       if (save != null) {
         var restoredProgression = _worldBossBattleEngine
             .migrateLegacyWorldUnlocks(save.progression);
-        final savedAt = restoredProgression.legacySystems.lastSaveTimestamp;
-        final now = DateTime.now().millisecondsSinceEpoch;
-        final clockCheck = ClockRollbackPolicy.check(
-          nowMillis: now,
-          lastSaveTimestamp: savedAt,
-          timeTravelPenaltyUntil:
-              restoredProgression.legacySystems.timeTravelPenaltyUntil,
-          autoClickerActive:
-              restoredProgression.legacySystems.autoClickerActive,
+        final settlement = OfflineEarningsSettlement.settle(
+          progression: restoredProgression,
+          nowMillis: DateTime.now().millisecondsSinceEpoch,
         );
-        final timeTravelDetected = clockCheck.detected;
-        restoredProgression = restoredProgression.copyWith(
-          legacySystems: restoredProgression.legacySystems.copyWith(
-            autoClickerActive: clockCheck.autoClickerActive,
-            lastSaveTimestamp: clockCheck.lastSaveTimestamp,
-            timeTravelPenaltyUntil: clockCheck.timeTravelPenaltyUntil,
-          ),
-        );
-        final elapsedSeconds = savedAt > 0 && !timeTravelDetected
-            ? ((now - savedAt) ~/ 1000)
-            : 0;
-        final offlineEarnings = timeTravelDetected
-            ? BigNumber.fromInt(0)
-            : OfflineEarningsPolicy.calculate(
-                autoClickerWasActive:
-                    restoredProgression.legacySystems.autoClickerActive,
-                elapsedSeconds: elapsedSeconds,
-              );
-        if (offlineEarnings.compareTo(BigNumber.fromInt(0)) > 0) {
-          restoredProgression = restoredProgression.copyWith(
-            money: restoredProgression.money + offlineEarnings,
-            moneyEarned: restoredProgression.moneyEarned + offlineEarnings,
-          );
-        }
+        restoredProgression = settlement.progression;
+        final timeTravelDetected = settlement.clockRollbackDetected;
+        final offlineEarnings = settlement.earnings;
         final restoredSystems = restoreMusicStateFromSettings(
           settings: save.settings,
           systems: restoredProgression.legacySystems,
