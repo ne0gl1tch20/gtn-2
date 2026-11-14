@@ -102,6 +102,8 @@
 - [ ] **Upgrades:** Match GTN1's balance header, buy-multiplier dropdown and upgrade-card hierarchy, including labels, affordability/maxed states and purchase feedback. Source: GTN1 `app/src/main/java/com/jarrlyyy/guessthenumber/ui/screens/UpgradeScreen.kt`; destination: GTN2 `lib/shop/upgrade_shop_page.dart`.
 - [ ] For each of these five screens, capture GTN1 and GTN2 at the same viewport, document the concrete differences, then verify the corrected screen and its interactions. Keep the existing Material 3 Expressive blend, but do not substitute generic GTN2-only layouts for GTN1's structure.
 
+**Full-screen diff authority:** `docs/GTN1_SCREEN_PARITY_DIFF.md` is the active source-to-Dart screen comparison ledger. It covers all 22 Web Play roots and the complete Kotlin UI source-surface inventory (including Android, shared KMP and Windows desktop UI files). Work through its finite batches; every row must end as verified or explicitly not applicable with a source-backed reason. A destination route or widget is not proof of restored screen structure.
+
 **Required visual acceptance for every production screen/route (Kotlin and Web Play):**
 - [ ] Capture/inspect the pinned GTN1 source screen and compare GTN2 at the same agreed phone and desktop viewport sizes.
 - [ ] Match the source information hierarchy, layout proportions, typography, color roles, spacing, iconography, component density and visible labels. Preserve source-specific content rather than substituting generic cards or placeholder copy.
