@@ -45,12 +45,13 @@ class PlayerProfile {
     String? profileId,
     bool? setupComplete,
     bool clearCustomAvatar = false,
+    bool clearCustomAvatarData = false,
   }) {
     return PlayerProfile(
       username: username ?? this.username,
       bio: bio ?? this.bio,
       avatarId: avatarId ?? this.avatarId,
-      customAvatarData: clearCustomAvatar
+      customAvatarData: clearCustomAvatar || clearCustomAvatarData
           ? null
           : customAvatarData ?? this.customAvatarData,
       customAvatarPath: clearCustomAvatar
@@ -178,8 +179,7 @@ class PlayerProfileStore {
             );
             profile = profile.copyWith(
               customAvatarPath: path,
-              clearCustomAvatar: false,
-              customAvatarData: null,
+              clearCustomAvatarData: true,
             );
             await save(profile);
           } on Object {
