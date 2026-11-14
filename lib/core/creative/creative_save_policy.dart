@@ -148,9 +148,9 @@ class CreativeSavePolicy {
 
   static BigNumber? _parseSourceBigNumber(String input) {
     final match = RegExp(
-      r'^([0-9]+(?:\.[0-9]+)?)([A-Za-z]{1,4})?
+      r'^([0-9]+(?:\.[0-9]+)?)([A-Za-z]{1,4})?'
     ).firstMatch(input);
-    if (match == null) return null;
+    if (match == null || match.group(0) != input) return null;
 
     final numeric = match.group(1)!;
     final suffix = match.group(2)?.toUpperCase();
