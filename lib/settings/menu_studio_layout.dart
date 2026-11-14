@@ -194,6 +194,24 @@ class MenuStudioLayout {
   List<String> get visibleMoreIds =>
       moreOrder.where((id) => areas[id] == 'more').toList();
 
+  List<String> get primaryNavigationIds {
+    final beforePlay = visibleNavigationIds.where(
+      (id) => id == 'worlds' || id == 'arcade',
+    );
+    final afterPlay = visibleNavigationIds.where(
+      (id) => id != 'worlds' && id != 'arcade',
+    );
+    return [...beforePlay, 'play', ...afterPlay, 'more'];
+  }
+
+  int get playIndex => primaryNavigationIds.indexOf('play');
+
+  static String settingsIdFor(String sourceId) =>
+      _sourceToSettings[sourceId] ?? sourceId;
+
+  static String sourceIdForSettings(String settingsId) =>
+      _settingsToSource[settingsId] ?? settingsId;
+
   List<String> get settingsMoreOrder => visibleMoreIds
       .map((id) => _sourceToSettings[id] ?? id)
       .toList();
