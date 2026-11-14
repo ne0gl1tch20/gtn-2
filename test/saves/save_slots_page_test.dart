@@ -37,6 +37,46 @@ void main() {
     expect(firstSlotMenu.enabled, isFalse);
   });
 
+  testWidgets('new save dialog exposes permanent Creative Save setup', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      M3EMaterialApp(
+        data: M3EThemeData.light(seedColor: const Color(0xFF7C5CFC)),
+        fontFamily: 'Manrope',
+        autoTheming: false,
+        initialTheme: Brightness.dark,
+        home: SaveSlotsPage(
+          activeSlot: 1,
+          onSelect: (_) async {},
+          previewLoader: (_) => Future<SaveData?>.value(null),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byType(PopupMenuButton<String>).first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Create save'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Create Slot 1'), findsOneWidget);
+    expect(find.text('Creative Save'), findsOneWidget);
+    expect(find.byType(SwitchListTile), findsOneWidget);
+    expect(find.text('Range minimum (1–1,000,000)'), findsNothing);
+
+    await tester.tap(find.byType(SwitchListTile));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Range minimum (1–1,000,000)'), findsOneWidget);
+    expect(find.text('Range maximum (1–1,000,000)'), findsOneWidget);
+    expect(find.text('Permanently enables the active-save Creative Save tools.'), findsOneWidget);
+
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+    expect(find.text('Create Slot 1'), findsNothing);
+  });
+
   testWidgets('Reset Everything requires the source safety checks', (
     tester,
   ) async {
