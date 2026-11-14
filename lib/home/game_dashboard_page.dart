@@ -1409,10 +1409,21 @@ class _MoreMenuPage extends StatelessWidget {
                 child: Row(
                   children: [
                     leading ??
-                        Icon(
-                          icon,
-                          color: menuColor ?? const Color(0xFF62E8FF),
-                          size: 25,
+                        Container(
+                          width: 25,
+                          height: 25,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF62E8FF).withValues(
+                              alpha: .08,
+                            ),
+                            borderRadius: BorderRadius.circular(9),
+                          ),
+                          alignment: Alignment.center,
+                          child: Icon(
+                            icon,
+                            color: menuColor ?? const Color(0xFF62E8FF),
+                            size: 17,
+                          ),
                         ),
                     const SizedBox(width: 13),
                     Expanded(
@@ -1423,7 +1434,7 @@ class _MoreMenuPage extends StatelessWidget {
                           Text(
                             title,
                             style: TextStyle(
-                              color: foreground,
+                              color: menuColor ?? foreground,
                               fontSize: 14,
                               fontWeight: FontWeight.w800,
                               letterSpacing: -.2,
