@@ -975,19 +975,32 @@ class _GameHomePageState extends State<GameHomePage>
               'planet' => 'moon',
               _ => 'star',
             },
+            profileId: PlayerProfile.generateId(),
+            setupComplete: true,
           );
-          await _playerProfileStore.save(profile);
+          profile = await _playerProfileStore.save(profile);
         }
       }
-      if (mounted) {
-        setState(() {
-          _playerProfile = profile;
-          _isPlayerProfileLoaded = true;
-        });
+      if (mounted) setState(() => _playerProfile = profile);
+
+      if (!profile.setupComplete && mounted) {
+        await _pushShellRoute<void>(
+          MaterialPageRoute<void>(
+            builder: (_) => PlayerProfilePage(
+              initialProfile: profile,
+              store: _playerProfileStore,
+              firstLaunch: true,
+              viewOnly: false,
+              onSaved: (savedProfile) {
+                setState(() => _playerProfile = savedProfile);
+                unawaited(_syncPlayerProfileToSave(savedProfile));
+              },
+            ),
+          ),
+        );
       }
     } on Exception {
       // A missing or unreadable profile never blocks loading the game.
-      if (mounted) setState(() => _isPlayerProfileLoaded = true);
     }
   }
 
