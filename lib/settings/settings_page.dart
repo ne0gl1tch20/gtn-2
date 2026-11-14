@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../design/expressive_widgets.dart';
@@ -20,7 +23,52 @@ class SettingsPage extends StatelessWidget {
   final VoidCallback? onOpenMenuStudio;
   final VoidCallback? onReplayTutorial;
 
+  static const _notificationPermissionChannel = MethodChannel(
+    'gtn/notification_permission',
+  );
+
   void _update(GameSettings next) => onChanged(next);
+
+  Future<void> _setNotificationsEnabled(
+    BuildContext context,
+    bool enabled,
+  ) async {
+    if (!enabled) {
+      await _update(settings.copyWith(notificationsEnabled: false));
+      return;
+    }
+    if (defaultTargetPlatform != TargetPlatform.android) {
+      await _update(settings.copyWith(notificationsEnabled: true));
+      return;
+    }
+    try {
+      final granted =
+          await _notificationPermissionChannel.invokeMethod<bool>('request') ??
+          false;
+      if (granted) {
+        await _update(settings.copyWith(notificationsEnabled: true));
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Notifications enabled!')),
+          );
+        }
+      } else {
+        await _update(settings.copyWith(notificationsEnabled: false));
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Notification permission denied.')),
+          );
+        }
+      }
+    } on PlatformException {
+      await _update(settings.copyWith(notificationsEnabled: false));
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Notification permission denied.')),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -315,10 +363,18 @@ class SettingsPage extends StatelessWidget {
               _toggle(
                 'Notifications',
                 settings.notificationsEnabled,
-                (value) =>
-                    _update(settings.copyWith(notificationsEnabled: value)),
+                (value) => unawaited(_setNotificationsEnabled(context, value)),
+                description:
+                    'Enable optional game reminders and notifications. You can turn them off at any time.',
               ),
               if (settings.notificationsEnabled) ...[
+                const Padding(
+                  padding: EdgeInsets.fromLTRB(16, 0, 16, 8),
+                  child: Text(
+                    'Choose how many hours pass between scheduled reminders.',
+                    style: TextStyle(fontSize: 12),
+                  ),
+                ),
                 _dropdown<int>(
                   'Reminder Frequency',
                   settings.notificationIntervalHours,
@@ -341,6 +397,7 @@ class SettingsPage extends StatelessWidget {
                   (value) => _update(
                     settings.copyWith(notificationRemindersEnabled: value),
                   ),
+                  description: 'Periodic reminders to return to the game.',
                 ),
                 _toggle(
                   'Progression milestones',
@@ -348,6 +405,7 @@ class SettingsPage extends StatelessWidget {
                   (value) => _update(
                     settings.copyWith(notificationProgressionEnabled: value),
                   ),
+                  description: 'World unlocks and boss victories.',
                 ),
                 _toggle(
                   'Game events',
@@ -355,6 +413,8 @@ class SettingsPage extends StatelessWidget {
                   (value) => _update(
                     settings.copyWith(notificationEventsEnabled: value),
                   ),
+                  description:
+                      'New random events and limited-time event rewards.',
                 ),
               ],
             ],
@@ -369,11 +429,15 @@ class SettingsPage extends StatelessWidget {
                 'Sound effects',
                 settings.soundEnabled,
                 (value) => _update(settings.copyWith(soundEnabled: value)),
+                description:
+                    'Turn sound effects for in-game interactions on or off.',
               ),
               _toggle(
                 'Vibration',
                 settings.vibrationEnabled,
                 (value) => _update(settings.copyWith(vibrationEnabled: value)),
+                description:
+                    'Turn app-triggered vibration during interactions on or off.',
               ),
             ],
           ),
@@ -387,11 +451,15 @@ class SettingsPage extends StatelessWidget {
                 'Reduce Flashes',
                 settings.reduceFlashes,
                 (value) => _update(settings.copyWith(reduceFlashes: value)),
+                description:
+                    'Reduce flashes and sudden visual changes for greater visual comfort.',
               ),
               _toggle(
                 'Reduced Motion',
                 settings.reduceMotion,
                 (value) => _update(settings.copyWith(reduceMotion: value)),
+                description:
+                    'Soften or disable animated screen transitions.',
               ),
             ],
           ),
@@ -402,11 +470,14 @@ class SettingsPage extends StatelessWidget {
             children: [
               _SettingsSlider(
                 label: 'Master Volume',
+                description: 'Set the app’s audio level from silent to maximum.',
                 value: settings.volume,
                 onChanged: (value) => _update(settings.copyWith(volume: value)),
               ),
               _SettingsSlider(
                 label: 'Sound Effects Volume',
+                description:
+                    'Adjust sound-effect loudness independently of background music.',
                 value: settings.sfxVolume,
                 onChanged: settings.soundEnabled
                     ? (value) => _update(settings.copyWith(sfxVolume: value))
@@ -434,12 +505,19 @@ class SettingsPage extends StatelessWidget {
     onChanged: onChanged,
   );
 
-  Widget _toggle(String label, bool value, ValueChanged<bool> onChanged) =>
-      GtnExpressiveSwitchTile(
-        title: Text(label),
-        value: value,
-        onChanged: onChanged,
-      );
+  Widget _toggle(
+    String label,
+    bool value,
+    ValueChanged<bool> onChanged, {
+    String? description,
+  }) => GtnExpressiveSwitchTile(
+    title: Text(label),
+    subtitle: description == null
+        ? null
+        : Text(description, style: const TextStyle(fontSize: 12)),
+    value: value,
+    onChanged: onChanged,
+  );
 }
 
 class _SettingsSection extends StatelessWidget {
@@ -502,8 +580,10 @@ class _SettingsSlider extends StatelessWidget {
     required this.label,
     required this.value,
     required this.onChanged,
+    this.description,
   });
   final String label;
+  final String? description;
   final double value;
   final ValueChanged<double>? onChanged;
 
@@ -512,6 +592,8 @@ class _SettingsSlider extends StatelessWidget {
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       Text('$label · ${(value * 100).round()}%'),
+      if (description != null)
+        Text(description!, style: const TextStyle(fontSize: 12)),
       Slider(value: value, min: 0, max: 1, onChanged: onChanged),
     ],
   );
