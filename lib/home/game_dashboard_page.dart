@@ -114,45 +114,65 @@ class GameDashboardPage extends StatelessWidget {
     switch (id) {
       case 'worlds':
         onWorldMap();
+        return;
       case 'arcade':
         onArcade();
+        return;
       case 'upgrades':
         onUpgradeShop();
+        return;
       case 'rewards':
         onLegacySection(LegacySection.rewards);
+        return;
       case 'journey':
         onLegacySection(LegacySection.journey);
+        return;
       case 'shop':
         onNebulaShop();
+        return;
       case 'homebase':
         onSystemsView(LegacySystemsView.homeBase);
+        return;
       case 'relics':
         onSystemsView(LegacySystemsView.relics);
+        return;
       case 'codex':
         onLegacySection(LegacySection.codex);
+        return;
       case 'changelog':
         onLegacySection(LegacySection.changelog);
+        return;
       case 'about':
         onLegacySection(LegacySection.about);
+        return;
       case 'music':
         onMusic();
+        return;
       case 'settings':
         onSettings();
+        return;
       case 'prestige':
       case 'ultra':
         onPrestige();
+        return;
       case 'talent':
         onSystemsView(LegacySystemsView.talents);
+        return;
       case 'traits':
         onSystemsView(LegacySystemsView.traits);
+        return;
       case 'mutators':
         onSystemsView(LegacySystemsView.mutators);
+        return;
       case 'stats':
         onLegacySection(LegacySection.statistics);
+        return;
       case 'dev_settings':
         onDeveloperSettings();
+        return;
       case 'stake':
         onLuckyStake();
+        return;
     }
   }
 
@@ -166,102 +186,135 @@ class GameDashboardPage extends StatelessWidget {
     final panel = dark ? _panel : Colors.white;
     final raised = dark ? _raised : const Color(0xFFF0F1FA);
     final line = dark ? _line : const Color(0x180D1530);
+    final menuLayout = MenuStudioLayout.fromSettings(settings);
+    final navigationIds = menuLayout.primaryNavigationIds
+        .where((id) => id != 'dev_settings' || showDeveloperSettings)
+        .toList();
+    final playIndex = navigationIds.indexOf('play');
 
     return Scaffold(
       backgroundColor: dark ? _bg : const Color(0xFFF5F6FC),
       bottomNavigationBar: LayoutBuilder(
         builder: (context, constraints) {
+          IconData iconFor(String id) => switch (id) {
+            'worlds' => Icons.public_rounded,
+            'arcade' => Icons.sports_esports_rounded,
+            'play' => Icons.play_arrow_rounded,
+            'upgrades' => Icons.upgrade_rounded,
+            'more' => Icons.menu_rounded,
+            'rewards' => Icons.card_giftcard_rounded,
+            'journey' => Icons.timeline_rounded,
+            'shop' => Icons.storefront_rounded,
+            'homebase' => Icons.home_work_rounded,
+            'relics' => Icons.auto_awesome_rounded,
+            'codex' => Icons.menu_book_rounded,
+            'changelog' => Icons.history_rounded,
+            'about' => Icons.info_outline_rounded,
+            'music' => Icons.library_music_rounded,
+            'settings' => Icons.settings_rounded,
+            'prestige' => Icons.auto_awesome_rounded,
+            'ultra' => Icons.bolt_rounded,
+            'talent' => Icons.psychology_alt_rounded,
+            'traits' => Icons.auto_awesome_rounded,
+            'mutators' => Icons.tune_rounded,
+            'stats' => Icons.query_stats_rounded,
+            'dev_settings' => Icons.build_rounded,
+            'stake' => Icons.casino_rounded,
+            _ => Icons.circle_outlined,
+          };
+
+          String labelFor(String id) => switch (id) {
+            'worlds' => AppLocalizations.text(
+              'nav_worlds',
+              'Beyond the Numbers',
+            ),
+            'arcade' => AppLocalizations.text('nav_arcade', 'Arcade'),
+            'play' => AppLocalizations.text('nav_play', 'Play'),
+            'upgrades' => AppLocalizations.text('nav_upgrades', 'Upgrades'),
+            'more' => AppLocalizations.text('nav_more', 'More'),
+            'rewards' => 'Rewards',
+            'journey' => 'Journey',
+            'shop' => 'Shop',
+            'homebase' => 'Home Base',
+            'relics' => 'Relics',
+            'codex' => 'Codex',
+            'changelog' => 'Changelog',
+            'about' => 'About',
+            'music' => 'Music',
+            'settings' => 'Settings',
+            'prestige' => 'Prestige',
+            'ultra' => 'Ultra',
+            'talent' => 'Talents',
+            'traits' => 'Traits',
+            'mutators' => 'Mutators',
+            'stats' => 'Stats',
+            'dev_settings' => 'Dev Settings',
+            'stake' => 'Lucky Stake',
+            _ => id,
+          };
+
           void selectDestination(int index) {
-            // Primary tabs replace the active primary destination. Feature
-            // pages opened from More use push(), so Back returns to More while
-            // the shared navigation shell remains mounted.
+            if (index < 0 || index >= navigationIds.length) return;
+            final id = navigationIds[index];
             shellNavigatorKey.currentState?.popUntil((route) => route.isFirst);
             onPrimarySelected(index);
-            switch (index) {
-              case 0:
-                onWorldMap();
-                break;
-              case 1:
-                onArcade();
-                break;
-              case 2:
-                break;
-              case 3:
-                onUpgradeShop();
-                break;
-              case 4:
-                _openMoreMenu(context, panel);
-                break;
+            if (id == 'more') {
+              _openMoreMenu(context, panel, playIndex);
+            } else if (id != 'play') {
+              _openMenuDestination(id);
             }
           }
 
-          // The M3E bar switches to a wide horizontal-chip layout on larger
-          // windows. Keep the GTN1 five-item labels inside the available width
-          // with the standard adaptive M3 bar on tablets and desktop windows.
-          if (constraints.maxWidth > 600) {
-            return NavigationBar(
-              selectedIndex: selectedIndex,
-              onDestinationSelected: selectDestination,
-              labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-              height: 76,
-              backgroundColor: panel,
-              indicatorColor: _purple.withValues(alpha: .18),
-              destinations: [
-                NavigationDestination(
-                  icon: Icon(Icons.public_rounded),
-                  label: AppLocalizations.text(
-                    'nav_worlds',
-                    'Beyond the Numbers',
-                  ),
+          final selected = selectedIndex
+              .clamp(0, navigationIds.length - 1)
+              .toInt();
+          final wide = constraints.maxWidth > 600;
+          final minimumItemWidth = wide ? 124.0 : 76.0;
+          final minimumBarWidth = navigationIds.length * minimumItemWidth;
+          final barWidth = constraints.maxWidth > minimumBarWidth
+              ? constraints.maxWidth
+              : minimumBarWidth;
+
+          if (wide) {
+            return SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: SizedBox(
+                width: barWidth,
+                child: NavigationBar(
+                  selectedIndex: selected,
+                  onDestinationSelected: selectDestination,
+                  labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+                  height: 76,
+                  backgroundColor: panel,
+                  indicatorColor: _purple.withValues(alpha: .18),
+                  destinations: [
+                    for (final id in navigationIds)
+                      NavigationDestination(
+                        icon: Icon(iconFor(id)),
+                        label: labelFor(id),
+                      ),
+                  ],
                 ),
-                NavigationDestination(
-                  icon: Icon(Icons.sports_esports_rounded),
-                  label: AppLocalizations.text('nav_arcade', 'Arcade'),
-                ),
-                NavigationDestination(
-                  icon: Icon(Icons.play_arrow_rounded),
-                  label: AppLocalizations.text('nav_play', 'Play'),
-                ),
-                NavigationDestination(
-                  icon: Icon(Icons.upgrade_rounded),
-                  label: AppLocalizations.text('nav_upgrades', 'Upgrades'),
-                ),
-                NavigationDestination(
-                  icon: Icon(Icons.menu_rounded),
-                  label: AppLocalizations.text('nav_more', 'More'),
-                ),
-              ],
+              ),
             );
           }
 
-          return M3ENavigationBar(
-            destinations: [
-              M3ENavigationBarDestination(
-                icon: Icon(Icons.public_rounded),
-                label: AppLocalizations.text(
-                  'nav_worlds',
-                  'Beyond the Numbers',
-                ),
+          return SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: SizedBox(
+              width: barWidth,
+              child: M3ENavigationBar(
+                destinations: [
+                  for (final id in navigationIds)
+                    M3ENavigationBarDestination(
+                      icon: Icon(iconFor(id)),
+                      label: labelFor(id),
+                    ),
+                ],
+                selectedIndex: selected,
+                onDestinationSelected: selectDestination,
               ),
-              M3ENavigationBarDestination(
-                icon: Icon(Icons.sports_esports_rounded),
-                label: AppLocalizations.text('nav_arcade', 'Arcade'),
-              ),
-              M3ENavigationBarDestination(
-                icon: Icon(Icons.play_arrow_rounded),
-                label: AppLocalizations.text('nav_play', 'Play'),
-              ),
-              M3ENavigationBarDestination(
-                icon: Icon(Icons.upgrade_rounded),
-                label: AppLocalizations.text('nav_upgrades', 'Upgrades'),
-              ),
-              M3ENavigationBarDestination(
-                icon: Icon(Icons.menu_rounded),
-                label: AppLocalizations.text('nav_more', 'More'),
-              ),
-            ],
-            selectedIndex: selectedIndex,
-            onDestinationSelected: selectDestination,
+            ),
           );
         },
       ),
