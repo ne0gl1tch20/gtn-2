@@ -50,17 +50,25 @@ void main() {
         home: LiveOpsPage(
           progression: progression,
           repository: repository,
-          onClaim: (event) async => claimedId = event.id,
+          onClaim: (event) async {
+            claimedId = event.id;
+            return progression.copyWith(
+              legacySystems: progression.legacySystems.copyWith(
+                liveOpsClaims: {'test_event': 1},
+              ),
+            );
+          },
         ),
       ),
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Seasonal Events'), findsOneWidget);
+    expect(find.text('Seasonal Events'), findsNWidgets(2));
     expect(find.text('Test Seasonal Event'), findsOneWidget);
     expect(find.text('Claims: 0 / 2'), findsOneWidget);
     await tester.tap(find.text('Claim Reward (+10 Nebula)'));
     await tester.pumpAndSettle();
     expect(claimedId, 'test_event');
+    expect(find.text('Claims: 1 / 2'), findsOneWidget);
   });
 }

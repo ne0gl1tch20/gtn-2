@@ -19,6 +19,7 @@ import 'core/game/guess_economy_rules.dart';
 import 'core/game/guess_rate_limit_policy.dart';
 import 'core/legacy/invisible_trait_engine.dart';
 import 'core/legacy/legacy_systems_engine.dart';
+import 'core/liveops/live_ops_repository.dart';
 import 'core/numbers/big_number.dart';
 import 'core/progression/progression_calculator.dart';
 import 'core/progression/progression_engine.dart';
@@ -1287,7 +1288,7 @@ class _GameHomePageState extends State<GameHomePage>
     _scheduleAutoClicker();
   }
 
-  Future<void> _claimLiveOpsReward(LiveOpsEvent event) async {
+  Future<ProgressionState?> _claimLiveOpsReward(LiveOpsEvent event) async {
     final result = _legacySystemsEngine.claimLiveOpsReward(
       progression: _progression,
       systems: _progression.legacySystems,
@@ -1295,11 +1296,12 @@ class _GameHomePageState extends State<GameHomePage>
     );
     if (!result.accepted) {
       if (mounted) setState(() => _message = result.message);
-      return;
+      return null;
     }
     await _applyLegacyProgression(
       result.progression.copyWith(legacySystems: result.systems),
     );
+    return _progression;
   }
 
   Future<void> _openLiveOps() async {

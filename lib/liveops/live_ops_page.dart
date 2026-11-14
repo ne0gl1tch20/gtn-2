@@ -5,7 +5,7 @@ import '../core/progression/progression_state.dart';
 import '../design/expressive_widgets.dart';
 import '../i18n/app_localizations.dart';
 
-typedef LiveOpsClaim = Future<void> Function(LiveOpsEvent event);
+typedef LiveOpsClaim = Future<ProgressionState?> Function(LiveOpsEvent event);
 
 class LiveOpsPage extends StatefulWidget {
   const LiveOpsPage({
@@ -28,6 +28,7 @@ class _LiveOpsPageState extends State<LiveOpsPage> {
       widget.repository ?? LiveOpsRepository();
   late Future<LiveOpsSnapshot> _snapshot = _repository.load();
   String? _claimingEventId;
+  late ProgressionState _progression = widget.progression;
 
   Future<void> _reload() async {
     setState(() => _snapshot = _repository.load());
@@ -38,7 +39,10 @@ class _LiveOpsPageState extends State<LiveOpsPage> {
     if (_claimingEventId != null) return;
     setState(() => _claimingEventId = event.id);
     try {
-      await widget.onClaim(event);
+      final updated = await widget.onClaim(event);
+      if (updated != null && mounted) {
+        setState(() => _progression = updated);
+      }
     } finally {
       if (mounted) setState(() => _claimingEventId = null);
     }
@@ -65,7 +69,7 @@ class _LiveOpsPageState extends State<LiveOpsPage> {
           }
           final data = snapshot.data ??
               const LiveOpsSnapshot(enabled: false, events: []);
-          final systems = widget.progression.legacySystems;
+          final systems = _progression.legacySystems;
           return RefreshIndicator(
             onRefresh: _reload,
             child: ListView(
@@ -155,7 +159,7 @@ class _LiveOpsPageState extends State<LiveOpsPage> {
                     _EventCard(
                       event: event,
                       claims: systems.liveOpsClaims[event.id] ?? 0,
-                      progression: widget.progression,
+                      progression: _progression,
                       busy: _claimingEventId == event.id,
                       anyClaimBusy: _claimingEventId != null,
                       onClaim: () => _claim(event),
