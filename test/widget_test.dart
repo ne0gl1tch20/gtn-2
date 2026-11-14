@@ -8,6 +8,7 @@ import 'package:gtn_2/legacy/legacy_pages.dart';
 import 'package:gtn_2/legacy/legacy_systems_page.dart';
 import 'package:gtn_2/profile/player_profile_page.dart';
 import 'package:gtn_2/settings/game_settings.dart';
+import 'package:gtn_2/settings/menu_studio_layout.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -25,6 +26,8 @@ Widget buildDashboard({
   ValueChanged<int>? onPrimarySelected,
 }) {
   final navigatorKey = shellNavigatorKey ?? GlobalKey<NavigatorState>();
+  final dashboardSettings = settings ?? GameSettings.initial;
+  final menuLayout = MenuStudioLayout.fromSettings(dashboardSettings);
   return M3EMaterialApp(
     data: M3EThemeData.light(seedColor: const Color(0xFF7C5CFC)),
     fontFamily: 'Manrope',
@@ -33,7 +36,7 @@ Widget buildDashboard({
     home: GameDashboardPage(
       game: const GameState(secret: 42, attempts: 0, isComplete: false),
       progression: ProgressionState.initial,
-      settings: settings ?? GameSettings.initial,
+      settings: dashboardSettings,
       activeSlot: 1,
       loading: loading,
       message: 'Make your move.',
@@ -57,7 +60,7 @@ Widget buildDashboard({
       onSystems: () {},
       showDeveloperSettings: true,
       shellNavigatorKey: navigatorKey,
-      selectedIndex: 2,
+      selectedIndex: menuLayout.playIndex,
       onPrimarySelected: onPrimarySelected ?? (_) {},
       onSystemsView: onSystemsView ?? (_) {},
       onLegacySection: onLegacySection ?? (_) {},
@@ -89,6 +92,62 @@ void main() {
     );
     expect(find.text('+ 24 /s'), findsOneWidget);
     expect(find.text('0 earned'), findsOneWidget);
+  });
+
+  testWidgets('Menu Studio moves a pinned tab into the More menu', (
+    WidgetTester tester,
+  ) async {
+    final defaults = MenuStudioLayout.defaults();
+    final areas = Map<String, String>.of(defaults.areas)..['worlds'] = 'more';
+    final navOrder = List<String>.of(defaults.navOrder)..remove('worlds');
+    final moreOrder = [...defaults.moreOrder, 'worlds'];
+    final layout = defaults.copyWith(
+      areas: areas,
+      navOrder: navOrder,
+      moreOrder: moreOrder,
+    );
+    final settings = GameSettings.initial.copyWith(
+      moreScreenOrder: layout.settingsMoreOrder,
+      moreScreenButtonColors: layout.settingsColors,
+      webMenuStudioLayout: layout.encode(),
+    );
+
+    await tester.pumpWidget(buildDashboard(settings: settings));
+    await tester.tap(find.text('More').first);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Beyond the Numbers'), findsOneWidget);
+  });
+
+  testWidgets('Menu Studio moves a More destination into navigation', (
+    WidgetTester tester,
+  ) async {
+    LegacySection? openedSection;
+    final defaults = MenuStudioLayout.defaults();
+    final areas = Map<String, String>.of(defaults.areas)..['rewards'] = 'nav';
+    final navOrder = [...defaults.navOrder, 'rewards'];
+    final moreOrder = List<String>.of(defaults.moreOrder)..remove('rewards');
+    final layout = defaults.copyWith(
+      areas: areas,
+      navOrder: navOrder,
+      moreOrder: moreOrder,
+    );
+    final settings = GameSettings.initial.copyWith(
+      moreScreenOrder: layout.settingsMoreOrder,
+      moreScreenButtonColors: layout.settingsColors,
+      webMenuStudioLayout: layout.encode(),
+    );
+
+    await tester.pumpWidget(
+      buildDashboard(
+        settings: settings,
+        onLegacySection: (section) => openedSection = section,
+      ),
+    );
+    expect(find.text('Rewards'), findsOneWidget);
+    await tester.tap(find.text('Rewards'));
+    await tester.pumpAndSettle();
+    expect(openedSection, LegacySection.rewards);
   });
 
   testWidgets('More menu has one Dev Settings item and opens Nebula Shop', (
