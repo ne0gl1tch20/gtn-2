@@ -42,6 +42,12 @@ jobs:
         run: flutter pub get
       - name: Restore analysis configuration
         run: git restore -- analysis_options.yaml
+      - name: Print LiveOps formatter output
+        run: |
+          dart format --output=show lib/core/liveops/live_ops_repository.dart
+          dart format --output=show lib/liveops/live_ops_page.dart
+          dart format --output=show test/core/liveops/live_ops_repository_test.dart
+          dart format --output=show test/liveops/live_ops_page_test.dart
       - name: Verify Dart formatting
         run: dart format --output=none --set-exit-if-changed .
       - name: Analyze
