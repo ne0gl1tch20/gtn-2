@@ -628,11 +628,12 @@ class _GameHomePageState extends State<GameHomePage>
     return result;
   }
 
-  Future<void> _openProgressionHub() async {
+  Future<void> _openProgressionHub({bool ultra = false}) async {
     await _pushShellRoute<void>(
       MaterialPageRoute<void>(
         builder: (_) => ProgressionHubPage(
           progression: _progression,
+          initialUltra: ultra,
           onPrestige: () async {
             await _prestige();
             return _progression;
@@ -1846,6 +1847,7 @@ class _GameHomePageState extends State<GameHomePage>
       onNewGame: _newGame,
       onUpgradeShop: _openUpgradeShop,
       onPrestige: _openProgressionHub,
+      onUltra: () => _openProgressionHub(ultra: true),
       onArcade: _openArcade,
       onNebulaShop: _openNebulaShop,
       onWorldMap: _openWorldMap,
