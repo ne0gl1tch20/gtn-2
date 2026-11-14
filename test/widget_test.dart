@@ -547,6 +547,7 @@ void main() {
     WidgetTester tester,
   ) async {
     final settings = ValueNotifier(GameSettings.initial);
+    addTearDown(settings.dispose);
     await tester.pumpWidget(buildDashboard(settingsListenable: settings));
     await tester.tap(find.text('More').first);
     await tester.pumpAndSettle();
