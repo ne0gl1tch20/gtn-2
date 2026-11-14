@@ -114,11 +114,14 @@ class CreativeSavePolicy {
       _ => const <GameUpgrade>[],
     };
     if (catalog.isEmpty) return null;
-    final matches = catalog
-        .where((upgrade) => upgrade.definition.id == id)
-        .toList();
-    if (matches.isEmpty) return null;
-    final definition = matches.single;
+    GameUpgrade? definition;
+    for (final upgrade in catalog) {
+      if (upgrade.definition.id == id) {
+        definition = upgrade;
+        break;
+      }
+    }
+    if (definition == null) return null;
     final maximumLevel = definition.definition.maxLevel;
     final level = int.tryParse(value);
     if (maximumLevel == null ||
@@ -146,60 +149,7 @@ class CreativeSavePolicy {
 
   static BigNumber? _parseSourceBigNumber(String input) {
     final match = RegExp(
-      r'^([0-9]+(?:\.[0-9]+)?)([A-Za-z]{1,4})?
-    if (match == null || match.group(0) != input) return null;
-
-    final numeric = match.group(1)!;
-    final suffix = match.group(2)?.toUpperCase();
-    if (suffix == null) {
-      return BigNumber.parse(numeric);
-    }
-
-    const exponents = <String, int>{
-      'K': 3,
-      'M': 6,
-      'B': 9,
-      'T': 12,
-      'QA': 15,
-      'QI': 18,
-      'SX': 21,
-      'SP': 24,
-      'OC': 27,
-      'NO': 30,
-      'DC': 33,
-      'UD': 36,
-      'DD': 39,
-      'TD': 42,
-      'QAD': 45,
-      'QID': 48,
-      'SXD': 51,
-      'SPD': 54,
-      'OCD': 57,
-      'NOD': 60,
-      'VG': 63,
-      'UVG': 66,
-      'DVG': 69,
-      'TVG': 72,
-      'QAVG': 75,
-      'QIVG': 78,
-      'SXVG': 81,
-      'SPVG': 84,
-      'OCVG': 87,
-      'NOVG': 90,
-      'TG': 93,
-      'VGN': 63,
-    };
-    final exponent = exponents[suffix];
-    if (exponent == null) return BigNumber.fromInt(0);
-
-    final decimal = BigNumber.parse(numeric);
-    return BigNumber.fromParts(
-      decimal.coefficient * BigInt.from(10).pow(exponent),
-      decimal.scale,
-    );
-  }
-}
-,
+      r'^([0-9]+(?:\\.[0-9]+)?)([A-Za-z]{1,4})?$',
     ).firstMatch(input);
     if (match == null || match.group(0) != input) return null;
 
