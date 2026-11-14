@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:gtn_2/core/numbers/big_number.dart';
 import 'package:gtn_2/core/progression/progression_engine.dart';
 import 'package:gtn_2/core/progression/progression_state.dart';
+import 'package:gtn_2/shop/upgrade_batch_policy.dart';
 import 'package:gtn_2/shop/upgrade_catalog.dart';
 
 void main() {
@@ -127,4 +128,89 @@ void main() {
     expect(result.ultra.toString(), '0');
     expect(result.ultraUpgrades['ultra_money_boost'], 1);
   });
+  test('fixed and MAX batch modes stop at the largest affordable prefix', () {
+    final upgrade = UpgradeDefinition(
+      id: 'batch_test',
+      baseCost: BigNumber.fromInt(100),
+      growthRate: BigNumber.fromInt(2),
+      maxLevel: 10,
+    );
+
+    for (final multiplier in ['10', '100', 'MAX']) {
+      expect(
+        UpgradeBatchPolicy.affordableLevels(
+          balance: BigNumber.fromInt(350),
+          upgrade: upgrade,
+          currentLevel: 0,
+          multiplier: multiplier,
+        ),
+        2,
+      );
+    }
+  });
+
+  test('batch policy respects selected count, remaining cap and no-funds case', () {
+    final upgrade = UpgradeDefinition(
+      id: 'batch_test',
+      baseCost: BigNumber.fromInt(1),
+      growthRate: BigNumber.fromInt(1),
+      maxLevel: 3,
+    );
+
+    expect(
+      UpgradeBatchPolicy.affordableLevels(
+        balance: BigNumber.fromInt(100),
+        upgrade: upgrade,
+        currentLevel: 0,
+        multiplier: '10',
+      ),
+      3,
+    );
+    expect(
+      UpgradeBatchPolicy.affordableLevels(
+        balance: BigNumber.fromInt(100),
+        upgrade: upgrade,
+        currentLevel: 0,
+        multiplier: '100',
+      ),
+      3,
+    );
+    expect(
+      UpgradeBatchPolicy.affordableLevels(
+        balance: BigNumber.fromInt(0),
+        upgrade: upgrade,
+        currentLevel: 0,
+        multiplier: 'MAX',
+      ),
+      0,
+    );
+    expect(
+      UpgradeBatchPolicy.affordableLevels(
+        balance: BigNumber.fromInt(100),
+        upgrade: upgrade,
+        currentLevel: 3,
+        multiplier: 'MAX',
+      ),
+      0,
+    );
+  });
+
+  test('one-level mode never buys more than one level', () {
+    final upgrade = UpgradeDefinition(
+      id: 'batch_test',
+      baseCost: BigNumber.fromInt(1),
+      growthRate: BigNumber.fromInt(1),
+      maxLevel: 10,
+    );
+    expect(
+      UpgradeBatchPolicy.affordableLevels(
+        balance: BigNumber.fromInt(100),
+        upgrade: upgrade,
+        currentLevel: 0,
+        multiplier: '1',
+      ),
+      1,
+    );
+  });
+
 }

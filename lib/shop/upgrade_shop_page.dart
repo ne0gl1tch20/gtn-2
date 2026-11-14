@@ -5,6 +5,7 @@ import '../core/numbers/big_number.dart';
 import '../core/progression/progression_engine.dart';
 import '../core/progression/progression_state.dart';
 import '../design/expressive_widgets.dart';
+import 'upgrade_batch_policy.dart';
 import 'upgrade_catalog.dart';
 
 typedef UpgradePurchase = Future<ProgressionState> Function(
@@ -33,21 +34,12 @@ class _UpgradeShopPageState extends State<UpgradeShopPage> {
 
   int _levelsToBuy(GameUpgrade upgrade) {
     final current = _progression.upgrades[upgrade.definition.id] ?? 0;
-    final maxLevel = upgrade.definition.maxLevel ?? 999999;
-    final remaining = maxLevel - current;
-    if (remaining <= 0) return 0;
-    if (_buyMultiplier == 'MAX') {
-      var levels = 0;
-      var total = BigNumber.fromInt(0);
-      while (levels < remaining) {
-        final nextCost = upgrade.definition.costAtLevel(current + levels);
-        if (_progression.money.compareTo(total + nextCost) < 0) break;
-        total += nextCost;
-        levels++;
-      }
-      return levels == 0 ? 1 : levels;
-    }
-    return int.parse(_buyMultiplier).clamp(1, remaining);
+    return UpgradeBatchPolicy.affordableLevels(
+      balance: _progression.money,
+      upgrade: upgrade.definition,
+      currentLevel: current,
+      multiplier: _buyMultiplier,
+    );
   }
 
   BigNumber _costForLevels(GameUpgrade upgrade, int levels) {
@@ -137,7 +129,6 @@ class _UpgradeShopPageState extends State<UpgradeShopPage> {
                           upgrade,
                           _levelsToBuy(upgrade),
                         ),
-                        multiplier: _buyMultiplier,
                         onBuy: (levels) => _buy(upgrade, levels),
                       ),
                     ),
@@ -183,7 +174,6 @@ class _UpgradeCard extends StatelessWidget {
     required this.busy,
     required this.levelsToBuy,
     required this.totalCost,
-    required this.multiplier,
     required this.onBuy,
   });
 
@@ -193,7 +183,6 @@ class _UpgradeCard extends StatelessWidget {
   final bool busy;
   final int levelsToBuy;
   final BigNumber totalCost;
-  final String multiplier;
   final ValueChanged<int> onBuy;
 
   @override
@@ -242,9 +231,9 @@ class _UpgradeCard extends StatelessWidget {
                     : 'Upgrade · $cost Money${levelsToBuy > 1 ? ' ($levelsToBuy levels)' : ''}',
               ),
             ),
-            if (!isMaxed && multiplier != 'MAX' && !canAfford)
+            if (!isMaxed && levelsToBuy == 0)
               Text(
-                'Need ${cost - money} more Money',
+                'Not enough Money for the next level',
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodySmall,
               ),

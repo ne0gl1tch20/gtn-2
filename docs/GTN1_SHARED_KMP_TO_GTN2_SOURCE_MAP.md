@@ -75,7 +75,7 @@ This is a file-level destination map, not a parity-completion claim. A mapped ta
 
 | GTN1 source | GTN2 destination | Regression surface | Mapping |
 |---|---|---|---|
-| `desktop/economy/DesktopEconomyTransactions.kt` | `lib/core/legacy/legacy_systems_engine.dart`; transaction orchestration in `lib/main.dart` | `test/core/legacy/legacy_systems_engine_test.dart`; `test/core/guess_economy_rules_test.dart`; `test/world_boss_battle_engine_test.dart` | Partial — shared Dart transactions cover many systems; compare all desktop-only transaction invariants and relic/world settlement. |
+| `desktop/economy/DesktopEconomyTransactions.kt` | `lib/core/legacy/legacy_systems_engine.dart`; `lib/shop/upgrade_batch_policy.dart`; transaction orchestration in `lib/main.dart` | `test/core/legacy/legacy_systems_engine_test.dart`; `test/core/guess_economy_rules_test.dart`; `test/shop/upgrade_shop_test.dart`; `test/shop/upgrade_shop_page_test.dart`; `test/world_boss_battle_engine_test.dart` | Partial — fixed/maximum Money upgrade purchases now match GTN1's largest-affordable-prefix transaction and UI estimate. Remaining desktop transaction invariants and relic/world settlement still require comparison. |
 | `desktop/persistence/DesktopSaveStore.kt` | `lib/data/saves/save_storage.dart`; `lib/data/saves/save_data.dart` | `test/data/save_data_test.dart` | Partial — slot persistence and recovery exist; source file locking/atomic replacement and failure semantics need platform verification. |
 
 ## 4. Shared KMP regression tests (30)
@@ -102,7 +102,7 @@ The source test inventory is mapped below. These rows identify the closest GTN2 
 | `commonTest/.../GuessStateRulesTest.kt` | `test/core/game_engine_test.dart`; `test/data/save_data_test.dart` | Partial |
 | `commonTest/.../GuessTransitionRulesTest.kt` | `test/core/game_engine_test.dart` | Partial |
 | `commonTest/.../SharedGameContractsTest.kt` | `test/core/game_engine_test.dart`; `test/widget_test.dart` | Partial |
-| `jvmTest/.../DesktopEconomyTransactionsTest.kt` | `test/core/legacy/legacy_systems_engine_test.dart`; `test/core/guess_economy_rules_test.dart` | Partial |
+| `jvmTest/.../DesktopEconomyTransactionsTest.kt` | `test/shop/upgrade_shop_test.dart`; `test/shop/upgrade_shop_page_test.dart`; `test/core/legacy/legacy_systems_engine_test.dart` | Partial — source bulk Money upgrade cost, largest-affordable-prefix and multiplier cases are mirrored; remaining transaction cases are still open. |
 | `jvmTest/.../RelicSetBonusGameplayTest.kt` | `test/core/guess_economy_rules_test.dart`; `test/core/legacy/legacy_systems_engine_test.dart` | Partial — inspect whether every set composition and proc case is covered before marking verified. |
 | `jvmTest/.../DesktopSaveStoreTest.kt` | `test/data/save_data_test.dart` | Partial — persistence exists; desktop atomic-write/locking failure cases are not proven. |
 | `jvmTest/.../ArcadeRewardRulesTest.kt` | `test/arcade/arcade_reward_rules_test.dart` | Mapped |
