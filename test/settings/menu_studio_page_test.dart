@@ -129,8 +129,7 @@ void main() {
     await tester.tap(find.text('Move to More').first);
     await tester.pumpAndSettle();
     expect(
-      MenuStudioLayout.tryParse(previewed!.webMenuStudioLayout)!
-          .visibleMoreIds,
+      MenuStudioLayout.tryParse(previewed!.webMenuStudioLayout)!.visibleMoreIds,
       contains('worlds'),
     );
 
@@ -139,5 +138,4 @@ void main() {
     expect(cancelled, isTrue);
     expect(find.text('Open Menu Studio'), findsOneWidget);
   });
-
 }
