@@ -113,7 +113,7 @@ The source test inventory is mapped below. These rows identify the closest GTN2 
 | `jvmTest/.../DailyRewardPolicyTest.kt` | `test/core/legacy/legacy_systems_engine_test.dart`; `test/legacy_systems_test.dart` | Partial — daily claim flow exists; exact streak/calendar/claim-cap cases need comparison. |
 | `jvmTest/.../AntiTimeTravelRulesTest.kt` | `test/core/automation/automation_policy_test.dart` | Mapped |
 | `jvmTest/.../SaveStateRulesTest.kt` | `test/data/save_data_test.dart` | Partial — Dart validation exists; compare all source fields and invalid-state cases. |
-| `jvmTest/.../SeasonalThemeCalendarTest.kt` | `test/legacy_systems_test.dart`; `test/core/legacy/legacy_systems_engine_test.dart` | Partial — season logic exists; exact source boundary cases need explicit tests. |
+| `jvmTest/.../SeasonalThemeCalendarTest.kt` | `test/core/seasonal_theme_calendar_test.dart` | Verified — the source boundary, regional, Lunar New Year, Easter and winter cases are mirrored in focused Dart tests. |
 
 ## 5. Mapping summary and follow-up
 

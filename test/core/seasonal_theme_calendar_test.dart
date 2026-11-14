@@ -83,14 +83,8 @@ void main() {
 
     test('Philippine summer ends before the school window begins', () {
       final active = SeasonalThemeCalendar.activeThemes(DateTime(2027, 6, 15));
-      expect(
-        active.any((theme) => theme.id == 'back_to_school'),
-        isTrue,
-      );
-      expect(
-        active.any((theme) => theme.id == 'philippine_summer'),
-        isFalse,
-      );
+      expect(active.any((theme) => theme.id == 'back_to_school'), isTrue);
+      expect(active.any((theme) => theme.id == 'philippine_summer'), isFalse);
     });
 
     test('Lunar New Year windows cover the fifteen-day inclusive event', () {
@@ -128,8 +122,10 @@ void main() {
         'lunar_new_year',
       );
       expect(
-        SeasonalThemeCalendar.activeThemes(DateTime(2027, 2, 8), config)
-            .any((theme) => theme.id == 'lunar_new_year'),
+        SeasonalThemeCalendar.activeThemes(
+          DateTime(2027, 2, 8),
+          config,
+        ).any((theme) => theme.id == 'lunar_new_year'),
         isFalse,
       );
     });
@@ -162,10 +158,7 @@ void main() {
       expect(
         SeasonalThemeCalendar.activeThemes(
           date,
-          SeasonalThemeCalendarConfig(
-            regionCode: 'US',
-            winterEnabled: true,
-          ),
+          SeasonalThemeCalendarConfig(regionCode: 'US', winterEnabled: true),
         ).any((theme) => theme.id == 'winter'),
         isTrue,
       );

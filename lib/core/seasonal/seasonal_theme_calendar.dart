@@ -27,7 +27,9 @@ class SeasonalMonthDay {
 class SeasonalDateWindow {
   SeasonalDateWindow({required this.start, required this.endExclusive}) {
     if (!endExclusive.isAfter(start)) {
-      throw ArgumentError('Seasonal date window must have a positive duration.');
+      throw ArgumentError(
+        'Seasonal date window must have a positive duration.',
+      );
     }
   }
 
@@ -247,12 +249,13 @@ class SeasonalThemeCalendar {
       if (theme != null) active.add(theme);
     }
 
-    final unique = <String, ActiveSeasonalTheme>{
-      for (final theme in active) theme.id: theme,
-    }.values.toList()..sort((a, b) {
-      final priority = b.priority.compareTo(a.priority);
-      return priority != 0 ? priority : a.id.compareTo(b.id);
-    });
+    final unique =
+        <String, ActiveSeasonalTheme>{
+          for (final theme in active) theme.id: theme,
+        }.values.toList()..sort((a, b) {
+          final priority = b.priority.compareTo(a.priority);
+          return priority != 0 ? priority : a.id.compareTo(b.id);
+        });
     return List.unmodifiable(unique);
   }
 

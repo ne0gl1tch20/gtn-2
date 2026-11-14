@@ -1,7 +1,3 @@
-import 'package:flutter_test/flutter_test.dart';
-import 'package:gtn_2/core/legacy/trait_catalog_repository.dart';
-import 'package:gtn_2/data/saves/save_data.dart';
-import 'package:gtn_2/dev/developer_settings_page.dart';
 import 'package:gtn_2/dev/seasonal_theme_simulator_card.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
@@ -64,9 +60,11 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    final initialPreview = tester.widget<Text>(
-      find.byKey(const ValueKey('season-simulator-preview-date')),
-    ).data;
+    final initialPreview = tester
+        .widget<Text>(
+          find.byKey(const ValueKey('season-simulator-preview-date')),
+        )
+        .data;
 
     await tester.enterText(
       find.byKey(const ValueKey('season-simulator-date')),
@@ -77,9 +75,11 @@ void main() {
 
     expect(find.text('Enter a valid date like 2027-02-06.'), findsOneWidget);
     expect(
-      tester.widget<Text>(
-        find.byKey(const ValueKey('season-simulator-preview-date')),
-      ).data,
+      tester
+          .widget<Text>(
+            find.byKey(const ValueKey('season-simulator-preview-date')),
+          )
+          .data,
       initialPreview,
     );
   });
