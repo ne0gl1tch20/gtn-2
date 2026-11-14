@@ -17,11 +17,12 @@ class SaveData {
     GameSettings? settings,
     this.profileName = '',
     this.profileIconId = 'default',
+    this.creativeModeEnabled = false,
     this.creativeMode,
   }) : progression = progression ?? ProgressionState.initial,
        settings = settings ?? GameSettings.initial;
 
-  static const currentSchemaVersion = 5;
+  static const currentSchemaVersion = 6;
   static const profileIconIds = <String>[
     'default',
     'star',
@@ -41,6 +42,9 @@ class SaveData {
   final GameSettings settings;
   final String profileName;
   final String profileIconId;
+  /// Permanently marks this active save as eligible for GTN1-style Creative Save tools.
+  /// This is distinct from [creativeMode], which stores an isolated sandbox run.
+  final bool creativeModeEnabled;
   final CreativeModeSave? creativeMode;
 
   SaveData copyWith({
@@ -55,6 +59,7 @@ class SaveData {
     GameSettings? settings,
     String? profileName,
     String? profileIconId,
+    bool? creativeModeEnabled,
     CreativeModeSave? creativeMode,
     bool clearCreativeMode = false,
   }) => SaveData(
@@ -69,6 +74,7 @@ class SaveData {
     settings: settings ?? this.settings,
     profileName: profileName ?? this.profileName,
     profileIconId: profileIconId ?? this.profileIconId,
+    creativeModeEnabled: creativeModeEnabled ?? this.creativeModeEnabled,
     creativeMode: clearCreativeMode ? null : creativeMode ?? this.creativeMode,
   );
 
@@ -84,6 +90,7 @@ class SaveData {
     'settings': settings.toJson(),
     'profileName': profileName,
     'profileIconId': profileIconId,
+    'creativeModeEnabled': creativeModeEnabled,
     'creativeMode': creativeMode?.toJson(),
   };
 
@@ -100,12 +107,10 @@ class SaveData {
     final profileName = json['profileName'] ?? '';
     final profileIconId = json['profileIconId'] ?? 'default';
     final creativeModeJson = json['creativeMode'];
+    final creativeModeEnabled = json['creativeModeEnabled'] ?? false;
     if (version is! int ||
-        (version != 1 &&
-            version != 2 &&
-            version != 3 &&
-            version != 4 &&
-            version != currentSchemaVersion) ||
+        version < 1 ||
+        version > currentSchemaVersion ||
         secret is! int ||
         attempts is! int ||
         gamesWon is! int ||
@@ -121,6 +126,7 @@ class SaveData {
         gamesWon < 0 ||
         profileName is! String ||
         profileName.length > 24 ||
+        creativeModeEnabled is! bool ||
         profileIconId is! String ||
         !profileIconIds.contains(profileIconId)) {
       throw const FormatException('Unsupported or invalid save data.');
@@ -155,6 +161,7 @@ class SaveData {
       settings: settings,
       profileName: profileName,
       profileIconId: profileIconId,
+      creativeModeEnabled: creativeModeEnabled,
       creativeMode: creativeMode,
     );
   }
