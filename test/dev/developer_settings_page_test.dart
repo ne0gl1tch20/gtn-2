@@ -7,7 +7,7 @@ import 'package:material_ui/material_ui.dart';
 
 void main() {
   testWidgets(
-    'developer page exposes trait, runtime and diagnostic inspectors',
+    'developer page exposes trait, runtime, seasonal and diagnostic inspectors',
     (tester) async {
       await tester.pumpWidget(
         M3EMaterialApp(
@@ -24,12 +24,23 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-
       expect(find.text('Trait Registry Inspector'), findsOneWidget);
       expect(find.text('Runtime Inspector'), findsOneWidget);
+
       await tester.scrollUntilVisible(
-        find.text('Diagnostic Log Viewer'),
-        250,
+        find.text('Season Simulator'), 250,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Quick presets'), findsOneWidget);
+      await tester.ensureVisible(find.text('Lunar New Year').first);
+      await tester.tap(find.text('Lunar New Year').first);
+      await tester.pumpAndSettle();
+      expect(find.text('Preview: 2027-02-06'), findsOneWidget);
+      expect(find.textContaining('Lunar New Year'), findsWidgets);
+
+      await tester.scrollUntilVisible(
+        find.text('Diagnostic Log Viewer'), 250,
         scrollable: find.byType(Scrollable).first,
       );
       await tester.pumpAndSettle();
