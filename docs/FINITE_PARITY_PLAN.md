@@ -8,6 +8,10 @@
 - **Target:** GTN2's existing Android and Windows targets.
 - **Included:** Features, screens, game rules, content, settings, save behavior and platform behavior that exist in the pinned GTN1 source and apply to the target platform.
 - **Not included:** New features, redesigns beyond reproducing GTN1, speculative improvements, unrelated refactors, extra platforms, or features added to GTN1 after the pinned commit.
+- **Code completion criterion:** Every applicable production source file in the pinned GTN1 inventory must have its behavior implemented in GTN2 or be explicitly marked not applicable with a source-backed reason. Flutter/Dart is the native implementation; this does not mean copying Kotlin syntax into Dart. A destination filename or matching data asset alone is not proof of parity. No unexplained production-source gap may remain at closure.
+- **UI completion criterion:** GTN2 must reproduce the player-facing UI and interactions from both GTN1's production Kotlin screens and its HTML/CSS/JS Web Play shell. Web Play is a visual/behavioral source, not a requirement to ship a WebView. Reimplement its screens, layout, typography, colors, spacing, controls, overlays, motion and responsive behavior natively in Flutter.
+- **Design integration criterion:** Blend the reproduced GTN1 visual identity and screen behavior with Material 3 Expressive components, motion and adaptive behavior. Material 3 Expressive is the native design-system layer, not a reason to replace or simplify GTN1-specific UI. The result must read as one coherent GTN2 app rather than a generic Material template or disconnected copied screens.
+- **Finite-work rule:** Work only from the frozen inventory and recorded gaps. Verify each item once against its GTN1 source and GTN2 evidence; reopen a verified item only for a reproducible mismatch. Do not create repeated fix/recheck loops or add newly imagined parity requirements after the inventory is frozen.
 - **Inventory boundary:** The pinned GTN1 repository contains 214 production Kotlin files and 111 Kotlin test files across all modules: app 107 production + 49 JVM tests + 3 Android instrumentation tests; shared KMP 50 production + 30 tests; Windows desktop 55 production + 29 tests; build logic 2 production files. The earlier 107/49 figures covered only the Android app module. The inventory also records one Web Play HTML shell, 5 JavaScript modules, 1 stylesheet, 24 Jarrlyy UI SDK files, 4 shipped core Lua scripts, 17 game JSON catalogs, 320 trait definitions and 23 locale files. The 24-file SDK count includes demo and TypeScript support files; only runtime-used files need behavioral mapping. See `docs/GTN1_SOURCE_INVENTORY.json` for exact paths and counting rules.
 
 ## Rules that prevent scope creep
@@ -80,6 +84,14 @@
 
 ### Stage 4 — Screens, content and visual behavior
 
+**Required visual acceptance for every production screen/route (Kotlin and Web Play):**
+- [ ] Capture/inspect the pinned GTN1 source screen and compare GTN2 at the same agreed phone and desktop viewport sizes.
+- [ ] Match the source information hierarchy, layout proportions, typography, color roles, spacing, iconography, component density and visible labels. Preserve source-specific content rather than substituting generic cards or placeholder copy.
+- [ ] Reproduce every source control and state: default, selected, disabled, locked, loading, error, empty, confirmation/dialog, success/feedback and navigation outcomes where the source defines them.
+- [ ] Port Web Play CSS/JS interaction behavior to native Flutter widgets and Dart state. No WebView is required, but no player-facing Web Play behavior may be dropped merely because its original implementation used HTML/JS.
+- [ ] Apply Material 3 Expressive through the app theme, adaptive components and motion while retaining GTN1's recognizable visual language. Verify typography, shape, color, elevation, transitions, focus/semantics and reduced-motion behavior as a unified system.
+- [ ] Record one source reference and one GTN2 test or visual/platform evidence reference per completed screen group. A screen is not complete just because its route exists.
+
 - [ ] Every screen/route rendered by the single Web Play HTML shell has a corresponding native Flutter destination (the pinned tree does not contain 22 separate HTML screen roots).
 - [ ] Each screen's primary controls, dialogs, navigation and state transitions work.
 - [ ] The fixed screen set is compared against GTN1 at agreed mobile and desktop viewport sizes.
@@ -90,7 +102,7 @@
 - [ ] Required fonts, images, icons and audio assets resolve offline.
 - [ ] Labels and user-visible terminology match GTN1 where the original exposes them.
 
-**Exit:** No screen, catalog, locale or asset in the frozen inventory is missing or represented by a placeholder. Visual work is limited to matching the fixed GTN1 screen set, not endless pixel polishing.
+**Exit:** Every Kotlin and Web Play production screen/route in the frozen inventory is present, functional and visually compared at the fixed viewports; source-defined interactions and states are represented; the GTN1 visual identity is coherently integrated with Material 3 Expressive. No screen, catalog, locale or asset is missing or represented by a placeholder. No open-ended pixel polishing is allowed after these acceptance checks pass.
 
 ### Stage 5 — Saves, compatibility and reliability
 
