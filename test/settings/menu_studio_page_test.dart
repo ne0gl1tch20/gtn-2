@@ -72,13 +72,19 @@ void main() {
     await tester.scrollUntilVisible(
       find.text('Live preview'),
       240,
-      scrollable: find.byKey(const Key('menu-studio-scroll')),
+      scrollable: find.descendant(
+        of: find.byKey(const Key('menu-studio-scroll')),
+        matching: find.byType(Scrollable),
+      ).first,
     );
     expect(find.text('Live preview'), findsOneWidget);
     await tester.scrollUntilVisible(
       find.text('Save changes'),
       240,
-      scrollable: find.byKey(const Key('menu-studio-scroll')),
+      scrollable: find.descendant(
+        of: find.byKey(const Key('menu-studio-scroll')),
+        matching: find.byType(Scrollable),
+      ).first,
     );
     await tester.tap(find.text('Save changes'));
     await tester.pumpAndSettle();
