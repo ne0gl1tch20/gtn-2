@@ -193,7 +193,7 @@ class CreativeSavePolicy {
       'VGN': 63,
     };
     final exponent = exponents[suffix];
-    if (exponent == null) return null;
+    if (exponent == null) return BigNumber.fromInt(0);
 
     final decimal = BigNumber.parse(numeric);
     return BigNumber.fromParts(
