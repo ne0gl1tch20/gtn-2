@@ -117,6 +117,7 @@ class SaveData {
         isComplete is! bool ||
         minimum is! int ||
         maximum is! int ||
+        creativeModeEnabled is! bool ||
         minimum < 1 ||
         maximum > (creativeModeEnabled ? 1000000 : 500) ||
         minimum > maximum ||
