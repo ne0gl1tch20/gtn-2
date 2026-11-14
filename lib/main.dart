@@ -191,6 +191,7 @@ class _GameHomePageState extends State<GameHomePage>
   final GlobalKey<NavigatorState> _shellNavigatorKey =
       GlobalKey<NavigatorState>();
   int _gamesWon = 0;
+  bool _creativeModeEnabled = false;
   bool _isLoading = true;
   bool _isPlayerProfileLoaded = false;
   GameSettings? _menuStudioPreviewSettings;
@@ -413,6 +414,7 @@ class _GameHomePageState extends State<GameHomePage>
             savedMaximum: save.maximum,
           );
           _gamesWon = save.gamesWon;
+          _creativeModeEnabled = save.creativeModeEnabled;
           _progression = restoredProgression;
           _settings = restoredSettings;
           _selectedPrimaryIndex =
@@ -473,6 +475,7 @@ class _GameHomePageState extends State<GameHomePage>
               maximum: _game.maximum,
               progression: _progression,
               settings: _settings,
+              creativeModeEnabled: _creativeModeEnabled,
             );
         return base.copyWith(
           secret: _game.secret,
@@ -483,6 +486,7 @@ class _GameHomePageState extends State<GameHomePage>
           maximum: _game.maximum,
           progression: _progression,
           settings: _settings,
+          creativeModeEnabled: _creativeModeEnabled,
         );
       });
     } on Exception {
@@ -935,6 +939,7 @@ class _GameHomePageState extends State<GameHomePage>
                 savedMaximum: save.maximum,
               );
         _gamesWon = save?.gamesWon ?? 0;
+        _creativeModeEnabled = save?.creativeModeEnabled ?? false;
         _progression = nextProgression;
         _settings = nextSettings;
         GtnApp.settingsNotifier.value = _settings;
@@ -1053,6 +1058,7 @@ class _GameHomePageState extends State<GameHomePage>
       _engine = _engineFor(_progression, _settings);
       _game = _engine.newGame();
       _gamesWon = 0;
+      _creativeModeEnabled = false;
       _controller.clear();
       _botTeam.reset(_game.minimum, _game.maximum);
       _message = 'All game data has been reset.';
@@ -1225,6 +1231,7 @@ class _GameHomePageState extends State<GameHomePage>
     maximum: _game.maximum,
     progression: _progression,
     settings: _settings,
+    creativeModeEnabled: _creativeModeEnabled,
   );
 
   Future<void> _applyDeveloperSave(SaveData save) async {
@@ -1248,6 +1255,7 @@ class _GameHomePageState extends State<GameHomePage>
         savedMaximum: save.maximum,
       );
       _gamesWon = save.gamesWon;
+      _creativeModeEnabled = save.creativeModeEnabled;
       _progression = restoredProgression;
       _settings = restoredSettings;
       GtnApp.settingsNotifier.value = _settings;
