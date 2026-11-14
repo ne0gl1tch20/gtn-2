@@ -1413,9 +1413,8 @@ class _MoreMenuPage extends StatelessWidget {
                           width: 25,
                           height: 25,
                           decoration: BoxDecoration(
-                            color: const Color(0xFF62E8FF).withValues(
-                              alpha: .08,
-                            ),
+                            color: const Color(0xFF62E8FF)
+                                .withValues(alpha: .08),
                             borderRadius: BorderRadius.circular(9),
                           ),
                           alignment: Alignment.center,
