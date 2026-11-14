@@ -86,12 +86,16 @@ class _ProgressionHubPageState extends State<ProgressionHubPage> {
         padding: const EdgeInsets.fromLTRB(12, 14, 12, 28),
         children: [
           GtnPageHeader(
-            eyebrow: widget.initialUltra ? 'ASCEND BEYOND PRESTIGE' : 'RESET FOR PERMANENT POWER',
+            eyebrow: widget.initialUltra
+                ? 'ASCEND BEYOND PRESTIGE'
+                : 'RESET FOR PERMANENT POWER',
             title: widget.initialUltra ? 'Ultra' : 'Prestige',
             description: widget.initialUltra
                 ? 'Ascend beyond Prestige and earn permanent Ultra power.'
                 : 'Reset your run to earn permanent Prestige power.',
-            icon: widget.initialUltra ? Icons.auto_awesome_rounded : Icons.workspace_premium_rounded,
+            icon: widget.initialUltra
+                ? Icons.auto_awesome_rounded
+                : Icons.workspace_premium_rounded,
             accent: widget.initialUltra ? GtnUiTokens.purple : GtnUiTokens.cyan,
           ),
           const SizedBox(height: 8),
@@ -103,35 +107,36 @@ class _ProgressionHubPageState extends State<ProgressionHubPage> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Text('Prestige', style: theme.textTheme.headlineSmall),
-                  const SizedBox(height: 8),
-                  Text('Current Prestige: ${_state.prestige}'),
-                  Text('Money: ${_state.money}'),
-                  Text('Required: $prestigeRequirement Money'),
-                  Text('Next reward: $prestigeReward Prestige'),
-                  const SizedBox(height: 12),
-                  const Text(
-                    'Prestige resets Money and normal upgrades while keeping permanent Prestige upgrades.',
-                  ),
-                  const SizedBox(height: 12),
-                  M3EButton.filled(
-                    onPressed:
-                        _busy ||
-                            _state.money.compareTo(prestigeRequirement) < 0 ||
-                            prestigeReward.compareTo(BigNumber.fromInt(0)) <= 0
-                        ? null
-                        : () => _run(widget.onPrestige),
-                    child: const Text('Prestige reset'),
-                  ),
-                  M3EButton.icon(
-                    style: M3EButtonStyle.outlined,
-                    onPressed: _busy ? null : () => _openPermanentShop(false),
-                    icon: const Icon(Icons.upgrade),
-                    label: const Text('Prestige upgrades'),
-                  ),
-                ],
+                    const SizedBox(height: 8),
+                    Text('Current Prestige: ${_state.prestige}'),
+                    Text('Money: ${_state.money}'),
+                    Text('Required: $prestigeRequirement Money'),
+                    Text('Next reward: $prestigeReward Prestige'),
+                    const SizedBox(height: 12),
+                    const Text(
+                      'Prestige resets Money and normal upgrades while keeping permanent Prestige upgrades.',
+                    ),
+                    const SizedBox(height: 12),
+                    M3EButton.filled(
+                      onPressed:
+                          _busy ||
+                              _state.money.compareTo(prestigeRequirement) < 0 ||
+                              prestigeReward.compareTo(BigNumber.fromInt(0)) <=
+                                  0
+                          ? null
+                          : () => _run(widget.onPrestige),
+                      child: const Text('Prestige reset'),
+                    ),
+                    M3EButton.icon(
+                      style: M3EButtonStyle.outlined,
+                      onPressed: _busy ? null : () => _openPermanentShop(false),
+                      icon: const Icon(Icons.upgrade),
+                      label: const Text('Prestige upgrades'),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
           if (widget.initialUltra)
             GtnExpressiveCard(
               child: Padding(
@@ -140,43 +145,43 @@ class _ProgressionHubPageState extends State<ProgressionHubPage> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Text('Ultra', style: theme.textTheme.headlineSmall),
-                  const SizedBox(height: 8),
-                  Text('Current Ultra: ${_state.ultra}'),
-                  Text('Prestige balance: ${_state.prestige} / 1000'),
-                  Text('Money: ${_state.money}'),
-                  Text('Required: $ultraRequirement Money'),
-                  Text('Next reward: $ultraReward Ultra (max 2,000)'),
-                  const SizedBox(height: 12),
-                  const Text(
-                    'Ultra is a stronger reset. It clears Money, Prestige and the related progression upgrades.',
-                  ),
-                  const SizedBox(height: 12),
-                  M3EButton.filled(
-                    onPressed:
-                        _busy ||
-                            !hasPrestigeForUltra ||
-                            _state.money.compareTo(ultraRequirement) < 0 ||
-                            ultraReward <= 0
-                        ? null
-                        : () => _run(widget.onUltra),
-                    child: const Text('Ultra reset'),
-                  ),
-                  M3EButton.icon(
-                    style: M3EButtonStyle.outlined,
-                    onPressed: _busy ? null : () => _openPermanentShop(true),
-                    icon: const Icon(Icons.auto_awesome),
-                    label: const Text('Ultra upgrades'),
-                  ),
-                  if (!hasPrestigeForUltra)
-                    Text(
-                      'You need 1,000 Prestige before Ultra is available.',
-                      style: theme.textTheme.bodySmall,
-                      textAlign: TextAlign.center,
+                    const SizedBox(height: 8),
+                    Text('Current Ultra: ${_state.ultra}'),
+                    Text('Prestige balance: ${_state.prestige} / 1000'),
+                    Text('Money: ${_state.money}'),
+                    Text('Required: $ultraRequirement Money'),
+                    Text('Next reward: $ultraReward Ultra (max 2,000)'),
+                    const SizedBox(height: 12),
+                    const Text(
+                      'Ultra is a stronger reset. It clears Money, Prestige and the related progression upgrades.',
                     ),
-                ],
+                    const SizedBox(height: 12),
+                    M3EButton.filled(
+                      onPressed:
+                          _busy ||
+                              !hasPrestigeForUltra ||
+                              _state.money.compareTo(ultraRequirement) < 0 ||
+                              ultraReward <= 0
+                          ? null
+                          : () => _run(widget.onUltra),
+                      child: const Text('Ultra reset'),
+                    ),
+                    M3EButton.icon(
+                      style: M3EButtonStyle.outlined,
+                      onPressed: _busy ? null : () => _openPermanentShop(true),
+                      icon: const Icon(Icons.auto_awesome),
+                      label: const Text('Ultra upgrades'),
+                    ),
+                    if (!hasPrestigeForUltra)
+                      Text(
+                        'You need 1,000 Prestige before Ultra is available.',
+                        style: theme.textTheme.bodySmall,
+                        textAlign: TextAlign.center,
+                      ),
+                  ],
+                ),
               ),
             ),
-          ),
         ],
       ),
     );

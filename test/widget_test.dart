@@ -228,8 +228,7 @@ void main() {
           progression: ProgressionState.initial,
           onPrestige: () async => ProgressionState.initial,
           onUltra: () async => ProgressionState.initial,
-          onPurchasePermanentUpgrade: (_, __) async =>
-              ProgressionState.initial,
+          onPurchasePermanentUpgrade: (_, __) async => ProgressionState.initial,
         ),
       ),
     );
@@ -249,8 +248,7 @@ void main() {
           initialUltra: true,
           onPrestige: () async => ProgressionState.initial,
           onUltra: () async => ProgressionState.initial,
-          onPurchasePermanentUpgrade: (_, __) async =>
-              ProgressionState.initial,
+          onPurchasePermanentUpgrade: (_, __) async => ProgressionState.initial,
         ),
       ),
     );
