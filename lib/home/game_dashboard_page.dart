@@ -29,6 +29,7 @@ class GameDashboardPage extends StatelessWidget {
     required this.game,
     required this.progression,
     required this.settings,
+    required this.settingsListenable,
     required this.activeSlot,
     required this.loading,
     required this.message,
@@ -63,6 +64,7 @@ class GameDashboardPage extends StatelessWidget {
   final GameState game;
   final ProgressionState progression;
   final GameSettings settings;
+  final ValueListenable<GameSettings> settingsListenable;
   final int activeSlot;
   final bool loading;
   final String message;
@@ -99,6 +101,7 @@ class GameDashboardPage extends StatelessWidget {
           MaterialPageRoute<void>(
             builder: (_) => _MoreMenuPage(
               settings: settings,
+              settingsListenable: settingsListenable,
               showDeveloperSettings: showDeveloperSettings,
               onSaveSlots: onSaveSlots,
               playerProfile: playerProfile,
@@ -1078,6 +1081,7 @@ class _BotArena extends StatelessWidget {
 class _MoreMenuPage extends StatelessWidget {
   const _MoreMenuPage({
     required this.settings,
+    required this.settingsListenable,
     required this.showDeveloperSettings,
     required this.onSaveSlots,
     required this.playerProfile,
@@ -1086,6 +1090,7 @@ class _MoreMenuPage extends StatelessWidget {
   });
 
   final GameSettings settings;
+  final ValueListenable<GameSettings> settingsListenable;
   final bool showDeveloperSettings;
   final VoidCallback onSaveSlots;
   final PlayerProfile playerProfile;
@@ -1099,7 +1104,12 @@ class _MoreMenuPage extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => ValueListenableBuilder<GameSettings>(
+    valueListenable: settingsListenable,
+    builder: (context, liveSettings, _) => _buildWithSettings(context, liveSettings),
+  );
+
+  Widget _buildWithSettings(BuildContext context, GameSettings settings) {
     final dark = Theme.of(context).brightness == Brightness.dark;
     final foreground = dark ? _white : const Color(0xFF172039);
     final muted = dark ? _muted : const Color(0xFF65708C);
