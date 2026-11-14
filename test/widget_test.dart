@@ -50,6 +50,7 @@ Widget buildDashboard({
       onSettings: () {},
       onDeveloperSettings: () {},
       onLegacyPages: () {},
+      onLiveOps: () {},
       onMusic: () {},
       onLuckyStake: () {},
       onSystems: () {},
