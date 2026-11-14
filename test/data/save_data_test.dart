@@ -78,14 +78,17 @@ void main() {
     });
 
     test('round-trips huge progression currencies and permanent levels', () {
+      String expanded(String digits, int zeroCount) =>
+          '$digits${List<String>.filled(zeroCount, '0').join()}';
+
       final progression = ProgressionState.initial.copyWith(
-        money: BigNumber.parse('10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000'),
-        prestige: BigNumber.parse('250000000000000000000000000000000000000000000000000000000000000000000000000000000'),
-        ultra: BigNumber.parse('3000000000000000000000000000000000000000000000000000000000000'),
-        nebula: BigNumber.parse('40000000000000000000000000000000000000000'),
-        moneyEarned: BigNumber.parse('50000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000'),
-        moneySpent: BigNumber.parse('6000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000'),
-        nebulaEarned: BigNumber.parse('700000000000000000000000000000000000000000000000000'),
+        money: BigNumber.parse(expanded('1', 100)),
+        prestige: BigNumber.parse(expanded('25', 79)),
+        ultra: BigNumber.parse(expanded('3', 60)),
+        nebula: BigNumber.parse(expanded('4', 40)),
+        moneyEarned: BigNumber.parse(expanded('5', 100)),
+        moneySpent: BigNumber.parse(expanded('6', 90)),
+        nebulaEarned: BigNumber.parse(expanded('7', 50)),
         prestigeUpgrades: const {
           'prestige_money_boost': 4,
           'prestige_gain_boost': 5,
