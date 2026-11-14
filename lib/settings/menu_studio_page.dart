@@ -309,6 +309,7 @@ class _MenuStudioPageState extends State<MenuStudioPage> {
           ),
         ),
         body: ListView(
+          key: const Key('menu-studio-scroll'),
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
           children: [
             const Text(
