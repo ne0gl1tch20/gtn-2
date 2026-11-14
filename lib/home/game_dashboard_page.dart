@@ -468,7 +468,11 @@ class GameDashboardPage extends StatelessWidget {
                                     width: fullWidth,
                                     child: Container(
                                       padding: EdgeInsets.all(
-                                        compact ? 21 : 25,
+                                        MediaQuery.sizeOf(context).width >= 1100
+                                            ? 32
+                                            : compact
+                                            ? 21
+                                            : 25,
                                       ),
                                       constraints: BoxConstraints(
                                         minHeight: MediaQuery.sizeOf(context).width >= 1100
@@ -610,6 +614,10 @@ class GameDashboardPage extends StatelessWidget {
                                                       color: Colors.white,
                                                       fontSize: compact
                                                           ? 35
+                                                          : MediaQuery.sizeOf(context).width >= 1100
+                                                          ? (MediaQuery.sizeOf(context).width * .04)
+                                                                .clamp(42.0, 58.0)
+                                                                .toDouble()
                                                           : 42,
                                                       height: 1,
                                                       fontWeight:
