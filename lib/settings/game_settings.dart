@@ -47,6 +47,7 @@ class GameSettings {
       'traits',
       'mutators',
       'stats',
+      'dev_settings',
       'staking',
     ],
     this.moreScreenButtonColors = const {},
