@@ -186,22 +186,24 @@ The following source surfaces are in GTN1's frozen production inventory. Some ar
 - GTN1 edits two areas: the top navigation (`worlds`, `arcade`, `upgrades`) and More. Play and More remain pinned. The editor supports reordering within each area, moving entries between areas, per-button colors through the shared native color picker, a live preview, reset and save.
 - GTN2 now has the matching source inventory: navigation IDs `worlds`, `arcade`, `upgrades`, plus the exact 18 `.more-links` IDs read from pinned `index.html`. It implements two-area move/reorder, per-button HSV/hex color selection through the shared GTN color picker, reset and save.
 - The serialized payload now includes `areas`, `orders.nav`, `orders.more` and `colors`, matching GTN1 `validLayout()`. `GameDashboardPage` consumes the stored layout for navigation order and button colors. Widget tests assert the source-pinned order, both required order arrays, moving a navigation entry into More and restoring the payload.
-- **Remaining mismatch:** GTN1's `apply()` updates the actual navigation and More buttons immediately while editing. Flutter currently updates an editor-only chip preview and applies the changed layout to the dashboard after Save. Implement live preview with cancel/revert behavior and verify persistence/reload plus runtime navigation changes.
+- Flutter now sends the in-progress layout to the dashboard settings notifier. The actual bottom navigation and More route consume that live settings value, so order and per-button colors update while the editor remains open. Cancel restores the original settings; Save persists the edited layout. The widget test now asserts the preview callback and moved destination state.
+- **Still open:** add a route-level regression test proving that the rendered dashboard navigation and More cards change and revert, then verify live reorder/color/cancel/save/reload behavior at runtime on Android and Windows.
 
 ### Player Profile cross-diff
 
 - Compared GTN1 `PlayerProfileScreen.kt` with GTN2 `lib/profile/player_profile_page.dart` and `lib/main.dart`.
 - GTN1 has distinct first-launch/edit and read-only profile modes. The read-only view shows avatar, username and bio, then offers an Edit profile action. Its persisted model includes `profileId` and `setupComplete`; custom images are copied into app-private files.
 - GTN2 now opens a read-only profile view with a separate Edit profile action. Its model persists `profileId` and `setupComplete`; older GTN2 profile JSON receives a generated identity and infers completion from a non-empty username. The app now gates first launch on profile setup. Model/widget tests cover identity round-trip and the view-to-edit transition.
-- GTN1 stores custom avatars as app-private image files; Flutter still stores a base64 data URI (4 MB limit). Runtime save/reload and save-slot metadata synchronization are not yet verified.
-- **Open:** switch custom avatar storage to app-private files, verify first-launch completion and edit persistence on Android/Windows, and verify save-slot metadata synchronization.
+- Flutter now stores custom avatars as app-private image files and migrates older GTN2 base64 data-URI avatars into that file store. The model still retains the original GTN1 `profileId` and `setupComplete` fields. Runtime save/reload and save-slot metadata synchronization are not yet verified.
+- **Open:** verify first-launch completion and edit persistence on Android/Windows, and verify save-slot metadata synchronization.
 
 ### Save Slots cross-diff
 
 - Compared GTN1 `SaveSlotsScreen.kt`, `SaveManager.kt` and `PortableSaveBackup.kt` against GTN2 `lib/saves/save_slots_page.dart` and `lib/data/saves/save_storage.dart`.
 - Both implementations support 10 slots. GTN2 already has create, edit slot profile, duplicate, reset one slot, restore local backup and Creative Mode actions.
-- GTN1 additionally exposes encrypted whole-save export/import, passphrase-protected portable backup (minimum 12-character passphrase), legacy encrypted import, legacy single-save migration into Slot 1 and a guarded Reset Everything flow (45-second wait, acknowledgement checkbox and math challenge). Those flows are absent from the current Flutter Save Slots screen/storage.
-- **Open:** port the source transfer envelope and compatible import/export semantics, migration behavior and guarded global reset; add tests for wrong passphrases, malformed payloads, empty/occupied slots, backup retention and reset confirmation.
+- Flutter now has a guarded Reset Everything action that clears all ten save files and backups, resets the active slot to 1 and restores a fresh in-memory game. Its dialog mirrors the source 45-second wait, acknowledgement checkbox and arithmetic challenge; a widget test verifies that confirmation remains blocked before the gate.
+- GTN1's encrypted whole-save export/import, passphrase-protected portable backup (minimum 12-character passphrase), legacy encrypted import and legacy single-save migration into Slot 1 are still absent from Flutter. The pinned source bundle contains app preferences, active slot, ten primary slots, ten backups and Creative Mode slot data; the portable wrapper uses PBKDF2-HMAC-SHA256 + AES-256-GCM with a fixed AAD and a 12-byte nonce.
+- **Open:** port the source transfer envelope and compatible import/export semantics plus legacy migration; add tests for wrong passphrases, malformed payloads, empty/occupied slots, backup retention and successful reset completion.
 
 ### Latest validation state
 
