@@ -93,7 +93,8 @@ void main() {
     await tester.pumpWidget(
       buildDashboard(incomePerSecond: BigNumber.fromInt(24)),
     );
-    expect(find.text('+ 24 /s'), findsOneWidget);
+    expect(find.text('24'), findsOneWidget);
+    expect(find.text('/s'), findsOneWidget);
     expect(find.text('0 earned'), findsOneWidget);
   });
 
