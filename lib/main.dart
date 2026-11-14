@@ -556,8 +556,7 @@ class _GameHomePageState extends State<GameHomePage>
       }
       _message = 'Creative Save updated.';
     });
-    await _persist(evaluateAchievements: false);
-    return true;
+    return _persist(evaluateAchievements: false);
   }
 
   Future<ProgressionState> _purchaseUpgrade(
