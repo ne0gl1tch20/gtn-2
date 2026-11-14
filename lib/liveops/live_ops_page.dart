@@ -1,358 +1,309 @@
-import 'package:material_ui/material_ui.dart';
+[36;1mdart format --output=show test/core/liveops/live_ops_repository_test.dart[0m
+[36;1mdart format --output=show test/liveops/live_ops_page_test.dart[0m
+shell: /usr/bin/bash -e {0}
+env:
+  FLUTTER_ROOT: /opt/hostedtoolcache/flutter/stable-3.50.0-x64/flutter
+  PUB_CACHE: /home/runner/.pub-cache
+##[endgroup]
+import 'dart:convert';
 
-import '../core/liveops/live_ops_repository.dart';
-import '../core/progression/progression_state.dart';
-import '../design/expressive_widgets.dart';
-import '../i18n/app_localizations.dart';
+import 'package:flutter/services.dart';
 
-typedef LiveOpsClaim = Future<ProgressionState?> Function(LiveOpsEvent event);
+import '../legacy/live_ops_claim_policy.dart';
 
-class LiveOpsPage extends StatefulWidget {
-  const LiveOpsPage({
-    super.key,
-    required this.progression,
-    required this.onClaim,
-    this.repository,
+typedef LiveOpsAssetLoader = Future<String> Function(String path);
+
+class LiveOpsEvent {
+  const LiveOpsEvent({
+    required this.id,
+    required this.title,
+    required this.description,
+    required this.status,
+    required this.startDate,
+    required this.endDate,
+    required this.currencyName,
+    required this.maxClaims,
+    required this.rewardNebula,
+    required this.permanentBoostPerClaim,
+    required this.minCorrectGuesses,
+    required this.minPrestigeCount,
+    required this.minUltraCount,
   });
 
-  final ProgressionState progression;
-  final LiveOpsClaim onClaim;
-  final LiveOpsRepository? repository;
+  final String id;
+  final String title;
+  final String description;
+  final String status;
+  final String startDate;
+  final String endDate;
+  final String currencyName;
+  final int maxClaims;
+  final int rewardNebula;
+  final int permanentBoostPerClaim;
+  final int minCorrectGuesses;
+  final int minPrestigeCount;
+  final int minUltraCount;
 
-  @override
-  State<LiveOpsPage> createState() => _LiveOpsPageState();
+  LiveOpsEvent withStatus(String nextStatus) => LiveOpsEvent(
+    id: id,
+    title: title,
+    description: description,
+    status: nextStatus,
+    startDate: startDate,
+    endDate: endDate,
+    currencyName: currencyName,
+    maxClaims: maxClaims,
+    rewardNebula: rewardNebula,
+    permanentBoostPerClaim: permanentBoostPerClaim,
+    minCorrectGuesses: minCorrectGuesses,
+    minPrestigeCount: minPrestigeCount,
+    minUltraCount: minUltraCount,
+  );
+
+  LiveOpsClaimDefinition toClaimDefinition() => LiveOpsClaimDefinition(
+    id: id,
+    maxClaims: maxClaims,
+    rewardNebula: rewardNebula,
+    permanentBoostPerClaim: permanentBoostPerClaim,
+    minCorrectGuesses: minCorrectGuesses,
+    minPrestigeCount: minPrestigeCount,
+    minUltraCount: minUltraCount,
+  );
 }
 
-class _LiveOpsPageState extends State<LiveOpsPage> {
-  late final LiveOpsRepository _repository =
-      widget.repository ?? LiveOpsRepository();
-  late Future<LiveOpsSnapshot> _snapshot = _repository.load();
-  String? _claimingEventId;
-  late ProgressionState _progression = widget.progression;
+class LiveOpsManifest {
+  const LiveOpsManifest({
+    required this.manifestVersion,
+    required this.events,
+    this.schemaVersion = 1,
+  });
 
-  Future<void> _reload() async {
-    setState(() => _snapshot = _repository.load());
-    await _snapshot;
-  }
+  final int schemaVersion;
+  final int manifestVersion;
+  final List<LiveOpsEvent> events;
+}
 
-  Future<void> _claim(LiveOpsEvent event) async {
-    if (_claimingEventId != null) return;
-    setState(() => _claimingEventId = event.id);
-    try {
-      final updated = await widget.onClaim(event);
-      if (updated != null && mounted) {
-        setState(() => _progression = updated);
+class LiveOpsSnapshot {
+  const LiveOpsSnapshot({
+    required this.enabled,
+    required this.events,
+    this.error,
+  });
+
+  final bool enabled;
+  final List<LiveOpsEvent> events;
+  final String? error;
+}
+
+class LiveOpsContentValidator {
+  static const _statuses = {'UPCOMING', 'ACTIVE', 'ENDING', 'ARCHIVED'};
+  static const _maxLong = 0x7fffffffffffffff;
+
+  static void validate(LiveOpsManifest manifest) {
+    if (manifest.schemaVersion != 1) {
+      throw const FormatException('Unsupported LiveOps schema version.');
+    }
+    if (manifest.manifestVersion < 1 || manifest.manifestVersion > 2) {
+      throw const FormatException('Unsupported LiveOps manifest version.');
+    }
+    if (manifest.events.length > 32) {
+      throw const FormatException('LiveOps manifest contains too many events.');
+    }
+    final ids = <String>{};
+    for (final event in manifest.events) {
+      if (!RegExp(r'^[a-z0-9_-]{1,64}$').hasMatch(event.id) ||
+          !ids.add(event.id)) {
+        throw FormatException(
+          'LiveOps event ID is invalid or duplicated: ${event.id}',
+        );
       }
-    } finally {
-      if (mounted) setState(() => _claimingEventId = null);
+      if (event.title.trim().isEmpty ||
+          event.title.length > 100 ||
+          event.description.trim().isEmpty ||
+          event.description.length > 500 ||
+          event.currencyName.trim().isEmpty ||
+          event.currencyName.length > 32) {
+        throw FormatException(
+          'LiveOps event ${event.id} has invalid display content.',
+        );
+      }
+      if (!_statuses.contains(event.status)) {
+        throw FormatException(
+          'LiveOps event ${event.id} has an invalid status.',
+        );
+      }
+      final start = _parseInstant(event.startDate, event.id);
+      final end = _parseInstant(event.endDate, event.id);
+      if (!end.isAfter(start)) {
+        throw FormatException(
+          'LiveOps event ${event.id} has an invalid date window.',
+        );
+      }
+      if (event.maxClaims < 1 ||
+          event.maxClaims > 10000 ||
+          event.rewardNebula < 0 ||
+          event.rewardNebula > _maxLong ||
+          event.permanentBoostPerClaim < 0 ||
+          event.minCorrectGuesses < 0 ||
+          event.minPrestigeCount < 0 ||
+          event.minUltraCount < 0) {
+        throw FormatException(
+          'LiveOps event ${event.id} has invalid reward or eligibility values.',
+        );
+      }
     }
   }
 
-  String _dateLabel(String value) {
-    final date = DateTime.parse(value).toLocal();
-    return '${date.year.toString().padLeft(4, '0')}-'
-        '${date.month.toString().padLeft(2, '0')}-'
-        '${date.day.toString().padLeft(2, '0')}';
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: GtnExpressiveAppBar(
-        title: Text(AppLocalizations.text('live_ops_title', 'Seasonal Events')),
-      ),
-      body: FutureBuilder<LiveOpsSnapshot>(
-        future: _snapshot,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState != ConnectionState.done) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          final data = snapshot.data ??
-              const LiveOpsSnapshot(enabled: false, events: []);
-          final systems = _progression.legacySystems;
-          return RefreshIndicator(
-            onRefresh: _reload,
-            child: ListView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.fromLTRB(12, 14, 12, 28),
-              children: [
-                GtnPageHeader(
-                  eyebrow: AppLocalizations.text(
-                    'live_ops_eyebrow',
-                    'Limited-time rewards',
-                  ),
-                  title: AppLocalizations.text(
-                    'live_ops_heading',
-                    'Seasonal Events',
-                  ),
-                  description: AppLocalizations.text(
-                    'live_ops_intro',
-                    'Claim event rewards and build permanent bonuses for this save slot.',
-                  ),
-                  icon: Icons.event_available_rounded,
-                  accent: GtnUiTokens.cyan,
-                  trailing: _BonusLevelChip(level: systems.permanentEventBoosts),
-                ),
-                const SizedBox(height: 14),
-                GtnExpressiveCard(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          AppLocalizations.text(
-                            'live_ops_bonus_title',
-                            'Event Perks & Permanent Bonuses',
-                          ),
-                          style: Theme.of(context).textTheme.titleMedium,
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          AppLocalizations.text(
-                            'live_ops_bonus_description',
-                            '+2% Money per level and +1 Nebula per correct guess every 5 levels, up to level 25. Applies to this save slot.',
-                          ),
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                if (data.error != null) ...[
-                  const SizedBox(height: 12),
-                  _InfoCard(
-                    title: AppLocalizations.text(
-                      'live_ops_unavailable',
-                      'LiveOps unavailable',
-                    ),
-                    message: data.error!,
-                  ),
-                ],
-                if (!data.enabled) ...[
-                  const SizedBox(height: 12),
-                  _InfoCard(
-                    title: AppLocalizations.text(
-                      'live_ops_disabled',
-                      'Seasonal events are disabled',
-                    ),
-                    message: AppLocalizations.text(
-                      'live_ops_disabled_description',
-                      'Enable live_ops and seasonal_rewards in the bundled feature flags to show event offers.',
-                    ),
-                  ),
-                ] else if (data.events.isEmpty) ...[
-                  const SizedBox(height: 12),
-                  _InfoCard(
-                    title: AppLocalizations.text(
-                      'live_ops_no_events',
-                      'No seasonal events available',
-                    ),
-                    message: AppLocalizations.text(
-                      'live_ops_no_events_description',
-                      'Check again later for the next event.',
-                    ),
-                  ),
-                ] else ...[
-                  for (final event in data.events) ...[
-                    const SizedBox(height: 12),
-                    _EventCard(
-                      event: event,
-                      claims: systems.liveOpsClaims[event.id] ?? 0,
-                      progression: _progression,
-                      busy: _claimingEventId == event.id,
-                      anyClaimBusy: _claimingEventId != null,
-                      onClaim: () => _claim(event),
-                      dateLabel: _dateLabel,
-                    ),
-                  ],
-                ],
-              ],
-            ),
-          );
-        },
-      ),
-    );
+  static DateTime _parseInstant(String value, String eventId) {
+    if (!RegExp(r'(Z|[+-]\d{2}:\d{2})$').hasMatch(value)) {
+      throw FormatException(
+        'LiveOps event $eventId date must include a timezone.',
+      );
+    }
+    final parsed = DateTime.tryParse(value);
+    if (parsed == null) {
+      throw FormatException('LiveOps event $eventId date is invalid.');
+    }
+    return parsed.toUtc();
   }
 }
 
-class _BonusLevelChip extends StatelessWidget {
-  const _BonusLevelChip({required this.level});
+class LiveOpsRepository {
+  LiveOpsRepository({LiveOpsAssetLoader? loadAsset, DateTime Function()? clock})
+    : _loadAsset = loadAsset ?? ((path) => rootBundle.loadString(path)),
+      _clock = clock ?? DateTime.now;
 
-  final int level;
+  static const _defaultFlags = <String, bool>{
+    'live_ops': true,
+    'seasonal_rewards': true,
+    'world_map': true,
+    'challenge_builder': true,
+    'dev_console': true,
+    'lua_scripting': true,
+    'shared_web_play': true,
+  };
 
-  @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-    decoration: BoxDecoration(
-      color: GtnUiTokens.gold.withValues(alpha: .14),
-      borderRadius: BorderRadius.circular(14),
-    ),
-    child: Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          '+$level',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            color: GtnUiTokens.gold,
-            fontWeight: FontWeight.w900,
-          ),
+  final LiveOpsAssetLoader _loadAsset;
+  final DateTime Function() _clock;
+
+  Future<LiveOpsSnapshot> load() async {
+    try {
+      final flags = await _loadFeatureFlags();
+      final manifest = _decodeManifest(
+        await _loadAsset('assets/game/liveops_manifest.json'),
+      );
+      LiveOpsContentValidator.validate(manifest);
+      final now = _clock().toUtc();
+      final events = manifest.events
+          .map((event) {
+            final start = DateTime.parse(event.startDate).toUtc();
+            final end = DateTime.parse(event.endDate).toUtc();
+            final status = switch (true) {
+              _ when event.status == 'ARCHIVED' => 'ARCHIVED',
+              _ when now.isBefore(start) => 'UPCOMING',
+              _ when !now.isBefore(end) => 'ARCHIVED',
+              _ when event.status == 'ENDING' => 'ENDING',
+              _ => 'ACTIVE',
+            };
+            return event.withStatus(status);
+          })
+          .toList(growable: false);
+      return LiveOpsSnapshot(
+        enabled: flags['live_ops'] == true && flags['seasonal_rewards'] == true,
+        events: List.unmodifiable(events),
+      );
+    } on Object catch (error) {
+      final message = error.toString();
+      return LiveOpsSnapshot(
+        enabled: false,
+        events: const [],
+        error: message.length <= 240 ? message : message.substring(0, 240),
+      );
+    }
+  }
+
+  Future<Map<String, bool>> _loadFeatureFlags() async {
+    String source;
+    try {
+      source = await _loadAsset('assets/game/feature_flags.json');
+    } on Object {
+      return _defaultFlags;
+    }
+    final decoded = jsonDecode(source);
+    if (decoded is! Map<String, dynamic> ||
+        decoded['schemaVersion'] != 1 ||
+        decoded['flags'] is! Map<String, dynamic>) {
+      throw const FormatException('Invalid feature flag configuration.');
+    }
+    final rawFlags = decoded['flags'] as Map<String, dynamic>;
+    final flags = Map<String, bool>.of(_defaultFlags);
+    for (final entry in rawFlags.entries) {
+      if (entry.value is! bool) {
+        throw FormatException('Feature flag ${entry.key} must be boolean.');
+      }
+      if (flags.containsKey(entry.key)) {
+        flags[entry.key] = entry.value as bool;
+      }
+    }
+    return Map.unmodifiable(flags);
+  }
+
+  LiveOpsManifest _decodeManifest(String source) {
+    final decoded = jsonDecode(source);
+    if (decoded is! Map<String, dynamic> ||
+        decoded['schemaVersion'] is! int ||
+        decoded['manifestVersion'] is! int ||
+        decoded['events'] is! List) {
+      throw const FormatException('Invalid LiveOps manifest structure.');
+    }
+    final events = <LiveOpsEvent>[];
+    for (final raw in decoded['events'] as List) {
+      if (raw is! Map<String, dynamic>) {
+        throw const FormatException('Invalid LiveOps event entry.');
+      }
+      final requiredStrings = [
+        raw['id'],
+        raw['title'],
+        raw['description'],
+        raw['status'],
+        raw['startDate'],
+        raw['endDate'],
+        raw['currencyName'],
+      ];
+      final requiredInts = [
+        raw['maxClaims'],
+        raw['rewardNebula'] ?? 10,
+        raw['permanentBoostPerClaim'] ?? 1,
+        raw['minCorrectGuesses'] ?? 0,
+        raw['minPrestigeCount'] ?? 0,
+        raw['minUltraCount'] ?? 0,
+      ];
+      if (requiredStrings.any((value) => value is! String) ||
+          requiredInts.any((value) => value is! int)) {
+        throw const FormatException('LiveOps event fields have invalid types.');
+      }
+      events.add(
+        LiveOpsEvent(
+          id: raw['id'] as String,
+          title: raw['title'] as String,
+          description: raw['description'] as String,
+          status: raw['status'] as String,
+          startDate: raw['startDate'] as String,
+          endDate: raw['endDate'] as String,
+          currencyName: raw['currencyName'] as String,
+          maxClaims: raw['maxClaims'] as int,
+          rewardNebula: (raw['rewardNebula'] ?? 10) as int,
+          permanentBoostPerClaim: (raw['permanentBoostPerClaim'] ?? 1) as int,
+          minCorrectGuesses: (raw['minCorrectGuesses'] ?? 0) as int,
+          minPrestigeCount: (raw['minPrestigeCount'] ?? 0) as int,
+          minUltraCount: (raw['minUltraCount'] ?? 0) as int,
         ),
-        Text(
-          AppLocalizations.text('live_ops_bonus_level', 'BONUS LEVEL'),
-          style: Theme.of(context).textTheme.labelSmall,
-        ),
-      ],
-    ),
-  );
-}
-
-class _InfoCard extends StatelessWidget {
-  const _InfoCard({required this.title, required this.message});
-
-  final String title;
-  final String message;
-
-  @override
-  Widget build(BuildContext context) => GtnExpressiveCard(
-    child: Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(title, style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: 6),
-          Text(message, style: Theme.of(context).textTheme.bodySmall),
-        ],
-      ),
-    ),
-  );
-}
-
-class _EventCard extends StatelessWidget {
-  const _EventCard({
-    required this.event,
-    required this.claims,
-    required this.progression,
-    required this.busy,
-    required this.anyClaimBusy,
-    required this.onClaim,
-    required this.dateLabel,
-  });
-
-  final LiveOpsEvent event;
-  final int claims;
-  final ProgressionState progression;
-  final bool busy;
-  final bool anyClaimBusy;
-  final VoidCallback onClaim;
-  final String Function(String value) dateLabel;
-
-  @override
-  Widget build(BuildContext context) {
-    final eligible =
-        progression.correctGuesses >= event.minCorrectGuesses &&
-        progression.prestigeResets >= event.minPrestigeCount &&
-        progression.ultraResets >= event.minUltraCount;
-    final maxed = claims >= event.maxClaims;
-    final canClaim =
-        event.status == 'ACTIVE' && !maxed && eligible && !anyClaimBusy;
-    final theme = Theme.of(context);
-    final statusColor = switch (event.status) {
-      'ACTIVE' => GtnUiTokens.green,
-      'UPCOMING' => GtnUiTokens.cyan,
-      'ENDING' => GtnUiTokens.gold,
-      _ => GtnUiTokens.muted,
-    };
-
-    return GtnExpressiveCard(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Text(
-                    event.title,
-                    style: theme.textTheme.titleLarge,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 9,
-                    vertical: 5,
-                  ),
-                  decoration: BoxDecoration(
-                    color: statusColor.withValues(alpha: .14),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Text(
-                    event.status,
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: statusColor,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(event.description, style: theme.textTheme.bodyMedium),
-            const SizedBox(height: 10),
-            Text(
-              '${dateLabel(event.startDate)} → ${dateLabel(event.endDate)}',
-              style: theme.textTheme.labelSmall,
-            ),
-            const SizedBox(height: 6),
-            Text(
-              'Reward: +${event.rewardNebula} ${event.currencyName}',
-              style: theme.textTheme.titleSmall,
-            ),
-            Text(
-              'Eligibility: ${event.minCorrectGuesses} correct guesses, '
-              '${event.minPrestigeCount} Prestige, ${event.minUltraCount} Ultra',
-              style: theme.textTheme.bodySmall,
-            ),
-            if (!eligible) ...[
-              const SizedBox(height: 6),
-              Text(
-                AppLocalizations.text(
-                  'live_ops_not_eligible',
-                  'You do not meet this event’s requirements yet.',
-                ),
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.error,
-                ),
-              ),
-            ],
-            const Divider(height: 24),
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    'Claims: $claims / ${event.maxClaims}',
-                    style: theme.textTheme.labelLarge,
-                  ),
-                ),
-                M3EButton.filled(
-                  onPressed: canClaim ? onClaim : null,
-                  child: Text(
-                    busy
-                        ? AppLocalizations.text('claiming', 'Claiming…')
-                        : maxed
-                        ? AppLocalizations.text('max_claimed', 'Max Claimed')
-                        : 'Claim Reward (+${event.rewardNebula} ${event.currencyName})',
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
+      );
+    }
+    return LiveOpsManifest(
+      schemaVersion: decoded['schemaVersion'] as int,
+      manifestVersion: decoded['manifestVersion'] as int,
+      events: List.unmodifiable(events),
     );
   }
 }
