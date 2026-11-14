@@ -151,6 +151,7 @@ class PlayerProfilePage extends StatefulWidget {
     required this.onSaved,
     this.equippedCosmeticId,
     this.viewOnly = true,
+    this.firstLaunch = false,
   });
 
   final PlayerProfile initialProfile;
@@ -158,6 +159,7 @@ class PlayerProfilePage extends StatefulWidget {
   final ValueChanged<PlayerProfile> onSaved;
   final String? equippedCosmeticId;
   final bool viewOnly;
+  final bool firstLaunch;
 
   @override
   State<PlayerProfilePage> createState() => _PlayerProfilePageState();
@@ -173,7 +175,9 @@ class _PlayerProfilePageState extends State<PlayerProfilePage> {
   late String _avatarId = widget.initialProfile.avatarId;
   late String? _customAvatarData = widget.initialProfile.customAvatarData;
   bool _saving = false;
-  late bool _editing = !widget.viewOnly || !widget.initialProfile.setupComplete;
+  late bool _editing = widget.firstLaunch ||
+      !widget.viewOnly ||
+      !widget.initialProfile.setupComplete;
   String? _error;
 
   @override
@@ -243,7 +247,11 @@ class _PlayerProfilePageState extends State<PlayerProfilePage> {
       await widget.store.save(profile);
       if (!mounted) return;
       widget.onSaved(profile);
-      Navigator.of(context).pop();
+      if (widget.firstLaunch) {
+        setState(() => _editing = false);
+      } else {
+        Navigator.of(context).pop();
+      }
     } on Exception {
       if (mounted) {
         setState(() {
