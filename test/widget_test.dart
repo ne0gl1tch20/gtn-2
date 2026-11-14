@@ -382,6 +382,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('More').first, findsOneWidget);
+    expect(find.byKey(const Key('more-global-topbar')), findsOneWidget);
+    expect(find.text('OFFLINE'), findsWidgets);
     for (final label in [
       'Player profile',
       'Rewards',
