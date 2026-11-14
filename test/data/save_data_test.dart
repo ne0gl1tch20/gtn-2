@@ -164,28 +164,31 @@ void main() {
       );
     });
 
-    test('round-trips profile metadata and permanent Creative Save eligibility', () {
-      final save = SaveData(
-        secret: 42,
-        attempts: 0,
-        gamesWon: 0,
-        profileName: 'My Run',
-        profileIconId: 'planet',
-        creativeModeEnabled: true,
-      );
-      final restored = SaveData.fromJson(save.toJson());
-      expect(restored.profileName, 'My Run');
-      expect(restored.profileIconId, 'planet');
-      expect(restored.creativeModeEnabled, isTrue);
-      expect(
-        restored.copyWith(profileName: 'New Name').profileIconId,
-        'planet',
-      );
-      expect(
-        restored.copyWith(creativeModeEnabled: false).creativeModeEnabled,
-        isFalse,
-      );
-    });
+    test(
+      'round-trips profile metadata and permanent Creative Save eligibility',
+      () {
+        final save = SaveData(
+          secret: 42,
+          attempts: 0,
+          gamesWon: 0,
+          profileName: 'My Run',
+          profileIconId: 'planet',
+          creativeModeEnabled: true,
+        );
+        final restored = SaveData.fromJson(save.toJson());
+        expect(restored.profileName, 'My Run');
+        expect(restored.profileIconId, 'planet');
+        expect(restored.creativeModeEnabled, isTrue);
+        expect(
+          restored.copyWith(profileName: 'New Name').profileIconId,
+          'planet',
+        );
+        expect(
+          restored.copyWith(creativeModeEnabled: false).creativeModeEnabled,
+          isFalse,
+        );
+      },
+    );
 
     test('migrates old saves without profile fields', () {
       final oldSave =
@@ -260,10 +263,7 @@ void main() {
         minimum: 1,
         maximum: 501,
       );
-      expect(
-        () => SaveData.fromJson(ordinary.toJson()),
-        throwsFormatException,
-      );
+      expect(() => SaveData.fromJson(ordinary.toJson()), throwsFormatException);
     });
 
     test('rejects unknown versions and invalid fields', () {
@@ -308,48 +308,52 @@ void main() {
       );
     });
 
-    test('round-trips active counters independently from lifetime statistics', () {
-      final save = SaveData(
-        secret: 42,
-        attempts: 17,
-        correctGuesses: 6,
-        streak: 2,
-        bestStreak: 5,
-        gamesWon: 3,
-        progression: ProgressionState.initial.copyWith(
-          totalGuesses: 900,
-          correctGuesses: 700,
-          currentStreak: 2,
+    test(
+      'round-trips active counters independently from lifetime statistics',
+      () {
+        final save = SaveData(
+          secret: 42,
+          attempts: 17,
+          correctGuesses: 6,
+          streak: 2,
           bestStreak: 5,
-        ),
-      );
+          gamesWon: 3,
+          progression: ProgressionState.initial.copyWith(
+            totalGuesses: 900,
+            correctGuesses: 700,
+            currentStreak: 2,
+            bestStreak: 5,
+          ),
+        );
 
-      final restored = SaveData.fromJson(save.toJson());
+        final restored = SaveData.fromJson(save.toJson());
 
-      expect(restored.attempts, 17);
-      expect(restored.correctGuesses, 6);
-      expect(restored.streak, 2);
-      expect(restored.bestStreak, 5);
-      expect(restored.progression.totalGuesses, 900);
-      expect(restored.progression.correctGuesses, 700);
-    });
+        expect(restored.attempts, 17);
+        expect(restored.correctGuesses, 6);
+        expect(restored.streak, 2);
+        expect(restored.bestStreak, 5);
+        expect(restored.progression.totalGuesses, 900);
+        expect(restored.progression.correctGuesses, 700);
+      },
+    );
 
     test('migrates old progression counters into the new active fields', () {
-      final legacy = SaveData(
-        secret: 42,
-        attempts: 12,
-        gamesWon: 2,
-        progression: ProgressionState.initial.copyWith(
-          totalGuesses: 12,
-          correctGuesses: 4,
-          currentStreak: 2,
-          bestStreak: 3,
-        ),
-      ).toJson()
-        ..['schemaVersion'] = 6
-        ..remove('correctGuesses')
-        ..remove('streak')
-        ..remove('bestStreak');
+      final legacy =
+          SaveData(
+              secret: 42,
+              attempts: 12,
+              gamesWon: 2,
+              progression: ProgressionState.initial.copyWith(
+                totalGuesses: 12,
+                correctGuesses: 4,
+                currentStreak: 2,
+                bestStreak: 3,
+              ),
+            ).toJson()
+            ..['schemaVersion'] = 6
+            ..remove('correctGuesses')
+            ..remove('streak')
+            ..remove('bestStreak');
 
       final migrated = SaveData.fromJson(legacy);
 

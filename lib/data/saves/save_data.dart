@@ -48,6 +48,7 @@ class SaveData {
   final GameSettings settings;
   final String profileName;
   final String profileIconId;
+
   /// Permanently marks this active save as eligible for GTN1-style Creative Save tools.
   /// This is distinct from [creativeMode], which stores an isolated sandbox run.
   final bool creativeModeEnabled;
@@ -114,15 +115,18 @@ class SaveData {
     final secret = json['secret'];
     final attempts = json['attempts'];
     final legacyProgression = json['progression'];
-    final correctGuesses = json['correctGuesses'] ??
+    final correctGuesses =
+        json['correctGuesses'] ??
         (legacyProgression is Map<String, dynamic>
             ? legacyProgression['correctGuesses'] ?? 0
             : 0);
-    final streak = json['streak'] ??
+    final streak =
+        json['streak'] ??
         (legacyProgression is Map<String, dynamic>
             ? legacyProgression['currentStreak'] ?? 0
             : 0);
-    final bestStreak = json['bestStreak'] ??
+    final bestStreak =
+        json['bestStreak'] ??
         (legacyProgression is Map<String, dynamic>
             ? legacyProgression['bestStreak'] ?? 0
             : 0);

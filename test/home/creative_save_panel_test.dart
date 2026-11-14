@@ -64,27 +64,42 @@ void main() {
     expect(find.text('Prestige upgrades'), findsOneWidget);
     expect(find.text('Ultra upgrades'), findsOneWidget);
     expect(
-      tester.widget<TextField>(find.byKey(const Key('creative-save-correctGuesses'))).controller!.text,
+      tester
+          .widget<TextField>(
+            find.byKey(const Key('creative-save-correctGuesses')),
+          )
+          .controller!
+          .text,
       '2',
     );
     expect(
-      tester.widget<TextField>(find.byKey(const Key('creative-save-streak'))).controller!.text,
+      tester
+          .widget<TextField>(find.byKey(const Key('creative-save-streak')))
+          .controller!
+          .text,
       '1',
     );
     expect(
-      tester.widget<TextField>(find.byKey(const Key('creative-save-bestStreak'))).controller!.text,
+      tester
+          .widget<TextField>(find.byKey(const Key('creative-save-bestStreak')))
+          .controller!
+          .text,
       '4',
     );
 
     await tester.enterText(
       find.byWidgetPredicate(
-        (widget) => widget is TextField && widget.decoration?.labelText == 'Range minimum',
+        (widget) =>
+            widget is TextField &&
+            widget.decoration?.labelText == 'Range minimum',
       ),
       '20',
     );
     await tester.enterText(
       find.byWidgetPredicate(
-        (widget) => widget is TextField && widget.decoration?.labelText == 'Range maximum',
+        (widget) =>
+            widget is TextField &&
+            widget.decoration?.labelText == 'Range maximum',
       ),
       '500',
     );
@@ -95,7 +110,8 @@ void main() {
 
     await tester.enterText(
       find.byWidgetPredicate(
-        (widget) => widget is TextField && widget.decoration?.labelText == 'Money',
+        (widget) =>
+            widget is TextField && widget.decoration?.labelText == 'Money',
       ),
       '12.5K',
     );

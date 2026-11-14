@@ -147,11 +147,7 @@ class GameEngine {
     );
   }
 
-  GameState guess(
-    GameState state,
-    int value, {
-    bool countPlayerGuess = true,
-  }) {
+  GameState guess(GameState state, int value, {bool countPlayerGuess = true}) {
     if (state.isComplete) return state;
     // GTN1 clamps submitted values to the active range before resolving
     // feedback. Keep this behavior for manual input and automated callers.
@@ -170,8 +166,8 @@ class GameEngine {
     return GameState(
       secret: state.secret,
       attempts: state.attempts + (countPlayerGuess ? 1 : 0),
-      correctGuesses: state.correctGuesses +
-          (countPlayerGuess && isCorrect ? 1 : 0),
+      correctGuesses:
+          state.correctGuesses + (countPlayerGuess && isCorrect ? 1 : 0),
       streak: nextStreak,
       bestStreak: countPlayerGuess && isCorrect
           ? (state.bestStreak > nextStreak ? state.bestStreak : nextStreak)

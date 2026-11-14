@@ -138,10 +138,12 @@ class _CreativeSavePanelState extends State<CreativeSavePanel> {
     final minimum = int.tryParse(_controller('rangeMin').text);
     final maximum = int.tryParse(_controller('rangeMax').text);
     if (minimum == null || maximum == null) {
-      setState(() => _status = _t(
-        'web_ui_enter_a_valid_range_from_1_to_1_000_000',
-        'Enter a valid range from 1 to 1,000,000.',
-      ));
+      setState(
+        () => _status = _t(
+          'web_ui_enter_a_valid_range_from_1_to_1_000_000',
+          'Enter a valid range from 1 to 1,000,000.',
+        ),
+      );
       return;
     }
     await _run(() => widget.onRange(minimum, maximum));
@@ -221,9 +223,8 @@ class _CreativeSavePanelState extends State<CreativeSavePanel> {
                     children: [
                       Text(
                         _localizedUpgradeName(upgrade),
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
+                        style: Theme.of(context).textTheme.bodySmall
+                            ?.copyWith(fontWeight: FontWeight.w700),
                       ),
                       Text(
                         '${_t('web_ui_level', 'Level')} ${_levelFor(upgrade)} / ${upgrade.definition.maxLevel ?? 0}',
@@ -324,17 +325,41 @@ class _CreativeSavePanelState extends State<CreativeSavePanel> {
           if (MediaQuery.sizeOf(context).width <= 390)
             Column(
               children: [
-                _field('rangeMin', _t('web_ui_range_minimum', 'Range minimum'), numeric: true, maxLength: 7),
+                _field(
+                  'rangeMin',
+                  _t('web_ui_range_minimum', 'Range minimum'),
+                  numeric: true,
+                  maxLength: 7,
+                ),
                 const SizedBox(height: 10),
-                _field('rangeMax', _t('web_ui_range_maximum', 'Range maximum'), numeric: true, maxLength: 7),
+                _field(
+                  'rangeMax',
+                  _t('web_ui_range_maximum', 'Range maximum'),
+                  numeric: true,
+                  maxLength: 7,
+                ),
               ],
             )
           else
             Row(
               children: [
-                Expanded(child: _field('rangeMin', _t('web_ui_range_minimum', 'Range minimum'), numeric: true, maxLength: 7)),
+                Expanded(
+                  child: _field(
+                    'rangeMin',
+                    _t('web_ui_range_minimum', 'Range minimum'),
+                    numeric: true,
+                    maxLength: 7,
+                  ),
+                ),
                 const SizedBox(width: 10),
-                Expanded(child: _field('rangeMax', _t('web_ui_range_maximum', 'Range maximum'), numeric: true, maxLength: 7)),
+                Expanded(
+                  child: _field(
+                    'rangeMax',
+                    _t('web_ui_range_maximum', 'Range maximum'),
+                    numeric: true,
+                    maxLength: 7,
+                  ),
+                ),
               ],
             ),
           const SizedBox(height: 14),
@@ -346,7 +371,10 @@ class _CreativeSavePanelState extends State<CreativeSavePanel> {
             ),
           ),
           const SizedBox(height: 16),
-          Text(_t('web_ui_game_values', 'Game values'), style: Theme.of(context).textTheme.titleSmall),
+          Text(
+            _t('web_ui_game_values', 'Game values'),
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
           const SizedBox(height: 8),
           Text(
             _t(
@@ -364,14 +392,46 @@ class _CreativeSavePanelState extends State<CreativeSavePanel> {
             mainAxisSpacing: 10,
             childAspectRatio: 2.8,
             children: [
-              _field('money', _t('builder_kind_money', 'Money'), maxLength: 100),
+              _field(
+                'money',
+                _t('builder_kind_money', 'Money'),
+                maxLength: 100,
+              ),
               _field('prestige', _t('prestige', 'Prestige'), maxLength: 100),
-              _field('ultra', _t('currency_ultra_label', 'Ultra'), maxLength: 100),
-              _field('nebula', _t('currency_nebula_label', 'Nebula'), maxLength: 100),
-              _field('attempts', _t('web_ui_attempts_2', 'Attempts'), numeric: true, maxLength: 13),
-              _field('correctGuesses', _t('web_ui_correct_guesses', 'Correct guesses'), numeric: true, maxLength: 13),
-              _field('streak', _t('web_ui_current_streak', 'Current streak'), numeric: true, maxLength: 7),
-              _field('bestStreak', _t('web_ui_best_streak', 'Best streak'), numeric: true, maxLength: 7),
+              _field(
+                'ultra',
+                _t('currency_ultra_label', 'Ultra'),
+                maxLength: 100,
+              ),
+              _field(
+                'nebula',
+                _t('currency_nebula_label', 'Nebula'),
+                maxLength: 100,
+              ),
+              _field(
+                'attempts',
+                _t('web_ui_attempts_2', 'Attempts'),
+                numeric: true,
+                maxLength: 13,
+              ),
+              _field(
+                'correctGuesses',
+                _t('web_ui_correct_guesses', 'Correct guesses'),
+                numeric: true,
+                maxLength: 13,
+              ),
+              _field(
+                'streak',
+                _t('web_ui_current_streak', 'Current streak'),
+                numeric: true,
+                maxLength: 7,
+              ),
+              _field(
+                'bestStreak',
+                _t('web_ui_best_streak', 'Best streak'),
+                numeric: true,
+                maxLength: 7,
+              ),
             ],
           ),
           const SizedBox(height: 10),
@@ -389,9 +449,15 @@ class _CreativeSavePanelState extends State<CreativeSavePanel> {
                 ('ultra', _t('web_creative_set_ultra', 'Set ultra')),
                 ('nebula', _t('web_creative_set_nebula', 'Set nebula')),
                 ('attempts', _t('web_creative_set_attempts', 'Set attempts')),
-                ('correctGuesses', _t('web_creative_set_correct_guesses', 'Set correct guesses')),
+                (
+                  'correctGuesses',
+                  _t('web_creative_set_correct_guesses', 'Set correct guesses'),
+                ),
                 ('streak', _t('web_creative_set_streak', 'Set streak')),
-                ('bestStreak', _t('web_creative_set_best_streak', 'Set best streak')),
+                (
+                  'bestStreak',
+                  _t('web_creative_set_best_streak', 'Set best streak'),
+                ),
               ])
                 M3EButton.outlined(
                   onPressed: _saving ? null : () => _applyValue(item.$1),

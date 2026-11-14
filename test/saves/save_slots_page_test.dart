@@ -72,7 +72,10 @@ void main() {
     expect(find.text('Number range maximum (1–1,000,000)'), findsOneWidget);
     expect(find.text('Extra hints (0–5)'), findsOneWidget);
     expect(find.text('Attempt limit (0 = unlimited, 1–100)'), findsOneWidget);
-    expect(find.text('Permanent for this save. You can’t turn it off later.'), findsOneWidget);
+    expect(
+      find.text('Permanent for this save. You can’t turn it off later.'),
+      findsOneWidget,
+    );
 
     await tester.tap(find.text('Cancel'));
     await tester.pumpAndSettle();

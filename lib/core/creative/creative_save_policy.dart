@@ -43,7 +43,9 @@ class CreativeSavePolicy {
     required List<GameUpgrade> prestigeUpgrades,
     required List<GameUpgrade> ultraUpgrades,
   }) {
-    if (!current.creativeModeEnabled || value.length < 1 || value.length > 100) {
+    if (!current.creativeModeEnabled ||
+        value.length < 1 ||
+        value.length > 100) {
       return null;
     }
 
@@ -82,9 +84,7 @@ class CreativeSavePolicy {
         if (number == null || number < 0 || number > maxStreak) {
           return null;
         }
-        final best = current.bestStreak < number
-            ? number
-            : current.bestStreak;
+        final best = current.bestStreak < number ? number : current.bestStreak;
         return current.copyWith(
           streak: number,
           bestStreak: best,
@@ -95,9 +95,7 @@ class CreativeSavePolicy {
         );
       case 'bestStreak':
         final number = int.tryParse(value);
-        if (number == null ||
-            number < current.streak ||
-            number > maxStreak) {
+        if (number == null || number < current.streak || number > maxStreak) {
           return null;
         }
         return current.copyWith(
@@ -148,9 +146,8 @@ class CreativeSavePolicy {
   }
 
   static BigNumber? _parseSourceBigNumber(String input) {
-    final match = RegExp(
-      r'^([0-9]+(?:\.[0-9]+)?)([A-Za-z]{1,4})?$',
-    ).firstMatch(input);
+    final match = RegExp(r'^([0-9]+(?:\.[0-9]+)?)([A-Za-z]{1,4})?$')
+        .firstMatch(input);
     if (match == null || match.group(0) != input) return null;
 
     final numeric = match.group(1)!;

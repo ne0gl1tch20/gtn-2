@@ -81,7 +81,16 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
     var icon = 'default';
     final result =
         await GtnExpressiveDialog.show<
-          ({String name, String difficulty, String icon, bool creativeSave, int minimum, int maximum, int hints, int attemptLimit})
+          ({
+            String name,
+            String difficulty,
+            String icon,
+            bool creativeSave,
+            int minimum,
+            int maximum,
+            int hints,
+            int attemptLimit,
+          })
         >(
           context,
           builder: (dialogContext) => StatefulBuilder(
@@ -141,12 +150,16 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
                     GtnExpressiveTextField(
                       controller: creativeHintsController,
                       maxLength: 2,
-                      decoration: const InputDecoration(labelText: 'Extra hints (0–5)'),
+                      decoration: const InputDecoration(
+                        labelText: 'Extra hints (0–5)',
+                      ),
                     ),
                     GtnExpressiveTextField(
                       controller: creativeAttemptLimitController,
                       maxLength: 3,
-                      decoration: const InputDecoration(labelText: 'Attempt limit (0 = unlimited, 1–100)'),
+                      decoration: const InputDecoration(
+                        labelText: 'Attempt limit (0 = unlimited, 1–100)',
+                      ),
                     ),
                   ],
                   const SizedBox(height: 12),
@@ -177,7 +190,8 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
                     minimum: int.tryParse(creativeMinimumController.text) ?? 0,
                     maximum: int.tryParse(creativeMaximumController.text) ?? 0,
                     hints: int.tryParse(creativeHintsController.text) ?? 0,
-                    attemptLimit: int.tryParse(creativeAttemptLimitController.text) ?? 0,
+                    attemptLimit:
+                        int.tryParse(creativeAttemptLimitController.text) ?? 0,
                   )),
                   child: const Text('Create'),
                 ),
@@ -225,9 +239,7 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
         creativeModeEnabled: result.creativeSave,
         creativeMode: result.creativeSave
             ? CreativeModeSave(
-                name: result.name.isEmpty
-                    ? 'Creative Save $slot'
-                    : result.name,
+                name: result.name.isEmpty ? 'Creative Save $slot' : result.name,
                 enabled: true,
                 rangeMin: minimum,
                 rangeMax: maximum,
