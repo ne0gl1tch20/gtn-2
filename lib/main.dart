@@ -570,7 +570,7 @@ class _GameHomePageState extends State<GameHomePage>
 
     setState(() {
       _progression = updated.progression;
-      if (key == 'attempts') {
+      if (const {'attempts', 'correctGuesses', 'streak', 'bestStreak'}.contains(key)) {
         _game = GameState(
           secret: _game.secret,
           attempts: updated.attempts,
