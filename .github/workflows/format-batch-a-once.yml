@@ -15,8 +15,10 @@ jobs:
         with:
           flutter-version: '3.50.0'
           channel: stable
-      - name: Format Batch A implementation and tests
+      - name: Refresh latest main and format Batch A implementation and tests
         run: |
+          git fetch origin main
+          git reset --hard origin/main
           dart format \
             lib/main.dart \
             lib/profile/player_profile_page.dart \
