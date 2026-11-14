@@ -67,10 +67,12 @@ class MenuStudioLayout {
     if (stored != null) return stored;
 
     final defaults = MenuStudioLayout.defaults();
-    final moreOrder = settings.moreScreenOrder
+    final moreOrder = <String>[];
+    for (final id in settings.moreScreenOrder
         .map((id) => _settingsToSource[id] ?? id)
-        .where(moreIds.contains)
-        .toList();
+        .where(moreIds.contains)) {
+      if (!moreOrder.contains(id)) moreOrder.add(id);
+    }
     for (final id in moreIds) {
       if (!moreOrder.contains(id)) moreOrder.add(id);
     }
