@@ -1240,7 +1240,10 @@ class _MoreMenuPage extends StatelessWidget {
           .toSet(),
     );
     for (final id in destinations.keys) {
-      if (!orderedIds.contains(id)) orderedIds.add(id);
+      if ((id != 'dev_settings' || showDeveloperSettings) &&
+          !orderedIds.contains(id)) {
+        orderedIds.add(id);
+      }
     }
 
     return Scaffold(
