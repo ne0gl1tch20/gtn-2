@@ -42,6 +42,7 @@ class GameDashboardPage extends StatelessWidget {
     required this.onNewGame,
     required this.onUpgradeShop,
     required this.onPrestige,
+    required this.onUltra,
     required this.onArcade,
     required this.onNebulaShop,
     required this.onWorldMap,
@@ -77,6 +78,7 @@ class GameDashboardPage extends StatelessWidget {
   final VoidCallback onNewGame;
   final VoidCallback onUpgradeShop;
   final VoidCallback onPrestige;
+  final VoidCallback onUltra;
   final VoidCallback onArcade;
   final VoidCallback onNebulaShop;
   final VoidCallback onWorldMap;
@@ -159,8 +161,10 @@ class GameDashboardPage extends StatelessWidget {
         onSettings();
         return;
       case 'prestige':
-      case 'ultra':
         onPrestige();
+        return;
+      case 'ultra':
+        onUltra();
         return;
       case 'talent':
         onSystemsView(LegacySystemsView.talents);
