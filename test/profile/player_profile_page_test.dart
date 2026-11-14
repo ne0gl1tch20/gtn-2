@@ -69,6 +69,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Create your profile'), findsOneWidget);
+    await tester.ensureVisible(find.text('Create profile & continue'));
     expect(find.text('Create profile & continue'), findsOneWidget);
     expect(find.byTooltip('Back'), findsNothing);
     expect(find.byType(TextField), findsNWidgets(2));
@@ -105,6 +106,7 @@ void main() {
       await tester.tap(find.text('Edit profile'));
       await tester.pumpAndSettle();
       expect(find.byType(TextField), findsNWidgets(2));
+      await tester.ensureVisible(find.text('Save profile'));
       expect(find.text('Save profile'), findsOneWidget);
     },
   );
