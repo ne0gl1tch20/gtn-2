@@ -50,14 +50,14 @@ class SettingsPage extends StatelessWidget {
         await _update(settings.copyWith(notificationsEnabled: true));
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Notifications enabled!')),
+            const SnackBar(content: Text(AppLocalizations.text('notifications_enabled_toast', 'Notifications enabled!'))),
           );
         }
       } else {
         await _update(settings.copyWith(notificationsEnabled: false));
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Notification permission denied.')),
+            const SnackBar(content: Text(AppLocalizations.text('notification_permission_denied_toast', 'Notification permission denied.'))),
           );
         }
       }
@@ -359,7 +359,7 @@ class SettingsPage extends StatelessWidget {
           _SettingsSection(
             eyebrow: 'PUSH NOTIFICATIONS & REMINDERS',
             title: 'Push Notifications & Reminders',
-            description: 'Enable optional game reminders and notifications. You can turn them off at any time.',
+            description: AppLocalizations.text('settings_desc_notifications', 'Enable optional game reminders and notifications. You can turn them off at any time.'),
             children: [
               _toggle(
                 'Notifications',
@@ -370,7 +370,7 @@ class SettingsPage extends StatelessWidget {
                 const Padding(
                   padding: EdgeInsets.fromLTRB(16, 0, 16, 8),
                   child: Text(
-                    'Choose how many hours pass between scheduled reminders.',
+                    AppLocalizations.text('settings_desc_reminder_frequency', 'Choose how many hours pass between scheduled reminders.'),
                     style: TextStyle(fontSize: 12),
                   ),
                 ),
@@ -396,7 +396,7 @@ class SettingsPage extends StatelessWidget {
                   (value) => _update(
                     settings.copyWith(notificationRemindersEnabled: value),
                   ),
-                  description: 'Periodic reminders to return to the game.',
+                  description: AppLocalizations.text('notification_category_reminders_desc', 'Periodic reminders to return to the game'),
                 ),
                 _toggle(
                   'Progression milestones',
@@ -404,7 +404,7 @@ class SettingsPage extends StatelessWidget {
                   (value) => _update(
                     settings.copyWith(notificationProgressionEnabled: value),
                   ),
-                  description: 'World unlocks and boss victories.',
+                  description: AppLocalizations.text('notification_category_progression_desc', 'World unlocks and boss victories'),
                 ),
                 _toggle(
                   'Game events',
@@ -413,7 +413,7 @@ class SettingsPage extends StatelessWidget {
                     settings.copyWith(notificationEventsEnabled: value),
                   ),
                   description:
-                      'New random events and limited-time event rewards.',
+                      AppLocalizations.text('notification_category_events_desc', 'New random events and limited-time event rewards'),
                 ),
               ],
             ],
@@ -422,7 +422,7 @@ class SettingsPage extends StatelessWidget {
             eyebrow: 'SOUND FX',
             title: 'Sound FX',
             description:
-                'Turn sound effects for in-game interactions on or off.',
+                AppLocalizations.text('settings_desc_sound_fx', 'Turn sound effects for in-game interactions on or off.'),
             children: [
               _toggle(
                 'Sound effects',
@@ -434,7 +434,7 @@ class SettingsPage extends StatelessWidget {
                 settings.vibrationEnabled,
                 (value) => _update(settings.copyWith(vibrationEnabled: value)),
                 description:
-                    'Turn app-triggered vibration during interactions on or off.',
+                    AppLocalizations.text('settings_desc_vibration', 'Turn app-triggered vibration during interactions on or off.'),
               ),
             ],
           ),
@@ -449,14 +449,14 @@ class SettingsPage extends StatelessWidget {
                 settings.reduceFlashes,
                 (value) => _update(settings.copyWith(reduceFlashes: value)),
                 description:
-                    'Reduce flashes and sudden visual changes for greater visual comfort.',
+                    AppLocalizations.text('settings_desc_reduce_flashes', 'Reduce flashes and sudden visual changes for greater visual comfort.'),
               ),
               _toggle(
                 'Reduced Motion',
                 settings.reduceMotion,
                 (value) => _update(settings.copyWith(reduceMotion: value)),
                 description:
-                    'Soften or disable animated screen transitions.',
+                    AppLocalizations.text('settings_desc_reduced_motion', 'Soften or disable animated screen transitions.'),
               ),
             ],
           ),
@@ -467,14 +467,14 @@ class SettingsPage extends StatelessWidget {
             children: [
               _SettingsSlider(
                 label: 'Master Volume',
-                description: 'Set the app’s audio level from silent to maximum.',
+                description: AppLocalizations.text('settings_desc_master_volume', 'Set the app’s audio level from silent to maximum.'),
                 value: settings.volume,
                 onChanged: (value) => _update(settings.copyWith(volume: value)),
               ),
               _SettingsSlider(
                 label: 'Sound Effects Volume',
                 description:
-                    'Adjust sound-effect loudness independently of background music.',
+                    AppLocalizations.text('settings_desc_sfx_volume', 'Adjust sound-effect loudness independently of background music.'),
                 value: settings.sfxVolume,
                 onChanged: settings.soundEnabled
                     ? (value) => _update(settings.copyWith(sfxVolume: value))
