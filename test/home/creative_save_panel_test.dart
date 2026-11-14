@@ -29,11 +29,18 @@ void main() {
               game: const GameState(
                 secret: 42,
                 attempts: 8,
+                correctGuesses: 2,
+                streak: 1,
+                bestStreak: 4,
                 isComplete: false,
                 minimum: 1,
                 maximum: 100,
               ),
-              progression: ProgressionState.initial,
+              progression: ProgressionState.initial.copyWith(
+                correctGuesses: 90,
+                currentStreak: 80,
+                bestStreak: 100,
+              ),
               onRange: (minimum, maximum) async {
                 appliedRange = (minimum, maximum);
                 return true;
@@ -56,6 +63,18 @@ void main() {
     expect(find.text('Upgrade levels'), findsOneWidget);
     expect(find.text('Prestige upgrades'), findsOneWidget);
     expect(find.text('Ultra upgrades'), findsOneWidget);
+    expect(
+      tester.widget<TextField>(find.byKey(const Key('creative-save-correctGuesses'))).controller!.text,
+      '2',
+    );
+    expect(
+      tester.widget<TextField>(find.byKey(const Key('creative-save-streak'))).controller!.text,
+      '1',
+    );
+    expect(
+      tester.widget<TextField>(find.byKey(const Key('creative-save-bestStreak'))).controller!.text,
+      '4',
+    );
 
     await tester.enterText(
       find.byWidgetPredicate(
