@@ -80,7 +80,7 @@ void main() {
         jsonDecode(saved!.webMenuStudioLayout!) as Map<String, dynamic>;
     final areas = payload['areas'] as Map<String, dynamic>;
     final orders = payload['orders'] as Map<String, dynamic>;
-    expect(orders['nav'], isA<List>());
+    expect(orders['nav'], isA<List<dynamic>>());
     expect(orders['more'], contains('worlds'));
     expect(areas['worlds'], 'more');
     expect(saved!.moreScreenOrder, contains('worlds'));
@@ -107,7 +107,7 @@ void main() {
               child: TextButton(
                 onPressed: () {
                   Navigator.of(context).push(
-                    MaterialPageRoute(
+                    MaterialPageRoute<void>(
                       builder: (_) => MenuStudioPage(
                         settings: GameSettings.initial,
                         onChanged: (_) async {},
