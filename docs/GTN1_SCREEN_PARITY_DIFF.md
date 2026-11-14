@@ -184,16 +184,17 @@ The following source surfaces are in GTN1's frozen production inventory. Some ar
 
 - Compared GTN1 `app/src/main/assets/web-play/menu-studio.js` and its dedicated CSS with GTN2 `lib/settings/menu_studio_page.dart`, `lib/settings/game_settings.dart` and the actual dashboard navigation in `lib/home/game_dashboard_page.dart`.
 - GTN1 edits two areas: the top navigation (`worlds`, `arcade`, `upgrades`) and More. Play and More remain pinned. The editor supports reordering within each area, moving entries between areas, per-button colors through the shared native color picker, a live preview, reset and save.
-- GTN2 currently exposes only one reorderable More list. Its labels/inventory do not match the GTN1 IDs: it includes Flutter-only entries such as `world_map`, `endgame`, `nebula` and `save_slots`, while omitting source IDs such as `rewards`, `journey`, `shop`, `traits` and `dev_settings`. It has no top-navigation editor, area-move controls or live preview, and accepts raw hex text instead of opening the source picker.
-- **Schema mismatch:** GTN1's `validLayout()` requires both `orders.nav` and `orders.more`; GTN2 currently serializes only `orders.more`. The current Flutter layout payload is therefore rejected by GTN1's source validator. This is a functional compatibility defect, not merely a UI difference.
-- **Open:** implement the exact source inventory and two-area behavior, write the compatible schema, use the shared picker and verify persistence/reload plus actual dashboard navigation changes.
+- GTN2 now has the matching source inventory: navigation IDs `worlds`, `arcade`, `upgrades`, plus the exact 18 `.more-links` IDs read from pinned `index.html`. It implements two-area move/reorder, per-button HSV/hex color selection through the shared GTN color picker, reset and save.
+- The serialized payload now includes `areas`, `orders.nav`, `orders.more` and `colors`, matching GTN1 `validLayout()`. `GameDashboardPage` consumes the stored layout for navigation order and button colors. Widget tests assert the source-pinned order, both required order arrays, moving a navigation entry into More and restoring the payload.
+- **Remaining mismatch:** GTN1's `apply()` updates the actual navigation and More buttons immediately while editing. Flutter currently updates an editor-only chip preview and applies the changed layout to the dashboard after Save. Implement live preview with cancel/revert behavior and verify persistence/reload plus runtime navigation changes.
 
 ### Player Profile cross-diff
 
 - Compared GTN1 `PlayerProfileScreen.kt` with GTN2 `lib/profile/player_profile_page.dart` and `lib/main.dart`.
 - GTN1 has distinct first-launch/edit and read-only profile modes. The read-only view shows avatar, username and bio, then offers an Edit profile action. Its persisted model includes `profileId` and `setupComplete`; custom images are copied into app-private files.
-- GTN2 currently opens the edit form directly from the More profile entry. It supports the same 16 avatar presets and a custom image, but stores image data as a base64 data URI (limited to 4 MB) and its profile model has no `profileId` or `setupComplete` fields. A separate read-only profile destination and source first-launch completion behavior are not implemented.
-- **Open:** add the read-only view/edit transition, preserve source profile identity/setup fields and verify profile persistence/reload and save-slot metadata synchronization.
+- GTN2 now opens a read-only profile view with a separate Edit profile action. Its model persists `profileId` and `setupComplete`; older GTN2 profile JSON receives a generated identity and infers completion from a non-empty username. The app now gates first launch on profile setup. Model/widget tests cover identity round-trip and the view-to-edit transition.
+- GTN1 stores custom avatars as app-private image files; Flutter still stores a base64 data URI (4 MB limit). Runtime save/reload and save-slot metadata synchronization are not yet verified.
+- **Open:** switch custom avatar storage to app-private files, verify first-launch completion and edit persistence on Android/Windows, and verify save-slot metadata synchronization.
 
 ### Save Slots cross-diff
 
