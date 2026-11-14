@@ -924,11 +924,12 @@ class GameDashboardPage extends StatelessWidget {
                                         margin: EdgeInsets.zero,
                                         padding: const EdgeInsets.all(14),
                                         shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(18),
+                                          borderRadius: BorderRadius.circular(
+                                            18,
+                                          ),
                                           side: BorderSide(
-                                            color: const Color(
-                                              0xFFF59E0B,
-                                            ).withValues(alpha: .5),
+                                            color: const Color(0xFFF59E0B)
+                                                .withValues(alpha: .5),
                                           ),
                                         ),
                                         child: Column(
@@ -946,7 +947,8 @@ class GameDashboardPage extends StatelessWidget {
                                                 Expanded(
                                                   child: Column(
                                                     crossAxisAlignment:
-                                                        CrossAxisAlignment.start,
+                                                        CrossAxisAlignment
+                                                            .start,
                                                     children: [
                                                       Text(
                                                         'DEVELOPER INFO',
@@ -954,9 +956,11 @@ class GameDashboardPage extends StatelessWidget {
                                                             .textTheme
                                                             .labelSmall
                                                             ?.copyWith(
-                                                              letterSpacing: 1.1,
+                                                              letterSpacing:
+                                                                  1.1,
                                                               fontWeight:
-                                                                  FontWeight.w800,
+                                                                  FontWeight
+                                                                      .w800,
                                                             ),
                                                       ),
                                                       Text(
@@ -966,7 +970,8 @@ class GameDashboardPage extends StatelessWidget {
                                                             .titleMedium
                                                             ?.copyWith(
                                                               fontWeight:
-                                                                  FontWeight.w800,
+                                                                  FontWeight
+                                                                      .w800,
                                                             ),
                                                       ),
                                                     ],

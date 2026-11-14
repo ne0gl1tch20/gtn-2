@@ -162,9 +162,7 @@ void main() {
     expect(find.text('Debug build'), findsOneWidget);
     expect(find.text('DEBUG'), findsOneWidget);
     expect(
-      find.textContaining(
-        'This copy of Guess The Number is a debug build.',
-      ),
+      find.textContaining('This copy of Guess The Number is a debug build.'),
       findsOneWidget,
     );
   });
