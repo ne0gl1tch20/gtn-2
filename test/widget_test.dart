@@ -490,6 +490,36 @@ void main() {
     }
   });
 
+  testWidgets('quick actions stack on mobile and split on desktop', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(buildDashboard());
+    var beyond = tester.getTopLeft(
+      find.byKey(const Key('dashboard-action-beyond')),
+    );
+    var daily = tester.getTopLeft(
+      find.byKey(const Key('dashboard-action-daily')),
+    );
+    expect(beyond.dy, lessThan(daily.dy));
+    expect(beyond.dx, daily.dx);
+
+    tester.view.physicalSize = const Size(1200, 900);
+    await tester.pumpWidget(buildDashboard());
+    await tester.pumpAndSettle();
+    beyond = tester.getTopLeft(
+      find.byKey(const Key('dashboard-action-beyond')),
+    );
+    daily = tester.getTopLeft(
+      find.byKey(const Key('dashboard-action-daily')),
+    );
+    expect(beyond.dy, daily.dy);
+    expect(beyond.dx, lessThan(daily.dx));
+  });
+
   testWidgets('desktop Bot Arena uses the GTN1 half-column width', (
     WidgetTester tester,
   ) async {
