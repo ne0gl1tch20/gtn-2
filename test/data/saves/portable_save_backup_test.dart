@@ -12,6 +12,15 @@ void main() {
     expect(await PortableSaveBackup.decrypt(encrypted, passphrase), payload);
   });
 
+  test('decrypts a fixed vector from the pinned GTN1 envelope parameters', () async {
+    const fixture =
+        'GTNPORT1:AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGz7LWHAMisH/x7aX3zDHvENWzMQx6uMa1fp6boYc8/Em8ANESoiKRoXsvyu2X4Pr4M5Sc6o5r9tYLWpqNEnAe1mmWXHsD7qTT8EWqD1Sg50EQa57yBwCC33tyiDZZPYDeDvSzsXJ2ZNx9RLNUtOIzHVs2nECtkzh';
+    const payload =
+        '{"formatVersion":3,"appPreferencesJson":"{}","activeSlot":1,"slots":{},"backups":{},"creativeSlots":{}}';
+
+    expect(await PortableSaveBackup.decrypt(fixture, passphrase), payload);
+  });
+
   test('wrong passphrase and tampered ciphertext are rejected', () async {
     final encrypted = await PortableSaveBackup.encrypt(
       'private-save',
