@@ -159,17 +159,20 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    await tester.scrollUntilVisible(
-      find.text('Notifications'),
-      260,
-      scrollable: find.byType(Scrollable).first,
+    final notificationTile = find.ancestor(
+      of: find.text('Notifications'),
+      matching: find.byType(ListTile),
     );
-    await tester.scrollUntilVisible(
-      find.byType(M3ESwitch),
-      260,
-      scrollable: find.byType(Scrollable).first,
+    final notificationSwitch = find.descendant(
+      of: notificationTile,
+      matching: find.byType(M3ESwitch),
     );
-    await tester.tap(find.byType(Switch).first);
+    await tester.dragUntilVisible(
+      notificationSwitch,
+      find.byType(ListView).first,
+      const Offset(0, -300),
+    );
+    await tester.tap(notificationSwitch);
     await tester.pumpAndSettle();
 
     expect(latest.notificationsEnabled, isTrue);
@@ -205,12 +208,20 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    await tester.scrollUntilVisible(
-      find.byType(M3ESwitch),
-      260,
-      scrollable: find.byType(Scrollable).first,
+    final notificationTile = find.ancestor(
+      of: find.text('Notifications'),
+      matching: find.byType(ListTile),
     );
-    await tester.tap(find.byType(M3ESwitch).first);
+    final notificationSwitch = find.descendant(
+      of: notificationTile,
+      matching: find.byType(M3ESwitch),
+    );
+    await tester.dragUntilVisible(
+      notificationSwitch,
+      find.byType(ListView).first,
+      const Offset(0, -300),
+    );
+    await tester.tap(notificationSwitch);
     await tester.pumpAndSettle();
 
     expect(latest.notificationsEnabled, isFalse);
