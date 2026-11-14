@@ -67,7 +67,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(saved, isNotNull);
-    final payload = jsonDecode(saved!.webMenuStudioLayout!) as Map<String, dynamic>;
+    final payload =
+        jsonDecode(saved!.webMenuStudioLayout!) as Map<String, dynamic>;
     final areas = payload['areas'] as Map<String, dynamic>;
     final orders = payload['orders'] as Map<String, dynamic>;
     expect(orders['nav'], isA<List>());
