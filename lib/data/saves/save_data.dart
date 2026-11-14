@@ -127,7 +127,6 @@ class SaveData {
         gamesWon < 0 ||
         profileName is! String ||
         profileName.length > 24 ||
-        creativeModeEnabled is! bool ||
         profileIconId is! String ||
         !profileIconIds.contains(profileIconId)) {
       throw const FormatException('Unsupported or invalid save data.');
