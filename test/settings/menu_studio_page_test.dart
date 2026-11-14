@@ -18,6 +18,51 @@ void main() {
     ]);
   });
 
+  test('default More menu IDs and order match the pinned GTN1 DOM', () {
+    // GTN1 index.html at fe9cf567: #screen-more data-screen-target order.
+    final layout = MenuStudioLayout.defaults();
+    expect(layout.visibleMoreIds, [
+      'rewards',
+      'journey',
+      'shop',
+      'homebase',
+      'relics',
+      'codex',
+      'changelog',
+      'about',
+      'music',
+      'settings',
+      'prestige',
+      'ultra',
+      'talent',
+      'traits',
+      'mutators',
+      'stats',
+      'dev_settings',
+      'stake',
+    ]);
+    expect(layout.settingsMoreOrder, [
+      'rewards',
+      'journey',
+      'shop',
+      'home_base',
+      'relics',
+      'codex',
+      'changelog',
+      'about',
+      'music',
+      'settings',
+      'prestige',
+      'ultra',
+      'talent',
+      'traits',
+      'mutators',
+      'stats',
+      'dev_settings',
+      'staking',
+    ]);
+  });
+
   test('layout parser rejects payloads missing the source nav order', () {
     expect(
       MenuStudioLayout.tryParse(
