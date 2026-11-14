@@ -734,7 +734,7 @@ class GameDashboardPage extends StatelessWidget {
                                             muted,
                                           ),
                                         ),
-                                        const SizedBox(width: 6),
+                                        const SizedBox(width: 10),
                                         Expanded(
                                           child: _Stat(
                                             Icons.check_circle_rounded,
@@ -1597,13 +1597,21 @@ class _Wallet extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Text(
-                  '+ ${incomePerSecond ?? BigNumber.fromInt(0)} /s',
-                  style: const TextStyle(
-                    color: _green,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w800,
-                  ),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                  textBaseline: TextBaseline.alphabetic,
+                  children: [
+                    const Text('＋', style: TextStyle(color: _green, fontSize: 10)),
+                    Text(
+                      '${incomePerSecond ?? BigNumber.fromInt(0)}',
+                      style: const TextStyle(
+                        color: _green,
+                        fontSize: 17,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const Text('/s', style: TextStyle(color: _green, fontSize: 10)),
+                  ],
                 ),
                 Text(
                   '${state.moneyEarned} earned',
