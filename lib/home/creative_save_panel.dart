@@ -4,6 +4,7 @@ import '../core/game/game_engine.dart';
 import '../core/progression/progression_state.dart';
 import '../shop/upgrade_catalog.dart';
 import '../design/expressive_widgets.dart';
+import '../i18n/app_localizations.dart';
 
 class CreativeSavePanel extends StatefulWidget {
   const CreativeSavePanel({
@@ -24,6 +25,20 @@ class CreativeSavePanel extends StatefulWidget {
 }
 
 class _CreativeSavePanelState extends State<CreativeSavePanel> {
+  String _t(String key, String fallback) =>
+      AppLocalizations.text(key, fallback);
+
+  String _localizedUpgradeName(GameUpgrade upgrade) {
+    final id = upgrade.definition.id;
+    final key = switch (_upgradeKey(upgrade).split(':').first) {
+      'upgradeLevel' => 'upgrade_${id}_name',
+      'prestigeUpgradeLevel' => 'prestige_${id}_name',
+      'ultraUpgradeLevel' => 'ultra_${id}_name',
+      _ => id,
+    };
+    return _t(key, upgrade.name);
+  }
+
   final Map<String, TextEditingController> _controllers = {};
   final Map<String, FocusNode> _focusNodes = {};
   bool _saving = false;
@@ -123,7 +138,10 @@ class _CreativeSavePanelState extends State<CreativeSavePanel> {
     final minimum = int.tryParse(_controller('rangeMin').text);
     final maximum = int.tryParse(_controller('rangeMax').text);
     if (minimum == null || maximum == null) {
-      setState(() => _status = 'Enter whole numbers for the range.');
+      setState(() => _status = _t(
+        'web_ui_enter_a_valid_range_from_1_to_1_000_000',
+        'Enter a valid range from 1 to 1,000,000.',
+      ));
       return;
     }
     await _run(() => widget.onRange(minimum, maximum));
@@ -137,7 +155,7 @@ class _CreativeSavePanelState extends State<CreativeSavePanel> {
     if (_saving) return;
     setState(() {
       _saving = true;
-      _status = 'Saving…';
+      _status = '${_t('web_ui_saving', 'Saving')}…';
     });
     try {
       final saved = await action();
@@ -179,7 +197,12 @@ class _CreativeSavePanelState extends State<CreativeSavePanel> {
     if (upgrades.isEmpty) {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 6),
-        child: Text('$title catalog unavailable.'),
+        child: Text(switch (title) {
+          'Upgrade levels' => 'Upgrade catalog unavailable.',
+          'Prestige upgrades' => 'Prestige upgrade catalog unavailable.',
+          'Ultra upgrades' => 'Ultra upgrade catalog unavailable.',
+          _ => '$title catalog unavailable.',
+        }),
       );
     }
     return Column(
@@ -197,9 +220,9 @@ class _CreativeSavePanelState extends State<CreativeSavePanel> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(upgrade.name),
+                      Text(_localizedUpgradeName(upgrade)),
                       Text(
-                        'Level ${_levelFor(upgrade)} / ${upgrade.definition.maxLevel ?? 0}',
+                        '${_t('web_ui_level', 'Level')} ${_levelFor(upgrade)} / ${upgrade.definition.maxLevel ?? 0}',
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
                     ],
@@ -217,7 +240,7 @@ class _CreativeSavePanelState extends State<CreativeSavePanel> {
                     keyboardType: TextInputType.number,
                     maxLength: 7,
                     decoration: const InputDecoration(
-                      labelText: 'Level',
+                      labelText: _t('web_ui_level', 'Level'),
                       counterText: '',
                       isDense: true,
                       border: OutlineInputBorder(),
@@ -229,7 +252,7 @@ class _CreativeSavePanelState extends State<CreativeSavePanel> {
                   onPressed: _saving
                       ? null
                       : () => _applyValue(_upgradeKey(upgrade)),
-                  child: const Text('Set'),
+                  child: Text(_t('web_ui_set', 'Set')),
                 ),
               ],
             ),
@@ -256,7 +279,7 @@ class _CreativeSavePanelState extends State<CreativeSavePanel> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'CREATIVE SAVE',
+                      _t('web_ui_creative_save', 'CREATIVE SAVE'),
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
                         letterSpacing: 1.3,
                         fontWeight: FontWeight.w900,
@@ -272,17 +295,18 @@ class _CreativeSavePanelState extends State<CreativeSavePanel> {
             ],
           ),
           const SizedBox(height: 8),
-          const Text(
-            'Changes are validated and saved by the Android game. Updating the range starts a fresh guessing round.',
+          Text(
+            _t(
+              'web_ui_changes_are_validated_and_saved_by_the_android_game_upda',
+              'Changes are validated and saved by the Android game. Updating the range starts a fresh guessing round.',
+            ),
           ),
           const SizedBox(height: 14),
-          Text('Number range', style: Theme.of(context).textTheme.titleSmall),
-          const SizedBox(height: 8),
           Row(
             children: [
-              Expanded(child: _field('rangeMin', 'Range minimum', numeric: true, maxLength: 7)),
+              Expanded(child: _field('rangeMin', _t('web_ui_range_minimum', 'Range minimum'), numeric: true, maxLength: 7)),
               const SizedBox(width: 10),
-              Expanded(child: _field('rangeMax', 'Range maximum', numeric: true, maxLength: 7)),
+              Expanded(child: _field('rangeMax', _t('web_ui_range_maximum', 'Range maximum'), numeric: true, maxLength: 7)),
             ],
           ),
           const SizedBox(height: 8),
@@ -294,10 +318,13 @@ class _CreativeSavePanelState extends State<CreativeSavePanel> {
             ),
           ),
           const SizedBox(height: 16),
-          Text('Game values', style: Theme.of(context).textTheme.titleSmall),
+          Text(_t('web_ui_game_values', 'Game values'), style: Theme.of(context).textTheme.titleSmall),
           const SizedBox(height: 8),
-          const Text(
-            'Set currencies and run counters directly. Values are checked before saving.',
+          Text(
+            _t(
+              'web_ui_set_currencies_and_run_counters_directly_values_are_chec',
+              'Set currencies and run counters directly. Values are checked before saving.',
+            ),
           ),
           const SizedBox(height: 10),
           GridView.count(
@@ -308,14 +335,14 @@ class _CreativeSavePanelState extends State<CreativeSavePanel> {
             mainAxisSpacing: 10,
             childAspectRatio: 2.8,
             children: [
-              _field('money', 'Money', maxLength: 100),
-              _field('prestige', 'Prestige', maxLength: 100),
-              _field('ultra', 'Ultra', maxLength: 100),
-              _field('nebula', 'Nebula', maxLength: 100),
-              _field('attempts', 'Attempts', numeric: true, maxLength: 13),
-              _field('correctGuesses', 'Correct guesses', numeric: true, maxLength: 13),
-              _field('streak', 'Current streak', numeric: true, maxLength: 7),
-              _field('bestStreak', 'Best streak', numeric: true, maxLength: 7),
+              _field('money', _t('builder_kind_money', 'Money'), maxLength: 100),
+              _field('prestige', _t('prestige', 'Prestige'), maxLength: 100),
+              _field('ultra', _t('currency_ultra_label', 'Ultra'), maxLength: 100),
+              _field('nebula', _t('currency_nebula_label', 'Nebula'), maxLength: 100),
+              _field('attempts', _t('web_ui_attempts_2', 'Attempts'), numeric: true, maxLength: 13),
+              _field('correctGuesses', _t('web_ui_correct_guesses', 'Correct guesses'), numeric: true, maxLength: 13),
+              _field('streak', _t('web_ui_current_streak', 'Current streak'), numeric: true, maxLength: 7),
+              _field('bestStreak', _t('web_ui_best_streak', 'Best streak'), numeric: true, maxLength: 7),
             ],
           ),
           const SizedBox(height: 10),
@@ -324,14 +351,14 @@ class _CreativeSavePanelState extends State<CreativeSavePanel> {
             runSpacing: 8,
             children: [
               for (final item in [
-                ('money', 'Set money'),
-                ('prestige', 'Set prestige'),
-                ('ultra', 'Set ultra'),
-                ('nebula', 'Set nebula'),
-                ('attempts', 'Set attempts'),
-                ('correctGuesses', 'Set correct guesses'),
-                ('streak', 'Set streak'),
-                ('bestStreak', 'Set best streak'),
+                ('money', _t('web_creative_set_money', 'Set money')),
+                ('prestige', _t('web_creative_set_prestige', 'Set prestige')),
+                ('ultra', _t('web_creative_set_ultra', 'Set ultra')),
+                ('nebula', _t('web_creative_set_nebula', 'Set nebula')),
+                ('attempts', _t('web_creative_set_attempts', 'Set attempts')),
+                ('correctGuesses', _t('web_creative_set_correct_guesses', 'Set correct guesses')),
+                ('streak', _t('web_creative_set_streak', 'Set streak')),
+                ('bestStreak', _t('web_creative_set_best_streak', 'Set best streak')),
               ])
                 M3EButton.outlined(
                   onPressed: _saving ? null : () => _applyValue(item.$1),
@@ -340,12 +367,15 @@ class _CreativeSavePanelState extends State<CreativeSavePanel> {
             ],
           ),
           const SizedBox(height: 4),
-          const Text(
-            'Set owned upgrade levels directly, within each upgrade’s configured maximum.',
+          Text(
+            _t(
+              'web_ui_set_owned_upgrade_levels_directly_within_each_upgrade_s',
+              'Set owned upgrade levels directly, within each upgrade’s configured maximum.',
+            ),
           ),
-          _upgradeGroup('Upgrade levels', UpgradeCatalog.all),
-          _upgradeGroup('Prestige upgrades', UpgradeCatalog.prestige),
-          _upgradeGroup('Ultra upgrades', UpgradeCatalog.ultra),
+          _upgradeGroup(_t('web_ui_upgrade_levels', 'Upgrade levels'), UpgradeCatalog.all),
+          _upgradeGroup(_t('web_ui_prestige_upgrades', 'Prestige upgrades'), UpgradeCatalog.prestige),
+          _upgradeGroup(_t('web_ui_ultra_upgrades', 'Ultra upgrades'), UpgradeCatalog.ultra),
           const SizedBox(height: 8),
           Semantics(
             liveRegion: true,
