@@ -367,8 +367,8 @@ class SettingsPage extends StatelessWidget {
                 (value) => unawaited(_setNotificationsEnabled(context, value)),
               ),
               if (settings.notificationsEnabled) ...[
-                const Padding(
-                  padding: EdgeInsets.fromLTRB(16, 0, 16, 8),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
                   child: Text(
                     AppLocalizations.text('settings_desc_reminder_frequency', 'Choose how many hours pass between scheduled reminders.'),
                     style: TextStyle(fontSize: 12),
