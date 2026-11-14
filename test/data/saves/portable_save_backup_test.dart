@@ -46,7 +46,7 @@ void main() {
 
   test('short passphrases are rejected', () async {
     expect(
-      () => PortableSaveBackup.encrypt('payload', 'short'),
+      PortableSaveBackup.encrypt('payload', 'short'),
       throwsArgumentError,
     );
   });
