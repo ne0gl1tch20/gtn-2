@@ -1,0 +1,39 @@
+name: One-time Menu Studio formatter
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/format-menu-studio-once.yml'
+permissions:
+  contents: write
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.50.0'
+          channel: stable
+      - name: Format Menu Studio parity files
+        run: |
+          dart format \
+            lib/design/gtn_color_picker_dialog.dart \
+            lib/settings/settings_page.dart \
+            lib/settings/menu_studio_layout.dart \
+            lib/settings/menu_studio_page.dart \
+            lib/home/game_dashboard_page.dart \
+            lib/main.dart \
+            test/widget_test.dart \
+            test/settings/menu_studio_page_test.dart
+      - name: Commit formatter output
+        run: |
+          if git diff --quiet; then
+            echo "No formatting changes required."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add lib/design/gtn_color_picker_dialog.dart lib/settings/settings_page.dart lib/settings/menu_studio_layout.dart lib/settings/menu_studio_page.dart lib/home/game_dashboard_page.dart lib/main.dart test/widget_test.dart test/settings/menu_studio_page_test.dart
+          git commit -m "style: format Menu Studio parity batch"
+          git push
