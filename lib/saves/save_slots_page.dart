@@ -74,12 +74,14 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
     final nameController = TextEditingController();
     final creativeMinimumController = TextEditingController(text: '1');
     final creativeMaximumController = TextEditingController(text: '100');
+    final creativeHintsController = TextEditingController(text: '0');
+    final creativeAttemptLimitController = TextEditingController(text: '0');
     var difficulty = DifficultyRules.classic;
     var creativeSave = false;
     var icon = 'default';
     final result =
         await GtnExpressiveDialog.show<
-          ({String name, String difficulty, String icon, bool creativeSave, int minimum, int maximum})
+          ({String name, String difficulty, String icon, bool creativeSave, int minimum, int maximum, int hints, int attemptLimit})
         >(
           context,
           builder: (dialogContext) => StatefulBuilder(
@@ -113,9 +115,9 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
                   ),
                   SwitchListTile(
                     contentPadding: EdgeInsets.zero,
-                    title: const Text('Creative Save'),
+                    title: const Text('Creative Mode'),
                     subtitle: const Text(
-                      'Permanently enables the active-save Creative Save tools.',
+                      'Permanent for this save. You can’t turn it off later.',
                     ),
                     value: creativeSave,
                     onChanged: (value) =>
@@ -126,15 +128,25 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
                       controller: creativeMinimumController,
                       maxLength: 7,
                       decoration: const InputDecoration(
-                        labelText: 'Range minimum (1–1,000,000)',
+                        labelText: 'Number range minimum (1–1,000,000)',
                       ),
                     ),
                     GtnExpressiveTextField(
                       controller: creativeMaximumController,
                       maxLength: 7,
                       decoration: const InputDecoration(
-                        labelText: 'Range maximum (1–1,000,000)',
+                        labelText: 'Number range maximum (1–1,000,000)',
                       ),
+                    ),
+                    GtnExpressiveTextField(
+                      controller: creativeHintsController,
+                      maxLength: 2,
+                      decoration: const InputDecoration(labelText: 'Extra hints (0–5)'),
+                    ),
+                    GtnExpressiveTextField(
+                      controller: creativeAttemptLimitController,
+                      maxLength: 3,
+                      decoration: const InputDecoration(labelText: 'Attempt limit (0 = unlimited, 1–100)'),
                     ),
                   ],
                   const SizedBox(height: 12),
@@ -164,6 +176,8 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
                     creativeSave: creativeSave,
                     minimum: int.tryParse(creativeMinimumController.text) ?? 0,
                     maximum: int.tryParse(creativeMaximumController.text) ?? 0,
+                    hints: int.tryParse(creativeHintsController.text) ?? 0,
+                    attemptLimit: int.tryParse(creativeAttemptLimitController.text) ?? 0,
                   )),
                   child: const Text('Create'),
                 ),
@@ -174,6 +188,8 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
     nameController.dispose();
     creativeMinimumController.dispose();
     creativeMaximumController.dispose();
+    creativeHintsController.dispose();
+    creativeAttemptLimitController.dispose();
     if (result == null || !mounted) return;
     setState(() => _working = slot);
     try {
@@ -181,7 +197,11 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
       if (result.creativeSave &&
           (result.minimum < 1 ||
               result.maximum < result.minimum ||
-              result.maximum > CreativeModeSave.maxRange)) {
+              result.maximum > CreativeModeSave.maxRange ||
+              result.hints < 0 ||
+              result.hints > 5 ||
+              result.attemptLimit < 0 ||
+              result.attemptLimit > 100)) {
         throw const FormatException(
           'Creative Save range must be between 1 and 1,000,000.',
         );
@@ -211,6 +231,20 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
                 enabled: true,
                 rangeMin: minimum,
                 rangeMax: maximum,
+                effects: [
+                  if (result.hints > 0)
+                    CreativeModeEffect(
+                      id: 'bonus-hints',
+                      type: CreativeEffectType.extraHints,
+                      value: result.hints,
+                    ),
+                  if (result.attemptLimit > 0)
+                    CreativeModeEffect(
+                      id: 'attempt-cap',
+                      type: CreativeEffectType.attemptLimit,
+                      value: result.attemptLimit,
+                    ),
+                ],
               )
             : null,
       );
