@@ -26,25 +26,15 @@ class SettingsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: GtnExpressiveAppBar(
-        title: Text(AppLocalizations.text('settings', 'Settings')),
+        title: const Text('Settings & Save Management'),
       ),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(12, 16, 12, 28),
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 28),
         children: [
-          GtnPageHeader(
-            eyebrow: 'Game preferences',
-            title: AppLocalizations.text('settings', 'Settings'),
-            description:
-                'Customize how Guess The Number looks, sounds and plays.',
-            icon: Icons.tune_rounded,
-            accent: GtnUiTokens.cyan,
-          ),
-          const SizedBox(height: 4),
           _SettingsSection(
-            eyebrow: '01 / LANGUAGE & NUMBERS',
-            title: 'Language & Numbers',
-            description:
-                'Choose the language and how large values are displayed.',
+            eyebrow: 'GAME PREFERENCES',
+            title: 'Game Preferences',
+            description: 'Choose the language used for game text and menus.',
             children: [
               _dropdown<String>(
                 'Language',
@@ -53,48 +43,17 @@ class SettingsPage extends StatelessWidget {
                   for (final locale in AppLocalizations.supportedLocales)
                     DropdownMenuItem(value: locale.$1, child: Text(locale.$2)),
                 ],
-                (v) {
-                  if (v != null) _update(settings.copyWith(localeCode: v));
-                },
-              ),
-              _dropdown<String>(
-                'Number notation',
-                settings.numberNotation,
-                const [
-                  DropdownMenuItem(value: 'Standard', child: Text('Standard')),
-                  DropdownMenuItem(
-                    value: 'Scientific',
-                    child: Text('Scientific'),
-                  ),
-                  DropdownMenuItem(
-                    value: 'Engineering',
-                    child: Text('Engineering'),
-                  ),
-                ],
-                (v) {
-                  if (v != null) _update(settings.copyWith(numberNotation: v));
-                },
-              ),
-              _dropdown<String>(
-                'Difficulty',
-                settings.difficultyId,
-                [
-                  for (final id in DifficultyRules.ids)
-                    DropdownMenuItem(
-                      value: id,
-                      child: Text(DifficultyRules.name(id)),
-                    ),
-                ],
-                (v) {
-                  if (v != null) _update(settings.copyWith(difficultyId: v));
+                (value) {
+                  if (value != null) _update(settings.copyWith(localeCode: value));
                 },
               ),
             ],
           ),
           _SettingsSection(
-            eyebrow: '02 / APPEARANCE',
-            title: 'Appearance',
-            description: 'Tune the theme while keeping the original GTN cosmic identity.',
+            eyebrow: 'THEME APPEARANCE',
+            title: 'Theme Appearance',
+            description:
+                'Choose whether the app follows your device theme or uses Dark, Light or AMOLED mode.',
             children: [
               _dropdown<String>(
                 'Theme mode',
@@ -105,16 +64,27 @@ class SettingsPage extends StatelessWidget {
                   DropdownMenuItem(value: 'Light', child: Text('Light')),
                   DropdownMenuItem(value: 'AMOLED', child: Text('AMOLED')),
                 ],
-                (v) {
-                  if (v != null) {
-                    _update(
-                      settings.copyWith(
-                        themeMode: v,
-                        darkMode: v == 'Dark' || v == 'AMOLED',
-                      ),
-                    );
+                (value) {
+                  if (value != null) {
+                    _update(settings.copyWith(
+                      themeMode: value,
+                      darkMode: value == 'Dark' || value == 'AMOLED',
+                    ));
                   }
                 },
+              ),
+            ],
+          ),
+          _SettingsSection(
+            eyebrow: 'THEME COLORS',
+            title: 'Theme Colors',
+            description:
+                'Customize the app’s primary, secondary and tertiary colors. Changes apply immediately.',
+            children: [
+              _ThemeColorPreview(
+                primary: settings.customPrimaryColor,
+                secondary: settings.customSecondaryColor,
+                tertiary: settings.customTertiaryColor,
               ),
               _dropdown<String>(
                 'Theme preset',
@@ -126,247 +96,174 @@ class SettingsPage extends StatelessWidget {
                   DropdownMenuItem(value: 'Forest', child: Text('Forest')),
                   DropdownMenuItem(value: 'Custom', child: Text('Custom')),
                 ],
-                (v) {
-                  if (v == null) return;
+                (value) {
+                  if (value == null) return;
                   const presets = {
                     'Neon': ['#7C4DFF', '#00BCD4', '#00C853'],
                     'Sunset': ['#FF4081', '#FF9800', '#FFC107'],
                     'Ocean': ['#2196F3', '#00BCD4', '#3F51B5'],
                     'Forest': ['#4CAF50', '#009688', '#8BC34A'],
                   };
-                  final colors = presets[v];
-                  _update(
-                    settings.copyWith(
-                      themePreset: v,
-                      customPrimaryColor: colors?[0],
-                      customSecondaryColor: colors?[1],
-                      customTertiaryColor: colors?[2],
-                    ),
-                  );
+                  final colors = presets[value];
+                  _update(settings.copyWith(
+                    themePreset: value,
+                    customPrimaryColor: colors?[0],
+                    customSecondaryColor: colors?[1],
+                    customTertiaryColor: colors?[2],
+                  ));
                 },
               ),
               _ColorSetting(
-                label: 'Primary color',
+                label: 'Primary',
                 value: settings.customPrimaryColor,
-                onSubmitted: (v) => _update(
-                  settings.copyWith(
-                    themePreset: 'Custom',
-                    customPrimaryColor: v,
-                  ),
-                ),
+                onSubmitted: (value) => _update(settings.copyWith(
+                  themePreset: 'Custom',
+                  customPrimaryColor: value,
+                )),
               ),
               _ColorSetting(
-                label: 'Secondary color',
+                label: 'Secondary',
                 value: settings.customSecondaryColor,
-                onSubmitted: (v) => _update(
-                  settings.copyWith(
-                    themePreset: 'Custom',
-                    customSecondaryColor: v,
-                  ),
-                ),
+                onSubmitted: (value) => _update(settings.copyWith(
+                  themePreset: 'Custom',
+                  customSecondaryColor: value,
+                )),
               ),
               _ColorSetting(
-                label: 'Tertiary color',
+                label: 'Tertiary',
                 value: settings.customTertiaryColor,
-                onSubmitted: (v) => _update(
-                  settings.copyWith(
-                    themePreset: 'Custom',
-                    customTertiaryColor: v,
-                  ),
-                ),
+                onSubmitted: (value) => _update(settings.copyWith(
+                  themePreset: 'Custom',
+                  customTertiaryColor: value,
+                )),
               ),
             ],
           ),
           _SettingsSection(
-            eyebrow: '03 / AUDIO & HAPTICS',
-            title: 'Audio & Haptics',
+            eyebrow: 'NUMBER NOTATION',
+            title: 'Number Notation',
             description:
-                'Control background music, effects and interaction feedback.',
+                'Choose how large numbers are displayed: Standard, Scientific or Engineering.',
+            children: [
+              _dropdown<String>(
+                'Number notation',
+                settings.numberNotation,
+                const [
+                  DropdownMenuItem(value: 'Standard', child: Text('Standard')),
+                  DropdownMenuItem(value: 'Scientific', child: Text('Scientific')),
+                  DropdownMenuItem(value: 'Engineering', child: Text('Engineering')),
+                ],
+                (value) {
+                  if (value != null) {
+                    _update(settings.copyWith(numberNotation: value));
+                  }
+                },
+              ),
+            ],
+          ),
+          _SettingsSection(
+            eyebrow: 'PUSH NOTIFICATIONS & REMINDERS',
+            title: 'Push Notifications & Reminders',
+            description:
+                'Enable optional game reminders and notifications. You can turn them off at any time.',
             children: [
               _toggle(
-                'Background music',
-                settings.musicEnabled,
-                (v) => _update(settings.copyWith(musicEnabled: v)),
+                'Notifications',
+                settings.notificationsEnabled,
+                (value) => _update(settings.copyWith(notificationsEnabled: value)),
               ),
+              if (settings.notificationsEnabled) ...[
+                _dropdown<int>(
+                  'Reminder Frequency',
+                  settings.notificationIntervalHours,
+                  const [
+                    DropdownMenuItem(value: 12, child: Text('12 Hours')),
+                    DropdownMenuItem(value: 24, child: Text('24 Hours')),
+                    DropdownMenuItem(value: 48, child: Text('48 Hours')),
+                  ],
+                  (value) {
+                    if (value != null) {
+                      _update(settings.copyWith(notificationIntervalHours: value));
+                    }
+                  },
+                ),
+                _toggle(
+                  'Reminders',
+                  settings.notificationRemindersEnabled,
+                  (value) => _update(settings.copyWith(
+                    notificationRemindersEnabled: value,
+                  )),
+                ),
+                _toggle(
+                  'Progression milestones',
+                  settings.notificationProgressionEnabled,
+                  (value) => _update(settings.copyWith(
+                    notificationProgressionEnabled: value,
+                  )),
+                ),
+                _toggle(
+                  'Game events',
+                  settings.notificationEventsEnabled,
+                  (value) => _update(settings.copyWith(
+                    notificationEventsEnabled: value,
+                  )),
+                ),
+              ],
+            ],
+          ),
+          _SettingsSection(
+            eyebrow: 'SOUND FX',
+            title: 'Sound FX',
+            description:
+                'Turn sound effects for in-game interactions on or off.',
+            children: [
               _toggle(
                 'Sound effects',
                 settings.soundEnabled,
-                (v) => _update(settings.copyWith(soundEnabled: v)),
+                (value) => _update(settings.copyWith(soundEnabled: value)),
               ),
               _toggle(
                 'Vibration',
                 settings.vibrationEnabled,
-                (v) => _update(settings.copyWith(vibrationEnabled: v)),
-              ),
-              _SettingsSlider(
-                label: 'Master volume',
-                value: settings.volume,
-                onChanged: (v) => _update(settings.copyWith(volume: v)),
-              ),
-              _SettingsSlider(
-                label: 'Sound effects volume',
-                value: settings.sfxVolume,
-                onChanged: (v) => _update(settings.copyWith(sfxVolume: v)),
+                (value) => _update(settings.copyWith(vibrationEnabled: value)),
               ),
             ],
           ),
           _SettingsSection(
-            eyebrow: '04 / NOTIFICATIONS',
-            title: 'Notifications',
-            description:
-                'Preferences are saved. Scheduled delivery still needs '
-                'platform integration.',
+            eyebrow: 'VISUAL COMFORT & ACCESSIBILITY',
+            title: 'Visual comfort & accessibility',
+            description: 'Reduce flashes and soften animated screen transitions.',
             children: [
               _toggle(
-                'Game reminders',
-                settings.notificationsEnabled,
-                (v) => _update(settings.copyWith(notificationsEnabled: v)),
-              ),
-              _dropdown<int>(
-                'Reminder frequency',
-                settings.notificationIntervalHours,
-                const [
-                  DropdownMenuItem(value: 12, child: Text('12 hours')),
-                  DropdownMenuItem(value: 24, child: Text('24 hours')),
-                  DropdownMenuItem(value: 48, child: Text('48 hours')),
-                ],
-                (v) {
-                  if (v != null) {
-                    _update(settings.copyWith(notificationIntervalHours: v));
-                  }
-                },
-              ),
-              _toggle(
-                'Reminder notifications',
-                settings.notificationRemindersEnabled,
-                (v) =>
-                    _update(settings.copyWith(notificationRemindersEnabled: v)),
-              ),
-              _toggle(
-                'Progression milestones',
-                settings.notificationProgressionEnabled,
-                (v) => _update(
-                  settings.copyWith(notificationProgressionEnabled: v),
-                ),
-              ),
-              _toggle(
-                'Game events',
-                settings.notificationEventsEnabled,
-                (v) => _update(settings.copyWith(notificationEventsEnabled: v)),
-              ),
-            ],
-          ),
-          _SettingsSection(
-            eyebrow: '05 / UPDATES',
-            title: 'Updates',
-            description:
-                'Choose how often the app should check for new versions.',
-            children: [
-              _dropdown<int>(
-                'Automatic update checks',
-                settings.updateCheckIntervalHours,
-                const [
-                  DropdownMenuItem(value: 0, child: Text('None')),
-                  DropdownMenuItem(value: 1, child: Text('Every hour')),
-                  DropdownMenuItem(value: 6, child: Text('Every 6 hours')),
-                  DropdownMenuItem(value: 12, child: Text('Every 12 hours')),
-                  DropdownMenuItem(value: 24, child: Text('Every 24 hours')),
-                  DropdownMenuItem(value: 168, child: Text('Every 7 days')),
-                ],
-                (v) {
-                  if (v != null) {
-                    _update(settings.copyWith(updateCheckIntervalHours: v));
-                  }
-                },
-              ),
-              const Text(
-                'The preference is stored; background scheduling is not yet '
-                'connected.',
-                style: TextStyle(color: GtnUiTokens.muted, fontSize: 11),
-              ),
-            ],
-          ),
-          _SettingsSection(
-            eyebrow: '06 / ACCESSIBILITY',
-            title: 'Accessibility',
-            description: 'Reduce motion and sudden visual changes.',
-            children: [
-              _toggle(
-                'Reduced motion',
-                settings.reduceMotion,
-                (v) => _update(settings.copyWith(reduceMotion: v)),
-              ),
-              _toggle(
-                'Reduce flashes',
+                'Reduce Flashes',
                 settings.reduceFlashes,
-                (v) => _update(settings.copyWith(reduceFlashes: v)),
+                (value) => _update(settings.copyWith(reduceFlashes: value)),
+              ),
+              _toggle(
+                'Reduced Motion',
+                settings.reduceMotion,
+                (value) => _update(settings.copyWith(reduceMotion: value)),
               ),
             ],
           ),
           _SettingsSection(
-            eyebrow: '07 / HELP & TUTORIAL',
-            title: 'Help & Tutorial',
-            description: 'Need a refresher? Nimmy can show you around again.',
+            eyebrow: 'AUDIO LEVELS',
+            title: 'Volume',
+            description: 'Adjust the app and sound-effect audio levels.',
             children: [
-              Material(
-                color: Colors.transparent,
-                child: ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: const Icon(
-                    Icons.school_rounded,
-                    color: GtnUiTokens.cyan,
-                  ),
-                  title: const Text('Rerun Nimmy tutorial'),
-                  subtitle: const Text(
-                    'Review the main game controls and progression.',
-                  ),
-                  trailing: const Icon(Icons.chevron_right_rounded),
-                  onTap: onReplayTutorial,
-                ),
+              _SettingsSlider(
+                label: 'Master Volume',
+                value: settings.volume,
+                onChanged: (value) => _update(settings.copyWith(volume: value)),
+              ),
+              _SettingsSlider(
+                label: 'Sound Effects Volume',
+                value: settings.sfxVolume,
+                onChanged: settings.soundEnabled
+                    ? (value) => _update(settings.copyWith(sfxVolume: value))
+                    : null,
               ),
             ],
-          ),
-          _SettingsSection(
-            eyebrow: '08 / DEVELOPER & SAVE',
-            title: 'Developer & Save Preferences',
-            description:
-                'Control diagnostic logging, matching the original GTN1 '
-                'settings.',
-            children: [
-              _toggle(
-                'Save logs to storage',
-                settings.saveLogsToStorage,
-                (v) => _update(settings.copyWith(saveLogsToStorage: v)),
-              ),
-              _toggle(
-                'Verbose logging',
-                settings.verboseLogging,
-                (v) => _update(settings.copyWith(verboseLogging: v)),
-              ),
-            ],
-          ),
-          if (onOpenMenuStudio != null)
-            GtnExpressiveCard(
-              child: Material(
-                color: Colors.transparent,
-                borderRadius: BorderRadius.circular(24),
-                child: ListTile(
-                  leading: const Icon(Icons.palette_rounded),
-                  title: const Text('Menu Studio'),
-                  subtitle: const Text(
-                    'Reorder More destinations and customize their colors.',
-                  ),
-                  trailing: const Icon(Icons.chevron_right_rounded),
-                  onTap: onOpenMenuStudio,
-                ),
-              ),
-            ),
-          const Padding(
-            padding: EdgeInsets.fromLTRB(8, 10, 8, 0),
-            child: Text(
-              'Preferences are saved with your active game profile.',
-              style: TextStyle(color: GtnUiTokens.muted, fontSize: 11),
-            ),
           ),
         ],
       ),
@@ -459,7 +356,7 @@ class _SettingsSlider extends StatelessWidget {
   });
   final String label;
   final double value;
-  final ValueChanged<double> onChanged;
+  final ValueChanged<double>? onChanged;
 
   @override
   Widget build(BuildContext context) => Column(
