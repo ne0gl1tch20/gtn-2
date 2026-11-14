@@ -37,6 +37,7 @@ import 'profile/player_profile_page.dart';
 import 'progression/progression_hub_page.dart';
 import 'saves/save_slots_page.dart';
 import 'settings/game_settings.dart';
+import 'settings/menu_studio_layout.dart';
 import 'settings/menu_studio_page.dart';
 import 'settings/music_settings_sync.dart';
 import 'settings/settings_page.dart';
@@ -412,6 +413,9 @@ class _GameHomePageState extends State<GameHomePage>
           _gamesWon = save.gamesWon;
           _progression = restoredProgression;
           _settings = restoredSettings;
+          _selectedPrimaryIndex = MenuStudioLayout.fromSettings(
+            restoredSettings,
+          ).playIndex;
           GtnApp.settingsNotifier.value = _settings;
           _message = timeTravelDetected
               ? 'Clock rollback detected. Auto Clicker paused for 24 hours.'
@@ -1031,6 +1035,9 @@ class _GameHomePageState extends State<GameHomePage>
     await AppLocalizations.load(settings.localeCode);
     if (!mounted) return;
     final difficultyChanged = settings.difficultyId != _settings.difficultyId;
+    final menuLayoutChanged =
+        settings.webMenuStudioLayout != _settings.webMenuStudioLayout ||
+        settings.moreScreenOrder.join('|') != _settings.moreScreenOrder.join('|');
     final restoredSystems = restoreMusicStateFromSettings(
       settings: settings,
       systems: _progression.legacySystems,
@@ -1045,6 +1052,11 @@ class _GameHomePageState extends State<GameHomePage>
     setState(() {
       _progression = nextProgression;
       _settings = synchronizedSettings;
+      if (menuLayoutChanged) {
+        _selectedPrimaryIndex = MenuStudioLayout.fromSettings(
+          synchronizedSettings,
+        ).playIndex;
+      }
       if (difficultyChanged) {
         _engine = _engineFor(nextProgression, synchronizedSettings);
         _game = _engine.newGame();
