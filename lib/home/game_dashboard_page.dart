@@ -1131,18 +1131,6 @@ class _MoreMenuPage extends StatelessWidget {
                 : playerProfile.bio,
             onTap: onPlayerProfile,
           ),
-          'world_map': (
-            icon: Icons.public_rounded,
-            title: 'Beyond the Numbers',
-            subtitle: 'Explore unlocked worlds and bosses',
-            onTap: onWorldMap,
-          ),
-          'achievements': (
-            icon: Icons.emoji_events_rounded,
-            title: 'Achievements',
-            subtitle: 'Journey progress and rewards',
-            onTap: () => onLegacySection(LegacySection.journey),
-          ),
           'rewards': (
             icon: Icons.card_giftcard_rounded,
             title: 'Rewards',
@@ -1196,18 +1184,6 @@ class _MoreMenuPage extends StatelessWidget {
             title: 'Codex',
             subtitle: 'Discoveries and lore entries',
             onTap: () => onLegacySection(LegacySection.codex),
-          ),
-          'endgame': (
-            icon: Icons.flag_rounded,
-            title: 'Endgame',
-            subtitle: 'Prestige and Ultra progression',
-            onTap: onPrestige,
-          ),
-          'arcade': (
-            icon: Icons.sports_esports_rounded,
-            title: 'Arcade',
-            subtitle: 'Play minigames and earn rewards',
-            onTap: onArcade,
           ),
           'stats': (
             icon: Icons.query_stats_rounded,
@@ -1263,18 +1239,6 @@ class _MoreMenuPage extends StatelessWidget {
             subtitle: 'Offline library, playlists and queue',
             onTap: onMusic,
           ),
-          'live_ops': (
-            icon: Icons.event_available_rounded,
-            title: 'Seasonal Events',
-            subtitle: 'Claim limited-time rewards and permanent bonuses',
-            onTap: onLiveOps,
-          ),
-          'nebula': (
-            icon: Icons.diamond_rounded,
-            title: 'Nebula Shop',
-            subtitle: 'Permanent Nebula upgrades and items',
-            onTap: onNebulaShop,
-          ),
         };
     final orderedIds = <String>['player_profile'];
     orderedIds.addAll(
@@ -1296,16 +1260,16 @@ class _MoreMenuPage extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(12, 14, 12, 28),
             children: [
               const GtnPageHeader(
-                eyebrow: 'Explore GTN2',
-                title: 'More Menu',
-                description: 'Your shortcuts, your order.',
-                icon: Icons.grid_view_rounded,
+                eyebrow: 'Explore',
+                title: 'More',
+                description: 'Your game sections and settings.',
+                icon: Icons.explore_rounded,
                 accent: _purple,
               ),
               const SizedBox(height: 18),
               LayoutBuilder(
                 builder: (context, constraints) {
-                  final columns = constraints.maxWidth > 520 ? 2 : 1;
+                  const columns = 1;
                   const spacing = 12.0;
                   final itemWidth =
                       (constraints.maxWidth - spacing * (columns - 1)) /
