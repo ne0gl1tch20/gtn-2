@@ -1000,8 +1000,10 @@ class _GameHomePageState extends State<GameHomePage>
     };
     try {
       final storage = await _storage;
+      final current = await storage.load();
+      if (current == null) return;
       await storage.update((existing) {
-        final base = existing ?? _currentSaveData();
+        final base = existing ?? current;
         return base.copyWith(
           profileName: profile.username,
           profileIconId: legacyIconId,
