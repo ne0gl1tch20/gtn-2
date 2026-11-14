@@ -127,6 +127,9 @@ Green CI is build/test evidence only. It does not prove live Android/Windows beh
 | 2026-11-14 21:41:32 | `3a1bf57715f361864b114a02485e2c45c160dda4` | Format source currency parser expression | Dashboard | `GameViewModel.kt; BigNumber.kt` | `lib/core/creative/creative_save_policy.dart` | Addresses sole formatter diff in run 43644101277; fresh CI pending |
 | 2026-11-14 21:41:40 | `e2b1a2911a1919a5f6835c8cb9489c41305c91c5` | Correct Creative Save schema and CI evidence | Audit | `GameState.kt` | `docs/FINITE_PARITY_PLAN.md` | Documentation correction: schema v7, exact formatter failure evidence |
 | 2026-11-14 21:41:44 | `c31ee6facf7ac2f019e8dc394b8c613303d4d2a5` | Record Creative Save CI and source inventory status | Audit / Dashboard | `web-play/index.html; app.js; styles.css` | `docs/GTN1_SCREEN_PARITY_DIFF.md` | Documentation; runtime and paired screenshots remain open |
+| 2026-11-14 21:44:55 | `3a1bf57715f361864b114a02485e2c45c160dda4` | Attempt to format parser expression | Dashboard | `GameViewModel.kt; BigNumber.kt` | `lib/core/creative/creative_save_policy.dart` | Formatter attempt introduced malformed/truncated regex; detected by run 43644470798 and corrected below |
+| 2026-11-14 21:47:05 | `14b6388ef37bbf981ad6267d34747319aa1d63ad` | Restore complete source currency parser | Dashboard | `GameViewModel.kt; DesktopWebPlayActions.kt; BigNumber.kt` | `lib/core/creative/creative_save_policy.dart` | Rebuilt policy file; regex escape then audited and corrected in next commit |
+| 2026-11-14 21:47:15 | `a7d259c9cc4c4c7e22ae2ac2f76269023fddb84d` | Correct raw decimal regex escape | Dashboard | `GameViewModel.kt; DesktopWebPlayActions.kt` | `lib/core/creative/creative_save_policy.dart` | One raw regex escape restored; fresh format/analyze/tests/builds pending |
 
 ### Current Creative Save implementation state
 
