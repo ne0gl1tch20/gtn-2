@@ -734,7 +734,9 @@ class GameDashboardPage extends StatelessWidget {
                                             muted,
                                           ),
                                         ),
-                                        const SizedBox(width: 10),
+                                        SizedBox(
+                                          width: MediaQuery.sizeOf(context).width >= 1100 ? 12 : 10,
+                                        ),
                                         Expanded(
                                           child: _Stat(
                                             Icons.check_circle_rounded,
@@ -784,7 +786,9 @@ class GameDashboardPage extends StatelessWidget {
                                         ? Row(
                                             children: [
                                               Expanded(
-                                                child: _Action(
+                                                child: SizedBox(
+                                                  key: const Key('dashboard-action-beyond'),
+                                                  child: _Action(
                                                   'Beyond the Numbers',
                                                   'Explore your progression',
                                                   Icons.public_rounded,
@@ -795,10 +799,13 @@ class GameDashboardPage extends StatelessWidget {
                                                   foreground,
                                                   muted,
                                                 ),
+                                                ),
                                               ),
                                               const SizedBox(width: 9),
                                               Expanded(
-                                                child: _Action(
+                                                child: SizedBox(
+                                                  key: const Key('dashboard-action-daily'),
+                                                  child: _Action(
                                                   'Daily Momentum',
                                                   'Keep the streak alive',
                                                   Icons.auto_awesome_rounded,
@@ -811,12 +818,15 @@ class GameDashboardPage extends StatelessWidget {
                                                   foreground,
                                                   muted,
                                                 ),
+                                                ),
                                               ),
                                             ],
                                           )
                                         : Column(
                                             children: [
-                                              _Action(
+                                              SizedBox(
+                                                key: const Key('dashboard-action-beyond'),
+                                                child: _Action(
                                                 'Beyond the Numbers',
                                                 'Explore your progression',
                                                 Icons.public_rounded,
@@ -827,8 +837,11 @@ class GameDashboardPage extends StatelessWidget {
                                                 foreground,
                                                 muted,
                                               ),
+                                              ),
                                               const SizedBox(height: 9),
-                                              _Action(
+                                              SizedBox(
+                                                key: const Key('dashboard-action-daily'),
+                                                child: _Action(
                                                 'Daily Momentum',
                                                 'Keep the streak alive',
                                                 Icons.auto_awesome_rounded,
@@ -840,6 +853,7 @@ class GameDashboardPage extends StatelessWidget {
                                                 line,
                                                 foreground,
                                                 muted,
+                                              ),
                                               ),
                                             ],
                                           ),
