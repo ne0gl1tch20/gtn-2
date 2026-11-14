@@ -193,6 +193,7 @@ class _GameHomePageState extends State<GameHomePage>
   int _gamesWon = 0;
   bool _isLoading = true;
   bool _isPlayerProfileLoaded = false;
+  GameSettings? _menuStudioPreviewSettings;
   String _message = 'Make your move.';
 
   @override
@@ -1103,6 +1104,7 @@ class _GameHomePageState extends State<GameHomePage>
     setState(() {
       _progression = nextProgression;
       _settings = synchronizedSettings;
+      _menuStudioPreviewSettings = null;
       if (menuLayoutChanged) {
         final nextIndex = nextNavigation.indexOf(selectedDestination);
         _selectedPrimaryIndex = nextIndex >= 0
@@ -1192,8 +1194,20 @@ class _GameHomePageState extends State<GameHomePage>
   Future<void> _openMenuStudio() async {
     await _pushShellRoute<void>(
       MaterialPageRoute<void>(
-        builder: (_) =>
-            MenuStudioPage(settings: _settings, onChanged: _updateSettings),
+        builder: (_) => MenuStudioPage(
+          settings: _settings,
+          onChanged: _updateSettings,
+          onPreview: (settings) {
+            if (mounted) {
+              setState(() => _menuStudioPreviewSettings = settings);
+            }
+          },
+          onCancel: () {
+            if (mounted) {
+              setState(() => _menuStudioPreviewSettings = null);
+            }
+          },
+        ),
       ),
     );
   }
@@ -1818,7 +1832,7 @@ class _GameHomePageState extends State<GameHomePage>
       game: _game,
       progression: _progression,
       incomePerSecond: _incomePerSecond,
-      settings: _settings,
+      settings: _menuStudioPreviewSettings ?? _settings,
       activeSlot: _activeSlot,
       loading: _isLoading,
       message: _message,
