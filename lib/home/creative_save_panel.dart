@@ -265,7 +265,7 @@ class _CreativeSavePanelState extends State<CreativeSavePanel> {
           ),
           const SizedBox(height: 8),
           const Text(
-            'Changes are validated and saved to this active save. Updating the range starts a fresh guessing round.',
+            'Changes are validated and saved by the Android game. Updating the range starts a fresh guessing round.',
           ),
           const SizedBox(height: 14),
           Text('Number range', style: Theme.of(context).textTheme.titleSmall),
@@ -330,6 +330,10 @@ class _CreativeSavePanelState extends State<CreativeSavePanel> {
                   child: Text(item.$2),
                 ),
             ],
+          ),
+          const SizedBox(height: 4),
+          const Text(
+            'Set owned upgrade levels directly, within each upgrade’s configured maximum.',
           ),
           _upgradeGroup('Upgrade levels', UpgradeCatalog.all),
           _upgradeGroup('Prestige upgrades', UpgradeCatalog.prestige),
