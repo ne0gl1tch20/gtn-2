@@ -410,7 +410,7 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
     final settings = GameSettings.initial.copyWith(
-      moreScreenOrder: const ['music', 'settings', 'save_slots'],
+      moreScreenOrder: const ['settings', 'music'],
       moreScreenButtonColors: const {'music': '#FF5722'},
     );
     await tester.pumpWidget(buildDashboard(settings: settings));
@@ -422,12 +422,12 @@ void main() {
     expect(find.text('Settings'), findsOneWidget);
     expect(find.text('Save Slots'), findsOneWidget);
     expect(
-      tester.getTopLeft(find.text('Background Music')).dy,
-      lessThan(tester.getTopLeft(find.text('Settings')).dy),
-    );
-    expect(
       tester.getTopLeft(find.text('Settings')).dy,
       lessThan(tester.getTopLeft(find.text('Save Slots')).dy),
+    );
+    expect(
+      tester.getTopLeft(find.text('Save Slots')).dy,
+      lessThan(tester.getTopLeft(find.text('Background Music')).dy),
     );
     expect(
       find.byWidgetPredicate(
