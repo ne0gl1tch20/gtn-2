@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -66,7 +67,7 @@ void main() {
     });
 
     final store = PlayerProfileStore();
-    final avatar = await store.importCustomAvatar([1, 2, 3, 4], 'png');
+    final avatar = await store.importCustomAvatar(Uint8List.fromList([1, 2, 3, 4]), 'png');
     final profile = PlayerProfile(
       username: 'Player One',
       bio: 'Offline player',
