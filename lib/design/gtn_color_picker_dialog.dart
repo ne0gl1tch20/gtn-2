@@ -71,8 +71,8 @@ class _GtnColorPickerDialogState extends State<_GtnColorPickerDialog> {
     if (size.width <= 0 || size.height <= 0) return;
     setState(() {
       _hsv = _hsv
-          .withSaturation((position.dx / size.width).clamp(0.0, 1.0))
-          .withValue((1 - position.dy / size.height).clamp(0.0, 1.0));
+          .withSaturation((position.dx / size.width).clamp(0.0, 1.0).toDouble())
+          .withValue((1 - position.dy / size.height).clamp(0.0, 1.0).toDouble());
       _hexController.text = _formatHex(_hsv.toColor());
     });
   }
@@ -122,7 +122,7 @@ class _GtnColorPickerDialogState extends State<_GtnColorPickerDialog> {
               const SizedBox(height: 12),
               Text('Hue: ${_hsv.hue.round()}°'),
               Slider(
-                value: _hsv.hue.clamp(0, 360),
+                value: _hsv.hue.clamp(0, 360).toDouble(),
                 min: 0,
                 max: 360,
                 onChanged: (value) {
