@@ -851,9 +851,7 @@ class LegacyDetailPage extends StatelessWidget {
                 contentPadding: EdgeInsets.zero,
                 leading: const Icon(Icons.system_update_rounded),
                 title: Text(AppLocalizations.text('web_ui_updates', 'Updates')),
-                subtitle: const Text(
-                  'Check for a newer validated app build.',
-                ),
+                subtitle: const Text('Check for a newer validated app build.'),
               ),
             ),
             if (update.title != null) ...[
