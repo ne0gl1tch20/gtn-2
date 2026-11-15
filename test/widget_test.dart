@@ -767,6 +767,7 @@ void main() {
     await tester.pumpWidget(buildDashboard());
     final mobileNavigation = find.byKey(const Key('dashboard-navigation-bar'));
     expect(tester.getSize(mobileNavigation).width, 366);
+    expect(tester.getTopLeft(mobileNavigation).dx, 12);
     expect(tester.getSize(mobileNavigation).height, lessThanOrEqualTo(64));
     expect(tester.takeException(), isNull);
 
