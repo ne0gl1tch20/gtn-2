@@ -208,6 +208,12 @@ class _GameHomePageState extends State<GameHomePage>
   bool _isLoading = true;
   bool _isPlayerProfileLoaded = false;
   bool _nimmyTutorialScheduled = false;
+  bool _nimmyTutorialPending = false;
+  bool _hasActiveSave = false;
+  bool _initialSaveSlotsOpen = false;
+  bool _startupExperiencePending = true;
+  bool _firstRunNeedsSaveSlotSelection = false;
+  BigNumber _startupOfflineEarnings = BigNumber.fromInt(0);
   GameSettings? _menuStudioPreviewSettings;
   String _message = 'Make your move.';
 
@@ -581,6 +587,7 @@ class _GameHomePageState extends State<GameHomePage>
           ? firstSlotStorage
           : await SaveStorage.inApplicationDocuments(slot: activeSlot);
       final save = await storage.load();
+      _hasActiveSave = save != null;
       if (!mounted) return;
       setState(() {
         _storage = Future.value(storage);
@@ -596,6 +603,7 @@ class _GameHomePageState extends State<GameHomePage>
         restoredProgression = settlement.progression;
         final timeTravelDetected = settlement.clockRollbackDetected;
         final offlineEarnings = settlement.earnings;
+        _startupOfflineEarnings = offlineEarnings;
         final restoredSystems = restoreMusicStateFromSettings(
           settings: globalSettings ?? save.settings,
           systems: restoredProgression.legacySystems,
@@ -671,7 +679,7 @@ class _GameHomePageState extends State<GameHomePage>
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
-        if (shouldShowNimmyTutorial) _scheduleFirstRunNimmyTutorial();
+        _nimmyTutorialPending = shouldShowNimmyTutorial;
         _startPlaytimeTimer();
         _startRandomEventTimer();
         _startUpdateCheckTimer();
@@ -1221,6 +1229,8 @@ class _GameHomePageState extends State<GameHomePage>
       nextProgression = settlement.progression;
       final timeTravelDetected = settlement.clockRollbackDetected;
       final offlineEarnings = settlement.earnings;
+      _hasActiveSave = save != null;
+      if (_startupExperiencePending) _startupOfflineEarnings = offlineEarnings;
 
       // Slot changes must run the same legacy music migration as startup.
       // Otherwise a slot with settings-backed music can appear empty until
@@ -1277,7 +1287,8 @@ class _GameHomePageState extends State<GameHomePage>
       if (persistAfterLoad) await _persist();
       _botTeam.reset(_game.minimum, _game.maximum);
       _scheduleAutoClicker();
-      if (save != null && !nextSettings.tutorialCompleted) {
+      _nimmyTutorialPending = save != null && !nextSettings.tutorialCompleted;
+      if (save != null && !_startupExperiencePending && _nimmyTutorialPending) {
         _scheduleFirstRunNimmyTutorial();
       }
     } on Exception {
@@ -1316,11 +1327,119 @@ class _GameHomePageState extends State<GameHomePage>
         setState(() {
           _playerProfile = profile;
           _isPlayerProfileLoaded = true;
+          _firstRunNeedsSaveSlotSelection = !profile.setupComplete;
+        });
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted || !_playerProfile.setupComplete) return;
+          if (_hasActiveSave) {
+            unawaited(_presentStartupExperience());
+          } else {
+            unawaited(_openInitialSaveSlots());
+          }
         });
       }
     } on Exception {
       // A missing or unreadable profile never blocks loading the game.
-      if (mounted) setState(() => _isPlayerProfileLoaded = true);
+      if (mounted) {
+        setState(() {
+          _isPlayerProfileLoaded = true;
+          _firstRunNeedsSaveSlotSelection = true;
+        });
+      }
+    }
+  }
+
+  void _handlePlayerProfileSaved(PlayerProfile profile) {
+    if (!mounted) return;
+    setState(() => _playerProfile = profile);
+    unawaited(_syncPlayerProfileToSave(profile));
+    if (_firstRunNeedsSaveSlotSelection) {
+      _firstRunNeedsSaveSlotSelection = false;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) unawaited(_openInitialSaveSlots());
+      });
+    }
+  }
+
+  Future<void> _openInitialSaveSlots() async {
+    if (!mounted || _initialSaveSlotsOpen || !_playerProfile.setupComplete) return;
+    _initialSaveSlotsOpen = true;
+    try {
+      await Navigator.of(context).push<void>(
+        MaterialPageRoute<void>(
+          builder: (_) => SaveSlotsPage(
+            activeSlot: _activeSlot,
+            settings: _settings,
+            onSelect: _switchSaveSlot,
+            onImportComplete: _reloadAfterImport,
+            onResetEverything: _resetEverything,
+          ),
+        ),
+      );
+    } finally {
+      _initialSaveSlotsOpen = false;
+    }
+    if (mounted && _hasActiveSave) await _presentStartupExperience();
+  }
+
+  Future<void> _presentStartupExperience() async {
+    if (!mounted || _isLoading || !_isPlayerProfileLoaded ||
+        !_playerProfile.setupComplete || !_hasActiveSave ||
+        !_startupExperiencePending) return;
+    _startupExperiencePending = false;
+    final offline = _startupOfflineEarnings;
+    _startupOfflineEarnings = BigNumber.fromInt(0);
+    if (offline.compareTo(BigNumber.fromInt(0)) > 0) {
+      await showDialog<void>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: const Text('Welcome back!'),
+          content: Text('Your Auto Clicker earned $offline Money while you were away.'),
+          actions: [
+            FilledButton(onPressed: () => Navigator.pop(dialogContext), child: const Text('Continue')),
+          ],
+        ),
+      );
+    }
+    if (!mounted) return;
+    final today = DateTime.now().toIso8601String().substring(0, 10);
+    if (_progression.legacySystems.lastDailyRewardDate != today) {
+      final claim = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: const Text('Daily Nebula Reward'),
+          content: const Text('Claim today’s reward and keep your streak alive.'),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(dialogContext, false), child: const Text('Later')),
+            FilledButton.icon(
+              onPressed: () => Navigator.pop(dialogContext, true),
+              icon: const Icon(Icons.card_giftcard_rounded),
+              label: const Text('Claim reward'),
+            ),
+          ],
+        ),
+      );
+      if (claim == true && mounted) {
+        final effects = _legacySystemsEngine.evaluateTraits(
+          progression: _progression,
+          systems: _progression.legacySystems,
+          playerLevel: 1,
+          activeSeasonId: _currentSeasonId(),
+        );
+        final result = _legacySystemsEngine.claimDailyReward(
+          progression: _progression,
+          systems: _progression.legacySystems,
+          today: today,
+          traitNebulaBonus: effects.nebulaBonusPerClaim,
+          nebulaBoostOwned: (_progression.nebulaItems['nebula_boost'] ?? 0) > 0,
+        );
+        if (result.accepted) {
+          await _applyLegacyProgression(result.progression.copyWith(legacySystems: result.systems));
+        }
+      }
+    }
+    if (mounted && (_nimmyTutorialPending || !_settings.tutorialCompleted)) {
+      _scheduleFirstRunNimmyTutorial();
     }
   }
 
@@ -1359,10 +1478,7 @@ class _GameHomePageState extends State<GameHomePage>
           initialProfile: _playerProfile,
           store: _playerProfileStore,
           equippedCosmeticId: _progression.equippedCosmeticId,
-          onSaved: (profile) {
-            setState(() => _playerProfile = profile);
-            unawaited(_syncPlayerProfileToSave(profile));
-          },
+          onSaved: _handlePlayerProfileSaved,
         ),
       ),
     );
@@ -1504,7 +1620,8 @@ class _GameHomePageState extends State<GameHomePage>
   }
 
   void _scheduleFirstRunNimmyTutorial() {
-    if (_nimmyTutorialScheduled || _settings.tutorialCompleted || _isLoading) {
+    if (_nimmyTutorialScheduled || _settings.tutorialCompleted || _isLoading ||
+        !_isPlayerProfileLoaded || !_playerProfile.setupComplete || !_hasActiveSave) {
       return;
     }
     _nimmyTutorialScheduled = true;
@@ -2243,10 +2360,7 @@ class _GameHomePageState extends State<GameHomePage>
         initialProfile: _playerProfile,
         store: _playerProfileStore,
         equippedCosmeticId: _progression.equippedCosmeticId,
-        onSaved: (profile) {
-          setState(() => _playerProfile = profile);
-          unawaited(_syncPlayerProfileToSave(profile));
-        },
+        onSaved: _handlePlayerProfileSaved,
       );
     }
     return GameDashboardPage(
