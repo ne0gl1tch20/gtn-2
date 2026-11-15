@@ -1,0 +1,69 @@
+name: Temporary Batch A save migration formatter
+
+on:
+  push:
+    branches: ['batch-a/creative-save-active-slot']
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: batch-a-save-migration-format
+  cancel-in-progress: false
+
+jobs:
+  format-save-migration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref || github.ref_name }}
+          fetch-depth: 0
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Resolve dependencies
+        run: flutter pub get
+      - name: Format migration, storage, UI and tests
+        run: |
+          dart format \
+            lib/core/legacy/legacy_systems_state.dart \
+            lib/data/saves/legacy_gtn1_save_adapter.dart \
+            lib/data/saves/legacy_gtn1_backup_bundle.dart \
+            lib/data/saves/save_bundle_storage.dart \
+            lib/data/saves/save_storage.dart \
+            lib/main.dart \
+            lib/saves/save_slots_page.dart \
+            test/data/saves/legacy_gtn1_save_adapter_test.dart \
+            test/data/saves/legacy_gtn1_backup_bundle_test.dart \
+            test/data/saves/save_bundle_storage_test.dart \
+            test/data/save_data_test.dart \
+            test/saves/save_slots_page_test.dart
+      - name: Commit formatter output
+        env:
+          TARGET_REF: ${{ github.event.pull_request.head.ref || github.ref_name }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            lib/core/legacy/legacy_systems_state.dart \
+            lib/data/saves/legacy_gtn1_save_adapter.dart \
+            lib/data/saves/legacy_gtn1_backup_bundle.dart \
+            lib/data/saves/save_bundle_storage.dart \
+            lib/data/saves/save_storage.dart \
+            lib/main.dart \
+            lib/saves/save_slots_page.dart \
+            test/data/saves/legacy_gtn1_save_adapter_test.dart \
+            test/data/saves/legacy_gtn1_backup_bundle_test.dart \
+            test/data/saves/save_bundle_storage_test.dart \
+            test/data/save_data_test.dart \
+            test/saves/save_slots_page_test.dart
+          if git diff --cached --quiet; then
+            echo "Migration sources and tests are already formatted."
+          else
+            git commit -m "style(saves): format GTN1 migration and bundle restore"
+            git push origin "HEAD:${TARGET_REF}"
+          fi
