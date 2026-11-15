@@ -180,6 +180,7 @@ class LegacyGtn1SaveAdapter {
       ..['failedGuesses'] = (save.progression.totalGuesses -
               save.progression.correctGuesses)
           .clamp(0, save.progression.totalGuesses)
+          .toInt()
       ..['moneyEarned'] = save.progression.moneyEarned.toString()
       ..['moneySpent'] = save.progression.moneySpent.toString()
       ..['prestigesCount'] = save.progression.prestigeResets
