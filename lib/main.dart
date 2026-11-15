@@ -1020,7 +1020,8 @@ class _GameHomePageState extends State<GameHomePage>
       // Slot changes must run the same legacy music migration as startup.
       // Otherwise a slot with settings-backed music can appear empty until
       // the next full app restart, and the two persisted representations drift.
-      final savedSettings = globalSettings ?? save?.settings ?? GameSettings.initial;
+      final savedSettings =
+          globalSettings ?? save?.settings ?? GameSettings.initial;
       final restoredMusicSystems = restoreMusicStateFromSettings(
         settings: savedSettings,
         systems: nextProgression.legacySystems,
@@ -1188,7 +1189,8 @@ class _GameHomePageState extends State<GameHomePage>
     )).load();
     if (imported == null || imported.profileName.trim().isEmpty) return;
     final current = _playerProfile;
-    final hasCustomAvatar = current.customAvatarPath != null ||
+    final hasCustomAvatar =
+        current.customAvatarPath != null ||
         current.customAvatarData != null ||
         current.avatarId == 'custom';
     final avatarId = hasCustomAvatar

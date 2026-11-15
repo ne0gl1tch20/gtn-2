@@ -17,8 +17,12 @@ void main() {
     late Directory targetDirectory;
 
     setUp(() async {
-      sourceDirectory = await Directory.systemTemp.createTemp('gtn2-bundle-src-');
-      targetDirectory = await Directory.systemTemp.createTemp('gtn2-bundle-dst-');
+      sourceDirectory = await Directory.systemTemp.createTemp(
+        'gtn2-bundle-src-',
+      );
+      targetDirectory = await Directory.systemTemp.createTemp(
+        'gtn2-bundle-dst-',
+      );
     });
 
     tearDown(() async {
@@ -30,53 +34,73 @@ void main() {
       }
     });
 
-    test('exports and imports all slots, backups, active slot and global settings', () async {
-      final slotOne = SaveStorage(directory: sourceDirectory, slot: 1);
-      await slotOne.save(SaveData(secret: 20, attempts: 1, gamesWon: 0));
-      await slotOne.save(SaveData(secret: 30, attempts: 2, gamesWon: 1));
-      final slotTwo = SaveStorage(directory: sourceDirectory, slot: 2);
-      await slotTwo.save(
-        SaveData(
-          secret: 77,
-          attempts: 4,
-          gamesWon: 3,
-          profileName: 'Second',
-        ),
-      );
-      await slotTwo.saveActiveSlot(2);
+    test(
+      'exports and imports all slots, backups, active slot and global settings',
+      () async {
+        final slotOne = SaveStorage(directory: sourceDirectory, slot: 1);
+        await slotOne.save(SaveData(secret: 20, attempts: 1, gamesWon: 0));
+        await slotOne.save(SaveData(secret: 30, attempts: 2, gamesWon: 1));
+        final slotTwo = SaveStorage(directory: sourceDirectory, slot: 2);
+        await slotTwo.save(
+          SaveData(secret: 77, attempts: 4, gamesWon: 3, profileName: 'Second'),
+        );
+        await slotTwo.saveActiveSlot(2);
 
-      final settings = GameSettings.initial.copyWith(
-        localeCode: 'en_us',
-        themeMode: 'Dark',
-        updateCheckIntervalHours: 6,
-      );
-      final source = SaveBundleStorage(directory: sourceDirectory);
-      final backupText = await source.exportPortableBackup(
-        activeSlot: 2,
-        appPreferences: settings,
-        passphrase: 'correct horse battery',
-      );
+        final settings = GameSettings.initial.copyWith(
+          localeCode: 'en_us',
+          themeMode: 'Dark',
+          updateCheckIntervalHours: 6,
+        );
+        final source = SaveBundleStorage(directory: sourceDirectory);
+        final backupText = await source.exportPortableBackup(
+          activeSlot: 2,
+          appPreferences: settings,
+          passphrase: 'correct horse battery',
+        );
 
-      final target = SaveBundleStorage(directory: targetDirectory);
-      final result = await target.importBackup(
-        input: backupText,
-        passphrase: 'correct horse battery',
-        legacyTargetSlot: 1,
-      );
+        final target = SaveBundleStorage(directory: targetDirectory);
+        final result = await target.importBackup(
+          input: backupText,
+          passphrase: 'correct horse battery',
+          legacyTargetSlot: 1,
+        );
 
-      expect(result, isNotNull);
-      expect(result!.isFullBundle, isTrue);
-      expect(result.activeSlot, 2);
-      expect(result.importedSlots, 2);
-      expect(await SaveStorage(directory: targetDirectory).loadActiveSlot(), 2);
-      expect((await SaveStorage(directory: targetDirectory, slot: 1).loadPrimary())!.secret, 30);
-      expect((await SaveStorage(directory: targetDirectory, slot: 1).loadBackup())!.secret, 20);
-      expect((await SaveStorage(directory: targetDirectory, slot: 2).loadPrimary())!.profileName, 'Second');
-      final restoredSettings =
-          await SaveBundleStorage.loadAppPreferences(targetDirectory);
-      expect(restoredSettings!.themeMode, 'Dark');
-      expect(restoredSettings.updateCheckIntervalHours, 6);
-    });
+        expect(result, isNotNull);
+        expect(result!.isFullBundle, isTrue);
+        expect(result.activeSlot, 2);
+        expect(result.importedSlots, 2);
+        expect(
+          await SaveStorage(directory: targetDirectory).loadActiveSlot(),
+          2,
+        );
+        expect(
+          (await SaveStorage(
+            directory: targetDirectory,
+            slot: 1,
+          ).loadPrimary())!.secret,
+          30,
+        );
+        expect(
+          (await SaveStorage(
+            directory: targetDirectory,
+            slot: 1,
+          ).loadBackup())!.secret,
+          20,
+        );
+        expect(
+          (await SaveStorage(
+            directory: targetDirectory,
+            slot: 2,
+          ).loadPrimary())!.profileName,
+          'Second',
+        );
+        final restoredSettings = await SaveBundleStorage.loadAppPreferences(
+          targetDirectory,
+        );
+        expect(restoredSettings!.themeMode, 'Dark');
+        expect(restoredSettings.updateCheckIntervalHours, 6);
+      },
+    );
 
     test('wrong passphrase leaves every existing slot untouched', () async {
       final targetSlot = SaveStorage(directory: targetDirectory, slot: 1);
@@ -84,9 +108,10 @@ void main() {
       final before = await targetSlot.loadPrimary();
 
       final source = SaveBundleStorage(directory: sourceDirectory);
-      await SaveStorage(directory: sourceDirectory, slot: 1).save(
-        SaveData(secret: 12, attempts: 0, gamesWon: 0),
-      );
+      await SaveStorage(
+        directory: sourceDirectory,
+        slot: 1,
+      ).save(SaveData(secret: 12, attempts: 0, gamesWon: 0));
       final backupText = await source.exportPortableBackup(
         activeSlot: 1,
         appPreferences: GameSettings.initial,
@@ -116,9 +141,10 @@ void main() {
           creativeModeEnabled: true,
         ),
       );
-      await SaveStorage(directory: targetDirectory, slot: 2).save(
-        SaveData(secret: 44, attempts: 2, gamesWon: 0),
-      );
+      await SaveStorage(
+        directory: targetDirectory,
+        slot: 2,
+      ).save(SaveData(secret: 44, attempts: 2, gamesWon: 0));
       final sourceSave = {
         'difficultyId': 'classic',
         'profileName': 'Imported',
@@ -162,83 +188,95 @@ void main() {
       expect(restored.secret, 10);
       expect((await existing.loadBackup())!.secret, 50);
       expect(
-        (await SaveStorage(directory: targetDirectory, slot: 2).loadPrimary())!
-            .secret,
+        (await SaveStorage(
+          directory: targetDirectory,
+          slot: 2,
+        ).loadPrimary())!.secret,
         44,
       );
     });
 
-    test('full bundle import keeps existing permanent Creative Save eligibility', () async {
-      await SaveStorage(directory: sourceDirectory, slot: 1).save(
-        SaveData(secret: 50, attempts: 0, gamesWon: 0),
-      );
-      final source = SaveBundleStorage(directory: sourceDirectory);
-      final backupText = await source.exportPortableBackup(
-        activeSlot: 1,
-        appPreferences: GameSettings.initial,
-        passphrase: 'correct horse battery',
-      );
+    test(
+      'full bundle import keeps existing permanent Creative Save eligibility',
+      () async {
+        await SaveStorage(
+          directory: sourceDirectory,
+          slot: 1,
+        ).save(SaveData(secret: 50, attempts: 0, gamesWon: 0));
+        final source = SaveBundleStorage(directory: sourceDirectory);
+        final backupText = await source.exportPortableBackup(
+          activeSlot: 1,
+          appPreferences: GameSettings.initial,
+          passphrase: 'correct horse battery',
+        );
 
-      final target = SaveStorage(directory: targetDirectory, slot: 1);
-      await target.save(
-        SaveData(
-          secret: 800,
-          attempts: 2,
-          gamesWon: 1,
-          minimum: 100,
-          maximum: 1000,
-          creativeModeEnabled: true,
-        ),
-      );
-      await SaveBundleStorage(directory: targetDirectory).importBackup(
-        input: backupText,
-        passphrase: 'correct horse battery',
-        legacyTargetSlot: 1,
-      );
+        final target = SaveStorage(directory: targetDirectory, slot: 1);
+        await target.save(
+          SaveData(
+            secret: 800,
+            attempts: 2,
+            gamesWon: 1,
+            minimum: 100,
+            maximum: 1000,
+            creativeModeEnabled: true,
+          ),
+        );
+        await SaveBundleStorage(directory: targetDirectory).importBackup(
+          input: backupText,
+          passphrase: 'correct horse battery',
+          legacyTargetSlot: 1,
+        );
 
-      final restored = await target.loadPrimary();
-      expect(restored!.creativeModeEnabled, isTrue);
-      expect(restored.minimum, 100);
-      expect(restored.maximum, 1000);
-      expect(restored.secret, 100);
-    });
+        final restored = await target.loadPrimary();
+        expect(restored!.creativeModeEnabled, isTrue);
+        expect(restored.minimum, 100);
+        expect(restored.maximum, 1000);
+        expect(restored.secret, 100);
+      },
+    );
 
-    test('stores Creative Mode-only slots separately until a game save is created', () async {
-      const creative = CreativeModeSave(
-        name: 'Independent sandbox',
-        enabled: true,
-        rangeMin: 10,
-        rangeMax: 500,
-      );
-      final settings = GameSettings.initial;
-      final bundle = LegacyGtn1BackupBundle(
-        formatVersion: 3,
-        appPreferences: settings,
-        activeSlot: 4,
-        slots: const {},
-        backups: const {},
-        creativeSlots: const {4: creative},
-      );
-      final backupText = await PortableSaveBackup.encryptGtn1Payload(
-        bundle.encode(),
-        'correct horse battery',
-      );
+    test(
+      'stores Creative Mode-only slots separately until a game save is created',
+      () async {
+        const creative = CreativeModeSave(
+          name: 'Independent sandbox',
+          enabled: true,
+          rangeMin: 10,
+          rangeMax: 500,
+        );
+        final settings = GameSettings.initial;
+        final bundle = LegacyGtn1BackupBundle(
+          formatVersion: 3,
+          appPreferences: settings,
+          activeSlot: 4,
+          slots: const {},
+          backups: const {},
+          creativeSlots: const {4: creative},
+        );
+        final backupText = await PortableSaveBackup.encryptGtn1Payload(
+          bundle.encode(),
+          'correct horse battery',
+        );
 
-      await SaveBundleStorage(directory: targetDirectory).importBackup(
-        input: backupText,
-        passphrase: 'correct horse battery',
-        legacyTargetSlot: 1,
-      );
-      final storage = SaveStorage(directory: targetDirectory, slot: 4);
-      expect(await storage.loadPrimary(), isNull);
-      expect((await storage.loadCreativeMode())!.name, 'Independent sandbox');
+        await SaveBundleStorage(directory: targetDirectory).importBackup(
+          input: backupText,
+          passphrase: 'correct horse battery',
+          legacyTargetSlot: 1,
+        );
+        final storage = SaveStorage(directory: targetDirectory, slot: 4);
+        expect(await storage.loadPrimary(), isNull);
+        expect((await storage.loadCreativeMode())!.name, 'Independent sandbox');
 
-      final created = await storage.createIfEmpty(
-        SaveData(secret: 50, attempts: 0, gamesWon: 0),
-      );
-      expect(created, isTrue);
-      expect((await storage.load())!.creativeMode!.name, 'Independent sandbox');
-    });
+        final created = await storage.createIfEmpty(
+          SaveData(secret: 50, attempts: 0, gamesWon: 0),
+        );
+        expect(created, isTrue);
+        expect(
+          (await storage.load())!.creativeMode!.name,
+          'Independent sandbox',
+        );
+      },
+    );
 
     test('startup recovery restores the pre-import snapshot', () async {
       const transactionName = '.gtn2-bundle-import-txn';
@@ -247,7 +285,8 @@ void main() {
       await rollback.create(recursive: true);
       final target = File('${targetDirectory.path}/gtn2-save.json');
       await target.writeAsString('new partial contents');
-      await File('${rollback.path}/gtn2-save.json').writeAsString('old contents');
+      await File('${rollback.path}/gtn2-save.json')
+          .writeAsString('old contents');
       await File('${transaction.path}/manifest.json').writeAsString(
         jsonEncode({
           'files': [

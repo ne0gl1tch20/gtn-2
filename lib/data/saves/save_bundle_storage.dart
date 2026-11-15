@@ -149,7 +149,8 @@ class SaveBundleStorage {
       final backup = await storage.loadBackup();
       if (primary != null) slots[slot] = primary;
       if (backup != null) backups[slot] = backup;
-      final creative = primary?.creativeMode ?? await storage.loadCreativeMode();
+      final creative =
+          primary?.creativeMode ?? await storage.loadCreativeMode();
       if (creative != null) creativeSlots[slot] = creative;
     }
     final bundle = LegacyGtn1BackupBundle(
@@ -189,8 +190,10 @@ class SaveBundleStorage {
       final importedBundle = LegacyGtn1BackupBundle.decode(cleartext);
       final existing = <int, SaveData>{};
       for (var slot = 1; slot <= SaveStorage.maxSaveSlots; slot++) {
-        final current = await SaveStorage(directory: directory, slot: slot)
-            .loadPrimary();
+        final current = await SaveStorage(
+          directory: directory,
+          slot: slot,
+        ).loadPrimary();
         if (current != null) existing[slot] = current;
       }
       final slots = Map<int, SaveData>.from(importedBundle.slots);
@@ -233,12 +236,16 @@ class SaveBundleStorage {
         final backup = await storage.loadBackup();
         if (current != null) slots[slot] = current;
         if (backup != null) backups[slot] = backup;
-        final creative = current?.creativeMode ?? await storage.loadCreativeMode();
+        final creative =
+            current?.creativeMode ?? await storage.loadCreativeMode();
         if (creative != null) creativeSlots[slot] = creative;
       }
-      final target = legacyTargetSlot.clamp(1, SaveStorage.maxSaveSlots).toInt();
+      final target = legacyTargetSlot
+          .clamp(1, SaveStorage.maxSaveSlots)
+          .toInt();
       final existingPrimary = slots[target];
-      final existingCreative = creativeSlots[target] ?? existingPrimary?.creativeMode;
+      final existingCreative =
+          creativeSlots[target] ?? existingPrimary?.creativeMode;
       if (existingPrimary != null) backups[target] = existingPrimary;
       final protected = existingPrimary == null
           ? imported
@@ -256,7 +263,9 @@ class SaveBundleStorage {
         creativeSlots: creativeSlots,
       );
     } else {
-      throw const FormatException('Import is not a GTN1 save or backup bundle.');
+      throw const FormatException(
+        'Import is not a GTN1 save or backup bundle.',
+      );
     }
 
     await _applyBundle(bundle);
@@ -304,10 +313,14 @@ class SaveBundleStorage {
       final backup = bundle.backups[slot];
       targets[filename] = primary == null
           ? null
-          : jsonEncode(primary.copyWith(settings: bundle.appPreferences).toJson());
+          : jsonEncode(
+              primary.copyWith(settings: bundle.appPreferences).toJson(),
+            );
       targets['$filename.bak'] = backup == null
           ? null
-          : jsonEncode(backup.copyWith(settings: bundle.appPreferences).toJson());
+          : jsonEncode(
+              backup.copyWith(settings: bundle.appPreferences).toJson(),
+            );
       targets['$filename.tmp'] = null;
       targets['$filename.restore-tmp'] = null;
       final creative = bundle.creativeSlots[slot];
@@ -315,12 +328,15 @@ class SaveBundleStorage {
           ? null
           : CreativeModeSave.encode(creative);
     }
-    targets['gtn2-active-slot.json'] =
-        jsonEncode({'schemaVersion': 1, 'slot': bundle.activeSlot});
+    targets['gtn2-active-slot.json'] = jsonEncode({
+      'schemaVersion': 1,
+      'slot': bundle.activeSlot,
+    });
     targets['gtn2-active-slot.json.tmp'] = null;
     targets['gtn2-active-slot.json.bak'] = null;
-    targets['gtn2-app-preferences.json'] =
-        jsonEncode(bundle.appPreferences.toJson());
+    targets['gtn2-app-preferences.json'] = jsonEncode(
+      bundle.appPreferences.toJson(),
+    );
     targets['gtn2-app-preferences.json.tmp'] = null;
     targets['gtn2-app-preferences.json.bak'] = null;
 
@@ -332,10 +348,8 @@ class SaveBundleStorage {
         manifest.add({'name': name, 'existed': existed});
         if (existed) await target.copy('${rollback.path}/$name');
       }
-      await File('${transaction.path}/manifest.json').writeAsString(
-        jsonEncode({'files': manifest}),
-        flush: true,
-      );
+      await File('${transaction.path}/manifest.json')
+          .writeAsString(jsonEncode({'files': manifest}), flush: true);
 
       for (final entry in targets.entries) {
         final target = File('${directory.path}/${entry.key}');
@@ -348,7 +362,8 @@ class SaveBundleStorage {
           await stagedFile.rename(target.path);
         }
       }
-      await File('${transaction.path}/committed').writeAsString('yes', flush: true);
+      await File('${transaction.path}/committed')
+          .writeAsString('yes', flush: true);
       try {
         await transaction.delete(recursive: true);
       } on FileSystemException {

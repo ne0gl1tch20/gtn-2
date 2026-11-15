@@ -84,10 +84,8 @@ void main() {
       expect(decoded.slots[2]!.progression.nebulaItems, {'golden_guess': 1});
       expect(decoded.creativeSlots[2]!.name, 'Sandbox');
       expect(decoded.backups[1]!.secret, 25);
-      final retained = decoded.slots[2]!
-          .progression
-          .legacySystems
-          .legacyGtn1Snapshot;
+      final retained =
+          decoded.slots[2]!.progression.legacySystems.legacyGtn1Snapshot;
       expect(retained['shopPurchases'], ['old_shop_item']);
       expect(
         (retained['statistics'] as Map)['arcadeBestScores']['classic'],
@@ -96,69 +94,80 @@ void main() {
     });
 
     test('rejects malformed maps, unsupported versions and invalid slots', () {
-      final settings = jsonEncode(LegacyGtn1BackupBundle(
-        formatVersion: 3,
-        appPreferences: GameSettings.initial,
-        activeSlot: 1,
-        slots: const {},
-        backups: const {},
-        creativeSlots: const {},
-      ).appPreferences.toJson());
+      final settings = jsonEncode(
+        LegacyGtn1BackupBundle(
+          formatVersion: 3,
+          appPreferences: GameSettings.initial,
+          activeSlot: 1,
+          slots: const {},
+          backups: const {},
+          creativeSlots: const {},
+        ).appPreferences.toJson(),
+      );
 
       expect(
-        () => LegacyGtn1BackupBundle.decode(jsonEncode({
-          'formatVersion': 4,
-          'appPreferencesJson': settings,
-          'activeSlot': 1,
-        })),
-        throwsFormatException,
-      );
-      expect(
-        () => LegacyGtn1BackupBundle.decode(jsonEncode({
-          'formatVersion': 3,
-          'appPreferencesJson': settings,
-          'activeSlot': 1,
-          'slots': {'11': '{}'},
-        })),
-        throwsFormatException,
-      );
-      expect(
-        () => LegacyGtn1BackupBundle.decode(jsonEncode({
-          'formatVersion': 3,
-          'appPreferencesJson': settings,
-          'activeSlot': 1,
-          'creativeSlots': {'2': 'not-json'},
-        })),
-        throwsFormatException,
-      );
-    });
-
-    test('retains a Creative Mode-only source slot without dropping its config', () {
-      final creative = const CreativeModeSave(
-        name: 'Standalone sandbox',
-        enabled: true,
-      );
-      final raw = jsonEncode({
-        'formatVersion': 3,
-        'appPreferencesJson': jsonEncode(
-          LegacyGtn1BackupBundle(
-            formatVersion: 3,
-            appPreferences: GameSettings.initial,
-            activeSlot: 1,
-            slots: const {},
-            backups: const {},
-            creativeSlots: const {},
-          ).appPreferences.toJson(),
+        () => LegacyGtn1BackupBundle.decode(
+          jsonEncode({
+            'formatVersion': 4,
+            'appPreferencesJson': settings,
+            'activeSlot': 1,
+          }),
         ),
-        'activeSlot': 1,
-        'slots': <String, String>{},
-        'backups': <String, String>{},
-        'creativeSlots': {'4': CreativeModeSave.encode(creative)},
-      });
-
-      final decoded = LegacyGtn1BackupBundle.decode(raw);
-      expect(decoded.slots.containsKey(4), isFalse);
-      expect(decoded.creativeSlots[4]!.name, 'Standalone sandbox');
+        throwsFormatException,
+      );
+      expect(
+        () => LegacyGtn1BackupBundle.decode(
+          jsonEncode({
+            'formatVersion': 3,
+            'appPreferencesJson': settings,
+            'activeSlot': 1,
+            'slots': {'11': '{}'},
+          }),
+        ),
+        throwsFormatException,
+      );
+      expect(
+        () => LegacyGtn1BackupBundle.decode(
+          jsonEncode({
+            'formatVersion': 3,
+            'appPreferencesJson': settings,
+            'activeSlot': 1,
+            'creativeSlots': {'2': 'not-json'},
+          }),
+        ),
+        throwsFormatException,
+      );
     });
+
+    test(
+      'retains a Creative Mode-only source slot without dropping its config',
+      () {
+        final creative = const CreativeModeSave(
+          name: 'Standalone sandbox',
+          enabled: true,
+        );
+        final raw = jsonEncode({
+          'formatVersion': 3,
+          'appPreferencesJson': jsonEncode(
+            LegacyGtn1BackupBundle(
+              formatVersion: 3,
+              appPreferences: GameSettings.initial,
+              activeSlot: 1,
+              slots: const {},
+              backups: const {},
+              creativeSlots: const {},
+            ).appPreferences.toJson(),
+          ),
+          'activeSlot': 1,
+          'slots': <String, String>{},
+          'backups': <String, String>{},
+          'creativeSlots': {'4': CreativeModeSave.encode(creative)},
+        });
+
+        final decoded = LegacyGtn1BackupBundle.decode(raw);
+        expect(decoded.slots.containsKey(4), isFalse);
+        expect(decoded.creativeSlots[4]!.name, 'Standalone sandbox');
+      },
+    );
   });
 }

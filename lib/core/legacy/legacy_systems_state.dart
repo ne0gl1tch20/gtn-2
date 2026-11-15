@@ -126,6 +126,7 @@ class LegacySystemsState {
   final String? lastBotId;
   final int lastSaveTimestamp;
   final int timeTravelPenaltyUntil;
+
   /// Original GTN1 GameState JSON retained for fields GTN2 does not model yet.
   final Map<String, dynamic> legacyGtn1Snapshot;
 
@@ -336,8 +337,7 @@ class LegacySystemsState {
     'lastBotId': lastBotId,
     'lastSaveTimestamp': lastSaveTimestamp,
     'timeTravelPenaltyUntil': timeTravelPenaltyUntil,
-    if (legacyGtn1Snapshot.isNotEmpty)
-      'legacyGtn1Snapshot': legacyGtn1Snapshot,
+    if (legacyGtn1Snapshot.isNotEmpty) 'legacyGtn1Snapshot': legacyGtn1Snapshot,
   };
 
   factory LegacySystemsState.fromJson(Map<String, dynamic> json) {
@@ -477,7 +477,9 @@ class LegacySystemsState {
     final lastBotFeedback = json['lastBotFeedback'];
     final lastBotId = json['lastBotId'];
     if ((lastBotGuess != null &&
-            (lastBotGuess is! int || lastBotGuess < 1 || lastBotGuess > 1000000)) ||
+            (lastBotGuess is! int ||
+                lastBotGuess < 1 ||
+                lastBotGuess > 1000000)) ||
         (lastBotFeedback != null &&
             !{'TOO_LOW', 'TOO_HIGH', 'CORRECT'}.contains(lastBotFeedback)) ||
         (lastBotId != null &&

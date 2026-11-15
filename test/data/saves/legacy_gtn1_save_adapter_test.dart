@@ -79,7 +79,9 @@ void main() {
           'musicEnabled': false,
           'musicLibraryPaths': ['track-a.mp3'],
           'musicQueuePaths': ['track-a.mp3'],
-          'musicPlaylistPaths': {'focus': ['track-a.mp3']},
+          'musicPlaylistPaths': {
+            'focus': ['track-a.mp3'],
+          },
           'musicRepeatMode': 'all',
           'musicShuffle': true,
           'moreScreenOrder': ['save_slots', 'settings'],
@@ -105,70 +107,101 @@ void main() {
       expect(save.progression.prestigeResets, 2);
       expect(save.progression.defeatedBosses, {'grove_guardian'});
       expect(save.progression.legacySystems.activeMutators, {'hardcore'});
-      expect(save.progression.legacySystems.selectedTraitArms['left'], 'steady_hands');
-      expect(save.progression.legacySystems.adaptiveTraitProfile.failedGuessesObserved, 17);
-      expect(save.progression.legacySystems.adaptiveTraitProfile.helperUses['range_hint'], 2);
+      expect(
+        save.progression.legacySystems.selectedTraitArms['left'],
+        'steady_hands',
+      );
+      expect(
+        save
+            .progression
+            .legacySystems
+            .adaptiveTraitProfile
+            .failedGuessesObserved,
+        17,
+      );
+      expect(
+        save
+            .progression
+            .legacySystems
+            .adaptiveTraitProfile
+            .helperUses['range_hint'],
+        2,
+      );
       expect(save.settings.difficultyId, 'hard');
       expect(save.settings.localeCode, 'en_us');
       expect(save.settings.reduceMotion, isTrue);
       expect(save.settings.musicLibraryPaths, ['track-a.mp3']);
       expect(save.settings.musicPlaylistPaths['focus'], ['track-a.mp3']);
       expect(save.progression.playtimeSeconds, 3600);
-      expect(save.progression.legacySystems.legacyGtn1Snapshot['shopPurchases'], isNull);
-      final sourceStats = save.progression.legacySystems.legacyGtn1Snapshot['statistics'] as Map;
+      expect(
+        save.progression.legacySystems.legacyGtn1Snapshot['shopPurchases'],
+        isNull,
+      );
+      final sourceStats =
+          save.progression.legacySystems.legacyGtn1Snapshot['statistics']
+              as Map;
       expect(sourceStats['failedGuesses'], 17);
       expect(sourceStats['arcadePlayed'], 12);
       expect(sourceStats['arcadeBestScores']['classic'], 100);
     });
 
-    test('retains source-only statistics and shop fields for later round trips', () {
-      final save = LegacyGtn1SaveAdapter.fromGameStateJson({
-        'shopPurchases': ['range_boost'],
-        'prestigeShopPurchases': ['prestige_reward'],
-        'ultraShopPurchases': ['ultra_power'],
-        'buyMultiplier': '10',
-        'creativeAttemptLimit': 20,
-        'creativeRewardMultiplier': 2.5,
-        'lastSavedVersion': '1.4.0',
-        'statistics': {
-          'totalGuesses': 10,
-          'correctGuesses': 4,
-          'failedGuesses': 6,
-          'arcadePlayed': 3,
-          'arcadeBestScores': {'classic': 42},
-        },
-      });
-      final snapshot = save.progression.legacySystems.legacyGtn1Snapshot;
-      expect(snapshot['shopPurchases'], ['range_boost']);
-      expect(snapshot['prestigeShopPurchases'], ['prestige_reward']);
-      expect(snapshot['ultraShopPurchases'], ['ultra_power']);
-      expect(snapshot['buyMultiplier'], '10');
-      expect(snapshot['creativeAttemptLimit'], 20);
-      expect(snapshot['creativeRewardMultiplier'], 2.5);
-      expect(snapshot['lastSavedVersion'], '1.4.0');
-      expect((snapshot['statistics'] as Map)['failedGuesses'], 6);
-    });
+    test(
+      'retains source-only statistics and shop fields for later round trips',
+      () {
+        final save = LegacyGtn1SaveAdapter.fromGameStateJson({
+          'shopPurchases': ['range_boost'],
+          'prestigeShopPurchases': ['prestige_reward'],
+          'ultraShopPurchases': ['ultra_power'],
+          'buyMultiplier': '10',
+          'creativeAttemptLimit': 20,
+          'creativeRewardMultiplier': 2.5,
+          'lastSavedVersion': '1.4.0',
+          'statistics': {
+            'totalGuesses': 10,
+            'correctGuesses': 4,
+            'failedGuesses': 6,
+            'arcadePlayed': 3,
+            'arcadeBestScores': {'classic': 42},
+          },
+        });
+        final snapshot = save.progression.legacySystems.legacyGtn1Snapshot;
+        expect(snapshot['shopPurchases'], ['range_boost']);
+        expect(snapshot['prestigeShopPurchases'], ['prestige_reward']);
+        expect(snapshot['ultraShopPurchases'], ['ultra_power']);
+        expect(snapshot['buyMultiplier'], '10');
+        expect(snapshot['creativeAttemptLimit'], 20);
+        expect(snapshot['creativeRewardMultiplier'], 2.5);
+        expect(snapshot['lastSavedVersion'], '1.4.0');
+        expect((snapshot['statistics'] as Map)['failedGuesses'], 6);
+      },
+    );
 
-    test('reverse serialization updates live state but retains source-only fields', () {
-      final save = LegacyGtn1SaveAdapter.fromGameStateJson({
-        'shopPurchases': ['range_boost'],
-        'statistics': {
-          'totalGuesses': 10,
-          'correctGuesses': 4,
-          'failedGuesses': 6,
-          'arcadePlayed': 3,
-          'arcadeBestScores': {'classic': 42},
-        },
-        'settings': {'locale': 'en-US', 'themeMode': 'Dark'},
-      });
-      final source = LegacyGtn1SaveAdapter.toGameStateJson(save);
-      expect(source['shopPurchases'], ['range_boost']);
-      expect(source['nebula'], '0');
-      expect(source['streak'], 0);
-      expect((source['statistics'] as Map)['failedGuesses'], 6);
-      expect((source['statistics'] as Map)['arcadeBestScores']['classic'], 42);
-      expect((source['settings'] as Map)['locale'], 'en-US');
-    });
+    test(
+      'reverse serialization updates live state but retains source-only fields',
+      () {
+        final save = LegacyGtn1SaveAdapter.fromGameStateJson({
+          'shopPurchases': ['range_boost'],
+          'statistics': {
+            'totalGuesses': 10,
+            'correctGuesses': 4,
+            'failedGuesses': 6,
+            'arcadePlayed': 3,
+            'arcadeBestScores': {'classic': 42},
+          },
+          'settings': {'locale': 'en-US', 'themeMode': 'Dark'},
+        });
+        final source = LegacyGtn1SaveAdapter.toGameStateJson(save);
+        expect(source['shopPurchases'], ['range_boost']);
+        expect(source['nebula'], '0');
+        expect(source['streak'], 0);
+        expect((source['statistics'] as Map)['failedGuesses'], 6);
+        expect(
+          (source['statistics'] as Map)['arcadeBestScores']['classic'],
+          42,
+        );
+        expect((source['settings'] as Map)['locale'], 'en-US');
+      },
+    );
 
     test('rejects malformed source types and mirrors GTN1 negative-value sanitization', () {
       expect(
@@ -206,7 +239,10 @@ void main() {
       expect(save.secret, 50);
       expect(save.maximum, 100);
       expect(save.progression.money.toString(), '0');
-      expect(save.progression.legacySystems.adaptiveTraitProfile.schemaVersion, 1);
+      expect(
+        save.progression.legacySystems.adaptiveTraitProfile.schemaVersion,
+        1,
+      );
     });
   });
 }

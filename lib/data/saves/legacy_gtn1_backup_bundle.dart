@@ -33,8 +33,11 @@ class LegacyGtn1BackupBundle {
     final version = decoded['formatVersion'] ?? 3;
     final active = decoded['activeSlot'];
     final preferences = decoded['appPreferencesJson'];
-    if (version is! int || version < 2 || version > 3 ||
-        active is! int || preferences is! String) {
+    if (version is! int ||
+        version < 2 ||
+        version > 3 ||
+        active is! int ||
+        preferences is! String) {
       throw const FormatException('Unsupported GTN1 backup bundle header.');
     }
 
@@ -42,7 +45,6 @@ class LegacyGtn1BackupBundle {
     final slots = _decodeSaveMap(decoded['slots'], 'slots', settings);
     final backups = _decodeSaveMap(decoded['backups'], 'backups', settings);
     final creative = _decodeCreativeMap(decoded['creativeSlots']);
-
 
     return LegacyGtn1BackupBundle(
       formatVersion: version,
@@ -60,16 +62,22 @@ class LegacyGtn1BackupBundle {
       if (entry.key < 1 || entry.key > maxSlots) {
         throw const FormatException('Invalid GTN2 save slot index.');
       }
-      slotJson['${entry.key}'] =
-          jsonEncode(LegacyGtn1SaveAdapter.toGameStateJson(entry.value.copyWith(settings: appPreferences)));
+      slotJson['${entry.key}'] = jsonEncode(
+        LegacyGtn1SaveAdapter.toGameStateJson(
+          entry.value.copyWith(settings: appPreferences),
+        ),
+      );
     }
     final backupJson = <String, String>{};
     for (final entry in backups.entries) {
       if (entry.key < 1 || entry.key > maxSlots) {
         throw const FormatException('Invalid GTN2 backup slot index.');
       }
-      backupJson['${entry.key}'] =
-          jsonEncode(LegacyGtn1SaveAdapter.toGameStateJson(entry.value.copyWith(settings: appPreferences)));
+      backupJson['${entry.key}'] = jsonEncode(
+        LegacyGtn1SaveAdapter.toGameStateJson(
+          entry.value.copyWith(settings: appPreferences),
+        ),
+      );
     }
     final creativeJson = <String, String>{};
     for (final entry in slots.entries) {
@@ -83,8 +91,9 @@ class LegacyGtn1BackupBundle {
     }
     return jsonEncode({
       'formatVersion': 3,
-      'appPreferencesJson':
-          jsonEncode(LegacyGtn1SaveAdapter.toGameSettingsJson(appPreferences)),
+      'appPreferencesJson': jsonEncode(
+        LegacyGtn1SaveAdapter.toGameSettingsJson(appPreferences),
+      ),
       'activeSlot': activeSlot.clamp(1, maxSlots).toInt(),
       'slots': slotJson,
       'backups': backupJson,
@@ -136,7 +145,10 @@ class LegacyGtn1BackupBundle {
     final result = <int, CreativeModeSave>{};
     for (final entry in raw.entries) {
       final slot = int.tryParse(entry.key as String);
-      if (slot == null || slot < 1 || slot > maxSlots || entry.value is! String) {
+      if (slot == null ||
+          slot < 1 ||
+          slot > maxSlots ||
+          entry.value is! String) {
         throw const FormatException('Invalid GTN1 Creative Mode slot entry.');
       }
       final decoded = CreativeModeSave.decodeAndMigrate(entry.value as String);

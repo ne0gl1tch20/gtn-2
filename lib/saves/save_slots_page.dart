@@ -396,7 +396,9 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
     if (confirmed == null || !mounted) return;
     if (confirmed.length < 12) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Passphrase must be at least 12 characters.')),
+        const SnackBar(
+          content: Text('Passphrase must be at least 12 characters.'),
+        ),
       );
       return;
     }
@@ -412,7 +414,9 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Encrypted backup copied. Store it safely with your passphrase.'),
+            content: Text(
+              'Encrypted backup copied. Store it safely with your passphrase.',
+            ),
           ),
         );
       }
@@ -430,9 +434,7 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
   Future<void> _importPortableBackup() async {
     final backup = TextEditingController();
     final passphrase = TextEditingController();
-    final confirmed = await showDialog<
-      ({String backup, String passphrase})
-    >(
+    final confirmed = await showDialog<({String backup, String passphrase})>(
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: const Text('Import portable backup'),
@@ -455,7 +457,8 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
                 obscureText: true,
                 decoration: const InputDecoration(
                   labelText: 'Passphrase (portable backup)',
-                  helperText: 'Leave blank for an older GTN1 Base64/XOR export.',
+                  helperText:
+                      'Leave blank for an older GTN1 Base64/XOR export.',
                 ),
               ),
             ],
@@ -757,11 +760,15 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
                   runSpacing: 8,
                   children: [
                     M3EButton.filled(
-                      onPressed: _working == null ? _exportPortableBackup : null,
+                      onPressed: _working == null
+                          ? _exportPortableBackup
+                          : null,
                       child: const Text('Export backup'),
                     ),
                     M3EButton.text(
-                      onPressed: _working == null ? _importPortableBackup : null,
+                      onPressed: _working == null
+                          ? _importPortableBackup
+                          : null,
                       child: const Text('Import backup'),
                     ),
                   ],

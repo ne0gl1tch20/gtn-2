@@ -34,9 +34,10 @@ class LegacyGtn1SaveAdapter {
     final adaptiveTraitProfile = _adaptiveTraitProfile(traitJson);
     final upgradeLevels = _map(source, 'upgradeLevels');
     final attempts = _sanitizedCount(source, 'attempts');
-    final correctGuesses = _sanitizedCount(source, 'correctGuesses')
-        .clamp(0, attempts)
-        .toInt();
+    final correctGuesses = _sanitizedCount(
+      source,
+      'correctGuesses',
+    ).clamp(0, attempts).toInt();
     final streak = _sanitizedCount(source, 'streak');
     final bestStreak = _sanitizedCount(source, 'bestStreak') < streak
         ? streak
@@ -45,7 +46,8 @@ class LegacyGtn1SaveAdapter {
     final legacy = <String, dynamic>{
       ...extensionLegacy,
       'adaptiveTraitProfile': adaptiveTraitProfile.toJson(),
-      'legacyGtn1Snapshot': jsonDecode(jsonEncode(source)) as Map<String, dynamic>,
+      'legacyGtn1Snapshot':
+          jsonDecode(jsonEncode(source)) as Map<String, dynamic>,
       'discoveredTraits': _set(source, 'discoveredTraitIds').toList(),
       'selectedTraitArms': _stringMap(source, 'selectedTraitArms'),
       'activeMutators': _set(source, 'activeMutators').toList(),
@@ -74,8 +76,16 @@ class LegacyGtn1SaveAdapter {
       'worldMasteryLevels': _map(source, 'worldMasteryLevels'),
       'discoveredSecrets': _set(source, 'discoveredSecretIds').toList(),
       'codexEntries': _set(source, 'codexEntries').toList(),
-      'activeWorldId': _string(source, 'activeWorldId', fallback: 'verdant_grove'),
-      'unlockedWorldIds': _set(source, 'unlockedWorldIds', fallback: {'verdant_grove'}).toList(),
+      'activeWorldId': _string(
+        source,
+        'activeWorldId',
+        fallback: 'verdant_grove',
+      ),
+      'unlockedWorldIds': _set(
+        source,
+        'unlockedWorldIds',
+        fallback: {'verdant_grove'},
+      ).toList(),
       'endlessRiftTier': _int(source, 'endlessRiftTier'),
       'endlessRiftBestTier': _int(source, 'endlessRiftBestTier'),
       'endlessRiftActive': _bool(source, 'endlessRiftActive'),
@@ -86,7 +96,11 @@ class LegacyGtn1SaveAdapter {
       'musicLibrary': _list(settingsJson, 'musicLibraryPaths'),
       'musicQueue': _list(settingsJson, 'musicQueuePaths'),
       'musicPlaylists': _mapOfLists(settingsJson, 'musicPlaylistPaths'),
-      'musicRepeatMode': _string(settingsJson, 'musicRepeatMode', fallback: 'off'),
+      'musicRepeatMode': _string(
+        settingsJson,
+        'musicRepeatMode',
+        fallback: 'off',
+      ),
       'musicShuffle': _bool(settingsJson, 'musicShuffle'),
       'permanentEventBoosts': _int(source, 'permanentEventBoosts'),
       'endgameRewardsClaimed': _set(source, 'endgameRewardsClaimed').toList(),
@@ -105,7 +119,10 @@ class LegacyGtn1SaveAdapter {
       'botCorrectGuesses': _int(source, 'botCorrectGuesses'),
       'botIncorrectGuesses': _int(source, 'botIncorrectGuesses'),
       'lastSaveTimestamp': _sanitizedCount(source, 'lastSaveTimestamp'),
-      'timeTravelPenaltyUntil': _sanitizedCount(source, 'timeTravelPenaltyUntil'),
+      'timeTravelPenaltyUntil': _sanitizedCount(
+        source,
+        'timeTravelPenaltyUntil',
+      ),
     };
 
     final progression = ProgressionState(
@@ -117,7 +134,9 @@ class LegacyGtn1SaveAdapter {
       upgrades: upgradeLevels,
       prestigeUpgrades: _map(source, 'prestigeUpgradeLevels'),
       ultraUpgrades: _map(source, 'ultraUpgradeLevels'),
-      equippedCosmeticId: _supportedCosmetic(_nullableString(source, 'equippedCosmeticId')),
+      equippedCosmeticId: _supportedCosmetic(
+        _nullableString(source, 'equippedCosmeticId'),
+      ),
       defeatedBosses: _set(source, 'defeatedBossIds'),
       prestigeResets: _int(source, 'prestigeCount'),
       ultraResets: _int(source, 'ultraCount'),
@@ -126,7 +145,9 @@ class LegacyGtn1SaveAdapter {
       moneyEarned: _bigNumber(statistics, 'moneyEarned'),
       moneySpent: _bigNumber(statistics, 'moneySpent'),
       randomEventsTriggered: _int(statistics, 'randomEventsTriggered'),
-      lastRandomEventId: _supportedRandomEvent(_nullableString(source, 'lastRandomEventId')),
+      lastRandomEventId: _supportedRandomEvent(
+        _nullableString(source, 'lastRandomEventId'),
+      ),
       bossDamage: _map(source, 'bossBattleProgress'),
       currentStreak: streak,
       bestStreak: bestStreak,
@@ -137,18 +158,24 @@ class LegacyGtn1SaveAdapter {
     );
 
     final rawDifficulty = _string(source, 'difficultyId', fallback: 'classic');
-    final difficulty = const {'classic', 'hard', 'extreme'}.contains(rawDifficulty)
+    final difficulty =
+        const {'classic', 'hard', 'extreme'}.contains(rawDifficulty)
         ? rawDifficulty
         : 'classic';
     final settings = _settings(settingsJson).copyWith(
       difficultyId: difficulty,
-      tutorialCompleted: _bool(source, 'tutorialCompleted') ||
+      tutorialCompleted:
+          _bool(source, 'tutorialCompleted') ||
           _bool(settingsJson, 'tutorialCompleted'),
     );
     final name = _string(source, 'profileName').trim();
     final creative = _bool(source, 'creativeModeEnabled');
     final minimum = creative
-        ? _signedInt(source, 'currentRangeMin', fallback: 1).clamp(1, 1000000).toInt()
+        ? _signedInt(
+            source,
+            'currentRangeMin',
+            fallback: 1,
+          ).clamp(1, 1000000).toInt()
         : 1;
     final rawMaximum = _signedInt(source, 'currentRangeMax', fallback: 100);
     final difficultyMaximum = DifficultyRules.rangeMaximum(
@@ -158,22 +185,36 @@ class LegacyGtn1SaveAdapter {
     final maximum = creative
         ? rawMaximum.clamp(minimum, 1000000).toInt()
         : (rawMaximum < difficultyMaximum ? difficultyMaximum : rawMaximum)
-            .clamp(1, 500)
-            .toInt();
+              .clamp(1, 500)
+              .toInt();
     final data = SaveData(
-      secret: _signedInt(source, 'targetNumber', fallback: 50).clamp(minimum, maximum).toInt(),
+      secret: _signedInt(
+        source,
+        'targetNumber',
+        fallback: 50,
+      ).clamp(minimum, maximum).toInt(),
       attempts: attempts,
       correctGuesses: correctGuesses,
       streak: streak,
       bestStreak: bestStreak,
-      gamesWon: _int(extensions, 'gamesWon', fallback: _int(source, 'gamesWon')),
-      isComplete: _bool(extensions, 'isComplete', fallback: _bool(source, 'isComplete')),
+      gamesWon: _int(
+        extensions,
+        'gamesWon',
+        fallback: _int(source, 'gamesWon'),
+      ),
+      isComplete: _bool(
+        extensions,
+        'isComplete',
+        fallback: _bool(source, 'isComplete'),
+      ),
       minimum: minimum,
       maximum: maximum,
       progression: progression,
       settings: settings,
       profileName: name.substring(0, name.length > 24 ? 24 : name.length),
-      profileIconId: _profileIcon(_string(source, 'profileIconId', fallback: 'default')),
+      profileIconId: _profileIcon(
+        _string(source, 'profileIconId', fallback: 'default'),
+      ),
       creativeModeEnabled: creative,
     );
     SaveData.fromJson(data.toJson());
@@ -192,10 +233,10 @@ class LegacyGtn1SaveAdapter {
     statistics
       ..['totalGuesses'] = save.progression.totalGuesses
       ..['correctGuesses'] = save.progression.correctGuesses
-      ..['failedGuesses'] = (save.progression.totalGuesses -
-              save.progression.correctGuesses)
-          .clamp(0, save.progression.totalGuesses)
-          .toInt()
+      ..['failedGuesses'] =
+          (save.progression.totalGuesses - save.progression.correctGuesses)
+              .clamp(0, save.progression.totalGuesses)
+              .toInt()
       ..['moneyEarned'] = save.progression.moneyEarned.toString()
       ..['moneySpent'] = save.progression.moneySpent.toString()
       ..['prestigesCount'] = save.progression.prestigeResets
@@ -335,9 +376,7 @@ class LegacyGtn1SaveAdapter {
     };
   }
 
-  static Map<String, dynamic> _legacyExtensionJson(
-    LegacySystemsState state,
-  ) {
+  static Map<String, dynamic> _legacyExtensionJson(LegacySystemsState state) {
     final json = Map<String, dynamic>.from(state.toJson());
     json.remove('legacyGtn1Snapshot');
     return json;
@@ -349,7 +388,9 @@ class LegacyGtn1SaveAdapter {
     }
     final parsed = int.tryParse(value.coefficient.toString());
     if (parsed == null || parsed < 0) {
-      throw const FormatException('GTN1 nebulaEarned exceeds the source range.');
+      throw const FormatException(
+        'GTN1 nebulaEarned exceeds the source range.',
+      );
     }
     return parsed;
   }
@@ -368,7 +409,10 @@ class LegacyGtn1SaveAdapter {
       'prestigesObserved': _int(source, 'prestigesObserved'),
       'ultrasObserved': _int(source, 'ultrasObserved'),
       'upgradesPurchasedObserved': _int(source, 'upgradesPurchasedObserved'),
-      'moneyEarnedObserved': _bigNumber(source, 'moneyEarnedObserved').toString(),
+      'moneyEarnedObserved': _bigNumber(
+        source,
+        'moneyEarnedObserved',
+      ).toString(),
       'moneySpentObserved': _bigNumber(source, 'moneySpentObserved').toString(),
       'consistencyScore': _number(source, 'consistencyScore'),
       'accuracyScore': _number(source, 'accuracyScore'),
@@ -387,19 +431,41 @@ class LegacyGtn1SaveAdapter {
     final migrated = GameSettings(
       darkMode: theme.toLowerCase() != 'light',
       reduceMotion: _bool(source, 'reducedMotion'),
-      localeCode: _string(source, 'locale', fallback: 'en-US')
-          .replaceAll('-', '_')
-          .toLowerCase(),
+      localeCode: _string(
+        source,
+        'locale',
+        fallback: 'en-US',
+      ).replaceAll('-', '_').toLowerCase(),
       themeMode: theme,
       numberNotation: _string(source, 'numberNotation', fallback: 'Standard'),
       musicEnabled: _bool(source, 'musicEnabled', fallback: true),
       soundEnabled: _bool(source, 'soundEnabled', fallback: true),
       vibrationEnabled: _bool(source, 'vibrationEnabled', fallback: true),
-      notificationsEnabled: _bool(source, 'notificationsEnabled', fallback: true),
-      notificationRemindersEnabled: _bool(source, 'notificationRemindersEnabled', fallback: true),
-      notificationProgressionEnabled: _bool(source, 'notificationProgressionEnabled', fallback: true),
-      notificationEventsEnabled: _bool(source, 'notificationEventsEnabled', fallback: true),
-      notificationIntervalHours: _int(source, 'notificationIntervalHours', fallback: 24),
+      notificationsEnabled: _bool(
+        source,
+        'notificationsEnabled',
+        fallback: true,
+      ),
+      notificationRemindersEnabled: _bool(
+        source,
+        'notificationRemindersEnabled',
+        fallback: true,
+      ),
+      notificationProgressionEnabled: _bool(
+        source,
+        'notificationProgressionEnabled',
+        fallback: true,
+      ),
+      notificationEventsEnabled: _bool(
+        source,
+        'notificationEventsEnabled',
+        fallback: true,
+      ),
+      notificationIntervalHours: _int(
+        source,
+        'notificationIntervalHours',
+        fallback: 24,
+      ),
       volume: _number(source, 'volume', fallback: 1),
       sfxVolume: _number(source, 'sfxVolume', fallback: 1),
       reduceFlashes: _bool(source, 'reduceFlashes'),
@@ -412,20 +478,49 @@ class LegacyGtn1SaveAdapter {
       musicRepeatMode: _string(source, 'musicRepeatMode', fallback: 'off'),
       musicShuffle: _bool(source, 'musicShuffle'),
       themePreset: _string(source, 'themePreset', fallback: 'Neon'),
-      customPrimaryColor: _string(source, 'customPrimaryColor', fallback: '#7C4DFF'),
-      customSecondaryColor: _string(source, 'customSecondaryColor', fallback: '#00BCD4'),
-      customTertiaryColor: _string(source, 'customTertiaryColor', fallback: '#00C853'),
+      customPrimaryColor: _string(
+        source,
+        'customPrimaryColor',
+        fallback: '#7C4DFF',
+      ),
+      customSecondaryColor: _string(
+        source,
+        'customSecondaryColor',
+        fallback: '#00BCD4',
+      ),
+      customTertiaryColor: _string(
+        source,
+        'customTertiaryColor',
+        fallback: '#00C853',
+      ),
       moreScreenOrder: source['moreScreenOrder'] == null
           ? const [
-              'world_map', 'achievements', 'live_ops', 'lua_hub', 'mutators',
-              'talent', 'relics', 'home_base', 'codex', 'endgame', 'arcade',
-              'stats', 'changelog', 'settings', 'about', 'staking', 'ultra',
-              'prestige', 'save_slots', 'music',
+              'world_map',
+              'achievements',
+              'live_ops',
+              'lua_hub',
+              'mutators',
+              'talent',
+              'relics',
+              'home_base',
+              'codex',
+              'endgame',
+              'arcade',
+              'stats',
+              'changelog',
+              'settings',
+              'about',
+              'staking',
+              'ultra',
+              'prestige',
+              'save_slots',
+              'music',
             ]
           : _list(source, 'moreScreenOrder'),
       moreScreenButtonColors: _stringMap(source, 'moreScreenButtonColors'),
       webMenuStudioLayout: _nullableString(source, 'webMenuStudioLayout'),
-      tutorialCompleted: _bool(source, 'tutorialCompleted') ||
+      tutorialCompleted:
+          _bool(source, 'tutorialCompleted') ||
           _bool(source, 'gtn2TutorialCompleted'),
       tutorialSeenFeatures: _set(source, 'tutorialSeenFeatures'),
       updateCheckIntervalHours: _int(source, 'gtn2UpdateCheckIntervalHours'),
@@ -443,16 +538,24 @@ class LegacyGtn1SaveAdapter {
 
   static String? _supportedCosmetic(String? id) =>
       id == null ||
-          const {'cosmetic_nebula_ring', 'cosmetic_starfield', 'cosmetic_pixel_glow'}
-              .contains(id)
+          const {
+            'cosmetic_nebula_ring',
+            'cosmetic_starfield',
+            'cosmetic_pixel_glow',
+          }.contains(id)
       ? id
       : null;
 
   static String? _supportedRandomEvent(String? id) =>
       id == null ||
           const {
-            'cash_burst', 'nebula_rain', 'jackpot', 'streak_surge',
-            'range_shuffle', 'tax_refund', 'cosmic_gift',
+            'cash_burst',
+            'nebula_rain',
+            'jackpot',
+            'streak_surge',
+            'range_shuffle',
+            'tax_refund',
+            'cosmic_gift',
           }.contains(id)
       ? id
       : null;
@@ -469,7 +572,8 @@ class LegacyGtn1SaveAdapter {
 
   static int _int(Map<String, dynamic> source, String key, {int fallback = 0}) {
     final value = source[key] ?? fallback;
-    if (value is! int || value < 0) throw FormatException('Invalid GTN1 integer: $key');
+    if (value is! int || value < 0)
+      throw FormatException('Invalid GTN1 integer: $key');
     return value;
   }
 
