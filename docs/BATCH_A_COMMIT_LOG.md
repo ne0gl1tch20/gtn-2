@@ -398,3 +398,10 @@ Batch A remains active until Dashboard, More, Settings, Menu Studio, Profile and
 - Main audit updates: c6951e91506ea50f9570e586867b428909363ab8 (plan), 75e3b96b72be2a839d1803c99cf31fa1d1ed0ac5 (ledger), and 8d5e5f5d5761eb2afccf8658a269674f44a861b5 (screen diff).
 - Latest PR head at this checkpoint: 3bb5667569510c46897e11ae7b0bbac4b2d345bf. The PR is draft and mergeable; the branch was 333 ahead / 0 behind immediately before this main-only audit update.
 - Validate run #1933: https://github.com/ne0gl1tch20/gtn-2/actions/runs/43767953058. Format and analysis passed; Flutter tests, Android debug build and Windows debug build were still running when this entry was written. No final validation or runtime pass is claimed.
+
+
+### Save export dialog lifecycle correction — 2026-11-16
+
+- Validate run #1933 (head 3bb5667569510c46897e11ae7b0bbac4b2d345bf) passed formatting and analysis but failed the full suite: 431 passed, 4 failed. The four failures were Save Slots widget tests cascading from a confirmed lifecycle bug: the parent disposed TextEditingControllers while the dialog reverse-transition was still mounted.
+- Corrective commit: b7650a2112ee2294ab328bd29af89d167357e067. The export dialog now owns its two controllers in a dedicated StatefulWidget and disposes them only when the dialog subtree is removed. This also removes the parent/dialog lifetime race.
+- New Validate run #1936: https://github.com/ne0gl1tch20/gtn-2/actions/runs/43768293582, head b7650a2112ee2294ab328bd29af89d167357e067. Pending at this checkpoint. Do not treat run #1933 as a pass and do not claim the correction until #1936 finishes.
