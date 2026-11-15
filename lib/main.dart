@@ -1327,7 +1327,8 @@ class _GameHomePageState extends State<GameHomePage>
         setState(() {
           _playerProfile = profile;
           _isPlayerProfileLoaded = true;
-          _firstRunNeedsSaveSlotSelection = !profile.setupComplete && !_hasActiveSave;
+          _firstRunNeedsSaveSlotSelection =
+              !profile.setupComplete && !_hasActiveSave;
         });
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!mounted || !_playerProfile.setupComplete) return;
