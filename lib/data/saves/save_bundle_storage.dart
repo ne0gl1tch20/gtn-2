@@ -83,14 +83,26 @@ class SaveBundleStorage {
 
   static Future<GameSettings?> loadAppPreferences(Directory directory) async {
     final file = File('${directory.path}/$_preferencesName');
-    if (!await file.exists()) return null;
-    try {
-      final decoded = jsonDecode(await file.readAsString());
-      if (decoded is! Map<String, dynamic>) return null;
-      return GameSettings.fromJson(decoded);
-    } on FormatException {
-      return null;
+    for (final candidate in [
+      file,
+      File('${file.path}.tmp'),
+      File('${file.path}.bak'),
+    ]) {
+      if (!await candidate.exists()) continue;
+      try {
+        final decoded = jsonDecode(await candidate.readAsString());
+        if (decoded is! Map<String, dynamic>) continue;
+        final settings = GameSettings.fromJson(decoded);
+        if (candidate.path != file.path) {
+          if (await file.exists()) await file.delete();
+          await candidate.rename(file.path);
+        }
+        return settings;
+      } catch (_) {
+        continue;
+      }
     }
+    return null;
   }
 
   static Future<void> saveAppPreferences(
@@ -100,9 +112,25 @@ class SaveBundleStorage {
     await directory.create(recursive: true);
     final file = File('${directory.path}/$_preferencesName');
     final temporary = File('${file.path}.tmp');
+    final backup = File('${file.path}.bak');
     await temporary.writeAsString(jsonEncode(settings.toJson()), flush: true);
-    if (await file.exists()) await file.delete();
-    await temporary.rename(file.path);
+    var backedUp = false;
+    try {
+      if (await file.exists()) {
+        if (await backup.exists()) await backup.delete();
+        await file.rename(backup.path);
+        backedUp = true;
+      }
+      await temporary.rename(file.path);
+      if (backedUp && await backup.exists()) await backup.delete();
+    } on FileSystemException {
+      if (backedUp && !await file.exists() && await backup.exists()) {
+        await backup.rename(file.path);
+      }
+      rethrow;
+    } finally {
+      if (await temporary.exists()) await temporary.delete();
+    }
   }
 
   Future<String> exportPortableBackup({
@@ -229,6 +257,7 @@ class SaveBundleStorage {
     targets['gtn2-active-slot.json'] =
         jsonEncode({'schemaVersion': 1, 'slot': bundle.activeSlot});
     targets['gtn2-active-slot.json.tmp'] = null;
+    targets['gtn2-active-slot.json.bak'] = null;
     targets['gtn2-app-preferences.json'] =
         jsonEncode(bundle.appPreferences.toJson());
     targets['gtn2-app-preferences.json.tmp'] = null;
@@ -258,7 +287,11 @@ class SaveBundleStorage {
         }
       }
       await File('${transaction.path}/committed').writeAsString('yes', flush: true);
-      await transaction.delete(recursive: true);
+      try {
+        await transaction.delete(recursive: true);
+      } on FileSystemException {
+        // The committed marker makes startup cleanup safe if deletion is retried.
+      }
     } catch (_) {
       await recoverPendingImport(directory);
       rethrow;
