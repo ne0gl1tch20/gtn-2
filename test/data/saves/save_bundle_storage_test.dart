@@ -306,19 +306,24 @@ void main() {
       expect(await transaction.exists(), isFalse);
     });
 
-    test('ignores an incomplete temporary manifest before live files are touched', () async {
-      const transactionName = '.gtn2-bundle-import-txn';
-      final transaction = Directory('${targetDirectory.path}/$transactionName');
-      await transaction.create(recursive: true);
-      final target = File('${targetDirectory.path}/gtn2-save.json');
-      await target.writeAsString('original live save');
-      await File('${transaction.path}/manifest.json.tmp')
-          .writeAsString('{"files":');
+    test(
+      'ignores an incomplete temporary manifest before live files are touched',
+      () async {
+        const transactionName = '.gtn2-bundle-import-txn';
+        final transaction = Directory(
+          '${targetDirectory.path}/$transactionName',
+        );
+        await transaction.create(recursive: true);
+        final target = File('${targetDirectory.path}/gtn2-save.json');
+        await target.writeAsString('original live save');
+        await File('${transaction.path}/manifest.json.tmp')
+            .writeAsString('{"files":');
 
-      await SaveBundleStorage.recoverPendingImport(targetDirectory);
+        await SaveBundleStorage.recoverPendingImport(targetDirectory);
 
-      expect(await target.readAsString(), 'original live save');
-      expect(await transaction.exists(), isFalse);
-    });
+        expect(await target.readAsString(), 'original live save');
+        expect(await transaction.exists(), isFalse);
+      },
+    );
   });
 }
