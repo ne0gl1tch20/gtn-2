@@ -96,7 +96,7 @@ class SettingsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: GtnExpressiveAppBar(
-        title: const Text('Settings & Save Management'),
+        title: const Text('Settings', maxLines: 1, overflow: TextOverflow.ellipsis),
       ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 28),
