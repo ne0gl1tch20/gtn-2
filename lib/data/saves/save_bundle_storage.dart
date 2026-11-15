@@ -182,7 +182,32 @@ class SaveBundleStorage {
     if (decoded is Map<String, dynamic> &&
         decoded.containsKey('appPreferencesJson') &&
         decoded.containsKey('activeSlot')) {
-      bundle = LegacyGtn1BackupBundle.decode(cleartext);
+      final importedBundle = LegacyGtn1BackupBundle.decode(cleartext);
+      final existing = <int, SaveData>{};
+      for (var slot = 1; slot <= SaveStorage.maxSaveSlots; slot++) {
+        final current = await SaveStorage(directory: directory, slot: slot)
+            .loadPrimary();
+        if (current != null) existing[slot] = current;
+      }
+      final slots = Map<int, SaveData>.from(importedBundle.slots);
+      final backups = Map<int, SaveData>.from(importedBundle.backups);
+      for (final entry in existing.entries) {
+        final slot = entry.key;
+        if (slots[slot] case final incoming?) {
+          slots[slot] = _preserveCreativeEligibility(entry.value, incoming);
+        }
+        if (backups[slot] case final incoming?) {
+          backups[slot] = _preserveCreativeEligibility(entry.value, incoming);
+        }
+      }
+      bundle = LegacyGtn1BackupBundle(
+        formatVersion: importedBundle.formatVersion,
+        appPreferences: importedBundle.appPreferences,
+        activeSlot: importedBundle.activeSlot,
+        slots: slots,
+        backups: backups,
+        creativeSlots: importedBundle.creativeSlots,
+      );
     } else if (decoded is Map<String, dynamic>) {
       fullBundle = false;
       final imported = LegacyGtn1SaveAdapter.fromGameStateJson(decoded);
@@ -197,8 +222,13 @@ class SaveBundleStorage {
         if (backup != null) backups[slot] = backup;
       }
       final target = legacyTargetSlot.clamp(1, SaveStorage.maxSaveSlots).toInt();
-      final existingCreative = slots[target]?.creativeMode;
-      slots[target] = imported.copyWith(
+      final existingPrimary = slots[target];
+      final existingCreative = existingPrimary?.creativeMode;
+      if (existingPrimary != null) backups[target] = existingPrimary;
+      final protected = existingPrimary == null
+          ? imported
+          : _preserveCreativeEligibility(existingPrimary, imported);
+      slots[target] = protected.copyWith(
         settings: settings,
         creativeMode: imported.creativeMode ?? existingCreative,
       );
@@ -223,6 +253,23 @@ class SaveBundleStorage {
       activeSlot: bundle.activeSlot,
       importedSlots: bundle.slots.length,
       isFullBundle: fullBundle,
+    );
+  }
+
+  static SaveData _preserveCreativeEligibility(
+    SaveData existing,
+    SaveData incoming,
+  ) {
+    if (!existing.creativeModeEnabled || incoming.creativeModeEnabled) {
+      return incoming;
+    }
+    final minimum = existing.minimum < 1 ? 1 : existing.minimum;
+    final maximum = existing.maximum < minimum ? minimum : existing.maximum;
+    return incoming.copyWith(
+      creativeModeEnabled: true,
+      minimum: minimum,
+      maximum: maximum,
+      secret: incoming.secret.clamp(minimum, maximum).toInt(),
     );
   }
 
