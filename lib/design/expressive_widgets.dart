@@ -241,6 +241,7 @@ class GtnExpressiveTextField extends StatelessWidget {
     this.textAlign = TextAlign.start,
     this.obscureText = false,
     this.onEditingComplete,
+    this.fontSize = 18,
   });
 
   final TextEditingController? controller;
@@ -261,6 +262,7 @@ class GtnExpressiveTextField extends StatelessWidget {
   final TextAlign textAlign;
   final bool obscureText;
   final VoidCallback? onEditingComplete;
+  final double fontSize;
 
   @override
   Widget build(BuildContext context) {
@@ -290,7 +292,7 @@ class GtnExpressiveTextField extends StatelessWidget {
       onEditingComplete: onEditingComplete,
       style: TextStyle(
         color: dark ? GtnUiTokens.foreground : const Color(0xFF172039),
-        fontSize: 18,
+        fontSize: fontSize,
         fontWeight: FontWeight.w800,
       ),
       decoration: (decoration ?? const InputDecoration()).copyWith(
