@@ -26,6 +26,7 @@ import 'core/progression/progression_calculator.dart';
 import 'core/progression/progression_engine.dart';
 import 'core/progression/progression_state.dart';
 import 'core/scripting/lua_sandbox.dart';
+import 'data/saves/save_bundle_storage.dart';
 import 'data/saves/save_data.dart';
 import 'data/saves/save_storage.dart';
 import 'dev/developer_settings_page.dart';
@@ -367,6 +368,11 @@ class _GameHomePageState extends State<GameHomePage>
   Future<void> _restoreSave() async {
     var shouldPersistOfflineEarnings = false;
     try {
+      final bundleStorage = await SaveBundleStorage.inApplicationDocuments();
+      await SaveBundleStorage.recoverPendingImport(bundleStorage.directory);
+      final globalSettings = await SaveBundleStorage.loadAppPreferences(
+        bundleStorage.directory,
+      );
       final firstSlotStorage = await _storage;
       final activeSlot = await firstSlotStorage.loadActiveSlot();
       final storage = activeSlot == firstSlotStorage.slot
@@ -396,7 +402,7 @@ class _GameHomePageState extends State<GameHomePage>
           legacySystems: restoredSystems,
         );
         final restoredSettings = syncMusicSettingsFromLegacy(
-          settings: save.settings,
+          settings: globalSettings ?? save.settings,
           systems: restoredSystems,
         );
         final restoredEngine = _engineFor(
@@ -437,6 +443,14 @@ class _GameHomePageState extends State<GameHomePage>
               : 'Welcome back! Your saved game is ready.';
         });
         shouldPersistOfflineEarnings = true;
+      } else if (globalSettings != null) {
+        await AppLocalizations.load(globalSettings.localeCode);
+        if (mounted) {
+          setState(() {
+            _settings = globalSettings;
+            GtnApp.settingsNotifier.value = globalSettings;
+          });
+        }
       }
     } on Exception {
       if (mounted) {
@@ -978,6 +992,10 @@ class _GameHomePageState extends State<GameHomePage>
   Future<void> _switchSaveSlot(int slot) async {
     setState(() => _isLoading = true);
     try {
+      final bundleStorage = await SaveBundleStorage.inApplicationDocuments();
+      final globalSettings = await SaveBundleStorage.loadAppPreferences(
+        bundleStorage.directory,
+      );
       final storage = await SaveStorage.inApplicationDocuments(slot: slot);
       final save = await storage.load();
       if (!mounted) return;
@@ -995,7 +1013,7 @@ class _GameHomePageState extends State<GameHomePage>
       // Slot changes must run the same legacy music migration as startup.
       // Otherwise a slot with settings-backed music can appear empty until
       // the next full app restart, and the two persisted representations drift.
-      final savedSettings = save?.settings ?? GameSettings.initial;
+      final savedSettings = globalSettings ?? save?.settings ?? GameSettings.initial;
       final restoredMusicSystems = restoreMusicStateFromSettings(
         settings: savedSettings,
         systems: nextProgression.legacySystems,
@@ -1161,7 +1179,9 @@ class _GameHomePageState extends State<GameHomePage>
       MaterialPageRoute<void>(
         builder: (_) => SaveSlotsPage(
           activeSlot: _activeSlot,
+          settings: _settings,
           onSelect: _switchSaveSlot,
+          onImportComplete: _switchSaveSlot,
           onResetEverything: _resetEverything,
         ),
       ),
@@ -1223,6 +1243,11 @@ class _GameHomePageState extends State<GameHomePage>
       }
     });
     GtnApp.settingsNotifier.value = synchronizedSettings;
+    final bundleStorage = await SaveBundleStorage.inApplicationDocuments();
+    await SaveBundleStorage.saveAppPreferences(
+      bundleStorage.directory,
+      synchronizedSettings,
+    );
     await _persist();
   }
 
