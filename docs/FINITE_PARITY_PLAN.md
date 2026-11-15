@@ -299,3 +299,8 @@ Run #1933 failed with 431 passing and 4 failing tests. The primary failure was t
 ## Validate #1941 partial result — 2026-11-16
 
 At head c9557b4b69ae73ba176d1407927bbd618a0c34ff, formatting and analysis passed, all 435 Flutter tests passed, and the Android debug APK built successfully (artifact 14183730859). The Windows desktop debug build was still running; the Windows installer job was skipped. Full CI and runtime/visual parity remain open. Run: https://github.com/ne0gl1tch20/gtn-2/actions/runs/43768471017.
+
+
+## Validate #1941 final result — 2026-11-16
+
+Run #1941 completed successfully at head c9557b4b69ae73ba176d1407927bbd618a0c34ff. Format and analysis passed, all 435 Flutter tests passed, Android debug APK built, and Windows desktop debug build succeeded. The Windows installer job was skipped, not failed. Android artifact 14183730859 and Windows artifact 14183332045 are available until 2026-11-22. This does not close Batch A: Android/Windows runtime visual checks across Dashboard, More, Settings, Menu Studio, Profile and Save Slots remain required. The screenshot's Upgrade Shop horizontal overflow and World Map heading wrap remain separate follow-up defects. Run: https://github.com/ne0gl1tch20/gtn-2/actions/runs/43768471017.
