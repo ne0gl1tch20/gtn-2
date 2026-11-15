@@ -255,6 +255,12 @@ Green CI is build/test evidence only. It does not prove live Android/Windows beh
 
 | 2026-11-15 11:25 | `7babc2719627c26981fbf58d27731d6ef004664d` | Log Menu Studio reset preview parity implementation | Audit | `menu-studio.js` | `docs/BATCH_A_COMMIT_LOG.md` | Self-logs the implementation, regression, plan and source-diff commits |
 
+| 2026-11-15 11:26 | `fe416501cde196a7ca7c16be4d9becd522df3dd3` | Match Dart formatter for Menu Studio persistence assertion | Batch A / Menu Studio / Save Slots | `menu-studio.js` | `test/data/saves/save_bundle_storage_test.dart` | Makes the compact color assertion single-line to match Dart 3.50 formatter output |
+| 2026-11-15 11:26 | `3a2cb444e97db15f7316097212db088d9aa47bcb` | Remove generated Dart package configuration | Repository cleanup | — | `.dart_tool/package_config.json` | Removes machine-specific `/home/runner/.pub-cache` and Flutter SDK paths |
+| 2026-11-15 11:26 | `d5b65d1371021b3645f57f37a535d2582b74dcb9` | Remove generated Dart package graph | Repository cleanup | — | `.dart_tool/package_graph.json` | Removes generated dependency graph from tracked source |
+| 2026-11-15 11:26 | `14bc5fcf74dec2470fcbdc0d063edc837046e649` | Remove generated Dart SDK version marker | Repository cleanup | — | `.dart_tool/version` | Removes generated Flutter SDK version marker |
+| 2026-11-15 11:27 | `3fac9fb4239dc2914ae1c4e7da0359f8e6250599` | Ignore generated Dart package metadata | Repository cleanup | — | `.gitignore` | Prevents future formatter/dependency workflows from re-adding machine-local `.dart_tool/` files |
+
 ### Current Creative Save implementation state
 
 - **Implemented and CI-verified:** schema-v7 permanent `creativeModeEnabled` flag with old-save default false; separate from the existing isolated `creativeMode` sandbox payload.
