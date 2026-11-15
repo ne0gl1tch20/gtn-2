@@ -168,6 +168,24 @@ Green CI is build/test evidence only. It does not prove live Android/Windows beh
 
 
 
+| 2026-11-15 00:26:35 | `f0ccea72783dc7fc09eac6f382f01be8ca638dc9` | Self-log portable backup compatibility ledger update | Audit | — | `docs/BATCH_A_COMMIT_LOG.md` | Follow-up commit records the preceding ledger checkpoint |
+| 2026-11-15 00:27:00 | `eda1ed95aba250494ac31f285ab20102baef27ac` | Add temporary legacy codec formatter workflow | CI support | — | `.github/workflows/temporary-batch-a-legacy-codec-format.yml` | Temporary Dart formatter workflow; later removed |
+| 2026-11-15 00:27:10 | `0fe01eb8246eddba3c93358b934aeefd0ce82a72` | Run legacy codec formatter for pull requests | CI support | — | `.github/workflows/temporary-batch-a-legacy-codec-format.yml` | Adds pull-request trigger; initial checkout ref failed on synthetic PR merge ref |
+| 2026-11-15 00:27:20 | `028c9e866c5cd1e536450b3d3e644e5d8e8b35ce` | Fix temporary formatter checkout ref | CI support | — | `.github/workflows/temporary-batch-a-legacy-codec-format.yml` | Formatter rerun 43658417762 passed; 3 selected files reported 0 changes |
+| 2026-11-15 00:27:30 | `b01d5b0c9d4efefa8ae6ad7c327323f789cbaac6` | Remove temporary legacy save formatter workflow | CI support | — | `.github/workflows/temporary-batch-a-legacy-codec-format.yml` | Temporary workflow removed after formatter completed; no formatter automation is left in the branch |
+| 2026-11-15 00:28:00 | `c2c58ae8efe0ab6c12bb0f23335753bb95ab2879` | Add strict GTN1 save state migration adapter | Save Slots / Migration | `GameState.kt; SaveManager.kt` | `lib/data/saves/legacy_gtn1_save_adapter.dart` | Initial core field adapter; later corrected for GTN1 TraitProfile, selected trait-arm types and source settings locations |
+| 2026-11-15 00:28:10 | `55cabd9903e58247716d3ddf055ec7bb6711b904` | Preserve GTN1 adaptive trait profile during save migration | Save Slots / Migration | `TraitProfile.kt; GameState.kt` | `lib/data/saves/legacy_gtn1_save_adapter.dart` | Maps the full version-1 adaptive profile to GTN2 `AdaptiveTraitProfile`; uses strict fail-closed handling for fields without destinations |
+| 2026-11-15 00:28:20 | `3614ae47897da233bdeb42d91750e583fd15a1c3` | Test GTN1 save state migration adapter | Save Slots / Tests | `GameState.kt; TraitProfile.kt; GameSettings` | `test/data/saves/legacy_gtn1_save_adapter_test.dart` | Adds populated mapping, unsupported-field, malformed-input and default-state tests; pending execution |
+| 2026-11-15 00:28:25 | `ac295a610788be9c456ca01d2d57aacffef9c658` | Correct migrated music playlist assertion | Save Slots / Tests | `GameSettings` | `test/data/saves/legacy_gtn1_save_adapter_test.dart` | Aligns test with GTN2 `musicPlaylistPaths` property |
+| 2026-11-15 00:28:35 | `4b4676c0f2f737898e3431d9a2955a5f9a89eda2` | Match GTN1 save-load range and difficulty sanitization | Save Slots / Migration | `SaveManager.kt; GameState.kt` | `lib/data/saves/legacy_gtn1_save_adapter.dart` | Mirrors GTN1 fallback for invalid difficulty and normal/Creative range handling; tests pending |
+| 2026-11-15 00:28:45 | `a6774424ddf308f47c7f086345f2058c2cc95da3` | Record strict GTN1 save adapter implementation | Audit / Save Slots | `GameState.kt; TraitProfile.kt; SaveManager.kt` | `docs/FINITE_PARITY_PLAN.md` | Records mapped fields, fail-closed unsupported fields and remaining bundle/UI work |
+| 2026-11-15 00:28:55 | `8420b66800767d2093620765ad63dc990d8bea04` | Update Save Slots migration cross-diff | Audit / Save Slots | `GameState.kt; TraitProfile.kt; SaveManager.kt` | `docs/GTN1_SCREEN_PARITY_DIFF.md` | Records source-to-target mapping and explicit remaining gaps |
+| 2026-11-15 00:29:10 | `43658205380` | Validate run — formatter gate failed | CI / Save Slots | — | Adapter not yet present | Failed at Dart formatting before analysis/tests/builds; superseded by later formatted code |
+| 2026-11-15 00:29:20 | `43658417762` | Temporary formatter workflow — success | CI support | — | Three legacy codec Dart files | Passed; `dart format` reported 0 changed files |
+| 2026-11-15 00:29:30 | `43658417715` | Validate run — full debug validation passed | CI / Batch A | — | Code at `028c9e866c5cd1e536450b3d3e644e5d8e8b35ce` | Format/analyze passed, 399 Flutter tests passed, Android debug APK and Windows desktop debug builds passed; Windows release installer skipped. This run predates the new adapter commits |
+| 2026-11-15 00:29:40 | `43658417715` | Validate evidence checkpoint | Audit / CI | — | `docs/FINITE_PARITY_PLAN.md` | The completed run validates the previous codec checkpoint only; current adapter changes still need a fresh run |
+
+
 ### Current Creative Save implementation state
 
 - **Implemented and CI-verified:** schema-v7 permanent `creativeModeEnabled` flag with old-save default false; separate from the existing isolated `creativeMode` sandbox payload.
