@@ -146,10 +146,20 @@ class LegacyGtn1SaveAdapter {
       );
     }
 
+    final rawDifficulty = _string(source, 'difficultyId', fallback: 'classic');
+    final difficulty = const {'classic', 'hard', 'extreme'}.contains(rawDifficulty)
+        ? rawDifficulty
+        : 'classic';
     final settings = _settings(settingsJson).copyWith(
-      difficultyId: _string(source, 'difficultyId', fallback: 'classic'),
+      difficultyId: difficulty,
     );
     final name = _string(source, 'profileName').trim();
+    final creative = _bool(source, 'creativeModeEnabled');
+    final minimum = creative
+        ? _int(source, 'currentRangeMin', fallback: 1).clamp(1, 1000000)
+        : 1;
+    final maximum = _int(source, 'currentRangeMax', fallback: 100)
+        .clamp(minimum, 1000000);
     final data = SaveData(
       secret: _int(source, 'targetNumber', fallback: 50),
       attempts: _int(source, 'attempts'),
@@ -158,13 +168,13 @@ class LegacyGtn1SaveAdapter {
       bestStreak: _int(source, 'bestStreak'),
       gamesWon: _int(source, 'gamesWon'),
       isComplete: _bool(source, 'isComplete'),
-      minimum: _int(source, 'currentRangeMin', fallback: 1),
-      maximum: _int(source, 'currentRangeMax', fallback: 100),
+      minimum: minimum,
+      maximum: maximum,
       progression: progression,
       settings: settings,
       profileName: name.substring(0, name.length.clamp(0, 24)),
       profileIconId: _profileIcon(_string(source, 'profileIconId', fallback: 'default')),
-      creativeModeEnabled: _bool(source, 'creativeModeEnabled'),
+      creativeModeEnabled: creative,
     );
     SaveData.fromJson(data.toJson());
     return data;
