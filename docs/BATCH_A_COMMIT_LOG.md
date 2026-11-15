@@ -420,3 +420,12 @@ Batch A remains active until Dashboard, More, Settings, Menu Studio, Profile and
 - Android debug APK build: success. Artifact ID 14183730859, name android-debug-apk, size 99,204,521 bytes, SHA-256 bf6b403b0a13029a9e775477bf9fdc8f910f0ea2554481dde8784d8c535057af, expires 2026-11-22. Archive: https://api.github.com/repos/ne0gl1tch20/gtn-2/actions/artifacts/14183730859/zip
 - Windows desktop debug build was still in progress at this checkpoint. Windows release installer was skipped by the workflow. No Windows artifact or full Validate success is claimed yet.
 - Run: https://github.com/ne0gl1tch20/gtn-2/actions/runs/43768471017
+
+
+### Validate #1941 final result — 2026-11-16
+
+- Run https://github.com/ne0gl1tch20/gtn-2/actions/runs/43768471017 completed successfully at head c9557b4b69ae73ba176d1407927bbd618a0c34ff.
+- Format and analysis: success. Flutter tests: 435 passed. Android debug APK: success. Windows desktop debug build: success. Windows release installer: skipped (not failed; it is not part of this debug validation gate).
+- Android artifact: ID 14183730859, 99,204,521 bytes, SHA-256 bf6b403b0a13029a9e775477bf9fdc8f910f0ea2554481dde8784d8c535057af, expires 2026-11-22; https://api.github.com/repos/ne0gl1tch20/gtn-2/actions/artifacts/14183730859/zip
+- Windows artifact: ID 14183332045, 58,386,281 bytes, SHA-256 bf6c0344c80241cac99c83262705d2e79fc161c9da9cc1db2822964fb321e30a, expires 2026-11-22; https://api.github.com/repos/ne0gl1tch20/gtn-2/actions/artifacts/14183332045/zip
+- This is CI/build validation only. Batch A still requires Android and Windows runtime visual evidence and verification of all six surfaces. Upgrade Shop overflow and World Map hero-heading wrap remain follow-up defects outside this fix set.
