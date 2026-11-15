@@ -236,6 +236,14 @@ Green CI is build/test evidence only. It does not prove live Android/Windows beh
 
 | 2026-11-15 11:17 | `421326ad5ecfbb4214054b6ca0d67b6c9cd9249c` | Log Menu Studio test formatter correction | Audit | `menu-studio.js` | `docs/BATCH_A_COMMIT_LOG.md` | Records the formatter fix and the CI run that identified it |
 
+| 2026-11-15 11:18 | `d444564669a07c61b70947c805b29cf676243c88` | Add temporary Menu Studio formatter helper | CI support | — | `.github/workflows/temporary-batch-a-menu-studio-format.yml` | Temporary helper was added to format the new regression; no helper is intended to remain in the branch |
+| 2026-11-15 11:19 | `f97b80dad5ceafda0cbfc1923edf5b55bef91340` | Restore formatted test structure and preserve Menu Studio backup coverage | Batch A / Menu Studio / Save Slots | `menu-studio.js` | `test/data/saves/save_bundle_storage_test.dart` | Restores the previously validated multiline test structure before applying the new persistence assertions |
+| 2026-11-15 11:20 | `03e49d100f706631fe0088c608c9e5c1a3dffb98` | Remove temporary Menu Studio formatter | CI cleanup | — | `.github/workflows/temporary-batch-a-menu-studio-format.yml` | Removes the temporary helper; no temporary formatter workflow remains |
+| 2026-11-15 11:20 | `d2eb548be5ad3590950582b3d92e6cccac4a8c92` | Simplify Menu Studio persistence assertions | Batch A / Menu Studio / Save Slots | `menu-studio.js` | `test/data/saves/save_bundle_storage_test.dart` | Uses direct ordered-field and color assertions to keep the regression compact and formatter-stable |
+| 2026-11-15 11:21 | `43671653395` | Validate #1868 formatting gate failed | CI / Menu Studio | — | `test/data/saves/save_bundle_storage_test.dart` | Formatting failed before analysis/tests/builds; this first check identified the modified test file |
+| 2026-11-15 11:21 | `43671792622` | Validate #1871 formatting gate failed | CI / Menu Studio | — | `test/data/saves/save_bundle_storage_test.dart` | Formatting still failed after a continuation-indent-only correction; formatter logs showed this same file as the only changed file |
+| 2026-11-15 11:21 | `43671897578` | Validate #1872 formatting gate failed | CI / Menu Studio | — | `test/data/saves/save_bundle_storage_test.dart` | Formatting still failed on the previous test structure; restored the original formatted test block and simplified new assertions afterward |
+
 ### Current Creative Save implementation state
 
 - **Implemented and CI-verified:** schema-v7 permanent `creativeModeEnabled` flag with old-save default false; separate from the existing isolated `creativeMode` sandbox payload.
