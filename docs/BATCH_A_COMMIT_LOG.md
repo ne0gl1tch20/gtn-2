@@ -440,3 +440,23 @@ Batch A remains active until Dashboard, More, Settings, Menu Studio, Profile and
 - This confirms CI coverage for the Nimmy first-run, portable backup cancellation/confirmation, compact navigation and dashboard input regression changes. It does not provide live Android/Windows runtime evidence.
 - The authoritative checklist on `main` was refreshed in commit `001dd98fff8c4504b57cadd320180d57ec03d86b` to replace stale pending CI statements with the #1952 result while keeping device checks open.
 - Batch A remains active. PR #74 remains draft. Batch B remains blocked pending Android/Windows runtime checks, paired screenshots and all six surface exit criteria. The 51px Upgrade Shop overflow and World Map hero-heading wrap remain separate follow-up defects and are not included in this PR's fix claim.
+
+
+
+### PR #74 first-run / Save Slots runtime comment — 2026-11-16
+
+- GTN1 parity was rechecked against pinned source `fe9cf567169e19059e0330d08769fe454336ef94`: first-run profile gating and Save Slots routing in `NavGraph.kt`, plus offline reward → daily reward → Nimmy ordering in Web Play `renderRewardPopups` / `maybeStartNimmyTutorial`.
+- Code commits on `batch-a/creative-save-active-slot`: `beea122088b159daa5ddf96de6517c3fd2a0e391` (startup/profile flow); `42229144ff979d13b27fddc037808a92fb69c0d8` and `a336f7314c40618c0db3fb1b2882d6cf0f653e15` (empty slot creation, including active empty slot); `68dee9909559d659217bcabae57516ca3f5bb0db` (Create Save dialog controller ownership); `eb5627eee5f39570b2cdc4b5a723471cf4b9a5df` (mobile navigation width); `1cac72199277948c347a7f2ae4542d1b1e7f2ac8` and `ade459980d6185189a64ada86796728657ab239b` (Settings title constraint); `18e74ed12b5339d051856831a5f929bd7c4a30d5`, `2ccf58c5e69e378c3a8f2e4b3ecebd8012730b20`, `e4a27ed6751bc7a7f6f8c4655eb92785cecb665e`, `2d5e4d33eeeb36d0418a5fb9405307a295d67b7e`, and `33e1c6e73fe436103f0d3e88832b0e7bcf2cbcaa` (daily reward presentation, existing-save profile continuation, localization, strict analysis cleanup); `6265121368f9e07482d85e61df8952072838904d` (Dart formatter output).
+- Regression test commits: `0d53efe8ae8731bce967b987deaf7fd84bc215ee` and `abbab7de65be2d83538264e8ad988918d363366b`. The direct-tap test now covers an empty active slot and checks that dialog dismissal leaves no framework exception.
+- Temporary formatter workflow commits were removed after formatting; no temporary workflow remains on the branch.
+- Validate runs #1960–#1974 include formatter/analysis attempts and cancellations while the fixes were being staged. The authoritative latest verification is run #1975 at head `322ec8551def094f867d98f55b02a438a773e2c3`: https://github.com/ne0gl1tch20/gtn-2/actions/runs/43777288634. Format and analysis passed; Flutter tests, Android APK build and Windows desktop debug build were running at this checkpoint. No full validation pass is claimed yet.
+- Keep PR #74 draft, Batch A open, and Batch B blocked until the latest full validation and Android/Windows runtime evidence pass.
+
+
+
+### Validate #1975 — navigation geometry regression and correction — 2026-11-16
+
+- Run #1975 at `322ec8551def094f867d98f55b02a438a773e2c3`: format and analysis passed; Flutter tests reported 434 passed / 1 failed.
+- Failure: `bottom navigation matches GTN1 width limits` expected 366px at a 390px viewport, actual 390px. The attempted full-width fix removed the 24px source margin and broke the existing GTN1 geometry contract.
+- Corrected by restoring the 24px width inset and centering the compact navigation, preserving 366px width with symmetric 12px side margins. Added an explicit centered-position assertion. Commits: `58472f1e4695ccf17d6ab9538bad71138b808e73` and `c533651a2ac0dfac932de4cb8a7e5f4df98f6a91`.
+- Android and Windows builds from #1975 were still running; their result is not used to claim a passing validation. New full validation is required for the corrected head.
