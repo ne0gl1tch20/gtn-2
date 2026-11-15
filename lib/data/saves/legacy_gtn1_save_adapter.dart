@@ -233,10 +233,15 @@ class LegacyGtn1SaveAdapter {
     statistics
       ..['totalGuesses'] = save.progression.totalGuesses
       ..['correctGuesses'] = save.progression.correctGuesses
-      ..['failedGuesses'] =
-          (save.progression.totalGuesses - save.progression.correctGuesses)
-              .clamp(0, save.progression.totalGuesses)
-              .toInt()
+      // GTN2 has no independent failed-guesses counter. Preserve the
+      // original GTN1 value when available instead of replacing it with a
+      // derived value that may differ from the source's historical statistic.
+      ..['failedGuesses'] = statistics.containsKey('failedGuesses')
+          ? statistics['failedGuesses']
+          : (save.progression.totalGuesses -
+                    save.progression.correctGuesses)
+                .clamp(0, save.progression.totalGuesses)
+                .toInt()
       ..['moneyEarned'] = save.progression.moneyEarned.toString()
       ..['moneySpent'] = save.progression.moneySpent.toString()
       ..['prestigesCount'] = save.progression.prestigeResets
