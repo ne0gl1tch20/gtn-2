@@ -89,6 +89,9 @@ class LegacyGtn1BackupBundle {
           jsonEncode(LegacyGtn1SaveAdapter.toGameStateJson(entry.value));
     }
     final creativeJson = <String, String>{};
+    for (final entry in creativeSlots.entries) {
+      creativeJson['${entry.key}'] = CreativeModeSave.encode(entry.value);
+    }
     for (final entry in slots.entries) {
       final creative = entry.value.creativeMode;
       if (creative != null) {
