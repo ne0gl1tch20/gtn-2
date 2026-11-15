@@ -181,7 +181,9 @@ void main() {
         initialTheme: Brightness.dark,
         home: MenuStudioPage(
           settings: settings,
-          onChanged: (value) async => saved = value,
+          onChanged: (value) async {
+            saved = value;
+          },
           onPreview: (value) => previewed = value,
         ),
       ),
