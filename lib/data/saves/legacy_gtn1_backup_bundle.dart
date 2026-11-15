@@ -78,7 +78,7 @@ class LegacyGtn1BackupBundle {
         throw const FormatException('Invalid GTN2 save slot index.');
       }
       slotJson['${entry.key}'] =
-          jsonEncode(LegacyGtn1SaveAdapter.toGameStateJson(entry.value));
+          jsonEncode(LegacyGtn1SaveAdapter.toGameStateJson(entry.value.copyWith(settings: appPreferences)));
     }
     final backupJson = <String, String>{};
     for (final entry in backups.entries) {
