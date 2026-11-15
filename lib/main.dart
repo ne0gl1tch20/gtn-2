@@ -375,7 +375,7 @@ class _GameHomePageState extends State<GameHomePage>
                   'update_unavailable',
                   'No debug-latest release has been published yet.',
                 )
-              : '${AppLocalizations.text('update_unavailable', 'Update check failed')}: $error';
+              : "${AppLocalizations.text('update_unavailable', 'Update check failed')}: $error";
         });
         _publishUpdateNotice();
       }
@@ -422,7 +422,10 @@ class _GameHomePageState extends State<GameHomePage>
     } catch (error) {
       if (mounted) {
         setState(
-          () => _updateNoticeStatus = '${AppLocalizations.text('update_install_failed', 'Update installation failed')}: $error',
+          () => _updateNoticeStatus = AppLocalizations.text(
+            'update_install_failed',
+            'Update installation failed: %s',
+          ).replaceFirst('%s', error.toString()),
         );
         _publishUpdateNotice();
         ScaffoldMessenger.of(context)
