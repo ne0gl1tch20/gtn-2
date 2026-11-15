@@ -90,12 +90,11 @@ void main() {
       );
 
       await expectLater(
-        targetSlot: () async => SaveBundleStorage(directory: targetDirectory)
-            .importBackup(
-              input: backupText,
-              passphrase: 'incorrect horse battery',
-              legacyTargetSlot: 1,
-            ),
+        () => SaveBundleStorage(directory: targetDirectory).importBackup(
+          input: backupText,
+          passphrase: 'incorrect horse battery',
+          legacyTargetSlot: 1,
+        ),
         throwsFormatException,
       );
       expect((await targetSlot.loadPrimary())!.secret, before!.secret);
