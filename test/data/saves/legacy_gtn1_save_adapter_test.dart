@@ -137,9 +137,7 @@ void main() {
       );
       expect(
         () => LegacyGtn1SaveAdapter.fromGameStateJson({
-          'currentRangeMin': 10,
-          'currentRangeMax': 5,
-          'targetNumber': 7,
+          'attempts': -1,
         }),
         throwsFormatException,
       );
