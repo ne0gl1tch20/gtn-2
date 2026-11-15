@@ -399,6 +399,22 @@ void main() {
     expect((await storage.load())?.toJson(), second.toJson());
   });
 
+  test('backup recovery restores primary without consuming the backup', () async {
+    final directory = await Directory.systemTemp.createTemp(
+      'gtn2-save-backup-recovery-',
+    );
+    addTearDown(() => directory.delete(recursive: true));
+    final storage = SaveStorage(directory: directory);
+    await storage.save(SaveData(secret: 21, attempts: 1, gamesWon: 0));
+    await storage.save(SaveData(secret: 73, attempts: 2, gamesWon: 1));
+    final primary = File('${directory.path}/gtn2-save.json');
+    await primary.delete();
+
+    expect((await storage.load())?.secret, 21);
+    expect(await storage.hasBackup(), isTrue);
+    expect((await storage.loadBackup())?.secret, 21);
+  });
+
   test(
     'serializes writes across separate storage instances for one slot',
     () async {
