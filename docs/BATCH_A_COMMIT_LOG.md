@@ -232,6 +232,8 @@ Green CI is build/test evidence only. It does not prove live Android/Windows beh
 
 | 2026-11-15 11:15 | `8525c52ff28e1a73ed8f62bd7975d48d04d5ff17` | Log Menu Studio persistence regression and audit updates | Audit | `menu-studio.js` | `docs/BATCH_A_COMMIT_LOG.md` | Self-logs the test and source/plan documentation commits |
 
+| 2026-11-15 11:16 | `73b5b61ae29e4b65ed69c2f8aaea1b7df449ca19` | Fix Menu Studio persistence test formatting | Batch A / Menu Studio / Save Slots | `menu-studio.js` | `test/data/saves/save_bundle_storage_test.dart` | Corrects the formatter-reported continuation indentation; the failed formatting-only Validate run is recorded separately |
+
 ### Current Creative Save implementation state
 
 - **Implemented and CI-verified:** schema-v7 permanent `creativeModeEnabled` flag with old-save default false; separate from the existing isolated `creativeMode` sandbox payload.
