@@ -565,7 +565,7 @@ class LegacyGtn1SaveAdapter {
 
   static Map<String, dynamic> _object(Map<String, dynamic> source, String key) {
     final value = source[key];
-    if (value == null) return const {};
+    if (value == null) return <String, dynamic>{};
     if (value is! Map) throw FormatException('Invalid GTN1 object: $key');
     return Map<String, dynamic>.from(value);
   }
