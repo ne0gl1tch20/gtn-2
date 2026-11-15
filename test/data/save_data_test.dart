@@ -644,7 +644,8 @@ void main() {
   });
 
   test(
-    'restores permanent Creative Save eligibility per slot after slot changes and restart',
+    'restores permanent Creative Save eligibility per slot after slot '
+    'changes and restart',
     () async {
       final directory = await Directory.systemTemp.createTemp(
         'gtn2-creative-save-slot-switch-',
