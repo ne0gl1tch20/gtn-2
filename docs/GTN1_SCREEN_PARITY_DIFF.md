@@ -258,3 +258,14 @@ The following source surfaces are in GTN1's frozen production inventory. Some ar
 - The existing widget test covers moving a source destination, the compatible payload shape, live preview and cancel restoration.
 - Added an end-to-end persistence regression in `test/data/saves/save_bundle_storage_test.dart`: custom More ordering, per-button colors and the complete encoded Menu Studio layout are written into global app preferences, exported through the portable bundle and reloaded after import. The test asserts the restored values exactly.
 - This closes the automated backup/reload coverage gap for Menu Studio preferences. It does **not** replace a live app restart check or Android/Windows visual/interaction evidence; those remain open in Batch A.
+
+
+### Menu Studio Reset live-preview parity fix — 2026-11-15
+
+**Pinned GTN1 source:** `app/src/main/assets/web-play/menu-studio.js` at `fe9cf567169e19059e0330d08769fe454336ef94`.
+
+- GTN1's Reset layout handler replaces the working config with defaults, calls `setup()`, then calls `apply()` and `render()`. This immediately restores the real top-bar and More destinations before the user chooses Save changes.
+- GTN2's Reset layout button previously replaced only the editor's local `_layout`, so the live dashboard preview stayed stale until another edit or save.
+- Added `_reset()` to restore the default layout and immediately call the existing preview callback. The reset remains an unsaved preview; the test asserts it does not invoke `onChanged`.
+- Added `Menu Studio reset immediately updates the live preview` to `test/settings/menu_studio_page_test.dart`, checking Worlds returns to navigation and the More order returns to the pinned GTN1 default.
+- CI for this change is running in Validate run [43672157813](https://github.com/ne0gl1tch20/gtn-2/actions/runs/43672157813); do not treat the test as passed until the run completes. Android/Windows live UI checks remain open.
