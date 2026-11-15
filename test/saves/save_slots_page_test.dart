@@ -50,6 +50,7 @@ void main() {
         initialTheme: Brightness.dark,
         home: SaveSlotsPage(
           activeSlot: 1,
+          settings: GameSettings.initial,
           onSelect: (_) async {},
           previewLoader: (_) => Future<SaveData?>.value(null),
         ),
@@ -96,6 +97,7 @@ void main() {
         initialTheme: Brightness.dark,
         home: SaveSlotsPage(
           activeSlot: 1,
+          settings: GameSettings.initial,
           onSelect: (_) async {},
           onResetEverything: () async {
             resetCalled = true;
