@@ -82,7 +82,7 @@ void main() {
         '12345678901234567890',
       );
       expect(decoded.slots[2]!.progression.nebulaItems, {'golden_guess': 1});
-      expect(decoded.slots[2]!.creativeMode!.name, 'Sandbox');
+      expect(decoded.creativeSlots[2]!.name, 'Sandbox');
       expect(decoded.backups[1]!.secret, 25);
       final retained = decoded.slots[2]!
           .progression
@@ -157,8 +157,8 @@ void main() {
       });
 
       final decoded = LegacyGtn1BackupBundle.decode(raw);
-      expect(decoded.slots[4]!.creativeMode!.name, 'Standalone sandbox');
-      expect(decoded.slots[4]!.creativeModeEnabled, isFalse);
+      expect(decoded.slots.containsKey(4), isFalse);
+      expect(decoded.creativeSlots[4]!.name, 'Standalone sandbox');
     });
   });
 }
