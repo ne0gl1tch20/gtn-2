@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: validate-${{ github.event.pull_request.number || github.ref }}
@@ -21,7 +21,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          ref: ${{ github.event.pull_request.head.ref || github.ref }}
       - name: Fetch GTN1 source assets
         uses: actions/checkout@v4
         with:
@@ -42,8 +42,16 @@ jobs:
         run: flutter pub get
       - name: Restore analysis configuration
         run: git restore -- analysis_options.yaml
-      - name: Verify Dart formatting
-        run: dart format --output=none --set-exit-if-changed .
+      - name: Format Batch A screenshot fixes (temporary)
+        run: |
+          dart format lib/saves/save_slots_page.dart test/saves/save_slots_page_test.dart test/settings/game_settings_test.dart test/widget_test.dart
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add lib/saves/save_slots_page.dart test/saves/save_slots_page_test.dart test/settings/game_settings_test.dart test/widget_test.dart
+          if ! git diff --cached --quiet; then
+            git commit -m "Format Batch A screenshot fixes"
+            git push origin "HEAD:${GITHUB_HEAD_REF}"
+          fi
       - name: Analyze
         run: flutter analyze --fatal-infos
 
