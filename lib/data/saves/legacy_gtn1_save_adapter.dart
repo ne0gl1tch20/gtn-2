@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import '../../core/game/difficulty_rules.dart';
 import '../../core/legacy/adaptive_trait_profile.dart';
 import '../../core/legacy/legacy_systems_state.dart';
 import '../../core/numbers/big_number.dart';
@@ -24,34 +25,14 @@ class LegacyGtn1SaveAdapter {
   }
 
   static SaveData fromGameStateJson(Map<String, dynamic> source) {
-    final unsupported = <String>[];
-
-    void rejectWhen(bool condition, String field) {
-      if (condition) unsupported.add(field);
-    }
-
     final statistics = _object(source, 'statistics');
     final settingsJson = _object(source, 'settings');
     final traitJson = _object(source, 'traitProfile');
-
-    // The GTN1 trait profile and GTN2 adaptive profile share this exact
-    // persisted contract. Keep it rather than dropping behavioral memory.
     final adaptiveTraitProfile = _adaptiveTraitProfile(traitJson);
-
-    // These source values have no equivalent in the current GTN2 save model.
-    rejectWhen(_int(statistics, 'failedGuesses') != 0, 'statistics.failedGuesses');
-    rejectWhen(_int(statistics, 'arcadePlayed') != 0, 'statistics.arcadePlayed');
-    rejectWhen(_map(statistics, 'arcadeBestScores').isNotEmpty, 'statistics.arcadeBestScores');
-    rejectWhen(_set(source, 'shopPurchases').isNotEmpty, 'shopPurchases');
-    rejectWhen(_set(source, 'prestigeShopPurchases').isNotEmpty, 'prestigeShopPurchases');
-    rejectWhen(_set(source, 'ultraShopPurchases').isNotEmpty, 'ultraShopPurchases');
-    rejectWhen(_string(source, 'buyMultiplier', fallback: '1') != '1', 'buyMultiplier');
-    rejectWhen(_int(source, 'creativeAttemptLimit') != 0, 'creativeAttemptLimit');
-    rejectWhen(_number(source, 'creativeRewardMultiplier', fallback: 1) != 1, 'creativeRewardMultiplier');
-    rejectWhen(_string(source, 'lastSavedVersion', fallback: 'unknown') != 'unknown', 'lastSavedVersion');
 
     final legacy = <String, dynamic>{
       'adaptiveTraitProfile': adaptiveTraitProfile.toJson(),
+      'legacyGtn1Snapshot': jsonDecode(jsonEncode(source)) as Map<String, dynamic>,
       'discoveredTraits': _set(source, 'discoveredTraitIds').toList(),
       'selectedTraitArms': _stringMap(source, 'selectedTraitArms'),
       'activeMutators': _set(source, 'activeMutators').toList(),
@@ -118,11 +99,11 @@ class LegacyGtn1SaveAdapter {
       money: _bigNumber(source, 'money'),
       prestige: _bigNumber(source, 'prestige'),
       ultra: _bigNumber(source, 'ultra'),
-      nebula: _bigNumber(source, 'nebulaCurrency'),
+      nebula: _bigNumber(source, 'nebula'),
       upgrades: _map(source, 'upgradeLevels'),
       prestigeUpgrades: _map(source, 'prestigeUpgradeLevels'),
       ultraUpgrades: _map(source, 'ultraUpgradeLevels'),
-      equippedCosmeticId: _nullableString(source, 'equippedCosmeticId'),
+      equippedCosmeticId: _supportedCosmetic(_nullableString(source, 'equippedCosmeticId')),
       defeatedBosses: _set(source, 'defeatedBossIds'),
       prestigeResets: _int(source, 'prestigeCount'),
       ultraResets: _int(source, 'ultraCount'),
@@ -131,7 +112,7 @@ class LegacyGtn1SaveAdapter {
       moneyEarned: _bigNumber(statistics, 'moneyEarned'),
       moneySpent: _bigNumber(statistics, 'moneySpent'),
       randomEventsTriggered: _int(statistics, 'randomEventsTriggered'),
-      lastRandomEventId: _nullableString(source, 'lastRandomEventId'),
+      lastRandomEventId: _supportedRandomEvent(_nullableString(source, 'lastRandomEventId')),
       bossDamage: _map(source, 'bossBattleProgress'),
       currentStreak: _int(source, 'streak'),
       bestStreak: _int(source, 'bestStreak'),
@@ -153,23 +134,23 @@ class LegacyGtn1SaveAdapter {
         : 'classic';
     final settings = _settings(settingsJson).copyWith(
       difficultyId: difficulty,
+      tutorialCompleted: _bool(source, 'tutorialCompleted') ||
+          _bool(settingsJson, 'tutorialCompleted'),
     );
     final name = _string(source, 'profileName').trim();
     final creative = _bool(source, 'creativeModeEnabled');
     final minimum = creative
-        ? _int(source, 'currentRangeMin', fallback: 1).clamp(1, 1000000)
-        .toInt()
+        ? _int(source, 'currentRangeMin', fallback: 1).clamp(1, 1000000).toInt()
         : 1;
-    final maximum = _int(source, 'currentRangeMax', fallback: 100)
-        .clamp(minimum, 1000000)
-        .toInt();
+    final rawMaximum = _int(source, 'currentRangeMax', fallback: 100);
+    final maximum = creative
+        ? rawMaximum.clamp(minimum, 1000000).toInt()
+        : rawMaximum.clamp(DifficultyRules.baseRangeMaximum(difficulty), 500).toInt();
     final data = SaveData(
-      secret: _int(source, 'targetNumber', fallback: 50)
-          .clamp(minimum, maximum)
-          .toInt(),
+      secret: _int(source, 'targetNumber', fallback: 50).clamp(minimum, maximum).toInt(),
       attempts: _int(source, 'attempts'),
       correctGuesses: _int(source, 'correctGuesses'),
-      streak: _int(source, 'currentStreak'),
+      streak: _int(source, 'streak'),
       bestStreak: _int(source, 'bestStreak'),
       gamesWon: _int(source, 'gamesWon'),
       isComplete: _bool(source, 'isComplete'),
@@ -269,6 +250,22 @@ class LegacyGtn1SaveAdapter {
     }
     return _settings(decoded);
   }
+
+  static String? _supportedCosmetic(String? id) =>
+      id == null ||
+          const {'cosmetic_nebula_ring', 'cosmetic_starfield', 'cosmetic_pixel_glow'}
+              .contains(id)
+      ? id
+      : null;
+
+  static String? _supportedRandomEvent(String? id) =>
+      id == null ||
+          const {
+            'cash_burst', 'nebula_rain', 'jackpot', 'streak_surge',
+            'range_shuffle', 'tax_refund', 'cosmic_gift',
+          }.contains(id)
+      ? id
+      : null;
 
   static String _profileIcon(String id) =>
       SaveData.profileIconIds.contains(id) ? id : 'default';
