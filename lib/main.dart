@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -29,6 +30,8 @@ import 'core/scripting/lua_sandbox.dart';
 import 'data/saves/save_bundle_storage.dart';
 import 'data/saves/save_data.dart';
 import 'data/saves/save_storage.dart';
+import 'data/updates/update_check_schedule.dart';
+import 'data/updates/update_checker.dart';
 import 'dev/developer_settings_page.dart';
 import 'home/game_dashboard_page.dart';
 import 'i18n/app_localizations.dart';
@@ -177,6 +180,12 @@ class _GameHomePageState extends State<GameHomePage>
   bool _randomEventRunning = false;
   String? _randomEventMessage;
   Timer? _playtimeTimer;
+  Timer? _updateCheckTimer;
+  UpdateRelease? _availableUpdate;
+  WindowsUpdateRelease? _availableWindowsUpdate;
+  bool _checkingUpdate = false;
+  bool _updateNoticeDismissed = false;
+  String? _updateNoticeStatus;
   BigNumber _lastIncomeMeasurement = BigNumber.fromInt(0);
   BigNumber _incomePerSecond = BigNumber.fromInt(0);
   bool _autoClickerTickRunning = false;
@@ -212,6 +221,7 @@ class _GameHomePageState extends State<GameHomePage>
       unawaited(_resumeAutoClicker());
       _startPlaytimeTimer();
       _startRandomEventTimer();
+      _startUpdateCheckTimer();
     } else {
       _autoClickerTimer?.cancel();
       _autoClickerTimer = null;
@@ -219,6 +229,8 @@ class _GameHomePageState extends State<GameHomePage>
       _playtimeTimer = null;
       _randomEventTimer?.cancel();
       _randomEventTimer = null;
+      _updateCheckTimer?.cancel();
+      _updateCheckTimer = null;
     }
   }
 
@@ -261,6 +273,146 @@ class _GameHomePageState extends State<GameHomePage>
     _randomEventTimer = Timer.periodic(const Duration(minutes: 1), (_) {
       unawaited(_runRandomEventTick());
     });
+  }
+
+  void _startUpdateCheckTimer() {
+    _updateCheckTimer?.cancel();
+    if (!mounted ||
+        _isLoading ||
+        _settings.updateCheckIntervalHours <= 0 ||
+        (!Platform.isAndroid && !Platform.isWindows)) {
+      return;
+    }
+    _updateCheckTimer = Timer.periodic(const Duration(minutes: 1), (_) {
+      unawaited(_checkForUpdatesIfDue());
+    });
+    unawaited(_checkForUpdatesIfDue());
+  }
+
+  Future<void> _checkForUpdatesIfDue({bool force = false}) async {
+    if (!mounted ||
+        _isLoading ||
+        _checkingUpdate ||
+        (!Platform.isAndroid && !Platform.isWindows)) {
+      return;
+    }
+    final interval = _settings.updateCheckIntervalHours;
+    if (!force && interval <= 0) return;
+
+    final bundleStorage = await SaveBundleStorage.inApplicationDocuments();
+    final now = DateTime.now();
+    final lastChecked = await UpdateCheckSchedule.loadLastChecked(
+      bundleStorage.directory,
+    );
+    if (!force &&
+        !UpdateCheckSchedule.shouldCheck(
+          intervalHours: interval,
+          now: now,
+          lastCheckedAt: lastChecked,
+        )) {
+      return;
+    }
+    if (!mounted) return;
+    setState(() {
+      _checkingUpdate = true;
+      _updateNoticeStatus = 'Checking for updates…';
+    });
+    try {
+      if (Platform.isAndroid) {
+        final update = await UpdateChecker().checkForUpdate();
+        if (!mounted) return;
+        setState(() {
+          _availableUpdate = update;
+          _availableWindowsUpdate = null;
+          _updateNoticeDismissed = false;
+          _updateNoticeStatus = update == null
+              ? 'You are up to date.'
+              : 'A verified Android update is available.';
+        });
+      } else {
+        final update = await UpdateChecker().checkForWindowsUpdate();
+        if (!mounted) return;
+        setState(() {
+          _availableWindowsUpdate = update;
+          _availableUpdate = null;
+          _updateNoticeDismissed = false;
+          _updateNoticeStatus = update == null
+              ? 'You are up to date.'
+              : 'A verified Windows update is available.';
+        });
+      }
+    } catch (error) {
+      if (mounted) {
+        setState(() {
+          _availableUpdate = null;
+          _availableWindowsUpdate = null;
+          _updateNoticeStatus = error.toString().contains('404')
+              ? 'No debug-latest release has been published yet.'
+              : 'Update check failed: $error';
+        });
+      }
+    } finally {
+      await UpdateCheckSchedule.saveLastChecked(
+        bundleStorage.directory,
+        now,
+      );
+      if (mounted) setState(() => _checkingUpdate = false);
+    }
+  }
+
+  Future<void> _installAvailableUpdate() async {
+    final androidUpdate = _availableUpdate;
+    final windowsUpdate = _availableWindowsUpdate;
+    if (androidUpdate == null && windowsUpdate == null) return;
+    setState(() {
+      _checkingUpdate = true;
+      _updateNoticeStatus = 'Downloading and verifying update…';
+    });
+    try {
+      if (Platform.isAndroid && androidUpdate != null) {
+        await UpdateChecker().downloadAndInstall(androidUpdate);
+        if (mounted) {
+          setState(() {
+            _updateNoticeStatus =
+                'APK verified. Follow the Android installer prompts to finish.';
+          });
+        }
+      } else if (Platform.isWindows && windowsUpdate != null) {
+        await UpdateChecker().downloadAndInstallWindowsUpdate(windowsUpdate);
+      }
+    } catch (error) {
+      if (mounted) {
+        setState(() => _updateNoticeStatus = 'Update installation failed: $error');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(_updateNoticeStatus!)),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _checkingUpdate = false);
+    }
+  }
+
+  void _dismissUpdateNotice() {
+    setState(() => _updateNoticeDismissed = true);
+  }
+
+  String? get _updateNoticeTitle {
+    if (_updateNoticeDismissed) return null;
+    final updateName =
+        _availableUpdate?.versionName ?? _availableWindowsUpdate?.versionName;
+    return updateName == null ? null : 'Version $updateName is ready';
+  }
+
+  String? get _updateNoticeDetails {
+    final android = _availableUpdate;
+    if (android != null) {
+      return 'Android Debug · validated build #${android.runNumber} · ${android.commitSha.substring(0, 8)}';
+    }
+    final windows = _availableWindowsUpdate;
+    if (windows != null) {
+      return 'Windows Debug · validated build #${windows.runNumber} · ${windows.commitSha.substring(0, 8)}';
+    }
+    return null;
   }
 
   Future<void> _runRandomEventTick() async {
@@ -470,6 +622,7 @@ class _GameHomePageState extends State<GameHomePage>
         setState(() => _isLoading = false);
         _startPlaytimeTimer();
         _startRandomEventTimer();
+        _startUpdateCheckTimer();
       }
     }
     _botTeam.reset(_game.minimum, _game.maximum);
@@ -1288,6 +1441,7 @@ class _GameHomePageState extends State<GameHomePage>
       synchronizedSettings,
     );
     await _persist();
+    _startUpdateCheckTimer();
   }
 
   void _onPrimarySelected(int index) {
@@ -1605,8 +1759,16 @@ class _GameHomePageState extends State<GameHomePage>
   Future<void> _openLegacySection(LegacySection section) async {
     await _pushShellRoute<void>(
       MaterialPageRoute<void>(
-        builder: (_) =>
-            LegacyDetailPage(section: section, progression: _progression),
+        builder: (_) => LegacyDetailPage(
+          section: section,
+          progression: _progression,
+          updateNoticeTitle: _updateNoticeTitle,
+          updateNoticeDetails: _updateNoticeDetails,
+          updateNoticeStatus: _updateNoticeStatus,
+          updateChecking: _checkingUpdate,
+          onCheckUpdates: () => unawaited(_checkForUpdatesIfDue(force: true)),
+          onInstallUpdate: _installAvailableUpdate,
+        ),
       ),
     );
   }
@@ -2056,6 +2218,11 @@ class _GameHomePageState extends State<GameHomePage>
       creativeModeEnabled: _creativeModeEnabled,
       onCreativeRange: _updateCreativeRange,
       onCreativeValue: _updateCreativeValue,
+      updateNoticeTitle: _updateNoticeTitle,
+      updateNoticeDetails: _updateNoticeDetails,
+      updateNoticeChecking: _checkingUpdate,
+      onUpdateInstall: _installAvailableUpdate,
+      onUpdateDismiss: _dismissUpdateNotice,
     );
   }
 }
