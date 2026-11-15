@@ -178,9 +178,7 @@ class SaveBundleStorage {
       passphrase,
     );
     var fullBundle = true;
-    if (cleartext == null) {
-      cleartext = LegacyGtn1SaveCodec.decode(input.trim()) ?? input.trim();
-    }
+    cleartext ??= LegacyGtn1SaveCodec.decode(input.trim()) ?? input.trim();
 
     LegacyGtn1BackupBundle bundle;
     final decoded = jsonDecode(cleartext);
