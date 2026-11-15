@@ -39,6 +39,37 @@ void main() {
     expect(firstSlotMenu.enabled, isFalse);
   });
 
+  testWidgets('portable backup import and export controls are available', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      M3EMaterialApp(
+        data: M3EThemeData.light(seedColor: const Color(0xFF7C5CFC)),
+        fontFamily: 'Manrope',
+        autoTheming: false,
+        initialTheme: Brightness.dark,
+        home: SaveSlotsPage(
+          activeSlot: 1,
+          settings: GameSettings.initial,
+          onSelect: (_) async {},
+          previewLoader: (_) => Future<SaveData?>.value(null),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Portable Backup'), findsOneWidget);
+    expect(find.text('Export backup'), findsOneWidget);
+    expect(find.text('Import backup'), findsOneWidget);
+
+    await tester.tap(find.text('Import backup'));
+    await tester.pumpAndSettle();
+    expect(find.text('Paste backup text'), findsOneWidget);
+    expect(find.text('Passphrase (portable backup)'), findsOneWidget);
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+  });
+
   testWidgets('new save dialog exposes permanent Creative Save setup', (
     tester,
   ) async {
