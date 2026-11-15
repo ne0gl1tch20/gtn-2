@@ -279,3 +279,8 @@ Keep one status per checklist item: **Not started**, **In progress**, **Verified
 **Not closed by this patch:** the screenshot also shows a 51px horizontal overflow in Upgrade Shop and a narrow World Map hero heading. These are recorded as follow-up defects for their own parity batches; do not count them as fixed or use them to close Batch A. Settings typography and the remaining six-surface Android/Windows runtime checks still need review. A successful CI run alone is not visual evidence.
 
 The implementation commits on batch-a/creative-save-active-slot are 4d085133f661edb02ed830b659f44bba72edc5d5, 222c9a02cc8223cba900bd4f8e4c10434864c9f6, 0e0ca4662ad98c476decbf1871b6fa8aa6871866, 5cbb891f1d7444a27f5a9f2f573044d77ace3edb, abf8137cba64f37cc82f3b3ae17176ccbe72a2b1, 2596b1bfc2534153eebbe962955497a258140ff1, and 19a1f46ce1e668b9a11b4658a4b35caa098de16c. All validation and runtime evidence remains pending.
+
+
+## Latest validation checkpoint — 2026-11-16
+
+Current implementation head: 3bb5667569510c46897e11ae7b0bbac4b2d345bf. Validate run #1933 (https://github.com/ne0gl1tch20/gtn-2/actions/runs/43767953058) has passed Dart formatting and analysis. Flutter tests, Android debug APK and Windows debug build were still in progress at this checkpoint. The temporary formatter workflow has been removed from the branch; Validate is restored to the standard read-only workflow. All screenshot-driven fixes remain in progress until tests, platform builds and runtime evidence pass. PR #74 remains draft; Batch A and Batch B gates remain unchanged.
