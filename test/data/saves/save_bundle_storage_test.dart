@@ -34,84 +34,78 @@ void main() {
       }
     });
 
-    test(
-      'exports and imports all slots, backups, active slot and global settings',
-      () async {
-        final slotOne = SaveStorage(directory: sourceDirectory, slot: 1);
-        await slotOne.save(SaveData(secret: 20, attempts: 1, gamesWon: 0));
-        await slotOne.save(SaveData(secret: 30, attempts: 2, gamesWon: 1));
-        final slotTwo = SaveStorage(directory: sourceDirectory, slot: 2);
-        await slotTwo.save(
-          SaveData(secret: 77, attempts: 4, gamesWon: 3, profileName: 'Second'),
-        );
-        await slotTwo.saveActiveSlot(2);
+    test('exports and imports all slots, backups, active slot and global settings', () async {
+      final slotOne = SaveStorage(directory: sourceDirectory, slot: 1);
+      await slotOne.save(SaveData(secret: 20, attempts: 1, gamesWon: 0));
+      await slotOne.save(SaveData(secret: 30, attempts: 2, gamesWon: 1));
+      final slotTwo = SaveStorage(directory: sourceDirectory, slot: 2);
+      await slotTwo.save(
+        SaveData(secret: 77, attempts: 4, gamesWon: 3, profileName: 'Second'),
+      );
+      await slotTwo.saveActiveSlot(2);
 
-        const menuStudioLayout =
-            '{"areas":{"worlds":"more","rewards":"nav"},"orders":{"nav":["worlds","arcade","upgrades","rewards"],"more":["homebase","relics"]},"colors":{"worlds":"#ABCDEF"}}';
-        final settings = GameSettings.initial.copyWith(
-          localeCode: 'en_us',
-          themeMode: 'Dark',
-          updateCheckIntervalHours: 6,
-          moreScreenOrder: const ['about', 'settings', 'rewards'],
-          moreScreenButtonColors: const {'about': '#123456'},
-          webMenuStudioLayout: menuStudioLayout,
-        );
-        final source = SaveBundleStorage(directory: sourceDirectory);
-        final backupText = await source.exportPortableBackup(
-          activeSlot: 2,
-          appPreferences: settings,
-          passphrase: 'correct horse battery',
-        );
+      const menuStudioLayout =
+          '{"areas":{"worlds":"more","rewards":"nav"},"orders":{"nav":["worlds","arcade","upgrades","rewards"],"more":["homebase","relics"]},"colors":{"worlds":"#ABCDEF"}}';
+      final settings = GameSettings.initial.copyWith(
+        localeCode: 'en_us',
+        themeMode: 'Dark',
+        updateCheckIntervalHours: 6,
+        moreScreenOrder: const ['about', 'settings', 'rewards'],
+        moreScreenButtonColors: const {'about': '#123456'},
+        webMenuStudioLayout: menuStudioLayout,
+      );
+      final source = SaveBundleStorage(directory: sourceDirectory);
+      final backupText = await source.exportPortableBackup(
+        activeSlot: 2,
+        appPreferences: settings,
+        passphrase: 'correct horse battery',
+      );
 
-        final target = SaveBundleStorage(directory: targetDirectory);
-        final result = await target.importBackup(
-          input: backupText,
-          passphrase: 'correct horse battery',
-          legacyTargetSlot: 1,
-        );
+      final target = SaveBundleStorage(directory: targetDirectory);
+      final result = await target.importBackup(
+        input: backupText,
+        passphrase: 'correct horse battery',
+        legacyTargetSlot: 1,
+      );
 
-        expect(result, isNotNull);
-        expect(result!.isFullBundle, isTrue);
-        expect(result.activeSlot, 2);
-        expect(result.importedSlots, 2);
-        expect(
-          await SaveStorage(directory: targetDirectory).loadActiveSlot(),
-          2,
-        );
-        expect(
-          (await SaveStorage(
-            directory: targetDirectory,
-            slot: 1,
-          ).loadPrimary())!.secret,
-          30,
-        );
-        expect(
-          (await SaveStorage(
-            directory: targetDirectory,
-            slot: 1,
-          ).loadBackup())!.secret,
-          20,
-        );
-        expect(
-          (await SaveStorage(
-            directory: targetDirectory,
-            slot: 2,
-          ).loadPrimary())!.profileName,
-          'Second',
-        );
-        final restoredSettings = await SaveBundleStorage.loadAppPreferences(
-          targetDirectory,
-        );
-        expect(restoredSettings!.themeMode, 'Dark');
-        expect(restoredSettings.updateCheckIntervalHours, 6);
-        expect(restoredSettings.moreScreenOrder, hasLength(3));
-        expect(restoredSettings.moreScreenOrder[0], 'about');
-        expect(restoredSettings.moreScreenOrder[1], 'settings');
-        expect(restoredSettings.moreScreenOrder[2], 'rewards');
-        expect(restoredSettings.moreScreenButtonColors['about'], '#123456');
-        expect(restoredSettings.webMenuStudioLayout, menuStudioLayout);
-      },
-    );
+      expect(result, isNotNull);
+      expect(result!.isFullBundle, isTrue);
+      expect(result.activeSlot, 2);
+      expect(result.importedSlots, 2);
+      expect(await SaveStorage(directory: targetDirectory).loadActiveSlot(), 2);
+      expect(
+        (await SaveStorage(
+          directory: targetDirectory,
+          slot: 1,
+        ).loadPrimary())!.secret,
+        30,
+      );
+      expect(
+        (await SaveStorage(
+          directory: targetDirectory,
+          slot: 1,
+        ).loadBackup())!.secret,
+        20,
+      );
+      expect(
+        (await SaveStorage(
+          directory: targetDirectory,
+          slot: 2,
+        ).loadPrimary())!.profileName,
+        'Second',
+      );
+      final restoredSettings = await SaveBundleStorage.loadAppPreferences(
+        targetDirectory,
+      );
+      expect(restoredSettings!.themeMode, 'Dark');
+      expect(restoredSettings.updateCheckIntervalHours, 6);
+      expect(restoredSettings.moreScreenOrder, hasLength(3));
+      expect(restoredSettings.moreScreenOrder[0], 'about');
+      expect(restoredSettings.moreScreenOrder[1], 'settings');
+      expect(restoredSettings.moreScreenOrder[2], 'rewards');
+      expect(restoredSettings.moreScreenButtonColors['about'], '#123456');
+      expect(restoredSettings.webMenuStudioLayout, menuStudioLayout);
+    });
 
     test('wrong passphrase leaves every existing slot untouched', () async {
       final targetSlot = SaveStorage(directory: targetDirectory, slot: 1);
