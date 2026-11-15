@@ -833,9 +833,9 @@ class LegacyDetailPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const ListTile(
+            ListTile(
               contentPadding: EdgeInsets.zero,
-              leading: Icon(Icons.system_update_rounded),
+              leading: const Icon(Icons.system_update_rounded),
               title: Text(AppLocalizations.text('web_ui_updates', 'Updates')),
               subtitle: const Text('Check for a newer validated app build.'),
             ),
