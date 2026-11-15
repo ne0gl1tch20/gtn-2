@@ -104,14 +104,14 @@ void main() {
         );
         expect(restoredSettings!.themeMode, 'Dark');
         expect(restoredSettings.updateCheckIntervalHours, 6);
-        expect(restoredSettings.moreScreenOrder, [
-          'about',
-          'settings',
-          'rewards',
-        ]);
-        expect(restoredSettings.moreScreenButtonColors, {
-          'about': '#123456',
-        });
+        expect(restoredSettings.moreScreenOrder, hasLength(3));
+        expect(restoredSettings.moreScreenOrder[0], 'about');
+        expect(restoredSettings.moreScreenOrder[1], 'settings');
+        expect(restoredSettings.moreScreenOrder[2], 'rewards');
+        expect(
+          restoredSettings.moreScreenButtonColors['about'],
+          '#123456',
+        );
         expect(restoredSettings.webMenuStudioLayout, menuStudioLayout);
       },
     );
