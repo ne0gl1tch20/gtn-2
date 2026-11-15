@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import '../../core/legacy/adaptive_trait_profile.dart';
 import '../../core/legacy/legacy_systems_state.dart';
 import '../../core/numbers/big_number.dart';
 import '../../core/progression/progression_state.dart';
@@ -8,9 +9,9 @@ import 'save_data.dart';
 
 /// Strict adapter for a single GTN1 GameState JSON document.
 ///
-/// Fields are translated only where the GTN2 schema has an equivalent
-/// persisted representation. Non-default GTN1 fields without an equivalent
-/// cause a FormatException instead of being silently discarded.
+/// Fields are translated only where GTN2 has an equivalent persisted
+/// representation. Non-default GTN1 fields without an equivalent cause a
+/// FormatException instead of being silently discarded.
 class LegacyGtn1SaveAdapter {
   LegacyGtn1SaveAdapter._();
 
@@ -25,31 +26,34 @@ class LegacyGtn1SaveAdapter {
   static SaveData fromGameStateJson(Map<String, dynamic> source) {
     final unsupported = <String>[];
 
-    void unsupportedWhen(bool condition, String field) {
+    void rejectWhen(bool condition, String field) {
       if (condition) unsupported.add(field);
     }
 
     final statistics = _object(source, 'statistics');
     final settingsJson = _object(source, 'settings');
-    final traitProfile = _object(source, 'traitProfile');
+    final traitJson = _object(source, 'traitProfile');
 
-    // These GTN1 values have no faithful destination in the current GTN2
-    // SaveData schema. Refuse migration while any of them carries data.
-    unsupportedWhen(_int(statistics, 'failedGuesses') != 0, 'statistics.failedGuesses');
-    unsupportedWhen(_int(statistics, 'arcadePlayed') != 0, 'statistics.arcadePlayed');
-    unsupportedWhen(_map(statistics, 'arcadeBestScores').isNotEmpty, 'statistics.arcadeBestScores');
-    unsupportedWhen(_set(source, 'shopPurchases').isNotEmpty, 'shopPurchases');
-    unsupportedWhen(_set(source, 'prestigeShopPurchases').isNotEmpty, 'prestigeShopPurchases');
-    unsupportedWhen(_set(source, 'ultraShopPurchases').isNotEmpty, 'ultraShopPurchases');
-    unsupportedWhen(_string(source, 'buyMultiplier', fallback: '1') != '1', 'buyMultiplier');
-    unsupportedWhen(_int(source, 'creativeAttemptLimit') != 0, 'creativeAttemptLimit');
-    unsupportedWhen(_number(source, 'creativeRewardMultiplier', fallback: 1) != 1, 'creativeRewardMultiplier');
-    unsupportedWhen(_string(source, 'lastSavedVersion', fallback: 'unknown') != 'unknown', 'lastSavedVersion');
-    unsupportedWhen(traitProfile.isNotEmpty, 'traitProfile');
+    // The GTN1 trait profile and GTN2 adaptive profile share this exact
+    // persisted contract. Keep it rather than dropping behavioral memory.
+    final adaptiveTraitProfile = _adaptiveTraitProfile(traitJson);
+
+    // These source values have no equivalent in the current GTN2 save model.
+    rejectWhen(_int(statistics, 'failedGuesses') != 0, 'statistics.failedGuesses');
+    rejectWhen(_int(statistics, 'arcadePlayed') != 0, 'statistics.arcadePlayed');
+    rejectWhen(_map(statistics, 'arcadeBestScores').isNotEmpty, 'statistics.arcadeBestScores');
+    rejectWhen(_set(source, 'shopPurchases').isNotEmpty, 'shopPurchases');
+    rejectWhen(_set(source, 'prestigeShopPurchases').isNotEmpty, 'prestigeShopPurchases');
+    rejectWhen(_set(source, 'ultraShopPurchases').isNotEmpty, 'ultraShopPurchases');
+    rejectWhen(_string(source, 'buyMultiplier', fallback: '1') != '1', 'buyMultiplier');
+    rejectWhen(_int(source, 'creativeAttemptLimit') != 0, 'creativeAttemptLimit');
+    rejectWhen(_number(source, 'creativeRewardMultiplier', fallback: 1) != 1, 'creativeRewardMultiplier');
+    rejectWhen(_map(source, 'bossBattleProgress').isNotEmpty, 'bossBattleProgress');
 
     final legacy = <String, dynamic>{
+      'adaptiveTraitProfile': adaptiveTraitProfile.toJson(),
       'discoveredTraits': _set(source, 'discoveredTraitIds').toList(),
-      'selectedTraitArms': _map(source, 'selectedTraitArms'),
+      'selectedTraitArms': _stringMap(source, 'selectedTraitArms'),
       'activeMutators': _set(source, 'activeMutators').toList(),
       'talents': _set(source, 'talents').toList(),
       'relicInventory': _set(source, 'relicInventory').toList(),
@@ -85,9 +89,9 @@ class LegacyGtn1SaveAdapter {
       'stakesPlaced': _int(source, 'stakesPlaced'),
       'stakesWon': _int(source, 'stakesWon'),
       'stakesLost': _int(source, 'stakesLost'),
-      'musicLibrary': _list(source, 'musicLibraryPaths'),
-      'musicQueue': _list(source, 'musicQueuePaths'),
-      'musicPlaylists': _mapOfLists(source, 'musicPlaylistPaths'),
+      'musicLibrary': _list(settingsJson, 'musicLibraryPaths'),
+      'musicQueue': _list(settingsJson, 'musicQueuePaths'),
+      'musicPlaylists': _mapOfLists(settingsJson, 'musicPlaylistPaths'),
       'musicRepeatMode': _string(settingsJson, 'musicRepeatMode', fallback: 'off'),
       'musicShuffle': _bool(settingsJson, 'musicShuffle'),
       'permanentEventBoosts': _int(source, 'permanentEventBoosts'),
@@ -110,20 +114,16 @@ class LegacyGtn1SaveAdapter {
       'timeTravelPenaltyUntil': _int(source, 'timeTravelPenaltyUntil'),
     };
 
-    final upgrades = _map(source, 'upgradeLevels');
-    final prestigeUpgrades = _map(source, 'prestigeUpgradeLevels');
-    final ultraUpgrades = _map(source, 'ultraUpgradeLevels');
-    final defeatedBosses = _set(source, 'defeatedBosses');
     final progression = ProgressionState(
       money: _bigNumber(source, 'money'),
       prestige: _bigNumber(source, 'prestige'),
       ultra: _bigNumber(source, 'ultra'),
       nebula: _bigNumber(source, 'nebulaCurrency'),
-      upgrades: upgrades,
-      prestigeUpgrades: prestigeUpgrades,
-      ultraUpgrades: ultraUpgrades,
-      equippedCosmeticId: source['equippedCosmeticId'] as String?,
-      defeatedBosses: defeatedBosses,
+      upgrades: _map(source, 'upgradeLevels'),
+      prestigeUpgrades: _map(source, 'prestigeUpgradeLevels'),
+      ultraUpgrades: _map(source, 'ultraUpgradeLevels'),
+      equippedCosmeticId: _nullableString(source, 'equippedCosmeticId'),
+      defeatedBosses: _set(source, 'defeatedBosses'),
       prestigeResets: _int(source, 'prestigeCount'),
       ultraResets: _int(source, 'ultraCount'),
       totalGuesses: _int(statistics, 'totalGuesses'),
@@ -131,7 +131,7 @@ class LegacyGtn1SaveAdapter {
       moneyEarned: _bigNumber(statistics, 'moneyEarned'),
       moneySpent: _bigNumber(statistics, 'moneySpent'),
       randomEventsTriggered: _int(statistics, 'randomEventsTriggered'),
-      lastRandomEventId: source['lastRandomEventId'] as String?,
+      lastRandomEventId: _nullableString(source, 'lastRandomEventId'),
       currentStreak: _int(source, 'currentStreak'),
       bestStreak: _int(source, 'bestStreak'),
       playtimeSeconds: _int(statistics, 'playtimeSeconds'),
@@ -146,35 +146,56 @@ class LegacyGtn1SaveAdapter {
       );
     }
 
-    final sourceSettings = _settings(settingsJson);
-    final minimum = _int(source, 'currentRangeMin', fallback: 1);
-    final maximum = _int(source, 'currentRangeMax', fallback: 100);
-    final secret = _int(source, 'targetNumber', fallback: 50);
-    final attempts = _int(source, 'attempts');
-    final correct = _int(source, 'correctGuesses');
-    final creative = _bool(source, 'creativeModeEnabled');
+    final settings = _settings(settingsJson).copyWith(
+      difficultyId: _string(source, 'difficultyId', fallback: 'classic'),
+    );
+    final name = _string(source, 'profileName').trim();
     final data = SaveData(
-      secret: secret,
-      attempts: attempts,
-      correctGuesses: correct,
+      secret: _int(source, 'targetNumber', fallback: 50),
+      attempts: _int(source, 'attempts'),
+      correctGuesses: _int(source, 'correctGuesses'),
       streak: _int(source, 'currentStreak'),
       bestStreak: _int(source, 'bestStreak'),
       gamesWon: _int(source, 'gamesWon'),
       isComplete: _bool(source, 'isComplete'),
-      minimum: minimum,
-      maximum: maximum,
+      minimum: _int(source, 'currentRangeMin', fallback: 1),
+      maximum: _int(source, 'currentRangeMax', fallback: 100),
       progression: progression,
-      settings: sourceSettings,
-      profileName: _string(source, 'profileName').trim().substring(
-        0,
-        _string(source, 'profileName').trim().length.clamp(0, 24),
-      ),
+      settings: settings,
+      profileName: name.substring(0, name.length.clamp(0, 24)),
       profileIconId: _profileIcon(_string(source, 'profileIconId', fallback: 'default')),
-      creativeModeEnabled: creative,
+      creativeModeEnabled: _bool(source, 'creativeModeEnabled'),
     );
-    // Reuse GTN2's authoritative schema and invariant validation.
     SaveData.fromJson(data.toJson());
     return data;
+  }
+
+  static AdaptiveTraitProfile _adaptiveTraitProfile(
+    Map<String, dynamic> source,
+  ) {
+    final json = <String, dynamic>{
+      'schemaVersion': _int(source, 'schemaVersion', fallback: 1),
+      'totalGuessesObserved': _int(source, 'totalGuessesObserved'),
+      'correctGuessesObserved': _int(source, 'correctGuessesObserved'),
+      'failedGuessesObserved': _int(source, 'failedGuessesObserved'),
+      'closeMissesObserved': _int(source, 'closeMissesObserved'),
+      'longStreaksObserved': _int(source, 'longStreaksObserved'),
+      'sessionsObserved': _int(source, 'sessionsObserved'),
+      'prestigesObserved': _int(source, 'prestigesObserved'),
+      'ultrasObserved': _int(source, 'ultrasObserved'),
+      'upgradesPurchasedObserved': _int(source, 'upgradesPurchasedObserved'),
+      'moneyEarnedObserved': _bigNumber(source, 'moneyEarnedObserved').toString(),
+      'moneySpentObserved': _bigNumber(source, 'moneySpentObserved').toString(),
+      'consistencyScore': _number(source, 'consistencyScore'),
+      'accuracyScore': _number(source, 'accuracyScore'),
+      'riskScore': _number(source, 'riskScore'),
+      'persistenceScore': _number(source, 'persistenceScore'),
+      'progressionScore': _number(source, 'progressionScore'),
+      'helperUses': _map(source, 'helperUses'),
+      'helperCooldowns': _map(source, 'helperCooldowns'),
+      'awardedBonuses': _set(source, 'awardedBonuses').toList(),
+    };
+    return AdaptiveTraitProfile.fromJson(json);
   }
 
   static GameSettings _settings(Map<String, dynamic> source) {
@@ -182,7 +203,9 @@ class LegacyGtn1SaveAdapter {
     return GameSettings(
       darkMode: theme.toLowerCase() != 'light',
       reduceMotion: _bool(source, 'reducedMotion'),
-      localeCode: _string(source, 'locale', fallback: 'en-US').replaceAll('-', '_').toLowerCase(),
+      localeCode: _string(source, 'locale', fallback: 'en-US')
+          .replaceAll('-', '_')
+          .toLowerCase(),
       themeMode: theme,
       numberNotation: _string(source, 'numberNotation', fallback: 'Standard'),
       musicEnabled: _bool(source, 'musicEnabled', fallback: true),
@@ -198,7 +221,7 @@ class LegacyGtn1SaveAdapter {
       reduceFlashes: _bool(source, 'reduceFlashes'),
       saveLogsToStorage: _bool(source, 'saveLogsToStorage'),
       verboseLogging: _bool(source, 'verboseLogging'),
-      backgroundMusicPath: source['backgroundMusicPath'] as String?,
+      backgroundMusicPath: _nullableString(source, 'backgroundMusicPath'),
       musicLibraryPaths: _list(source, 'musicLibraryPaths'),
       musicQueuePaths: _list(source, 'musicQueuePaths'),
       musicPlaylistPaths: _mapOfLists(source, 'musicPlaylistPaths'),
@@ -210,7 +233,7 @@ class LegacyGtn1SaveAdapter {
       customTertiaryColor: _string(source, 'customTertiaryColor', fallback: '#00C853'),
       moreScreenOrder: _list(source, 'moreScreenOrder'),
       moreScreenButtonColors: _stringMap(source, 'moreScreenButtonColors'),
-      webMenuStudioLayout: source['webMenuStudioLayout'] as String?,
+      webMenuStudioLayout: _nullableString(source, 'webMenuStudioLayout'),
       tutorialCompleted: _bool(source, 'tutorialCompleted'),
       tutorialSeenFeatures: _set(source, 'tutorialSeenFeatures'),
     );
@@ -232,29 +255,54 @@ class LegacyGtn1SaveAdapter {
     return value;
   }
 
-  static double _number(Map<String, dynamic> source, String key, {double fallback = 0}) {
+  static double _number(
+    Map<String, dynamic> source,
+    String key, {
+    double fallback = 0,
+  }) {
     final value = source[key] ?? fallback;
-    if (value is! num || !value.isFinite) throw FormatException('Invalid GTN1 number: $key');
+    if (value is! num || !value.isFinite) {
+      throw FormatException('Invalid GTN1 number: $key');
+    }
     return value.toDouble();
   }
 
-  static bool _bool(Map<String, dynamic> source, String key, {bool fallback = false}) {
+  static bool _bool(
+    Map<String, dynamic> source,
+    String key, {
+    bool fallback = false,
+  }) {
     final value = source[key] ?? fallback;
     if (value is! bool) throw FormatException('Invalid GTN1 boolean: $key');
     return value;
   }
 
-  static String _string(Map<String, dynamic> source, String key, {String fallback = ''}) {
+  static String _string(
+    Map<String, dynamic> source,
+    String key, {
+    String fallback = '',
+  }) {
     final value = source[key] ?? fallback;
+    if (value is! String) throw FormatException('Invalid GTN1 string: $key');
+    return value;
+  }
+
+  static String? _nullableString(Map<String, dynamic> source, String key) {
+    final value = source[key];
+    if (value == null) return null;
     if (value is! String) throw FormatException('Invalid GTN1 string: $key');
     return value;
   }
 
   static BigNumber _bigNumber(Map<String, dynamic> source, String key) {
     final value = source[key] ?? '0';
-    if (value is! String && value is! num) throw FormatException('Invalid GTN1 currency: $key');
+    if (value is! String && value is! num) {
+      throw FormatException('Invalid GTN1 currency: $key');
+    }
     final parsed = BigNumber.parse(value.toString());
-    if (parsed.compareTo(BigNumber.fromInt(0)) < 0) throw FormatException('Negative GTN1 currency: $key');
+    if (parsed.compareTo(BigNumber.fromInt(0)) < 0) {
+      throw FormatException('Negative GTN1 currency: $key');
+    }
     return parsed;
   }
 
@@ -294,7 +342,10 @@ class LegacyGtn1SaveAdapter {
     return result;
   }
 
-  static Map<String, String> _stringMap(Map<String, dynamic> source, String key) {
+  static Map<String, String> _stringMap(
+    Map<String, dynamic> source,
+    String key,
+  ) {
     final value = source[key];
     if (value == null) return const {};
     if (value is! Map) throw FormatException('Invalid GTN1 string map: $key');
