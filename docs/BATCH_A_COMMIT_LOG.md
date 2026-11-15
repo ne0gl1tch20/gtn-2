@@ -221,6 +221,9 @@ Green CI is build/test evidence only. It does not prove live Android/Windows beh
 | 2026-11-15 02:08:10 | `43665919307` | Validate #1823 — full migration validation passed | CI / Batch A | — | GTN1 adapter, bundle serializer, portable backup and regression tests | Format/analyze passed, 420 Flutter tests passed, Android debug APK and Windows desktop debug build passed; Windows release installer skipped |
 
 
+| 2026-11-15 02:08:20 | `d989ae5df4cc961003f2cfc4d650d57423cf3915` | Log full GTN1 bundle parity and 420-test validation | Audit | — | `docs/BATCH_A_COMMIT_LOG.md` | Records adapter regression tests, formatter cleanup, generated artifact cleanup, failed formatting runs and latest green full validation |
+| 2026-11-15 02:08:30 | `fe7dcd5da64d006a97016573084163051840e6b8` | Record 420-test GTN1 bundle validation evidence | Audit / Save Slots | `SaveManager.kt; GameState.kt` | `docs/GTN1_SCREEN_PARITY_DIFF.md` | Updates the source-to-target diff from pending CI to verified CI while keeping device/runtime evidence open |
+
 ### Current Creative Save implementation state
 
 - **Implemented and CI-verified:** schema-v7 permanent `creativeModeEnabled` flag with old-save default false; separate from the existing isolated `creativeMode` sandbox payload.
