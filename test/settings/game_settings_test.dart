@@ -82,6 +82,16 @@ void main() {
     expect(restored.updateCheckIntervalHours, 168);
   });
 
+  test('GTN1 desktop reminder intervals 6 and 72 survive migration', () {
+    for (final interval in [6, 72]) {
+      final restored = GameSettings.fromJson({
+        ...GameSettings.initial.toJson(),
+        'notificationIntervalHours': interval,
+      });
+      expect(restored.notificationIntervalHours, interval);
+    }
+  });
+
   test('older GTN2 settings retain their original defaults', () {
     final restored = GameSettings.fromJson({
       'darkMode': false,
