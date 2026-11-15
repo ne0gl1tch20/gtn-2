@@ -46,10 +46,15 @@ void main() {
         );
         await slotTwo.saveActiveSlot(2);
 
+        const menuStudioLayout =
+            '{"areas":{"worlds":"more","rewards":"nav"},"orders":{"nav":["worlds","arcade","upgrades","rewards"],"more":["homebase","relics"]},"colors":{"worlds":"#ABCDEF"}}';
         final settings = GameSettings.initial.copyWith(
           localeCode: 'en_us',
           themeMode: 'Dark',
           updateCheckIntervalHours: 6,
+          moreScreenOrder: const ['about', 'settings', 'rewards'],
+          moreScreenButtonColors: const {'about': '#123456'},
+          webMenuStudioLayout: menuStudioLayout,
         );
         final source = SaveBundleStorage(directory: sourceDirectory);
         final backupText = await source.exportPortableBackup(
@@ -99,6 +104,15 @@ void main() {
         );
         expect(restoredSettings!.themeMode, 'Dark');
         expect(restoredSettings.updateCheckIntervalHours, 6);
+        expect(restoredSettings.moreScreenOrder, [
+          'about',
+          'settings',
+          'rewards',
+        ]);
+        expect(restoredSettings.moreScreenButtonColors, {
+          'about': '#123456',
+        });
+        expect(restoredSettings.webMenuStudioLayout, menuStudioLayout);
       },
     );
 
