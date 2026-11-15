@@ -294,3 +294,8 @@ Run #1933 did not pass the test suite: 431 tests passed and 4 Save Slots widget 
 ## Save Slots lifecycle follow-up — 2026-11-16
 
 Run #1933 failed with 431 passing and 4 failing tests. The primary failure was the export dialog's TextEditingControllers being disposed by the parent while the dialog route was still animating out. This is corrected by commit b7650a2112ee2294ab328bd29af89d167357e067: the dialog owns both controllers in its own StatefulWidget and disposes them when its subtree is removed. Dart formatting and analysis passed on the follow-up head. Validate run #1941 is currently running tests and Android/Windows builds: https://github.com/ne0gl1tch20/gtn-2/actions/runs/43768471017. No test or runtime pass is claimed yet.
+
+
+## Validate #1941 partial result — 2026-11-16
+
+At head c9557b4b69ae73ba176d1407927bbd618a0c34ff, formatting and analysis passed, all 435 Flutter tests passed, and the Android debug APK built successfully (artifact 14183730859). The Windows desktop debug build was still running; the Windows installer job was skipped. Full CI and runtime/visual parity remain open. Run: https://github.com/ne0gl1tch20/gtn-2/actions/runs/43768471017.
