@@ -1788,9 +1788,6 @@ class _GameHomePageState extends State<GameHomePage>
         builder: (_) => LegacyDetailPage(
           section: section,
           progression: _progression,
-          updateNoticeTitle: _updateNoticeTitle,
-          updateNoticeDetails: _updateNoticeDetails,
-          updateNoticeStatus: _updateNoticeStatus,
           updateNoticeListenable: _updateNoticeListenable,
           updateChecking: _checkingUpdate,
           onCheckUpdates: () => unawaited(_checkForUpdatesIfDue(force: true)),
