@@ -572,8 +572,9 @@ class LegacyGtn1SaveAdapter {
 
   static int _int(Map<String, dynamic> source, String key, {int fallback = 0}) {
     final value = source[key] ?? fallback;
-    if (value is! int || value < 0)
+    if (value is! int || value < 0) {
       throw FormatException('Invalid GTN1 integer: $key');
+    }
     return value;
   }
 
@@ -689,10 +690,14 @@ class LegacyGtn1SaveAdapter {
     if (value is! Map) throw FormatException('Invalid GTN1 map: $key');
     final result = <String, int>{};
     for (final entry in value.entries) {
-      if (entry.key is! String || entry.value is! int || entry.value < 0) {
+      if (entry.key is! String || entry.value is! int) {
         throw FormatException('Invalid GTN1 integer map: $key');
       }
-      result[entry.key as String] = entry.value as int;
+      final number = entry.value as int;
+      if (number < 0) {
+        throw FormatException('Invalid GTN1 integer map: $key');
+      }
+      result[entry.key as String] = number;
     }
     return result;
   }
