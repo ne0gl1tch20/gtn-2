@@ -881,7 +881,9 @@ class LegacyDetailPage extends StatelessWidget {
                       ? onInstallUpdate
                       : null,
                   icon: const Icon(Icons.system_update_alt_rounded),
-                  label: Text(AppLocalizations.text('update_install', 'Install update')),
+                  label: Text(
+                    AppLocalizations.text('update_install', 'Install update'),
+                  ),
                 ),
               ],
             ),
