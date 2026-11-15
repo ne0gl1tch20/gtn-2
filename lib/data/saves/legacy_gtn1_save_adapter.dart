@@ -328,6 +328,7 @@ class LegacyGtn1SaveAdapter {
       'moreScreenOrder': settings.moreScreenOrder,
       'moreScreenButtonColors': settings.moreScreenButtonColors,
       'webMenuStudioLayout': settings.webMenuStudioLayout,
+      'tutorialCompleted': settings.tutorialCompleted,
       'tutorialSeenFeatures': settings.tutorialSeenFeatures.toList(),
       'gtn2UpdateCheckIntervalHours': settings.updateCheckIntervalHours,
       'gtn2TutorialCompleted': settings.tutorialCompleted,
@@ -424,7 +425,8 @@ class LegacyGtn1SaveAdapter {
           : _list(source, 'moreScreenOrder'),
       moreScreenButtonColors: _stringMap(source, 'moreScreenButtonColors'),
       webMenuStudioLayout: _nullableString(source, 'webMenuStudioLayout'),
-      tutorialCompleted: _bool(source, 'gtn2TutorialCompleted'),
+      tutorialCompleted: _bool(source, 'tutorialCompleted') ||
+          _bool(source, 'gtn2TutorialCompleted'),
       tutorialSeenFeatures: _set(source, 'tutorialSeenFeatures'),
       updateCheckIntervalHours: _int(source, 'gtn2UpdateCheckIntervalHours'),
     );
