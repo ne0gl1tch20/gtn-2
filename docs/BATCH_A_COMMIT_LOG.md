@@ -186,6 +186,15 @@ Green CI is build/test evidence only. It does not prove live Android/Windows beh
 | 2026-11-15 00:29:40 | `43658417715` | Validate evidence checkpoint | Audit / CI | — | `docs/FINITE_PARITY_PLAN.md` | The completed run validates the previous codec checkpoint only; current adapter changes still need a fresh run |
 
 
+| 2026-11-15 00:30:00 | `a03a1d009faca342fbdca68395a71d83704bca2e` | Log GTN1 migration adapter and validation commits | Audit | — | `docs/BATCH_A_COMMIT_LOG.md` | Adds missing formatter/adapter commits and records the previous 399-test full validation checkpoint; follow-up self-log below |
+| 2026-11-15 00:30:10 | `437458012fb8046f4382ad2224084508c8b544a6` | Add temporary GTN1 migration adapter formatter | CI support | — | `.github/workflows/temporary-batch-a-migration-adapter-format.yml` | Temporary workflow intended to format the new adapter and tests; no workflow run was returned by the available PR-run lookup |
+| 2026-11-15 00:30:20 | `ba5b95065fbeda39690380bd8b86c111e265c84e` | Run migration adapter formatter on PR validation | CI support | — | `.github/workflows/temporary-batch-a-migration-adapter-format.yml` | Adds pull-request trigger and correct PR-head checkout/push ref; no run evidence surfaced |
+| 2026-11-15 00:30:30 | `3ece10759b6ef3b809899630ed0d402f572d6d23` | Remove temporary migration adapter formatter workflow | CI support | — | `.github/workflows/temporary-batch-a-migration-adapter-format.yml` | Temporary workflow removed; branch retains no formatter automation |
+| 2026-11-15 00:30:40 | `7ccc34ded9713ed81782c8ab08017e6a9f74e3fe` | Preserve GTN1 default menu order and target sanitization | Save Slots / Migration | `GameState.kt; GameSettings` | `lib/data/saves/legacy_gtn1_save_adapter.dart` | Preserves GTN1's default More order for old settings and clamps imported secret to the migrated range |
+| 2026-11-15 00:30:50 | `995501c8adcf0d9a693f3fd3f5bf466b50040d2a` | Use integer-safe GTN1 range conversion | Save Slots / Migration | `SaveManager.kt` | `lib/data/saves/legacy_gtn1_save_adapter.dart` | Ensures range and target conversions satisfy Dart's integer SaveData API |
+| 2026-11-15 00:31:00 | `b094bad3cdb57c0b6feb9de51c287f280fc2edd3` | Test rejection of invalid GTN1 counter values | Save Slots / Tests | `GameState.kt; SaveManager.kt` | `test/data/saves/legacy_gtn1_save_adapter_test.dart` | Replaces an invalid-range assertion that GTN1's load sanitizer intentionally normalizes with a negative-counter rejection case |
+
+
 ### Current Creative Save implementation state
 
 - **Implemented and CI-verified:** schema-v7 permanent `creativeModeEnabled` flag with old-save default false; separate from the existing isolated `creativeMode` sandbox payload.
