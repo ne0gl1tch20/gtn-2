@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gtn_2/design/expressive_widgets.dart';
 import 'package:gtn_2/settings/game_settings.dart';
 import 'package:gtn_2/settings/settings_page.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
@@ -122,12 +123,17 @@ void main() {
     );
     expect(find.text('None'), findsOneWidget);
     expect(find.text('Every hour'), findsNothing);
-    final dropdown = find.byWidgetPredicate(
-      (widget) =>
-          widget is DropdownButtonFormField<int> && widget.initialValue == 0,
+    final dropdown = find.ancestor(
+      of: find.text('Check for updates automatically'),
+      matching: find.byType(GtnExpressiveDropdown<int>),
     );
     expect(dropdown, findsOneWidget);
-    await tester.tap(dropdown);
+    final menu = find.descendant(
+      of: dropdown,
+      matching: find.byType(M3EDropdownMenu<int>),
+    );
+    await tester.tap(menu);
+    await tester.pumpAndSettle();
     await tester.pumpAndSettle();
     await tester.tap(find.text('Every 6 hours').last);
     await tester.pumpAndSettle();
