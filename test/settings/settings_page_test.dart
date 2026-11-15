@@ -132,11 +132,8 @@ void main() {
       of: dropdown,
       matching: find.byType(M3EDropdownMenu<int>),
     );
-    await tester.scrollUntilVisible(
-      menu,
-      260,
-      scrollable: find.byType(Scrollable).first,
-    );
+    await tester.ensureVisible(menu);
+    await tester.pumpAndSettle();
     await tester.tap(menu);
     await tester.pumpAndSettle();
     await tester.pumpAndSettle();
