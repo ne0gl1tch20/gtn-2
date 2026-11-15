@@ -207,6 +207,7 @@ class _GameHomePageState extends State<GameHomePage>
   bool _creativeModeEnabled = false;
   bool _isLoading = true;
   bool _isPlayerProfileLoaded = false;
+  bool _nimmyTutorialScheduled = false;
   GameSettings? _menuStudioPreviewSettings;
   String _message = 'Make your move.';
 
@@ -567,6 +568,7 @@ class _GameHomePageState extends State<GameHomePage>
 
   Future<void> _restoreSave() async {
     var shouldPersistOfflineEarnings = false;
+    var shouldShowNimmyTutorial = false;
     try {
       final bundleStorage = await SaveBundleStorage.inApplicationDocuments();
       await SaveBundleStorage.recoverPendingImport(bundleStorage.directory);
@@ -605,6 +607,7 @@ class _GameHomePageState extends State<GameHomePage>
           settings: globalSettings ?? save.settings,
           systems: restoredSystems,
         );
+        shouldShowNimmyTutorial = !restoredSettings.tutorialCompleted;
         final restoredEngine = _engineFor(
           restoredProgression,
           restoredSettings,
@@ -668,6 +671,7 @@ class _GameHomePageState extends State<GameHomePage>
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
+        if (shouldShowNimmyTutorial) _scheduleFirstRunNimmyTutorial();
         _startPlaytimeTimer();
         _startRandomEventTimer();
         _startUpdateCheckTimer();
@@ -1273,6 +1277,9 @@ class _GameHomePageState extends State<GameHomePage>
       if (persistAfterLoad) await _persist();
       _botTeam.reset(_game.minimum, _game.maximum);
       _scheduleAutoClicker();
+      if (save != null && !nextSettings.tutorialCompleted) {
+        _scheduleFirstRunNimmyTutorial();
+      }
     } on Exception {
       if (mounted) {
         setState(() {
@@ -1496,6 +1503,18 @@ class _GameHomePageState extends State<GameHomePage>
     setState(() => _selectedPrimaryIndex = index);
   }
 
+  void _scheduleFirstRunNimmyTutorial() {
+    if (_nimmyTutorialScheduled || _settings.tutorialCompleted || _isLoading) {
+      return;
+    }
+    _nimmyTutorialScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _nimmyTutorialScheduled = false;
+      if (!mounted || _isLoading || _settings.tutorialCompleted) return;
+      unawaited(_showNimmyTutorial());
+    });
+  }
+
   Future<void> _showNimmyTutorial() async {
     var step = 0;
     const steps = <({String title, String body})>[
@@ -1541,6 +1560,9 @@ class _GameHomePageState extends State<GameHomePage>
         ),
       ),
     );
+    if (!_settings.tutorialCompleted) {
+      await _updateSettings(_settings.copyWith(tutorialCompleted: true));
+    }
   }
 
   Future<void> _openSettings() async {
