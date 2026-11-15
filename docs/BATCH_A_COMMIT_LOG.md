@@ -270,6 +270,11 @@ Green CI is build/test evidence only. It does not prove live Android/Windows beh
 
 | 2026-11-15 11:29 | `c5715bc056e041e82fa5b262b614f50dae8a97ff` | Log Dart formatter diagnostic and exact correction | Audit | `menu-studio.js` | `docs/BATCH_A_COMMIT_LOG.md` | Self-logs the temporary diagnostic, exact formatting correction and workflow restoration |
 
+| 2026-11-15 11:30 | `1df6ff2cadeb337e91fbf915b22c5b5f583579a1` | Apply exact Dart 3.14 formatting to Menu Studio persistence test | Batch A / Menu Studio / Save Slots | `menu-studio.js` | `test/data/saves/save_bundle_storage_test.dart` | Exact formatter output applied; format gate passed in run #1896, but analysis exposed two pre-existing directive-order infos |
+| 2026-11-15 11:30 | `6c7f64935d4680d08ce80f0918c9beabe84c336b` | Sort Dart SDK imports for analyzer | Build / CI hygiene | — | `lib/main.dart` | Moves `dart:io` before `dart:math` to satisfy directives_ordering |
+| 2026-11-15 11:30 | `b5d0a8b8e3ccb4cf46fb5d28b299c0c0162a4492` | Sort widget test imports for analyzer | Build / CI hygiene | — | `test/widget_test.dart` | Places update_checker before design imports to satisfy directives_ordering |
+| 2026-11-15 11:30 | `43672625058` | Validate #1896 — format passed, analysis failed | CI / Batch A | — | `lib/main.dart; test/widget_test.dart` | Dart formatting passed; analysis failed only on two directives_ordering infos; tests and builds were skipped |
+
 ### Current Creative Save implementation state
 
 - **Implemented and CI-verified:** schema-v7 permanent `creativeModeEnabled` flag with old-save default false; separate from the existing isolated `creativeMode` sandbox payload.
