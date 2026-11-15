@@ -110,7 +110,7 @@ void main() {
       expect(save.settings.localeCode, 'en_us');
       expect(save.settings.reduceMotion, isTrue);
       expect(save.settings.musicLibraryPaths, ['track-a.mp3']);
-      expect(save.settings.musicPlaylists['focus'], ['track-a.mp3']);
+      expect(save.settings.musicPlaylistPaths['focus'], ['track-a.mp3']);
       expect(save.progression.playtimeSeconds, 3600);
     });
 
