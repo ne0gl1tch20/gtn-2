@@ -327,3 +327,9 @@ The GTN2 follow-up on `batch-a/creative-save-active-slot` now:
 A regression test now taps the active empty slot directly and verifies clean dialog dismissal. Upgrade Shop's 51px overflow and World Map hero-heading wrap remain separate defects.
 
 Current code head: `322ec8551def094f867d98f55b02a438a773e2c3`. Validate run #1975 is at [run #1975](https://github.com/ne0gl1tch20/gtn-2/actions/runs/43777288634). Format and analysis passed; Flutter tests, Android APK build and Windows desktop debug build are running. Do not claim full validation, do not close Batch A, and do not unblock Batch B until all jobs pass and Android/Windows runtime screenshots verify the affected flows. PR #74 remains draft.
+
+
+
+### Validate #1975 correction — 2026-11-16
+
+Run #1975 passed format and analysis but the Flutter suite reported 434 passed / 1 failed. The failure was the existing GTN1 navigation-width assertion: the 390px viewport expects a 366px mobile bar, while the initial right-gap adjustment expanded it to 390px. The implementation has been corrected to preserve the source 366px width and center the bar (12px margins on each side); the geometry test now asserts both width and centered position. Corrective commits: `58472f1e4695ccf17d6ab9538bad71138b808e73` and `c533651a2ac0dfac932de4cb8a7e5f4df98f6a91`. The Android and Windows build jobs from #1975 were still running at this checkpoint. New validation is required; Batch A remains open and Batch B blocked.
