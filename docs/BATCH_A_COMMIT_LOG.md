@@ -351,3 +351,19 @@ Batch A remains active until Dashboard, More, Settings, Menu Studio, Profile and
 | 2026-11-15 09:44 | `8ce10472da8b8db03764ed4f525bb1df6a7d4afe` | Sync main audit ledger and branch reconciliation status | Audit / plan | — | `docs/FINITE_PARITY_PLAN.md` | Documentation only | Corrects the plan's stale claim that the ledger is absent from main and records the exact PR #74 divergence. |
 
 | 2026-11-15 09:44 | `4987e0fe842ca5e858c525a338c80b64dd53c11c` | Refresh PR #74 divergence count | Audit / plan | — | `docs/FINITE_PARITY_PLAN.md` | Documentation only | Rechecked GitHub compare after ledger synchronization; PR branch is 320 commits ahead and 5 commits behind current main. |
+
+
+## 6. Reconciled PR-head validation — 2026-11-15
+
+| UTC date/time | Commit SHA | Commit subject / evidence | Batch A item(s) | GTN1 source paths | GTN2 paths changed | Tests / CI | Result and remaining gaps |
+|---|---|---|---|---|---|---|---|
+| 2026-11-15 09:49 | `ba98c2e81565eab9d046c616db2b97120abe1661` | Synchronize current main parity plan into PR #74 branch | Audit / plan | — | `docs/FINITE_PARITY_PLAN.md` | Documentation synchronization | Branch copy matched main after update. |
+| 2026-11-15 09:49 | `29ff75120cf4acde0bfcbca560c3772b3ae97410` | Synchronize current main Batch A ledger into PR #74 branch | Audit / ledger | — | `docs/BATCH_A_COMMIT_LOG.md` | Documentation synchronization; exact PR head | Branch copy matched main after update. |
+| 2026-11-15 09:53–09:54 | `29ff75120cf4acde0bfcbca560c3772b3ae97410` | Validate run [43701106083](https://github.com/ne0gl1tch20/gtn-2/actions/runs/43701106083) | Batch A continuation / CI | Pinned source `fe9cf567169e19059e0330d08769fe454336ef94`; Creative Save references listed in PR #74 | Full PR branch | Format and analysis passed; all 432 Flutter tests passed; Android debug APK succeeded; Windows portable debug build succeeded; Windows installer job skipped | All required debug validation jobs passed on the exact current PR head. Artifacts: Android `14156856276`, Windows `14156521810`, both expire 2026-11-22. CI does not close Android/Windows runtime, paired visual, import/export, active-slot restart or six-surface exit checks. |
+
+### Current continuation state (rechecked after run 43701106083)
+
+- PR #74 remains **open, draft and mergeable**, head `29ff75120cf4acde0bfcbca560c3772b3ae97410`, base `main` at `4fe04ee1572c3e4fb307cd37d796ee5312f30ce1`.
+- GitHub compare currently reports **322 commits ahead / 7 behind**, merge base `4fe04ee1572c3e4fb307cd37d796ee5312f30ce1`. This divergence includes main-only audit/plan history. The branch is content-reconciled for the plan and ledger at the time of the two sync commits, but is not ancestry-rebased.
+- Validate run `43701106083` is green for format, analysis, 432 tests, Android debug APK and Windows portable debug. Windows installer is skipped, not failed.
+- Batch A remains active. CI is not runtime or visual evidence. Keep PR #74 draft and Batch B blocked until all six Batch A surfaces satisfy the exit gate.
