@@ -456,6 +456,54 @@ class SettingsPage extends StatelessWidget {
             ],
           ),
           _SettingsSection(
+            eyebrow: AppLocalizations.text('web_ui_updates', 'UPDATES'),
+            title: AppLocalizations.text('web_ui_updates', 'Updates'),
+            description: AppLocalizations.text(
+              'web_ui_check_for_updates_automatically',
+              'Choose how often the app checks for a newer version. You can always check manually in About.',
+            ),
+            children: [
+              _dropdown<int>(
+                AppLocalizations.text(
+                  'web_ui_check_for_updates_automatically',
+                  'Check for updates automatically',
+                ),
+                settings.updateCheckIntervalHours,
+                [
+                  DropdownMenuItem(
+                    value: 0,
+                    child: Text(AppLocalizations.text('inspector_none', 'None')),
+                  ),
+                  DropdownMenuItem(
+                    value: 1,
+                    child: Text(AppLocalizations.text('web_ui_every_hour', 'Every hour')),
+                  ),
+                  DropdownMenuItem(
+                    value: 6,
+                    child: Text(AppLocalizations.text('web_ui_every_6_hours', 'Every 6 hours')),
+                  ),
+                  DropdownMenuItem(
+                    value: 12,
+                    child: Text(AppLocalizations.text('web_ui_every_12_hours', 'Every 12 hours')),
+                  ),
+                  DropdownMenuItem(
+                    value: 24,
+                    child: Text(AppLocalizations.text('web_ui_every_24_hours', 'Every 24 hours')),
+                  ),
+                  DropdownMenuItem(
+                    value: 168,
+                    child: Text(AppLocalizations.text('web_ui_every_7_days', 'Every 7 days')),
+                  ),
+                ],
+                (value) {
+                  if (value != null) {
+                    _update(settings.copyWith(updateCheckIntervalHours: value));
+                  }
+                },
+              ),
+            ],
+          ),
+          _SettingsSection(
             eyebrow: 'SOUND FX',
             title: 'Sound FX',
             description: AppLocalizations.text(
