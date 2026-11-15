@@ -4,6 +4,7 @@ import 'package:gtn_2/core/game/game_engine.dart';
 import 'package:gtn_2/core/numbers/big_number.dart';
 import 'package:gtn_2/core/progression/progression_state.dart';
 import 'package:gtn_2/design/expressive_widgets.dart';
+import 'package:gtn_2/data/updates/update_checker.dart';
 import 'package:gtn_2/home/game_dashboard_page.dart';
 import 'package:gtn_2/legacy/legacy_pages.dart';
 import 'package:gtn_2/legacy/legacy_systems_page.dart';
@@ -214,6 +215,47 @@ void main() {
       find.textContaining('This copy of Guess The Number is a debug build.'),
       findsOneWidget,
     );
+  });
+
+  testWidgets('About screen checks for and installs validated updates', (
+    WidgetTester tester,
+  ) async {
+    final notice = ValueNotifier(
+      const UpdateNoticeState(status: 'You are up to date.'),
+    );
+    var checks = 0;
+    var installs = 0;
+    await tester.pumpWidget(
+      M3EMaterialApp(
+        data: M3EThemeData.light(seedColor: const Color(0xFF7C5CFC)),
+        home: LegacyDetailPage(
+          section: LegacySection.about,
+          progression: ProgressionState.initial,
+          updateNoticeListenable: notice,
+          onCheckUpdates: () => checks++,
+          onInstallUpdate: () => installs++,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Updates'), findsOneWidget);
+    expect(find.text('You are up to date.'), findsOneWidget);
+    await tester.tap(find.text('Check for updates'));
+    expect(checks, 1);
+
+    notice.value = const UpdateNoticeState(
+      title: 'Version 2.1.0 is ready',
+      details: 'Android Debug · validated build #1832',
+      status: 'A verified Android update is available.',
+      available: true,
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Version 2.1.0 is ready'), findsOneWidget);
+    expect(find.text('A verified Android update is available.'), findsOneWidget);
+    await tester.tap(find.text('Install update'));
+    expect(installs, 1);
+    notice.dispose();
   });
 
   testWidgets('More menu has one Dev Settings item and opens Nebula Shop', (
