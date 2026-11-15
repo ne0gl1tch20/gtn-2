@@ -123,4 +123,17 @@ void main() {
     expect(restored.themeMode, 'System');
     expect(restored.darkMode, isTrue);
   });
+  test('tutorial completion defaults to false and survives settings persistence', () {
+    expect(GameSettings.initial.tutorialCompleted, isFalse);
+    final restored = GameSettings.fromJson({
+      ...GameSettings.initial.toJson(),
+      'tutorialCompleted': true,
+    });
+    expect(restored.tutorialCompleted, isTrue);
+    expect(
+      restored.copyWith(tutorialCompleted: false).toJson()['tutorialCompleted'],
+      isFalse,
+    );
+  });
+
 }
