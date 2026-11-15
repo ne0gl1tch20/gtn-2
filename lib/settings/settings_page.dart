@@ -405,9 +405,11 @@ class SettingsPage extends StatelessWidget {
                   'Reminder Frequency',
                   settings.notificationIntervalHours,
                   const [
+                    DropdownMenuItem(value: 6, child: Text('6 Hours')),
                     DropdownMenuItem(value: 12, child: Text('12 Hours')),
                     DropdownMenuItem(value: 24, child: Text('24 Hours')),
                     DropdownMenuItem(value: 48, child: Text('48 Hours')),
+                    DropdownMenuItem(value: 72, child: Text('72 Hours')),
                   ],
                   (value) {
                     if (value != null) {
