@@ -32,6 +32,7 @@ class LegacyGtn1SaveAdapter {
     final settingsJson = _object(source, 'settings');
     final traitJson = _object(source, 'traitProfile');
     final adaptiveTraitProfile = _adaptiveTraitProfile(traitJson);
+    final upgradeLevels = _map(source, 'upgradeLevels');
     final attempts = _sanitizedCount(source, 'attempts');
     final correctGuesses = _sanitizedCount(source, 'correctGuesses')
         .clamp(0, attempts)
@@ -113,7 +114,7 @@ class LegacyGtn1SaveAdapter {
       ultra: _sanitizedBigNumber(source, 'ultra'),
       nebula: _sanitizedBigNumber(source, 'nebula'),
       nebulaItems: _map(extensionProgression, 'nebulaItems'),
-      upgrades: _map(source, 'upgradeLevels'),
+      upgrades: upgradeLevels,
       prestigeUpgrades: _map(source, 'prestigeUpgradeLevels'),
       ultraUpgrades: _map(source, 'ultraUpgradeLevels'),
       equippedCosmeticId: _supportedCosmetic(_nullableString(source, 'equippedCosmeticId')),
@@ -150,9 +151,15 @@ class LegacyGtn1SaveAdapter {
         ? _signedInt(source, 'currentRangeMin', fallback: 1).clamp(1, 1000000).toInt()
         : 1;
     final rawMaximum = _signedInt(source, 'currentRangeMax', fallback: 100);
+    final difficultyMaximum = DifficultyRules.rangeMaximum(
+      difficulty,
+      upgradeLevels['better_range'] ?? 0,
+    );
     final maximum = creative
         ? rawMaximum.clamp(minimum, 1000000).toInt()
-        : rawMaximum.clamp(DifficultyRules.baseRangeMaximum(difficulty), 500).toInt();
+        : (rawMaximum < difficultyMaximum ? difficultyMaximum : rawMaximum)
+            .clamp(1, 500)
+            .toInt();
     final data = SaveData(
       secret: _signedInt(source, 'targetNumber', fallback: 50).clamp(minimum, maximum).toInt(),
       attempts: attempts,
