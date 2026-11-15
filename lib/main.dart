@@ -1367,8 +1367,9 @@ class _GameHomePageState extends State<GameHomePage>
   }
 
   Future<void> _openInitialSaveSlots() async {
-    if (!mounted || _initialSaveSlotsOpen || !_playerProfile.setupComplete)
+    if (!mounted || _initialSaveSlotsOpen || !_playerProfile.setupComplete) {
       return;
+    }
     _initialSaveSlotsOpen = true;
     try {
       await Navigator.of(context).push<void>(
@@ -1394,8 +1395,9 @@ class _GameHomePageState extends State<GameHomePage>
         !_isPlayerProfileLoaded ||
         !_playerProfile.setupComplete ||
         !_hasActiveSave ||
-        !_startupExperiencePending)
+        !_startupExperiencePending) {
       return;
+    }
     _startupExperiencePending = false;
     final offline = _startupOfflineEarnings;
     _startupOfflineEarnings = BigNumber.fromInt(0);
