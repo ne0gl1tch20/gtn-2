@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import '../../core/creative/creative_mode.dart';
-import '../../core/legacy/legacy_systems_state.dart';
 import '../../settings/game_settings.dart';
 import 'legacy_gtn1_save_adapter.dart';
 import 'save_data.dart';
