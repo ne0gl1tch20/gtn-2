@@ -26,11 +26,15 @@ class LegacyGtn1SaveAdapter {
 
   static SaveData fromGameStateJson(Map<String, dynamic> source) {
     final statistics = _object(source, 'statistics');
+    final extensions = _object(source, 'gtn2Extensions');
+    final extensionProgression = _object(extensions, 'progression');
+    final extensionLegacy = _object(extensions, 'legacySystems');
     final settingsJson = _object(source, 'settings');
     final traitJson = _object(source, 'traitProfile');
     final adaptiveTraitProfile = _adaptiveTraitProfile(traitJson);
 
     final legacy = <String, dynamic>{
+      ...extensionLegacy,
       'adaptiveTraitProfile': adaptiveTraitProfile.toJson(),
       'legacyGtn1Snapshot': jsonDecode(jsonEncode(source)) as Map<String, dynamic>,
       'discoveredTraits': _set(source, 'discoveredTraitIds').toList(),
@@ -100,6 +104,7 @@ class LegacyGtn1SaveAdapter {
       prestige: _bigNumber(source, 'prestige'),
       ultra: _bigNumber(source, 'ultra'),
       nebula: _bigNumber(source, 'nebula'),
+      nebulaItems: _map(extensionProgression, 'nebulaItems'),
       upgrades: _map(source, 'upgradeLevels'),
       prestigeUpgrades: _map(source, 'prestigeUpgradeLevels'),
       ultraUpgrades: _map(source, 'ultraUpgradeLevels'),
@@ -146,8 +151,8 @@ class LegacyGtn1SaveAdapter {
       correctGuesses: _int(source, 'correctGuesses'),
       streak: _int(source, 'streak'),
       bestStreak: _int(source, 'bestStreak'),
-      gamesWon: _int(source, 'gamesWon'),
-      isComplete: _bool(source, 'isComplete'),
+      gamesWon: _int(extensions, 'gamesWon', fallback: _int(source, 'gamesWon')),
+      isComplete: _bool(extensions, 'isComplete', fallback: _bool(source, 'isComplete')),
       minimum: minimum,
       maximum: maximum,
       progression: progression,
@@ -260,7 +265,13 @@ class LegacyGtn1SaveAdapter {
       ..['activeBossBattleWorldId'] = legacy.activeBossBattleWorldId
       ..['bossBattleMistakes'] = legacy.bossBattleMistakes
       ..['liveOpsClaims'] = legacy.liveOpsClaims
-      ..['lastRandomEventId'] = legacy.lastRandomEventId;
+      ..['lastRandomEventId'] = legacy.lastRandomEventId
+      ..['gtn2Extensions'] = {
+        'gamesWon': save.gamesWon,
+        'isComplete': save.isComplete,
+        'progression': {'nebulaItems': save.progression.nebulaItems},
+        'legacySystems': _legacyExtensionJson(legacy),
+      };
     return source;
   }
 
@@ -302,7 +313,16 @@ class LegacyGtn1SaveAdapter {
       'moreScreenButtonColors': settings.moreScreenButtonColors,
       'webMenuStudioLayout': settings.webMenuStudioLayout,
       'tutorialSeenFeatures': settings.tutorialSeenFeatures.toList(),
+      'gtn2UpdateCheckIntervalHours': settings.updateCheckIntervalHours,
     };
+  }
+
+  static Map<String, dynamic> _legacyExtensionJson(
+    LegacySystemsState state,
+  ) {
+    final json = Map<String, dynamic>.from(state.toJson());
+    json.remove('legacyGtn1Snapshot');
+    return json;
   }
 
   static int _bigNumberToLong(BigNumber value) {
@@ -389,6 +409,7 @@ class LegacyGtn1SaveAdapter {
       webMenuStudioLayout: _nullableString(source, 'webMenuStudioLayout'),
       tutorialCompleted: _bool(source, 'tutorialCompleted'),
       tutorialSeenFeatures: _set(source, 'tutorialSeenFeatures'),
+      updateCheckIntervalHours: _int(source, 'gtn2UpdateCheckIntervalHours'),
     );
     return GameSettings.fromJson(migrated.toJson());
   }
