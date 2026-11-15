@@ -367,32 +367,59 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
 
   Future<void> _exportPortableBackup() async {
     final passphrase = TextEditingController();
+    final confirmPassphrase = TextEditingController();
     final confirmed = await showDialog<String>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Export portable backup'),
-        content: TextField(
-          controller: passphrase,
-          obscureText: true,
-          autofocus: true,
-          decoration: const InputDecoration(
-            labelText: 'Backup passphrase',
-            helperText: 'Use at least 12 characters. Keep it somewhere safe.',
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: const Text('Export portable backup'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'Use a passphrase with at least 12 characters. You will need '
+                'this exact passphrase to restore the backup on another device. '
+                'It cannot be recovered.',
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: passphrase,
+                obscureText: true,
+                autofocus: true,
+                onChanged: (_) => setDialogState(() {}),
+                decoration: const InputDecoration(
+                  labelText: 'Backup passphrase',
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: confirmPassphrase,
+                obscureText: true,
+                onChanged: (_) => setDialogState(() {}),
+                decoration: const InputDecoration(
+                  labelText: 'Confirm passphrase',
+                ),
+              ),
+            ],
           ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: passphrase.text.length >= 12 &&
+                      passphrase.text == confirmPassphrase.text
+                  ? () => Navigator.pop(dialogContext, passphrase.text)
+                  : null,
+              child: const Text('Encrypt & Copy'),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(dialogContext, passphrase.text),
-            child: const Text('Export'),
-          ),
-        ],
       ),
     );
     passphrase.dispose();
+    confirmPassphrase.dispose();
     if (confirmed == null || !mounted) return;
     if (confirmed.length < 12) {
       ScaffoldMessenger.of(context).showSnackBar(
