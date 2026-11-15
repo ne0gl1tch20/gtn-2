@@ -282,3 +282,8 @@ The following source surfaces are in GTN1's frozen production inventory. Some ar
 - **Still open:** screenshot shows a 51px horizontal overflow in Upgrade Shop and a narrow World Map hero heading. These are separate follow-up parity defects, not fixed by this Batch A patch. No full visual or Batch A exit claim is made.
 
 Implementation commits: 4d085133f661edb02ed830b659f44bba72edc5d5, 222c9a02cc8223cba900bd4f8e4c10434864c9f6, 0e0ca4662ad98c476decbf1871b6fa8aa6871866, 5cbb891f1d7444a27f5a9f2f573044d77ace3edb, abf8137cba64f37cc82f3b3ae17176ccbe72a2b1, 2596b1bfc2534153eebbe962955497a258140ff1, and 19a1f46ce1e668b9a11b4658a4b35caa098de16c. Validation pending.
+
+
+### Export dialog controller lifetime correction — 2026-11-16
+
+The first regression test run exposed that disposing the passphrase controllers immediately after showDialog returned was too early: Flutter's reverse route transition still had TextFields listening to those controllers. The corrected implementation moves both controllers into a dedicated _PortableBackupExportDialog StatefulWidget and disposes them from that widget's dispose method. Commit b7650a2112ee2294ab328bd29af89d167357e067. Run #1933 failure is logged; Validate #1941 is pending.
