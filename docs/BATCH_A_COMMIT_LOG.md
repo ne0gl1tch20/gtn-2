@@ -367,3 +367,24 @@ Batch A remains active until Dashboard, More, Settings, Menu Studio, Profile and
 - GitHub compare currently reports **322 commits ahead / 7 behind**, merge base `4fe04ee1572c3e4fb307cd37d796ee5312f30ce1`. This divergence includes main-only audit/plan history. The branch is content-reconciled for the plan and ledger at the time of the two sync commits, but is not ancestry-rebased.
 - Validate run `43701106083` is green for format, analysis, 432 tests, Android debug APK and Windows portable debug. Windows installer is skipped, not failed.
 - Batch A remains active. CI is not runtime or visual evidence. Keep PR #74 draft and Batch B blocked until all six Batch A surfaces satisfy the exit gate.
+
+
+## Screenshot-driven Batch A fixes — 2026-11-16
+
+| UTC date/time | Commit SHA | Commit subject | Batch A item(s) | GTN1 source paths | GTN2 paths changed | Tests / CI | Result and remaining gaps |
+|---|---|---|---|---|---|---|---|
+| 2026-11-15 22:04 | 4d085133f661edb02ed830b659f44bba72edc5d5 | Restore and persist first-run Nimmy tutorial | Dashboard / first-run onboarding | app/src/main/assets/web-play/app.js; GlobalPreferencesManager.kt; pinned source fe9cf567169e19059e0330d08769fe454336ef94 | lib/main.dart | CI pending | Schedules the first-run guide after a saved slot is restored/selected when tutorialCompleted is false; persists completion through global settings. Needs automated first-run regression and Android/Windows runtime verification. |
+| 2026-11-15 22:04 | 222c9a02cc8223cba900bd4f8e4c10434864c9f6 | Match GTN1 portable backup passphrase confirmation | Save Slots | SaveSlotsScreen.kt | lib/saves/save_slots_page.dart | CI pending | Requires a 12+ character passphrase and exact confirmation before enabling Encrypt & Copy. Cancel does not export. |
+| 2026-11-15 22:04 | 0e0ca4662ad98c476decbf1871b6fa8aa6871866 | Test safe cancellation of blank portable backup export | Save Slots | SaveSlotsScreen.kt | test/saves/save_slots_page_test.dart | CI pending | Adds regression coverage that blank-passphrase export is disabled and Cancel closes without throwing. |
+| 2026-11-15 22:04 | 5cbb891f1d7444a27f5a9f2f573044d77ace3edb | Allow compact source-matched guess input typography | Dashboard | GTN1 Web Play mobile guess field | lib/design/expressive_widgets.dart | CI pending | Adds an opt-in text-size property while preserving the default style for all existing fields. |
+| 2026-11-15 22:04 | abf8137cba64f37cc82f3b3ae17176ccbe72a2b1 | Match GTN1 compact single-line bottom navigation and guess input | Dashboard / More | app/src/main/assets/web-play/index.html; styles.css | lib/home/game_dashboard_page.dart | CI pending | Uses 17px icons, 8px one-line labels and a 56px mobile navigation bar; sets the guess field/hint to 14px. Screenshot recheck pending. |
+| 2026-11-15 22:04 | 2596b1bfc2534153eebbe962955497a258140ff1 | Keep export passphrase dialog usable with the mobile keyboard | Save Slots | SaveSlotsScreen.kt | lib/saves/save_slots_page.dart | CI pending | Makes the confirmation dialog scrollable rather than overflowing above the keyboard. |
+| 2026-11-15 22:04 | 19a1f46ce1e668b9a11b4658a4b35caa098de16c | Assert compact mobile navigation geometry | Dashboard / More | GTN1 mobile navigation metrics | test/widget_test.dart | CI pending | Asserts the mobile navigation bar remains at most 64px high and produces no widget exception. |
+
+### Screenshot evidence and remaining defects
+
+- Retrieved and inspected all seven GTN2 screenshots from [PR #74 comment 6895492186](https://github.com/ne0gl1tch20/gtn-2/pull/74#issuecomment-6895492186).
+- The report's first-run Nimmy issue, blank-passphrase export flow and mobile navigation wrapping are addressed in code; no test/build/runtime pass is claimed yet.
+- Dashboard guess-field clipping received a targeted typography correction; device verification remains pending.
+- The screenshot's 51px Upgrade Shop horizontal overflow and World Map hero-heading wrap remain open follow-up defects for their respective parity batches. Settings and the full six-surface Batch A runtime gate remain open.
+- Current PR #74 head is 19a1f46ce1e668b9a11b4658a4b35caa098de16c. The branch still needs ancestry reconciliation with main before merge; keep the PR draft and Batch B blocked.
