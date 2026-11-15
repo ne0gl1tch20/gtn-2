@@ -1403,14 +1403,17 @@ class _GameHomePageState extends State<GameHomePage>
       await showDialog<void>(
         context: context,
         builder: (dialogContext) => AlertDialog(
-          title: const Text('Welcome back!'),
+          title: Text(AppLocalizations.text('welcome_back_title', 'Welcome back!')),
           content: Text(
-            'Your Auto Clicker earned $offline Money while you were away.',
+            AppLocalizations.text(
+              'offline_gains_text',
+              'While you were away, your auto-clicker generated %s money!',
+            ).replaceAll('%s', offline.toString()),
           ),
           actions: [
             FilledButton(
               onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('Continue'),
+              child: Text(AppLocalizations.text('continue', 'Continue')),
             ),
           ],
         ),
@@ -1437,19 +1440,22 @@ class _GameHomePageState extends State<GameHomePage>
         final claim = await showDialog<bool>(
           context: context,
           builder: (dialogContext) => AlertDialog(
-            title: const Text('Daily Nebula Reward'),
+            title: Text(
+              AppLocalizations.text('daily_reward_title', 'Daily Nebula Reward'),
+            ),
             content: Text(
-              'Day ${reward.systems.dailyRewardStreak} streak · +$amount Nebula',
+              '${AppLocalizations.text('daily_reward_subtitle', "Claim today's reward and keep your streak alive.")}\n'
+              '${AppLocalizations.text('daily_reward_streak', 'Day %s streak').replaceAll('%s', reward.systems.dailyRewardStreak.toString())} · +$amount Nebula',
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(dialogContext, false),
-                child: const Text('Later'),
+                child: Text(AppLocalizations.text('later', 'Later')),
               ),
               FilledButton.icon(
                 onPressed: () => Navigator.pop(dialogContext, true),
                 icon: const Icon(Icons.card_giftcard_rounded),
-                label: const Text('Claim reward'),
+                label: Text(AppLocalizations.text('daily_reward_claim', 'Claim reward')),
               ),
             ],
           ),
