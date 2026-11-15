@@ -238,8 +238,7 @@ class LegacyGtn1SaveAdapter {
       // derived value that may differ from the source's historical statistic.
       ..['failedGuesses'] = statistics.containsKey('failedGuesses')
           ? statistics['failedGuesses']
-          : (save.progression.totalGuesses -
-                    save.progression.correctGuesses)
+          : (save.progression.totalGuesses - save.progression.correctGuesses)
                 .clamp(0, save.progression.totalGuesses)
                 .toInt()
       ..['moneyEarned'] = save.progression.moneyEarned.toString()

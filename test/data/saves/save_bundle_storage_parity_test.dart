@@ -14,8 +14,12 @@ void main() {
     late Directory targetDirectory;
 
     setUp(() async {
-      sourceDirectory = await Directory.systemTemp.createTemp('gtn1-all-slots-');
-      targetDirectory = await Directory.systemTemp.createTemp('gtn2-all-slots-');
+      sourceDirectory = await Directory.systemTemp.createTemp(
+        'gtn1-all-slots-',
+      );
+      targetDirectory = await Directory.systemTemp.createTemp(
+        'gtn2-all-slots-',
+      );
     });
 
     tearDown(() async {
@@ -50,22 +54,20 @@ void main() {
           ),
         ],
       );
-      await File(
-        '${sourceDirectory.path}/gtn2-creative-slot10.json',
-      ).writeAsString(CreativeModeSave.encode(creative), flush: true);
+      await File('${sourceDirectory.path}/gtn2-creative-slot10.json')
+          .writeAsString(CreativeModeSave.encode(creative), flush: true);
 
       final settings = GameSettings.initial.copyWith(
         localeCode: 'en_ph',
         themeMode: 'Dark',
         updateCheckIntervalHours: 12,
       );
-      final exported = await SaveBundleStorage(
-        directory: sourceDirectory,
-      ).exportPortableBackup(
-        activeSlot: 10,
-        appPreferences: settings,
-        passphrase: 'correct horse battery',
-      );
+      final exported = await SaveBundleStorage(directory: sourceDirectory)
+          .exportPortableBackup(
+            activeSlot: 10,
+            appPreferences: settings,
+            passphrase: 'correct horse battery',
+          );
 
       final profileJson = jsonEncode({
         'schemaVersion': 2,
@@ -76,25 +78,29 @@ void main() {
         'profileId': 'local-profile-id',
         'setupComplete': true,
       });
-      final profileFile = File('${targetDirectory.path}/gtn2-player-profile.json');
+      final profileFile = File(
+        '${targetDirectory.path}/gtn2-player-profile.json',
+      );
       final avatarFile = File('${targetDirectory.path}/player-avatar.webp');
       await profileFile.writeAsString(profileJson, flush: true);
       final avatarBytes = [0, 1, 2, 3, 127, 128, 255];
       await avatarFile.writeAsBytes(avatarBytes, flush: true);
 
-      final imported = await SaveBundleStorage(
-        directory: targetDirectory,
-      ).importBackup(
-        input: exported,
-        passphrase: 'correct horse battery',
-        legacyTargetSlot: 1,
-      );
+      final imported = await SaveBundleStorage(directory: targetDirectory)
+          .importBackup(
+            input: exported,
+            passphrase: 'correct horse battery',
+            legacyTargetSlot: 1,
+          );
 
       expect(imported, isNotNull);
       expect(imported!.isFullBundle, isTrue);
       expect(imported.activeSlot, 10);
       expect(imported.importedSlots, 10);
-      expect(await SaveStorage(directory: targetDirectory).loadActiveSlot(), 10);
+      expect(
+        await SaveStorage(directory: targetDirectory).loadActiveSlot(),
+        10,
+      );
       for (var slot = 1; slot <= SaveStorage.maxSaveSlots; slot++) {
         final storage = SaveStorage(directory: targetDirectory, slot: slot);
         expect((await storage.loadPrimary())!.secret, 20 + slot);
@@ -118,62 +124,66 @@ void main() {
       expect(await avatarFile.readAsBytes(), avatarBytes);
     });
 
-    test('preserves profile and custom avatar during legacy single-save import', () async {
-      final profileJson = jsonEncode({
-        'schemaVersion': 2,
-        'username': 'Keep me',
-        'bio': 'Local only',
-        'avatarId': 'custom',
-        'customAvatarPath': '${targetDirectory.path}/avatar.png',
-        'profileId': 'keep-profile',
-        'setupComplete': true,
-      });
-      final profileFile = File('${targetDirectory.path}/gtn2-player-profile.json');
-      final avatarFile = File('${targetDirectory.path}/avatar.png');
-      await profileFile.writeAsString(profileJson, flush: true);
-      await avatarFile.writeAsBytes([9, 8, 7, 6], flush: true);
+    test(
+      'preserves profile and custom avatar during legacy single-save import',
+      () async {
+        final profileJson = jsonEncode({
+          'schemaVersion': 2,
+          'username': 'Keep me',
+          'bio': 'Local only',
+          'avatarId': 'custom',
+          'customAvatarPath': '${targetDirectory.path}/avatar.png',
+          'profileId': 'keep-profile',
+          'setupComplete': true,
+        });
+        final profileFile = File(
+          '${targetDirectory.path}/gtn2-player-profile.json',
+        );
+        final avatarFile = File('${targetDirectory.path}/avatar.png');
+        await profileFile.writeAsString(profileJson, flush: true);
+        await avatarFile.writeAsBytes([9, 8, 7, 6], flush: true);
 
-      final legacy = {
-        'difficultyId': 'classic',
-        'profileName': 'Migrated save',
-        'profileIconId': 'star',
-        'targetNumber': 42,
-        'currentRangeMin': 1,
-        'currentRangeMax': 100,
-        'attempts': 3,
-        'correctGuesses': 1,
-        'statistics': {
-          'totalGuesses': 3,
+        final legacy = {
+          'difficultyId': 'classic',
+          'profileName': 'Migrated save',
+          'profileIconId': 'star',
+          'targetNumber': 42,
+          'currentRangeMin': 1,
+          'currentRangeMax': 100,
+          'attempts': 3,
           'correctGuesses': 1,
-          'failedGuesses': 2,
-          'moneyEarned': '0',
-          'moneySpent': '0',
-          'nebulaEarned': 0,
-          'playtimeSeconds': 0,
-          'randomEventsTriggered': 0,
-        },
-        'settings': {'themeMode': 'Dark', 'locale': 'en-US'},
-      };
-      final result = await SaveBundleStorage(
-        directory: targetDirectory,
-      ).importBackup(
-        input: jsonEncode(legacy),
-        passphrase: '',
-        legacyTargetSlot: 4,
-      );
+          'statistics': {
+            'totalGuesses': 3,
+            'correctGuesses': 1,
+            'failedGuesses': 2,
+            'moneyEarned': '0',
+            'moneySpent': '0',
+            'nebulaEarned': 0,
+            'playtimeSeconds': 0,
+            'randomEventsTriggered': 0,
+          },
+          'settings': {'themeMode': 'Dark', 'locale': 'en-US'},
+        };
+        final result = await SaveBundleStorage(directory: targetDirectory)
+            .importBackup(
+              input: jsonEncode(legacy),
+              passphrase: '',
+              legacyTargetSlot: 4,
+            );
 
-      expect(result, isNotNull);
-      expect(result!.isFullBundle, isFalse);
-      expect(result.activeSlot, 4);
-      expect(
-        (await SaveStorage(
-          directory: targetDirectory,
-          slot: 4,
-        ).loadPrimary())!.secret,
-        42,
-      );
-      expect(await profileFile.readAsString(), profileJson);
-      expect(await avatarFile.readAsBytes(), [9, 8, 7, 6]);
-    });
+        expect(result, isNotNull);
+        expect(result!.isFullBundle, isFalse);
+        expect(result.activeSlot, 4);
+        expect(
+          (await SaveStorage(
+            directory: targetDirectory,
+            slot: 4,
+          ).loadPrimary())!.secret,
+          42,
+        );
+        expect(await profileFile.readAsString(), profileJson);
+        expect(await avatarFile.readAsBytes(), [9, 8, 7, 6]);
+      },
+    );
   });
 }

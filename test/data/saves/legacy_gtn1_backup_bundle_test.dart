@@ -104,7 +104,9 @@ void main() {
         'musicEnabled': false,
         'musicLibraryPaths': ['source-track.mp3'],
         'musicQueuePaths': ['source-track.mp3'],
-        'musicPlaylistPaths': {'focus': ['source-track.mp3']},
+        'musicPlaylistPaths': {
+          'focus': ['source-track.mp3'],
+        },
         'musicRepeatMode': 'all',
         'musicShuffle': true,
         'moreScreenOrder': ['save_slots', 'settings'],
@@ -165,7 +167,9 @@ void main() {
         'appPreferencesJson': jsonEncode(sourceSettings),
         'activeSlot': 3,
         'slots': {'3': jsonEncode(sourceSave)},
-        'backups': {'3': jsonEncode({...sourceSave, 'targetNumber': 60})},
+        'backups': {
+          '3': jsonEncode({...sourceSave, 'targetNumber': 60}),
+        },
         'creativeSlots': {'3': jsonEncode(sourceCreative)},
       });
 
@@ -176,7 +180,10 @@ void main() {
       expect(decoded.appPreferences.musicLibraryPaths, ['source-track.mp3']);
       expect(save.secret, 77);
       expect(save.progression.money.toString(), '98765432101234567890');
-      expect(save.progression.legacySystems.legacyGtn1Snapshot['shopPurchases'], ['shop_token']);
+      expect(
+        save.progression.legacySystems.legacyGtn1Snapshot['shopPurchases'],
+        ['shop_token'],
+      );
       final stats = Map<String, dynamic>.from(
         save.progression.legacySystems.legacyGtn1Snapshot['statistics'] as Map,
       );
