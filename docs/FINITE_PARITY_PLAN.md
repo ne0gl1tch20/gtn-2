@@ -263,3 +263,19 @@ The following evidence is still required across the six surfaces:
 ## Progress tracking
 
 Keep one status per checklist item: **Not started**, **In progress**, **Verified**, or **Not applicable**. A verified item records the GTN1 source reference and the GTN2 test or platform evidence. Do not create a new checklist section for each newly noticed idea.
+
+
+## Screenshot-driven regression fixes — 2026-11-16
+
+**Evidence:** seven GTN2-only screenshots attached to [PR #74 comment 6895492186](https://github.com/ne0gl1tch20/gtn-2/pull/74#issuecomment-6895492186). The screenshots were retrieved and inspected directly; no GTN1 screenshots were requested from the user.
+
+| Finding | Source comparison / target | Implementation state | Verification state |
+|---|---|---|---|
+| Nimmy first-run guide never starts automatically | GTN1 Web Play app.js onboarding state (nimmyTutorialCompleted) and complete_nimmy_tutorial; GTN2 GameSettings.tutorialCompleted and lib/main.dart | Added a first-run scheduling path after an existing save is restored or a save slot is selected. Completion is persisted through the existing global settings path. | In progress; regression test and Android/Windows runtime check still required |
+| Portable backup export dialog did not match GTN1 confirmation flow | Pinned GTN1 SaveSlotsScreen.kt | Added passphrase confirmation, requires at least 12 characters and exact match, disables export until valid, keeps Cancel as a non-exporting dismissal, and makes the dialog content scroll when the mobile keyboard is open. | In progress; blank-passphrase cancellation regression added, CI pending |
+| Bottom navigation labels wrap and increase bar height | Pinned GTN1 Web Play index.html and styles.css: five-column mobile navigation, 17px icons and compact 8px single-line labels | Replaced the mobile expressive navigation widget with the standard Material navigation bar using the source-sized icon/label metrics and a 56px bar. Added a mobile geometry/overflow assertion. | In progress; CI and Android/Windows screenshot recheck pending |
+| Dashboard guess placeholder is clipped | GTN2 GtnExpressiveTextField applied an 18px extra-bold input style to a narrow mobile field | Added an opt-in font-size parameter and reduced the dashboard guess field and hint to 14px without changing other text fields. | In progress; CI and device screenshot recheck pending |
+
+**Not closed by this patch:** the screenshot also shows a 51px horizontal overflow in Upgrade Shop and a narrow World Map hero heading. These are recorded as follow-up defects for their own parity batches; do not count them as fixed or use them to close Batch A. Settings typography and the remaining six-surface Android/Windows runtime checks still need review. A successful CI run alone is not visual evidence.
+
+The implementation commits on batch-a/creative-save-active-slot are 4d085133f661edb02ed830b659f44bba72edc5d5, 222c9a02cc8223cba900bd4f8e4c10434864c9f6, 0e0ca4662ad98c476decbf1871b6fa8aa6871866, 5cbb891f1d7444a27f5a9f2f573044d77ace3edb, abf8137cba64f37cc82f3b3ae17176ccbe72a2b1, 2596b1bfc2534153eebbe962955497a258140ff1, and 19a1f46ce1e668b9a11b4658a4b35caa098de16c. All validation and runtime evidence remains pending.
