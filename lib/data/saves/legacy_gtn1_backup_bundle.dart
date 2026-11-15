@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import '../../core/creative/creative_mode.dart';
+import '../../core/legacy/legacy_systems_state.dart';
 import '../../settings/game_settings.dart';
 import 'legacy_gtn1_save_adapter.dart';
 import 'save_data.dart';
@@ -125,8 +126,20 @@ class LegacyGtn1BackupBundle {
       if (slot == null || slot < 1 || slot > maxSlots || value is! String) {
         throw FormatException('Invalid GTN1 $label entry.');
       }
-      final save = LegacyGtn1SaveAdapter.decodeGameState(value)
-          .copyWith(settings: settings);
+      final decoded = LegacyGtn1SaveAdapter.decodeGameState(value);
+      final systems = decoded.progression.legacySystems.copyWith(
+        musicLibrary: settings.musicLibraryPaths,
+        musicQueue: settings.musicQueuePaths,
+        musicPlaylists: settings.musicPlaylistPaths,
+        musicRepeatMode: settings.musicRepeatMode,
+        musicShuffle: settings.musicShuffle,
+        currentTrackId: settings.backgroundMusicPath,
+        clearCurrentTrack: settings.backgroundMusicPath == null,
+      );
+      final save = decoded.copyWith(
+        settings: settings,
+        progression: decoded.progression.copyWith(legacySystems: systems),
+      );
       SaveData.fromJson(save.toJson());
       result[slot] = save;
     }
