@@ -246,3 +246,15 @@ The following source surfaces are in GTN1's frozen production inventory. Some ar
 - Added three widget tests: independent More callbacks, Prestige-only controls and Ultra-only controls.
 - Validation evidence: [Validate 43604941557](https://github.com/ne0gl1tch20/gtn-2/actions/runs/43604941557), **377 tests passed**, format and analysis passed. [Build Debug 43604941575](https://github.com/ne0gl1tch20/gtn-2/actions/runs/43604941575) passed Android and Windows debug builds and published `debug-latest`.
 - This closes the route conflation only. It does not close Prestige/Ultra screen parity, because the detailed source catalog panels and shop content still need implementation and runtime comparison.
+
+
+### Menu Studio persistence round-trip regression — 2026-11-15
+
+**Pinned GTN1 source:** `app/src/main/assets/web-play/menu-studio.js` and the `update_setting` host contract at `fe9cf567169e19059e0330d08769fe454336ef94`.
+
+**GTN2 targets:** `lib/settings/menu_studio_layout.dart`, `lib/settings/menu_studio_page.dart`, `lib/settings/game_settings.dart`, `lib/data/saves/save_bundle_storage.dart`.
+
+- Rechecked the source schema: `areas`, `orders.nav`, `orders.more`, and `colors`; the three pinned navigation destinations remain fixed ahead of movable destinations, while the 18 More destinations retain their source IDs and order.
+- The existing widget test covers moving a source destination, the compatible payload shape, live preview and cancel restoration.
+- Added an end-to-end persistence regression in `test/data/saves/save_bundle_storage_test.dart`: custom More ordering, per-button colors and the complete encoded Menu Studio layout are written into global app preferences, exported through the portable bundle and reloaded after import. The test asserts the restored values exactly.
+- This closes the automated backup/reload coverage gap for Menu Studio preferences. It does **not** replace a live app restart check or Android/Windows visual/interaction evidence; those remain open in Batch A.
