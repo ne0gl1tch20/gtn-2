@@ -544,12 +544,7 @@ class GameDashboardPage extends StatelessWidget {
                                                       updateNoticeChecking
                                                       ? null
                                                       : onUpdateDismiss,
-                                                  child: Text(
-                                                    AppLocalizations.text(
-                                                      'web_dismiss_update_notice',
-                                                      'Later',
-                                                    ),
-                                                  ),
+                                                  child: const Text('Later'),
                                                 ),
                                                 const Spacer(),
                                                 FilledButton.icon(
@@ -572,10 +567,7 @@ class GameDashboardPage extends StatelessWidget {
                                                         ),
                                                   label: Text(
                                                     updateNoticeChecking
-                                                        ? AppLocalizations.text(
-                                                            'update_installing',
-                                                            'Updating…',
-                                                          )
+                                                        ? 'Updating…'
                                                         : 'Update',
                                                   ),
                                                 ),
