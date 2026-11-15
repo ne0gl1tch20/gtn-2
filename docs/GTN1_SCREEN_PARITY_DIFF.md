@@ -269,3 +269,16 @@ The following source surfaces are in GTN1's frozen production inventory. Some ar
 - Added `_reset()` to restore the default layout and immediately call the existing preview callback. The reset remains an unsaved preview; the test asserts it does not invoke `onChanged`.
 - Added `Menu Studio reset immediately updates the live preview` to `test/settings/menu_studio_page_test.dart`, checking Worlds returns to navigation and the More order returns to the pinned GTN1 default.
 - CI for this change is running in Validate run [43672157813](https://github.com/ne0gl1tch20/gtn-2/actions/runs/43672157813); do not treat the test as passed until the run completes. Android/Windows live UI checks remain open.
+
+
+### GTN2-only screenshot review and corrective implementation — 2026-11-16
+
+**Evidence:** seven GTN2-only screenshots from [PR #74 comment 6895492186](https://github.com/ne0gl1tch20/gtn-2/pull/74#issuecomment-6895492186), inspected directly. The pinned GTN1 source remains fe9cf567169e19059e0330d08769fe454336ef94.
+
+- **Nimmy:** GTN1 Web Play reads nimmyTutorialCompleted through the onboarding-state bridge and persists completion through complete_nimmy_tutorial. GTN2 already had a GameSettings.tutorialCompleted flag and replay action, but never scheduled the first-run guide after a save became available. Added first-run scheduling after successful save restoration/slot selection and persisted completion using the existing global settings writer. Runtime timing and persistence still need device verification.
+- **Save export:** GTN1 SaveSlotsScreen.kt requires a passphrase of at least 12 characters and a matching confirmation before enabling encrypted export. GTN2 had only one passphrase field. The target now has both fields, disables export until they match, and keeps Cancel as a no-op dismissal. A widget regression covers cancelling with both fields blank; validation is pending.
+- **Bottom navigation:** GTN1 index.html defines five mobile destinations; styles.css uses 17px icons, 8px single-line labels and a compact fixed bar. GTN2's mobile M3ENavigationBar wrapped long labels (notably Beyond the Numbers and Upgrades), expanding the bar and clipping the labels. Replaced it with a compact Material NavigationBar using those metrics and added a geometry/overflow assertion. Android/Windows screenshot verification is pending.
+- **Dashboard guess field:** the screenshot showed the placeholder clipped in the mobile guess row. GTN2's reusable expressive field applied an 18px extra-bold style. Added an opt-in font-size parameter and applied 14px to the guess field/hint only; other fields retain their existing default.
+- **Still open:** screenshot shows a 51px horizontal overflow in Upgrade Shop and a narrow World Map hero heading. These are separate follow-up parity defects, not fixed by this Batch A patch. No full visual or Batch A exit claim is made.
+
+Implementation commits: 4d085133f661edb02ed830b659f44bba72edc5d5, 222c9a02cc8223cba900bd4f8e4c10434864c9f6, 0e0ca4662ad98c476decbf1871b6fa8aa6871866, 5cbb891f1d7444a27f5a9f2f573044d77ace3edb, abf8137cba64f37cc82f3b3ae17176ccbe72a2b1, 2596b1bfc2534153eebbe962955497a258140ff1, and 19a1f46ce1e668b9a11b4658a4b35caa098de16c. Validation pending.
