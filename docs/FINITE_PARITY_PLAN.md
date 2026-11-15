@@ -158,22 +158,106 @@
 
 Parity is finished when Stage 6 passes. Only reproducible defects in the delivered GTN2 build are maintenance bugs. New features, optional improvements and later GTN1 additions require a separate project/version decision; they do not reopen this checklist.
 
-## Batch A verification status — 2026-11-14
+## Batch A verification status — authoritative refresh, 2026-11-15
 
-Batch A is the active implementation gate. B–F remain queued in the fixed order below and must not be treated as complete because their routes or files exist.
+**This section supersedes the older Batch A status snapshots below it in Git history.** Keep this section current whenever Batch A code, CI evidence, source comparisons or runtime verification changes. Do not copy PR-branch implementation claims into the merged-main status.
 
-- **Dashboard / More:** the actual dashboard `_MoreMenuPage` and pinned GTN1 `#screen-play` / `#screen-more` + CSS were diffed. The Shop route now opens Nebula Shop; duplicate Dev Settings rendering was removed; More keeps the shared brand/offline header; Player Profile is a full-width card outside the reorderable links; and the 520px two-column breakpoint, 78px/70px card minimums, spacing, 25px cyan icon tiles, Save Slots `▣` glyph, source icon mapping and More order are covered by widget tests. Play width, Bot Arena half-column behavior, mobile-stacked / desktop-split quick actions, hero and stats sizing, debug-build card and 720px bottom-navigation behavior are also covered. **Fixed in this pass:** More now routes Prestige and Ultra independently, and `ProgressionHubPage` opens a focused Prestige or Ultra view with only that reset's controls; tests cover both callbacks and both focused views. **Still open:** source Update Available notice is not connected to the Flutter updater; Creative Save placement/visibility needs a direct source-to-target route check; GTN1's Prestige/Ultra catalog panels, detailed requirement/reward summaries and source shop contents are not yet reproduced exactly; exhaustively test every More destination action and capture paired runtime screenshots.
-- **Settings:** source-facing hierarchy and labels plus the Theme Colors live preview are implemented. The shared Flutter color picker matches GTN1's saturation/value plane, hue slider, live preview, hex entry and optional Use theme reset. Android notification permission request/result feedback is now bridged through the generated MainActivity and `POST_NOTIFICATIONS` manifest permission; category and control descriptions were restored. Widget tests cover permission grant/denial and category copy. Remaining: actual notification scheduling/delivery, localization parity, exact labels and runtime persistence/device evidence.
-- **Menu Studio:** the two-area model is implemented in `menu_studio_layout.dart` / `menu_studio_page.dart`: its 3 navigation IDs and 18 `.more-links` IDs match the pinned GTN1 DOM inventory; it supports move/reorder, per-button shared HSV/hex picker, reset, and the compatible `areas` + `orders.nav` + `orders.more` + `colors` payload. Preview changes now flow through the dashboard settings notifier to the actual navigation and More menu; cancel restores the original layout and save persists it. Widget tests cover source IDs, schema, moving a button, preview callback and restore. Remaining: run navigation-level tests and verify actual runtime move/reorder/color/cancel/reload behavior on Android and Windows.
-- **Player Profile:** the read-only profile view and separate Edit profile action are implemented. GTN2 persists `profileId` and `setupComplete`, migrates older profile JSON by generating an ID and inferring completion from an existing username, gates the app behind first-launch profile setup, and now stores custom avatars in app-private files while migrating old base64 profile images. Added model/widget coverage. Remaining: verify profile persistence/reload, first-launch behavior and save-slot metadata synchronization on Android and Windows.
-- **Save Slots:** both implementations support ten slots; Flutter has create/edit/duplicate/reset/restore/Creative Mode and guarded Reset Everything with the source 45-second wait, acknowledgement checkbox and arithmetic challenge. A widget test verifies the gate. GTN2's `PortableSaveBackup` helper implements the GTN1 `GTNPORT1` PBKDF2-HMAC-SHA256 (310,000 iterations) + AES-256-GCM envelope parameters and has round-trip/tamper tests, but Save Slots has no export/import UI or bundle serializer yet. The older GTN1 XOR/Base64 backup importer and legacy single-save migration are also absent. The source bundle stores `GameState` JSON, app preferences, ten slots, ten backups and Creative Mode data; GTN2 stores a materially different `SaveData` / `ProgressionState` schema. Do not simply wrap Flutter JSON in the source envelope or clear slots on a partially understood import. Implement an explicit field-preserving GTN1-to-GTN2 adapter, validate unsupported source fields, and test cross-language known-answer vectors, malformed data, wrong passphrases, slot replacement, backup retention and reset completion.
-- **Evidence gate — 2026-11-14:** The latest code-bearing baseline `f82b3599b941ff4866183d38f3cc4d9dc062e6c8` passed [Validate run 43605519424](https://github.com/ne0gl1tch20/gtn-2/actions/runs/43605519424), including Dart formatting, analysis and the full Flutter test suite; its Windows release installer job also passed. [Build Debug run 43605519391](https://github.com/ne0gl1tch20/gtn-2/actions/runs/43605519391) passed Android debug APK, Windows desktop debug and `debug-latest` publication. PR #72 (Play/More/Profile parity) and PR #73 (random-event port) are merged; PR #67 remains a draft explicitly postponed until parity is complete. The current `main` is now `c07776f5f8a79e8685eadfe3316ae3a156989709`, a documentation-only checkpoint refresh; its own Validate run [43610832411](https://github.com/ne0gl1tch20/gtn-2/actions/runs/43610832411) and Build Debug run [43610832349](https://github.com/ne0gl1tch20/gtn-2/actions/runs/43610832349) were still in progress when recorded. CI results do not prove live runtime parity. Paired GTN1/GTN2 screenshots, on-device Android permission prompt testing, Windows smoke checks and settings/profile persistence-reload remain outstanding.
+### Repository and source checkpoints
 
+- **Repository:** `ne0gl1tch20/gtn-2`; default branch: `main`.
+- **GTN1 parity source:** `ne0gl1tch20/GuessTheNumber@fe9cf567169e19059e0330d08769fe454336ef94`. This remains the pinned feature boundary.
+- **Current inspected GTN2 main checkpoint:** `4fe04ee1572c3e4fb307cd37d796ee5312f30ce1`. This is the actual base of the active Batch A continuation PR, not the PR's latest code.
+- **Active continuation:** [PR #74 — Batch A: implement GTN1 active-save Creative Save](https://github.com/ne0gl1tch20/gtn-2/pull/74), base `main`, head branch `batch-a/creative-save-active-slot`, latest inspected head `d9b5c5c74951be13642e3547f00a216ef889a9aa`. PR #74 is open and draft. Its implementation is **not merged into main**.
+- **Latest PR-head validation:** [Validate run 43673480248](https://github.com/ne0gl1tch20/gtn-2/actions/runs/43673480248), on PR head `d9b5c5c74951be13642e3547f00a216ef889a9aa`. Formatting passed, `flutter analyze --fatal-infos` reported no issues, all **432 Flutter tests passed**, Android debug APK built and Windows desktop debug build succeeded. The Windows release-installer job was skipped for this PR validation. This is PR-branch evidence, not evidence that the same code is already on main.
+- **Android artifact from that run:** [android-debug-apk](https://github.com/ne0gl1tch20/gtn-2/actions/runs/43673480248/artifacts/14144989267), artifact ID `14144989267`.
+- **Windows artifact from that run:** [windows-debug-portable](https://github.com/ne0gl1tch20/gtn-2/actions/runs/43673480248/artifacts/14145074090), artifact ID `14145074090`.
+- **Earlier merged baseline PRs:** #71 (Dashboard/More baseline) and #72 (Play/More/Profile baseline) are merged. PR #73 (random-event implementation) is merged but is not a Batch A surface closure. PR #67 remains a separate draft explicitly postponed until parity work is complete.
+- **Audit ledger location:** the append-only `docs/BATCH_A_COMMIT_LOG.md` was verified on the PR #74 head, but it is **not present on the inspected main checkpoint** (the main-branch path returns 404). Do not imply that its PR-branch entries are already committed to main. When PR #74 is merged, verify the ledger is present on main and continue appending every subsequent Batch A commit there.
 
+### Status rules
 
-**Creative Save source-to-target route audit — 2026-11-14:** The pinned GTN1 Web Play source places `#creativeToolsPanel` inline in `#screen-play` (not in More or as a separate route) and keeps it hidden unless the active `GameState.creativeModeEnabled` flag is true; `app.js` refreshes its range, Money, Prestige, Ultra, Nebula, attempts, correct guesses, streak and best-streak fields from the active save. The source Android/Windows transaction contract is in `GameViewModel.updateCreativeRange/updateCreativeValue` and `DesktopWebPlayActions.updateCreativeRange/updateCreativeValue`: edits are accepted only for a Creative Mode save, range changes reset the active round and target to the midpoint, currency values use validated BigNumber parsing, counters have cross-field bounds, and upgrade levels are checked against canonical catalogs. GTN2 currently exposes `CreativeModePage` from the Save Slots action menu, but that page is a separate sandbox run with its own range/effects/attempts and explicitly does not award or edit main-game progression; it is not equivalent to GTN1's active-save Creative Save panel. The GTN2 `SaveData.creativeMode` nested model is not yet a proven field-equivalent replacement for GTN1's permanent `creativeModeEnabled` flag. **Status: confirmed semantic parity gap, not a placement-only check.** Do not surface a fake dashboard panel or map the isolated sandbox to this feature. Implement a dedicated source-equivalent active-save model/transaction path and guarded inline Play controls, with source-backed validation tests, before marking this Batch A item complete.
+- **Implemented** means code exists on the explicitly named branch. It does not mean merged, runtime-verified or parity-complete.
+- **CI passed** means the exact named commit passed the named automated jobs. It does not prove runtime behavior, platform persistence or visual parity.
+- **Runtime verified** requires direct Android and Windows execution evidence for the stated behavior.
+- **Visually verified** requires paired GTN1/GTN2 screenshots at the agreed mobile and desktop viewports, reviewed against the pinned source.
+- **Verified / closed** requires the GTN1 source reference plus appropriate GTN2 automated and platform evidence. Keep a feature open if any required evidence is missing.
+- Do not advance to Batch B until all six Batch A surfaces pass their complete exit checks.
 
-**Batch A exit is blocked** until all six surfaces above have source-backed behavior, tests/persistence checks and paired runtime evidence. Keep all unverified items open; do not advance to Batch B until this gate passes.
+### Batch A surface status
+
+#### A1 — Dashboard
+
+**Status: In progress; not closed.**
+
+- The merged baseline includes the GTN1-facing Play hierarchy, responsive dashboard behavior, primary navigation and More routing work from PRs #71/#72.
+- The pinned Web Play source is `app/src/main/assets/web-play/index.html`, `styles.css` and `app.js`; the Android source includes the corresponding Play screen and ViewModel behavior.
+- PR #74 adds the source-equivalent active-save Creative Save panel to the dashboard on its branch. The panel is guarded by the active save's permanent eligibility flag and uses validated host-side transactions. This code is not yet on main.
+- Remaining: execute the dashboard on Android and Windows; verify normal and eligible-save states, active-slot switching, restart persistence, updater notice actions and every primary dashboard action; compare responsive layout and controls against paired GTN1 screenshots. Verify Creative Save controls, source labels, edge inputs and transaction results on both platforms.
+- Do not close Dashboard based on widget tests or PR CI alone.
+
+#### A2 — More
+
+**Status: In progress; not closed.**
+
+- Merged work establishes the More destination inventory, source-facing labels/order, profile card separation, responsive grid and distinct Prestige/Ultra navigation destinations.
+- Source references include the pinned Web Play `#screen-more` / `.more-links` markup and CSS, plus the Android More/navigation source.
+- Remaining: exercise every More destination action in the running app on Android and Windows; verify each destination and return path; compare the complete card order, labels, icons, dimensions and responsive behavior with GTN1 at phone and desktop widths. Prestige/Ultra route separation is implemented, but their detailed catalog panels, requirement/reward summaries and source shop content remain separate parity work and must not be counted as complete merely because the destinations open.
+
+#### A3 — Settings
+
+**Status: In progress; not closed.**
+
+- Source-facing settings hierarchy, theme color preview/picker, category descriptions and Android notification permission request/result bridge are implemented in the inspected baseline/continuation history. Update-check interval choices and updater scheduling are documented on the PR continuation; verify exact branch ownership before treating those changes as merged.
+- Source references include GTN1 settings screen/model and Web Play settings controls; GTN2 targets include `lib/settings/` and the Android permission bridge.
+- Remaining: verify every visible setting's source label, default, persistence and effect; test notification permission grant/denial on a real Android runtime, actual notification scheduling/delivery where applicable, updater interval behavior and app restart; verify Windows settings behavior and localization. Capture paired source/runtime screenshots.
+- Widget tests for permission outcomes do not establish that the operating-system prompt or notification delivery works on-device.
+
+#### A4 — Menu Studio
+
+**Status: In progress; not closed.**
+
+- The implementation on the continuation supports the two source areas (top navigation and More), source IDs (3 navigation entries and 18 More links), cross-area move/reorder, per-button HSV/hex color, reset, live preview, cancel and save using the GTN1-compatible `areas`, `orders.nav`, `orders.more` and `colors` payload.
+- Source references: GTN1 `app/src/main/assets/web-play/menu-studio.js`, its stylesheet and the pinned HTML DOM inventory. GTN2 targets: `lib/settings/menu_studio_layout.dart`, `lib/settings/menu_studio_page.dart`, dashboard settings integration and corresponding tests.
+- Remaining: verify actual drag/move/reorder, color changes, reset, cancel, save and reload in Android and Windows running builds. Confirm the live dashboard and More destinations update immediately and that cancel restores the prior layout. Capture paired screenshots.
+- Do not close based on payload/model tests alone.
+
+#### A5 — Player Profile
+
+**Status: In progress; not closed.**
+
+- The baseline implements a read-only profile view with a separate Edit profile action, profile identity/setup fields, first-launch setup gating, backward-compatible profile migration and app-private custom avatar storage/migration.
+- Source reference: GTN1 `PlayerProfileScreen.kt` and profile persistence implementation. GTN2 targets include `lib/profile/player_profile_page.dart`, profile model/storage and `lib/main.dart`.
+- Remaining: verify fresh-install/first-launch setup, edit/cancel/save behavior, avatar selection and file persistence, restart/reload, and save-slot metadata synchronization on Android and Windows. Confirm profile data remains independent of save-slot import/export as specified. Capture paired screenshots.
+- Model/widget tests do not close real filesystem and lifecycle behavior.
+
+#### A6 — Save Slots
+
+**Status: In progress; not closed.**
+
+- The baseline supports ten slots and the slot-management actions. PR #74 implements substantial additional work on its branch: permanent schema-v7 `creativeModeEnabled` distinct from the isolated sandbox payload; GTN1-shaped v2/v3 bundle conversion; field-preserving adapter mappings; full bundle import/export for ten slots, backups, active slot, Creative Mode slot payloads and global preferences; legacy single-save import; staged writes, rollback/recovery and regression fixtures.
+- Source references inspected for the continuation include GTN1 `GameState.kt`, `GameViewModel.kt`, `DesktopWebPlayActions.kt`, `SaveSlotsScreen.kt`, `SaveManager.kt`, `PortableSaveBackup.kt` and Web Play `index.html` / `app.js`. GTN2 targets include `lib/data/saves/save_data.dart`, `lib/data/saves/save_storage.dart`, `lib/saves/` and the legacy adapter/backup implementation.
+- PR-head evidence: Validate run 43673480248 passed all 432 tests plus Android and Windows debug builds. This includes the current PR-head code, not main. Earlier failed CI attempts and their fixes are retained in the PR-head append-only ledger; they are historical failures, not failures of the latest validated head.
+- Remaining: run Android and Windows runtime import/export and slot-management checks; verify all ten primary slots and backups, active-slot switching, standalone Creative slot behavior, profile/avatar preservation, wrong passphrase, malformed/unsupported data, interrupted transaction recovery, restart persistence and no partial writes. Verify source-only GTN1 fields survive round-trip and that unsupported data is never silently discarded. Capture paired screenshots and record an actual artifact checksum for the final merged-main build.
+- Do not close Save Slots or Batch A on code/CI alone.
+
+### Cross-surface Batch A exit gate
+
+The following evidence is still required across the six surfaces:
+
+- [ ] Install and run the current validated Android build; exercise all six surfaces and record device/runtime evidence.
+- [ ] Run the corresponding Windows desktop build; exercise all six surfaces and record runtime evidence.
+- [ ] Capture paired GTN1/GTN2 screenshots at agreed phone and desktop viewports for Dashboard, More, Settings, Menu Studio, Profile and Save Slots.
+- [ ] Verify every source-defined primary action, navigation destination, dialog, state transition, disabled/locked/empty/error state and return path for the six surfaces.
+- [ ] Verify settings/profile/menu/save persistence across process restart and active save-slot changes.
+- [ ] Verify Android notification permission and delivery behavior, updater behavior and platform-specific flows.
+- [ ] Verify Save Slots import/export, migration, validation and recovery with known-good, malformed and wrong-passphrase fixtures on both platforms.
+- [ ] Review all six surface diffs against the pinned GTN1 source and resolve every reproducible mismatch.
+- [ ] Update the append-only Batch A commit ledger with every implementation, documentation, test, formatting and CI-fix commit. Ensure the ledger is present on main after merge.
+- [ ] Merge PR #74 only after its review and required checks; then verify the merge commit and rerun/confirm required validation on the merged main state.
+- [ ] Build the final Batch A Android/Windows artifacts from the verified merged main commit and record their exact run IDs, artifact IDs and SHA-256 values.
+- [ ] Re-fetch this checklist from main after every material parity update so status never silently drifts from repository reality.
+
+**Batch A exit:** All six surfaces have source-backed behavior, regression coverage, persistence checks, paired Android/Windows runtime evidence and visual comparison. The validated implementation must be merged to main. Until every item above is satisfied, Batch A remains active and Batch B remains blocked.
 
 ## Progress tracking
 
