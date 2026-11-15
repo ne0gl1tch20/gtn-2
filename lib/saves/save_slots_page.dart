@@ -1,12 +1,14 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:flutter/services.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../core/creative/creative_mode.dart';
 import '../core/game/difficulty_rules.dart';
 import '../creative/creative_mode_page.dart';
+import '../data/saves/save_bundle_storage.dart';
 import '../data/saves/save_data.dart';
 import '../data/saves/save_storage.dart';
 import '../design/expressive_widgets.dart';
@@ -20,12 +22,16 @@ class SaveSlotsPage extends StatefulWidget {
     super.key,
     required this.activeSlot,
     required this.onSelect,
+    required this.settings,
+    this.onImportComplete,
     this.previewLoader,
     this.onResetEverything,
   });
 
   final int activeSlot;
   final SaveSlotSelection onSelect;
+  final GameSettings settings;
+  final SaveSlotSelection? onImportComplete;
   final SaveSlotPreviewLoader? previewLoader;
   final Future<void> Function()? onResetEverything;
 
@@ -359,6 +365,183 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
     _ => '🎮',
   };
 
+  Future<void> _exportPortableBackup() async {
+    final passphrase = TextEditingController();
+    final confirmed = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Export portable backup'),
+        content: TextField(
+          controller: passphrase,
+          obscureText: true,
+          autofocus: true,
+          decoration: const InputDecoration(
+            labelText: 'Backup passphrase',
+            helperText: 'Use at least 12 characters. Keep it somewhere safe.',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, passphrase.text),
+            child: const Text('Export'),
+          ),
+        ],
+      ),
+    );
+    passphrase.dispose();
+    if (confirmed == null || !mounted) return;
+    if (confirmed.length < 12) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Passphrase must be at least 12 characters.')),
+      );
+      return;
+    }
+    setState(() => _working = 0);
+    try {
+      final storage = await SaveBundleStorage.inApplicationDocuments();
+      final backup = await storage.exportPortableBackup(
+        activeSlot: widget.activeSlot,
+        appPreferences: widget.settings,
+        passphrase: confirmed,
+      );
+      await Clipboard.setData(ClipboardData(text: backup));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Encrypted backup copied. Store it safely with your passphrase.'),
+          ),
+        );
+      }
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not export backup: $error')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _working = null);
+    }
+  }
+
+  Future<void> _importPortableBackup() async {
+    final backup = TextEditingController();
+    final passphrase = TextEditingController();
+    final confirmed = await showDialog<
+      ({String backup, String passphrase})
+    >(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Import portable backup'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: backup,
+                minLines: 4,
+                maxLines: 8,
+                decoration: const InputDecoration(
+                  labelText: 'Paste backup text',
+                  alignLabelWithHint: true,
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: passphrase,
+                obscureText: true,
+                decoration: const InputDecoration(
+                  labelText: 'Passphrase (portable backup)',
+                  helperText: 'Leave blank only for an older GTN1 single-save export.',
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, (
+              backup: backup.text,
+              passphrase: passphrase.text,
+            )),
+            child: const Text('Validate and import'),
+          ),
+        ],
+      ),
+    );
+    backup.dispose();
+    passphrase.dispose();
+    if (confirmed == null || !mounted) return;
+    if (confirmed.backup.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Paste a backup before importing.')),
+      );
+      return;
+    }
+    final replace = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Replace local save data?'),
+        content: const Text(
+          'A full bundle replaces all ten slots and their backups. '
+          'A legacy single-save import replaces only the active slot. '
+          'The current player profile and avatar files are kept.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('Continue'),
+          ),
+        ],
+      ),
+    );
+    if (replace != true || !mounted) return;
+    setState(() => _working = 0);
+    try {
+      final storage = await SaveBundleStorage.inApplicationDocuments();
+      final result = await storage.importBackup(
+        input: confirmed.backup,
+        passphrase: confirmed.passphrase,
+        legacyTargetSlot: widget.activeSlot,
+      );
+      if (result == null) {
+        throw const FormatException('Backup could not be decoded.');
+      }
+      await widget.onImportComplete?.call(result.activeSlot);
+      await _refresh();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              result.isFullBundle
+                  ? 'Imported ${result.importedSlots} save slots and their backups.'
+                  : 'Imported the legacy save into Slot ${result.activeSlot}.',
+            ),
+          ),
+        );
+      }
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Import failed. Existing saves were preserved: $error')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _working = null);
+    }
+  }
+
   Future<void> _resetEverything() async {
     if (widget.onResetEverything == null || _working != null) return;
     final confirmed = await showDialog<bool>(
@@ -545,6 +728,38 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
         children: [
           const Text(
             'Your saves stay on this device. Choose a slot to continue or manage its backup.',
+          ),
+          const SizedBox(height: 12),
+          GtnExpressiveCard(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Portable Backup',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 6),
+                const Text(
+                  'Export all ten slots and restore backups, or import a GTN1 portable backup.',
+                ),
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    M3EButton.filled(
+                      onPressed: _working == null ? _exportPortableBackup : null,
+                      child: const Text('Export backup'),
+                    ),
+                    M3EButton.text(
+                      onPressed: _working == null ? _importPortableBackup : null,
+                      child: const Text('Import backup'),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 12),
           if (widget.onResetEverything != null) ...[
