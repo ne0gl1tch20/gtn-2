@@ -287,3 +287,8 @@ Implementation commits: 4d085133f661edb02ed830b659f44bba72edc5d5, 222c9a02cc8223
 ### Export dialog controller lifetime correction — 2026-11-16
 
 The first regression test run exposed that disposing the passphrase controllers immediately after showDialog returned was too early: Flutter's reverse route transition still had TextFields listening to those controllers. The corrected implementation moves both controllers into a dedicated _PortableBackupExportDialog StatefulWidget and disposes them from that widget's dispose method. Commit b7650a2112ee2294ab328bd29af89d167357e067. Run #1933 failure is logged; Validate #1941 is pending.
+
+
+### CI verification result — 2026-11-16
+
+Validate #1941 passed format/analyze, 435 Flutter tests, Android debug APK build and Windows desktop debug build at c9557b4b69ae73ba176d1407927bbd618a0c34ff. The Windows installer was skipped. CI success does not replace the Android/Windows screenshot comparison or close the Batch A exit gate. The 51px Upgrade Shop overflow and World Map hero-heading wrap remain open follow-ups.
