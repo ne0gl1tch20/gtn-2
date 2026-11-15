@@ -47,7 +47,7 @@ void main() {
         await slotTwo.saveActiveSlot(2);
 
         const menuStudioLayout =
-            '{"areas":{"worlds":"more","rewards":"nav"},"orders":{"nav":["worlds","arcade","upgrades","rewards"],"more":["homebase","relics"]},"colors":{"worlds":"#ABCDEF"}}';
+          '{"areas":{"worlds":"more","rewards":"nav"},"orders":{"nav":["worlds","arcade","upgrades","rewards"],"more":["homebase","relics"]},"colors":{"worlds":"#ABCDEF"}}';
         final settings = GameSettings.initial.copyWith(
           localeCode: 'en_us',
           themeMode: 'Dark',
