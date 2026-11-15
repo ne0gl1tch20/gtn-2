@@ -165,9 +165,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byType(PopupMenuButton<String>).first);
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Create save'));
+    await tester.tap(find.text('Empty slot').first);
     await tester.pumpAndSettle();
 
     expect(find.text('Create Slot 1'), findsOneWidget);
