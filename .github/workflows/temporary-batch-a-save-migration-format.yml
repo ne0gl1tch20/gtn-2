@@ -37,11 +37,13 @@ jobs:
             lib/data/saves/save_storage.dart \
             lib/main.dart \
             lib/saves/save_slots_page.dart \
+            lib/settings/game_settings.dart \
+            lib/settings/settings_page.dart \
             test/data/saves/legacy_gtn1_save_adapter_test.dart \
             test/data/saves/legacy_gtn1_backup_bundle_test.dart \
             test/data/saves/save_bundle_storage_test.dart \
             test/data/save_data_test.dart \
-            test/saves/save_slots_page_test.dart \\
+            test/saves/save_slots_page_test.dart \
             test/settings/game_settings_test.dart
       - name: Commit formatter output
         env:
@@ -57,11 +59,14 @@ jobs:
             lib/data/saves/save_storage.dart \
             lib/main.dart \
             lib/saves/save_slots_page.dart \
+            lib/settings/game_settings.dart \
+            lib/settings/settings_page.dart \
             test/data/saves/legacy_gtn1_save_adapter_test.dart \
             test/data/saves/legacy_gtn1_backup_bundle_test.dart \
             test/data/saves/save_bundle_storage_test.dart \
             test/data/save_data_test.dart \
-            test/saves/save_slots_page_test.dart
+            test/saves/save_slots_page_test.dart \
+            test/settings/game_settings_test.dart
           if git diff --cached --quiet; then
             echo "Migration sources and tests are already formatted."
           else
