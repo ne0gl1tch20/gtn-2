@@ -277,6 +277,11 @@ Green CI is build/test evidence only. It does not prove live Android/Windows beh
 
 | 2026-11-15 11:31 | `a36492d72b1a2039d278f43459579a5bb6af0f45` | Log analyzer import-order fixes | Audit / CI | — | `docs/BATCH_A_COMMIT_LOG.md` | Self-logs exact formatter correction and the two directives_ordering fixes |
 
+| 2026-11-15 11:32 | `1042ad0ffb76962fac2c9578e4ddbd4700e25a59` | Scroll Menu Studio reset action into view in regression | Batch A / Menu Studio | `menu-studio.js` | `test/settings/menu_studio_page_test.dart` | Handles ListView lazy construction so the reset button is built before tapping |
+| 2026-11-15 11:32 | `88c3ee684b9cdfdad710554c18d7075d6b00a0fb` | Scroll update schedule dropdown into view in widget test | Batch A / Settings | `web-play/app.js` | `test/settings/settings_page_test.dart` | Scrolls the actual dropdown into the viewport rather than only its label |
+| 2026-11-15 11:32 | `7971e2f5a3820cc0d6310292daf990b5ae532d33` | Give About screen ListTiles their own Material ink surface | UI / About | `app/src/main/java/com/jarrlyyy/guessthenumber/ui/screens/AboutScreen.kt` | `lib/legacy/legacy_pages.dart` | Prevents DecoratedBox backgrounds from obscuring ListTile ink and triggering Flutter framework assertions |
+| 2026-11-15 11:32 | `43672747391` | Validate #1900 — format/analyze passed, 429 tests passed and 3 failed | CI / Batch A | — | `test/settings/settings_page_test.dart; test/settings/menu_studio_page_test.dart; test/widget_test.dart` | Failures were two off-screen widget-test taps and About ListTile ink-surface assertions; Android/Windows builds were still running |
+
 ### Current Creative Save implementation state
 
 - **Implemented and CI-verified:** schema-v7 permanent `creativeModeEnabled` flag with old-save default false; separate from the existing isolated `creativeMode` sandbox payload.
