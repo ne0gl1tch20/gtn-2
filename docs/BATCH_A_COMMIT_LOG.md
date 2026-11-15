@@ -412,3 +412,11 @@ Batch A remains active until Dashboard, More, Settings, Menu Studio, Profile and
 - b7650a2112ee2294ab328bd29af89d167357e067 moved the export dialog's passphrase and confirmation controllers into a dedicated StatefulWidget. This fixes the run #1933 failure where the parent disposed controllers before the dialog reverse transition had removed its TextFields.
 - c844a0304bf5169130495d572b7174715d3ffdfa temporarily enabled CI formatting for the new dialog class; c400f346fed1847cccd0ae96ccee572857733d41 is the one-file Dart formatter commit; c9557b4b69ae73ba176d1407927bbd618a0c34ff restored the standard read-only Validate workflow. No temporary workflow changes remain in the branch.
 - Validate run #1941: https://github.com/ne0gl1tch20/gtn-2/actions/runs/43768471017, head c9557b4b69ae73ba176d1407927bbd618a0c34ff. Format and analysis passed; Flutter tests, Android debug APK and Windows debug build were still running at this checkpoint.
+
+
+### Validate #1941 progress — 2026-11-16
+
+- Head: c9557b4b69ae73ba176d1407927bbd618a0c34ff. Dart formatting and analysis: success. Flutter tests: 435 passed.
+- Android debug APK build: success. Artifact ID 14183730859, name android-debug-apk, size 99,204,521 bytes, SHA-256 bf6b403b0a13029a9e775477bf9fdc8f910f0ea2554481dde8784d8c535057af, expires 2026-11-22. Archive: https://api.github.com/repos/ne0gl1tch20/gtn-2/actions/artifacts/14183730859/zip
+- Windows desktop debug build was still in progress at this checkpoint. Windows release installer was skipped by the workflow. No Windows artifact or full Validate success is claimed yet.
+- Run: https://github.com/ne0gl1tch20/gtn-2/actions/runs/43768471017
