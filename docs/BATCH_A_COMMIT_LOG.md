@@ -253,6 +253,8 @@ Green CI is build/test evidence only. It does not prove live Android/Windows beh
 | 2026-11-15 11:24 | `0c275f9290700a8788959e8f070dfb18de349f40` | Document Menu Studio reset preview parity mismatch and fix | Audit / Menu Studio | `menu-studio.js` | `docs/GTN1_SCREEN_PARITY_DIFF.md` | Records the source-side `apply()` behavior, GTN2 mismatch, fix and pending validation |
 | 2026-11-15 11:24 | `43672157813` | Validate #1881 — Menu Studio persistence and reset regressions | CI / Batch A | — | `test/data/saves/save_bundle_storage_test.dart; test/settings/menu_studio_page_test.dart` | Run started on the new test/fix; results pending |
 
+| 2026-11-15 11:25 | `7babc2719627c26981fbf58d27731d6ef004664d` | Log Menu Studio reset preview parity implementation | Audit | `menu-studio.js` | `docs/BATCH_A_COMMIT_LOG.md` | Self-logs the implementation, regression, plan and source-diff commits |
+
 ### Current Creative Save implementation state
 
 - **Implemented and CI-verified:** schema-v7 permanent `creativeModeEnabled` flag with old-save default false; separate from the existing isolated `creativeMode` sandbox payload.
