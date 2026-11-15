@@ -186,6 +186,8 @@ class _GameHomePageState extends State<GameHomePage>
   bool _checkingUpdate = false;
   bool _updateNoticeDismissed = false;
   String? _updateNoticeStatus;
+  final ValueNotifier<UpdateNoticeState> _updateNoticeListenable =
+      ValueNotifier(const UpdateNoticeState());
   BigNumber _lastIncomeMeasurement = BigNumber.fromInt(0);
   BigNumber _incomePerSecond = BigNumber.fromInt(0);
   bool _autoClickerTickRunning = false;
@@ -275,6 +277,16 @@ class _GameHomePageState extends State<GameHomePage>
     });
   }
 
+  void _publishUpdateNotice() {
+    _updateNoticeListenable.value = UpdateNoticeState(
+      title: _updateNoticeTitle,
+      details: _updateNoticeDetails,
+      status: _updateNoticeStatus,
+      checking: _checkingUpdate,
+      available: _availableUpdate != null || _availableWindowsUpdate != null,
+    );
+  }
+
   void _startUpdateCheckTimer() {
     _updateCheckTimer?.cancel();
     if (!mounted ||
@@ -317,6 +329,7 @@ class _GameHomePageState extends State<GameHomePage>
       _checkingUpdate = true;
       _updateNoticeStatus = 'Checking for updates…';
     });
+    _publishUpdateNotice();
     try {
       if (Platform.isAndroid) {
         final update = await UpdateChecker().checkForUpdate();
@@ -329,6 +342,7 @@ class _GameHomePageState extends State<GameHomePage>
               ? 'You are up to date.'
               : 'A verified Android update is available.';
         });
+        _publishUpdateNotice();
       } else {
         final update = await UpdateChecker().checkForWindowsUpdate();
         if (!mounted) return;
@@ -340,6 +354,7 @@ class _GameHomePageState extends State<GameHomePage>
               ? 'You are up to date.'
               : 'A verified Windows update is available.';
         });
+        _publishUpdateNotice();
       }
     } catch (error) {
       if (mounted) {
@@ -350,13 +365,17 @@ class _GameHomePageState extends State<GameHomePage>
               ? 'No debug-latest release has been published yet.'
               : 'Update check failed: $error';
         });
+        _publishUpdateNotice();
       }
     } finally {
       await UpdateCheckSchedule.saveLastChecked(
         bundleStorage.directory,
         now,
       );
-      if (mounted) setState(() => _checkingUpdate = false);
+      if (mounted) {
+        setState(() => _checkingUpdate = false);
+        _publishUpdateNotice();
+      }
     }
   }
 
@@ -368,6 +387,7 @@ class _GameHomePageState extends State<GameHomePage>
       _checkingUpdate = true;
       _updateNoticeStatus = 'Downloading and verifying update…';
     });
+    _publishUpdateNotice();
     try {
       if (Platform.isAndroid && androidUpdate != null) {
         await UpdateChecker().downloadAndInstall(androidUpdate);
@@ -376,6 +396,7 @@ class _GameHomePageState extends State<GameHomePage>
             _updateNoticeStatus =
                 'APK verified. Follow the Android installer prompts to finish.';
           });
+          _publishUpdateNotice();
         }
       } else if (Platform.isWindows && windowsUpdate != null) {
         await UpdateChecker().downloadAndInstallWindowsUpdate(windowsUpdate);
@@ -383,17 +404,22 @@ class _GameHomePageState extends State<GameHomePage>
     } catch (error) {
       if (mounted) {
         setState(() => _updateNoticeStatus = 'Update installation failed: $error');
+        _publishUpdateNotice();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(_updateNoticeStatus!)),
         );
       }
     } finally {
-      if (mounted) setState(() => _checkingUpdate = false);
+      if (mounted) {
+        setState(() => _checkingUpdate = false);
+        _publishUpdateNotice();
+      }
     }
   }
 
   void _dismissUpdateNotice() {
     setState(() => _updateNoticeDismissed = true);
+    _publishUpdateNotice();
   }
 
   String? get _updateNoticeTitle {
@@ -1765,6 +1791,7 @@ class _GameHomePageState extends State<GameHomePage>
           updateNoticeTitle: _updateNoticeTitle,
           updateNoticeDetails: _updateNoticeDetails,
           updateNoticeStatus: _updateNoticeStatus,
+          updateNoticeListenable: _updateNoticeListenable,
           updateChecking: _checkingUpdate,
           onCheckUpdates: () => unawaited(_checkForUpdatesIfDue(force: true)),
           onInstallUpdate: _installAvailableUpdate,
@@ -2158,6 +2185,8 @@ class _GameHomePageState extends State<GameHomePage>
     _playtimeTimer?.cancel();
     _randomEventTimer?.cancel();
     _randomEventBannerTimer?.cancel();
+    _updateCheckTimer?.cancel();
+    _updateNoticeListenable.dispose();
     _controller.dispose();
     super.dispose();
   }
