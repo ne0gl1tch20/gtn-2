@@ -295,6 +295,8 @@ Green CI is build/test evidence only. It does not prove live Android/Windows beh
 | 2026-11-15 11:40 | `0b56c462f06274206b2c8d044aabdda285f199b3` | Ensure update schedule dropdown is visible before tapping | Batch A / Settings | `web-play/app.js` | `test/settings/settings_page_test.dart` | Uses WidgetTester.ensureVisible on the actual M3E dropdown after scrollUntilVisible on its label did not move the dropdown into the viewport |
 | 2026-11-15 11:40 | `43673240457` | Validate #1910 — format/analyze passed, 431 tests passed and 1 failed | CI / Batch A | — | `test/settings/settings_page_test.dart` | Menu Studio reset and About ListTile regressions passed; only the update interval dropdown test still tapped an off-screen control; Android/Windows builds were still running |
 
+| 2026-11-15 11:41 | `03730353b2e9511396f800187e446b9b92bb3c33` | Log remaining Settings dropdown test correction | Audit / Settings | `web-play/app.js` | `docs/BATCH_A_COMMIT_LOG.md` | Self-logs the last failed widget test and the ensureVisible correction |
+
 ### Current Creative Save implementation state
 
 - **Implemented and CI-verified:** schema-v7 permanent `creativeModeEnabled` flag with old-save default false; separate from the existing isolated `creativeMode` sandbox payload.
