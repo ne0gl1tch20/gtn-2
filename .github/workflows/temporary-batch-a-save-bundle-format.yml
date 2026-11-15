@@ -1,0 +1,44 @@
+name: Temporary Batch A save bundle formatter
+
+on:
+  push:
+    branches: ['batch-a/creative-save-active-slot']
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: batch-a-save-bundle-format
+  cancel-in-progress: false
+
+jobs:
+  format-save-bundle:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref || github.ref_name }}
+          fetch-depth: 0
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Resolve dependencies
+        run: flutter pub get
+      - name: Format GTN1 migration adapter and bundle tests
+        run: dart format lib/data/saves/legacy_gtn1_save_adapter.dart test/data/saves/legacy_gtn1_backup_bundle_test.dart test/data/saves/save_bundle_storage_parity_test.dart
+      - name: Commit formatter output
+        env:
+          TARGET_REF: ${{ github.event.pull_request.head.ref || github.ref_name }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add lib/data/saves/legacy_gtn1_save_adapter.dart test/data/saves/legacy_gtn1_backup_bundle_test.dart test/data/saves/save_bundle_storage_parity_test.dart
+          if git diff --cached --quiet; then
+            echo "Save bundle adapter and tests already formatted."
+          else
+            git commit -m "style(saves): format GTN1 bundle migration tests"
+            git push origin "HEAD:${TARGET_REF}"
+          fi
