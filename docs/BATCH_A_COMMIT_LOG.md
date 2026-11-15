@@ -1,0 +1,346 @@
+# Batch A Commit and Verification Ledger
+
+**Status:** ACTIVE — do not enter Batch B until every Batch A exit criterion is satisfied.  
+**Target repository:** `ne0gl1tch20/gtn-2`  
+**Target branch for the active continuation:** `batch-a/creative-save-active-slot`  
+**Parity source:** `ne0gl1tch20/GuessTheNumber` at pinned commit `fe9cf567169e19059e0330d08769fe454336ef94`  
+**Authoritative checklist:** [`docs/FINITE_PARITY_PLAN.md`](FINITE_PARITY_PLAN.md)  
+**Screen-level diff:** [`docs/GTN1_SCREEN_PARITY_DIFF.md`](GTN1_SCREEN_PARITY_DIFF.md)
+
+This is an append-only audit ledger. Add an entry for every commit made while Batch A is active, including documentation, implementation, test, formatting and CI-fix commits. Never silently rewrite a prior result; append a correction with the new evidence. Each implementation entry must identify the GTN1 source paths inspected and the GTN2 target paths changed.
+
+## 1. Current checkpoint
+
+- **Last inspected main:** `4fe04ee1572c3e4fb307cd37d796ee5312f30ce1` (2026-11-14 15:45:03 UTC).
+- **Continuation branch:** `batch-a/creative-save-active-slot`, created from the inspected `main` checkpoint.
+- **Validate:** [run 43611843871](https://github.com/ne0gl1tch20/gtn-2/actions/runs/43611843871) — success on `4fe04ee1572c3e4fb307cd37d796ee5312f30ce1`.
+- **Build Debug:** [run 43611843795](https://github.com/ne0gl1tch20/gtn-2/actions/runs/43611843795) — success on `4fe04ee1572c3e4fb307cd37d796ee5312f30ce1`.
+- The superseded runs for `0c5b01328012792ade30196fbe0f58857049d1b9` were cancelled after the next push. They are not failures.
+- **PR #71:** merged at `aad78da64e71853431b87bbb0176466b810c59ce`; dashboard/More structure pass.
+- **PR #72:** merged at `9c5afea63af395ae2abaec8a21054f3e5e2d2f71`; Play/More/Profile pass.
+- **PR #73:** merged at `871c21d9574971b124ad69b2cf375942d8a50200`; random-event implementation, recorded as baseline context rather than a Batch A surface closure.
+- **PR #67:** remains draft/open and deliberately postponed until parity work is complete.
+
+Green CI is build/test evidence only. It does not prove live Android/Windows behavior or visual parity.
+
+## 2. Retrospective ledger at continuation start
+
+| Commit / PR | Scope and evidence | Batch A interpretation |
+|---|---|---|
+| PR #71 — `aad78da64e71853431b87bbb0176466b810c59ce` | Play content order, More labels/order and phone-sized widget coverage; merged 2026-11-12. | Baseline dashboard/More work; not an exit sign-off. |
+| PR #72 — `9c5afea63af395ae2abaec8a21054f3e5e2d2f71` | 26 files; Play/More responsive parity, profile destination/editor, local profile persistence and migration; merged 2026-11-13. | Baseline for Dashboard, More and Profile; runtime/persistence checks remain open. |
+| `f82b3599b941ff4866183d38f3cc4d9dc062e6c8` | Updated the screen diff with separate Prestige/Ultra destination follow-up and earlier baseline evidence. | Documentation checkpoint; does not close Batch A. |
+| `c07776f5f8a79e8685eadfe3316ae3a156989709` | Refreshed Batch A evidence in the finite parity plan. | Documentation checkpoint. |
+| `65f6d23e41b011f44167974101af9482a3a8c9d6` | Clarified the code-bearing baseline and evidence wording in the finite parity plan. | Documentation checkpoint. |
+| `0c5b01328012792ade30196fbe0f58857049d1b9` | Recorded the Creative Save source-to-target semantic gap in the finite parity plan. | Explicit blocker; no implementation. |
+| `4fe04ee1572c3e4fb307cd37d796ee5312f30ce1` | Distinguished GTN1 active-save Creative Save from GTN2's isolated Creative Mode sandbox in the screen diff. | Explicit blocker; no implementation. |
+
+## 3. Active continuation — Creative Save implementation
+
+**Implementation checkpoint:** current branch head before this ledger update is `c31ee6facf7ac2f019e8dc394b8c613303d4d2a5`. All implementation commits are on top of the inspected `4fe04ee1572c3e4fb307cd37d796ee5312f30ce1` checkpoint. CI runs on intermediate heads were cancelled or failed during formatting/analyzer cleanup. Run `43644101277` failed at the formatter gate. After a formatter-only commit, run `43644826813` passed formatting but analyzer found two nullable accesses in `lib/main.dart` and one import-order info in `lib/home/game_dashboard_page.dart`; tests and platform builds were skipped. Commits `6e9b6cf48152e892615d28c134bf312dfd6253bb` and `3495e4e3fb4ad4c0ad41613f481747f94ae318cc` address those findings. Run `43645248494` on `4977006df42788dc0d6c497967016bcdfffe63b7` passed format/analyze and Android debug build, but Flutter tests reported 391 passed / 3 failed; Windows was cancelled after the test failure. The failures were: stale schema-version expectation (v7 treated as unknown), Creative Save section headings omitted when catalogs are empty, and a Save Slots ListTile/DecoratedBox ink-splash assertion. Commits `2655c74eeff20d90b36a969b81bd16b29bed4c93`, `6562c4dcd4f81fca938e065c205fedbd022eb504` and `dc17fb3fa1f046d9d890a4fc810559c690cc8ed4` address those three failures. The subsequent run `43645628611` stopped at formatting because the Save Slots Material wrapper needed Dart reformatting; commit `6215bb27b4ebd9cfd8fcc572844086bca4b6b31b` is the formatter output. The formatter workflow succeeded (run `43645708095`) and was removed in `1f0e909ee8830985db5d3b545a62479c4f002410`. Run `43645824593` passed format/analyze; the panel and schema tests passed and the suite improved to 393 passed / 1 failed. The remaining failure was the Creative Mode `SwitchListTile` inside the create dialog, which still sat over a decorated card surface. Commits `b9a423214c4cc1413ec64dbb28db614d55b3b7d4` and `09caa0cb00f0aed4f56702c72635fc214c6c437c` add its own transparent Material and align the code. Android/Windows builds were cancelled after the test failure; a new full validation run is required. Current PR head `9735dfd06c72b7e674ea825332d2f573ebfd1907` passed Validate run `43646223935`: format/analyze, full Flutter test suite, Android debug APK build and Windows desktop debug build. The Windows installer job was skipped for this PR run. The source-sync cleanup was audited against `main`; all ten tracked `assets/game/*.json` catalogs were restored and the accidental `gtn1-source` gitlink and generated `pubspec.lock` were removed. This CI result supersedes the earlier pending status; runtime and visual evidence remain open.
+
+**GTN1 sources compared for this pass:**
+- `shared/src/jvmAndAndroidMain/kotlin/com/jarrlyyy/guessthenumber/domain/model/GameState.kt`
+- `app/src/main/java/com/jarrlyyy/guessthenumber/ui/viewmodel/GameViewModel.kt`
+- `desktopApp/src/jvmMain/kotlin/com/jarrlyyy/guessthenumber/desktop/DesktopWebPlayActions.kt`
+- `app/src/main/java/com/jarrlyyy/guessthenumber/ui/screens/SaveSlotsScreen.kt`
+- `app/src/main/assets/web-play/index.html`
+- `app/src/main/assets/web-play/app.js`
+
+| UTC time | Commit SHA | Subject | GTN2 path(s) | Test / CI status |
+|---|---|---|---|---|
+| 2026-11-14 21:09:40 | `cb7c0b3f196b6b0b2fe2c24bef7b52ba6fb98314` | Add Batch A commit audit ledger | `docs/BATCH_A_COMMIT_LOG.md` | Documentation only |
+| 2026-11-14 21:09:48 | `6c76538893e233888bc503e7c82fa336932e97b6` | Refresh Batch A evidence and audit pointer | `docs/FINITE_PARITY_PLAN.md` | Documentation only |
+| 2026-11-14 21:10:18 | `098480e37fb573c4f4d40bb3de4a86d2a52a6d50` | Persist permanent Creative Save eligibility | `lib/data/saves/save_data.dart` | Schema implementation; pending CI |
+| 2026-11-14 21:10:33 | `fb1f430e2c9207383456368784134c27d253c7d3` | Cover Creative Save flag migration and round-trip | `test/data/save_data_test.dart` | Test added; pending CI |
+| 2026-11-14 21:11:22 | `32b8619ea095b07042a3ddf6f57c5795cef2ab75` | Allow source Creative Save range for opted-in slots | `lib/data/saves/save_data.dart` | Validation implementation; pending CI |
+| 2026-11-14 21:11:25 | `9d3356e172b42b34774d9302376ec5179239679b` | Validate Creative Save range by slot eligibility | `lib/data/saves/save_storage.dart` | Storage validation; pending CI |
+| 2026-11-14 21:11:28 | `702c157dc0095080d72ee3591709296bdea3d476` | Restore Creative Save ranges up to source limit | `lib/core/game/game_engine.dart` | Engine implementation; pending CI |
+| 2026-11-14 21:11:43 | `ab5fdd0342505564b6f7b14235f03da12fe3464b` | Verify Creative Save range migration and storage | `test/data/save_data_test.dart` | Tests added; pending CI |
+| 2026-11-14 21:11:48 | `78f3ea1db5e30393d3ce7d4a00cd3592b3fcb86c` | Cover GTN1 Creative Save range restore | `test/core/game_engine_test.dart` | Test added; pending CI |
+| 2026-11-14 21:12:01 | `ea4dd1f1ff94a5d95562ec44224e08906f39af7b` | Restore and persist active Creative Save state | `lib/main.dart` | Runtime state wiring; pending CI |
+| 2026-11-14 21:12:16 | `4de7858d2dd42c6255bd5c12cdcff05650fe6ac1` | Create permanent Creative Save slots | `lib/saves/save_slots_page.dart` | Save Slots creation flow; pending CI |
+| 2026-11-14 21:12:39 | `c10d97d73a1b0157e5b4cafe483a14a1f1086d4c` | Add source-backed active-save transactions | `lib/core/creative/creative_save_policy.dart` | Policy implementation; pending CI |
+| 2026-11-14 21:12:52 | `b1741b1ab16ce081cfd6927f07cdf4e2f9a15a55` | Harden catalog level validation and parsing | `lib/core/creative/creative_save_policy.dart` | Validation refinement; pending CI |
+| 2026-11-14 21:13:06 | `a65156409629c28adbd472fcca676c782735c739` | Correct Creative Save currency regex | `lib/core/creative/creative_save_policy.dart` | Parser fix; pending CI |
+| 2026-11-14 21:13:15 | `baa314654cb2172a0da6b356277438c9fa2113b4` | Enforce full-match currency parsing | `lib/core/creative/creative_save_policy.dart` | Parser hardening; pending CI |
+| 2026-11-14 21:13:44 | `4c64f41f99104c3170e5aa428cac7d49f9468de2` | Cover active-save Creative Save transactions | `test/core/creative/creative_save_policy_test.dart` | Tests added; pending CI |
+| 2026-11-14 21:14:34 | `a77b2f62f59477d4d3ecbbcfe46edd75ba3e2e0c` | Add inline active-save Creative Save panel | `lib/home/creative_save_panel.dart` | UI implementation; pending CI |
+| 2026-11-14 21:14:49 | `8103bc7ca3a548ac4ba46befddcd6b3bd5a67dd7` | Preserve focused Creative Save editor values | `lib/home/creative_save_panel.dart` | UI state refinement; pending CI |
+| 2026-11-14 21:15:00 | `4e2685378ba479d65493bc4ca5f0ab93a8acc0d4` | Show Creative Save tools on eligible active saves | `lib/home/game_dashboard_page.dart` | Dashboard placement; pending CI |
+| 2026-11-14 21:15:25 | `8865ac2f5fb93b0ae1c50b5c4999bb7dc6a7e3d3` | Wire validated active-save Creative Save edits | `lib/main.dart` | Transaction wiring; pending CI |
+| 2026-11-14 21:15:58 | `a5d46132c5b0826ec84f661caffc91d7c909c63a` | Preserve custom range across restored rounds | `lib/main.dart` | Engine range restoration; pending CI |
+| 2026-11-14 21:16:05 | `6af0c217149c28dd1b189f87360f57e66e919fe5` | Verify inline Creative Save controls | `test/home/creative_save_panel_test.dart` | Widget test added; pending CI |
+| 2026-11-14 21:16:19 | `f59de7d7dddc9b601d3f99f65b6dd302634813ce` | Validate Creative Save flag before range selection | `lib/data/saves/save_data.dart` | Malformed-flag validation fix; pending CI |
+| 2026-11-14 21:16:22 | `ed04045c51ffef245b14bbf90ab86550c7419dc4` | Remove duplicate Creative Save flag check | `lib/data/saves/save_data.dart` | Validation cleanup; pending CI |
+| 2026-11-14 21:16:26 | `aa4da8bc6c38ef40f09858b709267d2066f99142` | Keep restored slot promotion explicit | `lib/main.dart` | Null-safety refinement; pending CI |
+| 2026-11-14 21:16:41 | `d22f1128ca52ea19ebd6f9f7803334ff73dc765e` | Cover permanent Creative Save creation controls | `test/saves/save_slots_page_test.dart` | Widget test added; pending CI |
+| 2026-11-14 21:17:25 | `d9a6a7dd9911f034c53ecb2bdc54e88501dc0519` | Log Creative Save implementation commits | Audit | `docs/BATCH_A_COMMIT_LOG.md` | `Ledger append; pending follow-up self-entry` | undefined |
+| 2026-11-14 21:17:43 | `bf124966d2690fa60915dbb8194cc8ff94db2b95` | Record Creative Save implementation checkpoint | Audit | `docs/FINITE_PARITY_PLAN.md` | `Documentation; no runtime claim` | undefined |
+| 2026-11-14 21:17:47 | `c7b449daa570e901c0d257688e87607a83f4dec7` | Update Creative Save screen cross-diff | Dashboard / Save Slots | `docs/GTN1_SCREEN_PARITY_DIFF.md` | `Documentation; runtime checks open` | undefined |
+| 2026-11-14 21:18:20 | `daef674c7eb780903d7f83964e5309e2135638ed` | Report persistence failures to panel actions | Dashboard | `GameViewModel.kt; DesktopWebPlayActions.kt` | `lib/main.dart` | Persistence result handling; pending CI |
+| 2026-11-14 21:18:29 | `117a879130ef33861b0ed9609d90ad0c97b7c515` | Return actual save result for value edits | Dashboard | `GameViewModel.kt; DesktopWebPlayActions.kt` | `lib/main.dart` | Value callback now reflects save result; pending CI |
+| 2026-11-14 21:19:27 | `43570282176ff4c8d38eb8905d8ea709942f9047` | Match GTN1 Creative Mode setup fields | Save Slots | `SaveSlotsScreen.kt; GameViewModel.kt` | `lib/saves/save_slots_page.dart` | Setup fields and permanent toggle; pending CI |
+| 2026-11-14 21:19:33 | `f9ce1c595aa5cced810d9b4e7af7dd0987af7f80` | Match GTN1 Creative Mode setup labels | Save Slots | `SaveSlotsScreen.kt` | `test/saves/save_slots_page_test.dart` | Widget assertions; pending CI |
+| 2026-11-14 21:19:46 | `5ab7f4c36a1db8d19ea48d1520a553c64c5ef71c` | Mirror GTN1 unknown suffix conversion | Dashboard | `BigNumber.kt; GameViewModel.kt; DesktopWebPlayActions.kt` | `lib/core/creative/creative_save_policy.dart` | Unknown suffix maps to zero as GTN1; pending CI |
+| 2026-11-14 21:19:49 | `9b3b31a5e99842cac04cb5b4d8dcdd4c83839c04` | Match GTN1 Creative Save panel copy | Dashboard | `web-play/index.html` | `lib/home/creative_save_panel.dart` | Copy aligned; pending CI |
+| 2026-11-14 21:19:54 | `77649065108e27de6ecc85fcfe4550bdca44dc76` | Lock GTN1 BigNumber suffix fallback | Dashboard | `BigNumber.kt` | `test/core/creative/creative_save_policy_test.dart` | Regression test added; pending CI |
+| 2026-11-14 21:20:05 | `490807b00750290f914fbf443ff07a934068e819` | Match Creative Save input bounds and lengths | Dashboard | `web-play/index.html; GameViewModel.kt` | `lib/home/creative_save_panel.dart` | Input bounds/lengths; pending CI |
+| 2026-11-14 21:20:36 | `52acaca06d236348587745b5f96f8d00bfeb3b27` | Adapt background persistence to result status | Dashboard | `GameViewModel.kt` | `lib/main.dart` | Persistence result handling; pending CI |
+| 2026-11-14 21:21:07 | `347ecb71da810b0920358b7fe4f2f2be54aabf1b` | Target Creative Save fields by labels | Dashboard | `web-play/index.html` | `test/home/creative_save_panel_test.dart` | Stable field targeting; pending CI |
+| 2026-11-14 21:21:33 | `9b11b4ee3610d1b69a581525af2e2804d6271fa3` | Cover source counter and upgrade bounds | Dashboard | `GameViewModel.kt; DesktopWebPlayActions.kt` | `test/core/creative/creative_save_policy_test.dart` | Boundary tests added; pending CI |
+| 2026-11-14 21:22:43 | `bd80ccdfca925ec82284493d86e2f8f4bf4c4d10` | Separate active guessing counters from lifetime stats | Dashboard | `GameState.kt; GameViewModel.kt` | `lib/data/saves/save_data.dart` | Save schema split; pending CI |
+| 2026-11-14 21:22:51 | `2bd25fc11c59d9f3cc86020055d0bc6fff600755` | Track active Creative Save counters separately | Dashboard | `GameState.kt; GameViewModel.kt` | `lib/core/game/game_engine.dart` | Engine state expanded; pending CI |
+| 2026-11-14 21:22:59 | `a357ff0ce63494181cf36f741d81cce6d8eb3ac1` | Edit active counters without mutating lifetime stats | Dashboard | `GameViewModel.kt; DesktopWebPlayActions.kt` | `lib/core/creative/creative_save_policy.dart` | Policy separates run counters from lifetime stats; pending CI |
+| 2026-11-14 21:24:06 | `754c6ed27935406abd41e7f06cf8d2505e158c1f` | Remove duplicated parser tail and restore syntax | Dashboard | `GameViewModel.kt; BigNumber.kt` | `lib/core/creative/creative_save_policy.dart` | Parser syntax repair; pending CI |
+| 2026-11-14 21:24:18 | `0cf3afe6c085c1e9ce09b16362cfc9367ac962c0` | Truncate duplicated parser code and close suffix regex | Dashboard | `BigNumber.kt` | `lib/core/creative/creative_save_policy.dart` | Parser syntax repair; pending CI |
+| 2026-11-14 21:25:44 | `168968803551a4243310cd5e17ca0e7c4605c7e5` | Track GTN1 player guess counters and streaks | Dashboard | `GameState.kt; GameViewModel.kt` | `lib/core/game/game_engine.dart` | Guess counter behavior and tests updated; pending CI |
+| 2026-11-14 21:26:30 | `af64baa45726172698afccac0a5e92ed852eb960` | Persist and restore Creative Save active counters | Dashboard / Save Slots | `GameState.kt; GameViewModel.kt` | `lib/main.dart` | Persistence wiring; pending CI |
+| 2026-11-14 21:26:50 | `6d2d23169944e39b8db514f56dfdaca2a4b848fd` | Distinguish active counters from lifetime progression | Dashboard | `GameState.kt` | `test/core/creative/creative_save_policy_test.dart` | Regression coverage; pending CI |
+| 2026-11-14 21:26:59 | `7c429725e014f846b134418cd54f7722a3539cb9` | Verify source player counters and bot exclusion | Dashboard | `GameViewModel.kt; GameState.kt` | `test/core/game_engine_test.dart` | Player/bot counter coverage; pending CI |
+| 2026-11-14 21:27:14 | `fdd47701fca836f604a2ac76dc00bd13ab4a4281` | Verify active counters persist separately from lifetime stats | Dashboard / Save Slots | `GameState.kt` | `test/data/save_data_test.dart` | Save round-trip coverage; pending CI |
+| 2026-11-14 21:27:26 | `d38d39136c462d970421939f027d3091a580f3e3` | Restore complete anchored currency parser | Dashboard | `GameViewModel.kt; DesktopWebPlayActions.kt` | `lib/core/creative/creative_save_policy.dart` | Parser expression repair; pending CI |
+| 2026-11-14 21:27:32 | `47a022cd84d52c60f4c7b0152e9c7f70f9c423c5` | Normalize decimal regex escape | Dashboard | `GameViewModel.kt` | `lib/core/creative/creative_save_policy.dart` | Regex escape normalized; pending CI |
+| 2026-11-14 21:27:53 | `b19a2dfae1ebf41143f44a5919271ed9f2da8e30` | Apply all active counter edits to game state | Dashboard | `GameViewModel.kt` | `lib/main.dart` | Runtime counter updates; pending CI |
+| 2026-11-14 21:28:02 | `cfaee989f117e8e0312a60d25ec26287d23f9dce` | Preserve Creative Save state when editing attempts | Developer Settings / Dashboard | `GameViewModel.kt` | `lib/main.dart` | Developer command restore path aligned; pending CI |
+| 2026-11-14 21:28:28 | `71ddedb1c66c655aae9fc38300c9a769b1c0e180` | Display active Creative Save counters from game state | Dashboard | `web-play/app.js` | `lib/home/creative_save_panel.dart` | Counter source corrected; pending CI |
+| 2026-11-14 21:28:35 | `af340e570e071c7efd8ca39ee28be9ba6a95dec0` | Assert Creative Save reads active game counters | Dashboard | `web-play/app.js` | `test/home/creative_save_panel_test.dart` | Widget regression assertions; pending CI |
+| 2026-11-14 21:28:54 | `636612a665579ef0c902cbd272d3175641cdcb91` | Keep active counter wiring readable | Dashboard | `GameViewModel.kt` | `lib/main.dart` | Formatting-only cleanup; pending CI |
+| 2026-11-14 21:30:26 | `b880093f43bf3364eeb135348600a61f877b740e` | Localize Creative Save controls with GTN1 keys | Dashboard | `web-play/index.html; locale JSON catalogs` | `lib/home/creative_save_panel.dart` | Locale key reuse; pending CI |
+| 2026-11-14 21:30:55 | `d3315cf92dacb6955abf5182e2d17b85ea404324` | Localize catalog labels and semantics | Dashboard | `web-play/app.js; locale JSON catalogs` | `lib/home/creative_save_panel.dart` | Accessibility labels and catalog text; pending CI |
+| 2026-11-14 21:31:33 | `05a886cd97acf0c3fcfe8075c9466212dd070009` | Match GTN1 Creative Save responsive layout | Dashboard | `web-play/styles.css` | `lib/home/creative_save_panel.dart` | Responsive layout pass; pending paired captures |
+| 2026-11-14 21:32:16 | `debf23188dec006bb1962ed40cef71c9e717d7ea` | Add temporary formatter workflow | CI support | `—` | `.github/workflows/temporary-batch-a-format.yml` | Temporary workflow failed; removed next |
+| 2026-11-14 21:32:44 | `556b6d35fd9cc76cd9e288f879ab137318046007` | Remove unused temporary formatter workflow | CI support | `—` | `.github/workflows/temporary-batch-a-format.yml` | Temporary workflow removed |
+| 2026-11-14 21:32:47 | `ad0d6005fe6c0f57987b5fbd93373419724a4ff0` | Add PR formatting step to validation workflow | CI support | `—` | `.github/workflows/validate.yml` | Experiment reverted; final workflow remains read-only |
+| 2026-11-14 21:33:20 | `6bf689063b9817f9598d7e7f0d7cdb61991b9920` | Format Creative Save implementation | CI support | `—` | `Dart files plus generated GTN1 source-sync assets` | Accidentally staged generated assets and checkout state; later cleanup commits recorded below; not a clean verification result |
+| 2026-11-14 21:33:49 | `8ca510ed8404ca26d83dc2dfa0e5daf2f92457d4` | Restore standard read-only validation workflow | CI support | `—` | `.github/workflows/validate.yml` | Restored normal PR validation behavior |
+| 2026-11-14 21:34:08 | `115eb6c96db7904c237f18e61102e89cb8322528` | Match GTN1 upgrade row controls | Dashboard | `web-play/styles.css; web-play/app.js` | `lib/home/creative_save_panel.dart` | Row sizing/labels refined; pending paired captures |
+| 2026-11-14 21:35:53 | `38d7ad7be3609d5efd75a2c96df9d1d34495a51b` | Remove generated source-sync files from formatter commit | CI support | `—` | `Generated source-sync files` | Cleanup commit; subsequent diff audit found tracked catalogs still missing |
+| 2026-11-14 21:36:25 | `d3adff7948b11699f74005d6e0aa3fb239367607` | Remove generated source-sync assets from branch | CI support | `—` | `assets/game catalogs; gtn1-source` | Cleanup attempt removed tracked catalogs and retained checkout gitlink; analyzer failure on this SHA recorded separately |
+| 2026-11-14 21:38:03 | `42141980a6fd8f8f8aa48da61b76704001586e3b` | Clean policy imports and validation lint | Dashboard | `GameViewModel.kt` | `lib/core/creative/creative_save_policy.dart` | Analyzer cleanup; pending fresh CI |
+| 2026-11-14 21:38:06 | `1b923236b7de75d452dfeb3a525110c69d93c147` | Import Material 3 Expressive button primitives | Dashboard | `web-play/index.html` | `lib/home/creative_save_panel.dart` | Resolves M3EButton imports; pending fresh CI |
+| 2026-11-14 21:38:09 | `65602464e42ab57b6fad7a4aad6a86ddb40a7604` | Sort dashboard imports | Dashboard | `web-play/index.html` | `lib/home/game_dashboard_page.dart` | Import ordering cleanup; pending fresh CI |
+| 2026-11-14 21:38:13 | `2233a0824b11af21dbc2bf00f40a2bb3bccd3112` | Remove redundant nullable assertion | Dashboard | `GameViewModel.kt` | `lib/main.dart` | Null-safety lint cleanup; pending fresh CI |
+| 2026-11-14 21:38:15 | `aa9ac18ffd7843a75982be81cdd02411f6595f79` | Use current Flutter test view properties | Dashboard | `web-play/index.html` | `test/home/creative_save_panel_test.dart` | Test API updated; pending fresh CI |
+| 2026-11-14 21:40:53 | `82e01e3703cf50bfb2b4cef38489aaacf30dfa91` | Restore tracked catalogs and remove CI checkout artifacts | CI / source inventory | `main asset tree and checkout state` | `10 assets/game JSON catalogs; gtn1-source; pubspec.lock` | PR diff cleanup verified; new CI run still required |
+| 2026-11-14 21:41:20 | `5df39a3c79667794a683fe6771017b7e1ca07b4a` | Log every Batch A Creative Save commit (48 rows) | Audit | `docs/BATCH_A_COMMIT_LOG.md` | Append-only audit expansion; no runtime claim |
+| 2026-11-14 21:41:32 | `3a1bf57715f361864b114a02485e2c45c160dda4` | Format source currency parser expression | Dashboard | `GameViewModel.kt; BigNumber.kt` | `lib/core/creative/creative_save_policy.dart` | Addresses sole formatter diff in run 43644101277; fresh CI pending |
+| 2026-11-14 21:41:40 | `e2b1a2911a1919a5f6835c8cb9489c41305c91c5` | Correct Creative Save schema and CI evidence | Audit | `GameState.kt` | `docs/FINITE_PARITY_PLAN.md` | Documentation correction: schema v7, exact formatter failure evidence |
+| 2026-11-14 21:41:44 | `c31ee6facf7ac2f019e8dc394b8c613303d4d2a5` | Record Creative Save CI and source inventory status | Audit / Dashboard | `web-play/index.html; app.js; styles.css` | `docs/GTN1_SCREEN_PARITY_DIFF.md` | Documentation; runtime and paired screenshots remain open |
+| 2026-11-14 21:44:55 | `3a1bf57715f361864b114a02485e2c45c160dda4` | Attempt to format parser expression | Dashboard | `GameViewModel.kt; BigNumber.kt` | `lib/core/creative/creative_save_policy.dart` | Formatter attempt introduced malformed/truncated regex; detected by run 43644470798 and corrected below |
+| 2026-11-14 21:47:05 | `14b6388ef37bbf981ad6267d34747319aa1d63ad` | Restore complete source currency parser | Dashboard | `GameViewModel.kt; DesktopWebPlayActions.kt; BigNumber.kt` | `lib/core/creative/creative_save_policy.dart` | Rebuilt policy file; regex escape then audited and corrected in next commit |
+| 2026-11-14 21:47:15 | `a7d259c9cc4c4c7e22ae2ac2f76269023fddb84d` | Correct raw decimal regex escape | Dashboard | `GameViewModel.kt; DesktopWebPlayActions.kt` | `lib/core/creative/creative_save_policy.dart` | One raw regex escape restored; fresh format/analyze/tests/builds pending |
+| 2026-11-14 21:48:20 | `547f1cecd6ea7c90293b54b3eebf2fcd8b54e01c` | Add safe single-file formatter workflow | CI support | — | `.github/workflows/temporary-batch-a-policy-format.yml` | Temporary workflow formats only the policy file and stages no generated assets |
+| 2026-11-14 21:49:00 | `194bf1662363fb766874f8da1c6454434c646a27` | Apply Dart formatter to Creative Save policy | Dashboard | `GameViewModel.kt; BigNumber.kt` | `lib/core/creative/creative_save_policy.dart` | Formatter changed one guard and regex expression; run 43644812171 was action_required with no jobs |
+| 2026-11-14 21:49:12 | `a0fc3e8f3052b4501f84d127af693eb3bd7c6212` | Remove temporary single-file formatter | CI support | — | `.github/workflows/temporary-batch-a-policy-format.yml` | Temporary workflow removed; validation run 43644826813 passed formatting but failed analysis |
+| 2026-11-14 21:50:18 | `6e9b6cf48152e892615d28c134bf312dfd6253bb` | Promote loaded slot before reading Creative Save range | Save Slots / Dashboard | `GameViewModel.kt` | `lib/main.dart` | Fixes two nullable range accesses reported by analyzer; pending fresh CI |
+| 2026-11-14 21:50:24 | `3495e4e3fb4ad4c0ad41613f481747f94ae318cc` | Sort dashboard relative imports | Dashboard | `web-play/index.html` | `lib/home/game_dashboard_page.dart` | Fixes directives-ordering info reported by analyzer; pending fresh CI |
+| 2026-11-14 21:51:00 | `93fa8ec47b1f0752a1e035e6490eeda7a3ffaaea` | Append formatter and analyzer corrections | Audit | `GameViewModel.kt; web-play/index.html` | `docs/BATCH_A_COMMIT_LOG.md` | Ledger update; validation run 43645027984 started on this SHA and was superseded by later test fix |
+| 2026-11-14 21:53:45 | `3b30c73931557227f00231c13b9ce350ae9e2631` | Expose stable keys for Creative Save fields | Dashboard | `web-play/index.html` | `lib/home/creative_save_panel.dart` | Aligns field widgets with existing counter-source assertions; current validation run pending |
+| 2026-11-14 21:54:05 | `4977006df42788dc0d6c497967016bcdfffe63b7` | Log analyzer and Creative Save test fixes | Audit | `GameViewModel.kt; web-play/index.html` | `docs/BATCH_A_COMMIT_LOG.md` | Documentation checkpoint; run 43645248494 recorded below |
+| 2026-11-14 21:56:55 | `2655c74eeff20d90b36a969b81bd16b29bed4c93` | Update unsupported schema test to v8 | Save Slots | `GameState.kt` | `test/data/save_data_test.dart` | Fixes stale unknown-version test after schema v7; pending CI |
+| 2026-11-14 21:57:02 | `6562c4dcd4f81fca938e065c205fedbd022eb504` | Keep Creative Save catalog headings visible | Dashboard | `web-play/index.html` | `lib/home/creative_save_panel.dart` | Preserves source section hierarchy when catalogs are empty; pending CI |
+| 2026-11-14 21:57:10 | `dc17fb3fa1f046d9d890a4fc810559c690cc8ed4` | Preserve Save Slot ListTile ink feedback | Save Slots | `SaveSlotsScreen.kt` | `lib/saves/save_slots_page.dart` | Wraps interactive tile in clipped transparent Material; fixes Flutter assertion; pending CI |
+| 2026-11-14 21:57:20 | `ebd49d710054f2345d2484f73ed20f0933752935` | Record Creative Save test failures and fixes | Audit | `GameState.kt; SaveSlotsScreen.kt; web-play/index.html` | `docs/BATCH_A_COMMIT_LOG.md` | CI evidence update; fresh run pending |
+| 2026-11-14 21:59:40 | `339d20447d8edca9a7c29e17510ed296c05b086c` | Add safe Save Slots formatter workflow | CI support | — | `.github/workflows/temporary-batch-a-save-slots-format.yml` | Temporary formatter only stages the Save Slots Dart page |
+| 2026-11-14 22:00:10 | `6215bb27b4ebd9cfd8fcc572844086bca4b6b31b` | Apply Dart formatter to Save Slots page | Save Slots | `SaveSlotsScreen.kt` | `lib/saves/save_slots_page.dart` | Formatter success run 43645708095; follow-on PR run action_required due bot commit |
+| 2026-11-14 22:00:25 | `1f0e909ee8830985db5d3b545a62479c4f002410` | Remove temporary Save Slots formatter | CI support | — | `.github/workflows/temporary-batch-a-save-slots-format.yml` | Temporary workflow removed; fresh full validation still pending |
+| 2026-11-14 22:00:40 | `686357dbc16a26bf0340d86f3aa215e70dc2699a` | Log Save Slots formatter and cleanup commits | Audit | `SaveSlotsScreen.kt` | `docs/BATCH_A_COMMIT_LOG.md` | Ledger update; full validation run 43645824593 started on this checkpoint |
+| 2026-11-14 22:03:20 | `b9a423214c4cc1413ec64dbb28db614d55b3b7d4` | Give Creative Mode switch its own Material surface | Save Slots | `SaveSlotsScreen.kt` | `lib/saves/save_slots_page.dart` | Follow-up diagnosis: remaining ListTile ink assertion came from SwitchListTile inside dialog, not slot card; pending CI |
+| 2026-11-14 22:03:26 | `09caa0cb00f0aed4f56702c72635fc214c6c437c` | Align Creative Mode switch tile | Save Slots | `SaveSlotsScreen.kt` | `lib/saves/save_slots_page.dart` | Formatting adjustment for nested Material wrapper; validated by run 43646223935 |
+| 2026-11-14 22:05:22 | `9735dfd06c72b7e674ea825332d2f573ebfd1907` | Log remaining Save Slots switch fix | Audit | `SaveSlotsScreen.kt` | `docs/BATCH_A_COMMIT_LOG.md` | Historical ledger update; superseded status corrected below |
+| 2026-11-15 00:11:12 | `0f16f1b6ff6a71d0c2cbd3320167036c96875d3b` | Record Creative Save validation success | Audit / Dashboard | `GameState.kt; GameViewModel.kt; DesktopWebPlayActions.kt; web-play/index.html; web-play/app.js` | `docs/FINITE_PARITY_PLAN.md` | CI evidence update; Validate 43646223935 passed all required jobs |
+| 2026-11-15 00:11:16 | `b6ef577680fb4e7e67ea66ad8bf209aa96a9bf75` | Update Creative Save CI evidence | Audit / Dashboard | `GameState.kt; GameViewModel.kt; DesktopWebPlayActions.kt; web-play/index.html; web-play/app.js` | `docs/GTN1_SCREEN_PARITY_DIFF.md` | CI evidence update; paired runtime screenshots remain open |
+| 2026-11-15 00:11:34 | `8e3507e152753b799a2849c3a78f17bbcbe58d4e` | Log Batch A Creative Save CI pass | Audit | — | `docs/BATCH_A_COMMIT_LOG.md` | Records Validate 43646223935; docs-only ledger correction |
+| 2026-11-15 00:12:18 | `a8eb59035359d6ab4948cab4b3dce87ca4dbd858` | Verify Creative Save across slot switches | Save Slots / Creative Save | `SaveSlotsScreen.kt; GameState.kt` | `test/data/save_data_test.dart` | Adds per-slot permanent-flag and range persistence regression; first Validate attempt stopped at formatting |
+| 2026-11-15 00:13:20 | `34b0146870c4ba63348ab00e55e22e8d41c616d9` | Format Creative Save slot-switch test (manual adjustment) | Test formatting | — | `test/data/save_data_test.dart` | Initial manual wrap was still not Dart-formatted; superseded by formatter commit below |
+| 2026-11-15 00:14:20 | `aa00fbc6547189087649cee583556e953b952382` | Add temporary Creative Save test formatter | CI support | — | `.github/workflows/temporary-batch-a-creative-slot-format.yml` | Temporary workflow applied Dart formatter to the single test file |
+| 2026-11-15 00:14:45 | `a52c2b652483f6a7058ce79c6362c45aaa77e1d3` | Apply Dart formatter to Creative Save slot-switch test | Test formatting | — | `test/data/save_data_test.dart` | Formatter-generated commit; PR validation required a user-authored follow-up after bot action_required |
+| 2026-11-15 00:15:20 | `5c5361cea5d131cd37a805c8cd71a8e3c03047aa` | Remove temporary Creative Save test formatter | CI support | — | `.github/workflows/temporary-batch-a-creative-slot-format.yml` | Temporary workflow removed; Validate 43657265678 (run 1717) is checking formatted test and platform builds |
+| 2026-11-15 00:17:58 | `625612867c61158e8b1b28f062bad7a65422b6de` | Log Creative Save slot-switch regression commits | Audit | `SaveSlotsScreen.kt; GameState.kt` | `docs/BATCH_A_COMMIT_LOG.md; docs/FINITE_PARITY_PLAN.md` | Ledger records the slot-switch regression; superseded by fresh Validate run 43657481673 |
+| 2026-11-15 00:24:27 | `84fe358f2b370da9909715261a2182406057c288` | Decode GTN1 legacy save payload wrapper | Save Slots / Compatibility | `app/src/main/java/com/jarrlyyy/guessthenumber/data/store/SaveManager.kt` | `lib/data/saves/legacy_gtn1_save_codec.dart` | Implements source salt/XOR/Base64 and plain-Base64 fallback; fixed source vector added next |
+| 2026-11-15 00:24:35 | `da75e799f292c4df38eefa75e65d85093107913b` | Layer GTN1 legacy payload inside portable backup | Save Slots / Compatibility | `PortableSaveBackup.kt; SaveManager.kt` | `lib/data/saves/portable_save_backup.dart` | Adds two-layer GTN1 encode/decode helpers; test pending |
+| 2026-11-15 00:24:44 | `d6891f669671abf0132b68e4a2f54505f58b270d` | Verify GTN1 legacy portable payload compatibility | Save Slots / Tests | `PortableSaveBackup.kt; SaveManager.kt` | `test/data/saves/portable_save_backup_test.dart` | Fixed inner codec vector, legacy Base64 fallback, two-layer round-trip and wrong-passphrase rejection |
+| 2026-11-15 00:25:17 | `5e8ce90e25d63b6f2ef7367b0bae35825a6deedd` | Add GTN1 two-layer portable backup fixture | Save Slots / Tests | `PortableSaveBackup.kt; SaveManager.kt` | `test/data/saves/portable_save_backup_test.dart` | Adds independent deterministic PBKDF2/AES-GCM fixture matching GTN1 outer + inner envelope |
+| 2026-11-15 00:25:44 | `d5094d81cb5cc73c77c1cddc1c0442156c127f76` | Record GTN1 save-envelope compatibility work | Audit / Save Slots | `PortableSaveBackup.kt; SaveManager.kt` | `docs/FINITE_PARITY_PLAN.md` | Updates exact envelope progress and remaining bundle-conversion/restore/UI blockers |
+| 2026-11-15 00:25:54 | `efb7bc5090b477a11bfe9616eee3ac2cd00fe2cd` | Update Save Slots compatibility diff | Audit / Save Slots | `PortableSaveBackup.kt; SaveManager.kt` | `docs/GTN1_SCREEN_PARITY_DIFF.md` | Records envelope implementation and explicit remaining compatibility gaps |
+| 2026-11-15 00:26:18 | `7f53ccc3ab1fb20da7da3782c85189673cdeb1d1` | Log GTN1 portable backup compatibility commits | Audit / Save Slots | `PortableSaveBackup.kt; SaveManager.kt` | `docs/BATCH_A_COMMIT_LOG.md` | Records codec, two-layer helpers, fixed fixture and docs updates; fresh validation still pending |
+
+
+
+| 2026-11-15 00:26:35 | `f0ccea72783dc7fc09eac6f382f01be8ca638dc9` | Self-log portable backup compatibility ledger update | Audit | — | `docs/BATCH_A_COMMIT_LOG.md` | Follow-up commit records the preceding ledger checkpoint |
+| 2026-11-15 00:27:00 | `eda1ed95aba250494ac31f285ab20102baef27ac` | Add temporary legacy codec formatter workflow | CI support | — | `.github/workflows/temporary-batch-a-legacy-codec-format.yml` | Temporary Dart formatter workflow; later removed |
+| 2026-11-15 00:27:10 | `0fe01eb8246eddba3c93358b934aeefd0ce82a72` | Run legacy codec formatter for pull requests | CI support | — | `.github/workflows/temporary-batch-a-legacy-codec-format.yml` | Adds pull-request trigger; initial checkout ref failed on synthetic PR merge ref |
+| 2026-11-15 00:27:20 | `028c9e866c5cd1e536450b3d3e644e5d8e8b35ce` | Fix temporary formatter checkout ref | CI support | — | `.github/workflows/temporary-batch-a-legacy-codec-format.yml` | Formatter rerun 43658417762 passed; 3 selected files reported 0 changes |
+| 2026-11-15 00:27:30 | `b01d5b0c9d4efefa8ae6ad7c327323f789cbaac6` | Remove temporary legacy save formatter workflow | CI support | — | `.github/workflows/temporary-batch-a-legacy-codec-format.yml` | Temporary workflow removed after formatter completed; no formatter automation is left in the branch |
+| 2026-11-15 00:28:00 | `c2c58ae8efe0ab6c12bb0f23335753bb95ab2879` | Add strict GTN1 save state migration adapter | Save Slots / Migration | `GameState.kt; SaveManager.kt` | `lib/data/saves/legacy_gtn1_save_adapter.dart` | Initial core field adapter; later corrected for GTN1 TraitProfile, selected trait-arm types and source settings locations |
+| 2026-11-15 00:28:10 | `55cabd9903e58247716d3ddf055ec7bb6711b904` | Preserve GTN1 adaptive trait profile during save migration | Save Slots / Migration | `TraitProfile.kt; GameState.kt` | `lib/data/saves/legacy_gtn1_save_adapter.dart` | Maps the full version-1 adaptive profile to GTN2 `AdaptiveTraitProfile`; uses strict fail-closed handling for fields without destinations |
+| 2026-11-15 00:28:20 | `3614ae47897da233bdeb42d91750e583fd15a1c3` | Test GTN1 save state migration adapter | Save Slots / Tests | `GameState.kt; TraitProfile.kt; GameSettings` | `test/data/saves/legacy_gtn1_save_adapter_test.dart` | Adds populated mapping, unsupported-field, malformed-input and default-state tests; pending execution |
+| 2026-11-15 00:28:25 | `ac295a610788be9c456ca01d2d57aacffef9c658` | Correct migrated music playlist assertion | Save Slots / Tests | `GameSettings` | `test/data/saves/legacy_gtn1_save_adapter_test.dart` | Aligns test with GTN2 `musicPlaylistPaths` property |
+| 2026-11-15 00:28:35 | `4b4676c0f2f737898e3431d9a2955a5f9a89eda2` | Match GTN1 save-load range and difficulty sanitization | Save Slots / Migration | `SaveManager.kt; GameState.kt` | `lib/data/saves/legacy_gtn1_save_adapter.dart` | Mirrors GTN1 fallback for invalid difficulty and normal/Creative range handling; tests pending |
+| 2026-11-15 00:28:45 | `a6774424ddf308f47c7f086345f2058c2cc95da3` | Record strict GTN1 save adapter implementation | Audit / Save Slots | `GameState.kt; TraitProfile.kt; SaveManager.kt` | `docs/FINITE_PARITY_PLAN.md` | Records mapped fields, fail-closed unsupported fields and remaining bundle/UI work |
+| 2026-11-15 00:28:55 | `8420b66800767d2093620765ad63dc990d8bea04` | Update Save Slots migration cross-diff | Audit / Save Slots | `GameState.kt; TraitProfile.kt; SaveManager.kt` | `docs/GTN1_SCREEN_PARITY_DIFF.md` | Records source-to-target mapping and explicit remaining gaps |
+| 2026-11-15 00:29:10 | `43658205380` | Validate run — formatter gate failed | CI / Save Slots | — | Adapter not yet present | Failed at Dart formatting before analysis/tests/builds; superseded by later formatted code |
+| 2026-11-15 00:29:20 | `43658417762` | Temporary formatter workflow — success | CI support | — | Three legacy codec Dart files | Passed; `dart format` reported 0 changed files |
+| 2026-11-15 00:29:30 | `43658417715` | Validate run — full debug validation passed | CI / Batch A | — | Code at `028c9e866c5cd1e536450b3d3e644e5d8e8b35ce` | Format/analyze passed, 399 Flutter tests passed, Android debug APK and Windows desktop debug builds passed; Windows release installer skipped. This run predates the new adapter commits |
+| 2026-11-15 00:29:40 | `43658417715` | Validate evidence checkpoint | Audit / CI | — | `docs/FINITE_PARITY_PLAN.md` | The completed run validates the previous codec checkpoint only; current adapter changes still need a fresh run |
+
+
+| 2026-11-15 00:30:00 | `a03a1d009faca342fbdca68395a71d83704bca2e` | Log GTN1 migration adapter and validation commits | Audit | — | `docs/BATCH_A_COMMIT_LOG.md` | Adds missing formatter/adapter commits and records the previous 399-test full validation checkpoint; follow-up self-log below |
+| 2026-11-15 00:30:10 | `437458012fb8046f4382ad2224084508c8b544a6` | Add temporary GTN1 migration adapter formatter | CI support | — | `.github/workflows/temporary-batch-a-migration-adapter-format.yml` | Temporary workflow intended to format the new adapter and tests; no workflow run was returned by the available PR-run lookup |
+| 2026-11-15 00:30:20 | `ba5b95065fbeda39690380bd8b86c111e265c84e` | Run migration adapter formatter on PR validation | CI support | — | `.github/workflows/temporary-batch-a-migration-adapter-format.yml` | Adds pull-request trigger and correct PR-head checkout/push ref; no run evidence surfaced |
+| 2026-11-15 00:30:30 | `3ece10759b6ef3b809899630ed0d402f572d6d23` | Remove temporary migration adapter formatter workflow | CI support | — | `.github/workflows/temporary-batch-a-migration-adapter-format.yml` | Temporary workflow removed; branch retains no formatter automation |
+| 2026-11-15 00:30:40 | `7ccc34ded9713ed81782c8ab08017e6a9f74e3fe` | Preserve GTN1 default menu order and target sanitization | Save Slots / Migration | `GameState.kt; GameSettings` | `lib/data/saves/legacy_gtn1_save_adapter.dart` | Preserves GTN1's default More order for old settings and clamps imported secret to the migrated range |
+| 2026-11-15 00:30:50 | `995501c8adcf0d9a693f3fd3f5bf466b50040d2a` | Use integer-safe GTN1 range conversion | Save Slots / Migration | `SaveManager.kt` | `lib/data/saves/legacy_gtn1_save_adapter.dart` | Ensures range and target conversions satisfy Dart's integer SaveData API |
+| 2026-11-15 00:31:00 | `b094bad3cdb57c0b6feb9de51c287f280fc2edd3` | Test rejection of invalid GTN1 counter values | Save Slots / Tests | `GameState.kt; SaveManager.kt` | `test/data/saves/legacy_gtn1_save_adapter_test.dart` | Replaces an invalid-range assertion that GTN1's load sanitizer intentionally normalizes with a negative-counter rejection case |
+
+
+| 2026-11-15 00:31:20 | `b2d39a4888e273e8f8f92e671b9871d8228eab32` | Log GTN1 adapter corrections and formatter cleanup | Audit | — | `docs/BATCH_A_COMMIT_LOG.md` | Records adapter follow-up commits and temporary formatter workflow removal; self-log below |
+| 2026-11-15 00:31:30 | `4a6349850822535a4346581c6b70a5baad6884f6` | Clarify adapter validation remains pending | Audit / CI | — | `docs/FINITE_PARITY_PLAN.md` | Explicitly distinguishes prior 399-test CI pass from the newer unvalidated adapter commits |
+
+
+| 2026-11-15 00:31:40 | `4f48069d27132383a97319eb29c43ed2bb2925e0` | Self-log adapter documentation checkpoints | Audit | — | `docs/BATCH_A_COMMIT_LOG.md` | Records the prior ledger update; this is the final self-log checkpoint for the current work segment |
+
+| 2026-11-15 00:31:50 | `586866350e5d2a1f447687d4fcfd5ba705bddbc2` | Record final Batch A adapter ledger checkpoint | Audit | — | `docs/BATCH_A_COMMIT_LOG.md` | Self-log of the previous ledger commit; current adapter validation is still pending |
+
+| 2026-11-15 02:02:10 | `1a1dc5ff1ab9b0e362939a7854c3b5fc20dbfab1` | Test exact preservation of GTN1 failed-guess history | Save Slots / Tests | `GameState.kt; SaveManager.kt` | `test/data/saves/legacy_gtn1_save_adapter_test.dart` | Regression test now uses a source failedGuesses value different from the derived GTN2 count, proving exact snapshot preservation |
+| 2026-11-15 02:02:20 | `fc1bdd70d460ca3229b348faee968c803a53929c` | Test full GTN1 bundle and profile preservation parity | Save Slots / Tests | `SaveManager.kt; GlobalPreferencesManager.kt; GameState.kt` | `test/data/saves/save_bundle_storage_parity_test.dart` | Covers all ten primary saves/backups, standalone Creative save, preferences and unchanged local profile/avatar files |
+| 2026-11-15 02:02:30 | `02b2d69ecdf0f84cf8dd8e7d3ef70f45545d32e0` | Add independent GTN1 v3 bundle compatibility fixture | Save Slots / Tests | `SaveManager.kt; GameState.kt; CreativeModeSave.kt; GameSettings` | `test/data/saves/legacy_gtn1_backup_bundle_test.dart` | Independent GTN1-shaped fixture verifies bundle decode, source-only shop/Arcade/failed-guess retention and re-serialization |
+| 2026-11-15 02:02:40 | `ce15fb735d9eaa9584ad9e5389808585022c029c` | Record full GTN1 bundle migration and preservation parity | Audit / Save Slots | `SaveManager.kt; GameState.kt; CreativeModeSave.kt; GlobalPreferencesManager.kt` | `docs/GTN1_SCREEN_PARITY_DIFF.md` | Corrects stale individual-adapter-only status; records full bundle/import/export path and remaining runtime evidence |
+| 2026-11-15 02:03:03 | `ba2396ca3b5bd8fe563824f58ae488ca9e766a05` | Add temporary save parity formatter | CI support | — | `.github/workflows/temporary-batch-a-save-parity-format.yml` | Temporary helper only; run 43665919308 succeeded and reported 126 files formatted, 0 changed; removed below |
+| 2026-11-15 02:03:20 | `67dcb23555342e6d8a89a0a08b3a15e5a357ae0c` | Remove temporary save parity formatter | CI cleanup | — | `.github/workflows/temporary-batch-a-save-parity-format.yml` | Removes temporary formatter after successful no-change formatting run |
+| 2026-11-15 02:03:30 | `25344815291aba86e5cd707f95f747956afad700` | Remove temporary save bundle formatter | CI cleanup | — | `.github/workflows/temporary-batch-a-save-bundle-format.yml` | Removes earlier temporary formatter helper; no temporary formatter is intended to remain |
+| 2026-11-15 02:03:40 | `30703b0b74286d82da8eb87ae54d19b7f8b09316` | Remove generated Dart package configuration | Repository cleanup | — | `.dart_tool/package_config.json` | Removes generated machine-local dependency paths from source control |
+| 2026-11-15 02:03:50 | `d84fa0b3fa2064ae03fdfdea37de9a31d3af22c9` | Remove generated Dart package graph | Repository cleanup | — | `.dart_tool/package_graph.json` | Removes generated package graph from source control |
+| 2026-11-15 02:04:00 | `e01ce1117e0efe1314f1357338dbd2505eba12f8` | Remove generated Dart toolchain version marker | Repository cleanup | — | `.dart_tool/version` | Removes generated Flutter SDK marker from source control |
+| 2026-11-15 02:07:15 | `04fa95ef6359e40d8f439052ee2d6a71f93ed975` | Record 420-test GTN1 bundle migration validation | Audit / CI | — | `docs/FINITE_PARITY_PLAN.md` | Records run 43665919307: format/analyze, 420 tests, Android debug APK and Windows desktop debug build passed; installer skipped |
+| 2026-11-15 02:07:30 | `43664871340` | Validate #1809 stopped at Dart formatting | CI / Save Slots | — | Adapter and bundle test files | Formatting gate failed before analysis/tests/builds; superseded by formatter and later full validation |
+| 2026-11-15 02:07:40 | `43664931175` | Validate #1810 stopped at Dart formatting | CI / Save Slots | — | Adapter and bundle test files | Formatting gate failed before analysis/tests/builds; superseded by formatter and later full validation |
+| 2026-11-15 02:07:50 | `43664965582` | Validate #1811 stopped at Dart formatting | CI / Save Slots | — | Adapter and bundle test files | Formatting gate failed before analysis/tests/builds; superseded by formatter and later full validation |
+| 2026-11-15 02:08:00 | `43665065194` | Validate #1813 stopped at Dart formatting | CI / Save Slots | — | Adapter and bundle test files | Formatting gate failed before analysis/tests/builds; superseded by formatter and later full validation |
+| 2026-11-15 02:08:10 | `43665919307` | Validate #1823 — full migration validation passed | CI / Batch A | — | GTN1 adapter, bundle serializer, portable backup and regression tests | Format/analyze passed, 420 Flutter tests passed, Android debug APK and Windows desktop debug build passed; Windows release installer skipped |
+
+
+| 2026-11-15 02:08:20 | `d989ae5df4cc961003f2cfc4d650d57423cf3915` | Log full GTN1 bundle parity and 420-test validation | Audit | — | `docs/BATCH_A_COMMIT_LOG.md` | Records adapter regression tests, formatter cleanup, generated artifact cleanup, failed formatting runs and latest green full validation |
+| 2026-11-15 02:08:30 | `fe7dcd5da64d006a97016573084163051840e6b8` | Record 420-test GTN1 bundle validation evidence | Audit / Save Slots | `SaveManager.kt; GameState.kt` | `docs/GTN1_SCREEN_PARITY_DIFF.md` | Updates the source-to-target diff from pending CI to verified CI while keeping device/runtime evidence open |
+
+| 2026-11-15 02:08:40 | `21d4f41d2f907263423a66da00cf9d7d0d46fae0` | Self-log bundle parity validation documentation | Audit | — | `docs/BATCH_A_COMMIT_LOG.md` | Records the previous ledger update and source-diff validation evidence |
+
+| 2026-11-15 11:13 | `4635f437a8856945375a4213de210620353c4392` | Test Menu Studio preferences survive portable bundle restore | Batch A / Menu Studio / Save Slots | `app/src/main/assets/web-play/menu-studio.js` | `test/data/saves/save_bundle_storage_test.dart` | Adds round-trip assertions for custom navigation order, More order, per-button color and serialized Menu Studio layout |
+| 2026-11-15 11:14 | `3fcb22f413eca6a80af2a636881da7e45d12c774` | Record Menu Studio preference backup persistence coverage | Audit | `menu-studio.js` | `docs/FINITE_PARITY_PLAN.md` | Records new regression coverage while keeping Android/Windows runtime checks open |
+| 2026-11-15 11:14 | `638c6ea922bfc57c1bab4c6666b1c954dac2c225` | Document Menu Studio persistence source diff | Audit / Menu Studio | `menu-studio.js` | `docs/GTN1_SCREEN_PARITY_DIFF.md` | Adds exact source schema comparison and portable backup/reload test evidence |
+
+| 2026-11-15 11:15 | `8525c52ff28e1a73ed8f62bd7975d48d04d5ff17` | Log Menu Studio persistence regression and audit updates | Audit | `menu-studio.js` | `docs/BATCH_A_COMMIT_LOG.md` | Self-logs the test and source/plan documentation commits |
+
+| 2026-11-15 11:16 | `73b5b61ae29e4b65ed69c2f8aaea1b7df449ca19` | Fix Menu Studio persistence test formatting | Batch A / Menu Studio / Save Slots | `menu-studio.js` | `test/data/saves/save_bundle_storage_test.dart` | Corrects the formatter-reported continuation indentation; the failed formatting-only Validate run is recorded separately |
+
+| 2026-11-15 11:17 | `421326ad5ecfbb4214054b6ca0d67b6c9cd9249c` | Log Menu Studio test formatter correction | Audit | `menu-studio.js` | `docs/BATCH_A_COMMIT_LOG.md` | Records the formatter fix and the CI run that identified it |
+
+| 2026-11-15 11:18 | `d444564669a07c61b70947c805b29cf676243c88` | Add temporary Menu Studio formatter helper | CI support | — | `.github/workflows/temporary-batch-a-menu-studio-format.yml` | Temporary helper was added to format the new regression; no helper is intended to remain in the branch |
+| 2026-11-15 11:19 | `f97b80dad5ceafda0cbfc1923edf5b55bef91340` | Restore formatted test structure and preserve Menu Studio backup coverage | Batch A / Menu Studio / Save Slots | `menu-studio.js` | `test/data/saves/save_bundle_storage_test.dart` | Restores the previously validated multiline test structure before applying the new persistence assertions |
+| 2026-11-15 11:20 | `03e49d100f706631fe0088c608c9e5c1a3dffb98` | Remove temporary Menu Studio formatter | CI cleanup | — | `.github/workflows/temporary-batch-a-menu-studio-format.yml` | Removes the temporary helper; no temporary formatter workflow remains |
+| 2026-11-15 11:20 | `d2eb548be5ad3590950582b3d92e6cccac4a8c92` | Simplify Menu Studio persistence assertions | Batch A / Menu Studio / Save Slots | `menu-studio.js` | `test/data/saves/save_bundle_storage_test.dart` | Uses direct ordered-field and color assertions to keep the regression compact and formatter-stable |
+| 2026-11-15 11:21 | `43671653395` | Validate #1868 formatting gate failed | CI / Menu Studio | — | `test/data/saves/save_bundle_storage_test.dart` | Formatting failed before analysis/tests/builds; this first check identified the modified test file |
+| 2026-11-15 11:21 | `43671792622` | Validate #1871 formatting gate failed | CI / Menu Studio | — | `test/data/saves/save_bundle_storage_test.dart` | Formatting still failed after a continuation-indent-only correction; formatter logs showed this same file as the only changed file |
+| 2026-11-15 11:21 | `43671897578` | Validate #1872 formatting gate failed | CI / Menu Studio | — | `test/data/saves/save_bundle_storage_test.dart` | Formatting still failed on the previous test structure; restored the original formatted test block and simplified new assertions afterward |
+
+| 2026-11-15 11:22 | `10a253551a94706c43f749a606412c234966e7ed` | Log Menu Studio formatter retries and cleanup | Audit | `menu-studio.js` | `docs/BATCH_A_COMMIT_LOG.md` | Records temporary formatter add/remove, restored test structure and failed formatting-only CI attempts |
+
+| 2026-11-15 11:23 | `a6f47d762bbdb28e2a81f821a16108e480a724d5` | Apply Menu Studio reset to live navigation preview | Batch A / Menu Studio | `app/src/main/assets/web-play/menu-studio.js` | `lib/settings/menu_studio_page.dart` | Adds `_reset()` so Reset layout publishes the default layout through the live preview callback, matching GTN1 `apply()` |
+| 2026-11-15 11:23 | `6b43dfb32a1785f3ccb97c7bf83dd0b6941199b3` | Test Menu Studio reset live preview parity | Batch A / Menu Studio | `menu-studio.js` | `test/settings/menu_studio_page_test.dart` | Regression verifies Worlds returns to the top bar, default More order is restored and reset is not persisted before Save changes |
+| 2026-11-15 11:23 | `e2d08634b98fd4235c4d6412a82e8d28a12ad353` | Use void callback in Menu Studio reset regression | Batch A / Menu Studio | `menu-studio.js` | `test/settings/menu_studio_page_test.dart` | Makes the async save callback explicitly return void |
+| 2026-11-15 11:24 | `6e1bf567617690dd4cd8bcb9549e716b3f53e4cd` | Record Menu Studio reset preview parity fix | Audit / Menu Studio | `menu-studio.js` | `docs/FINITE_PARITY_PLAN.md` | Updates the Batch A checklist with the live-preview behavior and regression coverage |
+| 2026-11-15 11:24 | `0c275f9290700a8788959e8f070dfb18de349f40` | Document Menu Studio reset preview parity mismatch and fix | Audit / Menu Studio | `menu-studio.js` | `docs/GTN1_SCREEN_PARITY_DIFF.md` | Records the source-side `apply()` behavior, GTN2 mismatch, fix and pending validation |
+| 2026-11-15 11:24 | `43672157813` | Validate #1881 — Menu Studio persistence and reset regressions | CI / Batch A | — | `test/data/saves/save_bundle_storage_test.dart; test/settings/menu_studio_page_test.dart` | Run started on the new test/fix; results pending |
+
+| 2026-11-15 11:25 | `7babc2719627c26981fbf58d27731d6ef004664d` | Log Menu Studio reset preview parity implementation | Audit | `menu-studio.js` | `docs/BATCH_A_COMMIT_LOG.md` | Self-logs the implementation, regression, plan and source-diff commits |
+
+| 2026-11-15 11:26 | `fe416501cde196a7ca7c16be4d9becd522df3dd3` | Match Dart formatter for Menu Studio persistence assertion | Batch A / Menu Studio / Save Slots | `menu-studio.js` | `test/data/saves/save_bundle_storage_test.dart` | Makes the compact color assertion single-line to match Dart 3.50 formatter output |
+| 2026-11-15 11:26 | `3a2cb444e97db15f7316097212db088d9aa47bcb` | Remove generated Dart package configuration | Repository cleanup | — | `.dart_tool/package_config.json` | Removes machine-specific `/home/runner/.pub-cache` and Flutter SDK paths |
+| 2026-11-15 11:26 | `d5b65d1371021b3645f57f37a535d2582b74dcb9` | Remove generated Dart package graph | Repository cleanup | — | `.dart_tool/package_graph.json` | Removes generated dependency graph from tracked source |
+| 2026-11-15 11:26 | `14bc5fcf74dec2470fcbdc0d063edc837046e649` | Remove generated Dart SDK version marker | Repository cleanup | — | `.dart_tool/version` | Removes generated Flutter SDK version marker |
+| 2026-11-15 11:27 | `3fac9fb4239dc2914ae1c4e7da0359f8e6250599` | Ignore generated Dart package metadata | Repository cleanup | — | `.gitignore` | Prevents future formatter/dependency workflows from re-adding machine-local `.dart_tool/` files |
+
+| 2026-11-15 11:27 | `0422432aad57bd1528e3676d2053b29853b4ee1b` | Log Dart formatter cleanup and ignore rule | Audit | — | `docs/BATCH_A_COMMIT_LOG.md` | Self-logs the formatting correction and generated `.dart_tool` removal/ignore work |
+
+| 2026-11-15 11:28 | `a3d371ead83e36b11246d1d9b39e5a1909ca4c9c` | Add temporary formatter-output diagnostic to Validate | CI support | — | `.github/workflows/validate.yml` | Temporarily prints Dart 3.14 formatter output for the modified test file after repeated format-only failures |
+| 2026-11-15 11:28 | `1df6ff2cadeb337e91fbf915b22c5b5f583579a1` | Apply exact Dart 3.14 formatting to Menu Studio persistence test | Batch A / Menu Studio / Save Slots | `menu-studio.js` | `test/data/saves/save_bundle_storage_test.dart` | Replaces the modified test with the exact formatted output captured from Dart 3.14; includes compact test call and color assertion formatting |
+| 2026-11-15 11:28 | `ebf4d1686e7790afa0ed02ca2f3f05946362c877` | Remove temporary Dart formatter diagnostic step | CI cleanup | — | `.github/workflows/validate.yml` | Restores the standard validation workflow without diagnostic output steps |
+| 2026-11-15 11:28 | `43672514079` | Validate #1892 — formatting diagnostic run | CI / Menu Studio | — | `test/data/saves/save_bundle_storage_test.dart` | Format gate failed as expected; the diagnostic step captured the exact Dart formatter output used for the correction |
+
+| 2026-11-15 11:29 | `c5715bc056e041e82fa5b262b614f50dae8a97ff` | Log Dart formatter diagnostic and exact correction | Audit | `menu-studio.js` | `docs/BATCH_A_COMMIT_LOG.md` | Self-logs the temporary diagnostic, exact formatting correction and workflow restoration |
+
+| 2026-11-15 11:30 | `1df6ff2cadeb337e91fbf915b22c5b5f583579a1` | Apply exact Dart 3.14 formatting to Menu Studio persistence test | Batch A / Menu Studio / Save Slots | `menu-studio.js` | `test/data/saves/save_bundle_storage_test.dart` | Exact formatter output applied; format gate passed in run #1896, but analysis exposed two pre-existing directive-order infos |
+| 2026-11-15 11:30 | `6c7f64935d4680d08ce80f0918c9beabe84c336b` | Sort Dart SDK imports for analyzer | Build / CI hygiene | — | `lib/main.dart` | Moves `dart:io` before `dart:math` to satisfy directives_ordering |
+| 2026-11-15 11:30 | `b5d0a8b8e3ccb4cf46fb5d28b299c0c0162a4492` | Sort widget test imports for analyzer | Build / CI hygiene | — | `test/widget_test.dart` | Places update_checker before design imports to satisfy directives_ordering |
+| 2026-11-15 11:30 | `43672625058` | Validate #1896 — format passed, analysis failed | CI / Batch A | — | `lib/main.dart; test/widget_test.dart` | Dart formatting passed; analysis failed only on two directives_ordering infos; tests and builds were skipped |
+
+| 2026-11-15 11:31 | `a36492d72b1a2039d278f43459579a5bb6af0f45` | Log analyzer import-order fixes | Audit / CI | — | `docs/BATCH_A_COMMIT_LOG.md` | Self-logs exact formatter correction and the two directives_ordering fixes |
+
+| 2026-11-15 11:32 | `1042ad0ffb76962fac2c9578e4ddbd4700e25a59` | Scroll Menu Studio reset action into view in regression | Batch A / Menu Studio | `menu-studio.js` | `test/settings/menu_studio_page_test.dart` | Handles ListView lazy construction so the reset button is built before tapping |
+| 2026-11-15 11:32 | `88c3ee684b9cdfdad710554c18d7075d6b00a0fb` | Scroll update schedule dropdown into view in widget test | Batch A / Settings | `web-play/app.js` | `test/settings/settings_page_test.dart` | Scrolls the actual dropdown into the viewport rather than only its label |
+| 2026-11-15 11:32 | `7971e2f5a3820cc0d6310292daf990b5ae532d33` | Give About screen ListTiles their own Material ink surface | UI / About | `app/src/main/java/com/jarrlyyy/guessthenumber/ui/screens/AboutScreen.kt` | `lib/legacy/legacy_pages.dart` | Prevents DecoratedBox backgrounds from obscuring ListTile ink and triggering Flutter framework assertions |
+| 2026-11-15 11:32 | `43672747391` | Validate #1900 — format/analyze passed, 429 tests passed and 3 failed | CI / Batch A | — | `test/settings/settings_page_test.dart; test/settings/menu_studio_page_test.dart; test/widget_test.dart` | Failures were two off-screen widget-test taps and About ListTile ink-surface assertions; Android/Windows builds were still running |
+
+| 2026-11-15 11:33 | `ca5c6c16a37e9c3aff52f37d83edef21085e2cee` | Log Menu Studio and settings test fixes plus About ink-surface fix | Audit | `menu-studio.js; web-play/app.js; AboutScreen.kt` | `docs/BATCH_A_COMMIT_LOG.md` | Self-logs the three failed-test diagnoses and their source/UI corrections |
+
+| 2026-11-15 11:34 | `3d4530bf62eeef0579925cf6328c9b9090b295c7` | Add temporary About page formatter diagnostic | CI support | — | `.github/workflows/validate.yml` | Temporarily prints Dart formatter output after the About ink-surface change failed format gate |
+| 2026-11-15 11:34 | `b3489ade8621e853b1ddb13203e6e14a8ac7c2a4` | Apply exact Dart formatter output to About ink-surface fix | UI / About | `AboutScreen.kt` | `lib/legacy/legacy_pages.dart` | Applies the exact Dart 3.14 formatted file output |
+| 2026-11-15 11:34 | `840cb295820e8db1651a3de6d0fe0b1a081bd91b` | Remove temporary About formatter diagnostic | CI cleanup | — | `.github/workflows/validate.yml` | Restores the standard validation workflow without diagnostic output steps |
+| 2026-11-15 11:34 | `43673074998` | Validate #1905 — formatting gate failed | CI / About | — | `lib/legacy/legacy_pages.dart` | Formatter identified the About ink-surface file as the only unformatted source |
+| 2026-11-15 11:34 | `43673142844` | Validate #1906 — formatting diagnostic | CI / About | — | `lib/legacy/legacy_pages.dart` | Diagnostic captured the exact formatted source; the formatting correction was applied and diagnostic step removed |
+
+| 2026-11-15 11:35 | `5dbb148098bc892b2b3acb45dec67ffd337f86f8` | Log About formatter diagnostic and cleanup | Audit | `AboutScreen.kt` | `docs/BATCH_A_COMMIT_LOG.md` | Self-logs the temporary formatter diagnostic, exact output correction and workflow restoration |
+
+| 2026-11-15 11:40 | `0b56c462f06274206b2c8d044aabdda285f199b3` | Ensure update schedule dropdown is visible before tapping | Batch A / Settings | `web-play/app.js` | `test/settings/settings_page_test.dart` | Uses WidgetTester.ensureVisible on the actual M3E dropdown after scrollUntilVisible on its label did not move the dropdown into the viewport |
+| 2026-11-15 11:40 | `43673240457` | Validate #1910 — format/analyze passed, 431 tests passed and 1 failed | CI / Batch A | — | `test/settings/settings_page_test.dart` | Menu Studio reset and About ListTile regressions passed; only the update interval dropdown test still tapped an off-screen control; Android/Windows builds were still running |
+
+| 2026-11-15 11:41 | `03730353b2e9511396f800187e446b9b92bb3c33` | Log remaining Settings dropdown test correction | Audit / Settings | `web-play/app.js` | `docs/BATCH_A_COMMIT_LOG.md` | Self-logs the last failed widget test and the ensureVisible correction |
+
+### Current Creative Save implementation state
+
+- **Implemented and CI-verified:** schema-v7 permanent `creativeModeEnabled` flag with old-save default false; separate from the existing isolated `creativeMode` sandbox payload.
+- **Implemented and CI-verified:** permanent Creative Save toggle/range inputs during Save Slot creation; eligible save range and engine restore support up to the GTN1 1,000,000 maximum.
+- **Implemented and CI-verified:** inline dashboard panel shown only when the active slot's permanent flag is true.
+- **Implemented and CI-verified:** typed active-save range, currency, counter, streak and three upgrade-catalog transactions. Currency parsing accepts GTN1 suffix notation and rejects invalid/negative values.
+- **Tests executed and passed on the base Creative Save implementation:** schema migration/round-trip, storage persistence at 1,000,000, engine restore, transaction validation, panel interactions and Save Slots creation controls. Validate run [43646223935](https://github.com/ne0gl1tch20/gtn-2/actions/runs/43646223935) passed formatting, analysis, all Flutter tests, Android debug APK build and Windows desktop debug build on head `9735dfd06c72b7e674ea825332d2f573ebfd1907`.
+- **New slot-switch regression:** added coverage proving a permanent Creative Save flag and one-million range survive active-slot changes and new storage instances. On current PR head `5c5361cea5d131cd37a805c8cd71a8e3c03047aa`, Validate run [43657265678](https://github.com/ne0gl1tch20/gtn-2/actions/runs/43657265678) has passed formatting and analysis; Flutter tests and Android/Windows builds are still running.
+- **Still open:** verify active-slot switch/restart persistence; compare exact native Android and desktop behavior; test malformed/edge inputs on both platforms; capture paired GTN1/GTN2 screenshots; finish source labels, localization, layout and accessibility diffs. Validate run [43657481673](https://github.com/ne0gl1tch20/gtn-2/actions/runs/43657481673) passed format, analysis, 395 Flutter tests, Android debug APK and Windows desktop debug build on `625612867c61158e8b1b28f062bad7a65422b6de`. The new GTN1 inner-payload codec and two-layer fixture commits are newer than that green run and still require fresh validation. CI success is not runtime or visual parity. Do not mark Creative Save or Batch A complete yet.
+
+## 4. Per-commit audit template
+
+Append one row per commit to the ledger table below, then add a detailed entry under the row. Keep SHAs full length.
+
+| UTC date/time | Commit SHA | Commit subject | Batch A item(s) | GTN1 source paths | GTN2 paths changed | Tests / CI | Result and remaining gaps |
+|---|---|---|---|---|---|---|---|
+
+
+### Required evidence for implementation commits
+
+1. Repository state inspected before editing; record the base SHA.
+2. Pinned GTN1 source implementation inspected in parallel with current GTN2 implementation.
+3. Exact behavioral and UI differences recorded in `GTN1_SCREEN_PARITY_DIFF.md`.
+4. Tests added or updated for valid, invalid, boundary, persistence/reload and failure cases as relevant.
+5. Dart format, static analysis, complete Flutter tests, Android debug build and Windows desktop debug build results recorded by exact workflow URL and commit SHA.
+6. Android and Windows runtime checks and paired GTN1/GTN2 screenshots recorded before claiming visual closure.
+7. `FINITE_PARITY_PLAN.md` status and this ledger updated in the same work batch.
+
+### Batch A exit gate
+
+Batch A remains active until Dashboard, More, Settings, Menu Studio, Profile and Save Slots all pass source-backed behavior, persistence/reload, interaction, Android/Windows runtime and paired visual checks. Keep every unverified item open. Do not start Batch B early.
+
+
+## 5. Main-branch audit synchronization — 2026-11-15
+
+| UTC date/time | Commit SHA | Commit subject | Batch A item(s) | GTN1 source paths | GTN2 paths changed | Tests / CI | Result and remaining gaps |
+|---|---|---|---|---|---|---|---|
+| 2026-11-15 11:?? | `a77564dfdc043869ae53681b4813ffee593641d1` | Refresh Batch A status and evidence on main | Audit / plan | Pinned GTN1 inventory and source references | `docs/FINITE_PARITY_PLAN.md` | Documentation-only; no CI run | Main plan refreshed and re-fetched successfully. No implementation or runtime gate closed by this commit. |
+
+### Main/continuation reconciliation checkpoint
+
+- Main plan update is committed at `a77564dfdc043869ae53681b4813ffee593641d1`.
+- PR #74 remains open/draft at head `d9b5c5c74951be13642e3547f00a216ef889a9aa`, based on `4fe04ee1572c3e4fb307cd37d796ee5312f30ce1`.
+- GitHub compare reports the continuation branch as diverged from current main: 320 commits ahead and 1 commit behind, with merge base `4fe04ee1572c3e4fb307cd37d796ee5312f30ce1`. This is not a simple fast-forward. Inspect/reconcile the one main-only documentation commit and re-run full validation on the reconciled head before merge.
+- The latest PR description cites Validate run `43673480248` for formatting, analysis, 432 Flutter tests, Android debug APK and Windows desktop debug builds. Windows release installer was skipped. This remains CI-only evidence, not live runtime or paired visual verification.
+- The ledger is now synchronized to main as an audit document. Continue appending entries on the active implementation branch and keep the main copy current; do not overwrite newer main plan evidence with the older branch copy.
+- Batch A remains active. Dashboard, More, Settings, Menu Studio, Profile and Save Slots must all pass the full source-backed behavior, persistence/reload, interaction, Android/Windows runtime and paired visual exit gate. Batch B remains blocked.
