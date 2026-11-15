@@ -244,6 +244,8 @@ Green CI is build/test evidence only. It does not prove live Android/Windows beh
 | 2026-11-15 11:21 | `43671792622` | Validate #1871 formatting gate failed | CI / Menu Studio | — | `test/data/saves/save_bundle_storage_test.dart` | Formatting still failed after a continuation-indent-only correction; formatter logs showed this same file as the only changed file |
 | 2026-11-15 11:21 | `43671897578` | Validate #1872 formatting gate failed | CI / Menu Studio | — | `test/data/saves/save_bundle_storage_test.dart` | Formatting still failed on the previous test structure; restored the original formatted test block and simplified new assertions afterward |
 
+| 2026-11-15 11:22 | `10a253551a94706c43f749a606412c234966e7ed` | Log Menu Studio formatter retries and cleanup | Audit | `menu-studio.js` | `docs/BATCH_A_COMMIT_LOG.md` | Records temporary formatter add/remove, restored test structure and failed formatting-only CI attempts |
+
 ### Current Creative Save implementation state
 
 - **Implemented and CI-verified:** schema-v7 permanent `creativeModeEnabled` flag with old-save default false; separate from the existing isolated `creativeMode` sandbox payload.
