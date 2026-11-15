@@ -1811,7 +1811,6 @@ class _GameHomePageState extends State<GameHomePage>
           section: section,
           progression: _progression,
           updateNoticeListenable: _updateNoticeListenable,
-          updateChecking: _checkingUpdate,
           onCheckUpdates: () => unawaited(_checkForUpdatesIfDue(force: true)),
           onInstallUpdate: _installAvailableUpdate,
         ),
