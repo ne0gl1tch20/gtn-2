@@ -77,142 +77,21 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
   }
 
   Future<void> _create(int slot) async {
-    final nameController = TextEditingController();
-    final creativeMinimumController = TextEditingController(text: '1');
-    final creativeMaximumController = TextEditingController(text: '100');
-    final creativeHintsController = TextEditingController(text: '0');
-    final creativeAttemptLimitController = TextEditingController(text: '0');
-    var difficulty = DifficultyRules.classic;
-    var creativeSave = false;
-    var icon = 'default';
-    final result =
-        await GtnExpressiveDialog.show<
-          ({
-            String name,
-            String difficulty,
-            String icon,
-            bool creativeSave,
-            int minimum,
-            int maximum,
-            int hints,
-            int attemptLimit,
-          })
-        >(
-          context,
-          builder: (dialogContext) => StatefulBuilder(
-            builder: (context, setDialogState) => GtnExpressiveDialog(
-              title: Text('Create Slot $slot'),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  GtnExpressiveTextField(
-                    controller: nameController,
-                    maxLength: 24,
-                    decoration: const InputDecoration(
-                      labelText: 'Save name (optional)',
-                    ),
-                  ),
-                  GtnExpressiveDropdown<String>(
-                    initialValue: difficulty,
-                    decoration: const InputDecoration(labelText: 'Difficulty'),
-                    items: [
-                      for (final id in DifficultyRules.ids)
-                        DropdownMenuItem(
-                          value: id,
-                          child: Text(DifficultyRules.name(id)),
-                        ),
-                    ],
-                    onChanged: (value) {
-                      if (value != null) {
-                        setDialogState(() => difficulty = value);
-                      }
-                    },
-                  ),
-                  Material(
-                    color: Colors.transparent,
-                    child: SwitchListTile(
-                      contentPadding: EdgeInsets.zero,
-                      title: const Text('Creative Mode'),
-                      subtitle: const Text(
-                        'Permanent for this save. You can’t turn it off later.',
-                      ),
-                      value: creativeSave,
-                      onChanged: (value) =>
-                          setDialogState(() => creativeSave = value),
-                    ),
-                  ),
-                  if (creativeSave) ...[
-                    GtnExpressiveTextField(
-                      controller: creativeMinimumController,
-                      maxLength: 7,
-                      decoration: const InputDecoration(
-                        labelText: 'Number range minimum (1–1,000,000)',
-                      ),
-                    ),
-                    GtnExpressiveTextField(
-                      controller: creativeMaximumController,
-                      maxLength: 7,
-                      decoration: const InputDecoration(
-                        labelText: 'Number range maximum (1–1,000,000)',
-                      ),
-                    ),
-                    GtnExpressiveTextField(
-                      controller: creativeHintsController,
-                      maxLength: 2,
-                      decoration: const InputDecoration(
-                        labelText: 'Extra hints (0–5)',
-                      ),
-                    ),
-                    GtnExpressiveTextField(
-                      controller: creativeAttemptLimitController,
-                      maxLength: 3,
-                      decoration: const InputDecoration(
-                        labelText: 'Attempt limit (0 = unlimited, 1–100)',
-                      ),
-                    ),
-                  ],
-                  const SizedBox(height: 12),
-                  Wrap(
-                    spacing: 8,
-                    children: [
-                      for (final id in SaveData.profileIconIds)
-                        GtnExpressiveChoiceChip(
-                          label: _iconSymbol(id),
-                          selected: icon == id,
-                          onSelected: (_) => setDialogState(() => icon = id),
-                        ),
-                    ],
-                  ),
-                ],
-              ),
-              actions: [
-                M3EButton.text(
-                  onPressed: () => Navigator.pop(dialogContext),
-                  child: const Text('Cancel'),
-                ),
-                M3EButton.filled(
-                  onPressed: () => Navigator.pop(dialogContext, (
-                    name: nameController.text.trim(),
-                    difficulty: difficulty,
-                    icon: icon,
-                    creativeSave: creativeSave,
-                    minimum: int.tryParse(creativeMinimumController.text) ?? 0,
-                    maximum: int.tryParse(creativeMaximumController.text) ?? 0,
-                    hints: int.tryParse(creativeHintsController.text) ?? 0,
-                    attemptLimit:
-                        int.tryParse(creativeAttemptLimitController.text) ?? 0,
-                  )),
-                  child: const Text('Create'),
-                ),
-              ],
-            ),
-          ),
-        );
-    nameController.dispose();
-    creativeMinimumController.dispose();
-    creativeMaximumController.dispose();
-    creativeHintsController.dispose();
-    creativeAttemptLimitController.dispose();
+    final result = await GtnExpressiveDialog.show<
+      ({
+        String name,
+        String difficulty,
+        String icon,
+        bool creativeSave,
+        int minimum,
+        int maximum,
+        int hints,
+        int attemptLimit,
+      })
+    >(
+      context,
+      builder: (_) => _CreateSaveSlotDialog(slot: slot),
+    );
     if (result == null || !mounted) return;
     setState(() => _working = slot);
     try {
@@ -899,6 +778,143 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
       ),
     );
   }
+}
+
+class _CreateSaveSlotDialog extends StatefulWidget {
+  const _CreateSaveSlotDialog({required this.slot});
+
+  final int slot;
+
+  @override
+  State<_CreateSaveSlotDialog> createState() => _CreateSaveSlotDialogState();
+}
+
+class _CreateSaveSlotDialogState extends State<_CreateSaveSlotDialog> {
+  final TextEditingController _name = TextEditingController();
+  final TextEditingController _minimum = TextEditingController(text: '1');
+  final TextEditingController _maximum = TextEditingController(text: '100');
+  final TextEditingController _hints = TextEditingController(text: '0');
+  final TextEditingController _attemptLimit = TextEditingController(text: '0');
+  String _difficulty = DifficultyRules.classic;
+  bool _creativeSave = false;
+  String _icon = 'default';
+
+  @override
+  void dispose() {
+    _name.dispose();
+    _minimum.dispose();
+    _maximum.dispose();
+    _hints.dispose();
+    _attemptLimit.dispose();
+    super.dispose();
+  }
+
+  String _iconSymbol(String id) => switch (id) {
+    'star' => '⭐',
+    'bolt' => '⚡',
+    'crown' => '👑',
+    'planet' => '🪐',
+    _ => '🎮',
+  };
+
+  @override
+  Widget build(BuildContext context) => GtnExpressiveDialog(
+    title: Text('Create Slot ${widget.slot}'),
+    content: SingleChildScrollView(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          GtnExpressiveTextField(
+            controller: _name,
+            maxLength: 24,
+            decoration: const InputDecoration(labelText: 'Save name (optional)'),
+          ),
+          GtnExpressiveDropdown<String>(
+            initialValue: _difficulty,
+            decoration: const InputDecoration(labelText: 'Difficulty'),
+            items: [
+              for (final id in DifficultyRules.ids)
+                DropdownMenuItem(value: id, child: Text(DifficultyRules.name(id))),
+            ],
+            onChanged: (value) {
+              if (value != null) setState(() => _difficulty = value);
+            },
+          ),
+          Material(
+            color: Colors.transparent,
+            child: SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: const Text('Creative Mode'),
+              subtitle: const Text(
+                'Permanent for this save. You can’t turn it off later.',
+              ),
+              value: _creativeSave,
+              onChanged: (value) => setState(() => _creativeSave = value),
+            ),
+          ),
+          if (_creativeSave) ...[
+            GtnExpressiveTextField(
+              controller: _minimum,
+              maxLength: 7,
+              decoration: const InputDecoration(
+                labelText: 'Number range minimum (1–1,000,000)',
+              ),
+            ),
+            GtnExpressiveTextField(
+              controller: _maximum,
+              maxLength: 7,
+              decoration: const InputDecoration(
+                labelText: 'Number range maximum (1–1,000,000)',
+              ),
+            ),
+            GtnExpressiveTextField(
+              controller: _hints,
+              maxLength: 2,
+              decoration: const InputDecoration(labelText: 'Extra hints (0–5)'),
+            ),
+            GtnExpressiveTextField(
+              controller: _attemptLimit,
+              maxLength: 3,
+              decoration: const InputDecoration(
+                labelText: 'Attempt limit (0 = unlimited, 1–100)',
+              ),
+            ),
+          ],
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            children: [
+              for (final id in SaveData.profileIconIds)
+                GtnExpressiveChoiceChip(
+                  label: _iconSymbol(id),
+                  selected: _icon == id,
+                  onSelected: (_) => setState(() => _icon = id),
+                ),
+            ],
+          ),
+        ],
+      ),
+    ),
+    actions: [
+      M3EButton.text(
+        onPressed: () => Navigator.pop(context),
+        child: const Text('Cancel'),
+      ),
+      M3EButton.filled(
+        onPressed: () => Navigator.pop(context, (
+          name: _name.text.trim(),
+          difficulty: _difficulty,
+          icon: _icon,
+          creativeSave: _creativeSave,
+          minimum: int.tryParse(_minimum.text) ?? 0,
+          maximum: int.tryParse(_maximum.text) ?? 0,
+          hints: int.tryParse(_hints.text) ?? 0,
+          attemptLimit: int.tryParse(_attemptLimit.text) ?? 0,
+        )),
+        child: const Text('Create'),
+      ),
+    ],
+  );
 }
 
 class _PortableBackupExportDialog extends StatefulWidget {
