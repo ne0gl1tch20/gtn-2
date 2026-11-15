@@ -388,3 +388,44 @@ Batch A remains active until Dashboard, More, Settings, Menu Studio, Profile and
 - Dashboard guess-field clipping received a targeted typography correction; device verification remains pending.
 - The screenshot's 51px Upgrade Shop horizontal overflow and World Map hero-heading wrap remain open follow-up defects for their respective parity batches. Settings and the full six-surface Batch A runtime gate remain open.
 - Current PR #74 head is 19a1f46ce1e668b9a11b4658a4b35caa098de16c. The branch still needs ancestry reconciliation with main before merge; keep the PR draft and Batch B blocked.
+
+
+### Follow-up tests, formatting and ancestry reconciliation — 2026-11-16
+
+- Test coverage commits: c60f3ffc4f6d76d4c090c6c2e8f158c31949f209 (matching 12+ character export passphrases), dadf4743a8b7dfbfe6ee5ef717dc37c4fc8968da (tutorial completion serialization), and beeca46afa235dd6f29b2953e77b883d38ab2d20 (documents the global tutorial flag's semantics).
+- Formatting support: bdd653c8e6d12483064474f78511f3ef1d88a027 temporarily changed Validate to format the four touched Dart files; fa9c2052e9225de783fd457cba431ceac3a0e992 is the formatter commit. The temporary workflow was restored to the original read-only workflow in 3bb5667569510c46897e11ae7b0bbac4b2d345bf. The temporary workflow is not left in the branch.
+- Documentation synchronization to the branch: 48bfebe3038483f01957a674ef252535b657a0d0 (plan), 291d2af914de925b4ced6c0ee8881f4b280bd2c4 (ledger), and cbf8ac500a8a169543326f5b77b6f442776aad45 (screen diff). Main ancestry was joined with merge commit 18b78176d8e82e403524aef46dc160b88f5fe4bd; this removed the previous behind count.
+- Main audit updates: c6951e91506ea50f9570e586867b428909363ab8 (plan), 75e3b96b72be2a839d1803c99cf31fa1d1ed0ac5 (ledger), and 8d5e5f5d5761eb2afccf8658a269674f44a861b5 (screen diff).
+- Latest PR head at this checkpoint: 3bb5667569510c46897e11ae7b0bbac4b2d345bf. The PR is draft and mergeable; the branch was 333 ahead / 0 behind immediately before this main-only audit update.
+- Validate run #1933: https://github.com/ne0gl1tch20/gtn-2/actions/runs/43767953058. Format and analysis passed; Flutter tests, Android debug build and Windows debug build were still running when this entry was written. No final validation or runtime pass is claimed.
+
+
+### Save export dialog lifecycle correction — 2026-11-16
+
+- Validate run #1933 (head 3bb5667569510c46897e11ae7b0bbac4b2d345bf) passed formatting and analysis but failed the full suite: 431 passed, 4 failed. The four failures were Save Slots widget tests cascading from a confirmed lifecycle bug: the parent disposed TextEditingControllers while the dialog reverse-transition was still mounted.
+- Corrective commit: b7650a2112ee2294ab328bd29af89d167357e067. The export dialog now owns its two controllers in a dedicated StatefulWidget and disposes them only when the dialog subtree is removed. This also removes the parent/dialog lifetime race.
+- New Validate run #1936: https://github.com/ne0gl1tch20/gtn-2/actions/runs/43768293582, head b7650a2112ee2294ab328bd29af89d167357e067. Pending at this checkpoint. Do not treat run #1933 as a pass and do not claim the correction until #1936 finishes.
+
+
+### Controller ownership fix and current verification — 2026-11-16
+
+- b7650a2112ee2294ab328bd29af89d167357e067 moved the export dialog's passphrase and confirmation controllers into a dedicated StatefulWidget. This fixes the run #1933 failure where the parent disposed controllers before the dialog reverse transition had removed its TextFields.
+- c844a0304bf5169130495d572b7174715d3ffdfa temporarily enabled CI formatting for the new dialog class; c400f346fed1847cccd0ae96ccee572857733d41 is the one-file Dart formatter commit; c9557b4b69ae73ba176d1407927bbd618a0c34ff restored the standard read-only Validate workflow. No temporary workflow changes remain in the branch.
+- Validate run #1941: https://github.com/ne0gl1tch20/gtn-2/actions/runs/43768471017, head c9557b4b69ae73ba176d1407927bbd618a0c34ff. Format and analysis passed; Flutter tests, Android debug APK and Windows debug build were still running at this checkpoint.
+
+
+### Validate #1941 progress — 2026-11-16
+
+- Head: c9557b4b69ae73ba176d1407927bbd618a0c34ff. Dart formatting and analysis: success. Flutter tests: 435 passed.
+- Android debug APK build: success. Artifact ID 14183730859, name android-debug-apk, size 99,204,521 bytes, SHA-256 bf6b403b0a13029a9e775477bf9fdc8f910f0ea2554481dde8784d8c535057af, expires 2026-11-22. Archive: https://api.github.com/repos/ne0gl1tch20/gtn-2/actions/artifacts/14183730859/zip
+- Windows desktop debug build was still in progress at this checkpoint. Windows release installer was skipped by the workflow. No Windows artifact or full Validate success is claimed yet.
+- Run: https://github.com/ne0gl1tch20/gtn-2/actions/runs/43768471017
+
+
+### Validate #1941 final result — 2026-11-16
+
+- Run https://github.com/ne0gl1tch20/gtn-2/actions/runs/43768471017 completed successfully at head c9557b4b69ae73ba176d1407927bbd618a0c34ff.
+- Format and analysis: success. Flutter tests: 435 passed. Android debug APK: success. Windows desktop debug build: success. Windows release installer: skipped (not failed; it is not part of this debug validation gate).
+- Android artifact: ID 14183730859, 99,204,521 bytes, SHA-256 bf6b403b0a13029a9e775477bf9fdc8f910f0ea2554481dde8784d8c535057af, expires 2026-11-22; https://api.github.com/repos/ne0gl1tch20/gtn-2/actions/artifacts/14183730859/zip
+- Windows artifact: ID 14183332045, 58,386,281 bytes, SHA-256 bf6c0344c80241cac99c83262705d2e79fc161c9da9cc1db2822964fb321e30a, expires 2026-11-22; https://api.github.com/repos/ne0gl1tch20/gtn-2/actions/artifacts/14183332045/zip
+- This is CI/build validation only. Batch A still requires Android and Windows runtime visual evidence and verification of all six surfaces. Upgrade Shop overflow and World Map hero-heading wrap remain follow-up defects outside this fix set.
