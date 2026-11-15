@@ -261,6 +261,8 @@ Green CI is build/test evidence only. It does not prove live Android/Windows beh
 | 2026-11-15 11:26 | `14bc5fcf74dec2470fcbdc0d063edc837046e649` | Remove generated Dart SDK version marker | Repository cleanup | — | `.dart_tool/version` | Removes generated Flutter SDK version marker |
 | 2026-11-15 11:27 | `3fac9fb4239dc2914ae1c4e7da0359f8e6250599` | Ignore generated Dart package metadata | Repository cleanup | — | `.gitignore` | Prevents future formatter/dependency workflows from re-adding machine-local `.dart_tool/` files |
 
+| 2026-11-15 11:27 | `0422432aad57bd1528e3676d2053b29853b4ee1b` | Log Dart formatter cleanup and ignore rule | Audit | — | `docs/BATCH_A_COMMIT_LOG.md` | Self-logs the formatting correction and generated `.dart_tool` removal/ignore work |
+
 ### Current Creative Save implementation state
 
 - **Implemented and CI-verified:** schema-v7 permanent `creativeModeEnabled` flag with old-save default false; separate from the existing isolated `creativeMode` sandbox payload.
