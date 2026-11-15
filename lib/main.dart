@@ -368,7 +368,11 @@ class _GameHomePageState extends State<GameHomePage>
         _publishUpdateNotice();
       }
     } finally {
-      await UpdateCheckSchedule.saveLastChecked(bundleStorage.directory, now);
+      try {
+        await UpdateCheckSchedule.saveLastChecked(bundleStorage.directory, now);
+      } on FileSystemException catch (error) {
+        debugPrint('Could not persist update check time: $error');
+      }
       if (mounted) {
         setState(() => _checkingUpdate = false);
         _publishUpdateNotice();
