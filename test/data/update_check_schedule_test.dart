@@ -9,10 +9,7 @@ void main() {
 
     test('None disables automatic checks', () {
       expect(
-        UpdateCheckSchedule.shouldCheck(
-          intervalHours: 0,
-          now: now,
-        ),
+        UpdateCheckSchedule.shouldCheck(intervalHours: 0, now: now),
         isFalse,
       );
     });
@@ -20,10 +17,7 @@ void main() {
     test('first enabled check is due when no prior check exists', () {
       for (final interval in [1, 6, 12, 24, 168]) {
         expect(
-          UpdateCheckSchedule.shouldCheck(
-            intervalHours: interval,
-            now: now,
-          ),
+          UpdateCheckSchedule.shouldCheck(intervalHours: interval, now: now),
           isTrue,
         );
       }
@@ -53,10 +47,7 @@ void main() {
 
     test('rejects unsupported interval values', () {
       expect(
-        UpdateCheckSchedule.shouldCheck(
-          intervalHours: 2,
-          now: now,
-        ),
+        UpdateCheckSchedule.shouldCheck(intervalHours: 2, now: now),
         isFalse,
       );
     });
@@ -66,18 +57,14 @@ void main() {
       addTearDown(() => directory.delete(recursive: true));
       await UpdateCheckSchedule.saveLastChecked(directory, now);
 
-      expect(
-        await UpdateCheckSchedule.loadLastChecked(directory),
-        now,
-      );
+      expect(await UpdateCheckSchedule.loadLastChecked(directory), now);
     });
 
     test('ignores corrupt persisted schedule data', () async {
       final directory = await Directory.systemTemp.createTemp('gtn-update-');
       addTearDown(() => directory.delete(recursive: true));
-      await File(
-        '${directory.path}/${UpdateCheckSchedule.stateFileName}',
-      ).writeAsString('{broken');
+      await File('${directory.path}/${UpdateCheckSchedule.stateFileName}')
+          .writeAsString('{broken');
 
       expect(await UpdateCheckSchedule.loadLastChecked(directory), isNull);
     });

@@ -124,8 +124,7 @@ void main() {
     expect(find.text('Every hour'), findsNothing);
     final dropdown = find.byWidgetPredicate(
       (widget) =>
-          widget is DropdownButtonFormField<int> &&
-          widget.initialValue == 0,
+          widget is DropdownButtonFormField<int> && widget.initialValue == 0,
     );
     expect(dropdown, findsOneWidget);
     await tester.tap(dropdown);

@@ -472,27 +472,51 @@ class SettingsPage extends StatelessWidget {
                 [
                   DropdownMenuItem(
                     value: 0,
-                    child: Text(AppLocalizations.text('inspector_none', 'None')),
+                    child: Text(
+                      AppLocalizations.text('inspector_none', 'None'),
+                    ),
                   ),
                   DropdownMenuItem(
                     value: 1,
-                    child: Text(AppLocalizations.text('web_ui_every_hour', 'Every hour')),
+                    child: Text(
+                      AppLocalizations.text('web_ui_every_hour', 'Every hour'),
+                    ),
                   ),
                   DropdownMenuItem(
                     value: 6,
-                    child: Text(AppLocalizations.text('web_ui_every_6_hours', 'Every 6 hours')),
+                    child: Text(
+                      AppLocalizations.text(
+                        'web_ui_every_6_hours',
+                        'Every 6 hours',
+                      ),
+                    ),
                   ),
                   DropdownMenuItem(
                     value: 12,
-                    child: Text(AppLocalizations.text('web_ui_every_12_hours', 'Every 12 hours')),
+                    child: Text(
+                      AppLocalizations.text(
+                        'web_ui_every_12_hours',
+                        'Every 12 hours',
+                      ),
+                    ),
                   ),
                   DropdownMenuItem(
                     value: 24,
-                    child: Text(AppLocalizations.text('web_ui_every_24_hours', 'Every 24 hours')),
+                    child: Text(
+                      AppLocalizations.text(
+                        'web_ui_every_24_hours',
+                        'Every 24 hours',
+                      ),
+                    ),
                   ),
                   DropdownMenuItem(
                     value: 168,
-                    child: Text(AppLocalizations.text('web_ui_every_7_days', 'Every 7 days')),
+                    child: Text(
+                      AppLocalizations.text(
+                        'web_ui_every_7_days',
+                        'Every 7 days',
+                      ),
+                    ),
                   ),
                 ],
                 (value) {

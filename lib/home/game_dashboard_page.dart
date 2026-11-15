@@ -521,7 +521,8 @@ class GameDashboardPage extends StatelessWidget {
                                                     fontWeight: FontWeight.w800,
                                                   ),
                                             ),
-                                            if (updateNoticeDetails != null) ...[
+                                            if (updateNoticeDetails !=
+                                                null) ...[
                                               const SizedBox(height: 4),
                                               Text(
                                                 updateNoticeDetails!,
@@ -536,7 +537,8 @@ class GameDashboardPage extends StatelessWidget {
                                             Row(
                                               children: [
                                                 TextButton(
-                                                  onPressed: updateNoticeChecking
+                                                  onPressed:
+                                                      updateNoticeChecking
                                                       ? null
                                                       : onUpdateDismiss,
                                                   child: const Text('Later'),
@@ -557,7 +559,8 @@ class GameDashboardPage extends StatelessWidget {
                                                               ),
                                                         )
                                                       : const Icon(
-                                                          Icons.system_update_alt_rounded,
+                                                          Icons
+                                                              .system_update_alt_rounded,
                                                         ),
                                                   label: Text(
                                                     updateNoticeChecking

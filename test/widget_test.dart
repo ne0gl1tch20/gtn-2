@@ -252,7 +252,10 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.text('Version 2.1.0 is ready'), findsOneWidget);
-    expect(find.text('A verified Android update is available.'), findsOneWidget);
+    expect(
+      find.text('A verified Android update is available.'),
+      findsOneWidget,
+    );
     await tester.tap(find.text('Install update'));
     expect(installs, 1);
     notice.dispose();

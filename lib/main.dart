@@ -368,10 +368,7 @@ class _GameHomePageState extends State<GameHomePage>
         _publishUpdateNotice();
       }
     } finally {
-      await UpdateCheckSchedule.saveLastChecked(
-        bundleStorage.directory,
-        now,
-      );
+      await UpdateCheckSchedule.saveLastChecked(bundleStorage.directory, now);
       if (mounted) {
         setState(() => _checkingUpdate = false);
         _publishUpdateNotice();
@@ -403,11 +400,12 @@ class _GameHomePageState extends State<GameHomePage>
       }
     } catch (error) {
       if (mounted) {
-        setState(() => _updateNoticeStatus = 'Update installation failed: $error');
-        _publishUpdateNotice();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(_updateNoticeStatus!)),
+        setState(
+          () => _updateNoticeStatus = 'Update installation failed: $error',
         );
+        _publishUpdateNotice();
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(_updateNoticeStatus!)));
       }
     } finally {
       if (mounted) {

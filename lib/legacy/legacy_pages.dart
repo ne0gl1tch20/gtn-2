@@ -867,7 +867,9 @@ class LegacyDetailPage extends StatelessWidget {
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
                       : const Icon(Icons.refresh_rounded),
-                  label: Text(update.checking ? 'Checking…' : 'Check for updates'),
+                  label: Text(
+                    update.checking ? 'Checking…' : 'Check for updates',
+                  ),
                 ),
                 FilledButton.icon(
                   onPressed: update.available && !update.checking
