@@ -48,7 +48,7 @@ class LegacyGtn1SaveAdapter {
     rejectWhen(_string(source, 'buyMultiplier', fallback: '1') != '1', 'buyMultiplier');
     rejectWhen(_int(source, 'creativeAttemptLimit') != 0, 'creativeAttemptLimit');
     rejectWhen(_number(source, 'creativeRewardMultiplier', fallback: 1) != 1, 'creativeRewardMultiplier');
-    rejectWhen(_map(source, 'bossBattleProgress').isNotEmpty, 'bossBattleProgress');
+    rejectWhen(_string(source, 'lastSavedVersion', fallback: 'unknown') != 'unknown', 'lastSavedVersion');
 
     final legacy = <String, dynamic>{
       'adaptiveTraitProfile': adaptiveTraitProfile.toJson(),
@@ -110,7 +110,7 @@ class LegacyGtn1SaveAdapter {
       'botTotalGuesses': _int(source, 'botTotalGuesses'),
       'botCorrectGuesses': _int(source, 'botCorrectGuesses'),
       'botIncorrectGuesses': _int(source, 'botIncorrectGuesses'),
-      'lastSaveTimestamp': _int(source, 'lastSavedAt'),
+      'lastSaveTimestamp': _int(source, 'lastSaveTimestamp'),
       'timeTravelPenaltyUntil': _int(source, 'timeTravelPenaltyUntil'),
     };
 
@@ -123,7 +123,7 @@ class LegacyGtn1SaveAdapter {
       prestigeUpgrades: _map(source, 'prestigeUpgradeLevels'),
       ultraUpgrades: _map(source, 'ultraUpgradeLevels'),
       equippedCosmeticId: _nullableString(source, 'equippedCosmeticId'),
-      defeatedBosses: _set(source, 'defeatedBosses'),
+      defeatedBosses: _set(source, 'defeatedBossIds'),
       prestigeResets: _int(source, 'prestigeCount'),
       ultraResets: _int(source, 'ultraCount'),
       totalGuesses: _int(statistics, 'totalGuesses'),
@@ -132,7 +132,8 @@ class LegacyGtn1SaveAdapter {
       moneySpent: _bigNumber(statistics, 'moneySpent'),
       randomEventsTriggered: _int(statistics, 'randomEventsTriggered'),
       lastRandomEventId: _nullableString(source, 'lastRandomEventId'),
-      currentStreak: _int(source, 'currentStreak'),
+      bossDamage: _map(source, 'bossBattleProgress'),
+      currentStreak: _int(source, 'streak'),
       bestStreak: _int(source, 'bestStreak'),
       playtimeSeconds: _int(statistics, 'playtimeSeconds'),
       achievements: _set(source, 'achievements'),
@@ -214,7 +215,7 @@ class LegacyGtn1SaveAdapter {
 
   static GameSettings _settings(Map<String, dynamic> source) {
     final theme = _string(source, 'themeMode', fallback: 'System');
-    return GameSettings(
+    final migrated = GameSettings(
       darkMode: theme.toLowerCase() != 'light',
       reduceMotion: _bool(source, 'reducedMotion'),
       localeCode: _string(source, 'locale', fallback: 'en-US')
@@ -258,6 +259,15 @@ class LegacyGtn1SaveAdapter {
       tutorialCompleted: _bool(source, 'tutorialCompleted'),
       tutorialSeenFeatures: _set(source, 'tutorialSeenFeatures'),
     );
+    return GameSettings.fromJson(migrated.toJson());
+  }
+
+  static GameSettings decodeGameSettingsJson(String raw) {
+    final decoded = jsonDecode(raw);
+    if (decoded is! Map<String, dynamic>) {
+      throw const FormatException('GTN1 app preferences must be an object.');
+    }
+    return _settings(decoded);
   }
 
   static String _profileIcon(String id) =>
