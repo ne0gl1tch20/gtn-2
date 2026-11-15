@@ -343,16 +343,32 @@ class GameDashboardPage extends StatelessWidget {
             child: SizedBox(
               key: const Key('dashboard-navigation-bar'),
               width: barWidth,
-              child: M3ENavigationBar(
-                destinations: [
-                  for (final id in navigationIds)
-                    M3ENavigationBarDestination(
-                      icon: Icon(iconFor(id), color: colorFor(id)),
-                      label: labelFor(id),
+              child: NavigationBarTheme(
+                data: NavigationBarThemeData(
+                  labelTextStyle: WidgetStatePropertyAll(
+                    TextStyle(
+                      fontSize: 8,
+                      height: 1,
+                      fontWeight: FontWeight.w600,
                     ),
-                ],
-                selectedIndex: selected,
-                onDestinationSelected: selectDestination,
+                  ),
+                ),
+                child: NavigationBar(
+                  selectedIndex: selected,
+                  onDestinationSelected: selectDestination,
+                  labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+                  height: 56,
+                  backgroundColor: panel,
+                  indicatorColor: colorFor(navigationIds[selected])
+                      .withValues(alpha: .18),
+                  destinations: [
+                    for (final id in navigationIds)
+                      NavigationDestination(
+                        icon: Icon(iconFor(id), color: colorFor(id), size: 17),
+                        label: labelFor(id),
+                      ),
+                  ],
+                ),
               ),
             ),
           );
@@ -2308,10 +2324,16 @@ class _GuessInput extends StatelessWidget {
                   keyboardType: TextInputType.number,
                   textInputAction: TextInputAction.done,
                   onSubmitted: (_) => onGuess(),
+                  fontSize: 14,
                   decoration: InputDecoration(
                     hintText: AppLocalizations.text(
                       'play_enter_guess',
                       'Enter your guess',
+                    ),
+                    hintStyle: TextStyle(
+                      color: Theme.of(context).hintColor,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ),
