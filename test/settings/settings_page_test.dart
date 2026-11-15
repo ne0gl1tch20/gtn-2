@@ -47,6 +47,7 @@ void main() {
       'Theme Colors',
       'Number Notation',
       'Push Notifications & Reminders',
+      'Updates',
       'Sound FX',
       'Visual comfort & accessibility',
     ]) {
@@ -95,6 +96,43 @@ void main() {
       find.text('New random events and limited-time event rewards'),
       findsOneWidget,
     );
+  });
+
+  testWidgets('update interval setting exposes the GTN1 schedule choices', (
+    tester,
+  ) async {
+    var latest = GameSettings.initial;
+    await tester.pumpWidget(
+      M3EMaterialApp(
+        data: M3EThemeData.light(seedColor: const Color(0xFF7C5CFC)),
+        fontFamily: 'Manrope',
+        autoTheming: false,
+        initialTheme: Brightness.dark,
+        home: SettingsPage(
+          settings: latest,
+          onChanged: (next) async => latest = next,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.text('Check for updates automatically'),
+      260,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.text('None'), findsOneWidget);
+    expect(find.text('Every hour'), findsNothing);
+    final dropdown = find.byWidgetPredicate(
+      (widget) =>
+          widget is DropdownButtonFormField<int> &&
+          widget.initialValue == 0,
+    );
+    expect(dropdown, findsOneWidget);
+    await tester.tap(dropdown);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Every 6 hours').last);
+    await tester.pumpAndSettle();
+    expect(latest.updateCheckIntervalHours, 6);
   });
 
   testWidgets('Sound effects volume is disabled when sound FX are off', (
