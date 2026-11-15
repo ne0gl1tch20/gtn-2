@@ -108,10 +108,7 @@ void main() {
         expect(restoredSettings.moreScreenOrder[0], 'about');
         expect(restoredSettings.moreScreenOrder[1], 'settings');
         expect(restoredSettings.moreScreenOrder[2], 'rewards');
-        expect(
-          restoredSettings.moreScreenButtonColors['about'],
-          '#123456',
-        );
+        expect(restoredSettings.moreScreenButtonColors['about'], '#123456');
         expect(restoredSettings.webMenuStudioLayout, menuStudioLayout);
       },
     );
