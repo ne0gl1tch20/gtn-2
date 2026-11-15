@@ -327,7 +327,10 @@ class _GameHomePageState extends State<GameHomePage>
     if (!mounted) return;
     setState(() {
       _checkingUpdate = true;
-      _updateNoticeStatus = 'Checking for updates…';
+      _updateNoticeStatus = AppLocalizations.text(
+        'update_checking',
+        'Checking for updates…',
+      );
     });
     _publishUpdateNotice();
     try {
@@ -339,8 +342,11 @@ class _GameHomePageState extends State<GameHomePage>
           _availableWindowsUpdate = null;
           _updateNoticeDismissed = false;
           _updateNoticeStatus = update == null
-              ? 'You are up to date.'
-              : 'A verified Android update is available.';
+              ? AppLocalizations.text('update_up_to_date', "You're up to date.")
+              : AppLocalizations.text(
+                  'update_available',
+                  'A verified Android update is available.',
+                );
         });
         _publishUpdateNotice();
       } else {
@@ -351,8 +357,11 @@ class _GameHomePageState extends State<GameHomePage>
           _availableUpdate = null;
           _updateNoticeDismissed = false;
           _updateNoticeStatus = update == null
-              ? 'You are up to date.'
-              : 'A verified Windows update is available.';
+              ? AppLocalizations.text('update_up_to_date', "You're up to date.")
+              : AppLocalizations.text(
+                  'update_available',
+                  'A verified Windows update is available.',
+                );
         });
         _publishUpdateNotice();
       }
@@ -362,8 +371,11 @@ class _GameHomePageState extends State<GameHomePage>
           _availableUpdate = null;
           _availableWindowsUpdate = null;
           _updateNoticeStatus = error.toString().contains('404')
-              ? 'No debug-latest release has been published yet.'
-              : 'Update check failed: $error';
+              ? AppLocalizations.text(
+                  'update_unavailable',
+                  'No debug-latest release has been published yet.',
+                )
+              : '${AppLocalizations.text('update_unavailable', 'Update check failed')}: $error';
         });
         _publishUpdateNotice();
       }
@@ -386,7 +398,10 @@ class _GameHomePageState extends State<GameHomePage>
     if (androidUpdate == null && windowsUpdate == null) return;
     setState(() {
       _checkingUpdate = true;
-      _updateNoticeStatus = 'Downloading and verifying update…';
+      _updateNoticeStatus = AppLocalizations.text(
+        'update_downloading',
+        'Downloading and verifying update…',
+      );
     });
     _publishUpdateNotice();
     try {
@@ -394,8 +409,10 @@ class _GameHomePageState extends State<GameHomePage>
         await UpdateChecker().downloadAndInstall(androidUpdate);
         if (mounted) {
           setState(() {
-            _updateNoticeStatus =
-                'APK verified. Follow the Android installer prompts to finish.';
+            _updateNoticeStatus = AppLocalizations.text(
+              'update_install_started',
+              'APK verified. Follow the Android installer prompts to finish.',
+            );
           });
           _publishUpdateNotice();
         }
@@ -405,7 +422,7 @@ class _GameHomePageState extends State<GameHomePage>
     } catch (error) {
       if (mounted) {
         setState(
-          () => _updateNoticeStatus = 'Update installation failed: $error',
+          () => _updateNoticeStatus = '${AppLocalizations.text('update_install_failed', 'Update installation failed')}: $error',
         );
         _publishUpdateNotice();
         ScaffoldMessenger.of(context)
