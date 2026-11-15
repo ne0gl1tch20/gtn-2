@@ -195,6 +195,10 @@ Green CI is build/test evidence only. It does not prove live Android/Windows beh
 | 2026-11-15 00:31:00 | `b094bad3cdb57c0b6feb9de51c287f280fc2edd3` | Test rejection of invalid GTN1 counter values | Save Slots / Tests | `GameState.kt; SaveManager.kt` | `test/data/saves/legacy_gtn1_save_adapter_test.dart` | Replaces an invalid-range assertion that GTN1's load sanitizer intentionally normalizes with a negative-counter rejection case |
 
 
+| 2026-11-15 00:31:20 | `b2d39a4888e273e8f8f92e671b9871d8228eab32` | Log GTN1 adapter corrections and formatter cleanup | Audit | — | `docs/BATCH_A_COMMIT_LOG.md` | Records adapter follow-up commits and temporary formatter workflow removal; self-log below |
+| 2026-11-15 00:31:30 | `4a6349850822535a4346581c6b70a5baad6884f6` | Clarify adapter validation remains pending | Audit / CI | — | `docs/FINITE_PARITY_PLAN.md` | Explicitly distinguishes prior 399-test CI pass from the newer unvalidated adapter commits |
+
+
 ### Current Creative Save implementation state
 
 - **Implemented and CI-verified:** schema-v7 permanent `creativeModeEnabled` flag with old-save default false; separate from the existing isolated `creativeMode` sandbox payload.
