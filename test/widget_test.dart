@@ -29,6 +29,11 @@ Widget buildDashboard({
   VoidCallback? onPrestige,
   VoidCallback? onUltra,
   ValueChanged<int>? onPrimarySelected,
+  String? updateNoticeTitle,
+  String? updateNoticeDetails,
+  bool updateNoticeChecking = false,
+  VoidCallback? onUpdateInstall,
+  VoidCallback? onUpdateDismiss,
 }) {
   final navigatorKey = shellNavigatorKey ?? GlobalKey<NavigatorState>();
   final dashboardSettings = settings ?? GameSettings.initial;
@@ -72,6 +77,11 @@ Widget buildDashboard({
       onSystemsView: onSystemsView ?? (_) {},
       onLegacySection: onLegacySection ?? (_) {},
       onPlayerProfile: onPlayerProfile,
+      updateNoticeTitle: updateNoticeTitle,
+      updateNoticeDetails: updateNoticeDetails,
+      updateNoticeChecking: updateNoticeChecking,
+      onUpdateInstall: onUpdateInstall,
+      onUpdateDismiss: onUpdateDismiss,
     ),
   );
 }
@@ -89,6 +99,41 @@ void main() {
     );
     expect(find.byKey(const Key('dashboard-loading-barrier')), findsOneWidget);
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
+  });
+
+  testWidgets('dashboard update notice exposes install and Later actions', (
+    WidgetTester tester,
+  ) async {
+    var installs = 0;
+    var dismissals = 0;
+    await tester.pumpWidget(
+      buildDashboard(
+        updateNoticeTitle: 'Version 2.1.0 is ready',
+        updateNoticeDetails: 'Android Debug · validated build #1832',
+        onUpdateInstall: () => installs++,
+        onUpdateDismiss: () => dismissals++,
+      ),
+    );
+
+    expect(find.byKey(const Key('dashboard-update-notice')), findsOneWidget);
+    expect(find.text('UPDATE AVAILABLE'), findsOneWidget);
+    expect(find.text('Version 2.1.0 is ready'), findsOneWidget);
+    expect(find.text('Android Debug · validated build #1832'), findsOneWidget);
+
+    await tester.tap(find.text('Later'));
+    await tester.pump();
+    expect(dismissals, 1);
+
+    await tester.tap(find.text('Update'));
+    await tester.pump();
+    expect(installs, 1);
+  });
+
+  testWidgets('dashboard hides the update notice when no update is available', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(buildDashboard());
+    expect(find.byKey(const Key('dashboard-update-notice')), findsNothing);
   });
 
   testWidgets('Money displays the live income-per-second rate', (
