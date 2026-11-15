@@ -755,10 +755,13 @@ class LegacyDetailPage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const ListTile(
-            leading: Icon(Icons.link_rounded),
-            title: Text('Socials & source code'),
-            subtitle: Text('These links open in your external browser.'),
+          Material(
+            color: Colors.transparent,
+            child: const ListTile(
+              leading: Icon(Icons.link_rounded),
+              title: Text('Socials & source code'),
+              subtitle: Text('These links open in your external browser.'),
+            ),
           ),
           for (final link in const [
             (
@@ -779,13 +782,16 @@ class LegacyDetailPage extends StatelessWidget {
               'https://ne0gl1tch20.github.io/GuessTheNumber',
             ),
           ])
-            ListTile(
-              dense: true,
-              title: Text(link.$1),
-              trailing: const Icon(Icons.open_in_new_rounded),
-              onTap: () => launchUrl(
-                Uri.parse(link.$2),
-                mode: LaunchMode.externalApplication,
+            Material(
+              color: Colors.transparent,
+              child: ListTile(
+                dense: true,
+                title: Text(link.$1),
+                trailing: const Icon(Icons.open_in_new_rounded),
+                onTap: () => launchUrl(
+                  Uri.parse(link.$2),
+                  mode: LaunchMode.externalApplication,
+                ),
               ),
             ),
         ],
@@ -796,11 +802,14 @@ class LegacyDetailPage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const ListTile(
-            leading: Icon(Icons.code_rounded),
-            title: Text('Open-source libraries'),
-            subtitle: Text(
-              'Credits and licenses listed in the original GTN1 About screen.',
+          Material(
+            color: Colors.transparent,
+            child: const ListTile(
+              leading: Icon(Icons.code_rounded),
+              title: Text('Open-source libraries'),
+              subtitle: Text(
+                'Credits and licenses listed in the original GTN1 About screen.',
+              ),
             ),
           ),
           for (final item in const [
@@ -816,10 +825,13 @@ class LegacyDetailPage extends StatelessWidget {
             ('LuaJ', 'MIT · LuaJ project; James Roseborough and Ian Farmer'),
             ('Jarrlyy UI SDK', 'Project component · Jarrlyy'),
           ])
-            ListTile(
-              dense: true,
-              title: Text(item.$1),
-              subtitle: Text(item.$2),
+            Material(
+              color: Colors.transparent,
+              child: ListTile(
+                dense: true,
+                title: Text(item.$1),
+                subtitle: Text(item.$2),
+              ),
             ),
         ],
       ),
@@ -833,11 +845,16 @@ class LegacyDetailPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.system_update_rounded),
-              title: Text(AppLocalizations.text('web_ui_updates', 'Updates')),
-              subtitle: const Text('Check for a newer validated app build.'),
+            Material(
+              color: Colors.transparent,
+              child: ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.system_update_rounded),
+                title: Text(AppLocalizations.text('web_ui_updates', 'Updates')),
+                subtitle: const Text(
+                  'Check for a newer validated app build.',
+                ),
+              ),
             ),
             if (update.title != null) ...[
               Text(
