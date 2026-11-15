@@ -885,12 +885,10 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
                           ),
                         ],
                       ),
-                      onTap:
-                          _switching != null ||
-                              _working != null ||
-                              selected ||
-                              save == null
+                      onTap: _switching != null || _working != null || selected
                           ? null
+                          : save == null
+                          ? () => _create(slot)
                           : () => _select(slot),
                     ),
                   ),
