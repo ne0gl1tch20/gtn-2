@@ -346,8 +346,16 @@ class SaveBundleStorage {
         manifest.add({'name': name, 'existed': existed});
         if (existed) await target.copy('${rollback.path}/$name');
       }
-      await File('${transaction.path}/manifest.json')
-          .writeAsString(jsonEncode({'files': manifest}), flush: true);
+      // Publish the recovery manifest atomically before touching any live
+      // save. A crash during the write must leave no partial manifest that
+      // startup recovery could mistake for a complete rollback journal.
+      final manifestFile = File('${transaction.path}/manifest.json');
+      final manifestTemporary = File('${manifestFile.path}.tmp');
+      await manifestTemporary.writeAsString(
+        jsonEncode({'files': manifest}),
+        flush: true,
+      );
+      await manifestTemporary.rename(manifestFile.path);
 
       for (final entry in targets.entries) {
         final target = File('${directory.path}/${entry.key}');
