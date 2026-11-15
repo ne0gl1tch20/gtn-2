@@ -477,7 +477,7 @@ class LegacySystemsState {
     final lastBotFeedback = json['lastBotFeedback'];
     final lastBotId = json['lastBotId'];
     if ((lastBotGuess != null &&
-            (lastBotGuess is! int || lastBotGuess < 1 || lastBotGuess > 500)) ||
+            (lastBotGuess is! int || lastBotGuess < 1 || lastBotGuess > 1000000)) ||
         (lastBotFeedback != null &&
             !{'TOO_LOW', 'TOO_HIGH', 'CORRECT'}.contains(lastBotFeedback)) ||
         (lastBotId != null &&
