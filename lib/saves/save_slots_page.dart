@@ -903,7 +903,6 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
   }
 }
 
-
 class _PortableBackupExportDialog extends StatefulWidget {
   const _PortableBackupExportDialog();
 
@@ -918,8 +917,7 @@ class _PortableBackupExportDialogState
   final TextEditingController _confirmation = TextEditingController();
 
   bool get _canExport =>
-      _passphrase.text.length >= 12 &&
-      _passphrase.text == _confirmation.text;
+      _passphrase.text.length >= 12 && _passphrase.text == _confirmation.text;
 
   @override
   void dispose() {
@@ -946,18 +944,14 @@ class _PortableBackupExportDialogState
             obscureText: true,
             autofocus: true,
             onChanged: (_) => setState(() {}),
-            decoration: const InputDecoration(
-              labelText: 'Backup passphrase',
-            ),
+            decoration: const InputDecoration(labelText: 'Backup passphrase'),
           ),
           const SizedBox(height: 12),
           TextField(
             controller: _confirmation,
             obscureText: true,
             onChanged: (_) => setState(() {}),
-            decoration: const InputDecoration(
-              labelText: 'Confirm passphrase',
-            ),
+            decoration: const InputDecoration(labelText: 'Confirm passphrase'),
           ),
         ],
       ),
