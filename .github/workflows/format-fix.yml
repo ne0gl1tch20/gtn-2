@@ -33,3 +33,5 @@ jobs:
           git add lib/main.dart
           git commit -m "style: format localized startup rewards [skip ci]"
           git push
+
+# format-fix run marker
