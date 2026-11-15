@@ -47,10 +47,7 @@ class LegacyGtn1SaveCodec {
   static String encode(String payload) {
     final bytes = utf8.encode(payload);
     final salt = ascii.encode(_salt);
-    final wrapped = <int>[
-      ...salt,
-      for (final byte in bytes) byte ^ _xorKey,
-    ];
+    final wrapped = <int>[...salt, for (final byte in bytes) byte ^ _xorKey];
     return base64.encode(wrapped);
   }
 }

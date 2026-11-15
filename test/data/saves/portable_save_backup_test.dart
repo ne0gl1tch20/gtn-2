@@ -31,11 +31,14 @@ void main() {
     expect(LegacyGtn1SaveCodec.decode(fixture), payload);
   });
 
-  test('accepts GTN1 plain-Base64 legacy fallback and rejects malformed input', () {
-    const plain = 'eyJmb3JtYXRWZXJzaW9uIjoyfQ==';
-    expect(LegacyGtn1SaveCodec.decode(plain), '{"formatVersion":2}');
-    expect(LegacyGtn1SaveCodec.decode('not-base64!'), isNull);
-  });
+  test(
+    'accepts GTN1 plain-Base64 legacy fallback and rejects malformed input',
+    () {
+      const plain = 'eyJmb3JtYXRWZXJzaW9uIjoyfQ==';
+      expect(LegacyGtn1SaveCodec.decode(plain), '{"formatVersion":2}');
+      expect(LegacyGtn1SaveCodec.decode('not-base64!'), isNull);
+    },
+  );
 
   test('decrypts a pinned GTN1 two-layer portable backup fixture', () async {
     const fixture =

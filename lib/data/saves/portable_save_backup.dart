@@ -79,10 +79,8 @@ class PortableSaveBackup {
 
   /// Encrypts the GTN1-compatible legacy save payload inside the portable
   /// passphrase envelope. The inner wrapper matches SaveManager.encrypt().
-  static Future<String> encryptGtn1Payload(
-    String payload,
-    String passphrase,
-  ) => encrypt(LegacyGtn1SaveCodec.encode(payload), passphrase);
+  static Future<String> encryptGtn1Payload(String payload, String passphrase) =>
+      encrypt(LegacyGtn1SaveCodec.encode(payload), passphrase);
 
   /// Decrypts both layers of a GTN1 portable backup. Returns null when either
   /// the authenticated envelope or legacy inner wrapper is invalid.
