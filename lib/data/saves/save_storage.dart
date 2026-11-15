@@ -97,6 +97,13 @@ class SaveStorage {
     await candidate.rename(destination.path);
   }
 
+  /// Reads only the primary save, without falling back to recovery files.
+  Future<SaveData?> loadPrimary() => _enqueue(() => _readSave(_file));
+
+  /// Reads the last-known-good backup without changing either file.
+  Future<SaveData?> loadBackup() =>
+      _enqueue(() => _readSave(File('${_file.path}.bak')));
+
   Future<SaveData?> load() => _enqueue(_loadUnlocked);
 
   Future<SaveData?> _loadUnlocked() async {
