@@ -395,7 +395,7 @@ class _GameHomePageState extends State<GameHomePage>
         final timeTravelDetected = settlement.clockRollbackDetected;
         final offlineEarnings = settlement.earnings;
         final restoredSystems = restoreMusicStateFromSettings(
-          settings: save.settings,
+          settings: globalSettings ?? save.settings,
           systems: restoredProgression.legacySystems,
         );
         restoredProgression = restoredProgression.copyWith(
@@ -442,7 +442,14 @@ class _GameHomePageState extends State<GameHomePage>
               ? 'Welcome back! Your Auto Clicker earned $offlineEarnings Money while you were away.'
               : 'Welcome back! Your saved game is ready.';
         });
-        shouldPersistOfflineEarnings = true;
+        shouldPersistOfflineEarnings =
+            offlineEarnings.compareTo(BigNumber.fromInt(0)) > 0 ||
+            timeTravelDetected ||
+            jsonEncode(restoredProgression.toJson()) !=
+                jsonEncode(save.progression.toJson()) ||
+            (globalSettings == null &&
+                jsonEncode(restoredSettings.toJson()) !=
+                    jsonEncode(save.settings.toJson()));
       } else if (globalSettings != null) {
         await AppLocalizations.load(globalSettings.localeCode);
         if (mounted) {
@@ -1174,6 +1181,36 @@ class _GameHomePageState extends State<GameHomePage>
     });
   }
 
+  Future<void> _reloadAfterImport(int slot) async {
+    await _switchSaveSlot(slot, persistAfterLoad: false);
+    final imported = await (await SaveStorage.inApplicationDocuments(
+      slot: slot,
+    )).load();
+    if (imported == null || imported.profileName.trim().isEmpty) return;
+    final current = _playerProfile;
+    final hasCustomAvatar = current.customAvatarPath != null ||
+        current.customAvatarData != null ||
+        current.avatarId == 'custom';
+    final avatarId = hasCustomAvatar
+        ? current.avatarId
+        : switch (imported.profileIconId) {
+            'bolt' => 'lightning',
+            'crown' => 'crown',
+            'planet' => 'moon',
+            'star' || 'default' => 'star',
+            _ => 'star',
+          };
+    final next = current.copyWith(
+      username: imported.profileName.length > 20
+          ? imported.profileName.substring(0, 20)
+          : imported.profileName,
+      avatarId: avatarId,
+      setupComplete: true,
+    );
+    final saved = await _playerProfileStore.save(next);
+    if (mounted) setState(() => _playerProfile = saved);
+  }
+
   Future<void> _openSaveSlots() async {
     await _pushShellRoute<void>(
       MaterialPageRoute<void>(
@@ -1181,8 +1218,7 @@ class _GameHomePageState extends State<GameHomePage>
           activeSlot: _activeSlot,
           settings: _settings,
           onSelect: _switchSaveSlot,
-          onImportComplete: (slot) =>
-              _switchSaveSlot(slot, persistAfterLoad: false),
+          onImportComplete: _reloadAfterImport,
           onResetEverything: _resetEverything,
         ),
       ),
