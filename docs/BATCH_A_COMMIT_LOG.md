@@ -164,6 +164,7 @@ Green CI is build/test evidence only. It does not prove live Android/Windows beh
 | 2026-11-15 00:25:17 | `5e8ce90e25d63b6f2ef7367b0bae35825a6deedd` | Add GTN1 two-layer portable backup fixture | Save Slots / Tests | `PortableSaveBackup.kt; SaveManager.kt` | `test/data/saves/portable_save_backup_test.dart` | Adds independent deterministic PBKDF2/AES-GCM fixture matching GTN1 outer + inner envelope |
 | 2026-11-15 00:25:44 | `d5094d81cb5cc73c77c1cddc1c0442156c127f76` | Record GTN1 save-envelope compatibility work | Audit / Save Slots | `PortableSaveBackup.kt; SaveManager.kt` | `docs/FINITE_PARITY_PLAN.md` | Updates exact envelope progress and remaining bundle-conversion/restore/UI blockers |
 | 2026-11-15 00:25:54 | `efb7bc5090b477a11bfe9616eee3ac2cd00fe2cd` | Update Save Slots compatibility diff | Audit / Save Slots | `PortableSaveBackup.kt; SaveManager.kt` | `docs/GTN1_SCREEN_PARITY_DIFF.md` | Records envelope implementation and explicit remaining compatibility gaps |
+| 2026-11-15 00:26:18 | `7f53ccc3ab1fb20da7da3782c85189673cdeb1d1` | Log GTN1 portable backup compatibility commits | Audit / Save Slots | `PortableSaveBackup.kt; SaveManager.kt` | `docs/BATCH_A_COMMIT_LOG.md` | Records codec, two-layer helpers, fixed fixture and docs updates; fresh validation still pending |
 
 
 
