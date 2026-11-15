@@ -503,7 +503,10 @@ class GameDashboardPage extends StatelessWidget {
                                               CrossAxisAlignment.start,
                                           children: [
                                             const Text(
-                                              'UPDATE AVAILABLE',
+                                              AppLocalizations.text(
+                                                'web_ui_update_available',
+                                                'UPDATE AVAILABLE',
+                                              ),
                                               style: TextStyle(
                                                 color: _cyan,
                                                 fontSize: 10,
@@ -541,7 +544,12 @@ class GameDashboardPage extends StatelessWidget {
                                                       updateNoticeChecking
                                                       ? null
                                                       : onUpdateDismiss,
-                                                  child: const Text('Later'),
+                                                  child: Text(
+                                                    AppLocalizations.text(
+                                                      'web_dismiss_update_notice',
+                                                      'Later',
+                                                    ),
+                                                  ),
                                                 ),
                                                 const Spacer(),
                                                 FilledButton.icon(
@@ -564,7 +572,10 @@ class GameDashboardPage extends StatelessWidget {
                                                         ),
                                                   label: Text(
                                                     updateNoticeChecking
-                                                        ? 'Updating…'
+                                                        ? AppLocalizations.text(
+                                                            'update_installing',
+                                                            'Updating…',
+                                                          )
                                                         : 'Update',
                                                   ),
                                                 ),
