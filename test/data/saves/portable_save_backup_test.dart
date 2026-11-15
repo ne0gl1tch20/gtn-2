@@ -37,6 +37,19 @@ void main() {
     expect(LegacyGtn1SaveCodec.decode('not-base64!'), isNull);
   });
 
+  test('decrypts a pinned GTN1 two-layer portable backup fixture', () async {
+    const fixture =
+        'GTNPORT1:AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxfYbFAm1/bEwOLd1RTsm1A0hYR0wdBa8sRmRdEo1fwy2CN9TaujJoutk2PzOtvD+v9RRKEggNdbRSkscCHJUn+feWOlLY/XCuwj8jFFnq9MMoFflnAiGkrA13mdWO0HYC3MrYf+zd5xLPqH6JQJlUjMVTjfwAmP71EhEmb/usltsYhT5gBTbuiHMFBgmJOO0HjYMTHDJX0mmtuxwwOhl4Vachs1s+43l0PW4PI';
+    const payload =
+        '{"formatVersion":3,"appPreferencesJson":"{}","activeSlot":2,'
+        '"slots":{},"backups":{},"creativeSlots":{}}';
+
+    expect(
+      await PortableSaveBackup.decryptGtn1Payload(fixture, passphrase),
+      payload,
+    );
+  });
+
   test('round-trips the two-layer GTN1 portable backup format', () async {
     const payload =
         '{"formatVersion":3,"appPreferencesJson":"{}","activeSlot":2,'
