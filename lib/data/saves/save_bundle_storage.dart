@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:path_provider/path_provider.dart';
 
-import '../../core/creative/creative_mode.dart';
 import '../../settings/game_settings.dart';
 import 'legacy_gtn1_backup_bundle.dart';
 import 'legacy_gtn1_save_adapter.dart';
@@ -261,6 +260,7 @@ class SaveBundleStorage {
     targets['gtn2-app-preferences.json'] =
         jsonEncode(bundle.appPreferences.toJson());
     targets['gtn2-app-preferences.json.tmp'] = null;
+    targets['gtn2-app-preferences.json.bak'] = null;
 
     final manifest = <Map<String, Object>>[];
     try {
