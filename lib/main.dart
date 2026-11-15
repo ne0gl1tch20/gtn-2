@@ -1362,7 +1362,8 @@ class _GameHomePageState extends State<GameHomePage>
   }
 
   Future<void> _openInitialSaveSlots() async {
-    if (!mounted || _initialSaveSlotsOpen || !_playerProfile.setupComplete) return;
+    if (!mounted || _initialSaveSlotsOpen || !_playerProfile.setupComplete)
+      return;
     _initialSaveSlotsOpen = true;
     try {
       await Navigator.of(context).push<void>(
@@ -1383,9 +1384,13 @@ class _GameHomePageState extends State<GameHomePage>
   }
 
   Future<void> _presentStartupExperience() async {
-    if (!mounted || _isLoading || !_isPlayerProfileLoaded ||
-        !_playerProfile.setupComplete || !_hasActiveSave ||
-        !_startupExperiencePending) return;
+    if (!mounted ||
+        _isLoading ||
+        !_isPlayerProfileLoaded ||
+        !_playerProfile.setupComplete ||
+        !_hasActiveSave ||
+        !_startupExperiencePending)
+      return;
     _startupExperiencePending = false;
     final offline = _startupOfflineEarnings;
     _startupOfflineEarnings = BigNumber.fromInt(0);
@@ -1394,9 +1399,14 @@ class _GameHomePageState extends State<GameHomePage>
         context: context,
         builder: (dialogContext) => AlertDialog(
           title: const Text('Welcome back!'),
-          content: Text('Your Auto Clicker earned $offline Money while you were away.'),
+          content: Text(
+            'Your Auto Clicker earned $offline Money while you were away.',
+          ),
           actions: [
-            FilledButton(onPressed: () => Navigator.pop(dialogContext), child: const Text('Continue')),
+            FilledButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('Continue'),
+            ),
           ],
         ),
       );
@@ -1628,8 +1638,12 @@ class _GameHomePageState extends State<GameHomePage>
   }
 
   void _scheduleFirstRunNimmyTutorial() {
-    if (_nimmyTutorialScheduled || _settings.tutorialCompleted || _isLoading ||
-        !_isPlayerProfileLoaded || !_playerProfile.setupComplete || !_hasActiveSave) {
+    if (_nimmyTutorialScheduled ||
+        _settings.tutorialCompleted ||
+        _isLoading ||
+        !_isPlayerProfileLoaded ||
+        !_playerProfile.setupComplete ||
+        !_hasActiveSave) {
       return;
     }
     _nimmyTutorialScheduled = true;

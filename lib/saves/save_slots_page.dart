@@ -77,21 +77,19 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
   }
 
   Future<void> _create(int slot) async {
-    final result = await GtnExpressiveDialog.show<
-      ({
-        String name,
-        String difficulty,
-        String icon,
-        bool creativeSave,
-        int minimum,
-        int maximum,
-        int hints,
-        int attemptLimit,
-      })
-    >(
-      context,
-      builder: (_) => _CreateSaveSlotDialog(slot: slot),
-    );
+    final result =
+        await GtnExpressiveDialog.show<
+          ({
+            String name,
+            String difficulty,
+            String icon,
+            bool creativeSave,
+            int minimum,
+            int maximum,
+            int hints,
+            int attemptLimit,
+          })
+        >(context, builder: (_) => _CreateSaveSlotDialog(slot: slot));
     if (result == null || !mounted) return;
     setState(() => _working = slot);
     try {
@@ -764,7 +762,8 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
                           ),
                         ],
                       ),
-                      onTap: _switching != null ||
+                      onTap:
+                          _switching != null ||
                               _working != null ||
                               (selected && save != null)
                           ? null
@@ -829,14 +828,19 @@ class _CreateSaveSlotDialogState extends State<_CreateSaveSlotDialog> {
           GtnExpressiveTextField(
             controller: _name,
             maxLength: 24,
-            decoration: const InputDecoration(labelText: 'Save name (optional)'),
+            decoration: const InputDecoration(
+              labelText: 'Save name (optional)',
+            ),
           ),
           GtnExpressiveDropdown<String>(
             initialValue: _difficulty,
             decoration: const InputDecoration(labelText: 'Difficulty'),
             items: [
               for (final id in DifficultyRules.ids)
-                DropdownMenuItem(value: id, child: Text(DifficultyRules.name(id))),
+                DropdownMenuItem(
+                  value: id,
+                  child: Text(DifficultyRules.name(id)),
+                ),
             ],
             onChanged: (value) {
               if (value != null) setState(() => _difficulty = value);
