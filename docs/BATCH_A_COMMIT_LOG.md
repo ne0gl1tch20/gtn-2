@@ -275,6 +275,8 @@ Green CI is build/test evidence only. It does not prove live Android/Windows beh
 | 2026-11-15 11:30 | `b5d0a8b8e3ccb4cf46fb5d28b299c0c0162a4492` | Sort widget test imports for analyzer | Build / CI hygiene | — | `test/widget_test.dart` | Places update_checker before design imports to satisfy directives_ordering |
 | 2026-11-15 11:30 | `43672625058` | Validate #1896 — format passed, analysis failed | CI / Batch A | — | `lib/main.dart; test/widget_test.dart` | Dart formatting passed; analysis failed only on two directives_ordering infos; tests and builds were skipped |
 
+| 2026-11-15 11:31 | `a36492d72b1a2039d278f43459579a5bb6af0f45` | Log analyzer import-order fixes | Audit / CI | — | `docs/BATCH_A_COMMIT_LOG.md` | Self-logs exact formatter correction and the two directives_ordering fixes |
+
 ### Current Creative Save implementation state
 
 - **Implemented and CI-verified:** schema-v7 permanent `creativeModeEnabled` flag with old-save default false; separate from the existing isolated `creativeMode` sandbox payload.
