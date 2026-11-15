@@ -289,3 +289,8 @@ Current implementation head: 3bb5667569510c46897e11ae7b0bbac4b2d345bf. Validate 
 ## Correction to Validate run #1933 — 2026-11-16
 
 Run #1933 did not pass the test suite: 431 tests passed and 4 Save Slots widget tests failed. The primary exception was confirmed as a TextEditingController being disposed while the export dialog's reverse transition was still mounted. The export dialog now owns its controllers in a dedicated StatefulWidget and disposes them with its own lifecycle (commit b7650a2112ee2294ab328bd29af89d167357e067). New Validate run #1936 is pending at https://github.com/ne0gl1tch20/gtn-2/actions/runs/43768293582. The screenshot-driven fixes remain in progress until the new run and Android/Windows runtime evidence pass.
+
+
+## Save Slots lifecycle follow-up — 2026-11-16
+
+Run #1933 failed with 431 passing and 4 failing tests. The primary failure was the export dialog's TextEditingControllers being disposed by the parent while the dialog route was still animating out. This is corrected by commit b7650a2112ee2294ab328bd29af89d167357e067: the dialog owns both controllers in its own StatefulWidget and disposes them when its subtree is removed. Dart formatting and analysis passed on the follow-up head. Validate run #1941 is currently running tests and Android/Windows builds: https://github.com/ne0gl1tch20/gtn-2/actions/runs/43768471017. No test or runtime pass is claimed yet.
