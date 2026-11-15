@@ -3,6 +3,8 @@ name: Temporary Batch A legacy save codec formatter
 on:
   push:
     branches: ['batch-a/creative-save-active-slot']
+  pull_request:
+    branches: [main]
 
 permissions:
   contents: write
