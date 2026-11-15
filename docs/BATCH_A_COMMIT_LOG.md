@@ -199,6 +199,8 @@ Green CI is build/test evidence only. It does not prove live Android/Windows beh
 | 2026-11-15 00:31:30 | `4a6349850822535a4346581c6b70a5baad6884f6` | Clarify adapter validation remains pending | Audit / CI | — | `docs/FINITE_PARITY_PLAN.md` | Explicitly distinguishes prior 399-test CI pass from the newer unvalidated adapter commits |
 
 
+| 2026-11-15 00:31:40 | `4f48069d27132383a97319eb29c43ed2bb2925e0` | Self-log adapter documentation checkpoints | Audit | — | `docs/BATCH_A_COMMIT_LOG.md` | Records the prior ledger update; this is the final self-log checkpoint for the current work segment |
+
 ### Current Creative Save implementation state
 
 - **Implemented and CI-verified:** schema-v7 permanent `creativeModeEnabled` flag with old-save default false; separate from the existing isolated `creativeMode` sandbox payload.
