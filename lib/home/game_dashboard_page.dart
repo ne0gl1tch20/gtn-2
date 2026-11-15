@@ -68,6 +68,11 @@ class GameDashboardPage extends StatelessWidget {
     required this.onLegacySection,
     this.playerProfile = const PlayerProfile(),
     this.onPlayerProfile,
+    this.updateNoticeTitle,
+    this.updateNoticeDetails,
+    this.updateNoticeChecking = false,
+    this.onUpdateInstall,
+    this.onUpdateDismiss,
   });
 
   final GameState game;
@@ -107,6 +112,11 @@ class GameDashboardPage extends StatelessWidget {
   final ValueChanged<LegacySection> onLegacySection;
   final PlayerProfile playerProfile;
   final VoidCallback? onPlayerProfile;
+  final String? updateNoticeTitle;
+  final String? updateNoticeDetails;
+  final bool updateNoticeChecking;
+  final VoidCallback? onUpdateInstall;
+  final VoidCallback? onUpdateDismiss;
 
   void _openMoreMenu(BuildContext context, Color panel, int playIndex) {
     shellNavigatorKey.currentState!
@@ -482,6 +492,85 @@ class GameDashboardPage extends StatelessWidget {
                                       ],
                                     ),
                                   ),
+                                  if (updateNoticeTitle != null)
+                                    SizedBox(
+                                      key: const Key('dashboard-update-notice'),
+                                      width: fullWidth,
+                                      child: GtnExpressiveCard(
+                                        padding: const EdgeInsets.all(16),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            const Text(
+                                              'UPDATE AVAILABLE',
+                                              style: TextStyle(
+                                                color: _cyan,
+                                                fontSize: 10,
+                                                fontWeight: FontWeight.w900,
+                                                letterSpacing: 1.4,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 6),
+                                            Text(
+                                              updateNoticeTitle!,
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .titleMedium
+                                                  ?.copyWith(
+                                                    fontWeight: FontWeight.w800,
+                                                  ),
+                                            ),
+                                            if (updateNoticeDetails != null) ...[
+                                              const SizedBox(height: 4),
+                                              Text(
+                                                updateNoticeDetails!,
+                                                maxLines: 3,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .bodySmall,
+                                              ),
+                                            ],
+                                            const SizedBox(height: 12),
+                                            Row(
+                                              children: [
+                                                TextButton(
+                                                  onPressed: updateNoticeChecking
+                                                      ? null
+                                                      : onUpdateDismiss,
+                                                  child: const Text('Later'),
+                                                ),
+                                                const Spacer(),
+                                                FilledButton.icon(
+                                                  onPressed:
+                                                      updateNoticeChecking
+                                                      ? null
+                                                      : onUpdateInstall,
+                                                  icon: updateNoticeChecking
+                                                      ? const SizedBox(
+                                                          width: 16,
+                                                          height: 16,
+                                                          child:
+                                                              CircularProgressIndicator(
+                                                                strokeWidth: 2,
+                                                              ),
+                                                        )
+                                                      : const Icon(
+                                                          Icons.system_update_alt_rounded,
+                                                        ),
+                                                  label: Text(
+                                                    updateNoticeChecking
+                                                        ? 'Updating…'
+                                                        : 'Update',
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
                                   SizedBox(
                                     key: const Key('dashboard-hero-section'),
                                     width: fullWidth,
