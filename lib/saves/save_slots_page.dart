@@ -373,34 +373,36 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
       builder: (dialogContext) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
           title: const Text('Export portable backup'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                'Use a passphrase with at least 12 characters. You will need '
-                'this exact passphrase to restore the backup on another device. '
-                'It cannot be recovered.',
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: passphrase,
-                obscureText: true,
-                autofocus: true,
-                onChanged: (_) => setDialogState(() {}),
-                decoration: const InputDecoration(
-                  labelText: 'Backup passphrase',
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'Use a passphrase with at least 12 characters. You will need '
+                  'this exact passphrase to restore the backup on another device. '
+                  'It cannot be recovered.',
                 ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: confirmPassphrase,
-                obscureText: true,
-                onChanged: (_) => setDialogState(() {}),
-                decoration: const InputDecoration(
-                  labelText: 'Confirm passphrase',
+                const SizedBox(height: 12),
+                TextField(
+                  controller: passphrase,
+                  obscureText: true,
+                  autofocus: true,
+                  onChanged: (_) => setDialogState(() {}),
+                  decoration: const InputDecoration(
+                    labelText: 'Backup passphrase',
+                  ),
                 ),
-              ),
-            ],
+                const SizedBox(height: 12),
+                TextField(
+                  controller: confirmPassphrase,
+                  obscureText: true,
+                  onChanged: (_) => setDialogState(() {}),
+                  decoration: const InputDecoration(
+                    labelText: 'Confirm passphrase',
+                  ),
+                ),
+              ],
+            ),
           ),
           actions: [
             TextButton(
