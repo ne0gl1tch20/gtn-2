@@ -305,7 +305,7 @@ class GameDashboardPage extends StatelessWidget {
               .toInt();
           final wide = MediaQuery.sizeOf(context).width >= 720;
           final minimumBarWidth = wide ? navigationIds.length * 124.0 : 0.0;
-          final availableWidth = constraints.maxWidth
+          final availableWidth = (constraints.maxWidth - 24)
               .clamp(0.0, 1000.0)
               .toDouble();
           final barWidth = availableWidth > minimumBarWidth
@@ -338,8 +338,7 @@ class GameDashboardPage extends StatelessWidget {
             );
           }
 
-          return SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
+          return Center(
             child: SizedBox(
               key: const Key('dashboard-navigation-bar'),
               width: barWidth,
