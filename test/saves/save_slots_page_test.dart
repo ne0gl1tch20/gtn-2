@@ -188,6 +188,7 @@ void main() {
     await tester.tap(find.text('Cancel'));
     await tester.pumpAndSettle();
     expect(find.text('Create Slot 1'), findsNothing);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('Reset Everything requires the source safety checks', (
