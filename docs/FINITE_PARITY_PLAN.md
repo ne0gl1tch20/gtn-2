@@ -309,3 +309,21 @@ Run #1941 completed successfully at head c9557b4b69ae73ba176d1407927bbd618a0c34f
 ## Validate #1952 final result — 2026-11-16
 
 Validate run [#1952](https://github.com/ne0gl1tch20/gtn-2/actions/runs/43769040774) completed successfully against PR #74 head `217df064c85f34e821ad5aa6718a5d7a7ddd3016`. Formatting and analysis passed; all 435 Flutter tests passed; Android debug APK and Windows desktop debug builds succeeded. The Windows release installer was skipped by this debug validation workflow. Android artifact 14183164620 (SHA-256 `d94070c2a52653f22dffd2fb367609ea9174f4368d6a7499658be5671151a667`) and Windows artifact 14184055785 (SHA-256 `431b054364e5bbff647a4b141fa036105ce4c50685e2fd146d0921d384b7d5ce`) are available until 2026-11-22. This supersedes the earlier pending #1952 checkpoint and confirms the screenshot-driven regression tests pass. It does not replace Android/Windows runtime checks, paired screenshots, or the six-surface Batch A exit gate. PR #74 remains draft; Batch A remains active and Batch B remains blocked.
+
+
+
+## PR #74 runtime comment follow-up — 2026-11-16
+
+The latest Android test comment exposed a first-run ordering gap and several Save Slots/layout issues. GTN1 source comparison remains pinned to `fe9cf567169e19059e0330d08769fe454336ef94`: `NavGraph.kt` gates the game on profile setup and save-slot availability; the Web Play `renderRewardPopups` sequence presents offline earnings before the daily reward and only then starts Nimmy's tutorial.
+
+The GTN2 follow-up on `batch-a/creative-save-active-slot` now:
+- Opens Save Slots after first-launch profile completion when there is no active save, with a navigable Back route; existing saves do not get forced through a new-slot selection.
+- Allows tapping the active empty slot to create a save, not only using its overflow menu.
+- Moves Create Save dialog controllers into the dialog's own StatefulWidget so they remain alive until the reverse transition removes the fields.
+- Defers Nimmy until profile setup and an active save are ready.
+- Presents positive offline earnings, then the claimable daily Nebula reward with the exact engine-calculated streak amount, then Nimmy.
+- Uses the full available mobile navigation width and constrains the Settings app-bar title to one ellipsized line.
+
+A regression test now taps the active empty slot directly and verifies clean dialog dismissal. Upgrade Shop's 51px overflow and World Map hero-heading wrap remain separate defects.
+
+Current code head: `322ec8551def094f867d98f55b02a438a773e2c3`. Validate run #1975 is pending at [run #1975](https://github.com/ne0gl1tch20/gtn-2/actions/runs/43777288634). Do not claim the fixes validated, do not close Batch A, and do not unblock Batch B until this run passes and Android/Windows runtime screenshots verify the affected flows. PR #74 remains draft.
