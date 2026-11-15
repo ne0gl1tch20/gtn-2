@@ -282,6 +282,8 @@ Green CI is build/test evidence only. It does not prove live Android/Windows beh
 | 2026-11-15 11:32 | `7971e2f5a3820cc0d6310292daf990b5ae532d33` | Give About screen ListTiles their own Material ink surface | UI / About | `app/src/main/java/com/jarrlyyy/guessthenumber/ui/screens/AboutScreen.kt` | `lib/legacy/legacy_pages.dart` | Prevents DecoratedBox backgrounds from obscuring ListTile ink and triggering Flutter framework assertions |
 | 2026-11-15 11:32 | `43672747391` | Validate #1900 — format/analyze passed, 429 tests passed and 3 failed | CI / Batch A | — | `test/settings/settings_page_test.dart; test/settings/menu_studio_page_test.dart; test/widget_test.dart` | Failures were two off-screen widget-test taps and About ListTile ink-surface assertions; Android/Windows builds were still running |
 
+| 2026-11-15 11:33 | `ca5c6c16a37e9c3aff52f37d83edef21085e2cee` | Log Menu Studio and settings test fixes plus About ink-surface fix | Audit | `menu-studio.js; web-play/app.js; AboutScreen.kt` | `docs/BATCH_A_COMMIT_LOG.md` | Self-logs the three failed-test diagnoses and their source/UI corrections |
+
 ### Current Creative Save implementation state
 
 - **Implemented and CI-verified:** schema-v7 permanent `creativeModeEnabled` flag with old-save default false; separate from the existing isolated `creativeMode` sandbox payload.
