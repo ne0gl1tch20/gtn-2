@@ -246,6 +246,13 @@ Green CI is build/test evidence only. It does not prove live Android/Windows beh
 
 | 2026-11-15 11:22 | `10a253551a94706c43f749a606412c234966e7ed` | Log Menu Studio formatter retries and cleanup | Audit | `menu-studio.js` | `docs/BATCH_A_COMMIT_LOG.md` | Records temporary formatter add/remove, restored test structure and failed formatting-only CI attempts |
 
+| 2026-11-15 11:23 | `a6f47d762bbdb28e2a81f821a16108e480a724d5` | Apply Menu Studio reset to live navigation preview | Batch A / Menu Studio | `app/src/main/assets/web-play/menu-studio.js` | `lib/settings/menu_studio_page.dart` | Adds `_reset()` so Reset layout publishes the default layout through the live preview callback, matching GTN1 `apply()` |
+| 2026-11-15 11:23 | `6b43dfb32a1785f3ccb97c7bf83dd0b6941199b3` | Test Menu Studio reset live preview parity | Batch A / Menu Studio | `menu-studio.js` | `test/settings/menu_studio_page_test.dart` | Regression verifies Worlds returns to the top bar, default More order is restored and reset is not persisted before Save changes |
+| 2026-11-15 11:23 | `e2d08634b98fd4235c4d6412a82e8d28a12ad353` | Use void callback in Menu Studio reset regression | Batch A / Menu Studio | `menu-studio.js` | `test/settings/menu_studio_page_test.dart` | Makes the async save callback explicitly return void |
+| 2026-11-15 11:24 | `6e1bf567617690dd4cd8bcb9549e716b3f53e4cd` | Record Menu Studio reset preview parity fix | Audit / Menu Studio | `menu-studio.js` | `docs/FINITE_PARITY_PLAN.md` | Updates the Batch A checklist with the live-preview behavior and regression coverage |
+| 2026-11-15 11:24 | `0c275f9290700a8788959e8f070dfb18de349f40` | Document Menu Studio reset preview parity mismatch and fix | Audit / Menu Studio | `menu-studio.js` | `docs/GTN1_SCREEN_PARITY_DIFF.md` | Records the source-side `apply()` behavior, GTN2 mismatch, fix and pending validation |
+| 2026-11-15 11:24 | `43672157813` | Validate #1881 — Menu Studio persistence and reset regressions | CI / Batch A | — | `test/data/saves/save_bundle_storage_test.dart; test/settings/menu_studio_page_test.dart` | Run started on the new test/fix; results pending |
+
 ### Current Creative Save implementation state
 
 - **Implemented and CI-verified:** schema-v7 permanent `creativeModeEnabled` flag with old-save default false; separate from the existing isolated `creativeMode` sandbox payload.
