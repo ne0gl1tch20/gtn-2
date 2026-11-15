@@ -765,10 +765,12 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
     await tester.pumpWidget(buildDashboard());
-    expect(
-      tester.getSize(find.byKey(const Key('dashboard-navigation-bar'))).width,
-      366,
+    final mobileNavigation = find.byKey(
+      const Key('dashboard-navigation-bar'),
     );
+    expect(tester.getSize(mobileNavigation).width, 366);
+    expect(tester.getSize(mobileNavigation).height, lessThanOrEqualTo(64));
+    expect(tester.takeException(), isNull);
 
     tester.view.physicalSize = const Size(1200, 900);
     await tester.pumpWidget(buildDashboard());
