@@ -90,7 +90,7 @@ void main() {
 
       expect(save.secret, 42);
       expect(save.minimum, 1);
-      expect(save.maximum, 150);
+      expect(save.maximum, 135);
       expect(save.attempts, 7);
       expect(save.correctGuesses, 3);
       expect(save.streak, 2);
