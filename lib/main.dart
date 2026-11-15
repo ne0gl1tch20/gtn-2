@@ -1405,7 +1405,9 @@ class _GameHomePageState extends State<GameHomePage>
       await showDialog<void>(
         context: context,
         builder: (dialogContext) => AlertDialog(
-          title: Text(AppLocalizations.text('welcome_back_title', 'Welcome back!')),
+          title: Text(
+            AppLocalizations.text('welcome_back_title', 'Welcome back!'),
+          ),
           content: Text(
             AppLocalizations.text(
               'offline_gains_text',
@@ -1443,7 +1445,10 @@ class _GameHomePageState extends State<GameHomePage>
           context: context,
           builder: (dialogContext) => AlertDialog(
             title: Text(
-              AppLocalizations.text('daily_reward_title', 'Daily Nebula Reward'),
+              AppLocalizations.text(
+                'daily_reward_title',
+                'Daily Nebula Reward',
+              ),
             ),
             content: Text(
               '${AppLocalizations.text('daily_reward_subtitle', "Claim today's reward and keep your streak alive.")}\n'
@@ -1457,7 +1462,9 @@ class _GameHomePageState extends State<GameHomePage>
               FilledButton.icon(
                 onPressed: () => Navigator.pop(dialogContext, true),
                 icon: const Icon(Icons.card_giftcard_rounded),
-                label: Text(AppLocalizations.text('daily_reward_claim', 'Claim reward')),
+                label: Text(
+                  AppLocalizations.text('daily_reward_claim', 'Claim reward'),
+                ),
               ),
             ],
           ),
