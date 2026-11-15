@@ -70,6 +70,39 @@ void main() {
     await tester.pumpAndSettle();
   });
 
+  testWidgets('portable backup export can be cancelled with blank passphrases', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      M3EMaterialApp(
+        data: M3EThemeData.light(seedColor: const Color(0xFF7C5CFC)),
+        fontFamily: 'Manrope',
+        autoTheming: false,
+        initialTheme: Brightness.dark,
+        home: SaveSlotsPage(
+          activeSlot: 1,
+          settings: GameSettings.initial,
+          onSelect: (_) async {},
+          previewLoader: (_) => Future<SaveData?>.value(null),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Export backup'));
+    await tester.pumpAndSettle();
+    expect(find.text('Confirm passphrase'), findsOneWidget);
+    final exportButton = tester.widget<FilledButton>(
+      find.widgetWithText(FilledButton, 'Encrypt & Copy'),
+    );
+    expect(exportButton.onPressed, isNull);
+
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    expect(find.text('Export portable backup'), findsNothing);
+  });
+
   testWidgets('new save dialog exposes permanent Creative Save setup', (
     tester,
   ) async {
