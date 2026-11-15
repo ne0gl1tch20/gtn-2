@@ -193,11 +193,19 @@ class SaveBundleStorage {
       final backups = Map<int, SaveData>.from(importedBundle.backups);
       for (final entry in existing.entries) {
         final slot = entry.key;
-        if (slots[slot] case final incoming?) {
-          slots[slot] = _preserveCreativeEligibility(entry.value, incoming);
+        final incomingPrimary = slots[slot];
+        if (incomingPrimary != null) {
+          slots[slot] = _preserveCreativeEligibility(
+            entry.value,
+            incomingPrimary,
+          );
         }
-        if (backups[slot] case final incoming?) {
-          backups[slot] = _preserveCreativeEligibility(entry.value, incoming);
+        final incomingBackup = backups[slot];
+        if (incomingBackup != null) {
+          backups[slot] = _preserveCreativeEligibility(
+            entry.value,
+            incomingBackup,
+          );
         }
       }
       bundle = LegacyGtn1BackupBundle(
