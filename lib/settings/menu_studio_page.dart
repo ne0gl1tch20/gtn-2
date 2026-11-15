@@ -161,6 +161,11 @@ class _MenuStudioPageState extends State<MenuStudioPage> {
     _preview();
   }
 
+  void _reset() {
+    setState(() => _layout = MenuStudioLayout.defaults());
+    _preview();
+  }
+
   Future<void> _save() async {
     setState(() => _saving = true);
     try {
@@ -401,11 +406,7 @@ class _MenuStudioPageState extends State<MenuStudioPage> {
               children: [
                 Expanded(
                   child: M3EButton.tonal(
-                    onPressed: _saving
-                        ? null
-                        : () => setState(
-                            () => _layout = MenuStudioLayout.defaults(),
-                          ),
+                    onPressed: _saving ? null : _reset,
                     child: const Text('Reset layout'),
                   ),
                 ),
