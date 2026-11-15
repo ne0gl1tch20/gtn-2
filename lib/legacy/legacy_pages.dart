@@ -836,8 +836,13 @@ class LegacyDetailPage extends StatelessWidget {
             const ListTile(
               contentPadding: EdgeInsets.zero,
               leading: Icon(Icons.system_update_rounded),
-              title: Text('Updates'),
-              subtitle: Text('Check for a newer validated app build.'),
+              title: Text(AppLocalizations.text('web_ui_updates', 'Updates')),
+              subtitle: Text(
+                AppLocalizations.text(
+                  'update_check',
+                  'Check for a newer validated app build.',
+                ),
+              ),
             ),
             if (update.title != null) ...[
               Text(
@@ -876,7 +881,7 @@ class LegacyDetailPage extends StatelessWidget {
                       ? onInstallUpdate
                       : null,
                   icon: const Icon(Icons.system_update_alt_rounded),
-                  label: const Text('Install update'),
+                  label: Text(AppLocalizations.text('update_install', 'Install update')),
                 ),
               ],
             ),
