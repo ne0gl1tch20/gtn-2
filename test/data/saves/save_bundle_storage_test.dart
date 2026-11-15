@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gtn_2/data/saves/legacy_gtn1_save_codec.dart';
 import 'package:gtn_2/data/saves/save_bundle_storage.dart';
 import 'package:gtn_2/data/saves/save_data.dart';
 import 'package:gtn_2/data/saves/save_storage.dart';
@@ -98,6 +99,105 @@ void main() {
         throwsFormatException,
       );
       expect((await targetSlot.loadPrimary())!.secret, before!.secret);
+    });
+
+    test('legacy single-save import preserves other slots and Creative Save protection', () async {
+      final existing = SaveStorage(directory: targetDirectory, slot: 1);
+      await existing.save(
+        SaveData(
+          secret: 50,
+          attempts: 3,
+          gamesWon: 1,
+          minimum: 10,
+          maximum: 90,
+          creativeModeEnabled: true,
+        ),
+      );
+      await SaveStorage(directory: targetDirectory, slot: 2).save(
+        SaveData(secret: 44, attempts: 2, gamesWon: 0),
+      );
+      final sourceSave = {
+        'difficultyId': 'classic',
+        'profileName': 'Imported',
+        'profileIconId': 'star',
+        'targetNumber': 5,
+        'currentRangeMin': 1,
+        'currentRangeMax': 100,
+        'attempts': 1,
+        'correctGuesses': 0,
+        'streak': 0,
+        'bestStreak': 0,
+        'money': '0',
+        'prestige': '0',
+        'ultra': '0',
+        'nebula': '0',
+        'statistics': {
+          'totalGuesses': 1,
+          'correctGuesses': 0,
+          'moneyEarned': '0',
+          'moneySpent': '0',
+          'nebulaEarned': 0,
+          'playtimeSeconds': 0,
+          'randomEventsTriggered': 0,
+        },
+        'settings': {'themeMode': 'Dark', 'locale': 'en-US'},
+      };
+      final result = await SaveBundleStorage(directory: targetDirectory)
+          .importBackup(
+            input: LegacyGtn1SaveCodec.encode(jsonEncode(sourceSave)),
+            passphrase: '',
+            legacyTargetSlot: 1,
+          );
+
+      expect(result!.isFullBundle, isFalse);
+      expect(result.activeSlot, 1);
+      final restored = await existing.loadPrimary();
+      expect(restored!.profileName, 'Imported');
+      expect(restored.creativeModeEnabled, isTrue);
+      expect(restored.minimum, 10);
+      expect(restored.maximum, 90);
+      expect(restored.secret, 10);
+      expect((await existing.loadBackup())!.secret, 50);
+      expect(
+        (await SaveStorage(directory: targetDirectory, slot: 2).loadPrimary())!
+            .secret,
+        44,
+      );
+    });
+
+    test('full bundle import keeps existing permanent Creative Save eligibility', () async {
+      await SaveStorage(directory: sourceDirectory, slot: 1).save(
+        SaveData(secret: 50, attempts: 0, gamesWon: 0),
+      );
+      final source = SaveBundleStorage(directory: sourceDirectory);
+      final backupText = await source.exportPortableBackup(
+        activeSlot: 1,
+        appPreferences: GameSettings.initial,
+        passphrase: 'correct horse battery',
+      );
+
+      final target = SaveStorage(directory: targetDirectory, slot: 1);
+      await target.save(
+        SaveData(
+          secret: 800,
+          attempts: 2,
+          gamesWon: 1,
+          minimum: 100,
+          maximum: 1000,
+          creativeModeEnabled: true,
+        ),
+      );
+      await SaveBundleStorage(directory: targetDirectory).importBackup(
+        input: backupText,
+        passphrase: 'correct horse battery',
+        legacyTargetSlot: 1,
+      );
+
+      final restored = await target.loadPrimary();
+      expect(restored!.creativeModeEnabled, isTrue);
+      expect(restored.minimum, 100);
+      expect(restored.maximum, 1000);
+      expect(restored.secret, 100);
     });
 
     test('startup recovery restores the pre-import snapshot', () async {
