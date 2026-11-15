@@ -305,7 +305,7 @@ class GameDashboardPage extends StatelessWidget {
               .toInt();
           final wide = MediaQuery.sizeOf(context).width >= 720;
           final minimumBarWidth = wide ? navigationIds.length * 124.0 : 0.0;
-          final availableWidth = (constraints.maxWidth - 24)
+          final availableWidth = constraints.maxWidth
               .clamp(0.0, 1000.0)
               .toDouble();
           final barWidth = availableWidth > minimumBarWidth
