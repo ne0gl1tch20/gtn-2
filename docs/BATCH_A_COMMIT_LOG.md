@@ -201,6 +201,8 @@ Green CI is build/test evidence only. It does not prove live Android/Windows beh
 
 | 2026-11-15 00:31:40 | `4f48069d27132383a97319eb29c43ed2bb2925e0` | Self-log adapter documentation checkpoints | Audit | — | `docs/BATCH_A_COMMIT_LOG.md` | Records the prior ledger update; this is the final self-log checkpoint for the current work segment |
 
+| 2026-11-15 00:31:50 | `586866350e5d2a1f447687d4fcfd5ba705bddbc2` | Record final Batch A adapter ledger checkpoint | Audit | — | `docs/BATCH_A_COMMIT_LOG.md` | Self-log of the previous ledger commit; current adapter validation is still pending |
+
 ### Current Creative Save implementation state
 
 - **Implemented and CI-verified:** schema-v7 permanent `creativeModeEnabled` flag with old-save default false; separate from the existing isolated `creativeMode` sandbox payload.
