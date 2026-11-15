@@ -1,0 +1,40 @@
+name: Temporary Batch A Creative Save test formatter
+
+on:
+  push:
+    branches: ['batch-a/creative-save-active-slot']
+
+permissions:
+  contents: write
+
+concurrency:
+  group: batch-a-creative-slot-format
+  cancel-in-progress: false
+
+jobs:
+  format-creative-slot-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Resolve dependencies
+        run: flutter pub get
+      - name: Format only the Creative Save persistence test
+        run: dart format test/data/save_data_test.dart
+      - name: Commit only the formatted test
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add test/data/save_data_test.dart
+          if git diff --cached --quiet; then
+            echo "Creative Save persistence test already formatted."
+          else
+            git commit -m "style: apply Dart formatter to Creative Save slot-switch test"
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          fi
