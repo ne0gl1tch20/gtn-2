@@ -502,7 +502,7 @@ class GameDashboardPage extends StatelessWidget {
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
                                           children: [
-                                            const Text(
+                                            Text(
                                               AppLocalizations.text(
                                                 'web_ui_update_available',
                                                 'UPDATE AVAILABLE',
