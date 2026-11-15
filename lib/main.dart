@@ -989,7 +989,7 @@ class _GameHomePageState extends State<GameHomePage>
     );
   }
 
-  Future<void> _switchSaveSlot(int slot) async {
+  Future<void> _switchSaveSlot(int slot, {bool persistAfterLoad = true}) async {
     setState(() => _isLoading = true);
     try {
       final bundleStorage = await SaveBundleStorage.inApplicationDocuments();
@@ -1061,7 +1061,7 @@ class _GameHomePageState extends State<GameHomePage>
             : 'Save slot $slot loaded.';
         _isLoading = false;
       });
-      await _persist();
+      if (persistAfterLoad) await _persist();
       _botTeam.reset(_game.minimum, _game.maximum);
       _scheduleAutoClicker();
     } on Exception {
@@ -1181,7 +1181,8 @@ class _GameHomePageState extends State<GameHomePage>
           activeSlot: _activeSlot,
           settings: _settings,
           onSelect: _switchSaveSlot,
-          onImportComplete: _switchSaveSlot,
+          onImportComplete: (slot) =>
+              _switchSaveSlot(slot, persistAfterLoad: false),
           onResetEverything: _resetEverything,
         ),
       ),
