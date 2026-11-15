@@ -643,61 +643,58 @@ void main() {
     expect(await slotTen.loadActiveSlot(), 3);
   });
 
-  test(
-    'restores permanent Creative Save eligibility per slot after slot '
-    'changes and restart',
-    () async {
-      final directory = await Directory.systemTemp.createTemp(
-        'gtn2-creative-save-slot-switch-',
-      );
-      addTearDown(() => directory.delete(recursive: true));
-      final slotOne = SaveStorage(directory: directory, slot: 1);
-      final slotTwo = SaveStorage(directory: directory, slot: 2);
+  test('restores permanent Creative Save eligibility per slot after slot '
+      'changes and restart', () async {
+    final directory = await Directory.systemTemp.createTemp(
+      'gtn2-creative-save-slot-switch-',
+    );
+    addTearDown(() => directory.delete(recursive: true));
+    final slotOne = SaveStorage(directory: directory, slot: 1);
+    final slotTwo = SaveStorage(directory: directory, slot: 2);
 
-      await slotOne.save(
-        SaveData(
-          secret: 500001,
-          attempts: 3,
-          correctGuesses: 1,
-          gamesWon: 0,
-          minimum: 1,
-          maximum: 1000000,
-          creativeModeEnabled: true,
-        ),
-      );
-      await slotTwo.save(
-        SaveData(
-          secret: 42,
-          attempts: 0,
-          gamesWon: 0,
-          creativeModeEnabled: false,
-        ),
-      );
+    await slotOne.save(
+      SaveData(
+        secret: 500001,
+        attempts: 3,
+        correctGuesses: 1,
+        gamesWon: 0,
+        minimum: 1,
+        maximum: 1000000,
+        creativeModeEnabled: true,
+      ),
+    );
+    await slotTwo.save(
+      SaveData(
+        secret: 42,
+        attempts: 0,
+        gamesWon: 0,
+        creativeModeEnabled: false,
+      ),
+    );
 
-      await slotOne.saveActiveSlot(1);
-      final firstRestart = SaveStorage(
-        directory: directory,
-        slot: await slotOne.loadActiveSlot(),
-      );
-      expect((await firstRestart.load())?.creativeModeEnabled, isTrue);
-      expect((await firstRestart.load())?.maximum, 1000000);
+    await slotOne.saveActiveSlot(1);
+    final firstRestart = SaveStorage(
+      directory: directory,
+      slot: await slotOne.loadActiveSlot(),
+    );
+    expect((await firstRestart.load())?.creativeModeEnabled, isTrue);
+    expect((await firstRestart.load())?.maximum, 1000000);
 
-      await slotTwo.saveActiveSlot(2);
-      final secondRestart = SaveStorage(
-        directory: directory,
-        slot: await slotTwo.loadActiveSlot(),
-      );
-      expect((await secondRestart.load())?.creativeModeEnabled, isFalse);
+    await slotTwo.saveActiveSlot(2);
+    final secondRestart = SaveStorage(
+      directory: directory,
+      slot: await slotTwo.loadActiveSlot(),
+    );
+    expect((await secondRestart.load())?.creativeModeEnabled, isFalse);
 
-      await slotOne.saveActiveSlot(1);
-      final restoredAgain = SaveStorage(
-        directory: directory,
-        slot: await slotOne.loadActiveSlot(),
-      );
-      expect((await restoredAgain.load())?.creativeModeEnabled, isTrue);
-      expect((await restoredAgain.load())?.maximum, 1000000);
-    },
-  );
+    await slotOne.saveActiveSlot(1);
+    final restoredAgain = SaveStorage(
+      directory: directory,
+      slot: await slotOne.loadActiveSlot(),
+    );
+    expect((await restoredAgain.load())?.creativeModeEnabled, isTrue);
+    expect((await restoredAgain.load())?.maximum, 1000000);
+  });
 
   test(
     'rejects invalid active slot values without replacing the selection',
