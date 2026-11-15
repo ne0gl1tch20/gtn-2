@@ -230,6 +230,8 @@ Green CI is build/test evidence only. It does not prove live Android/Windows beh
 | 2026-11-15 11:14 | `3fcb22f413eca6a80af2a636881da7e45d12c774` | Record Menu Studio preference backup persistence coverage | Audit | `menu-studio.js` | `docs/FINITE_PARITY_PLAN.md` | Records new regression coverage while keeping Android/Windows runtime checks open |
 | 2026-11-15 11:14 | `638c6ea922bfc57c1bab4c6666b1c954dac2c225` | Document Menu Studio persistence source diff | Audit / Menu Studio | `menu-studio.js` | `docs/GTN1_SCREEN_PARITY_DIFF.md` | Adds exact source schema comparison and portable backup/reload test evidence |
 
+| 2026-11-15 11:15 | `8525c52ff28e1a73ed8f62bd7975d48d04d5ff17` | Log Menu Studio persistence regression and audit updates | Audit | `menu-studio.js` | `docs/BATCH_A_COMMIT_LOG.md` | Self-logs the test and source/plan documentation commits |
+
 ### Current Creative Save implementation state
 
 - **Implemented and CI-verified:** schema-v7 permanent `creativeModeEnabled` flag with old-save default false; separate from the existing isolated `creativeMode` sandbox payload.
