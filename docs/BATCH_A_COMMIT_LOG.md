@@ -263,6 +263,11 @@ Green CI is build/test evidence only. It does not prove live Android/Windows beh
 
 | 2026-11-15 11:27 | `0422432aad57bd1528e3676d2053b29853b4ee1b` | Log Dart formatter cleanup and ignore rule | Audit | — | `docs/BATCH_A_COMMIT_LOG.md` | Self-logs the formatting correction and generated `.dart_tool` removal/ignore work |
 
+| 2026-11-15 11:28 | `a3d371ead83e36b11246d1d9b39e5a1909ca4c9c` | Add temporary formatter-output diagnostic to Validate | CI support | — | `.github/workflows/validate.yml` | Temporarily prints Dart 3.14 formatter output for the modified test file after repeated format-only failures |
+| 2026-11-15 11:28 | `1df6ff2cadeb337e91fbf915b22c5b5f583579a1` | Apply exact Dart 3.14 formatting to Menu Studio persistence test | Batch A / Menu Studio / Save Slots | `menu-studio.js` | `test/data/saves/save_bundle_storage_test.dart` | Replaces the modified test with the exact formatted output captured from Dart 3.14; includes compact test call and color assertion formatting |
+| 2026-11-15 11:28 | `ebf4d1686e7790afa0ed02ca2f3f05946362c877` | Remove temporary Dart formatter diagnostic step | CI cleanup | — | `.github/workflows/validate.yml` | Restores the standard validation workflow without diagnostic output steps |
+| 2026-11-15 11:28 | `43672514079` | Validate #1892 — formatting diagnostic run | CI / Menu Studio | — | `test/data/saves/save_bundle_storage_test.dart` | Format gate failed as expected; the diagnostic step captured the exact Dart formatter output used for the correction |
+
 ### Current Creative Save implementation state
 
 - **Implemented and CI-verified:** schema-v7 permanent `creativeModeEnabled` flag with old-save default false; separate from the existing isolated `creativeMode` sandbox payload.
