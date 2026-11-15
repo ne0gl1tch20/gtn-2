@@ -290,6 +290,8 @@ Green CI is build/test evidence only. It does not prove live Android/Windows beh
 | 2026-11-15 11:34 | `43673074998` | Validate #1905 — formatting gate failed | CI / About | — | `lib/legacy/legacy_pages.dart` | Formatter identified the About ink-surface file as the only unformatted source |
 | 2026-11-15 11:34 | `43673142844` | Validate #1906 — formatting diagnostic | CI / About | — | `lib/legacy/legacy_pages.dart` | Diagnostic captured the exact formatted source; the formatting correction was applied and diagnostic step removed |
 
+| 2026-11-15 11:35 | `5dbb148098bc892b2b3acb45dec67ffd337f86f8` | Log About formatter diagnostic and cleanup | Audit | `AboutScreen.kt` | `docs/BATCH_A_COMMIT_LOG.md` | Self-logs the temporary formatter diagnostic, exact output correction and workflow restoration |
+
 ### Current Creative Save implementation state
 
 - **Implemented and CI-verified:** schema-v7 permanent `creativeModeEnabled` flag with old-save default false; separate from the existing isolated `creativeMode` sandbox payload.
