@@ -1,0 +1,40 @@
+name: Temporary Batch A legacy save codec formatter
+
+on:
+  push:
+    branches: ['batch-a/creative-save-active-slot']
+
+permissions:
+  contents: write
+
+concurrency:
+  group: batch-a-legacy-codec-format
+  cancel-in-progress: false
+
+jobs:
+  format-legacy-codec:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Resolve dependencies
+        run: flutter pub get
+      - name: Format the legacy save codec and tests
+        run: dart format lib/data/saves/legacy_gtn1_save_codec.dart lib/data/saves/portable_save_backup.dart test/data/saves/portable_save_backup_test.dart
+      - name: Commit formatter output
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add lib/data/saves/legacy_gtn1_save_codec.dart lib/data/saves/portable_save_backup.dart test/data/saves/portable_save_backup_test.dart
+          if git diff --cached --quiet; then
+            echo "Selected Dart files already formatted."
+          else
+            git commit -m "style(saves): apply Dart formatter to GTN1 backup codec"
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          fi
