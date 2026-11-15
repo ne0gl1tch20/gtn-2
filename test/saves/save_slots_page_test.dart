@@ -103,6 +103,47 @@ void main() {
     expect(find.text('Export portable backup'), findsNothing);
   });
 
+  testWidgets('portable backup export requires matching 12-character passphrases', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      M3EMaterialApp(
+        data: M3EThemeData.light(seedColor: const Color(0xFF7C5CFC)),
+        fontFamily: 'Manrope',
+        autoTheming: false,
+        initialTheme: Brightness.dark,
+        home: SaveSlotsPage(
+          activeSlot: 1,
+          settings: GameSettings.initial,
+          onSelect: (_) async {},
+          previewLoader: (_) => Future<SaveData?>.value(null),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Export backup'));
+    await tester.pumpAndSettle();
+    final export = find.widgetWithText(FilledButton, 'Encrypt & Copy');
+    expect(tester.widget<FilledButton>(export).onPressed, isNull);
+
+    final fields = find.byType(TextField);
+    await tester.enterText(fields.at(0), 'correct horse battery');
+    await tester.pump();
+    expect(tester.widget<FilledButton>(export).onPressed, isNull);
+
+    await tester.enterText(fields.at(1), 'different passphrase');
+    await tester.pump();
+    expect(tester.widget<FilledButton>(export).onPressed, isNull);
+
+    await tester.enterText(fields.at(1), 'correct horse battery');
+    await tester.pump();
+    expect(tester.widget<FilledButton>(export).onPressed, isNotNull);
+
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+  });
+
   testWidgets('new save dialog exposes permanent Creative Save setup', (
     tester,
   ) async {
