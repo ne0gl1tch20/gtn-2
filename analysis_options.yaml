@@ -4,6 +4,7 @@ analyzer:
   # The standalone parser package has its own pubspec and CI analysis.
   exclude:
     - packages/jarrlyyui_language/**
+    - build/**
   language:
     strict-casts: true
     strict-inference: true
