@@ -161,7 +161,7 @@ class LegacyGtn1SaveAdapter {
     final maximum = _int(source, 'currentRangeMax', fallback: 100)
         .clamp(minimum, 1000000);
     final data = SaveData(
-      secret: _int(source, 'targetNumber', fallback: 50),
+      secret: _int(source, 'targetNumber', fallback: 50).clamp(minimum, maximum),
       attempts: _int(source, 'attempts'),
       correctGuesses: _int(source, 'correctGuesses'),
       streak: _int(source, 'currentStreak'),
@@ -241,7 +241,14 @@ class LegacyGtn1SaveAdapter {
       customPrimaryColor: _string(source, 'customPrimaryColor', fallback: '#7C4DFF'),
       customSecondaryColor: _string(source, 'customSecondaryColor', fallback: '#00BCD4'),
       customTertiaryColor: _string(source, 'customTertiaryColor', fallback: '#00C853'),
-      moreScreenOrder: _list(source, 'moreScreenOrder'),
+      moreScreenOrder: source['moreScreenOrder'] == null
+          ? const [
+              'world_map', 'achievements', 'live_ops', 'lua_hub', 'mutators',
+              'talent', 'relics', 'home_base', 'codex', 'endgame', 'arcade',
+              'stats', 'changelog', 'settings', 'about', 'staking', 'ultra',
+              'prestige', 'save_slots', 'music',
+            ]
+          : _list(source, 'moreScreenOrder'),
       moreScreenButtonColors: _stringMap(source, 'moreScreenButtonColors'),
       webMenuStudioLayout: _nullableString(source, 'webMenuStudioLayout'),
       tutorialCompleted: _bool(source, 'tutorialCompleted'),
