@@ -451,3 +451,12 @@ Batch A remains active until Dashboard, More, Settings, Menu Studio, Profile and
 - Temporary formatter workflow commits were removed after formatting; no temporary workflow remains on the branch.
 - Validate runs #1960–#1974 include formatter/analysis attempts and cancellations while the fixes were being staged. The authoritative latest verification is run #1975 at head `322ec8551def094f867d98f55b02a438a773e2c3`: https://github.com/ne0gl1tch20/gtn-2/actions/runs/43777288634. Format and analysis passed; Flutter tests, Android APK build and Windows desktop debug build were running at this checkpoint. No full validation pass is claimed yet.
 - Keep PR #74 draft, Batch A open, and Batch B blocked until the latest full validation and Android/Windows runtime evidence pass.
+
+
+
+### Validate #1975 — navigation geometry regression and correction — 2026-11-16
+
+- Run #1975 at `322ec8551def094f867d98f55b02a438a773e2c3`: format and analysis passed; Flutter tests reported 434 passed / 1 failed.
+- Failure: `bottom navigation matches GTN1 width limits` expected 366px at a 390px viewport, actual 390px. The attempted full-width fix removed the 24px source margin and broke the existing GTN1 geometry contract.
+- Corrected by restoring the 24px width inset and centering the compact navigation, preserving 366px width with symmetric 12px side margins. Added an explicit centered-position assertion. Commits: `58472f1e4695ccf17d6ab9538bad71138b808e73` and `c533651a2ac0dfac932de4cb8a7e5f4df98f6a91`.
+- Android and Windows builds from #1975 were still running; their result is not used to claim a passing validation. New full validation is required for the corrected head.
