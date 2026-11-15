@@ -284,3 +284,8 @@ The implementation commits on batch-a/creative-save-active-slot are 4d085133f661
 ## Latest validation checkpoint — 2026-11-16
 
 Current implementation head: 3bb5667569510c46897e11ae7b0bbac4b2d345bf. Validate run #1933 (https://github.com/ne0gl1tch20/gtn-2/actions/runs/43767953058) has passed Dart formatting and analysis. Flutter tests, Android debug APK and Windows debug build were still in progress at this checkpoint. The temporary formatter workflow has been removed from the branch; Validate is restored to the standard read-only workflow. All screenshot-driven fixes remain in progress until tests, platform builds and runtime evidence pass. PR #74 remains draft; Batch A and Batch B gates remain unchanged.
+
+
+## Correction to Validate run #1933 — 2026-11-16
+
+Run #1933 did not pass the test suite: 431 tests passed and 4 Save Slots widget tests failed. The primary exception was confirmed as a TextEditingController being disposed while the export dialog's reverse transition was still mounted. The export dialog now owns its controllers in a dedicated StatefulWidget and disposes them with its own lifecycle (commit b7650a2112ee2294ab328bd29af89d167357e067). New Validate run #1936 is pending at https://github.com/ne0gl1tch20/gtn-2/actions/runs/43768293582. The screenshot-driven fixes remain in progress until the new run and Android/Windows runtime evidence pass.
