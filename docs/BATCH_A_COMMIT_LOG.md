@@ -151,6 +151,13 @@ Green CI is build/test evidence only. It does not prove live Android/Windows beh
 | 2026-11-14 22:05:22 | `9735dfd06c72b7e674ea825332d2f573ebfd1907` | Log remaining Save Slots switch fix | Audit | `SaveSlotsScreen.kt` | `docs/BATCH_A_COMMIT_LOG.md` | Historical ledger update; superseded status corrected below |
 | 2026-11-15 00:11:12 | `0f16f1b6ff6a71d0c2cbd3320167036c96875d3b` | Record Creative Save validation success | Audit / Dashboard | `GameState.kt; GameViewModel.kt; DesktopWebPlayActions.kt; web-play/index.html; web-play/app.js` | `docs/FINITE_PARITY_PLAN.md` | CI evidence update; Validate 43646223935 passed all required jobs |
 | 2026-11-15 00:11:16 | `b6ef577680fb4e7e67ea66ad8bf209aa96a9bf75` | Update Creative Save CI evidence | Audit / Dashboard | `GameState.kt; GameViewModel.kt; DesktopWebPlayActions.kt; web-play/index.html; web-play/app.js` | `docs/GTN1_SCREEN_PARITY_DIFF.md` | CI evidence update; paired runtime screenshots remain open |
+| 2026-11-15 00:11:34 | `8e3507e152753b799a2849c3a78f17bbcbe58d4e` | Log Batch A Creative Save CI pass | Audit | — | `docs/BATCH_A_COMMIT_LOG.md` | Records Validate 43646223935; docs-only ledger correction |
+| 2026-11-15 00:12:18 | `a8eb59035359d6ab4948cab4b3dce87ca4dbd858` | Verify Creative Save across slot switches | Save Slots / Creative Save | `SaveSlotsScreen.kt; GameState.kt` | `test/data/save_data_test.dart` | Adds per-slot permanent-flag and range persistence regression; first Validate attempt stopped at formatting |
+| 2026-11-15 00:13:20 | `34b0146870c4ba63348ab00e55e22e8d41c616d9` | Format Creative Save slot-switch test (manual adjustment) | Test formatting | — | `test/data/save_data_test.dart` | Initial manual wrap was still not Dart-formatted; superseded by formatter commit below |
+| 2026-11-15 00:14:20 | `aa00fbc6547189087649cee583556e953b952382` | Add temporary Creative Save test formatter | CI support | — | `.github/workflows/temporary-batch-a-creative-slot-format.yml` | Temporary workflow applied Dart formatter to the single test file |
+| 2026-11-15 00:14:45 | `a52c2b652483f6a7058ce79c6362c45aaa77e1d3` | Apply Dart formatter to Creative Save slot-switch test | Test formatting | — | `test/data/save_data_test.dart` | Formatter-generated commit; PR validation required a user-authored follow-up after bot action_required |
+| 2026-11-15 00:15:20 | `5c5361cea5d131cd37a805c8cd71a8e3c03047aa` | Remove temporary Creative Save test formatter | CI support | — | `.github/workflows/temporary-batch-a-creative-slot-format.yml` | Temporary workflow removed; Validate 43657265678 (run 1717) is checking formatted test and platform builds |
+
 
 ### Current Creative Save implementation state
 
@@ -158,7 +165,8 @@ Green CI is build/test evidence only. It does not prove live Android/Windows beh
 - **Implemented and CI-verified:** permanent Creative Save toggle/range inputs during Save Slot creation; eligible save range and engine restore support up to the GTN1 1,000,000 maximum.
 - **Implemented and CI-verified:** inline dashboard panel shown only when the active slot's permanent flag is true.
 - **Implemented and CI-verified:** typed active-save range, currency, counter, streak and three upgrade-catalog transactions. Currency parsing accepts GTN1 suffix notation and rejects invalid/negative values.
-- **Tests executed and passed:** save schema migration/round-trip, storage persistence at 1,000,000, engine restore, transaction validation, panel interactions and Save Slots creation controls. Validate run [43646223935](https://github.com/ne0gl1tch20/gtn-2/actions/runs/43646223935) passed formatting, analysis, all Flutter tests, Android debug APK build and Windows desktop debug build on head `9735dfd06c72b7e674ea825332d2f573ebfd1907`.
+- **Tests executed and passed on the base Creative Save implementation:** schema migration/round-trip, storage persistence at 1,000,000, engine restore, transaction validation, panel interactions and Save Slots creation controls. Validate run [43646223935](https://github.com/ne0gl1tch20/gtn-2/actions/runs/43646223935) passed formatting, analysis, all Flutter tests, Android debug APK build and Windows desktop debug build on head `9735dfd06c72b7e674ea825332d2f573ebfd1907`.
+- **New slot-switch regression:** added coverage proving a permanent Creative Save flag and one-million range survive active-slot changes and new storage instances. On current PR head `5c5361cea5d131cd37a805c8cd71a8e3c03047aa`, Validate run [43657265678](https://github.com/ne0gl1tch20/gtn-2/actions/runs/43657265678) has passed formatting and analysis; Flutter tests and Android/Windows builds are still running.
 - **Still open:** verify active-slot switch/restart persistence; compare the exact native Android and desktop behavior; test malformed/edge inputs on both platforms; capture paired GTN1/GTN2 screenshots; finish source label, localization, layout and accessibility diffs. CI success is not runtime or visual parity. Do not mark Creative Save or Batch A complete yet.
 
 ## 4. Per-commit audit template
@@ -167,7 +175,7 @@ Append one row per commit to the ledger table below, then add a detailed entry u
 
 | UTC date/time | Commit SHA | Commit subject | Batch A item(s) | GTN1 source paths | GTN2 paths changed | Tests / CI | Result and remaining gaps |
 |---|---|---|---|---|---|---|---|
-| _Pending new commits_ | — | — | — | — | — | — | — |
+
 
 ### Required evidence for implementation commits
 
