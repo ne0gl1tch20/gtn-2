@@ -2,10 +2,13 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gtn_2/core/creative/creative_mode.dart';
+import 'package:gtn_2/data/saves/legacy_gtn1_backup_bundle.dart';
 import 'package:gtn_2/data/saves/legacy_gtn1_save_codec.dart';
 import 'package:gtn_2/data/saves/save_bundle_storage.dart';
 import 'package:gtn_2/data/saves/save_data.dart';
 import 'package:gtn_2/data/saves/save_storage.dart';
+import 'package:gtn_2/data/saves/portable_save_backup.dart';
 import 'package:gtn_2/settings/game_settings.dart';
 
 void main() {
@@ -198,6 +201,43 @@ void main() {
       expect(restored.minimum, 100);
       expect(restored.maximum, 1000);
       expect(restored.secret, 100);
+    });
+
+    test('stores Creative Mode-only slots separately until a game save is created', () async {
+      const creative = CreativeModeSave(
+        name: 'Independent sandbox',
+        enabled: true,
+        rangeMin: 10,
+        rangeMax: 500,
+      );
+      final settings = GameSettings.initial;
+      final bundle = LegacyGtn1BackupBundle(
+        formatVersion: 3,
+        appPreferences: settings,
+        activeSlot: 4,
+        slots: const {},
+        backups: const {},
+        creativeSlots: const {4: creative},
+      );
+      final backupText = await PortableSaveBackup.encryptGtn1Payload(
+        bundle.encode(),
+        'correct horse battery',
+      );
+
+      await SaveBundleStorage(directory: targetDirectory).importBackup(
+        input: backupText,
+        passphrase: 'correct horse battery',
+        legacyTargetSlot: 1,
+      );
+      final storage = SaveStorage(directory: targetDirectory, slot: 4);
+      expect(await storage.loadPrimary(), isNull);
+      expect((await storage.loadCreativeMode())!.name, 'Independent sandbox');
+
+      final created = await storage.createIfEmpty(
+        SaveData(secret: 50, attempts: 0, gamesWon: 0),
+      );
+      expect(created, isTrue);
+      expect((await storage.load())!.creativeMode!.name, 'Independent sandbox');
     });
 
     test('startup recovery restores the pre-import snapshot', () async {
