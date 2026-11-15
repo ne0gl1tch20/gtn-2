@@ -1,0 +1,131 @@
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:flutter_test/flutter_test.dart';
+import 'package:gtn_2/data/saves/save_bundle_storage.dart';
+import 'package:gtn_2/data/saves/save_data.dart';
+import 'package:gtn_2/data/saves/save_storage.dart';
+import 'package:gtn_2/settings/game_settings.dart';
+
+void main() {
+  group('SaveBundleStorage', () {
+    late Directory sourceDirectory;
+    late Directory targetDirectory;
+
+    setUp(() async {
+      sourceDirectory = await Directory.systemTemp.createTemp('gtn2-bundle-src-');
+      targetDirectory = await Directory.systemTemp.createTemp('gtn2-bundle-dst-');
+    });
+
+    tearDown(() async {
+      if (await sourceDirectory.exists()) {
+        await sourceDirectory.delete(recursive: true);
+      }
+      if (await targetDirectory.exists()) {
+        await targetDirectory.delete(recursive: true);
+      }
+    });
+
+    test('exports and imports all slots, backups, active slot and global settings', () async {
+      final slotOne = SaveStorage(directory: sourceDirectory, slot: 1);
+      await slotOne.save(SaveData(secret: 20, attempts: 1, gamesWon: 0));
+      await slotOne.save(SaveData(secret: 30, attempts: 2, gamesWon: 1));
+      final slotTwo = SaveStorage(directory: sourceDirectory, slot: 2);
+      await slotTwo.save(
+        SaveData(
+          secret: 77,
+          attempts: 4,
+          gamesWon: 3,
+          profileName: 'Second',
+        ),
+      );
+      await slotTwo.saveActiveSlot(2);
+
+      final settings = GameSettings.initial.copyWith(
+        localeCode: 'en_us',
+        themeMode: 'Dark',
+        updateCheckIntervalHours: 6,
+      );
+      final source = SaveBundleStorage(directory: sourceDirectory);
+      final backupText = await source.exportPortableBackup(
+        activeSlot: 2,
+        appPreferences: settings,
+        passphrase: 'correct horse battery',
+      );
+
+      final target = SaveBundleStorage(directory: targetDirectory);
+      final result = await target.importBackup(
+        input: backupText,
+        passphrase: 'correct horse battery',
+        legacyTargetSlot: 1,
+      );
+
+      expect(result, isNotNull);
+      expect(result!.isFullBundle, isTrue);
+      expect(result.activeSlot, 2);
+      expect(result.importedSlots, 2);
+      expect(await SaveStorage(directory: targetDirectory).loadActiveSlot(), 2);
+      expect((await SaveStorage(directory: targetDirectory, slot: 1).loadPrimary())!.secret, 30);
+      expect((await SaveStorage(directory: targetDirectory, slot: 1).loadBackup())!.secret, 20);
+      expect((await SaveStorage(directory: targetDirectory, slot: 2).loadPrimary())!.profileName, 'Second');
+      final restoredSettings =
+          await SaveBundleStorage.loadAppPreferences(targetDirectory);
+      expect(restoredSettings!.themeMode, 'Dark');
+      expect(restoredSettings.updateCheckIntervalHours, 6);
+    });
+
+    test('wrong passphrase leaves every existing slot untouched', () async {
+      final targetSlot = SaveStorage(directory: targetDirectory, slot: 1);
+      await targetSlot.save(SaveData(secret: 88, attempts: 0, gamesWon: 0));
+      final before = await targetSlot.loadPrimary();
+
+      final source = SaveBundleStorage(directory: sourceDirectory);
+      await SaveStorage(directory: sourceDirectory, slot: 1).save(
+        SaveData(secret: 12, attempts: 0, gamesWon: 0),
+      );
+      final backupText = await source.exportPortableBackup(
+        activeSlot: 1,
+        appPreferences: GameSettings.initial,
+        passphrase: 'correct horse battery',
+      );
+
+      await expectLater(
+        targetSlot: () async => SaveBundleStorage(directory: targetDirectory)
+            .importBackup(
+              input: backupText,
+              passphrase: 'incorrect horse battery',
+              legacyTargetSlot: 1,
+            ),
+        throwsFormatException,
+      );
+      expect((await targetSlot.loadPrimary())!.secret, before!.secret);
+    });
+
+    test('startup recovery restores the pre-import snapshot', () async {
+      const transactionName = '.gtn2-bundle-import-txn';
+      final transaction = Directory('${targetDirectory.path}/$transactionName');
+      final rollback = Directory('${transaction.path}/rollback');
+      await rollback.create(recursive: true);
+      final target = File('${targetDirectory.path}/gtn2-save.json');
+      await target.writeAsString('new partial contents');
+      await File('${rollback.path}/gtn2-save.json').writeAsString('old contents');
+      await File('${transaction.path}/manifest.json').writeAsString(
+        jsonEncode({
+          'files': [
+            {'name': 'gtn2-save.json', 'existed': true},
+            {'name': 'gtn2-active-slot.json', 'existed': false},
+          ],
+        }),
+      );
+
+      await SaveBundleStorage.recoverPendingImport(targetDirectory);
+
+      expect(await target.readAsString(), 'old contents');
+      expect(
+        await File('${targetDirectory.path}/gtn2-active-slot.json').exists(),
+        isFalse,
+      );
+      expect(await transaction.exists(), isFalse);
+    });
+  });
+}
