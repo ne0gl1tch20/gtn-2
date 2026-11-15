@@ -167,6 +167,9 @@ class SaveBundleStorage {
     required String passphrase,
     required int legacyTargetSlot,
   }) async {
+    if (input.length > 20 * 1024 * 1024) {
+      throw const FormatException('Backup exceeds the 20 MB import limit.');
+    }
     await recoverPendingImport(directory);
     String? cleartext = await PortableSaveBackup.decryptGtn1Payload(
       input.trim(),
