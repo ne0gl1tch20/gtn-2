@@ -191,6 +191,16 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(previewed, isNull);
+    await tester.scrollUntilVisible(
+      find.text('Reset layout'),
+      240,
+      scrollable: find
+          .descendant(
+            of: find.byKey(const Key('menu-studio-scroll')),
+            matching: find.byType(Scrollable),
+          )
+          .first,
+    );
     await tester.tap(find.text('Reset layout'));
     await tester.pumpAndSettle();
 
