@@ -1,0 +1,15 @@
+name: jarrlyyui_flutter
+description: Native Flutter renderer and typed host bridge for jarrlyyui v1 documents.
+version: 0.1.0
+publish_to: none
+environment:
+  sdk: ">=3.6.0 <4.0.0"
+dependencies:
+  flutter:
+    sdk: flutter
+  jarrlyyui_language:
+    path: ../jarrlyyui_language
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
