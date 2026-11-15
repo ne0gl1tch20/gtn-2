@@ -3,6 +3,8 @@ import 'dart:io';
 
 import 'package:path_provider/path_provider.dart';
 
+import '../../core/creative/creative_mode.dart';
+
 import '../../settings/game_settings.dart';
 import 'legacy_gtn1_backup_bundle.dart';
 import 'legacy_gtn1_save_adapter.dart';
@@ -140,12 +142,15 @@ class SaveBundleStorage {
     await recoverPendingImport(directory);
     final slots = <int, SaveData>{};
     final backups = <int, SaveData>{};
+    final creativeSlots = <int, CreativeModeSave>{};
     for (var slot = 1; slot <= SaveStorage.maxSaveSlots; slot++) {
       final storage = SaveStorage(directory: directory, slot: slot);
       final primary = await storage.loadPrimary();
       final backup = await storage.loadBackup();
       if (primary != null) slots[slot] = primary;
       if (backup != null) backups[slot] = backup;
+      final creative = await storage.loadCreativeMode() ?? primary?.creativeMode;
+      if (creative != null) creativeSlots[slot] = creative;
     }
     final bundle = LegacyGtn1BackupBundle(
       formatVersion: 3,
@@ -153,11 +158,7 @@ class SaveBundleStorage {
       activeSlot: activeSlot,
       slots: slots,
       backups: backups,
-      creativeSlots: {
-        for (final entry in slots.entries)
-          if (entry.value.creativeMode != null)
-            entry.key: entry.value.creativeMode!,
-      },
+      creativeSlots: creativeSlots,
     );
     return PortableSaveBackup.encryptGtn1Payload(bundle.encode(), passphrase);
   }
@@ -225,16 +226,19 @@ class SaveBundleStorage {
       final settings = imported.settings;
       final slots = <int, SaveData>{};
       final backups = <int, SaveData>{};
+      final creativeSlots = <int, CreativeModeSave>{};
       for (var slot = 1; slot <= SaveStorage.maxSaveSlots; slot++) {
         final storage = SaveStorage(directory: directory, slot: slot);
         final current = await storage.loadPrimary();
         final backup = await storage.loadBackup();
         if (current != null) slots[slot] = current;
         if (backup != null) backups[slot] = backup;
+        final creative = await storage.loadCreativeMode() ?? current?.creativeMode;
+        if (creative != null) creativeSlots[slot] = creative;
       }
       final target = legacyTargetSlot.clamp(1, SaveStorage.maxSaveSlots).toInt();
       final existingPrimary = slots[target];
-      final existingCreative = existingPrimary?.creativeMode;
+      final existingCreative = creativeSlots[target] ?? existingPrimary?.creativeMode;
       if (existingPrimary != null) backups[target] = existingPrimary;
       final protected = existingPrimary == null
           ? imported
@@ -249,11 +253,7 @@ class SaveBundleStorage {
         activeSlot: target,
         slots: slots,
         backups: backups,
-        creativeSlots: {
-          for (final entry in slots.entries)
-            if (entry.value.creativeMode != null)
-              entry.key: entry.value.creativeMode!,
-        },
+        creativeSlots: creativeSlots,
       );
     } else {
       throw const FormatException('Import is not a GTN1 save or backup bundle.');
@@ -310,6 +310,10 @@ class SaveBundleStorage {
           : jsonEncode(backup.copyWith(settings: bundle.appPreferences).toJson());
       targets['$filename.tmp'] = null;
       targets['$filename.restore-tmp'] = null;
+      final creative = bundle.creativeSlots[slot];
+      targets['gtn2-creative-slot$slot.json'] = creative == null
+          ? null
+          : CreativeModeSave.encode(creative);
     }
     targets['gtn2-active-slot.json'] =
         jsonEncode({'schemaVersion': 1, 'slot': bundle.activeSlot});
