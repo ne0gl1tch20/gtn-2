@@ -429,3 +429,14 @@ Batch A remains active until Dashboard, More, Settings, Menu Studio, Profile and
 - Android artifact: ID 14183730859, 99,204,521 bytes, SHA-256 bf6b403b0a13029a9e775477bf9fdc8f910f0ea2554481dde8784d8c535057af, expires 2026-11-22; https://api.github.com/repos/ne0gl1tch20/gtn-2/actions/artifacts/14183730859/zip
 - Windows artifact: ID 14183332045, 58,386,281 bytes, SHA-256 bf6c0344c80241cac99c83262705d2e79fc161c9da9cc1db2822964fb321e30a, expires 2026-11-22; https://api.github.com/repos/ne0gl1tch20/gtn-2/actions/artifacts/14183332045/zip
 - This is CI/build validation only. Batch A still requires Android and Windows runtime visual evidence and verification of all six surfaces. Upgrade Shop overflow and World Map hero-heading wrap remain follow-up defects outside this fix set.
+
+
+### Validate #1952 final result and main checklist refresh — 2026-11-16
+
+- PR #74 head `217df064c85f34e821ad5aa6718a5d7a7ddd3016` passed Validate run [#1952](https://github.com/ne0gl1tch20/gtn-2/actions/runs/43769040774).
+- Format and analysis: success. Flutter tests: 435 passed. Android debug APK: success. Windows desktop debug build: success. Windows release installer: skipped by the debug validation workflow.
+- Android artifact: ID 14183164620, 99,204,521 bytes, SHA-256 `d94070c2a52653f22dffd2fb367609ea9174f4368d6a7499658be5671151a667`, expires 2026-11-22.
+- Windows artifact: ID 14184055785, 58,386,570 bytes, SHA-256 `431b054364e5bbff647a4b141fa036105ce4c50685e2fd146d0921d384b7d5ce`, expires 2026-11-22.
+- This confirms CI coverage for the Nimmy first-run, portable backup cancellation/confirmation, compact navigation and dashboard input regression changes. It does not provide live Android/Windows runtime evidence.
+- The authoritative checklist on `main` was refreshed in commit `001dd98fff8c4504b57cadd320180d57ec03d86b` to replace stale pending CI statements with the #1952 result while keeping device checks open.
+- Batch A remains active. PR #74 remains draft. Batch B remains blocked pending Android/Windows runtime checks, paired screenshots and all six surface exit criteria. The 51px Upgrade Shop overflow and World Map hero-heading wrap remain separate follow-up defects and are not included in this PR's fix claim.
