@@ -43,23 +43,6 @@ class LegacyGtn1BackupBundle {
     final backups = _decodeSaveMap(decoded['backups'], 'backups', settings);
     final creative = _decodeCreativeMap(decoded['creativeSlots']);
 
-    // GTN1 stores Creative Mode configurations in a separate per-slot map.
-    // GTN2 keeps the sandbox configuration nested in SaveData, so attach it
-    // after decoding the authoritative primary and backup game states.
-    for (final entry in creative.entries) {
-      final current = slots[entry.key];
-      if (current == null) {
-        slots[entry.key] = SaveData(
-          secret: 50,
-          attempts: 0,
-          gamesWon: 0,
-          settings: settings,
-          creativeMode: entry.value,
-        );
-      } else {
-        slots[entry.key] = current.copyWith(creativeMode: entry.value);
-      }
-    }
 
     return LegacyGtn1BackupBundle(
       formatVersion: version,
@@ -89,14 +72,14 @@ class LegacyGtn1BackupBundle {
           jsonEncode(LegacyGtn1SaveAdapter.toGameStateJson(entry.value));
     }
     final creativeJson = <String, String>{};
-    for (final entry in creativeSlots.entries) {
-      creativeJson['${entry.key}'] = CreativeModeSave.encode(entry.value);
-    }
     for (final entry in slots.entries) {
       final creative = entry.value.creativeMode;
       if (creative != null) {
         creativeJson['${entry.key}'] = CreativeModeSave.encode(creative);
       }
+    }
+    for (final entry in creativeSlots.entries) {
+      creativeJson['${entry.key}'] = CreativeModeSave.encode(entry.value);
     }
     return jsonEncode({
       'formatVersion': 3,
