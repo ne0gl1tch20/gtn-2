@@ -186,7 +186,7 @@ void main() {
           'statistics': {
             'totalGuesses': 10,
             'correctGuesses': 4,
-            'failedGuesses': 6,
+            'failedGuesses': 9,
             'arcadePlayed': 3,
             'arcadeBestScores': {'classic': 42},
           },
@@ -202,7 +202,7 @@ void main() {
         final sourceArcadeScores = Map<String, dynamic>.from(
           sourceStatistics['arcadeBestScores'] as Map,
         );
-        expect(sourceStatistics['failedGuesses'], 6);
+        expect(sourceStatistics['failedGuesses'], 9);
         expect(sourceArcadeScores['classic'], 42);
         expect((source['settings'] as Map)['locale'], 'en-US');
       },
