@@ -123,7 +123,7 @@ class SaveStorage {
     final backup = File('${_file.path}.bak');
     final backupSave = await _readSave(backup);
     if (backupSave != null) {
-      await _restoreRecoveryFile(backup);
+      await _restoreRecoveryFile(backup, keepCandidate: true);
       return backupSave;
     }
     return null;
@@ -227,13 +227,20 @@ class SaveStorage {
     }
   }
 
-  Future<void> _restoreRecoveryFile(File candidate) async {
+  Future<void> _restoreRecoveryFile(
+    File candidate, {
+    bool keepCandidate = false,
+  }) async {
     if (await _file.exists()) {
       final corrupt = File('${_file.path}.corrupt');
       if (await corrupt.exists()) await corrupt.delete();
       await _file.rename(corrupt.path);
     }
-    await candidate.rename(_file.path);
+    if (keepCandidate) {
+      await candidate.copy(_file.path);
+    } else {
+      await candidate.rename(_file.path);
+    }
   }
 
   bool _isValidSave(SaveData data) {
