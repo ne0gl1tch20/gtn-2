@@ -122,12 +122,6 @@ class LegacyGtn1SaveAdapter {
       legacySystems: LegacySystemsState.fromJson(legacy),
     );
 
-    if (unsupported.isNotEmpty) {
-      throw FormatException(
-        'GTN1 save contains fields that GTN2 cannot preserve yet: ${unsupported.join(', ')}',
-      );
-    }
-
     final rawDifficulty = _string(source, 'difficultyId', fallback: 'classic');
     final difficulty = const {'classic', 'hard', 'extreme'}.contains(rawDifficulty)
         ? rawDifficulty
