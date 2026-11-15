@@ -170,17 +170,35 @@ void main() {
       expect((source['settings'] as Map)['locale'], 'en-US');
     });
 
-    test('rejects malformed source types and invalid GTN2 invariants', () {
+    test('rejects malformed source types and mirrors GTN1 negative-value sanitization', () {
       expect(
         () => LegacyGtn1SaveAdapter.fromGameStateJson({'attempts': 'many'}),
         throwsFormatException,
       );
-      expect(
-        () => LegacyGtn1SaveAdapter.fromGameStateJson({
-          'attempts': -1,
-        }),
-        throwsFormatException,
-      );
+      final sanitized = LegacyGtn1SaveAdapter.fromGameStateJson({
+        'attempts': -1,
+        'correctGuesses': -2,
+        'streak': -3,
+        'bestStreak': -4,
+        'money': '-10',
+        'prestige': '-2',
+        'ultra': '-1',
+        'nebula': '-9',
+        'currentRangeMin': -10,
+        'currentRangeMax': -5,
+        'targetNumber': -1,
+      });
+      expect(sanitized.attempts, 0);
+      expect(sanitized.correctGuesses, 0);
+      expect(sanitized.streak, 0);
+      expect(sanitized.bestStreak, 0);
+      expect(sanitized.progression.money.toString(), '0');
+      expect(sanitized.progression.prestige.toString(), '0');
+      expect(sanitized.progression.ultra.toString(), '0');
+      expect(sanitized.progression.nebula.toString(), '0');
+      expect(sanitized.minimum, 1);
+      expect(sanitized.maximum, 100);
+      expect(sanitized.secret, 1);
     });
 
     test('accepts absent legacy fields using GTN1 defaults', () {
