@@ -410,7 +410,8 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
               child: const Text('Cancel'),
             ),
             FilledButton(
-              onPressed: passphrase.text.length >= 12 &&
+              onPressed:
+                  passphrase.text.length >= 12 &&
                       passphrase.text == confirmPassphrase.text
                   ? () => Navigator.pop(dialogContext, passphrase.text)
                   : null,
