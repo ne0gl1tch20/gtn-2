@@ -455,7 +455,7 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
                 obscureText: true,
                 decoration: const InputDecoration(
                   labelText: 'Passphrase (portable backup)',
-                  helperText: 'Leave blank only for an older GTN1 single-save export.',
+                  helperText: 'Leave blank for an older GTN1 Base64/XOR export.',
                 ),
               ),
             ],
@@ -508,6 +508,7 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
     );
     if (replace != true || !mounted) return;
     setState(() => _working = 0);
+    var importCommitted = false;
     try {
       final storage = await SaveBundleStorage.inApplicationDocuments();
       final result = await storage.importBackup(
@@ -518,8 +519,8 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
       if (result == null) {
         throw const FormatException('Backup could not be decoded.');
       }
+      importCommitted = true;
       await widget.onImportComplete?.call(result.activeSlot);
-      await _refresh();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -530,11 +531,18 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
             ),
           ),
         );
+        Navigator.of(context).pop();
       }
     } catch (error) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Import failed. Existing saves were preserved: $error')),
+          SnackBar(
+            content: Text(
+              importCommitted
+                  ? 'Backup imported, but app reload did not finish: $error'
+                  : 'Import failed. Existing saves were preserved: $error',
+            ),
+          ),
         );
       }
     } finally {
