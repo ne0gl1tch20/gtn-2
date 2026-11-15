@@ -526,7 +526,11 @@ class LegacyGtn1SaveAdapter {
     Map<String, dynamic> source,
     String key,
   ) {
-    final value = _bigNumber(source, key);
+    final raw = source[key] ?? '0';
+    if (raw is! String && raw is! num) {
+      throw FormatException('Invalid GTN1 currency: $key');
+    }
+    final value = BigNumber.parse(raw.toString());
     return value.compareTo(BigNumber.fromInt(0)) < 0
         ? BigNumber.fromInt(0)
         : value;
