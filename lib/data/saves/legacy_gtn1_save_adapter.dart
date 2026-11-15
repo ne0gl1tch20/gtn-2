@@ -32,6 +32,14 @@ class LegacyGtn1SaveAdapter {
     final settingsJson = _object(source, 'settings');
     final traitJson = _object(source, 'traitProfile');
     final adaptiveTraitProfile = _adaptiveTraitProfile(traitJson);
+    final attempts = _sanitizedCount(source, 'attempts');
+    final correctGuesses = _sanitizedCount(source, 'correctGuesses')
+        .clamp(0, attempts)
+        .toInt();
+    final streak = _sanitizedCount(source, 'streak');
+    final bestStreak = _sanitizedCount(source, 'bestStreak') < streak
+        ? streak
+        : _sanitizedCount(source, 'bestStreak');
 
     final legacy = <String, dynamic>{
       ...extensionLegacy,
@@ -95,15 +103,15 @@ class LegacyGtn1SaveAdapter {
       'botTotalGuesses': _int(source, 'botTotalGuesses'),
       'botCorrectGuesses': _int(source, 'botCorrectGuesses'),
       'botIncorrectGuesses': _int(source, 'botIncorrectGuesses'),
-      'lastSaveTimestamp': _int(source, 'lastSaveTimestamp'),
-      'timeTravelPenaltyUntil': _int(source, 'timeTravelPenaltyUntil'),
+      'lastSaveTimestamp': _sanitizedCount(source, 'lastSaveTimestamp'),
+      'timeTravelPenaltyUntil': _sanitizedCount(source, 'timeTravelPenaltyUntil'),
     };
 
     final progression = ProgressionState(
-      money: _bigNumber(source, 'money'),
-      prestige: _bigNumber(source, 'prestige'),
-      ultra: _bigNumber(source, 'ultra'),
-      nebula: _bigNumber(source, 'nebula'),
+      money: _sanitizedBigNumber(source, 'money'),
+      prestige: _sanitizedBigNumber(source, 'prestige'),
+      ultra: _sanitizedBigNumber(source, 'ultra'),
+      nebula: _sanitizedBigNumber(source, 'nebula'),
       nebulaItems: _map(extensionProgression, 'nebulaItems'),
       upgrades: _map(source, 'upgradeLevels'),
       prestigeUpgrades: _map(source, 'prestigeUpgradeLevels'),
@@ -119,8 +127,8 @@ class LegacyGtn1SaveAdapter {
       randomEventsTriggered: _int(statistics, 'randomEventsTriggered'),
       lastRandomEventId: _supportedRandomEvent(_nullableString(source, 'lastRandomEventId')),
       bossDamage: _map(source, 'bossBattleProgress'),
-      currentStreak: _int(source, 'streak'),
-      bestStreak: _int(source, 'bestStreak'),
+      currentStreak: streak,
+      bestStreak: bestStreak,
       playtimeSeconds: _int(statistics, 'playtimeSeconds'),
       achievements: _set(source, 'achievements'),
       nebulaEarned: _bigNumber(statistics, 'nebulaEarned'),
@@ -139,18 +147,18 @@ class LegacyGtn1SaveAdapter {
     final name = _string(source, 'profileName').trim();
     final creative = _bool(source, 'creativeModeEnabled');
     final minimum = creative
-        ? _int(source, 'currentRangeMin', fallback: 1).clamp(1, 1000000).toInt()
+        ? _signedInt(source, 'currentRangeMin', fallback: 1).clamp(1, 1000000).toInt()
         : 1;
-    final rawMaximum = _int(source, 'currentRangeMax', fallback: 100);
+    final rawMaximum = _signedInt(source, 'currentRangeMax', fallback: 100);
     final maximum = creative
         ? rawMaximum.clamp(minimum, 1000000).toInt()
         : rawMaximum.clamp(DifficultyRules.baseRangeMaximum(difficulty), 500).toInt();
     final data = SaveData(
-      secret: _int(source, 'targetNumber', fallback: 50).clamp(minimum, maximum).toInt(),
-      attempts: _int(source, 'attempts'),
-      correctGuesses: _int(source, 'correctGuesses'),
-      streak: _int(source, 'streak'),
-      bestStreak: _int(source, 'bestStreak'),
+      secret: _signedInt(source, 'targetNumber', fallback: 50).clamp(minimum, maximum).toInt(),
+      attempts: attempts,
+      correctGuesses: correctGuesses,
+      streak: streak,
+      bestStreak: bestStreak,
       gamesWon: _int(extensions, 'gamesWon', fallback: _int(source, 'gamesWon')),
       isComplete: _bool(extensions, 'isComplete', fallback: _bool(source, 'isComplete')),
       minimum: minimum,
@@ -493,6 +501,35 @@ class LegacyGtn1SaveAdapter {
     if (value == null) return null;
     if (value is! String) throw FormatException('Invalid GTN1 string: $key');
     return value;
+  }
+
+  static int _signedInt(
+    Map<String, dynamic> source,
+    String key, {
+    int fallback = 0,
+  }) {
+    final value = source[key] ?? fallback;
+    if (value is! int) throw FormatException('Invalid GTN1 integer: $key');
+    return value;
+  }
+
+  static int _sanitizedCount(
+    Map<String, dynamic> source,
+    String key, {
+    int fallback = 0,
+  }) {
+    final value = _signedInt(source, key, fallback: fallback);
+    return value < 0 ? 0 : value;
+  }
+
+  static BigNumber _sanitizedBigNumber(
+    Map<String, dynamic> source,
+    String key,
+  ) {
+    final value = _bigNumber(source, key);
+    return value.compareTo(BigNumber.fromInt(0)) < 0
+        ? BigNumber.fromInt(0)
+        : value;
   }
 
   static BigNumber _bigNumber(Map<String, dynamic> source, String key) {
