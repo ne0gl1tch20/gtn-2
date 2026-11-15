@@ -1404,37 +1404,45 @@ class _GameHomePageState extends State<GameHomePage>
     if (!mounted) return;
     final today = DateTime.now().toIso8601String().substring(0, 10);
     if (_progression.legacySystems.lastDailyRewardDate != today) {
-      final claim = await showDialog<bool>(
-        context: context,
-        builder: (dialogContext) => AlertDialog(
-          title: const Text('Daily Nebula Reward'),
-          content: const Text('Claim today’s reward and keep your streak alive.'),
-          actions: [
-            TextButton(onPressed: () => Navigator.pop(dialogContext, false), child: const Text('Later')),
-            FilledButton.icon(
-              onPressed: () => Navigator.pop(dialogContext, true),
-              icon: const Icon(Icons.card_giftcard_rounded),
-              label: const Text('Claim reward'),
-            ),
-          ],
-        ),
+      final effects = _legacySystemsEngine.evaluateTraits(
+        progression: _progression,
+        systems: _progression.legacySystems,
+        playerLevel: 1,
+        activeSeasonId: _currentSeasonId(),
       );
-      if (claim == true && mounted) {
-        final effects = _legacySystemsEngine.evaluateTraits(
-          progression: _progression,
-          systems: _progression.legacySystems,
-          playerLevel: 1,
-          activeSeasonId: _currentSeasonId(),
+      final reward = _legacySystemsEngine.claimDailyReward(
+        progression: _progression,
+        systems: _progression.legacySystems,
+        today: today,
+        traitNebulaBonus: effects.nebulaBonusPerClaim,
+        nebulaBoostOwned: (_progression.nebulaItems['nebula_boost'] ?? 0) > 0,
+      );
+      if (reward.accepted) {
+        final amount = reward.progression.nebula - _progression.nebula;
+        final claim = await showDialog<bool>(
+          context: context,
+          builder: (dialogContext) => AlertDialog(
+            title: const Text('Daily Nebula Reward'),
+            content: Text(
+              'Day ${reward.systems.dailyRewardStreak} streak · +$amount Nebula',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext, false),
+                child: const Text('Later'),
+              ),
+              FilledButton.icon(
+                onPressed: () => Navigator.pop(dialogContext, true),
+                icon: const Icon(Icons.card_giftcard_rounded),
+                label: const Text('Claim reward'),
+              ),
+            ],
+          ),
         );
-        final result = _legacySystemsEngine.claimDailyReward(
-          progression: _progression,
-          systems: _progression.legacySystems,
-          today: today,
-          traitNebulaBonus: effects.nebulaBonusPerClaim,
-          nebulaBoostOwned: (_progression.nebulaItems['nebula_boost'] ?? 0) > 0,
-        );
-        if (result.accepted) {
-          await _applyLegacyProgression(result.progression.copyWith(legacySystems: result.systems));
+        if (claim == true && mounted) {
+          await _applyLegacyProgression(
+            reward.progression.copyWith(legacySystems: reward.systems),
+          );
         }
       }
     }
