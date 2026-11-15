@@ -157,11 +157,15 @@ class LegacyGtn1SaveAdapter {
     final creative = _bool(source, 'creativeModeEnabled');
     final minimum = creative
         ? _int(source, 'currentRangeMin', fallback: 1).clamp(1, 1000000)
+        .toInt()
         : 1;
     final maximum = _int(source, 'currentRangeMax', fallback: 100)
-        .clamp(minimum, 1000000);
+        .clamp(minimum, 1000000)
+        .toInt();
     final data = SaveData(
-      secret: _int(source, 'targetNumber', fallback: 50).clamp(minimum, maximum),
+      secret: _int(source, 'targetNumber', fallback: 50)
+          .clamp(minimum, maximum)
+          .toInt(),
       attempts: _int(source, 'attempts'),
       correctGuesses: _int(source, 'correctGuesses'),
       streak: _int(source, 'currentStreak'),
@@ -172,7 +176,7 @@ class LegacyGtn1SaveAdapter {
       maximum: maximum,
       progression: progression,
       settings: settings,
-      profileName: name.substring(0, name.length.clamp(0, 24)),
+      profileName: name.substring(0, name.length > 24 ? 24 : name.length),
       profileIconId: _profileIcon(_string(source, 'profileIconId', fallback: 'default')),
       creativeModeEnabled: creative,
     );
