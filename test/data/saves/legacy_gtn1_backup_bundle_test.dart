@@ -87,10 +87,13 @@ void main() {
       final retained =
           decoded.slots[2]!.progression.legacySystems.legacyGtn1Snapshot;
       expect(retained['shopPurchases'], ['old_shop_item']);
-      expect(
-        (retained['statistics'] as Map)['arcadeBestScores']['classic'],
-        100,
+      final retainedStatistics = Map<String, dynamic>.from(
+        retained['statistics'] as Map,
       );
+      final retainedScores = Map<String, dynamic>.from(
+        retainedStatistics['arcadeBestScores'] as Map,
+      );
+      expect(retainedScores['classic'], 100);
     });
 
     test('rejects malformed maps, unsupported versions and invalid slots', () {
