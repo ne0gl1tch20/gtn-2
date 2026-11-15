@@ -1359,6 +1359,10 @@ class _GameHomePageState extends State<GameHomePage>
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) unawaited(_openInitialSaveSlots());
       });
+    } else if (_hasActiveSave) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) unawaited(_presentStartupExperience());
+      });
     }
   }
 
