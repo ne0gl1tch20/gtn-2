@@ -284,6 +284,12 @@ Green CI is build/test evidence only. It does not prove live Android/Windows beh
 
 | 2026-11-15 11:33 | `ca5c6c16a37e9c3aff52f37d83edef21085e2cee` | Log Menu Studio and settings test fixes plus About ink-surface fix | Audit | `menu-studio.js; web-play/app.js; AboutScreen.kt` | `docs/BATCH_A_COMMIT_LOG.md` | Self-logs the three failed-test diagnoses and their source/UI corrections |
 
+| 2026-11-15 11:34 | `3d4530bf62eeef0579925cf6328c9b9090b295c7` | Add temporary About page formatter diagnostic | CI support | — | `.github/workflows/validate.yml` | Temporarily prints Dart formatter output after the About ink-surface change failed format gate |
+| 2026-11-15 11:34 | `b3489ade8621e853b1ddb13203e6e14a8ac7c2a4` | Apply exact Dart formatter output to About ink-surface fix | UI / About | `AboutScreen.kt` | `lib/legacy/legacy_pages.dart` | Applies the exact Dart 3.14 formatted file output |
+| 2026-11-15 11:34 | `840cb295820e8db1651a3de6d0fe0b1a081bd91b` | Remove temporary About formatter diagnostic | CI cleanup | — | `.github/workflows/validate.yml` | Restores the standard validation workflow without diagnostic output steps |
+| 2026-11-15 11:34 | `43673074998` | Validate #1905 — formatting gate failed | CI / About | — | `lib/legacy/legacy_pages.dart` | Formatter identified the About ink-surface file as the only unformatted source |
+| 2026-11-15 11:34 | `43673142844` | Validate #1906 — formatting diagnostic | CI / About | — | `lib/legacy/legacy_pages.dart` | Diagnostic captured the exact formatted source; the formatting correction was applied and diagnostic step removed |
+
 ### Current Creative Save implementation state
 
 - **Implemented and CI-verified:** schema-v7 permanent `creativeModeEnabled` flag with old-save default false; separate from the existing isolated `creativeMode` sandbox payload.
