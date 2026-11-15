@@ -366,63 +366,10 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
   };
 
   Future<void> _exportPortableBackup() async {
-    final passphrase = TextEditingController();
-    final confirmPassphrase = TextEditingController();
     final confirmed = await showDialog<String>(
       context: context,
-      builder: (dialogContext) => StatefulBuilder(
-        builder: (context, setDialogState) => AlertDialog(
-          title: const Text('Export portable backup'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text(
-                  'Use a passphrase with at least 12 characters. You will need '
-                  'this exact passphrase to restore the backup on another device. '
-                  'It cannot be recovered.',
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: passphrase,
-                  obscureText: true,
-                  autofocus: true,
-                  onChanged: (_) => setDialogState(() {}),
-                  decoration: const InputDecoration(
-                    labelText: 'Backup passphrase',
-                  ),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: confirmPassphrase,
-                  obscureText: true,
-                  onChanged: (_) => setDialogState(() {}),
-                  decoration: const InputDecoration(
-                    labelText: 'Confirm passphrase',
-                  ),
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('Cancel'),
-            ),
-            FilledButton(
-              onPressed:
-                  passphrase.text.length >= 12 &&
-                      passphrase.text == confirmPassphrase.text
-                  ? () => Navigator.pop(dialogContext, passphrase.text)
-                  : null,
-              child: const Text('Encrypt & Copy'),
-            ),
-          ],
-        ),
-      ),
+      builder: (_) => const _PortableBackupExportDialog(),
     );
-    passphrase.dispose();
-    confirmPassphrase.dispose();
     if (confirmed == null || !mounted) return;
     if (confirmed.length < 12) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -954,6 +901,80 @@ class _SaveSlotsPageState extends State<SaveSlotsPage> {
       ),
     );
   }
+}
+
+
+class _PortableBackupExportDialog extends StatefulWidget {
+  const _PortableBackupExportDialog();
+
+  @override
+  State<_PortableBackupExportDialog> createState() =>
+      _PortableBackupExportDialogState();
+}
+
+class _PortableBackupExportDialogState
+    extends State<_PortableBackupExportDialog> {
+  final TextEditingController _passphrase = TextEditingController();
+  final TextEditingController _confirmation = TextEditingController();
+
+  bool get _canExport =>
+      _passphrase.text.length >= 12 &&
+      _passphrase.text == _confirmation.text;
+
+  @override
+  void dispose() {
+    _passphrase.dispose();
+    _confirmation.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => AlertDialog(
+    title: const Text('Export portable backup'),
+    content: SingleChildScrollView(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text(
+            'Use a passphrase with at least 12 characters. You will need '
+            'this exact passphrase to restore the backup on another device. '
+            'It cannot be recovered.',
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _passphrase,
+            obscureText: true,
+            autofocus: true,
+            onChanged: (_) => setState(() {}),
+            decoration: const InputDecoration(
+              labelText: 'Backup passphrase',
+            ),
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _confirmation,
+            obscureText: true,
+            onChanged: (_) => setState(() {}),
+            decoration: const InputDecoration(
+              labelText: 'Confirm passphrase',
+            ),
+          ),
+        ],
+      ),
+    ),
+    actions: [
+      TextButton(
+        onPressed: () => Navigator.pop(context),
+        child: const Text('Cancel'),
+      ),
+      FilledButton(
+        onPressed: _canExport
+            ? () => Navigator.pop(context, _passphrase.text)
+            : null,
+        child: const Text('Encrypt & Copy'),
+      ),
+    ],
+  );
 }
 
 class _ResetEverythingDialog extends StatefulWidget {
