@@ -1327,7 +1327,7 @@ class _GameHomePageState extends State<GameHomePage>
         setState(() {
           _playerProfile = profile;
           _isPlayerProfileLoaded = true;
-          _firstRunNeedsSaveSlotSelection = !profile.setupComplete;
+          _firstRunNeedsSaveSlotSelection = !profile.setupComplete && !_hasActiveSave;
         });
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!mounted || !_playerProfile.setupComplete) return;
@@ -1343,7 +1343,7 @@ class _GameHomePageState extends State<GameHomePage>
       if (mounted) {
         setState(() {
           _isPlayerProfileLoaded = true;
-          _firstRunNeedsSaveSlotSelection = true;
+          _firstRunNeedsSaveSlotSelection = !_hasActiveSave;
         });
       }
     }
@@ -1567,6 +1567,7 @@ class _GameHomePageState extends State<GameHomePage>
         ),
       ),
     );
+    if (mounted && _hasActiveSave) await _presentStartupExperience();
   }
 
   Future<void> _updateSettings(GameSettings settings) async {
