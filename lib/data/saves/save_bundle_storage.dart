@@ -149,7 +149,7 @@ class SaveBundleStorage {
       final backup = await storage.loadBackup();
       if (primary != null) slots[slot] = primary;
       if (backup != null) backups[slot] = backup;
-      final creative = await storage.loadCreativeMode() ?? primary?.creativeMode;
+      final creative = primary?.creativeMode ?? await storage.loadCreativeMode();
       if (creative != null) creativeSlots[slot] = creative;
     }
     final bundle = LegacyGtn1BackupBundle(
@@ -233,7 +233,7 @@ class SaveBundleStorage {
         final backup = await storage.loadBackup();
         if (current != null) slots[slot] = current;
         if (backup != null) backups[slot] = backup;
-        final creative = await storage.loadCreativeMode() ?? current?.creativeMode;
+        final creative = current?.creativeMode ?? await storage.loadCreativeMode();
         if (creative != null) creativeSlots[slot] = creative;
       }
       final target = legacyTargetSlot.clamp(1, SaveStorage.maxSaveSlots).toInt();
