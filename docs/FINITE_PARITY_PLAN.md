@@ -326,4 +326,4 @@ The GTN2 follow-up on `batch-a/creative-save-active-slot` now:
 
 A regression test now taps the active empty slot directly and verifies clean dialog dismissal. Upgrade Shop's 51px overflow and World Map hero-heading wrap remain separate defects.
 
-Current code head: `322ec8551def094f867d98f55b02a438a773e2c3`. Validate run #1975 is pending at [run #1975](https://github.com/ne0gl1tch20/gtn-2/actions/runs/43777288634). Do not claim the fixes validated, do not close Batch A, and do not unblock Batch B until this run passes and Android/Windows runtime screenshots verify the affected flows. PR #74 remains draft.
+Current code head: `322ec8551def094f867d98f55b02a438a773e2c3`. Validate run #1975 is at [run #1975](https://github.com/ne0gl1tch20/gtn-2/actions/runs/43777288634). Format and analysis passed; Flutter tests, Android APK build and Windows desktop debug build are running. Do not claim full validation, do not close Batch A, and do not unblock Batch B until all jobs pass and Android/Windows runtime screenshots verify the affected flows. PR #74 remains draft.
