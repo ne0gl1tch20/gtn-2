@@ -47,7 +47,6 @@ void main() {
           'ultrasCount': 1,
           'nebulaEarned': 9,
           'playtimeSeconds': 3600,
-          'arcadePlayed': 0,
           'randomEventsTriggered': 4,
         },
         'traitProfile': {
@@ -137,12 +136,15 @@ void main() {
         save.progression.legacySystems.legacyGtn1Snapshot['shopPurchases'],
         isNull,
       );
-      final sourceStats =
-          save.progression.legacySystems.legacyGtn1Snapshot['statistics']
-              as Map;
+      final sourceStats = Map<String, dynamic>.from(
+        save.progression.legacySystems.legacyGtn1Snapshot['statistics'] as Map,
+      );
       expect(sourceStats['failedGuesses'], 17);
       expect(sourceStats['arcadePlayed'], 12);
-      expect(sourceStats['arcadeBestScores']['classic'], 100);
+      final arcadeScores = Map<String, dynamic>.from(
+        sourceStats['arcadeBestScores'] as Map,
+      );
+      expect(arcadeScores['classic'], 100);
     });
 
     test(
@@ -194,11 +196,14 @@ void main() {
         expect(source['shopPurchases'], ['range_boost']);
         expect(source['nebula'], '0');
         expect(source['streak'], 0);
-        expect((source['statistics'] as Map)['failedGuesses'], 6);
-        expect(
-          (source['statistics'] as Map)['arcadeBestScores']['classic'],
-          42,
+        final sourceStatistics = Map<String, dynamic>.from(
+          source['statistics'] as Map,
         );
+        final sourceArcadeScores = Map<String, dynamic>.from(
+          sourceStatistics['arcadeBestScores'] as Map,
+        );
+        expect(sourceStatistics['failedGuesses'], 6);
+        expect(sourceArcadeScores['classic'], 42);
         expect((source['settings'] as Map)['locale'], 'en-US');
       },
     );
