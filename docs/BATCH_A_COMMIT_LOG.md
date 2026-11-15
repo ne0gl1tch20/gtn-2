@@ -328,3 +328,26 @@ Append one row per commit to the ledger table below, then add a detailed entry u
 ### Batch A exit gate
 
 Batch A remains active until Dashboard, More, Settings, Menu Studio, Profile and Save Slots all pass source-backed behavior, persistence/reload, interaction, Android/Windows runtime and paired visual checks. Keep every unverified item open. Do not start Batch B early.
+
+
+## 5. Main-branch audit synchronization — 2026-11-15
+
+| UTC date/time | Commit SHA | Commit subject | Batch A item(s) | GTN1 source paths | GTN2 paths changed | Tests / CI | Result and remaining gaps |
+|---|---|---|---|---|---|---|---|
+| 2026-11-15 09:44 | `a77564dfdc043869ae53681b4813ffee593641d1` | Refresh Batch A status and evidence on main | Audit / plan | Pinned GTN1 inventory and source references | `docs/FINITE_PARITY_PLAN.md` | Documentation-only; no CI run | Main plan refreshed and re-fetched successfully. No implementation or runtime gate closed by this commit. |
+
+### Main/continuation reconciliation checkpoint
+
+- Main plan update is committed at `a77564dfdc043869ae53681b4813ffee593641d1`.
+- PR #74 remains open/draft at head `d9b5c5c74951be13642e3547f00a216ef889a9aa`, based on `4fe04ee1572c3e4fb307cd37d796ee5312f30ce1`.
+- GitHub compare reports the continuation branch as diverged from current main: 320 commits ahead and 1 commit behind, with merge base `4fe04ee1572c3e4fb307cd37d796ee5312f30ce1`. This is not a simple fast-forward. Inspect/reconcile the one main-only documentation commit and re-run full validation on the reconciled head before merge.
+- The latest PR description cites Validate run `43673480248` for formatting, analysis, 432 Flutter tests, Android debug APK and Windows desktop debug builds. Windows release installer was skipped. This remains CI-only evidence, not live runtime or paired visual verification.
+- The ledger is now synchronized to main as an audit document. Continue appending entries on the active implementation branch and keep the main copy current; do not overwrite newer main plan evidence with the older branch copy.
+- Batch A remains active. Dashboard, More, Settings, Menu Studio, Profile and Save Slots must all pass the full source-backed behavior, persistence/reload, interaction, Android/Windows runtime and paired visual exit gate. Batch B remains blocked.
+
+
+| 2026-11-15 09:44 | `1287b1237632528a74482d2e1a9f7d6ee91d2cda` | Synchronize Batch A commit ledger to main | Audit | — | `docs/BATCH_A_COMMIT_LOG.md` | Documentation only | Adds the append-only ledger to main, preserving the continuation branch history and recording the branch/main divergence. |
+| 2026-11-15 09:44 | `bf82a00ed56998c6547fb8aac7b4965f84f09e79` | Correct Batch A ledger UTC timestamp | Audit | — | `docs/BATCH_A_COMMIT_LOG.md` | Documentation only | Replaces the temporary timestamp placeholder with 2026-11-15 09:44 UTC. |
+| 2026-11-15 09:44 | `8ce10472da8b8db03764ed4f525bb1df6a7d4afe` | Sync main audit ledger and branch reconciliation status | Audit / plan | — | `docs/FINITE_PARITY_PLAN.md` | Documentation only | Corrects the plan's stale claim that the ledger is absent from main and records the exact PR #74 divergence. |
+
+| 2026-11-15 09:44 | `4987e0fe842ca5e858c525a338c80b64dd53c11c` | Refresh PR #74 divergence count | Audit / plan | — | `docs/FINITE_PARITY_PLAN.md` | Documentation only | Rechecked GitHub compare after ledger synchronization; PR branch is 320 commits ahead and 5 commits behind current main. |
