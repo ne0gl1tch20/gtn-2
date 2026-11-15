@@ -160,6 +160,162 @@ class LegacyGtn1SaveAdapter {
     return data;
   }
 
+  /// Rebuilds the pinned GTN1 GameState schema while retaining source-only
+  /// fields from the imported snapshot. Current GTN2 values always win.
+  static Map<String, dynamic> toGameStateJson(SaveData save) {
+    final legacy = save.progression.legacySystems;
+    final snapshot = legacy.legacyGtn1Snapshot;
+    final source = snapshot.isEmpty
+        ? <String, dynamic>{}
+        : Map<String, dynamic>.from(jsonDecode(jsonEncode(snapshot)) as Map);
+    final statistics = _object(source, 'statistics');
+    statistics
+      ..['totalGuesses'] = save.progression.totalGuesses
+      ..['correctGuesses'] = save.progression.correctGuesses
+      ..['failedGuesses'] = (save.progression.totalGuesses -
+              save.progression.correctGuesses)
+          .clamp(0, save.progression.totalGuesses)
+      ..['moneyEarned'] = save.progression.moneyEarned.toString()
+      ..['moneySpent'] = save.progression.moneySpent.toString()
+      ..['prestigesCount'] = save.progression.prestigeResets
+      ..['ultrasCount'] = save.progression.ultraResets
+      ..['nebulaEarned'] = _bigNumberToLong(save.progression.nebulaEarned)
+      ..['playtimeSeconds'] = save.progression.playtimeSeconds
+      ..['randomEventsTriggered'] = save.progression.randomEventsTriggered;
+
+    source
+      ..['difficultyId'] = save.settings.difficultyId
+      ..['profileName'] = save.profileName
+      ..['profileIconId'] = save.profileIconId
+      ..['creativeModeEnabled'] = save.creativeModeEnabled
+      ..['money'] = save.progression.money.toString()
+      ..['prestige'] = save.progression.prestige.toString()
+      ..['ultra'] = save.progression.ultra.toString()
+      ..['nebula'] = save.progression.nebula.toString()
+      ..['currentRangeMin'] = save.minimum
+      ..['currentRangeMax'] = save.maximum
+      ..['targetNumber'] = save.secret
+      ..['attempts'] = save.attempts
+      ..['correctGuesses'] = save.correctGuesses
+      ..['streak'] = save.streak
+      ..['bestStreak'] = save.bestStreak
+      ..['upgradeLevels'] = save.progression.upgrades
+      ..['prestigeUpgradeLevels'] = save.progression.prestigeUpgrades
+      ..['ultraUpgradeLevels'] = save.progression.ultraUpgrades
+      ..['equippedCosmeticId'] = save.progression.equippedCosmeticId
+      ..['defeatedBossIds'] = save.progression.defeatedBosses.toList()
+      ..['prestigeCount'] = save.progression.prestigeResets
+      ..['ultraCount'] = save.progression.ultraResets
+      ..['achievements'] = save.progression.achievements.toList()
+      ..['bossBattleProgress'] = save.progression.bossDamage
+      ..['statistics'] = statistics
+      ..['settings'] = toGameSettingsJson(save.settings)
+      ..['traitProfile'] = legacy.adaptiveTraitProfile.toJson()
+      ..['tutorialCompleted'] = save.settings.tutorialCompleted
+      ..['lastSaveTimestamp'] = legacy.lastSaveTimestamp
+      ..['timeTravelPenaltyUntil'] = legacy.timeTravelPenaltyUntil
+      ..['autoClickerActive'] = legacy.autoClickerActive
+      ..['autoClickerSpeed'] = legacy.autoClickerSpeed
+      ..['lastBotGuess'] = legacy.lastBotGuess
+      ..['lastBotFeedback'] = legacy.lastBotFeedback
+      ..['lastBotId'] = legacy.lastBotId
+      ..['botActionSequence'] = legacy.botActionSequence
+      ..['botTotalGuesses'] = legacy.botTotalGuesses
+      ..['botCorrectGuesses'] = legacy.botCorrectGuesses
+      ..['botIncorrectGuesses'] = legacy.botIncorrectGuesses
+      ..['activeMutators'] = legacy.activeMutators.toList()
+      ..['discoveredTraitIds'] = legacy.discoveredTraits.toList()
+      ..['selectedTraitArms'] = legacy.selectedTraitArms
+      ..['relicInventory'] = legacy.relicInventory.toList()
+      ..['equippedRelicIds'] = legacy.equippedRelics.toList()
+      ..['homeBaseLevel'] = legacy.homeBaseLevel
+      ..['dailyQuestDate'] = legacy.dailyQuestDate
+      ..['dailyQuestGuesses'] = legacy.dailyQuestGuesses
+      ..['dailyQuestCorrectGuesses'] = legacy.dailyQuestCorrectGuesses
+      ..['dailyQuestBestStreak'] = legacy.dailyQuestBestStreak
+      ..['dailyQuestUpgradePurchases'] = legacy.dailyQuestUpgradePurchases
+      ..['claimedDailyQuests'] = legacy.claimedDailyQuests.toList()
+      ..['lastDailyRewardDate'] = legacy.lastDailyRewardDate
+      ..['dailyRewardStreak'] = legacy.dailyRewardStreak
+      ..['lootCommonChests'] = legacy.lootChests['common'] ?? 0
+      ..['lootRareChests'] = legacy.lootChests['rare'] ?? 0
+      ..['lootEpicChests'] = legacy.lootChests['epic'] ?? 0
+      ..['lootDropsFound'] = legacy.lootDropsFound
+      ..['lootChestsOpened'] = legacy.lootChestsOpened
+      ..['lastLootDropTier'] = legacy.lastLootDropTier
+      ..['lootEventId'] = legacy.lootEventId
+      ..['completedChallenges'] = legacy.completedChallenges.toList()
+      ..['worldMasteryLevels'] = legacy.worldMasteryLevels
+      ..['discoveredSecretIds'] = legacy.discoveredSecrets.toList()
+      ..['codexEntries'] = legacy.codexEntries.toList()
+      ..['activeWorldId'] = legacy.activeWorldId
+      ..['unlockedWorldIds'] = legacy.unlockedWorldIds.toList()
+      ..['endlessRiftTier'] = legacy.endlessRiftTier
+      ..['endlessRiftBestTier'] = legacy.endlessRiftBestTier
+      ..['endlessRiftActive'] = legacy.endlessRiftActive
+      ..['worldBossVictories'] = legacy.worldBossVictories
+      ..['permanentEventBoosts'] = legacy.permanentEventBoosts
+      ..['endgameRewardsClaimed'] = legacy.endgameRewardsClaimed.toList()
+      ..['codexRewardClaimed'] = legacy.codexRewardClaimed
+      ..['activeBossBattleWorldId'] = legacy.activeBossBattleWorldId
+      ..['bossBattleMistakes'] = legacy.bossBattleMistakes
+      ..['liveOpsClaims'] = legacy.liveOpsClaims
+      ..['lastRandomEventId'] = legacy.lastRandomEventId;
+    return source;
+  }
+
+  /// Encodes the GTN1 GameSettings property names and locale representation.
+  static Map<String, dynamic> toGameSettingsJson(GameSettings settings) {
+    final localeParts = settings.localeCode.split('_');
+    final locale = localeParts.length == 1
+        ? localeParts.first
+        : '${localeParts.first}-${localeParts.skip(1).map((part) => part.toUpperCase()).join('-')}';
+    return {
+      'musicEnabled': settings.musicEnabled,
+      'soundEnabled': settings.soundEnabled,
+      'vibrationEnabled': settings.vibrationEnabled,
+      'notificationsEnabled': settings.notificationsEnabled,
+      'notificationRemindersEnabled': settings.notificationRemindersEnabled,
+      'notificationProgressionEnabled': settings.notificationProgressionEnabled,
+      'notificationEventsEnabled': settings.notificationEventsEnabled,
+      'notificationIntervalHours': settings.notificationIntervalHours,
+      'themeMode': settings.themeMode,
+      'numberNotation': settings.numberNotation,
+      'locale': locale,
+      'reducedMotion': settings.reduceMotion,
+      'volume': settings.volume,
+      'sfxVolume': settings.sfxVolume,
+      'reduceFlashes': settings.reduceFlashes,
+      'saveLogsToStorage': settings.saveLogsToStorage,
+      'verboseLogging': settings.verboseLogging,
+      'backgroundMusicPath': settings.backgroundMusicPath,
+      'musicLibraryPaths': settings.musicLibraryPaths,
+      'musicQueuePaths': settings.musicQueuePaths,
+      'musicPlaylistPaths': settings.musicPlaylistPaths,
+      'musicRepeatMode': settings.musicRepeatMode,
+      'musicShuffle': settings.musicShuffle,
+      'themePreset': settings.themePreset,
+      'customPrimaryColor': settings.customPrimaryColor,
+      'customSecondaryColor': settings.customSecondaryColor,
+      'customTertiaryColor': settings.customTertiaryColor,
+      'moreScreenOrder': settings.moreScreenOrder,
+      'moreScreenButtonColors': settings.moreScreenButtonColors,
+      'webMenuStudioLayout': settings.webMenuStudioLayout,
+      'tutorialSeenFeatures': settings.tutorialSeenFeatures.toList(),
+    };
+  }
+
+  static int _bigNumberToLong(BigNumber value) {
+    if (value.scale != 0) {
+      throw const FormatException('GTN1 nebulaEarned requires an integer.');
+    }
+    final parsed = int.tryParse(value.coefficient.toString());
+    if (parsed == null || parsed < 0) {
+      throw const FormatException('GTN1 nebulaEarned exceeds the source range.');
+    }
+    return parsed;
+  }
+
   static AdaptiveTraitProfile _adaptiveTraitProfile(
     Map<String, dynamic> source,
   ) {
