@@ -1095,7 +1095,7 @@ void main() {
     );
     expect(
       changes.single.nebulaEarned,
-      BigNumber.fromInt(weeklyChallenges.first.rewardNebula * 2),
+      BigNumber.fromInt(weeklyChallenges.first.rewardNebula),
     );
   });
 
