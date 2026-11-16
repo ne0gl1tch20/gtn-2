@@ -57,6 +57,19 @@ These phases are the **work sequence**, not a reduction of the fixed parity inve
 
 **Execution rule:** Keep batches small and move forward as soon as their evidence is sufficient. Do not wait for every item in a broad domain before validating a finished vertical slice. Do not mark partial work complete, skip dependencies, reopen already verified work without a reproducible mismatch, or weaken the final full-parity release gate.
 
+**Continuous phase execution:** The user's instruction is to carry Phases 0–12 as one continuous development effort. Phase 0 is already verified complete and must not be repeated without evidence of a missing source item. Continue from Phase 1 through Phase 12 without asking for permission between phases. If a phase is blocked by external evidence (for example, physical Android/Windows runtime screenshots), record the blocker accurately and continue with independent work that does not bypass or falsify the blocked gate. Keep genuinely dependent work blocked. Do not declare a phase complete from code or CI alone.
+
+## Headless responsive UI verification
+
+Use fast Flutter widget tests as the first-line layout/overflow gate. These tests run headlessly on Linux; they are not a substitute for Android/Windows runtime screenshots or platform verification.
+
+- `test/responsive_layout_smoke_test.dart` sweeps 320, 360, 390, 430, 600, 719, 720, 1024, 1100 and 1280 logical-pixel widths, using bounded pumps instead of `pumpAndSettle` so repeating animations cannot stall the suite.
+- The smoke matrix covers Play Dashboard, More navigation, Settings, Menu Studio, Player Profile, Save Slots, Upgrade Shop, World Map and Progression Hub. It fails on Flutter layout exceptions, including RenderFlex overflow errors.
+- `.github/workflows/validate.yml` runs a dedicated **Headless responsive UI smoke** job in parallel with the full Flutter suite after formatting/analysis. It runs the smoke test plus the focused Upgrade Shop and World Map viewport regressions using compact output and bounded test concurrency.
+- The full Flutter suite also uses `--concurrency=4 --reporter=compact` for quicker feedback.
+- When a viewport fails, reproduce the exact width/height, inspect the GTN1 source breakpoint and the GTN2 widget constraints, fix the underlying layout, run Dart formatting, then rerun the focused smoke test and full validation. Do not hide overflow with clipping or suppress Flutter errors.
+- Record actual workflow results in the commit ledger. Until the new workflow completes, this headless matrix is **added but not yet validated**.
+
 ## Detailed parity acceptance checklist
 
 ### Stage 1 — Freeze and map the source (one-time)
@@ -422,3 +435,11 @@ Android artifact #14209791224 (`android-debug-apk`) is 99,197,414 bytes as a ZIP
 Windows artifact #14209895790 (`windows-debug-portable`) is 58,389,165 bytes, SHA-256 `34161b824ea6d97cb3d00d68c1327f6d0d57c44ad1fed20e189dfd6a0ddb36a3`, expires 2026-11-23.
 
 The two remaining narrow-screen comment defects are now implemented and test-covered. This does not close Batch A: Android/Windows runtime screenshots and behavior verification remain outstanding, as do any remaining parity checklist items. Keep PR #74 draft and Batch B blocked until the user-provided GTN2 runtime evidence and full Batch A exit gate are reviewed.
+
+
+## Continuous execution checkpoint — 2026-11-16
+
+- Phase 0 remains complete based on the frozen source inventory and source maps.
+- Phase 1 remains active: PR #74 is draft and the Batch A Android/Windows runtime and visual evidence gate is still open. Batch B must not be unblocked by CI alone.
+- Phases 2–12 remain required and must be advanced in the same continuous effort as their dependencies permit; no feature scope or acceptance requirement is removed.
+- A new headless responsive layout smoke test and parallel CI job have been added on the Batch A continuation branch. The test matrix covers 10 viewport widths and eight core pages/navigation states. CI results are pending; no pass is claimed yet.
