@@ -166,6 +166,200 @@ class BigNumber implements Comparable<BigNumber> {
   @override
   int get hashCode => Object.hash(coefficient, scale);
 
+  /// Formats this value using GTN1's Standard, Scientific or Engineering
+  /// display notation. Serialization must continue to use [toString] so save
+  /// files retain plain decimal values.
+  String format([String notation = 'Standard']) {
+    if (coefficient == BigInt.zero) return '0';
+    if (compareTo(BigNumber.fromInt(1)) < 0) {
+      return _stripTrailingDecimalZeros(_fixedDecimal(this, 2));
+    }
+
+    final digits = coefficient.abs().toString().length;
+    final exponent = digits - scale - 1;
+    if (notation == 'Scientific') {
+      return _scientificString(this, exponent);
+    }
+    if (notation == 'Engineering') {
+      final engineeringExponent = (exponent ~/ 3) * 3;
+      final scaled = _shiftDecimal(this, -engineeringExponent);
+      return '${_stripTrailingDecimalZeros(_fixedDecimal(scaled, 2))}e${engineeringExponent}';
+    }
+    if (exponent < 3) {
+      return _stripTrailingDecimalZeros(_fixedDecimal(this, 0));
+    }
+
+    final suffixIndex = exponent ~/ 3;
+    const suffixes = <String>[
+      '',
+      'K',
+      'M',
+      'B',
+      'T',
+      'Qa',
+      'Qi',
+      'Sx',
+      'Sp',
+      'Oc',
+      'No',
+      'Dc',
+      'Ud',
+      'Dd',
+      'Td',
+      'Qad',
+      'Qid',
+      'Sxd',
+      'Spd',
+      'Ocd',
+      'Nod',
+      'Vg',
+      'UVg',
+      'DVg',
+      'TVg',
+      'QaVg',
+      'QiVg',
+      'SxVg',
+      'SpVg',
+      'OcVg',
+      'NoVg',
+      'Tg',
+    ];
+    if (suffixIndex >= suffixes.length) {
+      return _scientificString(this, exponent);
+    }
+    final suffixExponent = exponent - exponent % 3;
+    final scaled = _shiftDecimal(this, -suffixExponent);
+    return '${_stripTrailingDecimalZeros(_fixedDecimal(scaled, 2))}${suffixes[suffixIndex]}';
+  }
+
+  static BigNumber _shiftDecimal(BigNumber value, int power) {
+    if (power >= 0) {
+      return BigNumber.fromParts(
+        value.coefficient * _powerOfTen(power),
+        value.scale,
+      );
+    }
+    return BigNumber.fromParts(value.coefficient, value.scale - power);
+  }
+
+  static BigNumber _roundToScale(BigNumber value, int targetScale) {
+    if (value.scale <= targetScale) {
+      return BigNumber.fromParts(
+        value.coefficient * _powerOfTen(targetScale - value.scale),
+        targetScale,
+      );
+    }
+    final discarded = value.scale - targetScale;
+    final divisor = _powerOfTen(discarded);
+    final absolute = value.coefficient.abs();
+    var quotient = absolute ~/ divisor;
+    final remainder = absolute.remainder(divisor);
+    if (remainder * BigInt.two >= divisor) quotient += BigInt.one;
+    if (value.coefficient.isNegative) quotient = -quotient;
+    return BigNumber.fromParts(quotient, targetScale);
+  }
+
+  static String _fixedDecimal(BigNumber value, int decimalPlaces) {
+    final rounded = _roundToScale(value, decimalPlaces);
+    final negative = rounded.coefficient.isNegative;
+    final digits = rounded.coefficient.abs().toString().padLeft(
+      decimalPlaces + 1,
+      '0',
+    );
+    if (decimalPlaces == 0) return '${negative ? '-' : ''}${digits}';
+    final split = digits.length - decimalPlaces;
+    return '${negative ? '-' : ''}${digits.substring(0, split)}.${digits.substring(split)}';
+  }
+
+  static String _stripTrailingDecimalZeros(String value) {
+    if (!value.contains('.')) return value;
+    return value.replaceFirst(RegExp(r'0+
+    if (scale == 0) return coefficient.toString();
+    final negative = coefficient.isNegative;
+    final digits = coefficient.abs().toString().padLeft(scale + 1, '0');
+    final split = digits.length - scale;
+    final result = '${digits.substring(0, split)}.${digits.substring(split)}';
+    return negative ? '-$result' : result;
+  }
+
+  static BigNumber _roundToPrecision(BigNumber value, {int precision = 34}) {
+    final digits = value.coefficient.abs().toString().length;
+    final discardedDigits = digits - precision;
+    if (discardedDigits <= 0 || value.coefficient == BigInt.zero) {
+      return value;
+    }
+
+    final divisor = _powerOfTen(discardedDigits);
+    final absolute = value.coefficient.abs();
+    var quotient = absolute ~/ divisor;
+    final remainder = absolute.remainder(divisor);
+    final midpoint = remainder * BigInt.two;
+    if (midpoint > divisor || (midpoint == divisor && quotient.isOdd)) {
+      quotient += BigInt.one;
+    }
+
+    if (value.coefficient.isNegative) quotient = -quotient;
+    final adjustedScale = value.scale - discardedDigits;
+    if (adjustedScale >= 0) {
+      return BigNumber.fromParts(quotient, adjustedScale);
+    }
+    return BigNumber.fromParts(quotient * _powerOfTen(-adjustedScale), 0);
+  }
+
+  static BigInt _powerOfTen(int exponent) => BigInt.from(10).pow(exponent);
+}
+), '').replaceFirst(RegExp(r'\.
+    if (scale == 0) return coefficient.toString();
+    final negative = coefficient.isNegative;
+    final digits = coefficient.abs().toString().padLeft(scale + 1, '0');
+    final split = digits.length - scale;
+    final result = '${digits.substring(0, split)}.${digits.substring(split)}';
+    return negative ? '-$result' : result;
+  }
+
+  static BigNumber _roundToPrecision(BigNumber value, {int precision = 34}) {
+    final digits = value.coefficient.abs().toString().length;
+    final discardedDigits = digits - precision;
+    if (discardedDigits <= 0 || value.coefficient == BigInt.zero) {
+      return value;
+    }
+
+    final divisor = _powerOfTen(discardedDigits);
+    final absolute = value.coefficient.abs();
+    var quotient = absolute ~/ divisor;
+    final remainder = absolute.remainder(divisor);
+    final midpoint = remainder * BigInt.two;
+    if (midpoint > divisor || (midpoint == divisor && quotient.isOdd)) {
+      quotient += BigInt.one;
+    }
+
+    if (value.coefficient.isNegative) quotient = -quotient;
+    final adjustedScale = value.scale - discardedDigits;
+    if (adjustedScale >= 0) {
+      return BigNumber.fromParts(quotient, adjustedScale);
+    }
+    return BigNumber.fromParts(quotient * _powerOfTen(-adjustedScale), 0);
+  }
+
+  static BigInt _powerOfTen(int exponent) => BigInt.from(10).pow(exponent);
+}
+), '');
+  }
+
+  static String _scientificString(BigNumber value, int exponent) {
+    var mantissa = _shiftDecimal(value, -exponent);
+    mantissa = _roundToScale(mantissa, 2);
+    if (mantissa.compareTo(BigNumber.fromInt(10)) >= 0) {
+      exponent++;
+      mantissa = BigNumber.fromParts(BigInt.one, 0);
+    }
+    final fixed = _fixedDecimal(mantissa, 2);
+    final exponentText = exponent >= 0
+        ? '+${exponent.toString().padLeft(2, '0')}'
+        : exponent.toString().padLeft(3, '0');
+    return '${fixed}e${exponentText}';
+  }
+
   @override
   String toString() {
     if (scale == 0) return coefficient.toString();
