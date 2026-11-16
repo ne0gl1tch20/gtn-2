@@ -957,6 +957,7 @@ class _GameHomePageState extends State<GameHomePage>
       MaterialPageRoute<void>(
         builder: (_) => ProgressionHubPage(
           progression: _progression,
+          numberNotation: _settings.numberNotation,
           initialUltra: ultra,
           onPrestige: () async {
             await _prestige();
@@ -2025,6 +2026,7 @@ class _GameHomePageState extends State<GameHomePage>
       MaterialPageRoute<void>(
         builder: (_) => UpgradeShopPage(
           progression: _progression,
+          numberNotation: _settings.numberNotation,
           onPurchase: _purchaseUpgrade,
         ),
       ),
