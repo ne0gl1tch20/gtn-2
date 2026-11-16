@@ -95,3 +95,9 @@ flutter test <relevant-test-files>
 ```
 
 If the formatter check fails in CI, obtain the formatter's exact output/diff first. Fix that output rather than hand-adjusting indentation by intuition.
+
+### Current UI verification implementation status
+
+- The project-owned `test/support/overflow_guard.dart` helper is now implemented and integrated into the responsive smoke and World Map widget-test pump. It captures full `FlutterErrorDetails`, uses bounded pumps, and fails on all framework exceptions rather than filtering overflow types.
+- The 320x640 World Map bottom overflow remains open. Validate #2027 passed format/analysis but failed both the full Flutter suite and responsive smoke on this issue; Validate #2028 is queued with enhanced diagnostic capture.
+- Golden tests/baselines are still pending. Do not mark the UI gate complete until the exact layout defect is fixed, widget tests and responsive matrix pass, and reviewed golden baselines are added.
