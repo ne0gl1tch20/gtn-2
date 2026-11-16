@@ -389,7 +389,7 @@ void main() {
         achievement,
         numberNotation: 'Engineering',
       ),
-      '12.35e+03 / 1000000',
+      '12.35e3 / 1000000',
     );
   });
 
