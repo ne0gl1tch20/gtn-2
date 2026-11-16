@@ -92,6 +92,30 @@ void main() {
       );
     });
 
+    test('formats GTN1 Standard suffix notation', () {
+      expect(BigNumber.fromInt(0).format(), '0');
+      expect(BigNumber.parse('0.009').format(), '0.01');
+      expect(BigNumber.parse('0.5').format(), '0.5');
+      expect(BigNumber.parse('999.5').format(), '1000');
+      expect(BigNumber.fromInt(1234).format(), '1.23K');
+      expect(BigNumber.fromInt(12345).format(), '12.35K');
+      expect(BigNumber.parse('1e100').format(), '1.00e+100');
+    });
+
+    test('formats GTN1 Scientific and Engineering notation', () {
+      expect(BigNumber.fromInt(1234).format('Scientific'), '1.23e+03');
+      expect(BigNumber.parse('999.9').format('Scientific'), '1.00e+03');
+      expect(BigNumber.fromInt(12345).format('Engineering'), '12.35e3');
+      expect(BigNumber.parse('1e100').format('Engineering'), '10e99');
+      expect(BigNumber.fromInt(1).format('Scientific'), '1.00e+00');
+    });
+
+    test('formatting does not change plain decimal serialization', () {
+      final value = BigNumber.parse('12345.6789');
+      expect(value.format(), '12.35K');
+      expect(value.toString(), '12345.6789');
+    });
+
     test('rejects malformed values', () {
       expect(() => BigNumber.parse('1x'), throwsFormatException);
       expect(() => BigNumber.parse('1.2.3'), throwsFormatException);
