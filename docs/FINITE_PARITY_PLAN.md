@@ -143,9 +143,9 @@ UI validation is a three-layer gate. All three layers are required for applicabl
   - [ ] Endless Rift scaling, rewards, rotation and best-tier persistence.
   - [ ] World selection, secret discovery and restoration after save/load.
 - [ ] Home Base/Sanctuary, daily and weekly rewards, quests, chests and minigames.
-  - [ ] Daily login streak schedule, trait bonus + Nebula Boost ordering, duplicate claims and missed-day reset. GTN1 source comparison is complete; deterministic GTN2 regression coverage added in `e77396a`; initial CI attempts stopped at Dart formatting only and exact formatter fixes are committed as `22c68f0` and `2b2d109`; fresh full validation pending.
-  - [ ] Daily quest progress (guesses/correct/streak/upgrades), rollover, all four rewards and claim-once persistence. GTN2 main guess and upgrade purchase call sites are source-audited; regression coverage added in `e77396a`, validation pending.
-  - [ ] Loot-drop probability boundaries, chest inventory, tier payouts and currency lifetime totals. GTN1 boundaries and GTN2 implementation match; deterministic tier/currency coverage added in `e77396a`, save reload coverage in `a834acc`, validation pending.
+  - [x] Daily login streak schedule, trait bonus + Nebula Boost ordering, duplicate claims and missed-day reset. Validated in run `43891411563` with 466 passing tests. GTN1 source comparison is complete; deterministic GTN2 regression coverage added in `e77396a`; initial CI attempts stopped at Dart formatting only and exact formatter fixes are committed as `22c68f0` and `2b2d109`; fresh full validation pending.
+  - [x] Daily quest progress (guesses/correct/streak/upgrades), rollover, all four rewards and claim-once persistence. Validated in run `43891411563` with 466 passing tests. GTN2 main guess and upgrade purchase call sites are source-audited; regression coverage added in `e77396a`, validation pending.
+  - [x] Loot-drop probability boundaries, chest inventory, tier payouts and currency lifetime totals. Save reload and both reward currencies validated in run `43891411563` with 466 passing tests. GTN1 boundaries and GTN2 implementation match; deterministic tier/currency coverage added in `e77396a`, save reload coverage in `a834acc`, validation pending.
 - [ ] Lucky Stake and achievements, including unlock conditions and reward settlement.
 - [ ] Automation, bot behavior, offline earnings and clock handling.
 
