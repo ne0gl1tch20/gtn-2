@@ -720,3 +720,13 @@ Batch A remains active until Dashboard, More, Settings, Menu Studio, Profile and
 - Validate `43880093401` at `bc1801cbf0a0c37e3c0f9315204169958693fb5d` passed formatting but failed analysis on three unnecessary interpolation braces. Corrected two interpolation sites and changed scientific output assembly to avoid analyzer warnings. The follow-up run `43880303914` passed formatting but reported one remaining `prefer_interpolation_to_compose_strings` info. Final lint correction commit: `b2a21d603b263f765a196b4b4bd9d41ffa38628e`.
 - None of these failed runs reached Flutter tests or platform builds. The formatter is not validated until a new full run passes all format/analyze, Flutter, responsive overflow, Android and Windows jobs.
 - Formatter behavior is still display-only and must not change plain decimal serialization. After formatter validation, continue wiring `numberNotation` into the corresponding currency/cost UI and add widget assertions for each affected surface.
+
+
+### Number notation UI wiring — 2026-11-16
+
+- The standalone formatter was fully validated by Validate run `43880544411` at `e8a8de484c0dba74d676e03b545b20bd8884e2b0`: format/analyze, Flutter tests, responsive overflow smoke, Android debug APK and Windows portable debug build passed; Windows installer skipped.
+- Compared the pinned GTN1 `BigNumber.format()` implementation and found real call sites in the Android achievement progress label and desktop/Web Play state payloads. The setting is intended to affect visible values, not serialization.
+- Wired the persisted notation setting through the main dashboard wallet, gameplay upgrade shop and Prestige/Ultra upgrade shop. Kept `BigNumber.toString()` and save serialization unchanged. Added a widget regression for Scientific notation in the gameplay shop.
+- Commits in order: `973eadc8637a5e4f641f3ce88a99b989f8ee25b8` (gameplay shop); `759ce915e72212fdb274316505b9ac96643d1418` (progression hub route); `14df7bd95b5e20ed36e1ce1135ef743dc761eac5` (permanent shop); `afc8032f63330b2296d57a01aaa5fe47d83fc1da` (main route wiring); `37fe83a436dae8b166a205737d5274408cb1ab3d` (dashboard wallet); `29f6c5cf15ad6ffc8f25370e376de9d575b80412` (widget test).
+- Current docs checkpoint is being committed separately. All six implementation/test commits above are newer than the successful formatter validation run; no pass is claimed for them until a fresh complete Validate run covers the final head.
+- Remaining source-mapped UI values include achievement/reward/statistics and Home Base/Lucky Stake displays. Continue auditing the exact GTN1 call sites and apply the setting consistently; keep the numeric/economy checklist open.
