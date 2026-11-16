@@ -260,9 +260,23 @@ class BigNumber implements Comparable<BigNumber> {
   }
 
   static String _fixedDecimal(BigNumber value, int decimalPlaces) {
-    final rounded = _roundToScale(value, decimalPlaces);
-    final negative = rounded.coefficient.isNegative;
-    final digits = rounded.coefficient.abs().toString().padLeft(
+    BigInt scaledCoefficient;
+    if (value.scale <= decimalPlaces) {
+      scaledCoefficient =
+          value.coefficient * _powerOfTen(decimalPlaces - value.scale);
+    } else {
+      final divisor = _powerOfTen(value.scale - decimalPlaces);
+      final absolute = value.coefficient.abs();
+      scaledCoefficient = absolute ~/ divisor;
+      if (absolute.remainder(divisor) * BigInt.two >= divisor) {
+        scaledCoefficient += BigInt.one;
+      }
+      if (value.coefficient.isNegative) {
+        scaledCoefficient = -scaledCoefficient;
+      }
+    }
+    final negative = scaledCoefficient.isNegative;
+    final digits = scaledCoefficient.abs().toString().padLeft(
       decimalPlaces + 1,
       '0',
     );
