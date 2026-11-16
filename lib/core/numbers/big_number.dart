@@ -43,14 +43,41 @@ class BigNumber implements Comparable<BigNumber> {
     final commonScale = scale > other.scale ? scale : other.scale;
     final left = coefficient * _powerOfTen(commonScale - scale);
     final right = other.coefficient * _powerOfTen(commonScale - other.scale);
-    return BigNumber.fromParts(left + right, commonScale);
+    return _roundToPrecision(
+      BigNumber.fromParts(left + right, commonScale),
+    );
   }
 
-  BigNumber operator -(BigNumber other) =>
-      this + BigNumber.fromParts(-other.coefficient, other.scale);
+  BigNumber operator -(BigNumber other) {
+    final commonScale = scale > other.scale ? scale : other.scale;
+    final left = coefficient * _powerOfTen(commonScale - scale);
+    final right = other.coefficient * _powerOfTen(commonScale - other.scale);
+    final result = _roundToPrecision(
+      BigNumber.fromParts(left - right, commonScale),
+    );
+    return result.coefficient.isNegative ? BigNumber.fromInt(0) : result;
+  }
 
-  BigNumber operator *(BigNumber other) =>
-      BigNumber.fromParts(coefficient * other.coefficient, scale + other.scale);
+  BigNumber operator *(BigNumber other) => _roundToPrecision(
+    BigNumber.fromParts(coefficient * other.coefficient, scale + other.scale),
+  );
+
+  /// Divides using GTN1's 16-place HALF_UP rule. A zero divisor returns zero.
+  BigNumber operator /(BigNumber other) {
+    if (other.coefficient == BigInt.zero) return BigNumber.fromInt(0);
+    const resultScale = 16;
+    final numerator =
+        coefficient * _powerOfTen(other.scale + resultScale);
+    final denominator = other.coefficient * _powerOfTen(scale);
+    var quotient = numerator ~/ denominator;
+    final remainder = numerator.remainder(denominator).abs();
+    if (remainder * BigInt.two >= denominator.abs()) {
+      quotient += numerator.isNegative != denominator.isNegative
+          ? -BigInt.one
+          : BigInt.one;
+    }
+    return BigNumber.fromParts(quotient, resultScale);
+  }
 
   BigNumber multiplyInt(int value) =>
       BigNumber.fromParts(coefficient * BigInt.from(value), scale);
@@ -60,7 +87,9 @@ class BigNumber implements Comparable<BigNumber> {
     if (exponent < 0) {
       throw ArgumentError.value(exponent, 'exponent', 'Must not be negative.');
     }
-    return BigNumber.fromParts(coefficient.pow(exponent), scale * exponent);
+    return _roundToPrecision(
+      BigNumber.fromParts(coefficient.pow(exponent), scale * exponent),
+    );
   }
 
   @override
@@ -88,6 +117,37 @@ class BigNumber implements Comparable<BigNumber> {
     final split = digits.length - scale;
     final result = '${digits.substring(0, split)}.${digits.substring(split)}';
     return negative ? '-$result' : result;
+  }
+
+  static BigNumber _roundToPrecision(
+    BigNumber value, {
+    int precision = 34,
+  }) {
+    final digits = value.coefficient.abs().toString().length;
+    final discardedDigits = digits - precision;
+    if (discardedDigits <= 0 || value.coefficient == BigInt.zero) {
+      return value;
+    }
+
+    final divisor = _powerOfTen(discardedDigits);
+    final absolute = value.coefficient.abs();
+    var quotient = absolute ~/ divisor;
+    final remainder = absolute.remainder(divisor);
+    final midpoint = remainder * BigInt.two;
+    if (midpoint > divisor ||
+        (midpoint == divisor && quotient.isOdd)) {
+      quotient += BigInt.one;
+    }
+
+    if (value.coefficient.isNegative) quotient = -quotient;
+    final adjustedScale = value.scale - discardedDigits;
+    if (adjustedScale >= 0) {
+      return BigNumber.fromParts(quotient, adjustedScale);
+    }
+    return BigNumber.fromParts(
+      quotient * _powerOfTen(-adjustedScale),
+      0,
+    );
   }
 
   static BigInt _powerOfTen(int exponent) => BigInt.from(10).pow(exponent);
