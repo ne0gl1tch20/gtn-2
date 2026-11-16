@@ -937,6 +937,7 @@ class GameDashboardPage extends StatelessWidget {
                                       foreground,
                                       muted,
                                       incomePerSecond,
+                                      settings.numberNotation,
                                     ),
                                   ),
                                   SizedBox(
@@ -2028,6 +2029,7 @@ class _Wallet extends StatelessWidget {
     this.foreground,
     this.muted,
     this.incomePerSecond,
+    this.numberNotation,
   );
   final ProgressionState state;
   final Color panel;
@@ -2036,6 +2038,7 @@ class _Wallet extends StatelessWidget {
   final Color foreground;
   final Color muted;
   final BigNumber? incomePerSecond;
+  final String numberNotation;
 
   @override
   Widget build(BuildContext context) => Container(
@@ -2078,7 +2081,7 @@ class _Wallet extends StatelessWidget {
                       style: TextStyle(color: _green, fontSize: 10),
                     ),
                     Text(
-                      '${incomePerSecond ?? BigNumber.fromInt(0)}',
+                      (incomePerSecond ?? BigNumber.fromInt(0)).format(numberNotation),
                       style: const TextStyle(
                         color: _green,
                         fontSize: 17,
@@ -2092,7 +2095,7 @@ class _Wallet extends StatelessWidget {
                   ],
                 ),
                 Text(
-                  '${state.moneyEarned} earned',
+                  '${state.moneyEarned.format(numberNotation)} earned',
                   style: TextStyle(color: muted, fontSize: 9),
                 ),
               ],
@@ -2101,7 +2104,7 @@ class _Wallet extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         Text(
-          state.money.toString(),
+          state.money.format(numberNotation),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: const TextStyle(
@@ -2153,7 +2156,7 @@ class _Wallet extends StatelessWidget {
               child: _Currency(
                 Icons.auto_awesome_rounded,
                 'PRESTIGE',
-                state.prestige.toString(),
+                state.prestige.format(numberNotation),
                 _purple,
                 raised,
                 foreground,
@@ -2165,7 +2168,7 @@ class _Wallet extends StatelessWidget {
               child: _Currency(
                 Icons.bolt_rounded,
                 'ULTRA',
-                state.ultra.toString(),
+                state.ultra.format(numberNotation),
                 _cyan,
                 raised,
                 foreground,
@@ -2177,7 +2180,7 @@ class _Wallet extends StatelessWidget {
               child: _Currency(
                 Icons.diamond_rounded,
                 'NEBULA',
-                state.nebula.toString(),
+                state.nebula.format(numberNotation),
                 const Color(0xFFB7A2FF),
                 raised,
                 foreground,
