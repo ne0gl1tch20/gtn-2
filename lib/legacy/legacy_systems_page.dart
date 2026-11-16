@@ -588,6 +588,16 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
           'Reward multiplier ×${_engine.mutatorRewardMultiplier(_systems)} · ${weeklyChallenges.length} rotating challenges',
         ),
         children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+            child: Text(
+              AppLocalizations.text(
+                'gameplay_mutators_title',
+                'Gameplay Mutators',
+              ),
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+          ),
           if (mutators.isEmpty) _catalogUnavailable(),
           for (final mutator in mutators)
             GtnExpressiveSwitchTile(
@@ -688,7 +698,12 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
                           child: Text(
                             claimed
                                 ? AppLocalizations.text('completed', 'Completed')
-                                : AppLocalizations.text('claim', 'Claim'),
+                                : eligible
+                                ? AppLocalizations.text('claim', 'Claim')
+                                : AppLocalizations.text(
+                                    'in_progress',
+                                    'In Progress',
+                                  ),
                           ),
                         ),
                       ),
