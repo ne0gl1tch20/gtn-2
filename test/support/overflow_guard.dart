@@ -26,7 +26,9 @@ Future<void> expectNoLayoutException(
     final exception = tester.takeException();
     if (exception == null) break;
     diagnostics.add(
-      exception is FlutterError ? exception.toStringDeep() : exception.toString(),
+      exception is FlutterError
+          ? exception.toStringDeep()
+          : exception.toString(),
     );
   }
 

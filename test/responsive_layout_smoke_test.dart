@@ -1,6 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-
-import 'support/overflow_guard.dart';
 import 'package:gtn_2/core/game/game_engine.dart';
 import 'package:gtn_2/core/progression/progression_state.dart';
 import 'package:gtn_2/home/game_dashboard_page.dart';
@@ -16,6 +14,8 @@ import 'package:gtn_2/shop/upgrade_shop_page.dart';
 import 'package:gtn_2/worlds/world_map_page.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
+
+import 'support/overflow_guard.dart';
 
 const _viewports = <({int width, int height})>[
   (width: 320, height: 640),
@@ -212,10 +212,7 @@ void main() {
       await expectNoLayoutException(
         tester,
         screen: 'More navigation',
-        viewport: Size(
-          viewport.width.toDouble(),
-          viewport.height.toDouble(),
-        ),
+        viewport: Size(viewport.width.toDouble(), viewport.height.toDouble()),
         pumpDuration: const Duration(milliseconds: 180),
       );
     }
