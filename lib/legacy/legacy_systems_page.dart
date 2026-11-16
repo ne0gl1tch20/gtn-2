@@ -659,6 +659,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
     final cost = BigNumber.fromInt(50000 * (level + 1));
     return GtnExpressiveCard(
       child: ExpansionTile(
+        initiallyExpanded: widget.view == LegacySystemsView.homeBase,
         leading: const Icon(Icons.home_work_rounded),
         title: const Text('Home Base'),
         subtitle: Text('Sanctuary level $level / 20 · +${level * 2}% Money'),
