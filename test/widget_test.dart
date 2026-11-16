@@ -8,6 +8,8 @@ import 'package:gtn_2/design/expressive_widgets.dart';
 import 'package:gtn_2/home/game_dashboard_page.dart';
 import 'package:gtn_2/legacy/legacy_pages.dart';
 import 'package:gtn_2/legacy/legacy_systems_page.dart';
+import 'package:gtn_2/core/legacy/weekly_challenge_catalog.dart';
+import 'package:gtn_2/i18n/app_localizations.dart';
 import 'package:gtn_2/profile/player_profile_page.dart';
 import 'package:gtn_2/progression/progression_hub_page.dart';
 import 'package:gtn_2/settings/game_settings.dart';
@@ -1021,4 +1023,80 @@ void main() {
 
     expect(find.text('Money available: 12.35K'), findsOneWidget);
   });
+
+  testWidgets('Mutators route renders and claims the three weekly challenges', (
+    WidgetTester tester,
+  ) async {
+    await AppLocalizations.load('en_us');
+    const viewport = Size(390, 844);
+    tester.view.physicalSize = viewport;
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final changes = <ProgressionState>[];
+    final progression = ProgressionState.initial.copyWith(
+      money: BigNumber.fromInt(10000000),
+      correctGuesses: 100,
+      bestStreak: 30,
+      totalGuesses: 500,
+      prestigeResets: 2,
+      ultraResets: 1,
+      playtimeSeconds: 3600,
+      nebulaItems: const {'nebula_boost': 1},
+    );
+    final weeklyChallenges = WeeklyChallengeCatalog.forDate(DateTime.now());
+
+    await runWithOverflowGuard(
+      tester,
+      screen: 'Mutators weekly challenges',
+      viewport: viewport,
+      action: () async {
+        await tester.pumpWidget(
+          M3EMaterialApp(
+            data: M3EThemeData.light(seedColor: const Color(0xFF7C5CFC)),
+            fontFamily: 'Manrope',
+            autoTheming: false,
+            initialTheme: Brightness.light,
+            home: LegacySystemsPage(
+              progression: progression,
+              onChanged: (next) async => changes.add(next),
+              view: LegacySystemsView.mutators,
+            ),
+          ),
+        );
+        await tester.pump(const Duration(milliseconds: 300));
+        expect(find.text('Weekly Challenges'), findsOneWidget);
+        for (final challenge in weeklyChallenges) {
+          expect(
+            find.text(
+              AppLocalizations.text(
+                'weekly_${challenge.kind}_name',
+                challenge.kind,
+              ),
+            ),
+            findsOneWidget,
+          );
+        }
+        expect(find.textContaining('Progress:'), findsNWidgets(3));
+        expect(find.textContaining('Reward: +'), findsNWidgets(3));
+        expect(find.text('Claim'), findsNWidgets(3));
+        await tester.ensureVisible(find.text('Claim').first);
+        await tester.tap(find.text('Claim').first);
+        await tester.pump(const Duration(milliseconds: 300));
+      },
+    );
+
+    expect(changes, hasLength(1));
+    expect(find.text('Claimed'), findsOneWidget);
+    expect(
+      changes.single.legacySystems.completedChallenges,
+      contains(weeklyChallenges.first.id),
+    );
+    expect(
+      changes.single.nebulaEarned,
+      BigNumber.fromInt(weeklyChallenges.first.rewardNebula * 2),
+    );
+  });
+
 }
