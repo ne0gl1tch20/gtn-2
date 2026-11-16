@@ -1010,4 +1010,5 @@ void main() {
     );
 
     expect(find.text('Money available: 12.35K'), findsOneWidget);
-  });}
+  });
+}
