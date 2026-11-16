@@ -47,7 +47,7 @@ jobs:
       - name: Show formatter diffs for changed UI test files
         if: failure()
         run: |
-          for file in test/support/overflow_guard.dart test/responsive_layout_smoke_test.dart test/world_map_page_test.dart test/core/game_engine_test.dart lib/core/progression/progression_engine.dart test/core/progression_engine_test.dart test/data/economy_transaction_persistence_test.dart lib/core/numbers/big_number.dart test/core/big_number_test.dart lib/home/game_dashboard_page.dart lib/shop/permanent_upgrade_shop_page.dart lib/shop/upgrade_shop_page.dart test/shop/upgrade_shop_page_test.dart test/widget_test.dart test/data/save_data_test.dart lib/legacy/legacy_systems_page.dart; do
+          for file in test/support/overflow_guard.dart test/responsive_layout_smoke_test.dart test/world_map_page_test.dart test/core/game_engine_test.dart lib/core/progression/progression_engine.dart test/core/progression_engine_test.dart test/data/economy_transaction_persistence_test.dart lib/core/numbers/big_number.dart test/core/big_number_test.dart lib/home/game_dashboard_page.dart lib/shop/permanent_upgrade_shop_page.dart lib/shop/upgrade_shop_page.dart test/shop/upgrade_shop_page_test.dart test/widget_test.dart test/data/save_data_test.dart test/legacy_systems_test.dart lib/legacy/legacy_systems_page.dart; do
             dart format --output=show "$file" > "/tmp/$(basename "$file")"
             diff -u "$file" "/tmp/$(basename "$file")" || true
           done
