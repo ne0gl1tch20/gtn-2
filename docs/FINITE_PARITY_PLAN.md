@@ -28,7 +28,49 @@
 6. If a source behavior is intentionally unsupported in GTN2, it is not parity. Either implement it or record a concrete, owner-approved exclusion before release.
 7. Once the fixed inventory passes the exit gate, parity work is closed. Later work is normal maintenance, not another parity phase.
 
-## Six-stage delivery checklist
+## Architecture decision — 2026-11-16
+
+- **Keep Flutter + Dart as the GTN2 application, UI and gameplay implementation** for Android and Windows. Preserve the existing Material 3 Expressive direction while retaining GTN1's recognizable visual identity and Android-native interaction expectations.
+- **The proposed Rust + Slint rebuild is shelved.** Do not replace Flutter, introduce Slint, create a Rust gameplay core, or start a Rust migration as part of the current GTN2 parity work.
+- Rust is not an active dependency or implementation requirement for this project. Reconsidering it would require a separate explicit architecture decision; it must not delay or expand the current parity scope.
+- This decision changes no feature requirements, source mappings, tests, platform targets or release gates. Full GTN1 parity remains the goal.
+
+## Short, meaningful execution phases
+
+These phases are the **work sequence**, not a reduction of the fixed parity inventory. Keep the detailed acceptance checklist below as the source of truth for requirements and status. Each phase should be delivered as a small, reviewable vertical slice; split a phase into smaller batches when that makes implementation and verification faster without separating a behavior from its tests.
+
+1. **Phase 0 — Source baseline and inventory (complete):** Preserve the pinned GTN1 revision, complete source maps and frozen feature boundary. Do not reopen mapping work without evidence of a missed source item.
+2. **Phase 1 — Close the active Batch A surfaces:** Finish Dashboard, More, Settings, Menu Studio, Profile and Save Slots against GTN1. Resolve remaining defects, obtain paired Android/Windows runtime evidence and close the Batch A exit gate before advancing the dependent screen batch.
+3. **Phase 2 — Guess loop and economy:** Complete guess-state transitions, difficulty/range boundaries, reward calculations, currencies, multipliers, penalties, upgrade purchases and transaction safety. Add source-backed tests for boundary and failure cases.
+4. **Phase 3 — Saves and lifecycle reliability:** Complete save-slot isolation, serialization, migrations, import/export, corruption recovery, restart persistence, pause/resume and offline settlement. Verify no progress or rewards are lost or duplicated.
+5. **Phase 4 — Progression and player builds:** Complete Prestige/Ultra, permanent upgrades, all 320 trait behaviors, talents, mutators and relic acquisition/equipment/set effects. Verify real gameplay effects, not just catalogs or screens.
+6. **Phase 5 — Worlds and endgame:** Complete world unlocks, boss eligibility and battles, phases, rewards, mastery, secrets, Codex, Endless Rift and claim-once persistence.
+7. **Phase 6 — Home Base and recurring gameplay:** Complete Home Base/Sanctuary, daily and weekly rewards, quests, chests, minigames/Arcade, Lucky Stake, achievements, bots and automation.
+8. **Phase 7 — Audio, scripting and LiveOps:** Complete music/player behavior, background media controls, Jarrlyy DSP, Lua sandbox and shipped scripts, plus signed remote LiveOps bundle verification, activation and rollback.
+9. **Phase 8 — Remaining screen and interaction parity:** Work through the frozen Kotlin and Web Play screen inventory in small screen groups. Reproduce navigation, labels, states, dialogs, responsive layouts and interactions; attach paired source/GTN2 screenshots and interaction tests.
+10. **Phase 9 — Catalog, localization and asset runtime parity:** Verify all 17 catalogs, 320 trait definitions, 23 locales, fonts, images, icons, audio and offline references are actually consumed by the runtime with no fallback placeholders or missing assets.
+11. **Phase 10 — Android platform parity:** Verify Android permissions, notifications/scheduled work, updater/install flow, lifecycle, storage, back navigation, audio/media integration and device behavior.
+12. **Phase 11 — Windows platform parity:** Verify desktop navigation/input, filesystem behavior, audio/media, updater/replacement/rollback, packaging and runtime behavior.
+13. **Phase 12 — Final cross-platform acceptance:** Run the complete source-to-port audit, formatting, analysis, automated tests, Android and Windows builds, real Android play-test and Windows runtime checks. Build and distribute the final APK only from the verified merged main commit after every applicable parity item is closed.
+
+**Phase completion rule:** A phase closes only when its GTN1 source scope is identified, the real Flutter/Dart behavior is implemented, relevant automated tests pass, applicable Android/Windows runtime checks are recorded, and this checklist plus the relevant audit ledger is updated. Visual phases also require paired screenshots. A green build alone never closes a phase.
+
+**Execution rule:** Keep batches small and move forward as soon as their evidence is sufficient. Do not wait for every item in a broad domain before validating a finished vertical slice. Do not mark partial work complete, skip dependencies, reopen already verified work without a reproducible mismatch, or weaken the final full-parity release gate.
+
+**Continuous phase execution:** The user's instruction is to carry Phases 0–12 as one continuous development effort. Phase 0 is already verified complete and must not be repeated without evidence of a missing source item. Continue from Phase 1 through Phase 12 without asking for permission between phases. If a phase is blocked by external evidence (for example, physical Android/Windows runtime screenshots), record the blocker accurately and continue with independent work that does not bypass or falsify the blocked gate. Keep genuinely dependent work blocked. Do not declare a phase complete from code or CI alone.
+
+## Headless responsive UI verification
+
+Use fast Flutter widget tests as the first-line layout/overflow gate. These tests run headlessly on Linux; they are not a substitute for Android/Windows runtime screenshots or platform verification.
+
+- `test/responsive_layout_smoke_test.dart` sweeps 320, 360, 390, 430, 600, 719, 720, 1024, 1100 and 1280 logical-pixel widths, using bounded pumps instead of `pumpAndSettle` so repeating animations cannot stall the suite.
+- The smoke matrix covers Play Dashboard, More navigation, Settings, Menu Studio, Player Profile, Save Slots, Upgrade Shop, World Map and Progression Hub. It fails on Flutter layout exceptions, including RenderFlex overflow errors.
+- `.github/workflows/validate.yml` runs a dedicated **Headless responsive UI smoke** job in parallel with the full Flutter suite after formatting/analysis. It runs the smoke test plus the focused Upgrade Shop and World Map viewport regressions using compact output and bounded test concurrency.
+- The full Flutter suite also uses `--concurrency=4 --reporter=compact` for quicker feedback.
+- When a viewport fails, reproduce the exact width/height, inspect the GTN1 source breakpoint and the GTN2 widget constraints, fix the underlying layout, run Dart formatting, then rerun the focused smoke test and full validation. Do not hide overflow with clipping or suppress Flutter errors.
+- Record actual workflow results in the commit ledger. Until the new workflow completes, this headless matrix is **added but not yet validated**.
+
+## Detailed parity acceptance checklist
 
 ### Stage 1 — Freeze and map the source (one-time)
 
@@ -381,3 +423,23 @@ Validate run #1993 initially stopped at the formatting gate because the new upgr
 ### Mobile World Map heading regression correction — 2026-11-16
 
 Validate run #1997 verified the Upgrade Shop mobile selector test, but reported the World Map hero title at 56px high in a 390px viewport (two lines). Moving the world-count chip below the header was not sufficient because the title still wrapped in the remaining 228px text column. Added an opt-in `singleLineTitle` mode to `GtnPageHeader`, using a scale-down fit for the World Map title only; other page headers retain their existing wrapping behavior. Commits: `c4181738918ac4b2ca35344c68b0f7ec74db1932` and `7082d079e70036ef9d7a87882946aaf0365a3f41`. Validate #1997 had 436 tests pass / 1 fail. A new full validation is required; do not claim the visual fix passes until the mobile heading test and full suite pass.
+
+
+
+### Validate #2001 — final mobile comment fixes passed — 2026-11-16
+
+Validate run [#2001](https://github.com/ne0gl1tch20/gtn-2/actions/runs/43832430777) passed at head `1e472eb2724cc56899a70713b7281aa853d5917b`. Format and analysis passed; all 437 Flutter tests passed, including both new 390px responsive UI regressions; Android debug APK and Windows desktop debug builds succeeded. The Windows release installer was skipped by the debug validation workflow.
+
+Android artifact #14209791224 (`android-debug-apk`) is 99,197,414 bytes as a ZIP, SHA-256 `3f71349042bb3737b14b27b194e3a0582e7e46cf61dbbf9fb2474d0d807c6ce9`, expires 2026-11-23. Extracted APK is 179,345,429 bytes, SHA-256 `2388916fa78bbb22e7db675c21a0dc35a4d3eb0ee917f92a98d0639d1f01347b`. The ZIP integrity check passed.
+
+Windows artifact #14209895790 (`windows-debug-portable`) is 58,389,165 bytes, SHA-256 `34161b824ea6d97cb3d00d68c1327f6d0d57c44ad1fed20e189dfd6a0ddb36a3`, expires 2026-11-23.
+
+The two remaining narrow-screen comment defects are now implemented and test-covered. This does not close Batch A: Android/Windows runtime screenshots and behavior verification remain outstanding, as do any remaining parity checklist items. Keep PR #74 draft and Batch B blocked until the user-provided GTN2 runtime evidence and full Batch A exit gate are reviewed.
+
+
+## Continuous execution checkpoint — 2026-11-16
+
+- Phase 0 remains complete based on the frozen source inventory and source maps.
+- Phase 1 remains active: PR #74 is draft and the Batch A Android/Windows runtime and visual evidence gate is still open. Batch B must not be unblocked by CI alone.
+- Phases 2–12 remain required and must be advanced in the same continuous effort as their dependencies permit; no feature scope or acceptance requirement is removed.
+- A new headless responsive layout smoke test and parallel CI job have been added on the Batch A continuation branch. The test matrix covers 10 viewport widths and eight core pages/navigation states. CI results are pending; no pass is claimed yet.
