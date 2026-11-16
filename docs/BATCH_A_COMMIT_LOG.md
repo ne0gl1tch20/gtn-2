@@ -791,3 +791,8 @@ Batch A remains active until Dashboard, More, Settings, Menu Studio, Profile and
 
 
 - Formatting validation history: runs `43890511047` (head `a834acc7`) and `43890760475` (head `6547dedb`) failed at Dart format only; tests and platform jobs were skipped. The exact formatter diff identified record-test wrapping plus map/assert layout in `test/legacy_systems_test.dart` and `test/data/save_data_test.dart`. Applied the formatter changes in `22c68f07a7a0e719f7a7bee52eda6f57fab64fe9` and `2b2d10908a7972d3753e41ab3c7852409f2fc7e8`. New full validation is required for this latest head.
+
+
+- Additional formatter retry: run `43891184869` at `7310b063` still failed only because the last daily economy test-group brace had been joined to the preceding close. Corrected the exact reported line in `c5d15641e6226f30189d7c19887a4e27e09a381e`.
+- Final daily rewards/quests/loot validation passed in run `43891411563` at `c5d15641e6226f30189d7c19887a4e27e09a381e`: Format/analyze passed; full Flutter suite passed **466 tests**; responsive overflow smoke passed; Android debug APK build passed; Windows desktop debug build passed. Windows installer skipped by workflow configuration. The deterministic daily reward/quest/loot tests and expanded SaveData round-trip assertions are validated at this head.
+- Phase 6 daily login reward, daily quest progress/rewards and loot/chest transaction sub-checks are complete. Phase 6 overall remains open: weekly challenges, remaining minigame/Arcade outcomes and other recurring systems still require separate source audits and runtime evidence.
