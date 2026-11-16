@@ -136,6 +136,7 @@ UI validation is a three-layer gate. All three layers are required for applicabl
 - [ ] Upgrades, prestige, Ultra progression and their reset/carry-over rules.
   - [x] Match GTN1's 1/10/100/MAX Money-upgrade batch policy: calculate each exact BigNumber level cost, buy the largest affordable prefix, clamp to remaining max level and return zero when no level is affordable. The shop preview and atomic purchase callback share this count. Evidence: `lib/shop/upgrade_batch_policy.dart`, `lib/shop/upgrade_shop_page.dart`, `test/shop/upgrade_shop_test.dart`, `test/shop/upgrade_shop_page_test.dart`; GTN1 `DesktopEconomyTransactions.upgradeBatch` and `bulkMoneyUpgradeChargesExactCombinedCost`, `maxUpgradeBuysOnlyLargestAffordablePrefix`, `fixedBulkPurchaseBuysLargestAffordablePrefix`.
 - [ ] Traits, talents, mutators and relics, including actual gameplay effects.
+  - [ ] Complete the custom challenge builder from GTN1 MutatorsScreen: mutator selection, objective kind/target, activate build, progress display and builder reward claim. Weekly challenge rotation is tracked separately in Phase 6.
 - [ ] Worlds, bosses, battles, mastery, secrets, codex and claim-once rewards.
   - [ ] World unlock requirements and migration behavior.
   - [ ] Boss battle eligibility, lifecycle, phases, hit/miss rules and defeat.
@@ -143,9 +144,11 @@ UI validation is a three-layer gate. All three layers are required for applicabl
   - [ ] Endless Rift scaling, rewards, rotation and best-tier persistence.
   - [ ] World selection, secret discovery and restoration after save/load.
 - [ ] Home Base/Sanctuary, daily and weekly rewards, quests, chests and minigames.
+  - [ ] Weekly challenge rotation (ISO week-year IDs, three of eight definitions), objective progress, exact reward validation, claim-once behavior and save persistence. Implementation added in `4e42793`, `ab92cbc` and `d1cea79`; full validation pending. GTN1 source confirms weekly claims do not receive the Nebula Boost multiplier.
+
   - [x] Daily login streak schedule, trait bonus + Nebula Boost ordering, duplicate claims and missed-day reset. Validated in run `43891411563` with 466 passing tests. GTN1 source comparison is complete; deterministic GTN2 regression coverage added in `e77396a`; initial CI attempts stopped at Dart formatting only and exact formatter fixes are committed as `22c68f0` and `2b2d109`; fresh full validation pending.
-  - [x] Daily quest progress (guesses/correct/streak/upgrades), rollover, all four rewards and claim-once persistence. Validated in run `43891411563` with 466 passing tests. GTN2 main guess and upgrade purchase call sites are source-audited; regression coverage added in `e77396a`, validation pending.
-  - [x] Loot-drop probability boundaries, chest inventory, tier payouts and currency lifetime totals. Save reload and both reward currencies validated in run `43891411563` with 466 passing tests. GTN1 boundaries and GTN2 implementation match; deterministic tier/currency coverage added in `e77396a`, save reload coverage in `a834acc`, validation pending.
+  - [x] Daily quest progress (guesses/correct/streak/upgrades), rollover, all four rewards and claim-once persistence. Validated in run `43891411563` with 466 passing tests. GTN2 main guess and upgrade purchase call sites are source-audited; regression coverage added in `e77396a`; full validation passed in run `43891411563`.
+  - [x] Loot-drop probability boundaries, chest inventory, tier payouts and currency lifetime totals. Save reload and both reward currencies validated in run `43891411563` with 466 passing tests. GTN1 boundaries and GTN2 implementation match; deterministic tier/currency coverage added in `e77396a`, save reload coverage in `a834acc`; full validation passed in run `43891411563`.
 - [ ] Lucky Stake and achievements, including unlock conditions and reward settlement.
 - [ ] Automation, bot behavior, offline earnings and clock handling.
 
