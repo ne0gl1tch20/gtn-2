@@ -2,7 +2,7 @@ name: Validate
 
 on:
   push:
-    branches: ['main', 'master', 'port/**']
+    branches: ['main', 'master', 'port/**', 'batch-a/**']
   pull_request:
     branches: [main, master]
   workflow_dispatch:
@@ -44,6 +44,11 @@ jobs:
         run: git restore -- analysis_options.yaml
       - name: Verify Dart formatting
         run: dart format --output=none --set-exit-if-changed .
+      - name: Show formatter diff for changed Menu Studio file
+        if: failure()
+        run: |
+          dart format --output=show lib/settings/menu_studio_page.dart > /tmp/menu_studio_page.dart
+          diff -u lib/settings/menu_studio_page.dart /tmp/menu_studio_page.dart || true
       - name: Analyze
         run: flutter analyze --fatal-infos
 
