@@ -30,10 +30,13 @@ Follow the short, meaningful phases in [docs/FINITE_PARITY_PLAN.md](../docs/FINI
 
 **Architecture decision (2026-11-16):** GTN2 remains Flutter + Dart for Android and Windows, with the existing Material 3 Expressive direction and GTN1 visual identity. The Rust + Slint rebuild proposal is shelved. Do not replace Flutter, add Slint, introduce a Rust gameplay core or start a Rust migration under the current parity project. Rust requires a separate explicit architecture decision and must not delay parity.
 
-Execute Phase 1 first: close the active Batch A surfaces with source-backed fixes and the required Android/Windows runtime evidence. Then proceed through the remaining phases in the authoritative plan. Work in small vertical slices; each slice must include implementation, relevant tests and the evidence appropriate to its behavior. A phase may be split into smaller batches, but its acceptance criteria and the full source inventory cannot be reduced.
+Execute Phases 0–12 as one continuous development effort. Phase 0 is already verified complete; do not repeat it without evidence of a missed source item. Continue from Phase 1 through Phase 12 without asking for confirmation between phases. Work in small vertical slices; each slice must include implementation, relevant tests and the evidence appropriate to its behavior. If physical Android/Windows evidence blocks a phase, record that blocker and continue independent work without bypassing dependent gates or falsely closing the phase. A phase may be split into smaller batches, but its acceptance criteria and the full source inventory cannot be reduced.
 
 Keep all in-scope GTN1 features. No placeholders, mocks, fake functionality, inert controls or knowingly missing features are acceptable in the final release. Do not publish or hand over an APK as the completed port until the final full-parity acceptance criteria pass.
 
+## Headless UI validation requirement
+
+Use a fast, headless Flutter widget-test matrix as the first-line overflow/layout gate. Maintain `test/responsive_layout_smoke_test.dart` across 320, 360, 390, 430, 600, 719, 720, 1024, 1100 and 1280 logical-pixel widths for Dashboard, More navigation, Settings, Menu Studio, Profile, Save Slots, Upgrade Shop, World Map and Progression Hub. Use bounded pumps (not `pumpAndSettle`) to avoid hangs from repeating animations, and fail on `tester.takeException()` so RenderFlex overflow errors fail CI. Keep a dedicated parallel `Headless responsive UI smoke` workflow job, focused responsive regression tests and compact/concurrent full-suite output. Headless tests are not screenshots and do not replace actual Android/Windows runtime verification. Fix the root layout constraints; never silence or clip away overflow warnings.
 ## Final definition of done
 
 The port is complete only when all of the following are true (it is just bullet points, do not check):
