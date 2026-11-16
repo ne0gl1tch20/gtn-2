@@ -44,6 +44,32 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('saved number notation formats balance and upgrade costs', (
+    tester,
+  ) async {
+    final initial = ProgressionState.initial.copyWith(
+      money: BigNumber.parse('12345.6789'),
+    );
+    await tester.pumpWidget(
+      M3EMaterialApp(
+        data: M3EThemeData.light(seedColor: const Color(0xFF7C5CFC)),
+        fontFamily: 'Manrope',
+        autoTheming: false,
+        initialTheme: Brightness.light,
+        home: UpgradeShopPage(
+          progression: initial,
+          numberNotation: 'Scientific',
+          onPurchase: (definition, {required levels}) async => initial,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('1.23e+04'), findsOneWidget);
+    expect(find.text('Upgrade · 1.00e+02 Money'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('10x buys the largest affordable upgrade prefix', (tester) async {
     final initial = ProgressionState.initial.copyWith(
       money: BigNumber.fromInt(200),
