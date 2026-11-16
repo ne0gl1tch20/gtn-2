@@ -460,3 +460,11 @@ Batch A remains active until Dashboard, More, Settings, Menu Studio, Profile and
 - Failure: `bottom navigation matches GTN1 width limits` expected 366px at a 390px viewport, actual 390px. The attempted full-width fix removed the 24px source margin and broke the existing GTN1 geometry contract.
 - Corrected by restoring the 24px width inset and centering the compact navigation, preserving 366px width with symmetric 12px side margins. Added an explicit centered-position assertion. Commits: `58472f1e4695ccf17d6ab9538bad71138b808e73` and `c533651a2ac0dfac932de4cb8a7e5f4df98f6a91`.
 - Android and Windows builds from #1975 were still running; their result is not used to claim a passing validation. New full validation is required for the corrected head.
+
+
+
+### Validate #1982 — mobile navigation vertical constraint correction — 2026-11-16
+
+- Run #1982 at head `4f1f5b8e32f5e1d7b507af73120e0347a7acbe10`: format and analysis passed; Flutter widget tests failed because the plain `Center` around the compact navigation expanded vertically and consumed the dashboard body in 390px viewport tests. This caused dashboard heading and More destination finders to see no widgets.
+- Fixed with `Center(heightFactor: 1)`, retaining the 366px width and centered 12px side margins while shrink-wrapping to the NavigationBar's own height. Corrective commit: `cb8fc830b30dace2f7e1c36d4a35ea518bb6c54e`.
+- Android and Windows jobs from #1982 were still running and were cancelled by the next branch update; no APK or Windows build result is claimed from #1982. A new full Validate run is required.
