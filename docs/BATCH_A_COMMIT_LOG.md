@@ -740,3 +740,13 @@ Batch A remains active until Dashboard, More, Settings, Menu Studio, Profile and
 
 
 - Validate run `43882152617` reproduced the same format-only failure and its expanded diagnostic step provided exact rewrites for the three affected production files. Applied the formatter output without changing behavior: dashboard `509242ad79b0b2d96e1900f772b1a9dc4f1904b7`; permanent shop `329844bf9aeaf01088220f773dc448c4464f6da2`; gameplay shop `85425dc56e8260bc6a6f81eb5ac0f6468473d7d6`. The focused test file was already formatted. Full validation remains pending on the resulting head.
+
+
+### Achievement, rewards and statistics number notation — 2026-11-16
+
+- Prior UI wiring Validate run `43882334336` passed on `7f9f5faa188b1f29b80b8fc7033bbd9d2f8bb90f`: Format/analyze, 457 Flutter tests, responsive overflow smoke, Android debug APK and Windows desktop debug build. Windows installer skipped.
+- GTN1 `PlayScreen.kt` formats the Millionaire achievement progress using the saved `numberNotation`; GTN2's corresponding `AchievementCatalog.progressLabel` had emitted raw decimal text. Added an optional notation parameter with Standard default and wired the setting into `LegacyDetailPage`.
+- Applied selected notation to achievement Money progress, Legacy lifetime Money earned/spent, current Money, Prestige and Ultra values. Nebula is stored/displayed as an integer and remains unchanged.
+- Commits: `b21f571c4c68a9bd93445988535852133725be18`; `04001327e93c39bfaaec2fe9ba4f9d80109634e8`; `8737804b759190f8942e5d234c62ca4653de900a`; `8797abeeaae12be3f488838c612ade11a94f40e7`; `57c1ad08ea4ac104f850f63968bf14d819a602d5`.
+- Added tests for Standard, Scientific and Engineering achievement progress. Engineering expectation matches the formatter's actual `e3` representation.
+- These changes are newer than the successful run and require fresh format/analyze, full tests, responsive overflow smoke, Android debug build and Windows desktop build. No validation pass is claimed for this batch.
