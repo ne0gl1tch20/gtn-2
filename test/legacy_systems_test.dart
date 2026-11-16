@@ -294,4 +294,260 @@ void main() {
       );
     });
   });
+
+  group('daily reward, quest and loot parity', () {
+    test('daily claim adds the trait bonus before applying Nebula Boost', () {
+      final progression = ProgressionState.initial.copyWith(
+        nebula: BigNumber.fromInt(2),
+        nebulaEarned: BigNumber.fromInt(2),
+      );
+      final systems = LegacySystemsState.initial.copyWith(
+        lastDailyRewardDate: '2026-11-06',
+        dailyRewardStreak: 1,
+      );
+
+      final result = engine.claimDailyReward(
+        progression: progression,
+        systems: systems,
+        today: '2026-11-07',
+        traitNebulaBonus: 3,
+        nebulaBoostOwned: true,
+      );
+
+      // Day two: (10 base + 3 trait bonus) × 2 boost = 26.
+      expect(result.accepted, isTrue);
+      expect(result.systems.dailyRewardStreak, 2);
+      expect(result.systems.lastDailyRewardDate, '2026-11-07');
+      expect(result.progression.nebula, BigNumber.fromInt(28));
+      expect(result.progression.nebulaEarned, BigNumber.fromInt(28));
+    });
+
+    test('all four daily quest payouts and lifetime totals match GTN1', () {
+      const today = '2026-11-07';
+      final cases = <(String, LegacySystemsState, int, int)>[
+        (
+          'daily_guesses_10',
+          LegacySystemsState.initial.copyWith(
+            dailyQuestDate: today,
+            dailyQuestGuesses: 10,
+          ),
+          10000,
+          0,
+        ),
+        (
+          'daily_correct_5',
+          LegacySystemsState.initial.copyWith(
+            dailyQuestDate: today,
+            dailyQuestCorrectGuesses: 5,
+          ),
+          0,
+          50,
+        ),
+        (
+          'daily_streak_5',
+          LegacySystemsState.initial.copyWith(
+            dailyQuestDate: today,
+            dailyQuestBestStreak: 5,
+          ),
+          0,
+          100,
+        ),
+        (
+          'daily_upgrades_3',
+          LegacySystemsState.initial.copyWith(
+            dailyQuestDate: today,
+            dailyQuestUpgradePurchases: 3,
+          ),
+          0,
+          70,
+        ),
+      ];
+
+      for (final (questId, systems, moneyReward, nebulaReward) in cases) {
+        final result = engine.claimDailyQuest(
+          progression: ProgressionState.initial.copyWith(
+            moneyEarned: BigNumber.fromInt(5),
+            nebulaEarned: BigNumber.fromInt(7),
+          ),
+          systems: systems,
+          questId: questId,
+          today: today,
+          nebulaBoostOwned: true,
+        );
+
+        expect(result.accepted, isTrue, reason: questId);
+        expect(
+          result.progression.money,
+          BigNumber.fromInt(moneyReward),
+          reason: '$questId Money payout',
+        );
+        expect(
+          result.progression.moneyEarned,
+          BigNumber.fromInt(5 + moneyReward),
+          reason: '$questId lifetime Money',
+        );
+        expect(
+          result.progression.nebula,
+          BigNumber.fromInt(nebulaReward),
+          reason: '$questId Nebula payout',
+        );
+        expect(
+          result.progression.nebulaEarned,
+          BigNumber.fromInt(7 + nebulaReward),
+          reason: '$questId lifetime Nebula',
+        );
+        expect(result.systems.claimedDailyQuests, contains(questId));
+
+        final duplicate = engine.claimDailyQuest(
+          progression: result.progression,
+          systems: result.systems,
+          questId: questId,
+          today: today,
+          nebulaBoostOwned: true,
+        );
+        expect(duplicate.accepted, isFalse, reason: '$questId duplicate');
+        expect(duplicate.progression, result.progression);
+      }
+    });
+
+    test('daily guess progress resets on date change before recording the guess', () {
+      final previous = LegacySystemsState.initial.copyWith(
+        dailyQuestDate: '2026-11-06',
+        dailyQuestGuesses: 9,
+        dailyQuestCorrectGuesses: 4,
+        dailyQuestBestStreak: 6,
+        dailyQuestUpgradePurchases: 3,
+        claimedDailyQuests: const {'daily_guesses_10'},
+        lootChests: const {'common': 2, 'rare': 1, 'epic': 0},
+      );
+
+      final next = engine.recordGuessProgress(
+        previous,
+        correct: false,
+        currentStreak: 0,
+        today: '2026-11-07',
+        lootRoll: 0,
+      );
+
+      expect(next.dailyQuestDate, '2026-11-07');
+      expect(next.dailyQuestGuesses, 1);
+      expect(next.dailyQuestCorrectGuesses, 0);
+      expect(next.dailyQuestBestStreak, 0);
+      expect(next.dailyQuestUpgradePurchases, 0);
+      expect(next.claimedDailyQuests, isEmpty);
+      expect(next.lootChests, const {'common': 2, 'rare': 1, 'epic': 0});
+      expect(next.lootDropsFound, 0);
+    });
+
+    test('loot-drop roll boundaries match the source tier probabilities', () {
+      const today = '2026-11-07';
+      const cases = <(int, String?)>[
+        (0, 'epic'),
+        (9, 'epic'),
+        (10, 'rare'),
+        (59, 'rare'),
+        (60, 'common'),
+        (239, 'common'),
+        (240, null),
+        (999, null),
+      ];
+
+      for (final (roll, expectedTier) in cases) {
+        final result = engine.recordGuessProgress(
+          LegacySystemsState.initial.copyWith(dailyQuestDate: today),
+          correct: true,
+          currentStreak: 3,
+          today: today,
+          lootRoll: roll,
+        );
+
+        expect(result.dailyQuestGuesses, 1, reason: 'roll $roll');
+        expect(result.dailyQuestCorrectGuesses, 1, reason: 'roll $roll');
+        expect(result.dailyQuestBestStreak, 3, reason: 'roll $roll');
+        expect(result.lastLootDropTier, expectedTier, reason: 'roll $roll');
+        expect(result.lootDropsFound, expectedTier == null ? 0 : 1);
+        expect(result.lootEventId, expectedTier == null ? 0 : 1);
+        for (final tier in const ['common', 'rare', 'epic']) {
+          expect(
+            result.lootChests[tier],
+            tier == expectedTier ? 1 : 0,
+            reason: 'roll $roll $tier inventory',
+          );
+        }
+      }
+    });
+
+    test('upgrade purchases reset stale daily progress then count the purchase', () {
+      final result = engine.recordUpgradePurchase(
+        LegacySystemsState.initial.copyWith(
+          dailyQuestDate: '2026-11-06',
+          dailyQuestGuesses: 9,
+          dailyQuestCorrectGuesses: 4,
+          dailyQuestBestStreak: 5,
+          dailyQuestUpgradePurchases: 2,
+          claimedDailyQuests: const {'daily_guesses_10'},
+        ),
+      );
+      final today = DateTime.now().toIso8601String().substring(0, 10);
+
+      expect(result.dailyQuestDate, today);
+      expect(result.dailyQuestGuesses, 0);
+      expect(result.dailyQuestCorrectGuesses, 0);
+      expect(result.dailyQuestBestStreak, 0);
+      expect(result.dailyQuestUpgradePurchases, 1);
+      expect(result.claimedDailyQuests, isEmpty);
+    });
+
+    test('all chest tiers consume one chest and credit only the selected currency', () {
+      const rewards = <String, (int, int)>{
+        'common': (5000, 5),
+        'rare': (25000, 25),
+        'epic': (100000, 100),
+      };
+
+      for (final entry in rewards.entries) {
+        for (final rewardNebula in [false, true]) {
+          final result = engine.openLootChest(
+            progression: ProgressionState.initial.copyWith(
+              money: BigNumber.fromInt(20),
+              moneyEarned: BigNumber.fromInt(10),
+              nebula: BigNumber.fromInt(5),
+              nebulaEarned: BigNumber.fromInt(3),
+            ),
+            systems: LegacySystemsState.initial.copyWith(
+              lootChests: {
+                'common': 0,
+                'rare': 0,
+                'epic': 0,
+                entry.key: 1,
+              },
+            ),
+            tier: entry.key,
+            rewardNebula: rewardNebula,
+          );
+
+          expect(result.accepted, isTrue, reason: '${entry.key} $rewardNebula');
+          expect(result.systems.lootChests[entry.key], 0);
+          expect(result.systems.lootChestsOpened, 1);
+          expect(
+            result.progression.money,
+            BigNumber.fromInt(20 + (rewardNebula ? 0 : entry.value.$1)),
+          );
+          expect(
+            result.progression.moneyEarned,
+            BigNumber.fromInt(10 + (rewardNebula ? 0 : entry.value.$1)),
+          );
+          expect(
+            result.progression.nebula,
+            BigNumber.fromInt(5 + (rewardNebula ? entry.value.$2 : 0)),
+          );
+          expect(
+            result.progression.nebulaEarned,
+            BigNumber.fromInt(3 + (rewardNebula ? entry.value.$2 : 0)),
+          );
+        }
+      }
+    });
+  });
+
 }
