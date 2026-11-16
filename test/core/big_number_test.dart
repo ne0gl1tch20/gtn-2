@@ -73,6 +73,15 @@ void main() {
       );
     });
 
+    test('rounds integer multiplication to GTN1 DECIMAL128 precision', () {
+      expect(
+        BigNumber.parse(
+          '9999999999999999999999999999999999',
+        ).multiplyInt(3).toString(),
+        '30000000000000000000000000000000000',
+      );
+    });
+
     test('rounds integer powers to GTN1 DECIMAL128 precision', () {
       expect(
         BigNumber.parse('2').powInt(120).toString(),
