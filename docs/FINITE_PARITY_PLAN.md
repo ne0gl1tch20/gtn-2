@@ -339,3 +339,9 @@ Run #1975 passed format and analysis but the Flutter suite reported 434 passed /
 ### Validate #1982 correction — mobile navigation shrink-wrap — 2026-11-16
 
 Run #1982 passed format and analysis but the Flutter widget suite exposed that a plain `Center` in the compact bottom-navigation slot expanded vertically and consumed the dashboard body in several 390px viewport tests. The centered 366px navigation now uses `Center(heightFactor: 1)` so it preserves the source 12px side margins while shrink-wrapping to the 56px navigation height. Corrective commit: `cb8fc830b30dace2f7e1c36d4a35ea518bb6c54e`. Run #1982 is superseded; its Android/Windows jobs were cancelled by the new head. Full validation remains pending.
+
+
+
+### Validate #1986 partial result — 2026-11-16
+
+At PR head `c8642b7df8f83d4d666b1ed293a3793eb53c8544`, Validate run #1986 has passed format, analysis and all 435 Flutter tests. Android debug APK and Windows desktop debug builds are still running; the Windows installer is skipped by this debug workflow. Do not call the full validation passed until both platform build jobs complete. Run: https://github.com/ne0gl1tch20/gtn-2/actions/runs/43778076654.
