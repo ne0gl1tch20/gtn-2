@@ -28,7 +28,36 @@
 6. If a source behavior is intentionally unsupported in GTN2, it is not parity. Either implement it or record a concrete, owner-approved exclusion before release.
 7. Once the fixed inventory passes the exit gate, parity work is closed. Later work is normal maintenance, not another parity phase.
 
-## Six-stage delivery checklist
+## Architecture decision — 2026-11-16
+
+- **Keep Flutter + Dart as the GTN2 application, UI and gameplay implementation** for Android and Windows. Preserve the existing Material 3 Expressive direction while retaining GTN1's recognizable visual identity and Android-native interaction expectations.
+- **The proposed Rust + Slint rebuild is shelved.** Do not replace Flutter, introduce Slint, create a Rust gameplay core, or start a Rust migration as part of the current GTN2 parity work.
+- Rust is not an active dependency or implementation requirement for this project. Reconsidering it would require a separate explicit architecture decision; it must not delay or expand the current parity scope.
+- This decision changes no feature requirements, source mappings, tests, platform targets or release gates. Full GTN1 parity remains the goal.
+
+## Short, meaningful execution phases
+
+These phases are the **work sequence**, not a reduction of the fixed parity inventory. Keep the detailed acceptance checklist below as the source of truth for requirements and status. Each phase should be delivered as a small, reviewable vertical slice; split a phase into smaller batches when that makes implementation and verification faster without separating a behavior from its tests.
+
+1. **Phase 0 — Source baseline and inventory (complete):** Preserve the pinned GTN1 revision, complete source maps and frozen feature boundary. Do not reopen mapping work without evidence of a missed source item.
+2. **Phase 1 — Close the active Batch A surfaces:** Finish Dashboard, More, Settings, Menu Studio, Profile and Save Slots against GTN1. Resolve remaining defects, obtain paired Android/Windows runtime evidence and close the Batch A exit gate before advancing the dependent screen batch.
+3. **Phase 2 — Guess loop and economy:** Complete guess-state transitions, difficulty/range boundaries, reward calculations, currencies, multipliers, penalties, upgrade purchases and transaction safety. Add source-backed tests for boundary and failure cases.
+4. **Phase 3 — Saves and lifecycle reliability:** Complete save-slot isolation, serialization, migrations, import/export, corruption recovery, restart persistence, pause/resume and offline settlement. Verify no progress or rewards are lost or duplicated.
+5. **Phase 4 — Progression and player builds:** Complete Prestige/Ultra, permanent upgrades, all 320 trait behaviors, talents, mutators and relic acquisition/equipment/set effects. Verify real gameplay effects, not just catalogs or screens.
+6. **Phase 5 — Worlds and endgame:** Complete world unlocks, boss eligibility and battles, phases, rewards, mastery, secrets, Codex, Endless Rift and claim-once persistence.
+7. **Phase 6 — Home Base and recurring gameplay:** Complete Home Base/Sanctuary, daily and weekly rewards, quests, chests, minigames/Arcade, Lucky Stake, achievements, bots and automation.
+8. **Phase 7 — Audio, scripting and LiveOps:** Complete music/player behavior, background media controls, Jarrlyy DSP, Lua sandbox and shipped scripts, plus signed remote LiveOps bundle verification, activation and rollback.
+9. **Phase 8 — Remaining screen and interaction parity:** Work through the frozen Kotlin and Web Play screen inventory in small screen groups. Reproduce navigation, labels, states, dialogs, responsive layouts and interactions; attach paired source/GTN2 screenshots and interaction tests.
+10. **Phase 9 — Catalog, localization and asset runtime parity:** Verify all 17 catalogs, 320 trait definitions, 23 locales, fonts, images, icons, audio and offline references are actually consumed by the runtime with no fallback placeholders or missing assets.
+11. **Phase 10 — Android platform parity:** Verify Android permissions, notifications/scheduled work, updater/install flow, lifecycle, storage, back navigation, audio/media integration and device behavior.
+12. **Phase 11 — Windows platform parity:** Verify desktop navigation/input, filesystem behavior, audio/media, updater/replacement/rollback, packaging and runtime behavior.
+13. **Phase 12 — Final cross-platform acceptance:** Run the complete source-to-port audit, formatting, analysis, automated tests, Android and Windows builds, real Android play-test and Windows runtime checks. Build and distribute the final APK only from the verified merged main commit after every applicable parity item is closed.
+
+**Phase completion rule:** A phase closes only when its GTN1 source scope is identified, the real Flutter/Dart behavior is implemented, relevant automated tests pass, applicable Android/Windows runtime checks are recorded, and this checklist plus the relevant audit ledger is updated. Visual phases also require paired screenshots. A green build alone never closes a phase.
+
+**Execution rule:** Keep batches small and move forward as soon as their evidence is sufficient. Do not wait for every item in a broad domain before validating a finished vertical slice. Do not mark partial work complete, skip dependencies, reopen already verified work without a reproducible mismatch, or weaken the final full-parity release gate.
+
+## Detailed parity acceptance checklist
 
 ### Stage 1 — Freeze and map the source (one-time)
 
