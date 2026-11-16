@@ -675,3 +675,13 @@ Batch A remains active until Dashboard, More, Settings, Menu Studio, Profile and
 
 - Re-read the pinned GTN1 constructor: parsing preserves the input BigDecimal precision; DECIMAL128 rounding is applied by arithmetic operations. Corrected the 34-digit tie fixture to add zero before asserting the rounded result, rather than incorrectly expecting the parser itself to round.
 - Test correction commit: `618b160aae4d5da448857ba272ea393fd150a44e`. The new final-head Validate run is `43872966018`; pending at time of entry.
+
+
+### GTN1 BigNumber notation parsing parity — 2026-11-16
+
+- Re-read pinned GTN1 `BigNumber.kt` at `fe9cf567169e19059e0330d08769fe454336ef94`. Its string constructor accepts Java BigDecimal scientific notation and the suffix map `K` through `TG`, including the legacy `VGN` alias for exponent 63.
+- GTN2's strict parser previously rejected scientific notation and all suffixes. Extended `BigNumber.parse` to parse scientific notation and every source suffix while preserving arbitrary decimal precision and plain-decimal serialization. Invalid values still throw `FormatException` rather than silently becoming zero, preserving GTN2 save-corruption rejection.
+- Added parser fixtures for `1e6`, `1.25e3`, `1.5K`, `2Qa` and `1Vgn`; malformed suffix rejection remains covered.
+- Commits: parser `950c34d24a1202908c1e3525dabdbac4611fc982`; parser interpolation correction `763f8d47b3cbba28482d0b052f8cfd0f5c19cee6`; test `06ab116cad4a4eb72c3ffb1092ce3f00e7f7904e`; test fixture correction `509c16917f1f3424e02760eb62e0ec977f704161`; checklist `be18f0e88f329e9e4a1dc993d5801d07d2fe8510.
+- The successful Validate run `43873029894` predates these parser commits and does not validate them. A new full-head run is required.
+- Further source comparison found GTN1's `format(notation)` is a separate player-facing behavior and GTN2's persisted `numberNotation` setting has no number-formatting call sites. Keep the economy/numeric parity item open; next inspect the display call sites and port Standard/Scientific/Engineering formatting without changing plain-decimal save serialization.
