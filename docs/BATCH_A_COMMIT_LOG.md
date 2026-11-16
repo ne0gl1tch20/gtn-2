@@ -601,3 +601,8 @@ Batch A remains active until Dashboard, More, Settings, Menu Studio, Profile and
 - Added regression tests for bot misses preserving attempts/correct/streak/best-streak and malformed active-range failure. Existing tests already cover bot wins, lower/upper clamping, single-value ranges, completed-round rejection, target continuation and lifetime-attempt preservation.
 - Files changed: `test/core/game_engine_test.dart`, `docs/FINITE_PARITY_PLAN.md`, this append-only ledger. No gameplay logic was changed because the source comparison found the existing Dart transition behavior already aligned; the remaining gap was explicit regression evidence.
 - Validation required at this commit: Dart format, Flutter analyze, full Flutter suite, responsive UI smoke, Android debug APK build and Windows desktop debug build. Do not close the phase until all required jobs pass.
+### Formatter diagnostic follow-up — 2026-11-16
+
+- Validate run `43867506819` at `98252058c35e6eebc648c693928035562f5b745b` stopped at the Dart format gate. The new test file `test/core/game_engine_test.dart` was the only formatted file; static analysis and later jobs did not run.
+- Extended the existing failure-only formatter-diff diagnostic list in `.github/workflows/validate.yml` to include `test/core/game_engine_test.dart`, so the next validation reports the exact formatter rewrite instead of only the changed-file summary.
+- No app or test behavior changes in this follow-up. Apply the exact formatter output and rerun the complete validation.
