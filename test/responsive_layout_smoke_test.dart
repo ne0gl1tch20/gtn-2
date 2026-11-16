@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:gtn_2/core/game/game_engine.dart';
 import 'package:gtn_2/core/progression/progression_state.dart';
 import 'package:gtn_2/home/game_dashboard_page.dart';
+import 'package:gtn_2/legacy/legacy_systems_page.dart';
 import 'package:gtn_2/profile/player_profile_page.dart';
 import 'package:gtn_2/progression/progression_hub_page.dart';
 import 'package:gtn_2/saves/save_slots_page.dart';
@@ -140,6 +141,14 @@ void main() {
           build: () => UpgradeShopPage(
             progression: progression,
             onPurchase: (definition, {required levels}) async => progression,
+          ),
+        ),
+        (
+          name: 'Mutators and weekly challenges',
+          build: () => LegacySystemsPage(
+            progression: progression,
+            onChanged: (_) async {},
+            view: LegacySystemsView.mutators,
           ),
         ),
         (
