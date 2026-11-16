@@ -212,7 +212,9 @@ class _PermanentUpgradeCard extends StatelessWidget {
             M3EButton.filled(
               onPressed: busy || maxed || !affordable ? null : onBuy,
               child: Text(
-                maxed ? 'Max level reached' : 'Upgrade · ${cost.format(numberNotation)} $currency',
+                maxed
+                    ? 'Max level reached'
+                    : 'Upgrade · ${cost.format(numberNotation)} $currency',
               ),
             ),
             if (!maxed && !affordable)
