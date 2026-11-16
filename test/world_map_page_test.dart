@@ -58,7 +58,6 @@ void main() {
     );
   }
 
-
   testWidgets('compact World Map app bar title stays on one line', (
     tester,
   ) async {
