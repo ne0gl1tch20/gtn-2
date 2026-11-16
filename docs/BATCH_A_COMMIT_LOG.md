@@ -618,3 +618,11 @@ Batch A remains active until Dashboard, More, Settings, Menu Studio, Profile and
 
 - Validate `43868274251` at `04032d7989c61a03bc3f5e98fd181a8e954c2756` stopped at formatting. Dart formatter reported changes in `lib/core/progression/progression_engine.dart` and `test/core/progression_engine_test.dart`; no tests/builds ran.
 - Extended the failure-only formatter diff list in `.github/workflows/validate.yml` with those two files so the next run exposes the exact rewrites. No logic change in this diagnostic-only commit.
+
+### Economy transaction persistence regression — 2026-11-16
+
+- Compared pinned GTN1 `GameEngine.kt` at `fe9cf567169e19059e0330d08769fe454336ef94` and `DesktopEconomyTransactions.kt` against GTN2 `ProgressionEngine.awardArcadeReward`, `purchaseNebulaItem`, `SaveData` serialization and `SaveStorage` restart behavior.
+- Added `test/data/economy_transaction_persistence_test.dart`: awards Nebula and Money, purchases the permanent Nebula boost, saves the resulting progression, creates a fresh `SaveStorage` instance and verifies balances, lifetime-earned totals and inventory survive repeated reload without replaying the transaction.
+- Implementation/test commit: `91ab3d51c94ecf9ec14bcac0e94e8d01ed89f008`.
+- Checklist evidence commit: `27881aa36b2e5e0891507bc5851674baca5b36b8`.
+- This adds one end-to-end persistence regression; it does not close the remaining economy transaction-family, rounding or persisted-boundary audit. Formatting, analysis, focused test, full Flutter suite, responsive UI smoke and Android/Windows builds must pass on the resulting head before treating this regression as validated.
