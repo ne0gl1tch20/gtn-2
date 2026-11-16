@@ -94,12 +94,7 @@ void main() {
       expect(rewarded.moneyEarned.toString(), '679.15');
 
       await storage.save(
-        SaveData(
-          secret: 42,
-          attempts: 0,
-          gamesWon: 0,
-          progression: rewarded,
-        ),
+        SaveData(secret: 42, attempts: 0, gamesWon: 0, progression: rewarded),
       );
       final restored = await SaveStorage(directory: directory).load();
 
@@ -111,5 +106,4 @@ void main() {
       expect(restored.progression.moneySpent, rewarded.moneySpent);
     },
   );
-
 }
