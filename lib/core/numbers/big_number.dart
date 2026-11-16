@@ -57,9 +57,9 @@ class BigNumber implements Comparable<BigNumber> {
       throw FormatException('Invalid decimal number.', value);
     }
     final fraction = match.group(3) ?? '';
-    final digits = '\${match.group(2)}$fraction';
+    final digits = '${match.group(2)}$fraction';
     var coefficient = BigInt.parse(
-      '\${match.group(1) == '-' ? '-' : ''}$digits',
+      '${match.group(1) == '-' ? '-' : ''}$digits',
     );
     var scale = fraction.length - int.parse(match.group(4) ?? '0') - suffixPower;
     if (scale < 0) {
