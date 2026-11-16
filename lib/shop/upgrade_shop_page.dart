@@ -80,7 +80,9 @@ class _UpgradeShopPageState extends State<UpgradeShopPage> {
             description: 'Make every correct guess count. Upgrade levels are saved automatically.',
             icon: Icons.upgrade_rounded,
             accent: GtnUiTokens.purple,
-            trailing: _BalanceChip(value: _progression.money.format(widget.numberNotation)),
+            trailing: _BalanceChip(
+              value: _progression.money.format(widget.numberNotation),
+            ),
           ),
           const SizedBox(height: 16),
           LayoutBuilder(
