@@ -98,10 +98,7 @@ void main() {
 
       final progression = ProgressionState.initial;
       final screens = <({String name, Widget Function() build})>[
-        (
-          name: 'Play dashboard',
-          build: () => _dashboard(controllers),
-        ),
+        (name: 'Play dashboard', build: () => _dashboard(controllers)),
         (
           name: 'Settings',
           build: () => SettingsPage(
