@@ -228,6 +228,7 @@ class _MenuStudioPageState extends State<MenuStudioPage> {
                 final id = order[index];
                 final color = _colorFor(id, context);
                 final targetArea = area == 'nav' ? 'more' : 'nav';
+                final isCompact = MediaQuery.sizeOf(context).width <= 560;
                 return GtnExpressiveCard(
                   key: ValueKey('$area-$id'),
                   margin: const EdgeInsets.only(bottom: 8),
@@ -277,35 +278,28 @@ class _MenuStudioPageState extends State<MenuStudioPage> {
                       ),
                       ConstrainedBox(
                         constraints: BoxConstraints(
-                          maxWidth: MediaQuery.sizeOf(context).width <= 560
-                              ? 88
-                              : 112,
+                          maxWidth: isCompact ? 88 : 112,
                         ),
                         child: TextButton(
                           style: TextButton.styleFrom(
                             padding: EdgeInsets.symmetric(
-                              horizontal: MediaQuery.sizeOf(context).width <= 560
-                                  ? 8
-                                  : 12,
-                              vertical: MediaQuery.sizeOf(context).width <= 560
-                                  ? 7
-                                  : 10,
+                              horizontal: isCompact ? 8 : 12,
+                              vertical: isCompact ? 7 : 10,
                             ),
                             minimumSize: Size.zero,
                             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                             visualDensity: VisualDensity.compact,
                           ),
-                          onPressed: _saving ? null : () => _move(id, targetArea),
+                          onPressed: _saving
+                              ? null
+                              : () => _move(id, targetArea),
                           child: Text(
                             area == 'nav' ? 'Move to More' : 'Move to top bar',
                             textAlign: TextAlign.center,
                             softWrap: true,
                             style: Theme.of(context).textTheme.labelSmall
                                 ?.copyWith(
-                                  fontSize:
-                                      MediaQuery.sizeOf(context).width <= 560
-                                      ? 10
-                                      : null,
+                                  fontSize: isCompact ? 10 : null,
                                   height: 1.25,
                                 ),
                           ),
