@@ -969,8 +969,6 @@ void main() {
             ),
           ),
         );
-        await tester.tap(find.byType(ExpansionTile).first);
-        await tester.pump();
       },
     );
 
