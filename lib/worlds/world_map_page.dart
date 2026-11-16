@@ -339,6 +339,7 @@ class _WorldMapPageState extends State<WorldMapPage> {
             description: 'Explore worlds, discover secrets and challenge their guardians.',
             icon: Icons.explore_rounded,
             accent: GtnUiTokens.cyan,
+            singleLineTitle: true,
           ),
           const SizedBox(height: 8),
           Align(
