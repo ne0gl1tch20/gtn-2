@@ -345,3 +345,15 @@ Run #1982 passed format and analysis but the Flutter widget suite exposed that a
 ### Validate #1986 partial result — 2026-11-16
 
 At PR head `c8642b7df8f83d4d666b1ed293a3793eb53c8544`, Validate run #1986 has passed format, analysis and all 435 Flutter tests. Android debug APK and Windows desktop debug builds are still running; the Windows installer is skipped by this debug workflow. Do not call the full validation passed until both platform build jobs complete. Run: https://github.com/ne0gl1tch20/gtn-2/actions/runs/43778076654.
+
+
+
+### Validate #1986 final result — 2026-11-16
+
+Validate run [#1986](https://github.com/ne0gl1tch20/gtn-2/actions/runs/43778076654) passed at PR #74 head `c8642b7df8f83d4d666b1ed293a3793eb53c8544`. Format and analysis passed; all 435 Flutter tests passed; Android debug APK and Windows desktop debug builds succeeded. Windows release installer was skipped by this debug validation workflow.
+
+Android artifact #14187456134 (`android-debug-apk`), 99,195,032-byte ZIP, SHA-256 `c36560ca7c1dfb8aaae4d40d6e95d4e3af6dd862df659152bb3e050fed2dd475`, expires 2026-11-23. Extracted APK: 179,344,345 bytes, SHA-256 `44b7e46719eb282e7509b2b06db6ec2780f6e038ed9cbbcec57c93ac33b74230`.
+
+Windows artifact #14187805031 (`windows-debug-portable`), 58,384,937-byte ZIP, SHA-256 `ca96e0cb9355d9659776d8428cf0da32f8e86bcf719163ce2a97fb784b03a2b8`, expires 2026-11-23.
+
+This closes the CI/build-validation portion of this runtime-comment follow-up only. Android/Windows runtime and visual verification across Dashboard, More, Settings, Menu Studio, Profile and Save Slots remains required. Upgrade Shop's 51px overflow and World Map hero-heading wrap remain separate follow-up defects. Keep PR #74 draft, Batch A active, and Batch B blocked until the user-provided GTN2 runtime evidence is reviewed.
