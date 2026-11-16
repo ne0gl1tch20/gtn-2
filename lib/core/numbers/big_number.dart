@@ -287,77 +287,14 @@ class BigNumber implements Comparable<BigNumber> {
 
   static String _stripTrailingDecimalZeros(String value) {
     if (!value.contains('.')) return value;
-    return value.replaceFirst(RegExp(r'0+
-    if (scale == 0) return coefficient.toString();
-    final negative = coefficient.isNegative;
-    final digits = coefficient.abs().toString().padLeft(scale + 1, '0');
-    final split = digits.length - scale;
-    final result = '${digits.substring(0, split)}.${digits.substring(split)}';
-    return negative ? '-$result' : result;
-  }
-
-  static BigNumber _roundToPrecision(BigNumber value, {int precision = 34}) {
-    final digits = value.coefficient.abs().toString().length;
-    final discardedDigits = digits - precision;
-    if (discardedDigits <= 0 || value.coefficient == BigInt.zero) {
-      return value;
+    var result = value;
+    while (result.endsWith('0')) {
+      result = result.substring(0, result.length - 1);
     }
-
-    final divisor = _powerOfTen(discardedDigits);
-    final absolute = value.coefficient.abs();
-    var quotient = absolute ~/ divisor;
-    final remainder = absolute.remainder(divisor);
-    final midpoint = remainder * BigInt.two;
-    if (midpoint > divisor || (midpoint == divisor && quotient.isOdd)) {
-      quotient += BigInt.one;
+    if (result.endsWith('.')) {
+      result = result.substring(0, result.length - 1);
     }
-
-    if (value.coefficient.isNegative) quotient = -quotient;
-    final adjustedScale = value.scale - discardedDigits;
-    if (adjustedScale >= 0) {
-      return BigNumber.fromParts(quotient, adjustedScale);
-    }
-    return BigNumber.fromParts(quotient * _powerOfTen(-adjustedScale), 0);
-  }
-
-  static BigInt _powerOfTen(int exponent) => BigInt.from(10).pow(exponent);
-}
-), '').replaceFirst(RegExp(r'\.
-    if (scale == 0) return coefficient.toString();
-    final negative = coefficient.isNegative;
-    final digits = coefficient.abs().toString().padLeft(scale + 1, '0');
-    final split = digits.length - scale;
-    final result = '${digits.substring(0, split)}.${digits.substring(split)}';
-    return negative ? '-$result' : result;
-  }
-
-  static BigNumber _roundToPrecision(BigNumber value, {int precision = 34}) {
-    final digits = value.coefficient.abs().toString().length;
-    final discardedDigits = digits - precision;
-    if (discardedDigits <= 0 || value.coefficient == BigInt.zero) {
-      return value;
-    }
-
-    final divisor = _powerOfTen(discardedDigits);
-    final absolute = value.coefficient.abs();
-    var quotient = absolute ~/ divisor;
-    final remainder = absolute.remainder(divisor);
-    final midpoint = remainder * BigInt.two;
-    if (midpoint > divisor || (midpoint == divisor && quotient.isOdd)) {
-      quotient += BigInt.one;
-    }
-
-    if (value.coefficient.isNegative) quotient = -quotient;
-    final adjustedScale = value.scale - discardedDigits;
-    if (adjustedScale >= 0) {
-      return BigNumber.fromParts(quotient, adjustedScale);
-    }
-    return BigNumber.fromParts(quotient * _powerOfTen(-adjustedScale), 0);
-  }
-
-  static BigInt _powerOfTen(int exponent) => BigInt.from(10).pow(exponent);
-}
-), '');
+    return result;
   }
 
   static String _scientificString(BigNumber value, int exponent) {
