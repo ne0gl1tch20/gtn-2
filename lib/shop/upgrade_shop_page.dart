@@ -81,14 +81,10 @@ class _UpgradeShopPageState extends State<UpgradeShopPage> {
             trailing: _BalanceChip(value: _progression.money.toString()),
           ),
           const SizedBox(height: 16),
-          Row(
-            children: [
-              Text(
-                'Buy multiplier',
-                style: Theme.of(context).textTheme.titleSmall,
-              ),
-              const Spacer(),
-              SegmentedButton<String>(
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final multiplierControl = SegmentedButton<String>(
+                key: const ValueKey('upgrade-buy-multiplier-control'),
                 segments: const [
                   ButtonSegment(value: '1', label: Text('1×')),
                   ButtonSegment(value: '10', label: Text('10×')),
@@ -101,8 +97,30 @@ class _UpgradeShopPageState extends State<UpgradeShopPage> {
                           setState(() => _buyMultiplier = selection.first)
                     : null,
                 showSelectedIcon: false,
-              ),
-            ],
+              );
+              final label = Text(
+                'Buy multiplier',
+                style: Theme.of(context).textTheme.titleSmall,
+              );
+              if (constraints.maxWidth < 500) {
+                return Column(
+                  key: const ValueKey('upgrade-buy-multiplier-layout'),
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    label,
+                    const SizedBox(height: 8),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: multiplierControl,
+                    ),
+                  ],
+                );
+              }
+              return Row(
+                key: const ValueKey('upgrade-buy-multiplier-layout'),
+                children: [label, const Spacer(), multiplierControl],
+              );
+            },
           ),
           const SizedBox(height: 12),
           LayoutBuilder(
