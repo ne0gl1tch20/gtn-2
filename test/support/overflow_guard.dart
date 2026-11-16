@@ -44,9 +44,9 @@ Future<void> runWithOverflowGuard(
     }
 
     if (flutterErrors.isNotEmpty || exceptions.isNotEmpty) {
-      final details = flutterErrors.map((error) => error.toString()).join(
-        '\n--- additional FlutterErrorDetails ---\n',
-      );
+      final details = flutterErrors
+          .map((error) => error.toString())
+          .join('\n--- additional FlutterErrorDetails ---\n');
       final pending = exceptions.join(
         '\n--- additional pending exception ---\n',
       );
