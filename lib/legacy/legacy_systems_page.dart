@@ -208,7 +208,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
       LegacySystemsView.talents =>
         'Review talent paths and manage earned progression choices.',
       LegacySystemsView.mutators =>
-        'Shape a run with optional gameplay modifiers.',
+        'Shape a run with optional gameplay modifiers and rotating weekly challenges.',
       LegacySystemsView.relics =>
         'Collect and equip relics that influence your progression.',
       LegacySystemsView.homeBase =>
@@ -690,7 +690,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
                               : null,
                           child: Text(
                             claimed
-                                ? AppLocalizations.text('claimed', 'Claimed')
+                                ? AppLocalizations.text('completed', 'Completed')
                                 : AppLocalizations.text('claim', 'Claim'),
                           ),
                         ),
