@@ -15,6 +15,8 @@ import 'package:gtn_2/settings/menu_studio_layout.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
 
+import 'support/overflow_guard.dart';
+
 Widget buildDashboard({
   GameSettings? settings,
   ValueListenable<GameSettings>? settingsListenable,
@@ -937,4 +939,77 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Dev Settings'), findsOneWidget);
   });
+
+  testWidgets('Home Base formats its restoration cost like GTN1', (
+    WidgetTester tester,
+  ) async {
+    const viewport = Size(390, 844);
+    tester.view.physicalSize = viewport;
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await runWithOverflowGuard(
+      tester,
+      screen: 'Home Base currency formatting',
+      viewport: viewport,
+      action: () async {
+        await tester.pumpWidget(
+          M3EMaterialApp(
+            data: M3EThemeData.light(seedColor: const Color(0xFF7C5CFC)),
+            fontFamily: 'Manrope',
+            autoTheming: false,
+            initialTheme: Brightness.light,
+            home: LegacySystemsPage(
+              progression: ProgressionState.initial.copyWith(
+                money: BigNumber.fromInt(50000),
+              ),
+              onChanged: (_) async {},
+              view: LegacySystemsView.homeBase,
+            ),
+          ),
+        );
+        await tester.tap(find.byType(ExpansionTile).first);
+        await tester.pump();
+      },
+    );
+
+    expect(find.text('Restore next level · 50.00K Money'), findsOneWidget);
+  });
+
+  testWidgets('Lucky Stake formats available Money like GTN1', (
+    WidgetTester tester,
+  ) async {
+    const viewport = Size(390, 844);
+    tester.view.physicalSize = viewport;
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await runWithOverflowGuard(
+      tester,
+      screen: 'Lucky Stake currency formatting',
+      viewport: viewport,
+      action: () async {
+        await tester.pumpWidget(
+          M3EMaterialApp(
+            data: M3EThemeData.light(seedColor: const Color(0xFF7C5CFC)),
+            fontFamily: 'Manrope',
+            autoTheming: false,
+            initialTheme: Brightness.light,
+            home: LegacySystemsPage(
+              progression: ProgressionState.initial.copyWith(
+                money: BigNumber.parse('12345.6789'),
+              ),
+              onChanged: (_) async {},
+              view: LegacySystemsView.luckyStake,
+            ),
+          ),
+        );
+      },
+    );
+
+    expect(find.text('Money available: 12.35K'), findsOneWidget);
+  });
+
 }
