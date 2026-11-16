@@ -64,6 +64,12 @@ void main() {
           money: BigNumber.parse('12345678901234567890.25'),
           prestige: BigNumber.fromInt(4),
           upgrades: const {'income': 2},
+          legacySystems: LegacySystemsState.initial.copyWith(
+            homeBaseLevel: 13,
+            stakesPlaced: 8,
+            stakesWon: 5,
+            stakesLost: 3,
+          ),
         ),
         settings: const GameSettings(
           darkMode: false,
@@ -75,6 +81,13 @@ void main() {
       expect(SaveData.fromJson(save.toJson()).minimum, 25);
       expect(SaveData.fromJson(save.toJson()).maximum, 150);
       expect(SaveData.fromJson(save.toJson()).settings.difficultyId, 'hard');
+      final restoredSystems = SaveData.fromJson(save.toJson())
+          .progression
+          .legacySystems;
+      expect(restoredSystems.homeBaseLevel, 13);
+      expect(restoredSystems.stakesPlaced, 8);
+      expect(restoredSystems.stakesWon, 5);
+      expect(restoredSystems.stakesLost, 3);
     });
 
     test('round-trips huge progression currencies and permanent levels', () {
