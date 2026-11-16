@@ -5,6 +5,7 @@ import '../progression/progression_state.dart';
 import 'builtin_trait_catalog.dart';
 import 'legacy_systems_state.dart';
 import 'live_ops_claim_policy.dart';
+import 'weekly_challenge_catalog.dart';
 
 /// A validated definition loaded from the pinned GTN1 talent catalog.
 class TalentDefinition {
@@ -841,6 +842,66 @@ class LegacySystemsEngine {
       return _reject(progression, systems, 'Challenge is not claimable.');
     }
     final reward = nebulaReward * (nebulaBoostOwned ? 2 : 1);
+    return _accept(
+      _addNebula(progression, reward),
+      systems.copyWith(
+        completedChallenges: Set.unmodifiable({
+          ...systems.completedChallenges,
+          challengeId,
+        }),
+      ),
+    );
+  }
+
+  BigNumber weeklyChallengeProgress(
+    ProgressionState progression,
+    String kind,
+  ) {
+    return switch (kind) {
+      'correct' => BigNumber.fromInt(progression.correctGuesses),
+      'streak' || 'frenzy' => BigNumber.fromInt(progression.bestStreak),
+      'money' => progression.money,
+      'guesses' => BigNumber.fromInt(progression.totalGuesses),
+      'prestige' => BigNumber.fromInt(progression.prestigeResets),
+      'ultra' => BigNumber.fromInt(progression.ultraResets),
+      'playtime' => BigNumber.fromInt(progression.playtimeSeconds),
+      _ => BigNumber.fromInt(0),
+    };
+  }
+
+  LegacyActionResult claimWeeklyChallenge({
+    required ProgressionState progression,
+    required LegacySystemsState systems,
+    required String challengeId,
+    required DateTime today,
+    bool nebulaBoostOwned = false,
+  }) {
+    WeeklyChallengeDefinition? challenge;
+    for (final candidate in WeeklyChallengeCatalog.forDate(today)) {
+      if (candidate.id == challengeId) {
+        challenge = candidate;
+        break;
+      }
+    }
+    if (challenge == null ||
+        systems.completedChallenges.contains(challengeId)) {
+      return _reject(
+        progression,
+        systems,
+        'Weekly challenge is not claimable.',
+      );
+    }
+
+    final progress = weeklyChallengeProgress(progression, challenge.kind);
+    if (progress.compareTo(BigNumber.fromInt(challenge.target)) < 0) {
+      return _reject(
+        progression,
+        systems,
+        'Weekly challenge objective is not complete.',
+      );
+    }
+
+    final reward = challenge.rewardNebula * (nebulaBoostOwned ? 2 : 1);
     return _accept(
       _addNebula(progression, reward),
       systems.copyWith(
