@@ -82,6 +82,16 @@ void main() {
     expect(restored.updateCheckIntervalHours, 168);
   });
 
+  test('GTN1 desktop reminder intervals 6 and 72 survive migration', () {
+    for (final interval in [6, 72]) {
+      final restored = GameSettings.fromJson({
+        ...GameSettings.initial.toJson(),
+        'notificationIntervalHours': interval,
+      });
+      expect(restored.notificationIntervalHours, interval);
+    }
+  });
+
   test('older GTN2 settings retain their original defaults', () {
     final restored = GameSettings.fromJson({
       'darkMode': false,
@@ -113,4 +123,22 @@ void main() {
     expect(restored.themeMode, 'System');
     expect(restored.darkMode, isTrue);
   });
+  // Tutorial completion is global onboarding state, not per-slot progression.
+  test(
+    'tutorial completion defaults to false and survives settings persistence',
+    () {
+      expect(GameSettings.initial.tutorialCompleted, isFalse);
+      final restored = GameSettings.fromJson({
+        ...GameSettings.initial.toJson(),
+        'tutorialCompleted': true,
+      });
+      expect(restored.tutorialCompleted, isTrue);
+      expect(
+        restored
+            .copyWith(tutorialCompleted: false)
+            .toJson()['tutorialCompleted'],
+        isFalse,
+      );
+    },
+  );
 }

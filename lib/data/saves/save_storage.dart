@@ -97,11 +97,21 @@ class SaveStorage {
     await candidate.rename(destination.path);
   }
 
+  /// Reads only the primary save, without falling back to recovery files.
+  Future<SaveData?> loadPrimary() => _enqueue(() => _readSave(_file));
+
+  /// Reads the last-known-good backup without changing either file.
+  Future<SaveData?> loadBackup() =>
+      _enqueue(() => _readSave(File('${_file.path}.bak')));
+
+  Future<CreativeModeSave?> loadCreativeMode() =>
+      _enqueue(_readCreativeModeUnlocked);
+
   Future<SaveData?> load() => _enqueue(_loadUnlocked);
 
   Future<SaveData?> _loadUnlocked() async {
     final primary = await _readSave(_file);
-    if (primary != null) return primary;
+    if (primary != null) return _attachCreativeMode(primary);
 
     // A process can be killed after the old save is moved to .bak but before
     // the flushed .tmp file is renamed into place. Prefer that complete new
@@ -110,14 +120,14 @@ class SaveStorage {
     final temporarySave = await _readSave(temporary);
     if (temporarySave != null) {
       await _restoreRecoveryFile(temporary);
-      return temporarySave;
+      return _attachCreativeMode(temporarySave);
     }
 
     final backup = File('${_file.path}.bak');
     final backupSave = await _readSave(backup);
     if (backupSave != null) {
-      await _restoreRecoveryFile(backup);
-      return backupSave;
+      await _restoreRecoveryFile(backup, keepCandidate: true);
+      return _attachCreativeMode(backupSave);
     }
     return null;
   }
@@ -177,7 +187,11 @@ class SaveStorage {
         await temporary.exists()) {
       return false;
     }
-    await _write(data);
+    final existingCreative = await _readCreativeModeUnlocked();
+    final next = data.creativeMode == null && existingCreative != null
+        ? data.copyWith(creativeMode: existingCreative)
+        : data;
+    await _write(next);
     return true;
   });
 
@@ -205,6 +219,8 @@ class SaveStorage {
       final file = File('${_file.path}$suffix');
       if (await file.exists()) await file.delete();
     }
+    final creativeFile = _creativeModeFile;
+    if (await creativeFile.exists()) await creativeFile.delete();
   });
 
   Future<SaveData?> _readSave(File file) async {
@@ -220,19 +236,26 @@ class SaveStorage {
     }
   }
 
-  Future<void> _restoreRecoveryFile(File candidate) async {
+  Future<void> _restoreRecoveryFile(
+    File candidate, {
+    bool keepCandidate = false,
+  }) async {
     if (await _file.exists()) {
       final corrupt = File('${_file.path}.corrupt');
       if (await corrupt.exists()) await corrupt.delete();
       await _file.rename(corrupt.path);
     }
-    await candidate.rename(_file.path);
+    if (keepCandidate) {
+      await candidate.copy(_file.path);
+    } else {
+      await candidate.rename(_file.path);
+    }
   }
 
   bool _isValidSave(SaveData data) {
     if (data.schemaVersion != SaveData.currentSchemaVersion ||
         data.minimum < 1 ||
-        data.maximum > 500 ||
+        data.maximum > (data.creativeModeEnabled ? 1000000 : 500) ||
         data.minimum > data.maximum ||
         data.secret < data.minimum ||
         data.secret > data.maximum ||
@@ -278,6 +301,25 @@ class SaveStorage {
     });
     _fileQueues[_file.path] = next;
     return completer.future;
+  }
+
+  File get _creativeModeFile =>
+      File('${_file.parent.path}/gtn2-creative-slot$slot.json');
+
+  Future<CreativeModeSave?> _readCreativeModeUnlocked() async {
+    final file = _creativeModeFile;
+    if (!await file.exists()) return null;
+    try {
+      return CreativeModeSave.decodeAndMigrate(await file.readAsString());
+    } on FormatException {
+      return null;
+    }
+  }
+
+  Future<SaveData> _attachCreativeMode(SaveData save) async {
+    if (save.creativeMode != null) return save;
+    final creative = await _readCreativeModeUnlocked();
+    return creative == null ? save : save.copyWith(creativeMode: creative);
   }
 
   Future<void> _write(SaveData data) async {

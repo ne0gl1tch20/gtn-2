@@ -686,7 +686,7 @@ void main() {
       expect(
         () => LegacySystemsState.fromJson(<String, dynamic>{
           ...LegacySystemsState.initial.toJson(),
-          'lastBotGuess': 501,
+          'lastBotGuess': 1000001,
         }),
         throwsFormatException,
       );

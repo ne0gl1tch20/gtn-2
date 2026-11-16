@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gtn_2/design/expressive_widgets.dart';
 import 'package:gtn_2/settings/game_settings.dart';
 import 'package:gtn_2/settings/settings_page.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
@@ -47,6 +48,7 @@ void main() {
       'Theme Colors',
       'Number Notation',
       'Push Notifications & Reminders',
+      'Updates',
       'Sound FX',
       'Visual comfort & accessibility',
     ]) {
@@ -95,6 +97,49 @@ void main() {
       find.text('New random events and limited-time event rewards'),
       findsOneWidget,
     );
+  });
+
+  testWidgets('update interval setting exposes the GTN1 schedule choices', (
+    tester,
+  ) async {
+    var latest = GameSettings.initial;
+    await tester.pumpWidget(
+      M3EMaterialApp(
+        data: M3EThemeData.light(seedColor: const Color(0xFF7C5CFC)),
+        fontFamily: 'Manrope',
+        autoTheming: false,
+        initialTheme: Brightness.dark,
+        home: SettingsPage(
+          settings: latest,
+          onChanged: (next) async => latest = next,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.text('Check for updates automatically'),
+      260,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.text('None'), findsOneWidget);
+    expect(find.text('Every hour'), findsNothing);
+    final dropdown = find.ancestor(
+      of: find.text('Check for updates automatically'),
+      matching: find.byType(GtnExpressiveDropdown<int>),
+    );
+    expect(dropdown, findsOneWidget);
+    final menu = find.descendant(
+      of: dropdown,
+      matching: find.byType(M3EDropdownMenu<int>),
+    );
+    await tester.ensureVisible(menu);
+    await tester.pumpAndSettle();
+    await tester.tap(menu);
+    await tester.pumpAndSettle();
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Every 6 hours').last);
+    await tester.pumpAndSettle();
+    expect(latest.updateCheckIntervalHours, 6);
   });
 
   testWidgets('Sound effects volume is disabled when sound FX are off', (

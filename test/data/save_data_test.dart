@@ -164,22 +164,31 @@ void main() {
       );
     });
 
-    test('round-trips save profile name and icon', () {
-      final save = SaveData(
-        secret: 42,
-        attempts: 0,
-        gamesWon: 0,
-        profileName: 'My Run',
-        profileIconId: 'planet',
-      );
-      final restored = SaveData.fromJson(save.toJson());
-      expect(restored.profileName, 'My Run');
-      expect(restored.profileIconId, 'planet');
-      expect(
-        restored.copyWith(profileName: 'New Name').profileIconId,
-        'planet',
-      );
-    });
+    test(
+      'round-trips profile metadata and permanent Creative Save eligibility',
+      () {
+        final save = SaveData(
+          secret: 42,
+          attempts: 0,
+          gamesWon: 0,
+          profileName: 'My Run',
+          profileIconId: 'planet',
+          creativeModeEnabled: true,
+        );
+        final restored = SaveData.fromJson(save.toJson());
+        expect(restored.profileName, 'My Run');
+        expect(restored.profileIconId, 'planet');
+        expect(restored.creativeModeEnabled, isTrue);
+        expect(
+          restored.copyWith(profileName: 'New Name').profileIconId,
+          'planet',
+        );
+        expect(
+          restored.copyWith(creativeModeEnabled: false).creativeModeEnabled,
+          isFalse,
+        );
+      },
+    );
 
     test('migrates old saves without profile fields', () {
       final oldSave =
@@ -190,11 +199,13 @@ void main() {
               gamesWon: 0,
             ).toJson()
             ..remove('profileName')
-            ..remove('profileIconId');
+            ..remove('profileIconId')
+            ..remove('creativeModeEnabled');
       final migrated = SaveData.fromJson(oldSave);
       expect(migrated.schemaVersion, SaveData.currentSchemaVersion);
       expect(migrated.profileName, isEmpty);
       expect(migrated.profileIconId, 'default');
+      expect(migrated.creativeModeEnabled, isFalse);
     });
 
     test('rejects invalid profile metadata', () {
@@ -231,10 +242,34 @@ void main() {
       );
     });
 
+    test('accepts Creative Save ranges through the GTN1 one-million limit', () {
+      final creative = SaveData(
+        secret: 500001,
+        attempts: 0,
+        gamesWon: 0,
+        minimum: 1,
+        maximum: 1000000,
+        creativeModeEnabled: true,
+      );
+      final restored = SaveData.fromJson(creative.toJson());
+      expect(restored.maximum, 1000000);
+      expect(restored.secret, 500001);
+      expect(restored.creativeModeEnabled, isTrue);
+
+      final ordinary = SaveData(
+        secret: 501,
+        attempts: 0,
+        gamesWon: 0,
+        minimum: 1,
+        maximum: 501,
+      );
+      expect(() => SaveData.fromJson(ordinary.toJson()), throwsFormatException);
+    });
+
     test('rejects unknown versions and invalid fields', () {
       expect(
         () => SaveData.fromJson({
-          'schemaVersion': 6,
+          'schemaVersion': 8,
           'secret': 42,
           'attempts': 0,
           'gamesWon': 0,
@@ -273,6 +308,63 @@ void main() {
       );
     });
 
+    test(
+      'round-trips active counters independently from lifetime statistics',
+      () {
+        final save = SaveData(
+          secret: 42,
+          attempts: 17,
+          correctGuesses: 6,
+          streak: 2,
+          bestStreak: 5,
+          gamesWon: 3,
+          progression: ProgressionState.initial.copyWith(
+            totalGuesses: 900,
+            correctGuesses: 700,
+            currentStreak: 2,
+            bestStreak: 5,
+          ),
+        );
+
+        final restored = SaveData.fromJson(save.toJson());
+
+        expect(restored.attempts, 17);
+        expect(restored.correctGuesses, 6);
+        expect(restored.streak, 2);
+        expect(restored.bestStreak, 5);
+        expect(restored.progression.totalGuesses, 900);
+        expect(restored.progression.correctGuesses, 700);
+      },
+    );
+
+    test('migrates old progression counters into the new active fields', () {
+      final legacy =
+          SaveData(
+              secret: 42,
+              attempts: 12,
+              gamesWon: 2,
+              progression: ProgressionState.initial.copyWith(
+                totalGuesses: 12,
+                correctGuesses: 4,
+                currentStreak: 2,
+                bestStreak: 3,
+              ),
+            ).toJson()
+            ..['schemaVersion'] = 6
+            ..remove('correctGuesses')
+            ..remove('streak')
+            ..remove('bestStreak');
+
+      final migrated = SaveData.fromJson(legacy);
+
+      expect(migrated.attempts, 12);
+      expect(migrated.correctGuesses, 4);
+      expect(migrated.streak, 2);
+      expect(migrated.bestStreak, 3);
+      expect(migrated.progression.totalGuesses, 12);
+      expect(migrated.progression.correctGuesses, 4);
+    });
+
     test('migrates schema 1 saves and preserves nested legacy systems', () {
       final legacy = LegacySystemsState.initial.copyWith(
         activeMutators: const {'mut_hardcore'},
@@ -306,6 +398,25 @@ void main() {
     await storage.save(second);
     expect((await storage.load())?.toJson(), second.toJson());
   });
+
+  test(
+    'backup recovery restores primary without consuming the backup',
+    () async {
+      final directory = await Directory.systemTemp.createTemp(
+        'gtn2-save-backup-recovery-',
+      );
+      addTearDown(() => directory.delete(recursive: true));
+      final storage = SaveStorage(directory: directory);
+      await storage.save(SaveData(secret: 21, attempts: 1, gamesWon: 0));
+      await storage.save(SaveData(secret: 73, attempts: 2, gamesWon: 1));
+      final primary = File('${directory.path}/gtn2-save.json');
+      await primary.delete();
+
+      expect((await storage.load())?.secret, 21);
+      expect(await storage.hasBackup(), isTrue);
+      expect((await storage.loadBackup())?.secret, 21);
+    },
+  );
 
   test(
     'serializes writes across separate storage instances for one slot',
@@ -387,6 +498,29 @@ void main() {
       expect(restored?.settings.difficultyId, 'hard');
     },
   );
+
+  test('persists a Creative Save range through the storage layer', () async {
+    final directory = await Directory.systemTemp.createTemp(
+      'gtn2-creative-save-range-test-',
+    );
+    addTearDown(() => directory.delete(recursive: true));
+    final storage = SaveStorage(directory: directory);
+    final creative = SaveData(
+      secret: 500001,
+      attempts: 0,
+      gamesWon: 0,
+      minimum: 1,
+      maximum: 1000000,
+      creativeModeEnabled: true,
+    );
+
+    await storage.save(creative);
+
+    final restored = await storage.load();
+    expect(restored?.maximum, 1000000);
+    expect(restored?.secret, 500001);
+    expect(restored?.creativeModeEnabled, isTrue);
+  });
 
   test('persists Extreme Hardcore saves through the storage layer', () async {
     final directory = await Directory.systemTemp.createTemp(
@@ -526,6 +660,59 @@ void main() {
     expect(await slotOne.loadActiveSlot(), 10);
     await slotOne.saveActiveSlot(3);
     expect(await slotTen.loadActiveSlot(), 3);
+  });
+
+  test('restores permanent Creative Save eligibility per slot after slot '
+      'changes and restart', () async {
+    final directory = await Directory.systemTemp.createTemp(
+      'gtn2-creative-save-slot-switch-',
+    );
+    addTearDown(() => directory.delete(recursive: true));
+    final slotOne = SaveStorage(directory: directory, slot: 1);
+    final slotTwo = SaveStorage(directory: directory, slot: 2);
+
+    await slotOne.save(
+      SaveData(
+        secret: 500001,
+        attempts: 3,
+        correctGuesses: 1,
+        gamesWon: 0,
+        minimum: 1,
+        maximum: 1000000,
+        creativeModeEnabled: true,
+      ),
+    );
+    await slotTwo.save(
+      SaveData(
+        secret: 42,
+        attempts: 0,
+        gamesWon: 0,
+        creativeModeEnabled: false,
+      ),
+    );
+
+    await slotOne.saveActiveSlot(1);
+    final firstRestart = SaveStorage(
+      directory: directory,
+      slot: await slotOne.loadActiveSlot(),
+    );
+    expect((await firstRestart.load())?.creativeModeEnabled, isTrue);
+    expect((await firstRestart.load())?.maximum, 1000000);
+
+    await slotTwo.saveActiveSlot(2);
+    final secondRestart = SaveStorage(
+      directory: directory,
+      slot: await slotTwo.loadActiveSlot(),
+    );
+    expect((await secondRestart.load())?.creativeModeEnabled, isFalse);
+
+    await slotOne.saveActiveSlot(1);
+    final restoredAgain = SaveStorage(
+      directory: directory,
+      slot: await slotOne.loadActiveSlot(),
+    );
+    expect((await restoredAgain.load())?.creativeModeEnabled, isTrue);
+    expect((await restoredAgain.load())?.maximum, 1000000);
   });
 
   test(

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
@@ -5,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../core/progression/achievement_catalog.dart';
 import '../core/progression/progression_state.dart';
+import '../data/updates/update_checker.dart';
 import '../design/expressive_widgets.dart';
 import '../i18n/app_localizations.dart';
 import '../worlds/world_boss_catalog.dart';
@@ -371,10 +373,16 @@ class LegacyDetailPage extends StatelessWidget {
     super.key,
     required this.section,
     required this.progression,
+    this.updateNoticeListenable,
+    this.onCheckUpdates,
+    this.onInstallUpdate,
   });
 
   final LegacySection section;
   final ProgressionState progression;
+  final ValueListenable<UpdateNoticeState>? updateNoticeListenable;
+  final VoidCallback? onCheckUpdates;
+  final VoidCallback? onInstallUpdate;
 
   @override
   Widget build(BuildContext context) {
@@ -735,14 +743,25 @@ class LegacyDetailPage extends StatelessWidget {
       'A Flutter-based continuation of Guess The Number. Game progress is stored locally on this device.',
     ),
     const SizedBox(height: 16),
+    if (updateNoticeListenable != null)
+      ValueListenableBuilder<UpdateNoticeState>(
+        valueListenable: updateNoticeListenable!,
+        builder: (context, update, _) => _updateCard(context, update),
+      )
+    else
+      _updateCard(context, const UpdateNoticeState()),
+    const SizedBox(height: 12),
     GtnExpressiveCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const ListTile(
-            leading: Icon(Icons.link_rounded),
-            title: Text('Socials & source code'),
-            subtitle: Text('These links open in your external browser.'),
+          Material(
+            color: Colors.transparent,
+            child: const ListTile(
+              leading: Icon(Icons.link_rounded),
+              title: Text('Socials & source code'),
+              subtitle: Text('These links open in your external browser.'),
+            ),
           ),
           for (final link in const [
             (
@@ -763,13 +782,16 @@ class LegacyDetailPage extends StatelessWidget {
               'https://ne0gl1tch20.github.io/GuessTheNumber',
             ),
           ])
-            ListTile(
-              dense: true,
-              title: Text(link.$1),
-              trailing: const Icon(Icons.open_in_new_rounded),
-              onTap: () => launchUrl(
-                Uri.parse(link.$2),
-                mode: LaunchMode.externalApplication,
+            Material(
+              color: Colors.transparent,
+              child: ListTile(
+                dense: true,
+                title: Text(link.$1),
+                trailing: const Icon(Icons.open_in_new_rounded),
+                onTap: () => launchUrl(
+                  Uri.parse(link.$2),
+                  mode: LaunchMode.externalApplication,
+                ),
               ),
             ),
         ],
@@ -780,11 +802,14 @@ class LegacyDetailPage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const ListTile(
-            leading: Icon(Icons.code_rounded),
-            title: Text('Open-source libraries'),
-            subtitle: Text(
-              'Credits and licenses listed in the original GTN1 About screen.',
+          Material(
+            color: Colors.transparent,
+            child: const ListTile(
+              leading: Icon(Icons.code_rounded),
+              title: Text('Open-source libraries'),
+              subtitle: Text(
+                'Credits and licenses listed in the original GTN1 About screen.',
+              ),
             ),
           ),
           for (final item in const [
@@ -800,15 +825,83 @@ class LegacyDetailPage extends StatelessWidget {
             ('LuaJ', 'MIT · LuaJ project; James Roseborough and Ian Farmer'),
             ('Jarrlyy UI SDK', 'Project component · Jarrlyy'),
           ])
-            ListTile(
-              dense: true,
-              title: Text(item.$1),
-              subtitle: Text(item.$2),
+            Material(
+              color: Colors.transparent,
+              child: ListTile(
+                dense: true,
+                title: Text(item.$1),
+                subtitle: Text(item.$2),
+              ),
             ),
         ],
       ),
     ),
   ];
+
+  Widget _updateCard(BuildContext context, UpdateNoticeState update) {
+    return GtnExpressiveCard(
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Material(
+              color: Colors.transparent,
+              child: ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.system_update_rounded),
+                title: Text(AppLocalizations.text('web_ui_updates', 'Updates')),
+                subtitle: const Text('Check for a newer validated app build.'),
+              ),
+            ),
+            if (update.title != null) ...[
+              Text(
+                update.title!,
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
+              if (update.details != null) ...[
+                const SizedBox(height: 4),
+                Text(update.details!),
+              ],
+            ],
+            if (update.status != null) ...[
+              const SizedBox(height: 6),
+              Text(update.status!),
+            ],
+            const SizedBox(height: 10),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                OutlinedButton.icon(
+                  onPressed: update.checking ? null : onCheckUpdates,
+                  icon: update.checking
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.refresh_rounded),
+                  label: Text(
+                    update.checking ? 'Checking…' : 'Check for updates',
+                  ),
+                ),
+                FilledButton.icon(
+                  onPressed: update.available && !update.checking
+                      ? onInstallUpdate
+                      : null,
+                  icon: const Icon(Icons.system_update_alt_rounded),
+                  label: Text(
+                    AppLocalizations.text('update_install', 'Install update'),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   Widget _valueCard(String label, String value, IconData icon) =>
       GtnExpressiveCard(

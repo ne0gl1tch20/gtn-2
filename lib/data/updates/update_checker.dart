@@ -45,6 +45,22 @@ class WindowsUpdateRelease {
   final String releaseUrl;
 }
 
+class UpdateNoticeState {
+  const UpdateNoticeState({
+    this.title,
+    this.details,
+    this.status,
+    this.checking = false,
+    this.available = false,
+  });
+
+  final String? title;
+  final String? details;
+  final String? status;
+  final bool checking;
+  final bool available;
+}
+
 class UpdateChecker {
   static const repository = 'ne0gl1tch20/gtn-2';
   static const releaseTag = 'debug-latest';

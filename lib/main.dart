@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
@@ -11,6 +12,7 @@ import 'arcade/arcade_page.dart';
 import 'core/automation/bot_team.dart';
 import 'core/automation/guessing_bot.dart';
 import 'core/automation/offline_earnings_settlement.dart';
+import 'core/creative/creative_save_policy.dart';
 import 'core/events/random_event_engine.dart';
 import 'core/game/adaptive_target_generator.dart';
 import 'core/game/difficulty_rules.dart';
@@ -25,8 +27,11 @@ import 'core/progression/progression_calculator.dart';
 import 'core/progression/progression_engine.dart';
 import 'core/progression/progression_state.dart';
 import 'core/scripting/lua_sandbox.dart';
+import 'data/saves/save_bundle_storage.dart';
 import 'data/saves/save_data.dart';
 import 'data/saves/save_storage.dart';
+import 'data/updates/update_check_schedule.dart';
+import 'data/updates/update_checker.dart';
 import 'dev/developer_settings_page.dart';
 import 'home/game_dashboard_page.dart';
 import 'i18n/app_localizations.dart';
@@ -175,6 +180,14 @@ class _GameHomePageState extends State<GameHomePage>
   bool _randomEventRunning = false;
   String? _randomEventMessage;
   Timer? _playtimeTimer;
+  Timer? _updateCheckTimer;
+  UpdateRelease? _availableUpdate;
+  WindowsUpdateRelease? _availableWindowsUpdate;
+  bool _checkingUpdate = false;
+  bool _updateNoticeDismissed = false;
+  String? _updateNoticeStatus;
+  final ValueNotifier<UpdateNoticeState> _updateNoticeListenable =
+      ValueNotifier(const UpdateNoticeState());
   BigNumber _lastIncomeMeasurement = BigNumber.fromInt(0);
   BigNumber _incomePerSecond = BigNumber.fromInt(0);
   bool _autoClickerTickRunning = false;
@@ -191,8 +204,16 @@ class _GameHomePageState extends State<GameHomePage>
   final GlobalKey<NavigatorState> _shellNavigatorKey =
       GlobalKey<NavigatorState>();
   int _gamesWon = 0;
+  bool _creativeModeEnabled = false;
   bool _isLoading = true;
   bool _isPlayerProfileLoaded = false;
+  bool _nimmyTutorialScheduled = false;
+  bool _nimmyTutorialPending = false;
+  bool _hasActiveSave = false;
+  bool _initialSaveSlotsOpen = false;
+  bool _startupExperiencePending = true;
+  bool _firstRunNeedsSaveSlotSelection = false;
+  BigNumber _startupOfflineEarnings = BigNumber.fromInt(0);
   GameSettings? _menuStudioPreviewSettings;
   String _message = 'Make your move.';
 
@@ -209,6 +230,7 @@ class _GameHomePageState extends State<GameHomePage>
       unawaited(_resumeAutoClicker());
       _startPlaytimeTimer();
       _startRandomEventTimer();
+      _startUpdateCheckTimer();
     } else {
       _autoClickerTimer?.cancel();
       _autoClickerTimer = null;
@@ -216,6 +238,8 @@ class _GameHomePageState extends State<GameHomePage>
       _playtimeTimer = null;
       _randomEventTimer?.cancel();
       _randomEventTimer = null;
+      _updateCheckTimer?.cancel();
+      _updateCheckTimer = null;
     }
   }
 
@@ -241,7 +265,7 @@ class _GameHomePageState extends State<GameHomePage>
         _incomePerSecond = income;
       });
       if (unlocked || evaluated.playtimeSeconds % 30 == 0) {
-        unawaited(_persist());
+        unawaited(_persist().then<void>((_) {}));
       }
     });
   }
@@ -258,6 +282,192 @@ class _GameHomePageState extends State<GameHomePage>
     _randomEventTimer = Timer.periodic(const Duration(minutes: 1), (_) {
       unawaited(_runRandomEventTick());
     });
+  }
+
+  void _publishUpdateNotice() {
+    _updateNoticeListenable.value = UpdateNoticeState(
+      title: _updateNoticeTitle,
+      details: _updateNoticeDetails,
+      status: _updateNoticeStatus,
+      checking: _checkingUpdate,
+      available: _availableUpdate != null || _availableWindowsUpdate != null,
+    );
+  }
+
+  void _startUpdateCheckTimer() {
+    _updateCheckTimer?.cancel();
+    if (!mounted ||
+        _isLoading ||
+        _settings.updateCheckIntervalHours <= 0 ||
+        (!Platform.isAndroid && !Platform.isWindows)) {
+      return;
+    }
+    _updateCheckTimer = Timer.periodic(const Duration(minutes: 1), (_) {
+      unawaited(_checkForUpdatesIfDue());
+    });
+    unawaited(_checkForUpdatesIfDue());
+  }
+
+  Future<void> _checkForUpdatesIfDue({bool force = false}) async {
+    if (!mounted ||
+        _isLoading ||
+        _checkingUpdate ||
+        (!Platform.isAndroid && !Platform.isWindows)) {
+      return;
+    }
+    final interval = _settings.updateCheckIntervalHours;
+    if (!force && interval <= 0) return;
+
+    final bundleStorage = await SaveBundleStorage.inApplicationDocuments();
+    final now = DateTime.now();
+    final lastChecked = await UpdateCheckSchedule.loadLastChecked(
+      bundleStorage.directory,
+    );
+    if (!force &&
+        !UpdateCheckSchedule.shouldCheck(
+          intervalHours: interval,
+          now: now,
+          lastCheckedAt: lastChecked,
+        )) {
+      return;
+    }
+    if (!mounted) return;
+    setState(() {
+      _checkingUpdate = true;
+      _updateNoticeStatus = AppLocalizations.text(
+        'update_checking',
+        'Checking for updates…',
+      );
+    });
+    _publishUpdateNotice();
+    try {
+      if (Platform.isAndroid) {
+        final update = await UpdateChecker().checkForUpdate();
+        if (!mounted) return;
+        setState(() {
+          _availableUpdate = update;
+          _availableWindowsUpdate = null;
+          _updateNoticeDismissed = false;
+          _updateNoticeStatus = update == null
+              ? AppLocalizations.text('update_up_to_date', "You're up to date.")
+              : AppLocalizations.text(
+                  'update_available',
+                  'A verified Android update is available.',
+                );
+        });
+        _publishUpdateNotice();
+      } else {
+        final update = await UpdateChecker().checkForWindowsUpdate();
+        if (!mounted) return;
+        setState(() {
+          _availableWindowsUpdate = update;
+          _availableUpdate = null;
+          _updateNoticeDismissed = false;
+          _updateNoticeStatus = update == null
+              ? AppLocalizations.text('update_up_to_date', "You're up to date.")
+              : AppLocalizations.text(
+                  'update_available',
+                  'A verified Windows update is available.',
+                );
+        });
+        _publishUpdateNotice();
+      }
+    } catch (error) {
+      if (mounted) {
+        setState(() {
+          _availableUpdate = null;
+          _availableWindowsUpdate = null;
+          _updateNoticeStatus = error.toString().contains('404')
+              ? AppLocalizations.text(
+                  'update_unavailable',
+                  'No debug-latest release has been published yet.',
+                )
+              : "${AppLocalizations.text('update_unavailable', 'Update check failed')}: $error";
+        });
+        _publishUpdateNotice();
+      }
+    } finally {
+      try {
+        await UpdateCheckSchedule.saveLastChecked(bundleStorage.directory, now);
+      } on FileSystemException catch (error) {
+        debugPrint('Could not persist update check time: $error');
+      }
+      if (mounted) {
+        setState(() => _checkingUpdate = false);
+        _publishUpdateNotice();
+      }
+    }
+  }
+
+  Future<void> _installAvailableUpdate() async {
+    final androidUpdate = _availableUpdate;
+    final windowsUpdate = _availableWindowsUpdate;
+    if (androidUpdate == null && windowsUpdate == null) return;
+    setState(() {
+      _checkingUpdate = true;
+      _updateNoticeStatus = AppLocalizations.text(
+        'update_downloading',
+        'Downloading and verifying update…',
+      );
+    });
+    _publishUpdateNotice();
+    try {
+      if (Platform.isAndroid && androidUpdate != null) {
+        await UpdateChecker().downloadAndInstall(androidUpdate);
+        if (mounted) {
+          setState(() {
+            _updateNoticeStatus = AppLocalizations.text(
+              'update_install_started',
+              'APK verified. Follow the Android installer prompts to finish.',
+            );
+          });
+          _publishUpdateNotice();
+        }
+      } else if (Platform.isWindows && windowsUpdate != null) {
+        await UpdateChecker().downloadAndInstallWindowsUpdate(windowsUpdate);
+      }
+    } catch (error) {
+      if (mounted) {
+        setState(
+          () => _updateNoticeStatus = AppLocalizations.text(
+            'update_install_failed',
+            'Update installation failed: %s',
+          ).replaceFirst('%s', error.toString()),
+        );
+        _publishUpdateNotice();
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(_updateNoticeStatus!)));
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _checkingUpdate = false);
+        _publishUpdateNotice();
+      }
+    }
+  }
+
+  void _dismissUpdateNotice() {
+    setState(() => _updateNoticeDismissed = true);
+    _publishUpdateNotice();
+  }
+
+  String? get _updateNoticeTitle {
+    if (_updateNoticeDismissed) return null;
+    final updateName =
+        _availableUpdate?.versionName ?? _availableWindowsUpdate?.versionName;
+    return updateName == null ? null : 'Version $updateName is ready';
+  }
+
+  String? get _updateNoticeDetails {
+    final android = _availableUpdate;
+    if (android != null) {
+      return 'Android Debug · validated build #${android.runNumber} · ${android.commitSha.substring(0, 8)}';
+    }
+    final windows = _availableWindowsUpdate;
+    if (windows != null) {
+      return 'Windows Debug · validated build #${windows.runNumber} · ${windows.commitSha.substring(0, 8)}';
+    }
+    return null;
   }
 
   Future<void> _runRandomEventTick() async {
@@ -329,7 +539,7 @@ class _GameHomePageState extends State<GameHomePage>
           _randomEventMessage = null;
           _progression = _progression.copyWith(clearLastRandomEventId: true);
         });
-        unawaited(_persist());
+        unawaited(_persist().then<void>((_) {}));
       });
       await _persist();
     } catch (error) {
@@ -364,13 +574,20 @@ class _GameHomePageState extends State<GameHomePage>
 
   Future<void> _restoreSave() async {
     var shouldPersistOfflineEarnings = false;
+    var shouldShowNimmyTutorial = false;
     try {
+      final bundleStorage = await SaveBundleStorage.inApplicationDocuments();
+      await SaveBundleStorage.recoverPendingImport(bundleStorage.directory);
+      final globalSettings = await SaveBundleStorage.loadAppPreferences(
+        bundleStorage.directory,
+      );
       final firstSlotStorage = await _storage;
       final activeSlot = await firstSlotStorage.loadActiveSlot();
       final storage = activeSlot == firstSlotStorage.slot
           ? firstSlotStorage
           : await SaveStorage.inApplicationDocuments(slot: activeSlot);
       final save = await storage.load();
+      _hasActiveSave = save != null;
       if (!mounted) return;
       setState(() {
         _storage = Future.value(storage);
@@ -386,17 +603,19 @@ class _GameHomePageState extends State<GameHomePage>
         restoredProgression = settlement.progression;
         final timeTravelDetected = settlement.clockRollbackDetected;
         final offlineEarnings = settlement.earnings;
+        _startupOfflineEarnings = offlineEarnings;
         final restoredSystems = restoreMusicStateFromSettings(
-          settings: save.settings,
+          settings: globalSettings ?? save.settings,
           systems: restoredProgression.legacySystems,
         );
         restoredProgression = restoredProgression.copyWith(
           legacySystems: restoredSystems,
         );
         final restoredSettings = syncMusicSettingsFromLegacy(
-          settings: save.settings,
+          settings: globalSettings ?? save.settings,
           systems: restoredSystems,
         );
+        shouldShowNimmyTutorial = !restoredSettings.tutorialCompleted;
         final restoredEngine = _engineFor(
           restoredProgression,
           restoredSettings,
@@ -404,15 +623,21 @@ class _GameHomePageState extends State<GameHomePage>
         await AppLocalizations.load(restoredSettings.localeCode);
         if (!mounted) return;
         setState(() {
-          _engine = restoredEngine;
+          _engine = save.creativeModeEnabled
+              ? GameEngine(minimum: save.minimum, maximum: save.maximum)
+              : restoredEngine;
           _game = _engine.restore(
             secret: save.secret,
             attempts: save.attempts,
             isComplete: save.isComplete,
             savedMinimum: save.minimum,
             savedMaximum: save.maximum,
+            savedCorrectGuesses: save.correctGuesses,
+            savedStreak: save.streak,
+            savedBestStreak: save.bestStreak,
           );
           _gamesWon = save.gamesWon;
+          _creativeModeEnabled = save.creativeModeEnabled;
           _progression = restoredProgression;
           _settings = restoredSettings;
           _selectedPrimaryIndex =
@@ -428,7 +653,22 @@ class _GameHomePageState extends State<GameHomePage>
               ? 'Welcome back! Your Auto Clicker earned $offlineEarnings Money while you were away.'
               : 'Welcome back! Your saved game is ready.';
         });
-        shouldPersistOfflineEarnings = true;
+        shouldPersistOfflineEarnings =
+            offlineEarnings.compareTo(BigNumber.fromInt(0)) > 0 ||
+            timeTravelDetected ||
+            jsonEncode(restoredProgression.toJson()) !=
+                jsonEncode(save.progression.toJson()) ||
+            (globalSettings == null &&
+                jsonEncode(restoredSettings.toJson()) !=
+                    jsonEncode(save.settings.toJson()));
+      } else if (globalSettings != null) {
+        await AppLocalizations.load(globalSettings.localeCode);
+        if (mounted) {
+          setState(() {
+            _settings = globalSettings;
+            GtnApp.settingsNotifier.value = globalSettings;
+          });
+        }
       }
     } on Exception {
       if (mounted) {
@@ -439,8 +679,10 @@ class _GameHomePageState extends State<GameHomePage>
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
+        _nimmyTutorialPending = shouldShowNimmyTutorial;
         _startPlaytimeTimer();
         _startRandomEventTimer();
+        _startUpdateCheckTimer();
       }
     }
     _botTeam.reset(_game.minimum, _game.maximum);
@@ -448,11 +690,13 @@ class _GameHomePageState extends State<GameHomePage>
     _scheduleAutoClicker();
   }
 
-  Future<void> _persist() async {
-    final evaluated = _progressionEngine.evaluateAchievements(_progression);
-    if (evaluated != _progression) {
-      _progression = evaluated;
-      if (mounted) setState(() {});
+  Future<bool> _persist({bool evaluateAchievements = true}) async {
+    if (evaluateAchievements) {
+      final evaluated = _progressionEngine.evaluateAchievements(_progression);
+      if (evaluated != _progression) {
+        _progression = evaluated;
+        if (mounted) setState(() {});
+      }
     }
     try {
       final storage = await _storage;
@@ -467,29 +711,109 @@ class _GameHomePageState extends State<GameHomePage>
             SaveData(
               secret: _game.secret,
               attempts: _game.attempts,
+              correctGuesses: _game.correctGuesses,
+              streak: _game.streak,
+              bestStreak: _game.bestStreak,
+
               gamesWon: _gamesWon,
               isComplete: _game.isComplete,
               minimum: _game.minimum,
               maximum: _game.maximum,
               progression: _progression,
               settings: _settings,
+              creativeModeEnabled: _creativeModeEnabled,
             );
         return base.copyWith(
           secret: _game.secret,
           attempts: _game.attempts,
+          correctGuesses: _game.correctGuesses,
+          streak: _game.streak,
+          bestStreak: _game.bestStreak,
+
           gamesWon: _gamesWon,
           isComplete: _game.isComplete,
           minimum: _game.minimum,
           maximum: _game.maximum,
           progression: _progression,
           settings: _settings,
+          creativeModeEnabled: _creativeModeEnabled,
         );
       });
+      return true;
     } on Exception {
       if (mounted) {
         setState(() => _message = 'Game is still playable, but saving failed.');
       }
+      return false;
     }
+  }
+
+  Future<bool> _updateCreativeRange(int minimum, int maximum) async {
+    if (!_creativeModeEnabled) return false;
+    final updated = CreativeSavePolicy.updateRange(
+      current: _currentSaveData(),
+      minimum: minimum,
+      maximum: maximum,
+    );
+    if (updated == null) return false;
+
+    _engine = GameEngine(minimum: minimum, maximum: maximum);
+    final nextGame = _engine.restore(
+      secret: updated.secret,
+      attempts: updated.attempts,
+      isComplete: updated.isComplete,
+      savedMinimum: updated.minimum,
+      savedMaximum: updated.maximum,
+      savedCorrectGuesses: updated.correctGuesses,
+      savedStreak: updated.streak,
+      savedBestStreak: updated.bestStreak,
+    );
+    setState(() {
+      _game = nextGame;
+      _progression = updated.progression;
+      _controller.clear();
+      _message = 'Creative Save range updated. A fresh round is ready.';
+    });
+    _botTeam.reset(minimum, maximum);
+    return _persist(evaluateAchievements: false);
+  }
+
+  Future<bool> _updateCreativeValue(String key, String value) async {
+    if (!_creativeModeEnabled) return false;
+    final updated = CreativeSavePolicy.updateValue(
+      current: _currentSaveData(),
+      key: key,
+      value: value,
+      upgrades: UpgradeCatalog.all,
+      prestigeUpgrades: UpgradeCatalog.prestige,
+      ultraUpgrades: UpgradeCatalog.ultra,
+    );
+    if (updated == null) return false;
+
+    setState(() {
+      _progression = updated.progression;
+      if (const {
+        'attempts',
+        'correctGuesses',
+        'streak',
+        'bestStreak',
+      }.contains(key)) {
+        _game = GameState(
+          secret: _game.secret,
+          attempts: updated.attempts,
+          correctGuesses: updated.correctGuesses,
+          streak: updated.streak,
+          bestStreak: updated.bestStreak,
+
+          isComplete: _game.isComplete,
+          lastResult: _game.lastResult,
+          minimum: _game.minimum,
+          maximum: _game.maximum,
+        );
+      }
+      _message = 'Creative Save updated.';
+    });
+    return _persist(evaluateAchievements: false);
   }
 
   Future<ProgressionState> _purchaseUpgrade(
@@ -885,9 +1209,13 @@ class _GameHomePageState extends State<GameHomePage>
     );
   }
 
-  Future<void> _switchSaveSlot(int slot) async {
+  Future<void> _switchSaveSlot(int slot, {bool persistAfterLoad = true}) async {
     setState(() => _isLoading = true);
     try {
+      final bundleStorage = await SaveBundleStorage.inApplicationDocuments();
+      final globalSettings = await SaveBundleStorage.loadAppPreferences(
+        bundleStorage.directory,
+      );
       final storage = await SaveStorage.inApplicationDocuments(slot: slot);
       final save = await storage.load();
       if (!mounted) return;
@@ -901,11 +1229,14 @@ class _GameHomePageState extends State<GameHomePage>
       nextProgression = settlement.progression;
       final timeTravelDetected = settlement.clockRollbackDetected;
       final offlineEarnings = settlement.earnings;
+      _hasActiveSave = save != null;
+      if (_startupExperiencePending) _startupOfflineEarnings = offlineEarnings;
 
       // Slot changes must run the same legacy music migration as startup.
       // Otherwise a slot with settings-backed music can appear empty until
       // the next full app restart, and the two persisted representations drift.
-      final savedSettings = save?.settings ?? GameSettings.initial;
+      final savedSettings =
+          globalSettings ?? save?.settings ?? GameSettings.initial;
       final restoredMusicSystems = restoreMusicStateFromSettings(
         settings: savedSettings,
         systems: nextProgression.legacySystems,
@@ -924,7 +1255,9 @@ class _GameHomePageState extends State<GameHomePage>
       setState(() {
         _storage = Future.value(storage);
         _activeSlot = slot;
-        _engine = nextEngine;
+        _engine = save != null && save.creativeModeEnabled
+            ? GameEngine(minimum: save.minimum, maximum: save.maximum)
+            : nextEngine;
         _game = save == null
             ? _engine.newGame()
             : _engine.restore(
@@ -933,8 +1266,12 @@ class _GameHomePageState extends State<GameHomePage>
                 isComplete: save.isComplete,
                 savedMinimum: save.minimum,
                 savedMaximum: save.maximum,
+                savedCorrectGuesses: save.correctGuesses,
+                savedStreak: save.streak,
+                savedBestStreak: save.bestStreak,
               );
         _gamesWon = save?.gamesWon ?? 0;
+        _creativeModeEnabled = save?.creativeModeEnabled ?? false;
         _progression = nextProgression;
         _settings = nextSettings;
         GtnApp.settingsNotifier.value = _settings;
@@ -947,9 +1284,13 @@ class _GameHomePageState extends State<GameHomePage>
             : 'Save slot $slot loaded.';
         _isLoading = false;
       });
-      await _persist();
+      if (persistAfterLoad) await _persist();
       _botTeam.reset(_game.minimum, _game.maximum);
       _scheduleAutoClicker();
+      _nimmyTutorialPending = save != null && !nextSettings.tutorialCompleted;
+      if (save != null && !_startupExperiencePending && _nimmyTutorialPending) {
+        _scheduleFirstRunNimmyTutorial();
+      }
     } on Exception {
       if (mounted) {
         setState(() {
@@ -986,11 +1327,157 @@ class _GameHomePageState extends State<GameHomePage>
         setState(() {
           _playerProfile = profile;
           _isPlayerProfileLoaded = true;
+          _firstRunNeedsSaveSlotSelection =
+              !profile.setupComplete && !_hasActiveSave;
+        });
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted || !_playerProfile.setupComplete) return;
+          if (_hasActiveSave) {
+            unawaited(_presentStartupExperience());
+          } else {
+            unawaited(_openInitialSaveSlots());
+          }
         });
       }
     } on Exception {
       // A missing or unreadable profile never blocks loading the game.
-      if (mounted) setState(() => _isPlayerProfileLoaded = true);
+      if (mounted) {
+        setState(() {
+          _isPlayerProfileLoaded = true;
+          _firstRunNeedsSaveSlotSelection = !_hasActiveSave;
+        });
+      }
+    }
+  }
+
+  void _handlePlayerProfileSaved(PlayerProfile profile) {
+    if (!mounted) return;
+    setState(() => _playerProfile = profile);
+    unawaited(_syncPlayerProfileToSave(profile));
+    if (_firstRunNeedsSaveSlotSelection) {
+      _firstRunNeedsSaveSlotSelection = false;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) unawaited(_openInitialSaveSlots());
+      });
+    } else if (_hasActiveSave) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) unawaited(_presentStartupExperience());
+      });
+    }
+  }
+
+  Future<void> _openInitialSaveSlots() async {
+    if (!mounted || _initialSaveSlotsOpen || !_playerProfile.setupComplete) {
+      return;
+    }
+    _initialSaveSlotsOpen = true;
+    try {
+      await Navigator.of(context).push<void>(
+        MaterialPageRoute<void>(
+          builder: (_) => SaveSlotsPage(
+            activeSlot: _activeSlot,
+            settings: _settings,
+            onSelect: _switchSaveSlot,
+            onImportComplete: _reloadAfterImport,
+            onResetEverything: _resetEverything,
+          ),
+        ),
+      );
+    } finally {
+      _initialSaveSlotsOpen = false;
+    }
+    if (mounted && _hasActiveSave) await _presentStartupExperience();
+  }
+
+  Future<void> _presentStartupExperience() async {
+    if (!mounted ||
+        _isLoading ||
+        !_isPlayerProfileLoaded ||
+        !_playerProfile.setupComplete ||
+        !_hasActiveSave ||
+        !_startupExperiencePending) {
+      return;
+    }
+    _startupExperiencePending = false;
+    final offline = _startupOfflineEarnings;
+    _startupOfflineEarnings = BigNumber.fromInt(0);
+    if (offline.compareTo(BigNumber.fromInt(0)) > 0) {
+      await showDialog<void>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: Text(
+            AppLocalizations.text('welcome_back_title', 'Welcome back!'),
+          ),
+          content: Text(
+            AppLocalizations.text(
+              'offline_gains_text',
+              'While you were away, your auto-clicker generated %s money!',
+            ).replaceAll('%s', offline.toString()),
+          ),
+          actions: [
+            FilledButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: Text(AppLocalizations.text('continue', 'Continue')),
+            ),
+          ],
+        ),
+      );
+    }
+    if (!mounted) return;
+    final today = DateTime.now().toIso8601String().substring(0, 10);
+    if (_progression.legacySystems.lastDailyRewardDate != today) {
+      final effects = _legacySystemsEngine.evaluateTraits(
+        progression: _progression,
+        systems: _progression.legacySystems,
+        playerLevel: 1,
+        activeSeasonId: _currentSeasonId(),
+      );
+      final reward = _legacySystemsEngine.claimDailyReward(
+        progression: _progression,
+        systems: _progression.legacySystems,
+        today: today,
+        traitNebulaBonus: effects.nebulaBonusPerClaim,
+        nebulaBoostOwned: (_progression.nebulaItems['nebula_boost'] ?? 0) > 0,
+      );
+      if (reward.accepted) {
+        final amount = reward.progression.nebula - _progression.nebula;
+        final claim = await showDialog<bool>(
+          context: context,
+          builder: (dialogContext) => AlertDialog(
+            title: Text(
+              AppLocalizations.text(
+                'daily_reward_title',
+                'Daily Nebula Reward',
+              ),
+            ),
+            content: Text(
+              '${AppLocalizations.text('daily_reward_subtitle', "Claim today's reward and keep your streak alive.")}\n'
+              '${AppLocalizations.text('daily_reward_streak', 'Day %s streak').replaceAll('%s', reward.systems.dailyRewardStreak.toString())} · +$amount Nebula',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext, false),
+                child: Text(AppLocalizations.text('later', 'Later')),
+              ),
+              FilledButton.icon(
+                onPressed: () => Navigator.pop(dialogContext, true),
+                icon: const Icon(Icons.card_giftcard_rounded),
+                label: Text(
+                  AppLocalizations.text('daily_reward_claim', 'Claim reward'),
+                ),
+              ),
+            ],
+          ),
+        );
+        if (claim == true && mounted) {
+          await _applyLegacyProgression(
+            reward.progression.copyWith(legacySystems: reward.systems),
+          );
+        }
+      }
+    }
+    if (mounted && (_nimmyTutorialPending || !_settings.tutorialCompleted)) {
+      _scheduleFirstRunNimmyTutorial();
     }
   }
 
@@ -1029,10 +1516,7 @@ class _GameHomePageState extends State<GameHomePage>
           initialProfile: _playerProfile,
           store: _playerProfileStore,
           equippedCosmeticId: _progression.equippedCosmeticId,
-          onSaved: (profile) {
-            setState(() => _playerProfile = profile);
-            unawaited(_syncPlayerProfileToSave(profile));
-          },
+          onSaved: _handlePlayerProfileSaved,
         ),
       ),
     );
@@ -1053,10 +1537,42 @@ class _GameHomePageState extends State<GameHomePage>
       _engine = _engineFor(_progression, _settings);
       _game = _engine.newGame();
       _gamesWon = 0;
+      _creativeModeEnabled = false;
       _controller.clear();
       _botTeam.reset(_game.minimum, _game.maximum);
       _message = 'All game data has been reset.';
     });
+  }
+
+  Future<void> _reloadAfterImport(int slot) async {
+    await _switchSaveSlot(slot, persistAfterLoad: false);
+    final imported = await (await SaveStorage.inApplicationDocuments(
+      slot: slot,
+    )).load();
+    if (imported == null || imported.profileName.trim().isEmpty) return;
+    final current = _playerProfile;
+    final hasCustomAvatar =
+        current.customAvatarPath != null ||
+        current.customAvatarData != null ||
+        current.avatarId == 'custom';
+    final avatarId = hasCustomAvatar
+        ? current.avatarId
+        : switch (imported.profileIconId) {
+            'bolt' => 'lightning',
+            'crown' => 'crown',
+            'planet' => 'moon',
+            'star' || 'default' => 'star',
+            _ => 'star',
+          };
+    final next = current.copyWith(
+      username: imported.profileName.length > 20
+          ? imported.profileName.substring(0, 20)
+          : imported.profileName,
+      avatarId: avatarId,
+      setupComplete: true,
+    );
+    final saved = await _playerProfileStore.save(next);
+    if (mounted) setState(() => _playerProfile = saved);
   }
 
   Future<void> _openSaveSlots() async {
@@ -1064,11 +1580,14 @@ class _GameHomePageState extends State<GameHomePage>
       MaterialPageRoute<void>(
         builder: (_) => SaveSlotsPage(
           activeSlot: _activeSlot,
+          settings: _settings,
           onSelect: _switchSaveSlot,
+          onImportComplete: _reloadAfterImport,
           onResetEverything: _resetEverything,
         ),
       ),
     );
+    if (mounted && _hasActiveSave) await _presentStartupExperience();
   }
 
   Future<void> _updateSettings(GameSettings settings) async {
@@ -1126,11 +1645,34 @@ class _GameHomePageState extends State<GameHomePage>
       }
     });
     GtnApp.settingsNotifier.value = synchronizedSettings;
+    final bundleStorage = await SaveBundleStorage.inApplicationDocuments();
+    await SaveBundleStorage.saveAppPreferences(
+      bundleStorage.directory,
+      synchronizedSettings,
+    );
     await _persist();
+    _startUpdateCheckTimer();
   }
 
   void _onPrimarySelected(int index) {
     setState(() => _selectedPrimaryIndex = index);
+  }
+
+  void _scheduleFirstRunNimmyTutorial() {
+    if (_nimmyTutorialScheduled ||
+        _settings.tutorialCompleted ||
+        _isLoading ||
+        !_isPlayerProfileLoaded ||
+        !_playerProfile.setupComplete ||
+        !_hasActiveSave) {
+      return;
+    }
+    _nimmyTutorialScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _nimmyTutorialScheduled = false;
+      if (!mounted || _isLoading || _settings.tutorialCompleted) return;
+      unawaited(_showNimmyTutorial());
+    });
   }
 
   Future<void> _showNimmyTutorial() async {
@@ -1178,6 +1720,9 @@ class _GameHomePageState extends State<GameHomePage>
         ),
       ),
     );
+    if (!_settings.tutorialCompleted) {
+      await _updateSettings(_settings.copyWith(tutorialCompleted: true));
+    }
   }
 
   Future<void> _openSettings() async {
@@ -1219,12 +1764,17 @@ class _GameHomePageState extends State<GameHomePage>
   SaveData _currentSaveData() => SaveData(
     secret: _game.secret,
     attempts: _game.attempts,
+    correctGuesses: _game.correctGuesses,
+    streak: _game.streak,
+    bestStreak: _game.bestStreak,
+
     gamesWon: _gamesWon,
     isComplete: _game.isComplete,
     minimum: _game.minimum,
     maximum: _game.maximum,
     progression: _progression,
     settings: _settings,
+    creativeModeEnabled: _creativeModeEnabled,
   );
 
   Future<void> _applyDeveloperSave(SaveData save) async {
@@ -1239,15 +1789,23 @@ class _GameHomePageState extends State<GameHomePage>
       settings: save.settings,
       systems: restoredSystems,
     );
+    final restoredEngine = save.creativeModeEnabled
+        ? GameEngine(minimum: save.minimum, maximum: save.maximum)
+        : _engineFor(restoredProgression, restoredSettings);
     setState(() {
+      _engine = restoredEngine;
       _game = _engine.restore(
         secret: save.secret,
         attempts: save.attempts,
         isComplete: save.isComplete,
         savedMinimum: save.minimum,
         savedMaximum: save.maximum,
+        savedCorrectGuesses: save.correctGuesses,
+        savedStreak: save.streak,
+        savedBestStreak: save.bestStreak,
       );
       _gamesWon = save.gamesWon;
+      _creativeModeEnabled = save.creativeModeEnabled;
       _progression = restoredProgression;
       _settings = restoredSettings;
       GtnApp.settingsNotifier.value = _settings;
@@ -1301,12 +1859,20 @@ class _GameHomePageState extends State<GameHomePage>
           return '$action set to $amount.';
         case '/attempts':
           final value = int.parse(parts[1]);
-          if (value < 0) return 'Attempts cannot be negative.';
+          if (value < _game.correctGuesses ||
+              value > CreativeSavePolicy.maxCounter) {
+            return 'Attempts must be between the current correct guesses and 1,000,000,000,000.';
+          }
           setState(() {
             _game = _engine.restore(
               secret: _game.secret,
               attempts: value,
               isComplete: _game.isComplete,
+              savedMinimum: _game.minimum,
+              savedMaximum: _game.maximum,
+              savedCorrectGuesses: _game.correctGuesses,
+              savedStreak: _game.streak,
+              savedBestStreak: _game.bestStreak,
             );
           });
           await _persist();
@@ -1423,8 +1989,13 @@ class _GameHomePageState extends State<GameHomePage>
   Future<void> _openLegacySection(LegacySection section) async {
     await _pushShellRoute<void>(
       MaterialPageRoute<void>(
-        builder: (_) =>
-            LegacyDetailPage(section: section, progression: _progression),
+        builder: (_) => LegacyDetailPage(
+          section: section,
+          progression: _progression,
+          updateNoticeListenable: _updateNoticeListenable,
+          onCheckUpdates: () => unawaited(_checkForUpdatesIfDue(force: true)),
+          onInstallUpdate: _installAvailableUpdate,
+        ),
       ),
     );
   }
@@ -1491,9 +2062,13 @@ class _GameHomePageState extends State<GameHomePage>
     setState(() {
       var rangeScoutActive = false;
       final previousAttempts = _game.attempts;
-      _game = _engine.guess(_game, guess);
+      _game = _engine.guess(_game, guess, countPlayerGuess: !isBot);
       resultForMessage = _game.lastResult;
-      if (_game.attempts > previousAttempts) {
+      if (GameEngine.shouldSettleGuess(
+        isBot: isBot,
+        previousAttempts: previousAttempts,
+        nextAttempts: _game.attempts,
+      )) {
         final correct = resultForMessage == GuessResult.correct;
         final beforeGuess = _progression;
         final legacySystems = beforeGuess.legacySystems;
@@ -1725,6 +2300,10 @@ class _GameHomePageState extends State<GameHomePage>
             _game = GameState(
               secret: _game.secret,
               attempts: previousAttempts,
+              correctGuesses: _game.correctGuesses,
+              streak: _game.streak,
+              bestStreak: _game.bestStreak,
+
               isComplete: false,
               lastResult: resultForMessage,
               minimum: _game.minimum,
@@ -1810,6 +2389,8 @@ class _GameHomePageState extends State<GameHomePage>
     _playtimeTimer?.cancel();
     _randomEventTimer?.cancel();
     _randomEventBannerTimer?.cancel();
+    _updateCheckTimer?.cancel();
+    _updateNoticeListenable.dispose();
     _controller.dispose();
     super.dispose();
   }
@@ -1826,10 +2407,7 @@ class _GameHomePageState extends State<GameHomePage>
         initialProfile: _playerProfile,
         store: _playerProfileStore,
         equippedCosmeticId: _progression.equippedCosmeticId,
-        onSaved: (profile) {
-          setState(() => _playerProfile = profile);
-          unawaited(_syncPlayerProfileToSave(profile));
-        },
+        onSaved: _handlePlayerProfileSaved,
       );
     }
     return GameDashboardPage(
@@ -1867,6 +2445,14 @@ class _GameHomePageState extends State<GameHomePage>
       onLegacySection: _openLegacySection,
       playerProfile: _playerProfile,
       onPlayerProfile: _openPlayerProfile,
+      creativeModeEnabled: _creativeModeEnabled,
+      onCreativeRange: _updateCreativeRange,
+      onCreativeValue: _updateCreativeValue,
+      updateNoticeTitle: _updateNoticeTitle,
+      updateNoticeDetails: _updateNoticeDetails,
+      updateNoticeChecking: _checkingUpdate,
+      onUpdateInstall: _installAvailableUpdate,
+      onUpdateDismiss: _dismissUpdateNotice,
     );
   }
 }

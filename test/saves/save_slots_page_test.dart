@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gtn_2/data/saves/save_data.dart';
 import 'package:gtn_2/saves/save_slots_page.dart';
+import 'package:gtn_2/settings/game_settings.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -16,6 +17,7 @@ void main() {
         initialTheme: Brightness.dark,
         home: SaveSlotsPage(
           activeSlot: 1,
+          settings: GameSettings.initial,
           onSelect: (_) async {},
           previewLoader: (slot) => slot == 1
               ? Future<SaveData?>.error(StateError('Preview failed'))
@@ -37,6 +39,158 @@ void main() {
     expect(firstSlotMenu.enabled, isFalse);
   });
 
+  testWidgets('portable backup import and export controls are available', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      M3EMaterialApp(
+        data: M3EThemeData.light(seedColor: const Color(0xFF7C5CFC)),
+        fontFamily: 'Manrope',
+        autoTheming: false,
+        initialTheme: Brightness.dark,
+        home: SaveSlotsPage(
+          activeSlot: 1,
+          settings: GameSettings.initial,
+          onSelect: (_) async {},
+          previewLoader: (_) => Future<SaveData?>.value(null),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Portable Backup'), findsOneWidget);
+    expect(find.text('Export backup'), findsOneWidget);
+    expect(find.text('Import backup'), findsOneWidget);
+
+    await tester.tap(find.text('Import backup'));
+    await tester.pumpAndSettle();
+    expect(find.text('Paste backup text'), findsOneWidget);
+    expect(find.text('Passphrase (portable backup)'), findsOneWidget);
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets(
+    'portable backup export can be cancelled with blank passphrases',
+    (tester) async {
+      await tester.pumpWidget(
+        M3EMaterialApp(
+          data: M3EThemeData.light(seedColor: const Color(0xFF7C5CFC)),
+          fontFamily: 'Manrope',
+          autoTheming: false,
+          initialTheme: Brightness.dark,
+          home: SaveSlotsPage(
+            activeSlot: 1,
+            settings: GameSettings.initial,
+            onSelect: (_) async {},
+            previewLoader: (_) => Future<SaveData?>.value(null),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Export backup'));
+      await tester.pumpAndSettle();
+      expect(find.text('Confirm passphrase'), findsOneWidget);
+      final exportButton = tester.widget<FilledButton>(
+        find.widgetWithText(FilledButton, 'Encrypt & Copy'),
+      );
+      expect(exportButton.onPressed, isNull);
+
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(find.text('Export portable backup'), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'portable backup export requires matching 12-character passphrases',
+    (tester) async {
+      await tester.pumpWidget(
+        M3EMaterialApp(
+          data: M3EThemeData.light(seedColor: const Color(0xFF7C5CFC)),
+          fontFamily: 'Manrope',
+          autoTheming: false,
+          initialTheme: Brightness.dark,
+          home: SaveSlotsPage(
+            activeSlot: 1,
+            settings: GameSettings.initial,
+            onSelect: (_) async {},
+            previewLoader: (_) => Future<SaveData?>.value(null),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Export backup'));
+      await tester.pumpAndSettle();
+      final export = find.widgetWithText(FilledButton, 'Encrypt & Copy');
+      expect(tester.widget<FilledButton>(export).onPressed, isNull);
+
+      final fields = find.byType(TextField);
+      await tester.enterText(fields.at(0), 'correct horse battery');
+      await tester.pump();
+      expect(tester.widget<FilledButton>(export).onPressed, isNull);
+
+      await tester.enterText(fields.at(1), 'different passphrase');
+      await tester.pump();
+      expect(tester.widget<FilledButton>(export).onPressed, isNull);
+
+      await tester.enterText(fields.at(1), 'correct horse battery');
+      await tester.pump();
+      expect(tester.widget<FilledButton>(export).onPressed, isNotNull);
+
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
+    },
+  );
+
+  testWidgets('new save dialog exposes permanent Creative Save setup', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      M3EMaterialApp(
+        data: M3EThemeData.light(seedColor: const Color(0xFF7C5CFC)),
+        fontFamily: 'Manrope',
+        autoTheming: false,
+        initialTheme: Brightness.dark,
+        home: SaveSlotsPage(
+          activeSlot: 1,
+          settings: GameSettings.initial,
+          onSelect: (_) async {},
+          previewLoader: (_) => Future<SaveData?>.value(null),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Empty slot').first);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Create Slot 1'), findsOneWidget);
+    expect(find.text('Creative Mode'), findsOneWidget);
+    expect(find.byType(SwitchListTile), findsOneWidget);
+    expect(find.text('Number range minimum (1–1,000,000)'), findsNothing);
+
+    await tester.tap(find.byType(SwitchListTile));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Number range minimum (1–1,000,000)'), findsOneWidget);
+    expect(find.text('Number range maximum (1–1,000,000)'), findsOneWidget);
+    expect(find.text('Extra hints (0–5)'), findsOneWidget);
+    expect(find.text('Attempt limit (0 = unlimited, 1–100)'), findsOneWidget);
+    expect(
+      find.text('Permanent for this save. You can’t turn it off later.'),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+    expect(find.text('Create Slot 1'), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('Reset Everything requires the source safety checks', (
     tester,
   ) async {
@@ -49,6 +203,7 @@ void main() {
         initialTheme: Brightness.dark,
         home: SaveSlotsPage(
           activeSlot: 1,
+          settings: GameSettings.initial,
           onSelect: (_) async {},
           onResetEverything: () async {
             resetCalled = true;

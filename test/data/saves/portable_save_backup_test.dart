@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gtn_2/data/saves/legacy_gtn1_save_codec.dart';
 import 'package:gtn_2/data/saves/portable_save_backup.dart';
 
 void main() {
@@ -19,6 +20,59 @@ void main() {
         '{"formatVersion":3,"appPreferencesJson":"{}","activeSlot":1,"slots":{},"backups":{},"creativeSlots":{}}';
 
     expect(await PortableSaveBackup.decrypt(fixture, passphrase), payload);
+  });
+
+  test('matches the pinned GTN1 XOR/Base64 inner payload vector', () {
+    const payload = '{"formatVersion":2,"slot":"legacy"}';
+    const fixture =
+        'R1ROX0VOQ18yMDI1XzlgJC0wLyM2FCcwMSstLGB4cG5gMS4tNmB4YC4nJSMhO2A/';
+
+    expect(LegacyGtn1SaveCodec.encode(payload), fixture);
+    expect(LegacyGtn1SaveCodec.decode(fixture), payload);
+  });
+
+  test(
+    'accepts GTN1 plain-Base64 legacy fallback and rejects malformed input',
+    () {
+      const plain = 'eyJmb3JtYXRWZXJzaW9uIjoyfQ==';
+      expect(LegacyGtn1SaveCodec.decode(plain), '{"formatVersion":2}');
+      expect(LegacyGtn1SaveCodec.decode('not-base64!'), isNull);
+    },
+  );
+
+  test('decrypts a pinned GTN1 two-layer portable backup fixture', () async {
+    const fixture =
+        'GTNPORT1:AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxfYbFAm1/bEwOLd1RTsm1A0hYR0wdBa8sRmRdEo1fwy2CN9TaujJoutk2PzOtvD+v9RRKEggNdbRSkscCHJUn+feWOlLY/XCuwj8jFFnq9MMoFflnAiGkrA13mdWO0HYC3MrYf+zd5xLPqH6JQJlUjMVTjfwAmP71EhEmb/usltsYhT5gBTbuiHMFBgmJOO0HjYMTHDJX0mmtuxwwOhl4Vachs1s+43l0PW4PI';
+    const payload =
+        '{"formatVersion":3,"appPreferencesJson":"{}","activeSlot":2,'
+        '"slots":{},"backups":{},"creativeSlots":{}}';
+
+    expect(
+      await PortableSaveBackup.decryptGtn1Payload(fixture, passphrase),
+      payload,
+    );
+  });
+
+  test('round-trips the two-layer GTN1 portable backup format', () async {
+    const payload =
+        '{"formatVersion":3,"appPreferencesJson":"{}","activeSlot":2,'
+        '"slots":{},"backups":{},"creativeSlots":{}}';
+    final encrypted = await PortableSaveBackup.encryptGtn1Payload(
+      payload,
+      passphrase,
+    );
+
+    expect(
+      await PortableSaveBackup.decryptGtn1Payload(encrypted, passphrase),
+      payload,
+    );
+    expect(
+      await PortableSaveBackup.decryptGtn1Payload(
+        encrypted,
+        'another incorrect passphrase',
+      ),
+      isNull,
+    );
   });
 
   test('wrong passphrase and tampered ciphertext are rejected', () async {

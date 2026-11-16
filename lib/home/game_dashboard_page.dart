@@ -15,6 +15,7 @@ import '../legacy/legacy_systems_page.dart';
 import '../profile/player_profile_page.dart';
 import '../settings/game_settings.dart';
 import '../settings/menu_studio_layout.dart';
+import 'creative_save_panel.dart';
 
 const _purple = GtnUiTokens.purple;
 const _cyan = GtnUiTokens.cyan;
@@ -57,6 +58,9 @@ class GameDashboardPage extends StatelessWidget {
     this.showDeveloperSettings = false,
     this.randomEventMessage,
     this.incomePerSecond,
+    this.creativeModeEnabled = false,
+    this.onCreativeRange,
+    this.onCreativeValue,
     required this.shellNavigatorKey,
     required this.selectedIndex,
     required this.onPrimarySelected,
@@ -64,6 +68,11 @@ class GameDashboardPage extends StatelessWidget {
     required this.onLegacySection,
     this.playerProfile = const PlayerProfile(),
     this.onPlayerProfile,
+    this.updateNoticeTitle,
+    this.updateNoticeDetails,
+    this.updateNoticeChecking = false,
+    this.onUpdateInstall,
+    this.onUpdateDismiss,
   });
 
   final GameState game;
@@ -93,6 +102,9 @@ class GameDashboardPage extends StatelessWidget {
   final bool showDeveloperSettings;
   final String? randomEventMessage;
   final BigNumber? incomePerSecond;
+  final bool creativeModeEnabled;
+  final Future<bool> Function(int minimum, int maximum)? onCreativeRange;
+  final Future<bool> Function(String key, String value)? onCreativeValue;
   final GlobalKey<NavigatorState> shellNavigatorKey;
   final int selectedIndex;
   final ValueChanged<int> onPrimarySelected;
@@ -100,6 +112,11 @@ class GameDashboardPage extends StatelessWidget {
   final ValueChanged<LegacySection> onLegacySection;
   final PlayerProfile playerProfile;
   final VoidCallback? onPlayerProfile;
+  final String? updateNoticeTitle;
+  final String? updateNoticeDetails;
+  final bool updateNoticeChecking;
+  final VoidCallback? onUpdateInstall;
+  final VoidCallback? onUpdateDismiss;
 
   void _openMoreMenu(BuildContext context, Color panel, int playIndex) {
     shellNavigatorKey.currentState!
@@ -321,21 +338,37 @@ class GameDashboardPage extends StatelessWidget {
             );
           }
 
-          return SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
+          return Center(
+            heightFactor: 1,
             child: SizedBox(
               key: const Key('dashboard-navigation-bar'),
               width: barWidth,
-              child: M3ENavigationBar(
-                destinations: [
-                  for (final id in navigationIds)
-                    M3ENavigationBarDestination(
-                      icon: Icon(iconFor(id), color: colorFor(id)),
-                      label: labelFor(id),
+              child: NavigationBarTheme(
+                data: NavigationBarThemeData(
+                  labelTextStyle: WidgetStatePropertyAll(
+                    TextStyle(
+                      fontSize: 8,
+                      height: 1,
+                      fontWeight: FontWeight.w600,
                     ),
-                ],
-                selectedIndex: selected,
-                onDestinationSelected: selectDestination,
+                  ),
+                ),
+                child: NavigationBar(
+                  selectedIndex: selected,
+                  onDestinationSelected: selectDestination,
+                  labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+                  height: 56,
+                  backgroundColor: panel,
+                  indicatorColor: colorFor(navigationIds[selected])
+                      .withValues(alpha: .18),
+                  destinations: [
+                    for (final id in navigationIds)
+                      NavigationDestination(
+                        icon: Icon(iconFor(id), color: colorFor(id), size: 17),
+                        label: labelFor(id),
+                      ),
+                  ],
+                ),
               ),
             ),
           );
@@ -475,6 +508,91 @@ class GameDashboardPage extends StatelessWidget {
                                       ],
                                     ),
                                   ),
+                                  if (updateNoticeTitle != null)
+                                    SizedBox(
+                                      key: const Key('dashboard-update-notice'),
+                                      width: fullWidth,
+                                      child: GtnExpressiveCard(
+                                        padding: const EdgeInsets.all(16),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              AppLocalizations.text(
+                                                'web_ui_update_available',
+                                                'UPDATE AVAILABLE',
+                                              ),
+                                              style: TextStyle(
+                                                color: _cyan,
+                                                fontSize: 10,
+                                                fontWeight: FontWeight.w900,
+                                                letterSpacing: 1.4,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 6),
+                                            Text(
+                                              updateNoticeTitle!,
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .titleMedium
+                                                  ?.copyWith(
+                                                    fontWeight: FontWeight.w800,
+                                                  ),
+                                            ),
+                                            if (updateNoticeDetails !=
+                                                null) ...[
+                                              const SizedBox(height: 4),
+                                              Text(
+                                                updateNoticeDetails!,
+                                                maxLines: 3,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .bodySmall,
+                                              ),
+                                            ],
+                                            const SizedBox(height: 12),
+                                            Row(
+                                              children: [
+                                                TextButton(
+                                                  onPressed:
+                                                      updateNoticeChecking
+                                                      ? null
+                                                      : onUpdateDismiss,
+                                                  child: const Text('Later'),
+                                                ),
+                                                const Spacer(),
+                                                FilledButton.icon(
+                                                  onPressed:
+                                                      updateNoticeChecking
+                                                      ? null
+                                                      : onUpdateInstall,
+                                                  icon: updateNoticeChecking
+                                                      ? const SizedBox(
+                                                          width: 16,
+                                                          height: 16,
+                                                          child:
+                                                              CircularProgressIndicator(
+                                                                strokeWidth: 2,
+                                                              ),
+                                                        )
+                                                      : const Icon(
+                                                          Icons
+                                                              .system_update_alt_rounded,
+                                                        ),
+                                                  label: Text(
+                                                    updateNoticeChecking
+                                                        ? 'Updating…'
+                                                        : 'Update',
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
                                   SizedBox(
                                     key: const Key('dashboard-hero-section'),
                                     width: fullWidth,
@@ -908,6 +1026,18 @@ class GameDashboardPage extends StatelessWidget {
                                             ],
                                           ),
                                   ),
+                                  if (creativeModeEnabled &&
+                                      onCreativeRange != null &&
+                                      onCreativeValue != null)
+                                    SizedBox(
+                                      width: fullWidth,
+                                      child: CreativeSavePanel(
+                                        game: game,
+                                        progression: progression,
+                                        onRange: onCreativeRange!,
+                                        onValue: onCreativeValue!,
+                                      ),
+                                    ),
                                   if (game.isComplete)
                                     SizedBox(
                                       width: fullWidth,
@@ -2194,10 +2324,16 @@ class _GuessInput extends StatelessWidget {
                   keyboardType: TextInputType.number,
                   textInputAction: TextInputAction.done,
                   onSubmitted: (_) => onGuess(),
+                  fontSize: 14,
                   decoration: InputDecoration(
                     hintText: AppLocalizations.text(
                       'play_enter_guess',
                       'Enter your guess',
+                    ),
+                    hintStyle: TextStyle(
+                      color: Theme.of(context).hintColor,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ),

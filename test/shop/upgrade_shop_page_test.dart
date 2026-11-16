@@ -12,6 +12,38 @@ void main() {
 
   setUpAll(UpgradeCatalog.load);
 
+  testWidgets('mobile multiplier controls fit without horizontal overflow', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final initial = ProgressionState.initial.copyWith(
+      money: BigNumber.fromInt(200),
+    );
+    await tester.pumpWidget(
+      M3EMaterialApp(
+        data: M3EThemeData.light(seedColor: const Color(0xFF7C5CFC)),
+        fontFamily: 'Manrope',
+        autoTheming: false,
+        initialTheme: Brightness.light,
+        home: UpgradeShopPage(
+          progression: initial,
+          onPurchase: (definition, {required levels}) async => initial,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const ValueKey('upgrade-buy-multiplier-control')),
+      findsOneWidget,
+    );
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('10x buys the largest affordable upgrade prefix', (tester) async {
     final initial = ProgressionState.initial.copyWith(
       money: BigNumber.fromInt(200),

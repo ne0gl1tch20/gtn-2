@@ -288,7 +288,7 @@ class GameSettings {
           'Scientific',
           'Engineering',
         ].contains(read<String>('numberNotation', 'Standard')) ||
-        !const [12, 24, 48].contains(notificationInterval) ||
+        !const [6, 12, 24, 48, 72].contains(notificationInterval) ||
         !const [0, 1, 6, 12, 24, 168].contains(updateInterval) ||
         !const ['off', 'one', 'all'].contains(repeat) ||
         volume < 0 ||

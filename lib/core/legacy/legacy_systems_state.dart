@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'adaptive_trait_profile.dart';
 
 /// Persisted per-save-slot state for GTN 1 systems that were not in the first Flutter slice.
@@ -62,6 +64,7 @@ class LegacySystemsState {
     this.lastBotId,
     this.lastSaveTimestamp = 0,
     this.timeTravelPenaltyUntil = 0,
+    this.legacyGtn1Snapshot = const {},
   });
 
   final AdaptiveTraitProfile adaptiveTraitProfile;
@@ -123,6 +126,9 @@ class LegacySystemsState {
   final String? lastBotId;
   final int lastSaveTimestamp;
   final int timeTravelPenaltyUntil;
+
+  /// Original GTN1 GameState JSON retained for fields GTN2 does not model yet.
+  final Map<String, dynamic> legacyGtn1Snapshot;
 
   static const initial = LegacySystemsState();
 
@@ -193,6 +199,7 @@ class LegacySystemsState {
     bool clearLastBotId = false,
     int? lastSaveTimestamp,
     int? timeTravelPenaltyUntil,
+    Map<String, dynamic>? legacyGtn1Snapshot,
   }) => LegacySystemsState(
     adaptiveTraitProfile: adaptiveTraitProfile ?? this.adaptiveTraitProfile,
     discoveredTraits: discoveredTraits ?? this.discoveredTraits,
@@ -267,6 +274,7 @@ class LegacySystemsState {
     lastSaveTimestamp: lastSaveTimestamp ?? this.lastSaveTimestamp,
     timeTravelPenaltyUntil:
         timeTravelPenaltyUntil ?? this.timeTravelPenaltyUntil,
+    legacyGtn1Snapshot: legacyGtn1Snapshot ?? this.legacyGtn1Snapshot,
   );
 
   Map<String, Object?> toJson() => {
@@ -329,6 +337,7 @@ class LegacySystemsState {
     'lastBotId': lastBotId,
     'lastSaveTimestamp': lastSaveTimestamp,
     'timeTravelPenaltyUntil': timeTravelPenaltyUntil,
+    if (legacyGtn1Snapshot.isNotEmpty) 'legacyGtn1Snapshot': legacyGtn1Snapshot,
   };
 
   factory LegacySystemsState.fromJson(Map<String, dynamic> json) {
@@ -374,6 +383,23 @@ class LegacySystemsState {
         throw FormatException('Invalid legacy save value: $key');
       }
       return value;
+    }
+
+    final rawSnapshot = json['legacyGtn1Snapshot'];
+    final snapshot = <String, dynamic>{};
+    if (rawSnapshot != null) {
+      if (rawSnapshot is! Map ||
+          rawSnapshot.keys.any((key) => key is! String)) {
+        throw const FormatException('Invalid retained GTN1 snapshot.');
+      }
+      snapshot.addAll(Map<String, dynamic>.from(rawSnapshot));
+      try {
+        if (utf8.encode(jsonEncode(snapshot)).length > 1024 * 1024) {
+          throw const FormatException('Retained GTN1 snapshot is too large.');
+        }
+      } on JsonUnsupportedObjectError {
+        throw const FormatException('Retained GTN1 snapshot is not JSON-safe.');
+      }
     }
 
     final rawArms = json['selectedTraitArms'];
@@ -451,7 +477,9 @@ class LegacySystemsState {
     final lastBotFeedback = json['lastBotFeedback'];
     final lastBotId = json['lastBotId'];
     if ((lastBotGuess != null &&
-            (lastBotGuess is! int || lastBotGuess < 1 || lastBotGuess > 500)) ||
+            (lastBotGuess is! int ||
+                lastBotGuess < 1 ||
+                lastBotGuess > 1000000)) ||
         (lastBotFeedback != null &&
             !{'TOO_LOW', 'TOO_HIGH', 'CORRECT'}.contains(lastBotFeedback)) ||
         (lastBotId != null &&
@@ -547,6 +575,7 @@ class LegacySystemsState {
       lastBotId: lastBotId as String?,
       lastSaveTimestamp: count('lastSaveTimestamp'),
       timeTravelPenaltyUntil: count('timeTravelPenaltyUntil'),
+      legacyGtn1Snapshot: Map.unmodifiable(snapshot),
     );
     if (state.homeBaseLevel > 20 ||
         state.permanentEventBoosts > 25 ||

@@ -339,12 +339,17 @@ class _WorldMapPageState extends State<WorldMapPage> {
             description: 'Explore worlds, discover secrets and challenge their guardians.',
             icon: Icons.explore_rounded,
             accent: GtnUiTokens.cyan,
-            trailing: _StatusChip(
+            singleLineTitle: true,
+          ),
+          const SizedBox(height: 8),
+          Align(
+            alignment: Alignment.centerRight,
+            child: _StatusChip(
               label: '${WorldBossCatalog.worlds.length} WORLDS',
               color: GtnUiTokens.purple,
             ),
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 8),
           Row(
             children: [
               Expanded(

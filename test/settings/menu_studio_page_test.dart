@@ -153,6 +153,65 @@ void main() {
     expect(restored!.visibleNavigationIds, isNot(contains('worlds')));
     expect(restored.visibleMoreIds, contains('worlds'));
   });
+  testWidgets('Menu Studio reset immediately updates the live preview', (
+    tester,
+  ) async {
+    final defaults = MenuStudioLayout.defaults();
+    final areas = Map<String, String>.of(defaults.areas)..['worlds'] = 'more';
+    final navOrder = List<String>.of(defaults.navOrder)..remove('worlds');
+    final moreOrder = [...defaults.moreOrder, 'worlds'];
+    final moved = defaults.copyWith(
+      areas: areas,
+      navOrder: navOrder,
+      moreOrder: moreOrder,
+    );
+    final settings = GameSettings.initial.copyWith(
+      moreScreenOrder: moved.settingsMoreOrder,
+      moreScreenButtonColors: moved.settingsColors,
+      webMenuStudioLayout: moved.encode(),
+    );
+    GameSettings? previewed;
+    GameSettings? saved;
+
+    await tester.pumpWidget(
+      M3EMaterialApp(
+        data: M3EThemeData.light(seedColor: const Color(0xFF7C5CFC)),
+        fontFamily: 'Manrope',
+        autoTheming: false,
+        initialTheme: Brightness.dark,
+        home: MenuStudioPage(
+          settings: settings,
+          onChanged: (value) async {
+            saved = value;
+          },
+          onPreview: (value) => previewed = value,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(previewed, isNull);
+    await tester.scrollUntilVisible(
+      find.text('Reset layout'),
+      240,
+      scrollable: find
+          .descendant(
+            of: find.byKey(const Key('menu-studio-scroll')),
+            matching: find.byType(Scrollable),
+          )
+          .first,
+    );
+    await tester.tap(find.text('Reset layout'));
+    await tester.pumpAndSettle();
+
+    expect(saved, isNull);
+    expect(previewed, isNotNull);
+    final reset = MenuStudioLayout.tryParse(previewed!.webMenuStudioLayout);
+    expect(reset!.visibleNavigationIds, contains('worlds'));
+    expect(reset.visibleMoreIds, isNot(contains('worlds')));
+    expect(reset.visibleMoreIds, MenuStudioLayout.defaults().visibleMoreIds);
+  });
+
   testWidgets('Menu Studio cancel restores the original live preview', (
     tester,
   ) async {

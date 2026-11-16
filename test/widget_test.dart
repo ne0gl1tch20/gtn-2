@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:gtn_2/core/game/game_engine.dart';
 import 'package:gtn_2/core/numbers/big_number.dart';
 import 'package:gtn_2/core/progression/progression_state.dart';
+import 'package:gtn_2/data/updates/update_checker.dart';
 import 'package:gtn_2/design/expressive_widgets.dart';
 import 'package:gtn_2/home/game_dashboard_page.dart';
 import 'package:gtn_2/legacy/legacy_pages.dart';
@@ -29,6 +30,11 @@ Widget buildDashboard({
   VoidCallback? onPrestige,
   VoidCallback? onUltra,
   ValueChanged<int>? onPrimarySelected,
+  String? updateNoticeTitle,
+  String? updateNoticeDetails,
+  bool updateNoticeChecking = false,
+  VoidCallback? onUpdateInstall,
+  VoidCallback? onUpdateDismiss,
 }) {
   final navigatorKey = shellNavigatorKey ?? GlobalKey<NavigatorState>();
   final dashboardSettings = settings ?? GameSettings.initial;
@@ -72,6 +78,11 @@ Widget buildDashboard({
       onSystemsView: onSystemsView ?? (_) {},
       onLegacySection: onLegacySection ?? (_) {},
       onPlayerProfile: onPlayerProfile,
+      updateNoticeTitle: updateNoticeTitle,
+      updateNoticeDetails: updateNoticeDetails,
+      updateNoticeChecking: updateNoticeChecking,
+      onUpdateInstall: onUpdateInstall,
+      onUpdateDismiss: onUpdateDismiss,
     ),
   );
 }
@@ -89,6 +100,41 @@ void main() {
     );
     expect(find.byKey(const Key('dashboard-loading-barrier')), findsOneWidget);
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
+  });
+
+  testWidgets('dashboard update notice exposes install and Later actions', (
+    WidgetTester tester,
+  ) async {
+    var installs = 0;
+    var dismissals = 0;
+    await tester.pumpWidget(
+      buildDashboard(
+        updateNoticeTitle: 'Version 2.1.0 is ready',
+        updateNoticeDetails: 'Android Debug · validated build #1832',
+        onUpdateInstall: () => installs++,
+        onUpdateDismiss: () => dismissals++,
+      ),
+    );
+
+    expect(find.byKey(const Key('dashboard-update-notice')), findsOneWidget);
+    expect(find.text('UPDATE AVAILABLE'), findsOneWidget);
+    expect(find.text('Version 2.1.0 is ready'), findsOneWidget);
+    expect(find.text('Android Debug · validated build #1832'), findsOneWidget);
+
+    await tester.tap(find.text('Later'));
+    await tester.pump();
+    expect(dismissals, 1);
+
+    await tester.tap(find.text('Update'));
+    await tester.pump();
+    expect(installs, 1);
+  });
+
+  testWidgets('dashboard hides the update notice when no update is available', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(buildDashboard());
+    expect(find.byKey(const Key('dashboard-update-notice')), findsNothing);
   });
 
   testWidgets('Money displays the live income-per-second rate', (
@@ -169,6 +215,50 @@ void main() {
       find.textContaining('This copy of Guess The Number is a debug build.'),
       findsOneWidget,
     );
+  });
+
+  testWidgets('About screen checks for and installs validated updates', (
+    WidgetTester tester,
+  ) async {
+    final notice = ValueNotifier(
+      const UpdateNoticeState(status: 'You are up to date.'),
+    );
+    var checks = 0;
+    var installs = 0;
+    await tester.pumpWidget(
+      M3EMaterialApp(
+        data: M3EThemeData.light(seedColor: const Color(0xFF7C5CFC)),
+        home: LegacyDetailPage(
+          section: LegacySection.about,
+          progression: ProgressionState.initial,
+          updateNoticeListenable: notice,
+          onCheckUpdates: () => checks++,
+          onInstallUpdate: () => installs++,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Updates'), findsOneWidget);
+    expect(find.text('You are up to date.'), findsOneWidget);
+    await tester.tap(find.text('Check for updates'));
+    expect(checks, 1);
+
+    notice.value = const UpdateNoticeState(
+      title: 'Version 2.1.0 is ready',
+      details: 'Android Debug · validated build #1832',
+      status: 'A verified Android update is available.',
+      available: true,
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Version 2.1.0 is ready'), findsOneWidget);
+    expect(
+      find.text('A verified Android update is available.'),
+      findsOneWidget,
+    );
+    await tester.tap(find.text('Install update'));
+    expect(installs, 1);
+    notice.dispose();
   });
 
   testWidgets('More menu has one Dev Settings item and opens Nebula Shop', (
@@ -675,10 +765,11 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
     await tester.pumpWidget(buildDashboard());
-    expect(
-      tester.getSize(find.byKey(const Key('dashboard-navigation-bar'))).width,
-      366,
-    );
+    final mobileNavigation = find.byKey(const Key('dashboard-navigation-bar'));
+    expect(tester.getSize(mobileNavigation).width, 366);
+    expect(tester.getTopLeft(mobileNavigation).dx, 12);
+    expect(tester.getSize(mobileNavigation).height, lessThanOrEqualTo(64));
+    expect(tester.takeException(), isNull);
 
     tester.view.physicalSize = const Size(1200, 900);
     await tester.pumpWidget(buildDashboard());

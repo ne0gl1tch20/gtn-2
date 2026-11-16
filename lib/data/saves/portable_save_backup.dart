@@ -4,6 +4,8 @@ import 'dart:typed_data';
 
 import 'package:cryptography/cryptography.dart';
 
+import 'legacy_gtn1_save_codec.dart';
+
 /// GTN1-compatible portable backup envelope.
 ///
 /// The envelope is:
@@ -73,6 +75,22 @@ class PortableSaveBackup {
     } finally {
       passwordBytes.fillRange(0, passwordBytes.length, 0);
     }
+  }
+
+  /// Encrypts the GTN1-compatible legacy save payload inside the portable
+  /// passphrase envelope. The inner wrapper matches SaveManager.encrypt().
+  static Future<String> encryptGtn1Payload(String payload, String passphrase) =>
+      encrypt(LegacyGtn1SaveCodec.encode(payload), passphrase);
+
+  /// Decrypts both layers of a GTN1 portable backup. Returns null when either
+  /// the authenticated envelope or legacy inner wrapper is invalid.
+  static Future<String?> decryptGtn1Payload(
+    String input,
+    String passphrase,
+  ) async {
+    final wrapped = await decrypt(input, passphrase);
+    if (wrapped == null) return null;
+    return LegacyGtn1SaveCodec.decode(wrapped);
   }
 
   static Future<String?> decrypt(String input, String passphrase) async {
