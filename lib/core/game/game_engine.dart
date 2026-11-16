@@ -40,6 +40,14 @@ class GameEngine {
   final int minimum;
   final int maximum;
 
+  /// Automated guesses skip player-attempt counters but still settle rewards,
+  /// bot statistics, daily quest progress and world-boss effects.
+  static bool shouldSettleGuess({
+    required bool isBot,
+    required int previousAttempts,
+    required int nextAttempts,
+  }) => isBot || nextAttempts > previousAttempts;
+
   GameState newGame() => GameState(
     secret: minimum + _random.nextInt(maximum - minimum + 1),
     attempts: 0,
