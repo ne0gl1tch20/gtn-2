@@ -9,6 +9,14 @@ void main() {
       expect(BigNumber.parse('0.000').toString(), '0');
     });
 
+    test('parses GTN1 scientific notation and magnitude suffixes', () {
+      expect(BigNumber.parse('1e6').toString(), '1000000');
+      expect(BigNumber.parse('1.25e3').toString(), '1250');
+      expect(BigNumber.parse('1.5K').toString(), '1500');
+      expect(BigNumber.parse('2Qa').toString(), '2000000000000000');
+      expect(BigNumber.parse('1Vgn').toString(), '1' + '0' * 63);
+    });
+
     test('adds and subtracts without floating point loss', () {
       expect(
         (BigNumber.parse('0.1') + BigNumber.parse('0.2')).toString(),
@@ -82,7 +90,7 @@ void main() {
     });
 
     test('rejects malformed values', () {
-      expect(() => BigNumber.parse('1e6'), throwsFormatException);
+      expect(() => BigNumber.parse('1x'), throwsFormatException);
       expect(() => BigNumber.parse('1.2.3'), throwsFormatException);
     });
   });
