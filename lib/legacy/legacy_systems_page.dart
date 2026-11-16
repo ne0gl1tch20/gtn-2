@@ -679,12 +679,6 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
                                     systems: _systems,
                                     challengeId: challenge.id,
                                     today: DateTime.now(),
-                                    nebulaBoostOwned:
-                                        (_progression.nebulaItems[
-                                              'nebula_boost'
-                                            ] ??
-                                            0) >
-                                        0,
                                   ),
                                 )
                               : null,
