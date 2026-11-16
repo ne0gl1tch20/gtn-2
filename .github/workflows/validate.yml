@@ -44,11 +44,13 @@ jobs:
         run: git restore -- analysis_options.yaml
       - name: Verify Dart formatting
         run: dart format --output=none --set-exit-if-changed .
-      - name: Show formatter diff for changed Menu Studio file
+      - name: Show formatter diffs for changed UI test files
         if: failure()
         run: |
-          dart format --output=show lib/settings/menu_studio_page.dart > /tmp/menu_studio_page.dart
-          diff -u lib/settings/menu_studio_page.dart /tmp/menu_studio_page.dart || true
+          for file in test/support/overflow_guard.dart test/responsive_layout_smoke_test.dart test/world_map_page_test.dart; do
+            dart format --output=show "$file" > "/tmp/$(basename "$file")"
+            diff -u "$file" "/tmp/$(basename "$file")" || true
+          done
       - name: Analyze
         run: flutter analyze --fatal-infos
 
