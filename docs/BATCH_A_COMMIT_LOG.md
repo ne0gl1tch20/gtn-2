@@ -498,3 +498,12 @@ Batch A remains active until Dashboard, More, Settings, Menu Studio, Profile and
 - Added 390px viewport regression tests for both layouts: `84be546e9f64e7c8b607261f0e47b4032c4fd508` and `a11bd7a12c42d9301183f45de119475a6ed4d62c`.
 - Validate #1993 found a Dart-format mismatch in the new upgrade-shop test (one long assertion). Fixed and committed as `091a57213a7d074fd4508e11e8ab280fad4ff5f1`; a new full Validate run is required.
 - Keep PR #74 draft, Batch A active and Batch B blocked until validation passes and runtime visual evidence is reviewed.
+
+
+
+### Validate #1997 — World Map title follow-up — 2026-11-16
+
+- Format and analysis passed. The new Upgrade Shop mobile test passed.
+- Flutter tests: 436 passed / 1 failed. The failure was the World Map title height assertion: 56px at 390px width, proving it still wrapped after the chip was moved below the header.
+- Added opt-in `singleLineTitle` to `GtnPageHeader` with a scale-down fit and enabled it only for World Map. Commits: `c4181738918ac4b2ca35344c68b0f7ec74db1932`, `7082d079e70036ef9d7a87882946aaf0365a3f41`.
+- The new code head requires full validation. Android and Windows builds from #1997 are not used as final artifacts because tests failed.
