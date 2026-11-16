@@ -50,12 +50,7 @@ void main() {
       expect(purchased.nebulaItems['nebula_boost'], 1);
 
       await storage.save(
-        SaveData(
-          secret: 42,
-          attempts: 0,
-          gamesWon: 0,
-          progression: purchased,
-        ),
+        SaveData(secret: 42, attempts: 0, gamesWon: 0, progression: purchased),
       );
 
       final restartedStorage = SaveStorage(directory: directory);
@@ -73,4 +68,48 @@ void main() {
       expect(secondLoad.progression.nebulaEarned.toString(), '10');
     },
   );
+  test(
+    'saturated arcade Nebula and fractional Money survive a fresh storage load',
+    () async {
+      final longMax = BigNumber.parse('9223372036854775807');
+      final initial = ProgressionState.initial.copyWith(
+        nebula: BigNumber.fromInt(10),
+        nebulaEarned: longMax - BigNumber.fromInt(5),
+        money: BigNumber.parse('123.45'),
+        moneyEarned: BigNumber.parse('678.90'),
+        moneySpent: BigNumber.parse('0.1'),
+        ultraUpgrades: const {'ultra_nebula_boost': 15},
+        nebulaItems: const {'nebula_boost': 1},
+      );
+
+      final rewarded = ProgressionEngine().awardArcadeReward(
+        initial,
+        nebulaReward: BigNumber.fromInt(288230376151711744),
+        moneyReward: BigNumber.parse('0.25'),
+      );
+
+      expect(rewarded.nebula.toString(), '9223372036854775817');
+      expect(rewarded.nebulaEarned, longMax);
+      expect(rewarded.money.toString(), '123.7');
+      expect(rewarded.moneyEarned.toString(), '679.15');
+
+      await storage.save(
+        SaveData(
+          secret: 42,
+          attempts: 0,
+          gamesWon: 0,
+          progression: rewarded,
+        ),
+      );
+      final restored = await SaveStorage(directory: directory).load();
+
+      expect(restored, isNotNull);
+      expect(restored!.progression.nebula, rewarded.nebula);
+      expect(restored.progression.nebulaEarned, longMax);
+      expect(restored.progression.money, rewarded.money);
+      expect(restored.progression.moneyEarned, rewarded.moneyEarned);
+      expect(restored.progression.moneySpent, rewarded.moneySpent);
+    },
+  );
+
 }
