@@ -24,114 +24,15 @@ No placeholders, mock systems, fake functionality, inert controls, or knowingly 
 7. Preserve existing player progress and verify migrations, recovery, and save-slot isolation.
 8. Do not silently omit a GTN1 feature. If a feature is genuinely out of scope or impossible to reproduce, document the reason and get an explicit scope decision before claiming completion.
 
-## Finite implementation roadmap
+## Execution roadmap
 
-### 1. Finish the interactive world map
+Follow the short, meaningful phases in [docs/FINITE_PARITY_PLAN.md](../docs/FINITE_PARITY_PLAN.md). That document is the authoritative scope, phase order, checklist and live status. Do not maintain a conflicting second roadmap here.
 
-<badge>Implementation merged</badge>
+**Architecture decision (2026-11-16):** GTN2 remains Flutter + Dart for Android and Windows, with the existing Material 3 Expressive direction and GTN1 visual identity. The Rust + Slint rebuild proposal is shelved. Do not replace Flutter, add Slint, introduce a Rust gameplay core or start a Rust migration under the current parity project. Rust requires a separate explicit architecture decision and must not delay parity.
 
-- PR [#25](https://github.com/ne0gl1tch20/gtn-2/pull/25) merged to `main` at `7582784c17f74466bef215cc1eb3213c0e218c88`.
-- PR #25 combined the world-boss state-machine work from PR #23 with the interactive map. PR #23 was closed without a separate merge because its changes were included in PR #25.
-- Branch: `port/gtn1-interactive-world-map`
-- The branch validation run [#42450609725](https://github.com/ne0gl1tch20/gtn-2/actions/runs/42450609725) passed formatting, analysis, automated tests, Android debug build and Windows desktop debug build.
-- The full-port APK gate remains closed; final Android installation/play-test is still required in Step 8.
+Execute Phase 1 first: close the active Batch A surfaces with source-backed fixes and the required Android/Windows runtime evidence. Then proceed through the remaining phases in the authoritative plan. Work in small vertical slices; each slice must include implementation, relevant tests and the evidence appropriate to its behavior. A phase may be split into smaller batches, but its acceptance criteria and the full source inventory cannot be reduced.
 
-Acceptance:
-- Validate the four world nodes, original route graph and source coordinates.
-- Verify locked, unlocked, defeated, selected, and active-battle states.
-- Verify secret route thresholds and discovered state.
-- Verify pan, pinch zoom, fit, reset, and selection behavior.
-- Verify selection and Endless Rift rotation stay synchronized with persisted progression.
-- Verify actions use the authoritative progression/boss engine.
-- Pass relevant widget and gameplay tests plus Android and Windows validation.
-- Merge the dependent changes in the correct order and close Issue #24 only after acceptance.
-
-### 2. Complete world and boss progression
-
-Audit GTN1 against GTN2 for:
-- World unlock requirements and migration behavior.
-- Boss battle eligibility, lifecycle, phases, hit/miss rules, and defeat.
-- Boss rewards, multipliers, relic/codex unlocks, and mastery.
-- Endless Rift scaling, rewards, rotation, and best-tier persistence.
-- World selection, secret discovery, and restoration after save/load.
-- All corresponding screens, details, localized strings, and player feedback.
-
-Acceptance: every source behavior is implemented, reachable through the app, persists correctly, and has tests for the meaningful success, failure, and boundary cases.
-
-### 3. Complete remaining gameplay content
-
-Perform a source-to-target inventory and implement all remaining:
-- Traits and their actual gameplay effects (including the full 320-trait package).
-- Talents.
-- Mutators.
-- Relics and set bonuses.
-- Any remaining game modes, challenges, events, or special mechanics found in GTN1.
-
-Do not count a trait/talent/relic/mutator as ported merely because its name, icon, description, or data record exists. Its effect must be connected to real gameplay rules and tested.
-
-Acceptance: every in-scope source entry is accounted for, every effect is wired into authoritative gameplay, and unsupported or placeholder entries are zero.
-
-### 4. Complete core gameplay, economy, and progression
-
-Audit and finish all GTN1 behavior for:
-- Guessing rules, ranges, difficulties, validation, and feedback.
-- Rewards, streaks, frenzy, criticals, and all reward modifiers.
-- Normal upgrades, shops, purchase validation, and upgrade effects.
-- Automation, bots, auto-clickers, and offline earnings.
-- Prestige and higher-tier resets/progression.
-- Daily rewards, quests, chests, statistics, achievements, and other progression systems.
-- Any other source-discovered economy or progression feature.
-
-Acceptance: calculations and transactions match GTN1, purchases and claims cannot be duplicated or bypassed, and state changes are covered by tests.
-
-### 5. Complete persistence and data integrity
-
-Audit:
-- Save format and every persisted gameplay field.
-- Multiple save slots and per-slot isolation.
-- Save/load round trips and backward-compatible migrations.
-- Interrupted-write recovery, backups, and corrupt-save handling.
-- Import/export behavior, validation, and safe failure handling.
-- Restoration of active modes, selected world, progression, and other transient-looking state that GTN1 persists.
-
-Acceptance: representative GTN1 saves migrate without losing valid progress; independent slots remain isolated; invalid or interrupted data cannot silently corrupt a valid save.
-
-### 6. Complete presentation and platform behavior
-
-Audit and finish:
-- All screens, menus, dialogs, navigation, settings, and interactive controls.
-- Original GTN1 artwork, icons, fonts, and other bundled assets.
-- Localization coverage and fallback behavior.
-- Music, sound effects, volume controls, and missing-asset safety.
-- Android lifecycle, storage, back navigation, and other platform integrations.
-- Windows desktop behavior and platform-specific interactions.
-- Any updater or other platform feature that exists in the pinned source.
-
-Acceptance: no missing assets, dead controls, placeholder screens, broken navigation, or platform-specific crashes remain. Verify behavior on actual Android installation and Windows build where applicable.
-
-### 7. Final source-to-port parity audit
-
-Create a final inventory from the pinned GTN1 source. For each in-scope feature, record:
-- GTN1 source file/class/function or data definition.
-- GTN2 implementation location.
-- Relevant automated test(s).
-- Status: Complete, Incomplete, or Blocked.
-- Any approved scope exception and its reason.
-
-Resolve every Incomplete item. Resolve every Blocked item or obtain an explicit scope decision. Run the full relevant test suite and platform builds after the final implementation changes.
-
-Acceptance: no unexplained gaps remain in the inventory.
-
-### 8. Release candidate and handoff
-
-Only after Stage 7 passes:
-- Build the Android debug APK from the validated final branch.
-- Install and launch it on Android.
-- Play-test the main gameplay loop and representative progression systems, save/load, unlocks, rewards, and advanced content.
-- Verify the Windows desktop build.
-- Check bundled assets and runtime logs for missing resources or crashes.
-- Publish the validated APK to the agreed `debug-latest` GitHub release target.
-- State exactly what was tested and disclose any known limitations.
+Keep all in-scope GTN1 features. No placeholders, mocks, fake functionality, inert controls or knowingly missing features are acceptable in the final release. Do not publish or hand over an APK as the completed port until the final full-parity acceptance criteria pass.
 
 ## Final definition of done
 
@@ -150,28 +51,13 @@ The port is complete only when all of the following are true (it is just bullet 
 
 **Stop condition:** Once every item above passes, the port is done and the validated APK can be published. Do not extend the project with unrelated polish or arbitrary extra audit rounds. Reopen completed work only for a demonstrated defect, regression, or newly discovered source behavior.
 
-## Current checkpoint
+## Current status and execution
 
-This checkpoint is intentionally not a completion claim:
-- Step 1's interactive map and Step 2's world/boss progression implementation are merged in PR #25. Branch validation passed Android and Windows builds plus automated tests; real Android play-test remains in Step 8.
-- Step 2 world/boss progression implementation remains merged in PR #25, but its behavioral acceptance is still open. The first concrete gap confirmed against GTN1 is that `WorldBossCatalog.canFight` does not bypass normal fight requirements during Endless Rift; GTN1 `WorldMapScreen.kt` and `GameViewModel.kt` allow it. Fix this and add a regression test, then audit unlock migration, phases, rewards, mastery, rotation and save restoration.
-- Step 3's source inventory confirms 320 built-in trait definitions: 244 cosmetic badges, 64 Nebula bonuses, 6 XP multipliers, 2 streak-protection traits, and one each for combo reward, range hint, miss-penalty reduction, and risk reward. Cosmetic entries still require correct unlock/discovery and presentation behavior; data presence alone is not parity.
-- The previously identified `talent_reward_1` double-application defect is fixed on `main`: the base reward engine no longer treats the Prestige talent as the shop/upgrade flag, and `test/core/guess_economy_rules_test.dart` asserts a 10,000 base reward becomes 15,000, not 22,500. This is already implemented; do not repeat the fix.
-- The full-port APK gate remains closed.
+The live phase, Batch A/PR status, exact repository checkpoint, CI evidence and remaining gaps are maintained in [docs/FINITE_PARITY_PLAN.md](../docs/FINITE_PARITY_PLAN.md) and its linked audit ledgers. Read the current files on `main` before choosing the next task; never rely on an older checkpoint copied into this instruction file.
 
+Continue from the first open phase and next concrete source-backed gap. Do not stop after reporting a plan or one green workflow. Keep routine progress narration minimal and interrupt the user only for a genuine blocker or decision.
 
-## Execution instruction — start at step 1 and continue through step 8
-
-Start with **Step 1** above, then work through **Steps 2–8 in order**. Continue from the real repository state, implement the next concrete gap, validate it, and move forward. Do not turn this into an endless cycle of status checks or repeatedly ask whether to continue. Do not stop after reporting a plan or after one green workflow.
-
-Keep routine progress narration to yourself; only interrupt the user when a specific decision, permission, credential, unavailable device, or other genuine blocker requires their input.
-
-**Reminder from the user (preserve this goal):**
-
-> Continue around the goal without telling me or letting me know. Do not give me the apk without honest 100% port. Follow this goal: a complete, playable flutter port thats all flutter and dart with some cpp if needed instead of broken, placeholder, mock, fake, and missing features.
-
-This is a strict release gate, not a suggestion. Never hand over or publish an APK as the finished port until honest full parity is demonstrated by the source inventory, working implementations, tests, platform builds, and real Android play-test. If the port is not fully complete, keep working through the remaining steps and withhold the APK. Do not claim 100% based on compilation or CI alone.
-
+**Release gate:** Never hand over or publish a completion APK until the frozen GTN1 inventory, working implementations, tests, Android and Windows builds, real Android play-test and applicable Windows runtime checks demonstrate full parity. CI alone is not proof. If any in-scope item remains incomplete, continue the work and withhold the completion APK.
 
 ## Mandatory coding and validation reminders
 
