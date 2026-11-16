@@ -14,6 +14,7 @@ class ProgressionHubPage extends StatefulWidget {
   const ProgressionHubPage({
     super.key,
     required this.progression,
+    this.numberNotation = 'Standard',
     this.initialUltra = false,
     required this.onPrestige,
     required this.onUltra,
@@ -21,6 +22,7 @@ class ProgressionHubPage extends StatefulWidget {
   });
 
   final ProgressionState progression;
+  final String numberNotation;
   final bool initialUltra;
   final ResetAction onPrestige;
   final ResetAction onUltra;
@@ -51,6 +53,7 @@ class _ProgressionHubPageState extends State<ProgressionHubPage> {
       MaterialPageRoute<ProgressionState>(
         builder: (_) => PermanentUpgradeShopPage(
           progression: _state,
+          numberNotation: widget.numberNotation,
           ultra: ultra,
           onPurchase: (upgrade) =>
               widget.onPurchasePermanentUpgrade(upgrade, ultra),
