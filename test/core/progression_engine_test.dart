@@ -363,6 +363,36 @@ void main() {
     expect(engine.evaluateAchievements(unlocked).nebula.toString(), '60');
   });
 
+  test('achievement money progress follows selected number notation', () {
+    final state = ProgressionState.initial.copyWith(
+      money: BigNumber.parse('12345.6789'),
+    );
+    final achievement = AchievementCatalog.all.firstWhere(
+      (item) => item.id == 'millionaire',
+    );
+
+    expect(
+      AchievementCatalog.progressLabel(state, achievement),
+      '12345.6789 / 1000000',
+    );
+    expect(
+      AchievementCatalog.progressLabel(
+        state,
+        achievement,
+        numberNotation: 'Scientific',
+      ),
+      '1.23e+04 / 1000000',
+    );
+    expect(
+      AchievementCatalog.progressLabel(
+        state,
+        achievement,
+        numberNotation: 'Engineering',
+      ),
+      '12.35e+03 / 1000000',
+    );
+  });
+
   test('achievement evaluation respects exact thresholds', () {
     final below = ProgressionState.initial.copyWith(
       correctGuesses: 9,
