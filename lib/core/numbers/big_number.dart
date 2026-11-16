@@ -79,8 +79,9 @@ class BigNumber implements Comparable<BigNumber> {
     return BigNumber.fromParts(quotient, resultScale);
   }
 
-  BigNumber multiplyInt(int value) =>
-      BigNumber.fromParts(coefficient * BigInt.from(value), scale);
+  BigNumber multiplyInt(int value) => _roundToPrecision(
+    BigNumber.fromParts(coefficient * BigInt.from(value), scale),
+  );
 
   /// Raises this value to a non-negative integer exponent exactly.
   BigNumber powInt(int exponent) {
