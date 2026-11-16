@@ -1088,7 +1088,7 @@ void main() {
     );
 
     expect(changes, hasLength(1));
-    expect(find.text('Claimed'), findsOneWidget);
+    expect(find.text('Completed'), findsOneWidget);
     expect(
       changes.single.legacySystems.completedChallenges,
       contains(weeklyChallenges.first.id),
