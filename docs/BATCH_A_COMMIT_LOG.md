@@ -648,3 +648,8 @@ Batch A remains active until Dashboard, More, Settings, Menu Studio, Profile and
 - Updated `docs/FINITE_PARITY_PLAN.md` in `146da6a64191a300ccb79123e89fd62117eb230a` to keep the broader economy item open and explicitly track the source `BigNumber.kt` DECIMAL128 arithmetic gap: 34-digit HALF_EVEN add/multiply/power, scale-16 HALF_UP division and subtraction clamped to zero.
 - GTN1 source checked: `shared/src/jvmAndAndroidMain/kotlin/com/jarrlyyy/guessthenumber/domain/model/BigNumber.kt` at `fe9cf567169e19059e0330d08769fe454336ef94`. GTN2 target: `lib/core/numbers/big_number.dart`. No BigNumber implementation change has been made yet; next work must add source-backed arithmetic fixtures before changing it.
 - This ledger update is a documentation-only checkpoint; full validation of the corrected persistence test remains required.
+### Persistence boundary test formatter correction — 2026-11-16
+
+- Validate run `43870153865` at `b1d0f98dd15ebf4f6fbc9e1e39f56e4a12895b6b` failed only at the format gate. The new cap-boundary persistence test required its `SaveData(...)` constructor to be collapsed to one line and a redundant blank line removed. No analysis, tests or builds ran.
+- Applied the exact formatter output in `test/data/economy_transaction_persistence_test.dart`. Commit `64eafaa9f361ebf0e63597e1b70d4b38e32f904c`.
+- This correction is formatting-only; the new boundary assertions remain unchanged. A fresh full validation run is required.
