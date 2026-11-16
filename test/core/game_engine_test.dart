@@ -159,10 +159,7 @@ void main() {
         maximum: 1,
       );
 
-      expect(
-        () => GameEngine().guess(malformed, 42),
-        throwsArgumentError,
-      );
+      expect(() => GameEngine().guess(malformed, 42), throwsArgumentError);
     });
 
     test('bot guesses still settle when player attempts stay unchanged', () {

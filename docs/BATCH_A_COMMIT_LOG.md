@@ -606,3 +606,11 @@ Batch A remains active until Dashboard, More, Settings, Menu Studio, Profile and
 - Validate run `43867506819` at `98252058c35e6eebc648c693928035562f5b745b` stopped at the Dart format gate. The new test file `test/core/game_engine_test.dart` was the only formatted file; static analysis and later jobs did not run.
 - Extended the existing failure-only formatter-diff diagnostic list in `.github/workflows/validate.yml` to include `test/core/game_engine_test.dart`, so the next validation reports the exact formatter rewrite instead of only the changed-file summary.
 - No app or test behavior changes in this follow-up. Apply the exact formatter output and rerun the complete validation.
+### GTN1 Nebula signed-Long saturation parity — 2026-11-16
+
+- Source inspection of pinned GTN1 `GameEngine.kt` confirmed `calculateNebulaReward` saturates multiplied arcade rewards at `Long.MAX_VALUE` and `addNebulaEarned` clamps negative totals to zero and saturates lifetime earned totals at `Long.MAX_VALUE`.
+- Found a GTN2 mismatch: `ProgressionEngine.awardArcadeReward` and `awardNebulaFromArcade` multiplied arbitrary-precision `BigNumber` values without the source Long cap and added lifetime Nebula earned without saturation.
+- Added shared `ProgressionEngine.calculateNebulaReward` and `addNebulaEarned` implementations and routed both arcade reward paths through them. Spendable Nebula remains BigNumber and receives the source-capped reward; lifetime earned totals saturate independently, matching GTN1.
+- Added tests immediately below/above the exact `Long.MAX_VALUE / 32` boundary (15 Ultra Nebula levels plus Nebula Boost), lifetime-total saturation with exact spendable balance, and negative-total repair.
+- Also applied the exact Dart formatter rewrite reported by Validate `43867801945` to the malformed-range test in `test/core/game_engine_test.dart`.
+- Remaining economy parity work (other transaction families, rounding and save/reload boundary cases) remains open in `docs/FINITE_PARITY_PLAN.md`; this patch does not close the whole economy checklist.

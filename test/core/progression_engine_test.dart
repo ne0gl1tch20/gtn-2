@@ -261,6 +261,60 @@ void main() {
     expect(result.nebulaEarned.toString(), '30');
   });
 
+  group('GTN1 Nebula signed-Long saturation', () {
+    final longMax = BigNumber.parse('9223372036854775807');
+
+    test('multiplied arcade rewards saturate at Long.MAX_VALUE', () {
+      final state = ProgressionState.initial.copyWith(
+        ultraUpgrades: const {'ultra_nebula_boost': 15},
+        nebulaItems: const {'nebula_boost': 1},
+      );
+
+      final belowCap = engine.awardNebulaFromArcade(
+        state,
+        BigNumber.fromInt(288230376151711743),
+      );
+      expect(belowCap.nebula.toString(), '9223372036854775776');
+      expect(belowCap.nebulaEarned, belowCap.nebula);
+
+      final aboveCap = engine.awardNebulaFromArcade(
+        state,
+        BigNumber.fromInt(288230376151711744),
+      );
+      expect(aboveCap.nebula, longMax);
+      expect(aboveCap.nebulaEarned, longMax);
+    });
+
+    test(
+      'lifetime Nebula earned saturates while spendable balance remains exact',
+      () {
+        final state = ProgressionState.initial.copyWith(
+          nebula: BigNumber.fromInt(10),
+          nebulaEarned: longMax - BigNumber.fromInt(5),
+        );
+
+        final result = engine.awardArcadeReward(
+          state,
+          nebulaReward: BigNumber.fromInt(10),
+          moneyReward: BigNumber.fromInt(0),
+        );
+
+        expect(result.nebula.toString(), '20');
+        expect(result.nebulaEarned, longMax);
+      },
+    );
+
+    test('negative lifetime total is repaired to zero like GTN1', () {
+      expect(
+        engine.addNebulaEarned(
+          BigNumber.fromInt(-1),
+          BigNumber.fromInt(0),
+        ),
+        BigNumber.fromInt(0),
+      );
+    });
+  });
+
   test('GTN1 achievement catalog unlocks exact milestones and pays once', () {
     final before = ProgressionState.initial.copyWith(
       correctGuesses: 50,

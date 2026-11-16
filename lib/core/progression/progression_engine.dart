@@ -55,6 +55,36 @@ class UltraRules {
 class ProgressionEngine {
   const ProgressionEngine();
 
+  static final BigNumber _longMax = BigNumber.parse('9223372036854775807');
+
+  /// Mirrors GTN1 GameEngine.calculateNebulaReward's signed-Long saturation.
+  BigNumber calculateNebulaReward(
+    ProgressionState state,
+    BigNumber baseReward,
+  ) {
+    final zero = BigNumber.fromInt(0);
+    if (baseReward.compareTo(zero) <= 0) return zero;
+    final ultraLevel = (state.ultraUpgrades['ultra_nebula_boost'] ?? 0).clamp(
+      0,
+      15,
+    );
+    final shopMultiplier = (state.nebulaItems['nebula_boost'] ?? 0) > 0
+        ? 2
+        : 1;
+    final multiplier = (1 + ultraLevel) * shopMultiplier;
+    final multiplied = baseReward.multiplyInt(multiplier);
+    return multiplied.compareTo(_longMax) > 0 ? _longMax : multiplied;
+  }
+
+  /// Mirrors GTN1 GameEngine.addNebulaEarned, including negative-total repair.
+  BigNumber addNebulaEarned(BigNumber currentTotal, BigNumber reward) {
+    final zero = BigNumber.fromInt(0);
+    final current = currentTotal.compareTo(zero) < 0 ? zero : currentTotal;
+    if (reward.compareTo(zero) <= 0) return current;
+    final total = current + reward;
+    return total.compareTo(_longMax) > 0 ? _longMax : total;
+  }
+
   ProgressionState evaluateAchievements(ProgressionState state) =>
       AchievementCatalog.evaluate(state);
 
@@ -267,14 +297,10 @@ class ProgressionEngine {
     if (nebulaReward.compareTo(zero) < 0 || moneyReward.compareTo(zero) < 0) {
       throw ArgumentError('Arcade rewards cannot be negative.');
     }
-    final nebulaUpgradeLevel = (state.ultraUpgrades['ultra_nebula_boost'] ?? 0)
-        .clamp(0, 15);
-    final shopMultiplier = (state.nebulaItems['nebula_boost'] ?? 0) > 0 ? 2 : 1;
-    final nebulaMultiplier = (1 + nebulaUpgradeLevel) * shopMultiplier;
-    final actualNebulaReward = nebulaReward.multiplyInt(nebulaMultiplier);
+    final actualNebulaReward = calculateNebulaReward(state, nebulaReward);
     return state.copyWith(
       nebula: state.nebula + actualNebulaReward,
-      nebulaEarned: state.nebulaEarned + actualNebulaReward,
+      nebulaEarned: addNebulaEarned(state.nebulaEarned, actualNebulaReward),
       money: state.money + moneyReward,
       moneyEarned: state.moneyEarned + moneyReward,
     );
@@ -287,15 +313,10 @@ class ProgressionEngine {
     if (reward.compareTo(BigNumber.fromInt(0)) < 0) {
       throw ArgumentError('Nebula reward cannot be negative.');
     }
-    final ultraLevel = (state.ultraUpgrades['ultra_nebula_boost'] ?? 0).clamp(
-      0,
-      15,
-    );
-    final shopMultiplier = (state.nebulaItems['nebula_boost'] ?? 0) > 0 ? 2 : 1;
-    final actualReward = reward.multiplyInt((1 + ultraLevel) * shopMultiplier);
+    final actualReward = calculateNebulaReward(state, reward);
     return state.copyWith(
       nebula: state.nebula + actualReward,
-      nebulaEarned: state.nebulaEarned + actualReward,
+      nebulaEarned: addNebulaEarned(state.nebulaEarned, actualReward),
     );
   }
 
