@@ -357,3 +357,21 @@ Android artifact #14187456134 (`android-debug-apk`), 99,195,032-byte ZIP, SHA-25
 Windows artifact #14187805031 (`windows-debug-portable`), 58,384,937-byte ZIP, SHA-256 `ca96e0cb9355d9659776d8428cf0da32f8e86bcf719163ce2a97fb784b03a2b8`, expires 2026-11-23.
 
 This closes the CI/build-validation portion of this runtime-comment follow-up only. Android/Windows runtime and visual verification across Dashboard, More, Settings, Menu Studio, Profile and Save Slots remains required. Upgrade Shop's 51px overflow and World Map hero-heading wrap remain separate follow-up defects. Keep PR #74 draft, Batch A active, and Batch B blocked until the user-provided GTN2 runtime evidence is reviewed.
+
+
+
+## Remaining Batch A mobile visual comment fixes — 2026-11-16
+
+The earlier PR #74 screenshot audit left two narrow-screen defects: Upgrade Shop's buy-multiplier row overflowed by approximately 51px, and the World Map progression hero heading wrapped because its trailing world-count chip consumed horizontal title space.
+
+Compared against the pinned GTN1 source commit `fe9cf567169e19059e0330d08769fe454336ef94`:
+- GTN1's Android `UpgradeScreen.kt` places the multiplier label and selector in a width-aware full-width row. GTN2's four-segment selector had been placed beside the label with a Spacer, which exceeded a phone's content width. GTN2 now stacks the label above the selector below 500px and retains the side-by-side desktop layout.
+- GTN1's Android `WorldMapScreen.kt` does not use the new Flutter progression hero header. GTN2's custom `GtnPageHeader` was allocating title width to a trailing chip; the chip is now moved to its own right-aligned row below the heading, preserving the title and keeping the world count visible.
+
+Regression coverage added:
+- `test/shop/upgrade_shop_page_test.dart`: 390px viewport verifies multiplier control exists and no Flutter layout exception occurs.
+- `test/world_map_page_test.dart`: 390px viewport verifies the hero title remains within one line-height, the world-count chip remains visible, and no layout exception occurs.
+
+Code commits: `788e4101df4a447f79a6e0bf1c0a9558b40db6d8`, `df8275221ee01d3485a43565ea62ca8b5c8173bc`. Regression-test commits: `84be546e9f64e7c8b607261f0e47b4032c4fd508`, `a11bd7a12c42d9301183f45de119475a6ed4d62c`. Dart-format correction: `091a57213a7d074fd4508e11e8ab280fad4ff5f1`.
+
+Validate run #1993 initially stopped at the formatting gate because the new upgrade-shop test contained one unformatted long assertion. The assertion was formatted in the correction commit above. Full validation is still required at the documentation-synced head; do not close Batch A or unblock Batch B until it passes and Android/Windows runtime screenshots verify the flows.
