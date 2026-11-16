@@ -101,3 +101,8 @@ If the formatter check fails in CI, obtain the formatter's exact output/diff fir
 - The project-owned `test/support/overflow_guard.dart` helper is now implemented and integrated into the responsive smoke and World Map widget-test pump. It captures full `FlutterErrorDetails`, uses bounded pumps, and fails on all framework exceptions rather than filtering overflow types.
 - The 320x640 World Map bottom overflow remains open. Validate #2027 passed format/analysis but failed both the full Flutter suite and responsive smoke on this issue; Validate #2028 is queued with enhanced diagnostic capture.
 - Golden tests/baselines are still pending. Do not mark the UI gate complete until the exact layout defect is fixed, widget tests and responsive matrix pass, and reviewed golden baselines are added.
+### Latest validated UI and debug-build status — 2026-11-16
+
+- The 320x640 World Map overflow was traced to the Material 3 Expressive app-bar title wrapping inside a fixed 64px toolbar (title column width 108px). `WorldMapPage` now constrains the title to one line with ellipsis; a focused 320x640 regression test was added.
+- Validate #2033 at `0880600233d991684e9cbfc6fe30811a548b16d0` passed formatting, static analysis, all 441 Flutter tests, the 10-viewport headless responsive smoke, Android debug APK build and Windows desktop debug build.
+- The project-owned overflow guard is active and captures full FlutterErrorDetails around UI actions. Golden tests and reviewed GTN1 visual baselines remain pending; do not close the overall UI gate or claim complete parity until those and platform runtime evidence are reviewed.
