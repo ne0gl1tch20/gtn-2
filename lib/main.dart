@@ -2064,7 +2064,11 @@ class _GameHomePageState extends State<GameHomePage>
       final previousAttempts = _game.attempts;
       _game = _engine.guess(_game, guess, countPlayerGuess: !isBot);
       resultForMessage = _game.lastResult;
-      if (_game.attempts > previousAttempts) {
+      if (GameEngine.shouldSettleGuess(
+        isBot: isBot,
+        previousAttempts: previousAttempts,
+        nextAttempts: _game.attempts,
+      )) {
         final correct = resultForMessage == GuessResult.correct;
         final beforeGuess = _progression;
         final legacySystems = beforeGuess.legacySystems;
