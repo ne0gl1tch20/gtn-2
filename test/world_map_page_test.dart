@@ -58,6 +58,24 @@ void main() {
     );
   }
 
+
+  testWidgets('compact World Map app bar title stays on one line', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(320, 640);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final state = stateWith();
+    await pumpMap(tester, state: state, onAction: (_, __) async => state);
+
+    final appBarTitle = find.text('World Map');
+    expect(appBarTitle, findsOneWidget);
+    expect(tester.getSize(appBarTitle).height, lessThan(40));
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('mobile world hero keeps its heading on one line', (
     tester,
   ) async {

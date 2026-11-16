@@ -172,7 +172,12 @@ class _WorldMapPageState extends State<WorldMapPage> {
 
     return Scaffold(
       appBar: GtnExpressiveAppBar(
-        title: Text(AppLocalizations.text('world_map_title', 'World Map')),
+        title: Text(
+          AppLocalizations.text('world_map_title', 'World Map'),
+          maxLines: 1,
+          softWrap: false,
+          overflow: TextOverflow.ellipsis,
+        ),
         actions: [
           IconButton(
             tooltip: AppLocalizations.text(
