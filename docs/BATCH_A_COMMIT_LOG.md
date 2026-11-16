@@ -669,3 +669,9 @@ Batch A remains active until Dashboard, More, Settings, Menu Studio, Profile and
 - Validate run `43871998568` at `191b7b6550ff3f92a7ce62ff6cd0b60914bf6fbd` failed at the Dart format gate; no analysis, tests or builds ran. Formatter identified `lib/core/numbers/big_number.dart` and `test/core/big_number_test.dart`.
 - Added both files to the workflow's failure-only formatter diagnostics in commit `d201c22e33d7a21e56036780f3d4cbb386401a12`, then retrieved and applied the exact formatter rewrites. Engine formatting commit: `a72cd3f7f1913ac6b7693df6f7aca917a749b079`; test formatting commit: `606f5ca6da7fa2873ccd290cd6d8ffa4c23d07e4`.
 - Validate run `43872352407` at `d201c22e33d7a21e56036780f3d4cbb386401a12` confirmed the same two-file formatting issue. Its dependent test/build jobs were skipped. The formatter corrections now require a fresh complete Validate run at the final branch head.
+
+
+### BigNumber parsing fixture correction — 2026-11-16
+
+- Re-read the pinned GTN1 constructor: parsing preserves the input BigDecimal precision; DECIMAL128 rounding is applied by arithmetic operations. Corrected the 34-digit tie fixture to add zero before asserting the rounded result, rather than incorrectly expecting the parser itself to round.
+- Test correction commit: `618b160aae4d5da448857ba272ea393fd150a44e`. The new final-head Validate run is `43872966018`; pending at time of entry.
