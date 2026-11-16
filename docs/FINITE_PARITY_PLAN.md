@@ -381,3 +381,15 @@ Validate run #1993 initially stopped at the formatting gate because the new upgr
 ### Mobile World Map heading regression correction — 2026-11-16
 
 Validate run #1997 verified the Upgrade Shop mobile selector test, but reported the World Map hero title at 56px high in a 390px viewport (two lines). Moving the world-count chip below the header was not sufficient because the title still wrapped in the remaining 228px text column. Added an opt-in `singleLineTitle` mode to `GtnPageHeader`, using a scale-down fit for the World Map title only; other page headers retain their existing wrapping behavior. Commits: `c4181738918ac4b2ca35344c68b0f7ec74db1932` and `7082d079e70036ef9d7a87882946aaf0365a3f41`. Validate #1997 had 436 tests pass / 1 fail. A new full validation is required; do not claim the visual fix passes until the mobile heading test and full suite pass.
+
+
+
+### Validate #2001 — final mobile comment fixes passed — 2026-11-16
+
+Validate run [#2001](https://github.com/ne0gl1tch20/gtn-2/actions/runs/43832430777) passed at head `1e472eb2724cc56899a70713b7281aa853d5917b`. Format and analysis passed; all 437 Flutter tests passed, including both new 390px responsive UI regressions; Android debug APK and Windows desktop debug builds succeeded. The Windows release installer was skipped by the debug validation workflow.
+
+Android artifact #14209791224 (`android-debug-apk`) is 99,197,414 bytes as a ZIP, SHA-256 `3f71349042bb3737b14b27b194e3a0582e7e46cf61dbbf9fb2474d0d807c6ce9`, expires 2026-11-23. Extracted APK is 179,345,429 bytes, SHA-256 `2388916fa78bbb22e7db675c21a0dc35a4d3eb0ee917f92a98d0639d1f01347b`. The ZIP integrity check passed.
+
+Windows artifact #14209895790 (`windows-debug-portable`) is 58,389,165 bytes, SHA-256 `34161b824ea6d97cb3d00d68c1327f6d0d57c44ad1fed20e189dfd6a0ddb36a3`, expires 2026-11-23.
+
+The two remaining narrow-screen comment defects are now implemented and test-covered. This does not close Batch A: Android/Windows runtime screenshots and behavior verification remain outstanding, as do any remaining parity checklist items. Keep PR #74 draft and Batch B blocked until the user-provided GTN2 runtime evidence and full Batch A exit gate are reviewed.
