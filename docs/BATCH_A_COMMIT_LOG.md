@@ -750,3 +750,6 @@ Batch A remains active until Dashboard, More, Settings, Menu Studio, Profile and
 - Commits: `b21f571c4c68a9bd93445988535852133725be18`; `04001327e93c39bfaaec2fe9ba4f9d80109634e8`; `8737804b759190f8942e5d234c62ca4653de900a`; `8797abeeaae12be3f488838c612ade11a94f40e7`; `57c1ad08ea4ac104f850f63968bf14d819a602d5`.
 - Added tests for Standard, Scientific and Engineering achievement progress. Engineering expectation matches the formatter's actual `e3` representation.
 - These changes are newer than the successful run and require fresh format/analyze, full tests, responsive overflow smoke, Android debug build and Windows desktop build. No validation pass is claimed for this batch.
+
+
+- Validation attempt `43883428093` on `57c1ad08ea4ac104f850f63968bf14d819a602d5` failed at the format gate only: `lib/core/progression/achievement_catalog.dart` needed a multiline conditional return. Analysis, tests, responsive smoke and platform builds were skipped. Applied the exact formatting correction in `49116f0a0e9c71f31c166c8772f3ebfe2f1461c5`. Fresh validation is running on the corrected head; no pass is claimed yet.
