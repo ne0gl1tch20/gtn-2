@@ -373,6 +373,7 @@ class LegacyDetailPage extends StatelessWidget {
     super.key,
     required this.section,
     required this.progression,
+    this.numberNotation = 'Standard',
     this.updateNoticeListenable,
     this.onCheckUpdates,
     this.onInstallUpdate,
@@ -380,6 +381,7 @@ class LegacyDetailPage extends StatelessWidget {
 
   final LegacySection section;
   final ProgressionState progression;
+  final String numberNotation;
   final ValueListenable<UpdateNoticeState>? updateNoticeListenable;
   final VoidCallback? onCheckUpdates;
   final VoidCallback? onInstallUpdate;
@@ -502,6 +504,7 @@ class LegacyDetailPage extends StatelessWidget {
                                 : AchievementCatalog.progressLabel(
                                     progression,
                                     achievement,
+                                    numberNotation: numberNotation,
                                   ),
                             style: theme.textTheme.bodySmall,
                           ),
@@ -532,7 +535,7 @@ class LegacyDetailPage extends StatelessWidget {
     const SizedBox(height: 12),
     _valueCard(
       'Money earned',
-      progression.moneyEarned.toString(),
+      progression.moneyEarned.format(numberNotation),
       Icons.payments_rounded,
     ),
     _valueCard(
@@ -542,17 +545,17 @@ class LegacyDetailPage extends StatelessWidget {
     ),
     _valueCard(
       'Current Money',
-      progression.money.toString(),
+      progression.money.format(numberNotation),
       Icons.account_balance_wallet_rounded,
     ),
     _valueCard(
       'Current Prestige',
-      progression.prestige.toString(),
+      progression.prestige.format(numberNotation),
       Icons.auto_awesome_rounded,
     ),
     _valueCard(
       'Current Ultra',
-      progression.ultra.toString(),
+      progression.ultra.format(numberNotation),
       Icons.bolt_rounded,
     ),
     _valueCard(
@@ -648,12 +651,12 @@ class LegacyDetailPage extends StatelessWidget {
       const SizedBox(height: 8),
       _valueCard(
         'Money earned',
-        progression.moneyEarned.toString(),
+        progression.moneyEarned.format(numberNotation),
         Icons.trending_up_rounded,
       ),
       _valueCard(
         'Money spent',
-        progression.moneySpent.toString(),
+        progression.moneySpent.format(numberNotation),
         Icons.shopping_cart_rounded,
       ),
       _valueCard('Play time', playtime, Icons.timer_rounded),
