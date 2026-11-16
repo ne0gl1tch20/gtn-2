@@ -12,7 +12,9 @@ void main() {
   late SaveStorage storage;
 
   setUp(() async {
-    directory = await Directory.systemTemp.createTemp('gtn2-economy-persistence-');
+    directory = await Directory.systemTemp.createTemp(
+      'gtn2-economy-persistence-',
+    );
     storage = SaveStorage(directory: directory);
   });
 
