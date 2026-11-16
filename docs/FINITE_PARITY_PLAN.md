@@ -375,3 +375,9 @@ Regression coverage added:
 Code commits: `788e4101df4a447f79a6e0bf1c0a9558b40db6d8`, `df8275221ee01d3485a43565ea62ca8b5c8173bc`. Regression-test commits: `84be546e9f64e7c8b607261f0e47b4032c4fd508`, `a11bd7a12c42d9301183f45de119475a6ed4d62c`. Dart-format correction: `091a57213a7d074fd4508e11e8ab280fad4ff5f1`.
 
 Validate run #1993 initially stopped at the formatting gate because the new upgrade-shop test contained one unformatted long assertion. The assertion was formatted in the correction commit above. Full validation is still required at the documentation-synced head; do not close Batch A or unblock Batch B until it passes and Android/Windows runtime screenshots verify the flows.
+
+
+
+### Mobile World Map heading regression correction — 2026-11-16
+
+Validate run #1997 verified the Upgrade Shop mobile selector test, but reported the World Map hero title at 56px high in a 390px viewport (two lines). Moving the world-count chip below the header was not sufficient because the title still wrapped in the remaining 228px text column. Added an opt-in `singleLineTitle` mode to `GtnPageHeader`, using a scale-down fit for the World Map title only; other page headers retain their existing wrapping behavior. Commits: `c4181738918ac4b2ca35344c68b0f7ec74db1932` and `7082d079e70036ef9d7a87882946aaf0365a3f41`. Validate #1997 had 436 tests pass / 1 fail. A new full validation is required; do not claim the visual fix passes until the mobile heading test and full suite pass.
