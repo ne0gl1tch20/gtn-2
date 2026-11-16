@@ -1,4 +1,4 @@
-/// An exact base-10 decimal represented by an integer coefficient and scale.
+/// A base-10 decimal represented by an integer coefficient and scale.
 ///
 /// For example, 12.34 is stored as coefficient 1234 and scale 2.
 /// Trailing decimal zeroes are normalized away.
@@ -22,18 +22,51 @@ class BigNumber implements Comparable<BigNumber> {
     return BigNumber._(normalizedCoefficient, normalizedScale);
   }
 
+  /// Parses decimal/scientific notation and GTN1's named magnitude suffixes.
+  ///
+  /// Invalid input remains a FormatException so save validation can reject
+  /// malformed currency instead of silently converting it to zero.
   factory BigNumber.parse(String value) {
     final input = value.trim();
-    final match = RegExp(r'^([+-]?)(\d+)(?:\.(\d+))?$').firstMatch(input);
+    const suffixPowers = <String, int>{
+      'K': 3, 'M': 6, 'B': 9, 'T': 12, 'QA': 15, 'QI': 18,
+      'SX': 21, 'SP': 24, 'OC': 27, 'NO': 30, 'DC': 33, 'UD': 36,
+      'DD': 39, 'TD': 42, 'QAD': 45, 'QID': 48, 'SXD': 51,
+      'SPD': 54, 'OCD': 57, 'NOD': 60, 'VG': 63, 'UVG': 66,
+      'DVG': 69, 'TVG': 72, 'QAVG': 75, 'QIVG': 78, 'SXVG': 81,
+      'SPVG': 84, 'OCVG': 87, 'NOVG': 90, 'TG': 93, 'VGN': 63,
+    };
+
+    var numericInput = input;
+    var suffixPower = 0;
+    final suffixMatch = RegExp(r'^(.+?)([A-Za-z]+)$').firstMatch(input);
+    if (suffixMatch != null) {
+      final suffix = suffixMatch.group(2)!.toUpperCase();
+      final power = suffixPowers[suffix];
+      if (power == null) {
+        throw FormatException('Invalid decimal number.', value);
+      }
+      numericInput = suffixMatch.group(1)!.trim();
+      suffixPower = power;
+    }
+
+    final match = RegExp(
+      r'^([+-]?)(\d+)(?:\.(\d+))?(?:[eE]([+-]?\d+))?$',
+    ).firstMatch(numericInput);
     if (match == null) {
       throw FormatException('Invalid decimal number.', value);
     }
     final fraction = match.group(3) ?? '';
-    final digits = '${match.group(2)}$fraction';
-    final coefficient = BigInt.parse(
-      '${match.group(1) == '-' ? '-' : ''}$digits',
+    final digits = '\${match.group(2)}$fraction';
+    var coefficient = BigInt.parse(
+      '\${match.group(1) == '-' ? '-' : ''}$digits',
     );
-    return BigNumber.fromParts(coefficient, fraction.length);
+    var scale = fraction.length - int.parse(match.group(4) ?? '0') - suffixPower;
+    if (scale < 0) {
+      coefficient *= _powerOfTen(-scale);
+      scale = 0;
+    }
+    return BigNumber.fromParts(coefficient, scale);
   }
 
   final BigInt coefficient;
