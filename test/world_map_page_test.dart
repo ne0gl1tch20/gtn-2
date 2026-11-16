@@ -49,6 +49,24 @@ void main() {
     await tester.pump(const Duration(milliseconds: 400));
   }
 
+  testWidgets('mobile world hero keeps its heading on one line', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final state = stateWith();
+    await pumpMap(tester, state: state, onAction: (_, __) async => state);
+
+    final heading = find.text('Your universe');
+    expect(heading, findsOneWidget);
+    expect(tester.getSize(heading).height, lessThan(40));
+    expect(find.text('4 WORLDS'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('recreates GTN1 progression summary and world expedition list', (
     tester,
   ) async {
