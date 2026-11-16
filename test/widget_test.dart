@@ -969,10 +969,22 @@ void main() {
             ),
           ),
         );
+        expect(
+          tester
+              .widget<ExpansionTile>(find.byType(ExpansionTile).first)
+              .initiallyExpanded,
+          isTrue,
+        );
+        await tester.pump(const Duration(milliseconds: 300));
       },
     );
 
-    expect(find.text('Restore next level · 50.00K Money'), findsOneWidget);
+    final costLabel = find.textContaining('Restore next level');
+    expect(costLabel, findsOneWidget);
+    expect(
+      tester.widget<Text>(costLabel).data,
+      'Restore next level · ${BigNumber.fromInt(50000).format()} Money',
+    );
   });
 
   testWidgets('Lucky Stake formats available Money like GTN1', (
