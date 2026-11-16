@@ -693,3 +693,10 @@ Batch A remains active until Dashboard, More, Settings, Menu Studio, Profile and
 - Corrected the regex to use single raw-string escapes for digit and decimal matching. Commit: `d7aec358a0882ebf546d9a57851c6de60e67b1e9`.
 - Validate `43877376668` Android build was still running when the correction was pushed; its Windows build was cancelled by the newer head. No APK or desktop build success is claimed from this run. A fresh full validation on the corrected parser head is required before number-formatting implementation.
 - Source of truth remains GTN1 `BigNumber.kt` at `fe9cf567169e19059e0330d08769fe454336ef94`. Do not change save serialization or `BigNumber.toString()` to add display notation; the next implementation must add a separate display formatter and connect it to actual currency/cost UI call sites.
+
+
+### BigNumber parser regex syntax follow-up — 2026-11-16
+
+- Validate run `43877974795` at `99c1df2bd41e30b89f87ad7a1f8fe1b5f91f417e` failed at Dart formatting because the first regex escape correction left the RegExp expression without its closing quote/parenthesis. All dependent tests and platform jobs were skipped.
+- Replaced the complete parser expression with a syntactically complete raw RegExp using single escapes for digit and decimal groups. Commit: `95fd950771d3bfbec4e147db880983203c77f179`.
+- The earlier parser runtime failure remains the reason for the change; no parser, test-suite, responsive, APK or desktop success is claimed until a fresh validation of this exact head completes.
