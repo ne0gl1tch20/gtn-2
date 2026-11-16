@@ -487,3 +487,14 @@ Batch A remains active until Dashboard, More, Settings, Menu Studio, Profile and
 - Windows artifact: ID 14187805031, `windows-debug-portable`, 58,384,937 bytes, SHA-256 `ca96e0cb9355d9659776d8428cf0da32f8e86bcf719163ce2a97fb784b03a2b8`, expires 2026-11-23.
 - The six latest comment findings are implemented and CI-covered: profile-to-Save-Slots onboarding/back route, empty active-slot create action, dialog controller ownership, centered compact navigation, constrained Settings app-bar title, and offline → daily reward → Nimmy startup sequencing.
 - This is not Batch A exit evidence. Android/Windows runtime screenshots and behavior checks for Dashboard, More, Settings, Menu Studio, Profile and Save Slots remain open. PR #74 stays draft; Batch B remains blocked. Upgrade Shop overflow and World Map heading wrap are still separate defects.
+
+
+
+### Remaining Batch A mobile visual comment fixes — 2026-11-16
+
+- Rechecked GTN1 pinned source `fe9cf567169e19059e0330d08769fe454336ef94`, specifically `UpgradeScreen.kt` and `WorldMapScreen.kt`.
+- Upgrade Shop: replaced the narrow-screen label + Spacer + four-segment Row with a responsive LayoutBuilder. Below 500px, the label stacks above the multiplier selector; wide layouts retain the horizontal row. Code commit `788e4101df4a447f79a6e0bf1c0a9558b40db6d8`.
+- World Map: moved the world-count chip out of the hero header's trailing slot into a right-aligned row below the title so it no longer steals title width. Code commit `df8275221ee01d3485a43565ea62ca8b5c8173bc`.
+- Added 390px viewport regression tests for both layouts: `84be546e9f64e7c8b607261f0e47b4032c4fd508` and `a11bd7a12c42d9301183f45de119475a6ed4d62c`.
+- Validate #1993 found a Dart-format mismatch in the new upgrade-shop test (one long assertion). Fixed and committed as `091a57213a7d074fd4508e11e8ab280fad4ff5f1`; a new full Validate run is required.
+- Keep PR #74 draft, Batch A active and Batch B blocked until validation passes and runtime visual evidence is reviewed.
