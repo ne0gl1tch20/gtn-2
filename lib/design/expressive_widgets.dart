@@ -81,6 +81,7 @@ class GtnPageHeader extends StatelessWidget {
     required this.icon,
     this.accent = GtnUiTokens.purple,
     this.trailing,
+    this.singleLineTitle = false,
   });
 
   final String eyebrow;
@@ -89,6 +90,7 @@ class GtnPageHeader extends StatelessWidget {
   final IconData icon;
   final Color accent;
   final Widget? trailing;
+  final bool singleLineTitle;
 
   @override
   Widget build(BuildContext context) {
@@ -137,14 +139,30 @@ class GtnPageHeader extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 3),
-                Text(
-                  title,
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    color: foreground,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: -.55,
+                if (singleLineTitle)
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      title,
+                      maxLines: 1,
+                      softWrap: false,
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        color: foreground,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: -.55,
+                      ),
+                    ),
+                  )
+                else
+                  Text(
+                    title,
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      color: foreground,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -.55,
+                    ),
                   ),
-                ),
                 const SizedBox(height: 3),
                 Text(
                   description,
