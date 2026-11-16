@@ -688,7 +688,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
               child: Text(
                 level >= 20
                     ? 'Fully restored'
-                    : 'Restore next level · $cost Money',
+                    : 'Restore next level · ${cost.format()} Money',
               ),
             ),
           ),
@@ -718,7 +718,7 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
                   'Current streak: $streak · Win multiplier: ${multiplier.toStringAsFixed(1)}×',
                 ),
                 const SizedBox(height: 4),
-                Text('Money available: ${_progression.money}'),
+                Text('Money available: ${_progression.money.format()}'),
                 const SizedBox(height: 6),
                 const Text(
                   'Stake money on a 50/50 coin flip. A win pays your stake multiplied by 2.0× plus 0.1× for each current streak point. A loss forfeits the stake.',
@@ -781,8 +781,8 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
                     : BigNumber.fromInt(0);
                 setState(() {
                   _stakeResultMessage = won
-                      ? 'Lucky flip won. Payout: $payout Money.'
-                      : 'Lucky flip lost. $stake Money forfeited.';
+                      ? 'Lucky flip won. Payout: ${payout.format()} Money.'
+                      : 'Lucky flip lost. ${stake.format()} Money forfeited.';
                 });
                 _stakeController.clear();
                 await _apply(result);
