@@ -788,3 +788,6 @@ Batch A remains active until Dashboard, More, Settings, Menu Studio, Profile and
 - Existing GTN2 tests only covered a subset of the daily quest/chest paths. Added deterministic tests for trait bonus + boost order, all four quest rewards and claim-once behavior, date rollover, loot-roll boundaries, upgrade-purchase progress reset, all chest tiers and both reward currencies. Expanded SaveData round-trip coverage for daily reward/quest/loot state.
 - Commits: `e77396aef497cbe7224d1aca89d38864edfb7951` (daily/quest/loot boundary tests); `a834acc7ac7b53be1082045b3f337438ad90e5ea` (save persistence coverage).
 - No implementation changes were made because the audited GTN2 behavior already matched GTN1. Full validation for this test/persistence batch is pending. Phase 6 remains open until this batch passes and weekly rewards/minigames are separately audited.
+
+
+- Formatting validation history: runs `43890511047` (head `a834acc7`) and `43890760475` (head `6547dedb`) failed at Dart format only; tests and platform jobs were skipped. The exact formatter diff identified record-test wrapping plus map/assert layout in `test/legacy_systems_test.dart` and `test/data/save_data_test.dart`. Applied the formatter changes in `22c68f07a7a0e719f7a7bee52eda6f57fab64fe9` and `2b2d10908a7972d3753e41ab3c7852409f2fc7e8`. New full validation is required for this latest head.
