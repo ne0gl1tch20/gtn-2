@@ -410,34 +410,37 @@ void main() {
       }
     });
 
-    test('daily guess progress resets on date change before recording the guess', () {
-      final previous = LegacySystemsState.initial.copyWith(
-        dailyQuestDate: '2026-11-06',
-        dailyQuestGuesses: 9,
-        dailyQuestCorrectGuesses: 4,
-        dailyQuestBestStreak: 6,
-        dailyQuestUpgradePurchases: 3,
-        claimedDailyQuests: const {'daily_guesses_10'},
-        lootChests: const {'common': 2, 'rare': 1, 'epic': 0},
-      );
+    test(
+      'daily guess progress resets on date change before recording the guess',
+      () {
+        final previous = LegacySystemsState.initial.copyWith(
+          dailyQuestDate: '2026-11-06',
+          dailyQuestGuesses: 9,
+          dailyQuestCorrectGuesses: 4,
+          dailyQuestBestStreak: 6,
+          dailyQuestUpgradePurchases: 3,
+          claimedDailyQuests: const {'daily_guesses_10'},
+          lootChests: const {'common': 2, 'rare': 1, 'epic': 0},
+        );
 
-      final next = engine.recordGuessProgress(
-        previous,
-        correct: false,
-        currentStreak: 0,
-        today: '2026-11-07',
-        lootRoll: 0,
-      );
+        final next = engine.recordGuessProgress(
+          previous,
+          correct: false,
+          currentStreak: 0,
+          today: '2026-11-07',
+          lootRoll: 0,
+        );
 
-      expect(next.dailyQuestDate, '2026-11-07');
-      expect(next.dailyQuestGuesses, 1);
-      expect(next.dailyQuestCorrectGuesses, 0);
-      expect(next.dailyQuestBestStreak, 0);
-      expect(next.dailyQuestUpgradePurchases, 0);
-      expect(next.claimedDailyQuests, isEmpty);
-      expect(next.lootChests, const {'common': 2, 'rare': 1, 'epic': 0});
-      expect(next.lootDropsFound, 0);
-    });
+        expect(next.dailyQuestDate, '2026-11-07');
+        expect(next.dailyQuestGuesses, 1);
+        expect(next.dailyQuestCorrectGuesses, 0);
+        expect(next.dailyQuestBestStreak, 0);
+        expect(next.dailyQuestUpgradePurchases, 0);
+        expect(next.claimedDailyQuests, isEmpty);
+        expect(next.lootChests, const {'common': 2, 'rare': 1, 'epic': 0});
+        expect(next.lootDropsFound, 0);
+      },
+    );
 
     test('loot-drop roll boundaries match the source tier probabilities', () {
       const today = '2026-11-07';
@@ -477,77 +480,80 @@ void main() {
       }
     });
 
-    test('upgrade purchases reset stale daily progress then count the purchase', () {
-      final result = engine.recordUpgradePurchase(
-        LegacySystemsState.initial.copyWith(
-          dailyQuestDate: '2026-11-06',
-          dailyQuestGuesses: 9,
-          dailyQuestCorrectGuesses: 4,
-          dailyQuestBestStreak: 5,
-          dailyQuestUpgradePurchases: 2,
-          claimedDailyQuests: const {'daily_guesses_10'},
-        ),
-      );
-      final today = DateTime.now().toIso8601String().substring(0, 10);
+    test(
+      'upgrade purchases reset stale daily progress then count the purchase',
+      () {
+        final result = engine.recordUpgradePurchase(
+          LegacySystemsState.initial.copyWith(
+            dailyQuestDate: '2026-11-06',
+            dailyQuestGuesses: 9,
+            dailyQuestCorrectGuesses: 4,
+            dailyQuestBestStreak: 5,
+            dailyQuestUpgradePurchases: 2,
+            claimedDailyQuests: const {'daily_guesses_10'},
+          ),
+        );
+        final today = DateTime.now().toIso8601String().substring(0, 10);
 
-      expect(result.dailyQuestDate, today);
-      expect(result.dailyQuestGuesses, 0);
-      expect(result.dailyQuestCorrectGuesses, 0);
-      expect(result.dailyQuestBestStreak, 0);
-      expect(result.dailyQuestUpgradePurchases, 1);
-      expect(result.claimedDailyQuests, isEmpty);
-    });
+        expect(result.dailyQuestDate, today);
+        expect(result.dailyQuestGuesses, 0);
+        expect(result.dailyQuestCorrectGuesses, 0);
+        expect(result.dailyQuestBestStreak, 0);
+        expect(result.dailyQuestUpgradePurchases, 1);
+        expect(result.claimedDailyQuests, isEmpty);
+      },
+    );
 
-    test('all chest tiers consume one chest and credit only the selected currency', () {
-      const rewards = <String, (int, int)>{
-        'common': (5000, 5),
-        'rare': (25000, 25),
-        'epic': (100000, 100),
-      };
+    test(
+      'all chest tiers consume one chest and credit only the selected currency',
+      () {
+        const rewards = <String, (int, int)>{
+          'common': (5000, 5),
+          'rare': (25000, 25),
+          'epic': (100000, 100),
+        };
 
-      for (final entry in rewards.entries) {
-        for (final rewardNebula in [false, true]) {
-          final result = engine.openLootChest(
-            progression: ProgressionState.initial.copyWith(
-              money: BigNumber.fromInt(20),
-              moneyEarned: BigNumber.fromInt(10),
-              nebula: BigNumber.fromInt(5),
-              nebulaEarned: BigNumber.fromInt(3),
-            ),
-            systems: LegacySystemsState.initial.copyWith(
-              lootChests: {
-                'common': 0,
-                'rare': 0,
-                'epic': 0,
-                entry.key: 1,
-              },
-            ),
-            tier: entry.key,
-            rewardNebula: rewardNebula,
-          );
+        for (final entry in rewards.entries) {
+          for (final rewardNebula in [false, true]) {
+            final result = engine.openLootChest(
+              progression: ProgressionState.initial.copyWith(
+                money: BigNumber.fromInt(20),
+                moneyEarned: BigNumber.fromInt(10),
+                nebula: BigNumber.fromInt(5),
+                nebulaEarned: BigNumber.fromInt(3),
+              ),
+              systems: LegacySystemsState.initial.copyWith(
+                lootChests: {'common': 0, 'rare': 0, 'epic': 0, entry.key: 1},
+              ),
+              tier: entry.key,
+              rewardNebula: rewardNebula,
+            );
 
-          expect(result.accepted, isTrue, reason: '${entry.key} $rewardNebula');
-          expect(result.systems.lootChests[entry.key], 0);
-          expect(result.systems.lootChestsOpened, 1);
-          expect(
-            result.progression.money,
-            BigNumber.fromInt(20 + (rewardNebula ? 0 : entry.value.$1)),
-          );
-          expect(
-            result.progression.moneyEarned,
-            BigNumber.fromInt(10 + (rewardNebula ? 0 : entry.value.$1)),
-          );
-          expect(
-            result.progression.nebula,
-            BigNumber.fromInt(5 + (rewardNebula ? entry.value.$2 : 0)),
-          );
-          expect(
-            result.progression.nebulaEarned,
-            BigNumber.fromInt(3 + (rewardNebula ? entry.value.$2 : 0)),
-          );
+            expect(
+              result.accepted,
+              isTrue,
+              reason: '${entry.key} $rewardNebula',
+            );
+            expect(result.systems.lootChests[entry.key], 0);
+            expect(result.systems.lootChestsOpened, 1);
+            expect(
+              result.progression.money,
+              BigNumber.fromInt(20 + (rewardNebula ? 0 : entry.value.$1)),
+            );
+            expect(
+              result.progression.moneyEarned,
+              BigNumber.fromInt(10 + (rewardNebula ? 0 : entry.value.$1)),
+            );
+            expect(
+              result.progression.nebula,
+              BigNumber.fromInt(5 + (rewardNebula ? entry.value.$2 : 0)),
+            );
+            expect(
+              result.progression.nebulaEarned,
+              BigNumber.fromInt(3 + (rewardNebula ? entry.value.$2 : 0)),
+            );
+          }
         }
-      }
-    });
-  });
-
-}
+      },
+    );
+  });}
