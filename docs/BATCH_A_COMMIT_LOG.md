@@ -476,3 +476,14 @@ Batch A remains active until Dashboard, More, Settings, Menu Studio, Profile and
 - Head: `c8642b7df8f83d4d666b1ed293a3793eb53c8544`; run: https://github.com/ne0gl1tch20/gtn-2/actions/runs/43778076654.
 - Format and analysis: success. Flutter test suite: **435 passed**.
 - Android debug APK build and Windows desktop debug build: still running at this checkpoint. Windows release installer: skipped by the debug validation workflow. No full validation pass or APK artifact is claimed yet.
+
+
+
+### Validate #1986 final result — 2026-11-16
+
+- Run https://github.com/ne0gl1tch20/gtn-2/actions/runs/43778076654 passed at PR #74 head `c8642b7df8f83d4d666b1ed293a3793eb53c8544`.
+- Format and analysis: success. Flutter tests: 435 passed. Android debug APK: success. Windows desktop debug build: success. Windows release installer: skipped by the debug validation workflow.
+- Android artifact: ID 14187456134, `android-debug-apk`, 99,195,032 bytes, SHA-256 `c36560ca7c1dfb8aaae4d40d6e95d4e3af6dd862df659152bb3e050fed2dd475`, expires 2026-11-23. Extracted APK: 179,344,345 bytes, SHA-256 `44b7e46719eb282e7509b2b06db6ec2780f6e038ed9cbbcec57c93ac33b74230`.
+- Windows artifact: ID 14187805031, `windows-debug-portable`, 58,384,937 bytes, SHA-256 `ca96e0cb9355d9659776d8428cf0da32f8e86bcf719163ce2a97fb784b03a2b8`, expires 2026-11-23.
+- The six latest comment findings are implemented and CI-covered: profile-to-Save-Slots onboarding/back route, empty active-slot create action, dialog controller ownership, centered compact navigation, constrained Settings app-bar title, and offline → daily reward → Nimmy startup sequencing.
+- This is not Batch A exit evidence. Android/Windows runtime screenshots and behavior checks for Dashboard, More, Settings, Menu Studio, Profile and Save Slots remain open. PR #74 stays draft; Batch B remains blocked. Upgrade Shop overflow and World Map heading wrap are still separate defects.
