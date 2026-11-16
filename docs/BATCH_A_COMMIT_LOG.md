@@ -553,3 +553,11 @@ Batch A remains active until Dashboard, More, Settings, Menu Studio, Profile and
 - Simplified the responsive threshold to one `isCompact` value and aligned the long callback/conditional formatting with Dart style. No behavior or width constraints changed.
 - Follow-up implementation commit: `4b4d549fa81f3530c0c34c1f42bed7cce3cb60d9` (`Simplify compact Menu Studio sizing and formatting`).
 - A fresh CI run is required before judging this fix. The prior confirmed overflow remains the 43px GTN2 Menu Studio row defect at narrow width; this entry does not claim it is fixed until headless tests pass.
+
+
+### CI execution reliability — parity branch push validation — 2026-11-16
+
+- The validation workflow previously ran on `main`, `master`, `port/**` pushes and pull-request events, but not direct pushes to the active `batch-a/creative-save-active-slot` branch. The recent connector-authored commits updated PR #74's head without producing a fresh run for every commit.
+- Added `batch-a/**` to the push branch filter so parity branch commits get the same validation workflow. Added a failure-only Dart formatter diff diagnostic for `lib/settings/menu_studio_page.dart` to make any remaining format mismatch directly inspectable without flooding normal logs.
+- Workflow commit: `382c86b9faa2b7e1818c616325e2cf3442ee6655` (`Run validation on parity branches and expose formatter diffs`).
+- This workflow change itself does not establish test success. A subsequent commit on the parity branch is required to trigger the newly enabled push workflow; the resulting head's format, analysis, responsive smoke and full test results will be recorded separately.
