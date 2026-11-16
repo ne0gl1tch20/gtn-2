@@ -167,17 +167,18 @@ void main() {
         );
 
         for (final screen in screens) {
-          await tester.pumpWidget(_app(screen.build()));
           // Fixed, bounded frames keep the smoke suite deterministic and fast;
           // pumpAndSettle can hang on intentionally repeating UI animations.
-          await expectNoLayoutException(
+          await runWithOverflowGuard(
             tester,
             screen: screen.name,
             viewport: Size(
               viewport.width.toDouble(),
               viewport.height.toDouble(),
             ),
-            pumpDuration: const Duration(milliseconds: 120),
+            action: () async {
+              await tester.pumpWidget(_app(screen.build()));
+            },
           );
         }
       }
@@ -203,17 +204,18 @@ void main() {
         viewport.width.toDouble(),
         viewport.height.toDouble(),
       );
-      await tester.pumpWidget(_app(_dashboard(controllers)));
-      await tester.pump(const Duration(milliseconds: 80));
-
-      final more = find.text('More').first;
-      expect(more, findsOneWidget);
-      await tester.tap(more);
-      await expectNoLayoutException(
+      await runWithOverflowGuard(
         tester,
         screen: 'More navigation',
         viewport: Size(viewport.width.toDouble(), viewport.height.toDouble()),
         pumpDuration: const Duration(milliseconds: 180),
+        action: () async {
+          await tester.pumpWidget(_app(_dashboard(controllers)));
+          await tester.pump(const Duration(milliseconds: 80));
+          final more = find.text('More').first;
+          expect(more, findsOneWidget);
+          await tester.tap(more);
+        },
       );
     }
   });

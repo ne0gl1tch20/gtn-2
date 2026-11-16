@@ -39,20 +39,22 @@ void main() {
     // Use bounded frames: the expressive controls and map viewport can keep
     // scheduling animations, so waiting for global idle with pumpAndSettle is
     // not deterministic for this screen.
-    await tester.pumpWidget(
-      M3EMaterialApp(
-        data: M3EThemeData.light(seedColor: const Color(0xFF7C5CFC)),
-        fontFamily: 'Manrope',
-        autoTheming: false,
-        initialTheme: Brightness.light,
-        home: WorldMapPage(progression: state, onAction: onAction),
-      ),
-    );
-    await tester.pump(const Duration(milliseconds: 400));
-    await expectNoLayoutException(
+    await runWithOverflowGuard(
       tester,
       screen: 'World Map widget test',
       viewport: tester.view.physicalSize / tester.view.devicePixelRatio,
+      action: () async {
+        await tester.pumpWidget(
+          M3EMaterialApp(
+            data: M3EThemeData.light(seedColor: const Color(0xFF7C5CFC)),
+            fontFamily: 'Manrope',
+            autoTheming: false,
+            initialTheme: Brightness.light,
+            home: WorldMapPage(progression: state, onAction: onAction),
+          ),
+        );
+        await tester.pump(const Duration(milliseconds: 400));
+      },
     );
   }
 
