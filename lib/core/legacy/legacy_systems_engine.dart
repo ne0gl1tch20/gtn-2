@@ -874,7 +874,6 @@ class LegacySystemsEngine {
     required LegacySystemsState systems,
     required String challengeId,
     required DateTime today,
-    bool nebulaBoostOwned = false,
   }) {
     WeeklyChallengeDefinition? challenge;
     for (final candidate in WeeklyChallengeCatalog.forDate(today)) {
@@ -901,7 +900,7 @@ class LegacySystemsEngine {
       );
     }
 
-    final reward = challenge.rewardNebula * (nebulaBoostOwned ? 2 : 1);
+    final reward = challenge.rewardNebula;
     return _accept(
       _addNebula(progression, reward),
       systems.copyWith(
