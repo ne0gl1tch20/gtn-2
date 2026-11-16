@@ -129,6 +129,33 @@ void main() {
       expect(botWin.bestStreak, 3);
     });
 
+    test('bot guesses still settle when player attempts stay unchanged', () {
+      expect(
+        GameEngine.shouldSettleGuess(
+          isBot: true,
+          previousAttempts: 7,
+          nextAttempts: 7,
+        ),
+        isTrue,
+      );
+      expect(
+        GameEngine.shouldSettleGuess(
+          isBot: false,
+          previousAttempts: 7,
+          nextAttempts: 7,
+        ),
+        isFalse,
+      );
+      expect(
+        GameEngine.shouldSettleGuess(
+          isBot: false,
+          previousAttempts: 7,
+          nextAttempts: 8,
+        ),
+        isTrue,
+      );
+    });
+
     test('rejects advancing a game that was not won', () {
       final engine = GameEngine(random: FixedRandom(41));
       final initial = engine.newGame();
