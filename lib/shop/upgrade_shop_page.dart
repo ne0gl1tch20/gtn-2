@@ -17,10 +17,12 @@ class UpgradeShopPage extends StatefulWidget {
   const UpgradeShopPage({
     super.key,
     required this.progression,
+    this.numberNotation = 'Standard',
     required this.onPurchase,
   });
 
   final ProgressionState progression;
+  final String numberNotation;
   final UpgradePurchase onPurchase;
 
   @override
@@ -78,7 +80,7 @@ class _UpgradeShopPageState extends State<UpgradeShopPage> {
             description: 'Make every correct guess count. Upgrade levels are saved automatically.',
             icon: Icons.upgrade_rounded,
             accent: GtnUiTokens.purple,
-            trailing: _BalanceChip(value: _progression.money.toString()),
+            trailing: _BalanceChip(value: _progression.money.format(widget.numberNotation)),
           ),
           const SizedBox(height: 16),
           LayoutBuilder(
@@ -147,6 +149,7 @@ class _UpgradeShopPageState extends State<UpgradeShopPage> {
                           upgrade,
                           _levelsToBuy(upgrade),
                         ),
+                        numberNotation: widget.numberNotation,
                         onBuy: (levels) => _buy(upgrade, levels),
                       ),
                     ),
@@ -192,6 +195,7 @@ class _UpgradeCard extends StatelessWidget {
     required this.busy,
     required this.levelsToBuy,
     required this.totalCost,
+    required this.numberNotation,
     required this.onBuy,
   });
 
@@ -201,6 +205,7 @@ class _UpgradeCard extends StatelessWidget {
   final bool busy;
   final int levelsToBuy;
   final BigNumber totalCost;
+  final String numberNotation;
   final ValueChanged<int> onBuy;
 
   @override
@@ -246,7 +251,7 @@ class _UpgradeCard extends StatelessWidget {
               child: Text(
                 isMaxed
                     ? 'Max level reached'
-                    : 'Upgrade · $cost Money${levelsToBuy > 1 ? ' ($levelsToBuy levels)' : ''}',
+                    : 'Upgrade · ${cost.format(numberNotation)} Money${levelsToBuy > 1 ? ' ($levelsToBuy levels)' : ''}',
               ),
             ),
             if (!isMaxed && levelsToBuy == 0)
