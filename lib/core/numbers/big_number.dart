@@ -43,9 +43,7 @@ class BigNumber implements Comparable<BigNumber> {
     final commonScale = scale > other.scale ? scale : other.scale;
     final left = coefficient * _powerOfTen(commonScale - scale);
     final right = other.coefficient * _powerOfTen(commonScale - other.scale);
-    return _roundToPrecision(
-      BigNumber.fromParts(left + right, commonScale),
-    );
+    return _roundToPrecision(BigNumber.fromParts(left + right, commonScale));
   }
 
   BigNumber operator -(BigNumber other) {
@@ -66,8 +64,7 @@ class BigNumber implements Comparable<BigNumber> {
   BigNumber operator /(BigNumber other) {
     if (other.coefficient == BigInt.zero) return BigNumber.fromInt(0);
     const resultScale = 16;
-    final numerator =
-        coefficient * _powerOfTen(other.scale + resultScale);
+    final numerator = coefficient * _powerOfTen(other.scale + resultScale);
     final denominator = other.coefficient * _powerOfTen(scale);
     var quotient = numerator ~/ denominator;
     final remainder = numerator.remainder(denominator).abs();
@@ -120,10 +117,7 @@ class BigNumber implements Comparable<BigNumber> {
     return negative ? '-$result' : result;
   }
 
-  static BigNumber _roundToPrecision(
-    BigNumber value, {
-    int precision = 34,
-  }) {
+  static BigNumber _roundToPrecision(BigNumber value, {int precision = 34}) {
     final digits = value.coefficient.abs().toString().length;
     final discardedDigits = digits - precision;
     if (discardedDigits <= 0 || value.coefficient == BigInt.zero) {
@@ -135,8 +129,7 @@ class BigNumber implements Comparable<BigNumber> {
     var quotient = absolute ~/ divisor;
     final remainder = absolute.remainder(divisor);
     final midpoint = remainder * BigInt.two;
-    if (midpoint > divisor ||
-        (midpoint == divisor && quotient.isOdd)) {
+    if (midpoint > divisor || (midpoint == divisor && quotient.isOdd)) {
       quotient += BigInt.one;
     }
 
@@ -145,10 +138,7 @@ class BigNumber implements Comparable<BigNumber> {
     if (adjustedScale >= 0) {
       return BigNumber.fromParts(quotient, adjustedScale);
     }
-    return BigNumber.fromParts(
-      quotient * _powerOfTen(-adjustedScale),
-      0,
-    );
+    return BigNumber.fromParts(quotient * _powerOfTen(-adjustedScale), 0);
   }
 
   static BigInt _powerOfTen(int exponent) => BigInt.from(10).pow(exponent);
