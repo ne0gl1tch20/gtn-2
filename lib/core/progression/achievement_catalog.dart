@@ -336,6 +336,8 @@ class AchievementCatalog {
       'billionaire' => 1000000000,
       _ => 0,
     };
-    return amount == 0 ? 'Locked' : '${state.money.format(numberNotation)} / $amount';
+    return amount == 0
+        ? 'Locked'
+        : '${state.money.format(numberNotation)} / $amount';
   }
 }
