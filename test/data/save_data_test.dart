@@ -75,6 +75,7 @@ void main() {
             dailyQuestBestStreak: 5,
             dailyQuestUpgradePurchases: 3,
             claimedDailyQuests: const {'daily_guesses_10', 'daily_correct_5'},
+            completedChallenges: const {'weekly_2026_47_frenzy'},
             lastDailyRewardDate: '2026-11-15',
             dailyRewardStreak: 6,
             lootChests: const {'common': 2, 'rare': 1, 'epic': 3},
@@ -110,6 +111,10 @@ void main() {
         'daily_guesses_10',
         'daily_correct_5',
       });
+      expect(
+        restoredSystems.completedChallenges,
+        {'weekly_2026_47_frenzy'},
+      );
       expect(restoredSystems.lastDailyRewardDate, '2026-11-15');
       expect(restoredSystems.dailyRewardStreak, 6);
       expect(restoredSystems.lootChests, {'common': 2, 'rare': 1, 'epic': 3});
