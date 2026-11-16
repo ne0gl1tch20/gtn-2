@@ -639,3 +639,12 @@ Batch A remains active until Dashboard, More, Settings, Menu Studio, Profile and
 
 - The next Validate run `43869148953` again stopped at formatting, now identifying only `test/data/economy_transaction_persistence_test.dart`; no analysis/tests/platform builds ran. The formatter required the temporary-directory setup call to wrap across lines (the single-line form exceeded Dart's formatter width).
 - Corrected the line wrapping in commit `64a1f2d44b45968e313b61ec7d9fbca8c35d8efb`. This is formatting-only; a fresh Validate run is pending.
+
+### Nebula boundary persistence and BigNumber audit — 2026-11-16
+
+- Validate `43869767750` at `356d312215886ec44ebcb26ab09f3219e1c8e349` failed at the Dart format gate. The only changed file was `test/data/economy_transaction_persistence_test.dart`; the formatter required the `SaveData(...)` constructor to be collapsed to one line. No analysis, tests or builds ran.
+- Added the exact formatter rewrite and a second file-backed regression to `test/data/economy_transaction_persistence_test.dart`. Commit `502eff1a8dbaabc655ec1f0a145319944ea77382`.
+- The new case applies 15 Ultra Nebula levels plus Nebula Boost to a base arcade reward above `Long.MAX_VALUE / 32`, starts lifetime Nebula earned five below the cap, and adds fractional Money. It verifies spendable Nebula becomes `Long.MAX_VALUE + 10`, lifetime Nebula earned saturates at `Long.MAX_VALUE`, and Money values survive a fresh SaveStorage reload.
+- Updated `docs/FINITE_PARITY_PLAN.md` in `146da6a64191a300ccb79123e89fd62117eb230a` to keep the broader economy item open and explicitly track the source `BigNumber.kt` DECIMAL128 arithmetic gap: 34-digit HALF_EVEN add/multiply/power, scale-16 HALF_UP division and subtraction clamped to zero.
+- GTN1 source checked: `shared/src/jvmAndAndroidMain/kotlin/com/jarrlyyy/guessthenumber/domain/model/BigNumber.kt` at `fe9cf567169e19059e0330d08769fe454336ef94`. GTN2 target: `lib/core/numbers/big_number.dart`. No BigNumber implementation change has been made yet; next work must add source-backed arithmetic fixtures before changing it.
+- This ledger update is a documentation-only checkpoint; full validation of the corrected persistence test remains required.
