@@ -1,6 +1,8 @@
 import 'dart:ui' show Tristate;
 
 import 'package:flutter_test/flutter_test.dart';
+
+import 'support/overflow_guard.dart';
 import 'package:gtn_2/core/legacy/legacy_systems_state.dart';
 import 'package:gtn_2/core/numbers/big_number.dart';
 import 'package:gtn_2/core/progression/progression_state.dart';
@@ -47,6 +49,11 @@ void main() {
       ),
     );
     await tester.pump(const Duration(milliseconds: 400));
+    await expectNoLayoutException(
+      tester,
+      screen: 'World Map widget test',
+      viewport: tester.view.physicalSize / tester.view.devicePixelRatio,
+    );
   }
 
   testWidgets('mobile world hero keeps its heading on one line', (

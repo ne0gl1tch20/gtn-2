@@ -35,7 +35,7 @@ Future<void> expectNoLayoutException(
       '$screen raised ${diagnostics.length} Flutter exception(s) at '
       '${viewport.width.toStringAsFixed(0)}x'
       '${viewport.height.toStringAsFixed(0)} logical pixels.\\n'
-      '${diagnostics.join('\\n--- additional Flutter exception ---\\n')}',
+      '${diagnostics.join('\n--- additional Flutter exception ---\n')}',
     );
   }
 }
