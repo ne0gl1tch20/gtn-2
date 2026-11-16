@@ -2081,7 +2081,9 @@ class _Wallet extends StatelessWidget {
                       style: TextStyle(color: _green, fontSize: 10),
                     ),
                     Text(
-                      (incomePerSecond ?? BigNumber.fromInt(0)).format(numberNotation),
+                      (incomePerSecond ?? BigNumber.fromInt(0)).format(
+                        numberNotation,
+                      ),
                       style: const TextStyle(
                         color: _green,
                         fontSize: 17,
