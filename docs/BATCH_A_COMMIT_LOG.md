@@ -468,3 +468,11 @@ Batch A remains active until Dashboard, More, Settings, Menu Studio, Profile and
 - Run #1982 at head `4f1f5b8e32f5e1d7b507af73120e0347a7acbe10`: format and analysis passed; Flutter widget tests failed because the plain `Center` around the compact navigation expanded vertically and consumed the dashboard body in 390px viewport tests. This caused dashboard heading and More destination finders to see no widgets.
 - Fixed with `Center(heightFactor: 1)`, retaining the 366px width and centered 12px side margins while shrink-wrapping to the NavigationBar's own height. Corrective commit: `cb8fc830b30dace2f7e1c36d4a35ea518bb6c54e`.
 - Android and Windows jobs from #1982 were still running and were cancelled by the next branch update; no APK or Windows build result is claimed from #1982. A new full Validate run is required.
+
+
+
+### Validate #1986 progress — 2026-11-16
+
+- Head: `c8642b7df8f83d4d666b1ed293a3793eb53c8544`; run: https://github.com/ne0gl1tch20/gtn-2/actions/runs/43778076654.
+- Format and analysis: success. Flutter test suite: **435 passed**.
+- Android debug APK build and Windows desktop debug build: still running at this checkpoint. Windows release installer: skipped by the debug validation workflow. No full validation pass or APK artifact is claimed yet.
