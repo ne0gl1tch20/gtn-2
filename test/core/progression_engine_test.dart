@@ -306,10 +306,7 @@ void main() {
 
     test('negative lifetime total is repaired to zero like GTN1', () {
       expect(
-        engine.addNebulaEarned(
-          BigNumber.fromInt(-1),
-          BigNumber.fromInt(0),
-        ),
+        engine.addNebulaEarned(BigNumber.fromInt(-1), BigNumber.fromInt(0)),
         BigNumber.fromInt(0),
       );
     });
