@@ -15,6 +15,8 @@ import 'package:url_launcher/url_launcher.dart';
 import '../core/legacy/legacy_systems_engine.dart';
 import '../core/legacy/legacy_systems_state.dart';
 import '../core/legacy/trait_catalog_repository.dart';
+import '../core/legacy/weekly_challenge_catalog.dart';
+import '../i18n/app_localizations.dart';
 import '../core/music/music_playback_policy.dart';
 import '../core/numbers/big_number.dart';
 import '../core/progression/progression_state.dart';
@@ -572,12 +574,15 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
 
   Widget _mutatorsSection() {
     final mutators = _mutatorCatalog;
+    final today = DateTime.now();
+    final weeklyChallenges = WeeklyChallengeCatalog.forDate(today);
     return GtnExpressiveCard(
       child: ExpansionTile(
+        initiallyExpanded: widget.view == LegacySystemsView.mutators,
         leading: const Icon(Icons.tune_rounded),
-        title: const Text('Mutators & challenge builder'),
+        title: const Text('Mutators & weekly challenges'),
         subtitle: Text(
-          'Reward multiplier ×${_engine.mutatorRewardMultiplier(_systems)}',
+          'Reward multiplier ×${_engine.mutatorRewardMultiplier(_systems)} · ${weeklyChallenges.length} rotating challenges',
         ),
         children: [
           if (mutators.isEmpty) _catalogUnavailable(),
@@ -595,16 +600,137 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
                 ),
               ),
             ),
-          const Padding(
-            padding: EdgeInsets.fromLTRB(16, 0, 16, 12),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
             child: Text(
-              'Custom and weekly challenge rewards are claim-once transactions. Challenge objective tracking is connected to the save model.',
+              AppLocalizations.text(
+                'weekly_challenges_title',
+                'Weekly Challenges',
+              ),
+              style: Theme.of(context).textTheme.titleMedium,
             ),
           ),
+          for (final challenge in weeklyChallenges)
+            Builder(
+              builder: (context) {
+                final progress = _engine.weeklyChallengeProgress(
+                  _progression,
+                  challenge.kind,
+                );
+                final target = BigNumber.fromInt(challenge.target);
+                final isMoney = challenge.kind == 'money';
+                final progressValue = isMoney
+                    ? progress.format()
+                    : progress.toString();
+                final targetValue = isMoney
+                    ? target.format()
+                    : challenge.target.toString();
+                final name = AppLocalizations.text(
+                  'weekly_${challenge.kind}_name',
+                  _weeklyChallengeFallbackName(challenge.kind),
+                );
+                final descriptionTemplate = AppLocalizations.text(
+                  'weekly_${challenge.kind}_desc',
+                  _weeklyChallengeFallbackDescription(
+                    challenge.kind,
+                    targetValue,
+                  ),
+                );
+                final description = descriptionTemplate
+                    .replaceFirst('%s', targetValue)
+                    .replaceFirst('%d', targetValue);
+                final progressLabel = AppLocalizations.text(
+                  'weekly_progress_format',
+                  'Progress: %s / %s',
+                ).replaceFirst('%s', progressValue).replaceFirst(
+                  '%s',
+                  targetValue,
+                );
+                final rewardLabel = AppLocalizations.text(
+                  'weekly_reward_format',
+                  'Reward: +%s Nebula',
+                ).replaceFirst('%s', challenge.rewardNebula.toString());
+                final claimed = _systems.completedChallenges.contains(
+                  challenge.id,
+                );
+                final eligible = progress.compareTo(target) >= 0;
+                return Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 6, 16, 12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        name,
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(description),
+                      const SizedBox(height: 4),
+                      Text(progressLabel),
+                      Text(rewardLabel),
+                      const SizedBox(height: 6),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: M3EButton.tonal(
+                          onPressed: eligible && !claimed
+                              ? () => _apply(
+                                  _engine.claimWeeklyChallenge(
+                                    progression: _progression,
+                                    systems: _systems,
+                                    challengeId: challenge.id,
+                                    today: DateTime.now(),
+                                    nebulaBoostOwned:
+                                        (_progression.nebulaItems[
+                                              'nebula_boost'
+                                            ] ??
+                                            0) >
+                                        0,
+                                  ),
+                                )
+                              : null,
+                          child: Text(
+                            claimed
+                                ? AppLocalizations.text('claimed', 'Claimed')
+                                : AppLocalizations.text('claim', 'Claim'),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
         ],
       ),
     );
   }
+
+  String _weeklyChallengeFallbackName(String kind) => switch (kind) {
+    'correct' => 'Weekly Accuracy',
+    'streak' => 'Streak Climber',
+    'money' => 'Millionaire Sprint',
+    'guesses' => 'Guess Marathon',
+    'prestige' => 'Prestige Push',
+    'ultra' => 'Ultra Expedition',
+    'frenzy' => 'Frenzy Hunt',
+    'playtime' => 'Playtime Grinder',
+    _ => 'Weekly Challenge',
+  };
+
+  String _weeklyChallengeFallbackDescription(
+    String kind,
+    String target,
+  ) => switch (kind) {
+    'correct' => 'Make $target correct guesses this week.',
+    'streak' => 'Reach a best streak of $target this week.',
+    'money' => 'Reach $target money.',
+    'guesses' => 'Make $target total guesses this week.',
+    'prestige' => 'Perform $target Prestige resets.',
+    'ultra' => 'Perform $target Ultra reset.',
+    'frenzy' => 'Reach a best streak of $target for Frenzy.',
+    'playtime' => 'Play for $target seconds.',
+    _ => 'Complete this weekly challenge.',
+  };
 
   Widget _relicsSection() {
     final relics = _relicCatalog;
