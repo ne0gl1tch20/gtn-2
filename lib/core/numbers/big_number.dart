@@ -76,7 +76,7 @@ class BigNumber implements Comparable<BigNumber> {
       suffixPower = power;
     }
 
-    final match = RegExp(r'^([+-]?)(\d+)(?:\.(\d+))?(?:[eE]([+-]?\d+))?
+    final match = RegExp(r'^([+-]?)(\d+)(?:\.(\d+))?(?:[eE]([+-]?\d+))?$')
         .firstMatch(numericInput);
     if (match == null) {
       throw FormatException('Invalid decimal number.', value);
