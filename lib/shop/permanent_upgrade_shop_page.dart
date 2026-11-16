@@ -14,11 +14,13 @@ class PermanentUpgradeShopPage extends StatefulWidget {
   const PermanentUpgradeShopPage({
     super.key,
     required this.progression,
+    this.numberNotation = 'Standard',
     required this.ultra,
     required this.onPurchase,
   });
 
   final ProgressionState progression;
+  final String numberNotation;
   final bool ultra;
   final PermanentUpgradePurchase onPurchase;
 
@@ -83,7 +85,7 @@ class _PermanentUpgradeShopPageState extends State<PermanentUpgradeShopPage> {
             accent: widget.ultra ? GtnUiTokens.cyan : GtnUiTokens.purple,
             trailing: _PermanentBalanceChip(
               label: currency,
-              value: _balance.toString(),
+              value: _balance.format(widget.numberNotation),
             ),
           ),
           const SizedBox(height: 8),
@@ -105,6 +107,7 @@ class _PermanentUpgradeShopPageState extends State<PermanentUpgradeShopPage> {
                         level: _level(upgrade.definition.id),
                         balance: _balance,
                         currency: currency,
+                        numberNotation: widget.numberNotation,
                         busy: _buyingId != null,
                         onBuy: () => _buy(upgrade),
                       ),
@@ -160,6 +163,7 @@ class _PermanentUpgradeCard extends StatelessWidget {
     required this.level,
     required this.balance,
     required this.currency,
+    required this.numberNotation,
     required this.busy,
     required this.onBuy,
   });
@@ -168,6 +172,7 @@ class _PermanentUpgradeCard extends StatelessWidget {
   final int level;
   final BigNumber balance;
   final String currency;
+  final String numberNotation;
   final bool busy;
   final VoidCallback onBuy;
 
@@ -207,7 +212,7 @@ class _PermanentUpgradeCard extends StatelessWidget {
             M3EButton.filled(
               onPressed: busy || maxed || !affordable ? null : onBuy,
               child: Text(
-                maxed ? 'Max level reached' : 'Upgrade · $cost $currency',
+                maxed ? 'Max level reached' : 'Upgrade · ${cost.format(numberNotation)} $currency',
               ),
             ),
             if (!maxed && !affordable)
