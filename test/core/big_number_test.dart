@@ -76,7 +76,7 @@ void main() {
     test('rounds integer powers to GTN1 DECIMAL128 precision', () {
       expect(
         BigNumber.parse('2').powInt(120).toString(),
-        '1329227995784915872903807060280345',
+        '1329227995784915872903807060280345000',
       );
     });
 
