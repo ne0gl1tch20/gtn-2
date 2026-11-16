@@ -72,6 +72,7 @@ void main() {
     const engine = LegacySystemsEngine();
 
     final eligibleProgression = ProgressionState.initial.copyWith(
+      nebulaItems: const {'nebula_boost': 1},
       money: BigNumber.fromInt(10000000),
       correctGuesses: 100,
       bestStreak: 30,
@@ -81,7 +82,7 @@ void main() {
       playtimeSeconds: 3600,
     );
 
-    test('validates all eight objective kinds and exact boosted rewards', () {
+    test('validates all eight objective kinds and exact source rewards without boost', () {
       final firstWeek = DateTime(2025, 12, 29);
 
       for (var week = 0; week < 8; week++) {
@@ -92,13 +93,12 @@ void main() {
             systems: LegacySystemsState.initial,
             challengeId: challenge.id,
             today: today,
-            nebulaBoostOwned: true,
           );
 
           expect(result.accepted, isTrue, reason: challenge.id);
           expect(
             result.progression.nebula,
-            BigNumber.fromInt(challenge.rewardNebula * 2),
+            BigNumber.fromInt(challenge.rewardNebula),
             reason: challenge.id,
           );
           expect(
