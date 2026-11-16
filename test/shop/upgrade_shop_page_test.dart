@@ -37,7 +37,10 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.byKey(const ValueKey('upgrade-buy-multiplier-control')), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('upgrade-buy-multiplier-control')),
+      findsOneWidget,
+    );
     expect(tester.takeException(), isNull);
   });
 
