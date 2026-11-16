@@ -29,12 +29,38 @@ class BigNumber implements Comparable<BigNumber> {
   factory BigNumber.parse(String value) {
     final input = value.trim();
     const suffixPowers = <String, int>{
-      'K': 3, 'M': 6, 'B': 9, 'T': 12, 'QA': 15, 'QI': 18,
-      'SX': 21, 'SP': 24, 'OC': 27, 'NO': 30, 'DC': 33, 'UD': 36,
-      'DD': 39, 'TD': 42, 'QAD': 45, 'QID': 48, 'SXD': 51,
-      'SPD': 54, 'OCD': 57, 'NOD': 60, 'VG': 63, 'UVG': 66,
-      'DVG': 69, 'TVG': 72, 'QAVG': 75, 'QIVG': 78, 'SXVG': 81,
-      'SPVG': 84, 'OCVG': 87, 'NOVG': 90, 'TG': 93, 'VGN': 63,
+      'K': 3,
+      'M': 6,
+      'B': 9,
+      'T': 12,
+      'QA': 15,
+      'QI': 18,
+      'SX': 21,
+      'SP': 24,
+      'OC': 27,
+      'NO': 30,
+      'DC': 33,
+      'UD': 36,
+      'DD': 39,
+      'TD': 42,
+      'QAD': 45,
+      'QID': 48,
+      'SXD': 51,
+      'SPD': 54,
+      'OCD': 57,
+      'NOD': 60,
+      'VG': 63,
+      'UVG': 66,
+      'DVG': 69,
+      'TVG': 72,
+      'QAVG': 75,
+      'QIVG': 78,
+      'SXVG': 81,
+      'SPVG': 84,
+      'OCVG': 87,
+      'NOVG': 90,
+      'TG': 93,
+      'VGN': 63,
     };
 
     var numericInput = input;
@@ -61,7 +87,8 @@ class BigNumber implements Comparable<BigNumber> {
     var coefficient = BigInt.parse(
       '${match.group(1) == '-' ? '-' : ''}$digits',
     );
-    var scale = fraction.length - int.parse(match.group(4) ?? '0') - suffixPower;
+    var scale =
+        fraction.length - int.parse(match.group(4) ?? '0') - suffixPower;
     if (scale < 0) {
       coefficient *= _powerOfTen(-scale);
       scale = 0;
