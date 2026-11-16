@@ -373,7 +373,7 @@ void main() {
 
     expect(
       AchievementCatalog.progressLabel(state, achievement),
-      '12345.6789 / 1000000',
+      '12.35K / 1000000',
     );
     expect(
       AchievementCatalog.progressLabel(
