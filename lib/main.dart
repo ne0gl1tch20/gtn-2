@@ -1993,6 +1993,7 @@ class _GameHomePageState extends State<GameHomePage>
         builder: (_) => LegacyDetailPage(
           section: section,
           progression: _progression,
+          numberNotation: _settings.numberNotation,
           updateNoticeListenable: _updateNoticeListenable,
           onCheckUpdates: () => unawaited(_checkForUpdatesIfDue(force: true)),
           onInstallUpdate: _installAvailableUpdate,
