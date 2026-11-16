@@ -34,9 +34,17 @@ Execute Phases 0–12 as one continuous development effort. Phase 0 is already v
 
 Keep all in-scope GTN1 features. No placeholders, mocks, fake functionality, inert controls or knowingly missing features are acceptable in the final release. Do not publish or hand over an APK as the completed port until the final full-parity acceptance criteria pass.
 
-## Headless UI validation requirement
+## UI validation requirement — mandatory three-layer gate
 
-Use a fast, headless Flutter widget-test matrix as the first-line overflow/layout gate. Maintain `test/responsive_layout_smoke_test.dart` across 320, 360, 390, 430, 600, 719, 720, 1024, 1100 and 1280 logical-pixel widths for Dashboard, More navigation, Settings, Menu Studio, Profile, Save Slots, Upgrade Shop, World Map and Progression Hub. Use bounded pumps (not `pumpAndSettle`) to avoid hangs from repeating animations, and fail on `tester.takeException()` so RenderFlex overflow errors fail CI. Keep a dedicated parallel `Headless responsive UI smoke` workflow job, focused responsive regression tests and compact/concurrent full-suite output. Headless tests are not screenshots and do not replace actual Android/Windows runtime verification. Fix the root layout constraints; never silence or clip away overflow warnings.
+Use all three layers for applicable UI work. The authoritative details and current status live in [docs/FINITE_PARITY_PLAN.md](../docs/FINITE_PARITY_PLAN.md).
+
+1. **Project-owned `overflow_guard`:** Implement and use `test/support/overflow_guard.dart`. There is no verified third-party package by that name in this repository; do not invent a dependency. The helper must fail on Flutter layout exceptions after bounded pumps and meaningful interactions, with screen + logical viewport in the failure reason. Never swallow errors or hide overflow with clipping.
+2. **Native Flutter widget tests:** Keep `test/responsive_layout_smoke_test.dart` across 320x640, 360x720, 390x844, 430x900, 600x900, 719x900, 720x900, 1024x768, 1100x800 and 1280x800 for Dashboard, More navigation, Settings, Menu Studio, Profile, Save Slots, Upgrade Shop, World Map and Progression Hub. Focused widget tests must verify real interactions, navigation and state transitions, not just rendering. Use deterministic inputs and bounded pumps, not unbounded `pumpAndSettle`.
+3. **Golden tests:** Add reviewed native Flutter snapshots under `test/goldens/` for representative critical screens/states at selected phone/tablet/desktop breakpoints. Stabilize theme, fonts, locale, text scale, device pixel ratio, viewport and animation state. Compare against pinned GTN1 visual references. Inspect before/after images before updating baselines; never auto-approve changed or missing goldens.
+
+The dedicated parallel `Headless responsive UI smoke` job must run the guard-integrated responsive matrix, focused widget regressions and golden tests. Keep the full suite compact and bounded. Headless tests do not replace Android/Windows runtime screenshots and real interaction checks. On failure, record the exact run, SHA, screen, viewport and exception; compare the pinned GTN1 source and fix the root cause before rerunning.
+
+**Current status (2026-11-16):** Responsive matrix/job exist, but `overflow_guard` helper/integration and reviewed golden baselines are not yet implemented. Run `43861735109` at `59b84cd7f9eab97fa575caf794c212db72ca16f2` passed format/analyze and failed the full suite + responsive smoke due to a 20px bottom overflow in World Map at 320x640. Do not mark UI validation complete.
 ## Final definition of done
 
 The port is complete only when all of the following are true (it is just bullet points, do not check):
