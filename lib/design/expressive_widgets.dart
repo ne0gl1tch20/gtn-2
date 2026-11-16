@@ -230,7 +230,12 @@ class GtnExpressiveCard extends StatelessWidget {
                 ]
               : const [],
         ),
-        child: child,
+        child: Material(
+          type: MaterialType.transparency,
+          borderRadius: BorderRadius.circular(radius),
+          clipBehavior: Clip.antiAlias,
+          child: child,
+        ),
       ),
     );
   }
