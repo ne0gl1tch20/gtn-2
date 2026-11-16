@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'support/overflow_guard.dart';
 import 'package:gtn_2/core/game/game_engine.dart';
 import 'package:gtn_2/core/progression/progression_state.dart';
 import 'package:gtn_2/home/game_dashboard_page.dart';
@@ -168,13 +169,14 @@ void main() {
           await tester.pumpWidget(_app(screen.build()));
           // Fixed, bounded frames keep the smoke suite deterministic and fast;
           // pumpAndSettle can hang on intentionally repeating UI animations.
-          await tester.pump(const Duration(milliseconds: 120));
-          expect(
-            tester.takeException(),
-            isNull,
-            reason:
-                '${screen.name} raised a layout exception at '
-                '${viewport.width}x${viewport.height}.',
+          await expectNoLayoutException(
+            tester,
+            screen: screen.name,
+            viewport: Size(
+              viewport.width.toDouble(),
+              viewport.height.toDouble(),
+            ),
+            pumpDuration: const Duration(milliseconds: 120),
           );
         }
       }
@@ -206,13 +208,14 @@ void main() {
       final more = find.text('More').first;
       expect(more, findsOneWidget);
       await tester.tap(more);
-      await tester.pump(const Duration(milliseconds: 180));
-      expect(
-        tester.takeException(),
-        isNull,
-        reason:
-            'More navigation raised a layout exception at '
-            '${viewport.width}x${viewport.height}.',
+      await expectNoLayoutException(
+        tester,
+        screen: 'More navigation',
+        viewport: Size(
+          viewport.width.toDouble(),
+          viewport.height.toDouble(),
+        ),
+        pumpDuration: const Duration(milliseconds: 180),
       );
     }
   });
