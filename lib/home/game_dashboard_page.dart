@@ -339,6 +339,7 @@ class GameDashboardPage extends StatelessWidget {
           }
 
           return Center(
+            heightFactor: 1,
             child: SizedBox(
               key: const Key('dashboard-navigation-bar'),
               width: barWidth,
