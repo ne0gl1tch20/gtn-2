@@ -333,3 +333,9 @@ Current code head: `322ec8551def094f867d98f55b02a438a773e2c3`. Validate run #197
 ### Validate #1975 correction — 2026-11-16
 
 Run #1975 passed format and analysis but the Flutter suite reported 434 passed / 1 failed. The failure was the existing GTN1 navigation-width assertion: the 390px viewport expects a 366px mobile bar, while the initial right-gap adjustment expanded it to 390px. The implementation has been corrected to preserve the source 366px width and center the bar (12px margins on each side); the geometry test now asserts both width and centered position. Corrective commits: `58472f1e4695ccf17d6ab9538bad71138b808e73` and `c533651a2ac0dfac932de4cb8a7e5f4df98f6a91`. The Android and Windows build jobs from #1975 were still running at this checkpoint. New validation is required; Batch A remains open and Batch B blocked.
+
+
+
+### Validate #1982 correction — mobile navigation shrink-wrap — 2026-11-16
+
+Run #1982 passed format and analysis but the Flutter widget suite exposed that a plain `Center` in the compact bottom-navigation slot expanded vertically and consumed the dashboard body in several 390px viewport tests. The centered 366px navigation now uses `Center(heightFactor: 1)` so it preserves the source 12px side margins while shrink-wrapping to the 56px navigation height. Corrective commit: `cb8fc830b30dace2f7e1c36d4a35ea518bb6c54e`. Run #1982 is superseded; its Android/Windows jobs were cancelled by the new head. Full validation remains pending.
