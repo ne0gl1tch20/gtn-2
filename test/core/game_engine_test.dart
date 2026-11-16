@@ -129,6 +129,42 @@ void main() {
       expect(botWin.bestStreak, 3);
     });
 
+    test('bot misses preserve player attempts, counters and streak', () {
+      final engine = GameEngine();
+      final restored = engine.restore(
+        secret: 42,
+        attempts: 5,
+        isComplete: false,
+        savedCorrectGuesses: 2,
+        savedStreak: 3,
+        savedBestStreak: 7,
+      );
+
+      final botMiss = engine.guess(restored, 10, countPlayerGuess: false);
+
+      expect(botMiss.lastResult, GuessResult.tooLow);
+      expect(botMiss.isComplete, isFalse);
+      expect(botMiss.attempts, 5);
+      expect(botMiss.correctGuesses, 2);
+      expect(botMiss.streak, 3);
+      expect(botMiss.bestStreak, 7);
+    });
+
+    test('malformed active ranges fail like GTN1 range coercion', () {
+      final malformed = GameState(
+        secret: 42,
+        attempts: 0,
+        isComplete: false,
+        minimum: 10,
+        maximum: 1,
+      );
+
+      expect(
+        () => GameEngine().guess(malformed, 42),
+        throwsArgumentError,
+      );
+    });
+
     test('bot guesses still settle when player attempts stay unchanged', () {
       expect(
         GameEngine.shouldSettleGuess(
