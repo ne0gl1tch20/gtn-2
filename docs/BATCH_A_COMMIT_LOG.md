@@ -633,3 +633,9 @@ Batch A remains active until Dashboard, More, Settings, Menu Studio, Profile and
 - Validate run `43868882956` at `f09bfbe9e1bb7658d922f5381d4bd969859c6c09` stopped at `dart format --output=none --set-exit-if-changed .`; no analysis, tests or platform builds ran. Formatter identified three files: `lib/core/progression/progression_engine.dart`, `test/core/progression_engine_test.dart` and the new `test/data/economy_transaction_persistence_test.dart`.
 - Applied the exact formatter rewrites. Commits: engine `4524eee4df9c88851c7277740b2a43b95bf4c72f`; existing engine test `6e7e05f2c776a1fd689c1dde1551a052d80da809`; new persistence test `bb904604063a20d0d12098763acdb76335fb5912`.
 - This is formatting-only repair. A fresh complete Validate run on the final branch head is required; no test or APK success is claimed from the failed run.
+
+
+### Persistence test formatter follow-up — 2026-11-16
+
+- The next Validate run `43869148953` again stopped at formatting, now identifying only `test/data/economy_transaction_persistence_test.dart`; no analysis/tests/platform builds ran. The formatter required the temporary-directory setup call to wrap across lines (the single-line form exceeded Dart's formatter width).
+- Corrected the line wrapping in commit `64a1f2d44b45968e313b61ec7d9fbca8c35d8efb`. This is formatting-only; a fresh Validate run is pending.
