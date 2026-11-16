@@ -1098,5 +1098,4 @@ void main() {
       BigNumber.fromInt(weeklyChallenges.first.rewardNebula),
     );
   });
-
 }
