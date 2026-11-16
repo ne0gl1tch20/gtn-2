@@ -517,3 +517,12 @@ Batch A remains active until Dashboard, More, Settings, Menu Studio, Profile and
 - Android artifact #14209791224 (`android-debug-apk`): ZIP 99,197,414 bytes, SHA-256 `3f71349042bb3737b14b27b194e3a0582e7e46cf61dbbf9fb2474d0d807c6ce9`, expires 2026-11-23. Extracted APK 179,345,429 bytes, SHA-256 `2388916fa78bbb22e7db675c21a0dc35a4d3eb0ee917f92a98d0639d1f01347b`; ZIP integrity check passed.
 - Windows artifact #14209895790 (`windows-debug-portable`): 58,389,165 bytes, SHA-256 `34161b824ea6d97cb3d00d68c1327f6d0d57c44ad1fed20e189dfd6a0ddb36a3`, expires 2026-11-23.
 - Both mobile comment defects are fixed and covered by new 390px viewport tests. PR #74 remains draft; Batch A remains open and Batch B blocked pending Android/Windows runtime screenshots and full exit-gate verification.
+
+
+### Architecture decision and shorter parity phases — 2026-11-16
+
+- Documentation-only commits were made directly on `main`: `81c7b09204052d336d0f42a6d660ae293cc32229` updates `docs/FINITE_PARITY_PLAN.md`; `1a3e1f6cebd4f5535abcc6a79b7fab8c6aaa91cc` aligns `.openai/GPT-6.md` with that plan.
+- Architecture decision: GTN2 remains Flutter + Dart for Android and Windows, retaining Material 3 Expressive and GTN1's visual identity. The proposed Rust + Slint rebuild is shelved and is not an active dependency, implementation requirement or parity phase.
+- The authoritative parity plan now defines short vertical-slice phases 0–12, from the source baseline and active Batch A through gameplay/economy, persistence, progression, worlds, recurring gameplay, audio/LiveOps, screen parity, assets/locales, Android, Windows and final acceptance.
+- The detailed GTN1 source inventory, feature requirements, existing checklist evidence, Batch A gate and full-parity APK release gate remain intact. No feature was removed, no implementation was marked complete and no new build/runtime validation is claimed by these documentation changes.
+- Continue using `docs/FINITE_PARITY_PLAN.md` as the authoritative phase order and completion checklist. Keep this ledger append-only.
