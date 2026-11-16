@@ -39,17 +39,13 @@ void main() {
 
     test('matches GTN1 DECIMAL128 precision and HALF_EVEN ties', () {
       expect(
-        (BigNumber.parse(
-                  '9999999999999999999999999999999999',
-                ) +
+        (BigNumber.parse('9999999999999999999999999999999999') +
                 BigNumber.fromInt(1))
             .toString(),
         '10000000000000000000000000000000000',
       );
       expect(
-        BigNumber.parse(
-          '12345678901234567890123456789012345',
-        ).toString(),
+        BigNumber.parse('12345678901234567890123456789012345').toString(),
         '12345678901234567890123456789012340',
       );
     });
@@ -63,21 +59,15 @@ void main() {
         (BigNumber.parse('1') / BigNumber.parse('6')).toString(),
         '0.1666666666666667',
       );
-      expect(
-        (BigNumber.parse('1') / BigNumber.parse('8')).toString(),
-        '0.125',
-      );
-      expect(
-        (BigNumber.parse('12') / BigNumber.fromInt(0)).toString(),
-        '0',
-      );
+      expect((BigNumber.parse('1') / BigNumber.parse('8')).toString(), '0.125');
+      expect((BigNumber.parse('12') / BigNumber.fromInt(0)).toString(), '0');
     });
 
     test('rounds integer multiplication to GTN1 DECIMAL128 precision', () {
       expect(
-        BigNumber.parse(
-          '9999999999999999999999999999999999',
-        ).multiplyInt(3).toString(),
+        BigNumber.parse('9999999999999999999999999999999999')
+            .multiplyInt(3)
+            .toString(),
         '30000000000000000000000000000000000',
       );
     });
