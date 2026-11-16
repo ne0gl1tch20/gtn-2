@@ -662,3 +662,10 @@ Batch A remains active until Dashboard, More, Settings, Menu Studio, Profile and
 - Added focused regression fixtures for precision rollover, HALF_EVEN ties, subtraction floor, division rounding and zero divisor, integer multiplication precision and integer-power precision in `test/core/big_number_test.dart`.
 - Implementation commits: `ff2c59d2866657fa6331014176dc271c59c52ff8` (arithmetic operators, division and integer-power rounding), `3f20988de5124240743f6ce4077a911a71aea55a` (integer multiplication rounding). Test commits: `88576a0bc040afda54ad49799331331143fa33fa` and `191b7b6550ff3f92a7ce62ff6cd0b60914bf6fbd` (precision/division/power fixtures), `9cee3c1779b3af1df483b46b962a401296ec043b` (integer multiplication boundary fixture). Checklist commit: `73d59a132924e34fc89c44b71dfd86da57e1e220`.
 - Validation of the new BigNumber implementation is pending on the latest head. Any earlier cancelled Validate runs were superseded by subsequent commits; only the final-head run can be treated as evidence. Do not close the economy phase until this run passes and the remaining source-mapped transaction/persistence boundaries are verified.
+
+
+### BigNumber formatter gate correction — 2026-11-16
+
+- Validate run `43871998568` at `191b7b6550ff3f92a7ce62ff6cd0b60914bf6fbd` failed at the Dart format gate; no analysis, tests or builds ran. Formatter identified `lib/core/numbers/big_number.dart` and `test/core/big_number_test.dart`.
+- Added both files to the workflow's failure-only formatter diagnostics in commit `d201c22e33d7a21e56036780f3d4cbb386401a12`, then retrieved and applied the exact formatter rewrites. Engine formatting commit: `a72cd3f7f1913ac6b7693df6f7aca917a749b079`; test formatting commit: `606f5ca6da7fa2873ccd290cd6d8ffa4c23d07e4`.
+- Validate run `43872352407` at `d201c22e33d7a21e56036780f3d4cbb386401a12` confirmed the same two-file formatting issue. Its dependent test/build jobs were skipped. The formatter corrections now require a fresh complete Validate run at the final branch head.
