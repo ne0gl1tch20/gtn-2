@@ -69,6 +69,22 @@ void main() {
             stakesPlaced: 8,
             stakesWon: 5,
             stakesLost: 3,
+            dailyQuestDate: '2026-11-15',
+            dailyQuestGuesses: 12,
+            dailyQuestCorrectGuesses: 5,
+            dailyQuestBestStreak: 5,
+            dailyQuestUpgradePurchases: 3,
+            claimedDailyQuests: const {
+              'daily_guesses_10',
+              'daily_correct_5',
+            },
+            lastDailyRewardDate: '2026-11-15',
+            dailyRewardStreak: 6,
+            lootChests: const {'common': 2, 'rare': 1, 'epic': 3},
+            lootDropsFound: 8,
+            lootChestsOpened: 4,
+            lastLootDropTier: 'epic',
+            lootEventId: 9,
           ),
         ),
         settings: const GameSettings(
@@ -88,6 +104,25 @@ void main() {
       expect(restoredSystems.stakesPlaced, 8);
       expect(restoredSystems.stakesWon, 5);
       expect(restoredSystems.stakesLost, 3);
+      expect(restoredSystems.dailyQuestDate, '2026-11-15');
+      expect(restoredSystems.dailyQuestGuesses, 12);
+      expect(restoredSystems.dailyQuestCorrectGuesses, 5);
+      expect(restoredSystems.dailyQuestBestStreak, 5);
+      expect(restoredSystems.dailyQuestUpgradePurchases, 3);
+      expect(
+        restoredSystems.claimedDailyQuests,
+        {'daily_guesses_10', 'daily_correct_5'},
+      );
+      expect(restoredSystems.lastDailyRewardDate, '2026-11-15');
+      expect(restoredSystems.dailyRewardStreak, 6);
+      expect(
+        restoredSystems.lootChests,
+        {'common': 2, 'rare': 1, 'epic': 3},
+      );
+      expect(restoredSystems.lootDropsFound, 8);
+      expect(restoredSystems.lootChestsOpened, 4);
+      expect(restoredSystems.lastLootDropTier, 'epic');
+      expect(restoredSystems.lootEventId, 9);
     });
 
     test('round-trips huge progression currencies and permanent levels', () {
