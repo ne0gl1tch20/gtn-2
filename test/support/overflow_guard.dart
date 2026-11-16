@@ -1,11 +1,11 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-/// Pumps a bounded number of frames and fails with the full Flutter diagnostic
-/// for any framework exception, including RenderFlex/viewport overflow.
+/// Pumps bounded frames and fails with the full Flutter diagnostic for any
+/// framework exception, including RenderFlex and viewport overflows.
 ///
-/// This intentionally does not filter by exception type: layout, constraint,
-/// paint and lifecycle errors all fail the UI gate.
+/// No exception types are filtered: layout, constraint, paint and lifecycle
+/// errors all fail the UI gate.
 Future<void> expectNoLayoutException(
   WidgetTester tester, {
   required String screen,
@@ -34,7 +34,7 @@ Future<void> expectNoLayoutException(
     fail(
       '$screen raised ${diagnostics.length} Flutter exception(s) at '
       '${viewport.width.toStringAsFixed(0)}x'
-      '${viewport.height.toStringAsFixed(0)} logical pixels.\\n'
+      '${viewport.height.toStringAsFixed(0)} logical pixels.\n'
       '${diagnostics.join('\n--- additional Flutter exception ---\n')}',
     );
   }
