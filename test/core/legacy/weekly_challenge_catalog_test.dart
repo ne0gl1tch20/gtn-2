@@ -103,7 +103,7 @@ void main() {
           );
           expect(
             result.progression.nebulaEarned,
-            BigNumber.fromInt(challenge.rewardNebula * 2),
+            BigNumber.fromInt(challenge.rewardNebula),
             reason: challenge.id,
           );
           expect(
