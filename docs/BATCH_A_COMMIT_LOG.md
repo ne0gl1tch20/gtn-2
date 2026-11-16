@@ -753,3 +753,5 @@ Batch A remains active until Dashboard, More, Settings, Menu Studio, Profile and
 
 
 - Validation attempt `43883428093` on `57c1ad08ea4ac104f850f63968bf14d819a602d5` failed at the format gate only: `lib/core/progression/achievement_catalog.dart` needed a multiline conditional return. Analysis, tests, responsive smoke and platform builds were skipped. Applied the exact formatting correction in `49116f0a0e9c71f31c166c8772f3ebfe2f1461c5`. Fresh validation is running on the corrected head; no pass is claimed yet.
+
+- During test review, corrected the Standard expectation for `12345.6789` from raw decimal to `12.35K`, matching the pinned formatter's suffix catalog. Commit: `072aa9f71879facdc61b5787d42e4464e1476533`. The previous validation run was superseded by this test correction; fresh full validation must cover this commit and the documentation update.
