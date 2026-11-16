@@ -536,3 +536,12 @@ Batch A remains active until Dashboard, More, Settings, Menu Studio, Profile and
 - Updated `.github/workflows/validate.yml` in commit `299e3ed4d0545879a66fc61c937cc077c0a4255e`: dedicated `Headless responsive UI smoke` job runs in parallel with the full Flutter suite after fast checks, includes focused Upgrade Shop and World Map regressions, and uses compact output with concurrency 4. The full suite also uses concurrency 4 and compact output.
 - Updated the authoritative phase plan in commit `5ebe3ff97bce98330bc2842e98494ecf36150c42` and the agent execution instructions in commit `a2fd1a93f52987a74c5efcc888da908d2d00f3df` to require continuous phase execution and the headless UI gate.
 - **Validation status:** test/workflow changes are committed on the Batch A continuation branch. The new responsive matrix and workflow have not yet produced a confirmed CI result at this entry; do not claim they pass until the exact head SHA's workflow jobs complete. These headless tests do not replace paired Android/Windows runtime screenshots. PR #74 remains draft and Batch A remains active.
+
+
+### Responsive UI regression fix — Menu Studio compact row parity — 2026-11-16
+
+- Failed CI run `43860375786` at head `70c381bcd3e965949b50f8d335ed8be24ad50829` exposed a real `RenderFlex` overflow of 43 logical pixels in `lib/settings/menu_studio_page.dart:239` at a 320px viewport. The same exception was reproduced by both the dedicated responsive job and the full Flutter suite.
+- Cross-checked GTN1 pinned source `fe9cf567169e19059e0330d08769fe454336ef94`: `app/src/main/assets/web-play/menu-studio.js` uses a four-part row (drag grip, flexible label, color action, move action); `styles.css` sets compact mobile gaps/padding, 10px action text and an 88px max width for `.menu-studio-move` under 560px. GTN2's four-part Flutter row matched the structure but its move `TextButton` retained its unconstrained desktop intrinsic width.
+- Fixed the Flutter move action to match GTN1's compact mobile constraints: max width 88px at <=560px (112px otherwise), compact padding/density and 10px wrapped label on mobile. The button remains accessible and performs the same move action; no clipping or overflow suppression was added.
+- Implementation commit: `41fb4f64e3ef9340469f996922d44388ab019972` (`Match GTN1 compact Menu Studio move controls`).
+- Validation status at this entry: the failing run is diagnosed; a new workflow run for this fix is pending. Do not mark the responsive UI gate passed until the exact resulting head's smoke job and full suite pass.
