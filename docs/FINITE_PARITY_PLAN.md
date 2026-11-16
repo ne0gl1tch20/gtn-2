@@ -59,16 +59,41 @@ These phases are the **work sequence**, not a reduction of the fixed parity inve
 
 **Continuous phase execution:** The user's instruction is to carry Phases 0–12 as one continuous development effort. Phase 0 is already verified complete and must not be repeated without evidence of a missing source item. Continue from Phase 1 through Phase 12 without asking for permission between phases. If a phase is blocked by external evidence (for example, physical Android/Windows runtime screenshots), record the blocker accurately and continue with independent work that does not bypass or falsify the blocked gate. Keep genuinely dependent work blocked. Do not declare a phase complete from code or CI alone.
 
-## Headless responsive UI verification
+## UI verification contract — overflow guard, widget tests and goldens
 
-Use fast Flutter widget tests as the first-line layout/overflow gate. These tests run headlessly on Linux; they are not a substitute for Android/Windows runtime screenshots or platform verification.
+UI validation is a three-layer gate. All three layers are required for applicable screens; none substitutes for the others. Keep the fast headless checks separate from physical Android/Windows runtime evidence.
 
-- `test/responsive_layout_smoke_test.dart` sweeps 320, 360, 390, 430, 600, 719, 720, 1024, 1100 and 1280 logical-pixel widths, using bounded pumps instead of `pumpAndSettle` so repeating animations cannot stall the suite.
-- The smoke matrix covers Play Dashboard, More navigation, Settings, Menu Studio, Player Profile, Save Slots, Upgrade Shop, World Map and Progression Hub. It fails on Flutter layout exceptions, including RenderFlex overflow errors.
-- `.github/workflows/validate.yml` runs a dedicated **Headless responsive UI smoke** job in parallel with the full Flutter suite after formatting/analysis. It runs the smoke test plus the focused Upgrade Shop and World Map viewport regressions using compact output and bounded test concurrency.
-- The full Flutter suite also uses `--concurrency=4 --reporter=compact` for quicker feedback.
-- When a viewport fails, reproduce the exact width/height, inspect the GTN1 source breakpoint and the GTN2 widget constraints, fix the underlying layout, run Dart formatting, then rerun the focused smoke test and full validation. Do not hide overflow with clipping or suppress Flutter errors.
-- Record actual workflow results in the commit ledger. Until the new workflow completes, this headless matrix is **added but not yet validated**.
+### 1. `overflow_guard` — first-line layout exception guard
+
+- Add and use the project-owned test helper at `test/support/overflow_guard.dart`. No third-party `overflow_guard` package is currently present in `pubspec.yaml` or the repository, so do not add an unverified dependency or claim an external tool is installed.
+- The helper must expose a small, reusable assertion that drains and fails on Flutter test exceptions after a bounded frame pump and after meaningful interactions. It must identify the screen and exact logical viewport in its failure reason.
+- Treat RenderFlex, RenderViewport, overflow, unbounded-constraint and other Flutter layout exceptions as failures. Do not catch-and-ignore them, filter their messages, disable overflow diagnostics, or mask them with `ClipRect`, fixed-height clipping or test-only behavior.
+- Use the guard in responsive smoke tests and focused widget tests. Keep the helper deterministic and cheap; no arbitrary sleeps or unbounded `pumpAndSettle` loops.
+
+### 2. Native Flutter widget tests — behavior and responsive layout
+
+- `test/responsive_layout_smoke_test.dart` sweeps 320x640, 360x720, 390x844, 430x900, 600x900, 719x900, 720x900, 1024x768, 1100x800 and 1280x800 logical-pixel viewports.
+- The matrix covers Play Dashboard, More navigation, Settings, Menu Studio, Player Profile, Save Slots, Upgrade Shop, World Map and Progression Hub. Keep focused native widget tests for actual taps, navigation, state changes, disabled/loading states, save behavior and other meaningful interactions; rendering a widget without exercising its behavior is not sufficient.
+- Use bounded pumps and fixed test inputs. Run the narrowest affected test first, then the responsive matrix and full suite. CI uses compact output and bounded concurrency for fast feedback.
+- Every failure report must include the widget/screen, logical width and height, the triggering action/state and the thrown layout exception.
+
+### 3. Golden tests — visual regression
+
+- Add representative native Flutter golden tests under `test/goldens/` for high-value screens and states, starting with Dashboard/navigation, Settings/Menu Studio, Profile/Save Slots, Upgrade Shop and World Map.
+- Capture at deliberately selected phone, tablet and desktop breakpoints rather than multiplying every golden by every smoke-test viewport. Pair each golden with the relevant GTN1 source screenshot/reference and a short description of what the image protects.
+- Stabilize theme, brightness, locale, text scale, device pixel ratio, viewport size, clock/data inputs, animation state and bundled fonts before capture. Golden tests must use real app widgets and production styling; do not create simplified test-only UI to make snapshots pass.
+- Store reviewed baselines in the repository beside the golden test or in its documented golden directory. Golden updates require inspecting the before/after image and recording why the visual change is intentional; never regenerate all baselines automatically to silence CI.
+- Run golden tests in the headless Linux validation workflow with the same Flutter SDK and fonts as baseline generation. A missing baseline is a failure, not an automatic approval.
+
+### Fast CI execution
+
+- Keep the dedicated **Headless responsive UI smoke** job parallel with the full Flutter suite after format/analysis. It must run the overflow-guarded responsive matrix, focused widget regressions and golden tests.
+- The full Flutter suite continues to use `--concurrency=4 --reporter=compact`; keep the focused UI job bounded and avoid duplicating the entire suite there.
+- When a viewport fails, reproduce the exact width/height, inspect the pinned GTN1 source breakpoint and compare the GTN2 widget constraints, fix the root layout, format, then rerun the focused test, all three UI layers and the full suite. Do not hide overflow.
+- Record exact workflow run IDs, commit SHAs, failed/passed jobs and remaining blockers in `docs/BATCH_A_COMMIT_LOG.md`. A queued, cancelled, partial or failed workflow is never a pass.
+- Headless widget and golden tests do not replace paired Android/Windows runtime screenshots, device interaction checks or platform verification.
+
+**Current implementation status (2026-11-16):** The responsive smoke matrix and parallel CI job exist. The project-owned `overflow_guard` helper, reusable guard integration and reviewed golden baselines are **not yet implemented**. The latest workflow run `43861735109` at head `59b84cd7f9eab97fa575caf794c212db72ca16f2` passed Format and analyze but failed both the dedicated responsive job and full Flutter suite: World Map overflowed by 20 logical pixels at 320x640. Keep the UI gate open until the underlying defect is fixed and all three layers pass.
 
 ## Detailed parity acceptance checklist
 
