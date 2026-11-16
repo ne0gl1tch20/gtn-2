@@ -173,7 +173,10 @@ class _LegacySystemsPageState extends State<LegacySystemsPage> {
       LegacySystemsView.luckyStake => 'Lucky Stake',
       LegacySystemsView.traits => 'Traits',
       LegacySystemsView.talents => 'Talents',
-      LegacySystemsView.mutators => 'Mutators',
+      LegacySystemsView.mutators => AppLocalizations.text(
+        'mutators_title',
+        'Mutators & Weekly Challenges',
+      ),
       LegacySystemsView.relics => 'Relics',
       LegacySystemsView.homeBase => 'Home Base',
       LegacySystemsView.dailyRewards => 'Daily Rewards',
