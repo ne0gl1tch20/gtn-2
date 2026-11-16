@@ -614,3 +614,7 @@ Batch A remains active until Dashboard, More, Settings, Menu Studio, Profile and
 - Added tests immediately below/above the exact `Long.MAX_VALUE / 32` boundary (15 Ultra Nebula levels plus Nebula Boost), lifetime-total saturation with exact spendable balance, and negative-total repair.
 - Also applied the exact Dart formatter rewrite reported by Validate `43867801945` to the malformed-range test in `test/core/game_engine_test.dart`.
 - Remaining economy parity work (other transaction families, rounding and save/reload boundary cases) remains open in `docs/FINITE_PARITY_PLAN.md`; this patch does not close the whole economy checklist.
+### Economy patch formatter diagnostics — 2026-11-16
+
+- Validate `43868274251` at `04032d7989c61a03bc3f5e98fd181a8e954c2756` stopped at formatting. Dart formatter reported changes in `lib/core/progression/progression_engine.dart` and `test/core/progression_engine_test.dart`; no tests/builds ran.
+- Extended the failure-only formatter diff list in `.github/workflows/validate.yml` with those two files so the next run exposes the exact rewrites. No logic change in this diagnostic-only commit.
