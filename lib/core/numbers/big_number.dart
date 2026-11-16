@@ -183,7 +183,7 @@ class BigNumber implements Comparable<BigNumber> {
     if (notation == 'Engineering') {
       final engineeringExponent = (exponent ~/ 3) * 3;
       final scaled = _shiftDecimal(this, -engineeringExponent);
-      return '${_stripTrailingDecimalZeros(_fixedDecimal(scaled, 2))}e${engineeringExponent}';
+      return '${_stripTrailingDecimalZeros(_fixedDecimal(scaled, 2))}e$engineeringExponent';
     }
     if (exponent < 3) {
       return _stripTrailingDecimalZeros(_fixedDecimal(this, 0));
@@ -280,7 +280,7 @@ class BigNumber implements Comparable<BigNumber> {
       decimalPlaces + 1,
       '0',
     );
-    if (decimalPlaces == 0) return '${negative ? '-' : ''}${digits}';
+    if (decimalPlaces == 0) return '${negative ? '-' : ''}$digits';
     final split = digits.length - decimalPlaces;
     return '${negative ? '-' : ''}${digits.substring(0, split)}.${digits.substring(split)}';
   }
@@ -308,7 +308,7 @@ class BigNumber implements Comparable<BigNumber> {
     final exponentText = exponent >= 0
         ? '+${exponent.toString().padLeft(2, '0')}'
         : exponent.toString().padLeft(3, '0');
-    return '${fixed}e${exponentText}';
+    return '$fixede$exponentText';
   }
 
   @override
