@@ -14,7 +14,10 @@ void main() {
       expect(BigNumber.parse('1.25e3').toString(), '1250');
       expect(BigNumber.parse('1.5K').toString(), '1500');
       expect(BigNumber.parse('2Qa').toString(), '2000000000000000');
-      expect(BigNumber.parse('1Vgn').toString(), '1${List.filled(63, '0').join()}');
+      expect(
+        BigNumber.parse('1Vgn').toString(),
+        '1${List.filled(63, '0').join()}',
+      );
     });
 
     test('adds and subtracts without floating point loss', () {
