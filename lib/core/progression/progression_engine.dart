@@ -68,9 +68,7 @@ class ProgressionEngine {
       0,
       15,
     );
-    final shopMultiplier = (state.nebulaItems['nebula_boost'] ?? 0) > 0
-        ? 2
-        : 1;
+    final shopMultiplier = (state.nebulaItems['nebula_boost'] ?? 0) > 0 ? 2 : 1;
     final multiplier = (1 + ultraLevel) * shopMultiplier;
     final multiplied = baseReward.multiplyInt(multiplier);
     return multiplied.compareTo(_longMax) > 0 ? _longMax : multiplied;
