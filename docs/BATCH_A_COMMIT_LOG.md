@@ -685,3 +685,11 @@ Batch A remains active until Dashboard, More, Settings, Menu Studio, Profile and
 - Commits: parser `950c34d24a1202908c1e3525dabdbac4611fc982`; parser interpolation correction `763f8d47b3cbba28482d0b052f8cfd0f5c19cee6`; test `06ab116cad4a4eb72c3ffb1092ce3f00e7f7904e`; test fixture correction `509c16917f1f3424e02760eb62e0ec977f704161`; checklist `be18f0e88f329e9e4a1dc993d5801d07d2fe8510.
 - The successful Validate run `43873029894` predates these parser commits and does not validate them. A new full-head run is required.
 - Further source comparison found GTN1's `format(notation)` is a separate player-facing behavior and GTN2's persisted `numberNotation` setting has no number-formatting call sites. Keep the economy/numeric parity item open; next inspect the display call sites and port Standard/Scientific/Engineering formatting without changing plain-decimal save serialization.
+
+
+### BigNumber parser regex runtime correction — 2026-11-16
+
+- Validate run `43877376668` at `da3537a99a4d87a085b98033c75524f39144a02d`: Dart formatting and static analysis passed. The Flutter suite and responsive UI smoke failed because the raw Dart regular expression in `BigNumber.parse` contained doubled backslashes, so it matched literal backslash sequences instead of digit/decimal classes. Failures included ordinary values `100`, `1.00` and `9223372036854775807`; this also broke world-map widget setup and Nebula reward paths.
+- Corrected the regex to use single raw-string escapes for digit and decimal matching. Commit: `d7aec358a0882ebf546d9a57851c6de60e67b1e9`.
+- Validate `43877376668` Android build was still running when the correction was pushed; its Windows build was cancelled by the newer head. No APK or desktop build success is claimed from this run. A fresh full validation on the corrected parser head is required before number-formatting implementation.
+- Source of truth remains GTN1 `BigNumber.kt` at `fe9cf567169e19059e0330d08769fe454336ef94`. Do not change save serialization or `BigNumber.toString()` to add display notation; the next implementation must add a separate display formatter and connect it to actual currency/cost UI call sites.
