@@ -308,7 +308,7 @@ class BigNumber implements Comparable<BigNumber> {
     final exponentText = exponent >= 0
         ? '+${exponent.toString().padLeft(2, '0')}'
         : exponent.toString().padLeft(3, '0');
-    return '$fixede$exponentText';
+    return fixed + 'e' + exponentText;
   }
 
   @override
