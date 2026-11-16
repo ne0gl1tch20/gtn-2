@@ -323,8 +323,9 @@ class AchievementCatalog {
 
   static String progressLabel(
     ProgressionState state,
-    AchievementDefinition item,
-  ) {
+    AchievementDefinition item, {
+    String numberNotation = 'Standard',
+  }) {
     if (state.achievements.contains(item.id)) return 'Unlocked';
     final goal = target(item.id);
     if (goal > 0) return '${progress(state, item.id).clamp(0, goal)} / $goal';
@@ -335,6 +336,6 @@ class AchievementCatalog {
       'billionaire' => 1000000000,
       _ => 0,
     };
-    return amount == 0 ? 'Locked' : '${state.money.toString()} / $amount';
+    return amount == 0 ? 'Locked' : '${state.money.format(numberNotation)} / $amount';
   }
 }
